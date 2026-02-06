@@ -92,12 +92,14 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
+});
 
+test.describe('Notebook Markdown Editing', () => {
   test('Toggle bold formatting with Ctrl+B', async ({ page }) => {
-    await page.notebook.addCell('markdown', 'Bold text');
-    const cellIndex = (await page.notebook.getCellCount()) - 1;
+    await page.notebook.createNew();
+    await page.notebook.setCell(0, 'markdown', 'Bold text');
 
-    await page.notebook.enterCellEditingMode(cellIndex);
+    await page.notebook.enterCellEditingMode(0);
     await page.waitForTimeout(100);
 
     await page.keyboard.press('Home');
@@ -114,7 +116,7 @@ test.describe('Notebook Markdown', () => {
     await page.waitForTimeout(100);
 
     // Verify the text is wrapped with **
-    const cellText = await page.notebook.getCellTextInput(cellIndex);
+    const cellText = await page.notebook.getCellTextInput(0);
     expect(cellText).toContain('**Bold**');
     expect(cellText).toBe('**Bold** text');
 
@@ -131,7 +133,7 @@ test.describe('Notebook Markdown', () => {
     await page.waitForTimeout(100);
 
     // Verify the text is unwrapped
-    const cellTextAfterUnwrap = await page.notebook.getCellTextInput(cellIndex);
+    const cellTextAfterUnwrap = await page.notebook.getCellTextInput(0);
     expect(cellTextAfterUnwrap).not.toContain('**Bold**');
     expect(cellTextAfterUnwrap).toBe('Bold text');
   });
