@@ -581,7 +581,7 @@ test.describe.serial('Table of Contents', () => {
 });
 ```
 
-You generally should not attempt to delete this file manually in your own `afterAll()` callback.
+You generally should not delete the `tmpPath` directory in your own `afterAll()` callback.
 
 ## Benchmark
 
