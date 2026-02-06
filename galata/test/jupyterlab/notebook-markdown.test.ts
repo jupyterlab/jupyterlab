@@ -100,20 +100,16 @@ test.describe('Notebook Markdown Editing', () => {
     await page.notebook.setCell(0, 'markdown', 'Bold text');
 
     await page.notebook.enterCellEditingMode(0);
-    await page.waitForTimeout(100);
 
     await page.keyboard.press('Home');
-    await page.waitForTimeout(50);
 
     // Select "Bold" (4 characters)
     for (let i = 0; i < 4; i++) {
       await page.keyboard.press('Shift+ArrowRight');
     }
-    await page.waitForTimeout(50);
 
     // Press Ctrl+B (Accel B) to toggle bold
     await page.keyboard.press('Control+B');
-    await page.waitForTimeout(100);
 
     // Verify the text is wrapped with **
     const cellText = await page.notebook.getCellTextInput(0);
@@ -121,16 +117,13 @@ test.describe('Notebook Markdown Editing', () => {
     expect(cellText).toBe('**Bold** text');
 
     await page.keyboard.press('Home');
-    await page.waitForTimeout(50);
 
     for (let i = 0; i < 8; i++) {
       await page.keyboard.press('Shift+ArrowRight');
     }
-    await page.waitForTimeout(50);
 
     // Press Ctrl+B again to unwrap
     await page.keyboard.press('Control+B');
-    await page.waitForTimeout(100);
 
     // Verify the text is unwrapped
     const cellTextAfterUnwrap = await page.notebook.getCellTextInput(0);
