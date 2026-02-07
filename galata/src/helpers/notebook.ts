@@ -1288,22 +1288,22 @@ export class NotebookHelper {
           _reject = reject;
         });
         let framesWithoutChange = 0;
-        let content = cell.querySelector('.cm-content')!.innerHTML;
-        let latestContent = content;
+        let previousContent = cell.querySelector('.cm-content')!.innerHTML;
+        let newContent: string | null = null;
         const timeoutId = window.setTimeout(() => {
           _reject(
-            `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${content}; Current innerHTML: ${latestContent}`
+            `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${previousContent}; Current innerHTML: ${newContent}`
           );
         }, 10000);
         const waitUntilNextFrame = () => {
           window.requestAnimationFrame(() => {
-            const newContent = cell.querySelector('.cm-content')!.innerHTML;
-            latestContent = newContent;
-            if (content === newContent) {
+            newContent = cell.querySelector('.cm-content')!.innerHTML;
+            if (previousContent === newContent) {
               framesWithoutChange += 1;
             } else {
               framesWithoutChange = 0;
             }
+            previousContent = newContent;
             if (framesWithoutChange < 10) {
               waitUntilNextFrame();
             } else {
