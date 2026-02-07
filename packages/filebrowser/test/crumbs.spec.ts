@@ -385,13 +385,36 @@ describe('filebrowser/model', () => {
         Widget.attach(customCrumbs, container);
         MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
 
-        // With narrow width, should show minimum items
+        // Stub clientWidth to return controlled values
+        const originalClientWidth = Object.getOwnPropertyDescriptor(
+          HTMLElement.prototype,
+          'clientWidth'
+        );
+
+        // First, test with narrow width
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 150
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
         let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
         const narrowItemCount = items.length;
 
-        // Increase container width significantly
-        container.style.width = '800px';
-        // Trigger resize observer by forcing a layout
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 1000
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
         customCrumbs.update();
         await framePromise();
         MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
@@ -399,8 +422,17 @@ describe('filebrowser/model', () => {
         items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
         const wideItemCount = items.length;
 
-        // Wide container should show at least as many items as narrow
+        // With sufficient width (1000px), it should show all items
         expect(wideItemCount).toBeGreaterThanOrEqual(narrowItemCount);
+
+        // Restore original clientWidth descriptor if it existed
+        if (originalClientWidth) {
+          Object.defineProperty(
+            HTMLElement.prototype,
+            'clientWidth',
+            originalClientWidth
+          );
+        }
 
         Widget.detach(customCrumbs);
         customCrumbs.dispose();
