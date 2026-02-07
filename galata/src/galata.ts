@@ -836,6 +836,42 @@ export namespace galata {
     };
 
     /**
+     * Custom error thrown when a response is disposed.
+     */
+    class ResponseDisposedError extends Error {
+      constructor(error: string) {
+        super(error);
+        this.name = 'ResponseDisposedError';
+      }
+    }
+
+    /**
+     * Parse response JSON with response disposal error detection.
+     *
+     * @param response The API response to parse
+     * @returns Parsed JSON data
+     * @throws ResponseDisposedError if response was disposed
+     * @throws Error if parsing fails for other reasons
+     */
+    async function handleJsonResponse(
+      response: Awaited<ReturnType<APIRequestContext['fetch']>>
+    ): Promise<any> {
+      try {
+        return await response.json();
+      } catch (error) {
+        // Check if this is a disposal error
+        const isDisposalError =
+          error instanceof Error &&
+          error.message.toLowerCase().includes('disposed');
+        if (isDisposalError) {
+          throw new ResponseDisposedError(error.message);
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+
+    /**
      * Mock the runners API to display only those created during a test
      *
      * @param page Page model object
@@ -895,16 +931,29 @@ export namespace galata {
                   }
                   break;
                 }
-                const data = await response.json();
-                // Update stored runners
-                runners.set(type === 'terminals' ? data.name : data.id, data);
+                try {
+                  const data = await handleJsonResponse(response);
+                  // Update stored runners
+                  runners.set(type === 'terminals' ? data.name : data.id, data);
 
-                if (!page.isClosed() && !isClosed) {
-                  return route.fulfill({
-                    status: 200,
-                    body: JSON.stringify(data),
-                    contentType: 'application/json'
-                  });
+                  if (!page.isClosed() && !isClosed) {
+                    return route.fulfill({
+                      status: 200,
+                      body: JSON.stringify(data),
+                      contentType: 'application/json'
+                    });
+                  }
+                } catch (error) {
+                  if (
+                    error instanceof ResponseDisposedError &&
+                    (page.isClosed() || isClosed)
+                  ) {
+                    console.warn(
+                      `Route handler: ${error.message} during teardown`
+                    );
+                    return route.abort();
+                  }
+                  throw error;
                 }
                 break;
               } else {
@@ -933,7 +982,21 @@ export namespace galata {
                 }
                 break;
               }
-              const data = (await response.json()) as any[];
+              let data: any[];
+              try {
+                data = (await handleJsonResponse(response)) as any[];
+              } catch (error) {
+                if (
+                  error instanceof ResponseDisposedError &&
+                  (page.isClosed() || isClosed)
+                ) {
+                  console.warn(
+                    `Route handler: ${error.message} during teardown`
+                  );
+                  return route.abort();
+                }
+                throw error;
+              }
               const updated = new Set<string>();
               data.forEach(item => {
                 const itemID: string =
@@ -980,7 +1043,19 @@ export namespace galata {
               }
               break;
             }
-            const data = await response.json();
+            let data: any;
+            try {
+              data = await handleJsonResponse(response);
+            } catch (error) {
+              if (
+                error instanceof ResponseDisposedError &&
+                (page.isClosed() || isClosed)
+              ) {
+                console.warn(`Route handler: ${error.message} during teardown`);
+                return route.abort();
+              }
+              throw error;
+            }
             // Update stored runners
             runners.set(type === 'terminals' ? data.name : data.id, data);
             // Update kernels
@@ -1015,7 +1090,19 @@ export namespace galata {
               }
               break;
             }
-            const data = await response.json();
+            let data: any;
+            try {
+              data = await handleJsonResponse(response);
+            } catch (error) {
+              if (
+                error instanceof ResponseDisposedError &&
+                (page.isClosed() || isClosed)
+              ) {
+                console.warn(`Route handler: ${error.message} during teardown`);
+                return route.abort();
+              }
+              throw error;
+            }
             const id = type === 'terminals' ? data.name : data.id;
             runners.set(id, data);
             // Update kernels
