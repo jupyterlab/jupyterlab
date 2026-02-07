@@ -183,7 +183,7 @@ namespace Private {
     sliceSize: number = 512
   ): Blob {
     const byteCharacters = atob(b64Data);
-    const byteArrays: Uint8Array[] = [];
+    const byteArrays: Uint8Array<ArrayBuffer>[] = [];
 
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
       const slice = byteCharacters.slice(offset, offset + sliceSize);

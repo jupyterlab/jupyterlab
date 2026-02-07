@@ -170,8 +170,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return selectedCount > 1
       ? 'multiple'
       : selectedCount === 1 && !cellMode
-      ? 'single'
-      : 'none';
+        ? 'single'
+        : 'none';
   }
 
   /**

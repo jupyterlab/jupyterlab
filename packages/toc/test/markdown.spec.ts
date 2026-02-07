@@ -511,9 +511,7 @@ front: matter
         const parser: IMarkdownParser = createMarkdownParser(languages);
         const headings = TableOfContentsUtils.filterHeadings(
           await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            maximalDepth
-          }
+          { maximalDepth }
         );
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
@@ -529,9 +527,7 @@ front: matter
 
         const headings = TableOfContentsUtils.filterHeadings(
           await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            numberHeaders
-          }
+          { numberHeaders }
         );
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberHeaders ? '0.0.1. ' : '');

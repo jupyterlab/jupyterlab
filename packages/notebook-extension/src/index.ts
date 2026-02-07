@@ -2466,6 +2466,21 @@ function addCommands(
     return Private.isEnabledAndHeadingSelected(shell, tracker);
   };
 
+  const executePaste = async (
+    notebook: Notebook,
+    mode: 'below' | 'above' | 'replace'
+  ): Promise<void> => {
+    const stripOutputs = !!settings?.get('pasteCodeCellsWithoutOutput')
+      ?.composite;
+    if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+      await NotebookActions.pasteFromSystemClipboard(notebook, mode, {
+        stripOutputs
+      });
+    } else {
+      NotebookActions.paste(notebook, mode, { stripOutputs });
+    }
+  };
+
   // Set up signal handler to keep the collapse state consistent
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
@@ -3180,15 +3195,8 @@ function addCommands(
     },
     execute: async args => {
       const current = getCurrent(tracker, shell, args);
-
       if (current) {
-        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.pasteFromSystemClipboard(
-            current.content,
-            'below'
-          );
-        }
-        return NotebookActions.paste(current.content, 'below');
+        return executePaste(current.content, 'below');
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
@@ -3231,15 +3239,8 @@ function addCommands(
     },
     execute: async args => {
       const current = getCurrent(tracker, shell, args);
-
       if (current) {
-        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.pasteFromSystemClipboard(
-            current.content,
-            'above'
-          );
-        }
-        return NotebookActions.paste(current.content, 'above');
+        return executePaste(current.content, 'above');
       }
     },
     isEnabled,
@@ -3313,15 +3314,8 @@ function addCommands(
     },
     execute: async args => {
       const current = getCurrent(tracker, shell, args);
-
       if (current) {
-        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.pasteFromSystemClipboard(
-            current.content,
-            'replace'
-          );
-        }
-        return NotebookActions.paste(current.content, 'replace');
+        return executePaste(current.content, 'replace');
       }
     },
     isEnabled,

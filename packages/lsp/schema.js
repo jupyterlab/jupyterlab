@@ -27,10 +27,7 @@ async function generateInterface(schemaPath, filepath) {
     }
   });
 
-  const formatted = prettier.format(content, {
-    ...prettierConfig,
-    filepath
-  });
+  const formatted = prettier.format(content, { ...prettierConfig, filepath });
   return formatted;
 }
 

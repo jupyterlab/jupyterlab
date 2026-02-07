@@ -78,8 +78,7 @@ export interface IAdapterOptions {
  */
 export abstract class WidgetLSPAdapter<
   T extends IDocumentWidget = IDocumentWidget
-> implements IDisposable
-{
+> implements IDisposable {
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
