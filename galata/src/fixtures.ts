@@ -406,22 +406,28 @@ export const test: TestType<
     },
     use
   ) => {
-    await use(
-      await galata.initTestPage(
-        appPath,
-        autoGoto,
-        baseURL!,
-        mockConfig,
-        mockSettings,
-        mockState,
-        mockUser,
-        page,
-        sessions,
-        terminals,
-        tmpPath,
-        waitForApplication,
-        kernels
-      )
-    );
+    try {
+      await use(
+        await galata.initTestPage(
+          appPath,
+          autoGoto,
+          baseURL!,
+          mockConfig,
+          mockSettings,
+          mockState,
+          mockUser,
+          page,
+          sessions,
+          terminals,
+          tmpPath,
+          waitForApplication,
+          kernels
+        )
+      );
+    } finally {
+      if (!page.isClosed()) {
+        await page.unrouteAll({ behavior: 'ignoreErrors' });
+      }
+    }
   }
 });
