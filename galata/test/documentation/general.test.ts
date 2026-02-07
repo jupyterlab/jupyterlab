@@ -59,7 +59,7 @@ test.describe('General', () => {
     await page.notebook.run();
 
     const cell = page.locator(
-      '[aria-label="Code Cell Content with Output"] >> text=interactive'
+      '[aria-label="Code Cell Content with Output"] >> text=interactive(solve_lorenz'
     );
     await cell.click();
     await page.keyboard.press('ContextMenu');
