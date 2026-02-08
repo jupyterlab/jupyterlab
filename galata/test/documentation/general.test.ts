@@ -68,10 +68,10 @@ test.describe('General', () => {
     // and down to invoke cell/viewport alignement logic.
     await cell.click();
     await page.keyboard.press('Escape');
-    await page.keyboard.press('Down');
-    await page.keyboard.press('Down');
-    await page.keyboard.press('Up');
-    await page.keyboard.press('Up');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp');
 
     await cell.click();
     await page.keyboard.press('ContextMenu');
