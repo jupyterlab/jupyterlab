@@ -303,7 +303,7 @@ _rendered icon:_
 
 ### Background
 
-#### Icon handling in Jupyterlab
+#### Icon handling in JupyterLab
 
 Pre JupyterLab 2.0, most icons were created using the icons-as-css-background
 pattern:

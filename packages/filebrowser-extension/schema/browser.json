@@ -242,6 +242,12 @@
       "description": "Whether to group the notebooks away from files",
       "default": false
     },
+    "sortFileNamesNaturally": {
+      "type": "boolean",
+      "title": "Sort file names naturally",
+      "description": "When sorting by name, use natural order (e.g. file2 before file10). When disabled, use lexicographic order (e.g. file10 before file2).",
+      "default": true
+    },
     "singleClickNavigation": {
       "type": "boolean",
       "title": "Navigate files and directories with single click",

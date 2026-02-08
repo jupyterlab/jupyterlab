@@ -1354,8 +1354,8 @@ export class WindowedList<
     }
     for (const widget of this.layout.widgets) {
       this._itemsResizeObserver.observe(widget.node);
-      widget.disposed.connect(
-        () => this._itemsResizeObserver?.unobserve(widget.node)
+      widget.disposed.connect(() =>
+        this._itemsResizeObserver?.unobserve(widget.node)
       );
     }
     if (!this._areaResizeObserver) {
@@ -1436,8 +1436,8 @@ export class WindowedList<
         const item = toAdd[index];
         if (this._itemsResizeObserver && !this.layout.widgets.includes(item)) {
           this._itemsResizeObserver.observe(item.node);
-          item.disposed.connect(
-            () => this._itemsResizeObserver?.unobserve(item.node)
+          item.disposed.connect(() =>
+            this._itemsResizeObserver?.unobserve(item.node)
           );
         }
 

@@ -347,8 +347,9 @@ export interface IMessage<MSGTYPE extends MessageType = MessageType> {
 /**
  * A kernel message on the `'shell'` channel.
  */
-export interface IShellMessage<T extends ShellMessageType = ShellMessageType>
-  extends IMessage<T> {
+export interface IShellMessage<
+  T extends ShellMessageType = ShellMessageType
+> extends IMessage<T> {
   channel: 'shell';
 }
 
@@ -372,16 +373,18 @@ export type IShellControlMessage = IShellMessage | IControlMessage;
 /**
  * A kernel message on the `'iopub'` channel.
  */
-export interface IIOPubMessage<T extends IOPubMessageType = IOPubMessageType>
-  extends IMessage<T> {
+export interface IIOPubMessage<
+  T extends IOPubMessageType = IOPubMessageType
+> extends IMessage<T> {
   channel: 'iopub';
 }
 
 /**
  * A kernel message on the `'stdin'` channel.
  */
-export interface IStdinMessage<T extends StdinMessageType = StdinMessageType>
-  extends IMessage<T> {
+export interface IStdinMessage<
+  T extends StdinMessageType = StdinMessageType
+> extends IMessage<T> {
   channel: 'stdin';
 }
 
@@ -484,8 +487,7 @@ export function isDisplayDataMsg(msg: IMessage): msg is IDisplayDataMsg {
  *
  * See [Update Display data](https://jupyter-client.readthedocs.io/en/latest/messaging.html#update-display-data).
  */
-export interface IUpdateDisplayDataMsg
-  extends IIOPubMessage<'update_display_data'> {
+export interface IUpdateDisplayDataMsg extends IIOPubMessage<'update_display_data'> {
   content: IDisplayDataMsg['content'] & {
     // display_id is a required field in update_display_data
     transient: { display_id: string };
@@ -669,8 +671,9 @@ export function isDebugEventMsg(msg: IMessage): msg is IDebugEventMsg {
  *
  * See [Comm open](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
  */
-export interface ICommOpenMsg<T extends 'shell' | 'iopub' = 'iopub' | 'shell'>
-  extends IMessage<'comm_open'> {
+export interface ICommOpenMsg<
+  T extends 'shell' | 'iopub' = 'iopub' | 'shell'
+> extends IMessage<'comm_open'> {
   channel: T;
   content: {
     comm_id: string;
@@ -692,8 +695,9 @@ export function isCommOpenMsg(msg: IMessage): msg is ICommOpenMsg {
  *
  * See [Comm close](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
  */
-export interface ICommCloseMsg<T extends 'iopub' | 'shell' = 'iopub' | 'shell'>
-  extends IMessage<'comm_close'> {
+export interface ICommCloseMsg<
+  T extends 'iopub' | 'shell' = 'iopub' | 'shell'
+> extends IMessage<'comm_close'> {
   channel: T;
   content: {
     comm_id: string;
@@ -715,8 +719,9 @@ export function isCommCloseMsg(
  *
  * See [Comm msg](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
  */
-export interface ICommMsgMsg<T extends 'iopub' | 'shell' = 'iopub' | 'shell'>
-  extends IMessage<'comm_msg'> {
+export interface ICommMsgMsg<
+  T extends 'iopub' | 'shell' = 'iopub' | 'shell'
+> extends IMessage<'comm_msg'> {
   channel: T;
   content: {
     comm_id: string;
@@ -928,8 +933,7 @@ export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
  * @see {@link IKernelConnection.interrupt}
  */
 
-export interface IInterruptRequestMsg
-  extends IControlMessage<'interrupt_request'> {
+export interface IInterruptRequestMsg extends IControlMessage<'interrupt_request'> {
   content: Record<string, never>;
 }
 
@@ -1042,8 +1046,7 @@ export interface IHistoryReplyMsg extends IShellMessage<'history_reply'> {
  * @see {@link IIsCompleteReplyMsg}
  * @see {@link IKernelConnection.isComplete}
  */
-export interface IIsCompleteRequestMsg
-  extends IShellMessage<'is_complete_request'> {
+export interface IIsCompleteRequestMsg extends IShellMessage<'is_complete_request'> {
   content: {
     code: string;
   };
@@ -1056,8 +1059,7 @@ export interface IIsCompleteRequestMsg
  * @see {@link IIsCompleteRequest}
  * @see {@link IKernelConnection.isComplete}
  */
-export interface IIsCompleteReplyMsg
-  extends IShellMessage<'is_complete_reply'> {
+export interface IIsCompleteReplyMsg extends IShellMessage<'is_complete_reply'> {
   parent_header: IHeader<'is_complete_request'>;
   content: ReplyContent<IIsCompleteReplyIncomplete | IIsCompleteReplyOther>;
 }
@@ -1180,8 +1182,7 @@ export function isExecuteReplyMsg(msg: IMessage): msg is IExecuteReplyMsg {
  * @see {@link ICommInfoReplyMsg}
  * @see {@link IKernelConnection.commInfo}
  */
-export interface ICommInfoRequestMsg
-  extends IShellMessage<'comm_info_request'> {
+export interface ICommInfoRequestMsg extends IShellMessage<'comm_info_request'> {
   content: {
     /**
      * The comm target name to filter returned comms
@@ -1292,16 +1293,14 @@ export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
 /**
  * A `'create_subshell_request'` message on the `'control'` channel.
  */
-export interface ICreateSubshellRequestMsg
-  extends IControlMessage<'create_subshell_request'> {
+export interface ICreateSubshellRequestMsg extends IControlMessage<'create_subshell_request'> {
   content: Record<string, unknown>;
 }
 
 /**
  * A `'create_subshell_reply'` message on the `'control'` channel.
  */
-export interface ICreateSubshellReplyMsg
-  extends IControlMessage<'create_subshell_reply'> {
+export interface ICreateSubshellReplyMsg extends IControlMessage<'create_subshell_reply'> {
   content: {
     subshell_id: string;
   };
@@ -1310,8 +1309,7 @@ export interface ICreateSubshellReplyMsg
 /**
  * A `'delete_subshell_request'` message on the `'control'` channel.
  */
-export interface IDeleteSubshellRequestMsg
-  extends IControlMessage<'delete_subshell_request'> {
+export interface IDeleteSubshellRequestMsg extends IControlMessage<'delete_subshell_request'> {
   content: {
     subshell_id: string;
   };
@@ -1320,24 +1318,21 @@ export interface IDeleteSubshellRequestMsg
 /**
  * A `'delete_subshell_reply'` message on the `'control'` channel.
  */
-export interface IDeleteSubshellReplyMsg
-  extends IControlMessage<'delete_subshell_reply'> {
+export interface IDeleteSubshellReplyMsg extends IControlMessage<'delete_subshell_reply'> {
   content: Record<string, unknown>;
 }
 
 /**
  * A `'list_subshell_request'` message on the `'control'` channel.
  */
-export interface IListSubshellRequestMsg
-  extends IControlMessage<'list_subshell_request'> {
+export interface IListSubshellRequestMsg extends IControlMessage<'list_subshell_request'> {
   content: Record<string, unknown>;
 }
 
 /**
  * A `'list_subshell_reply'` message on the `'control'` channel.
  */
-export interface IListSubshellReplyMsg
-  extends IControlMessage<'list_subshell_reply'> {
+export interface IListSubshellReplyMsg extends IControlMessage<'list_subshell_reply'> {
   content: {
     subshell_id: string[];
   };

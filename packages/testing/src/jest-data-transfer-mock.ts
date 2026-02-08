@@ -13,8 +13,7 @@ export interface IFileSystemFileEntryOptions extends IFileSystemEntryOptions {
   };
 }
 
-export interface IFileSystemDirectoryEntryOptions
-  extends IFileSystemEntryOptions {
+export interface IFileSystemDirectoryEntryOptions extends IFileSystemEntryOptions {
   files: (IFileSystemDirectoryEntryOptions | IFileSystemFileEntryOptions)[];
 }
 
