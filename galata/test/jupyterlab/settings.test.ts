@@ -240,6 +240,8 @@ test('Check codemirror settings can all be set at the same time.', async ({
   for (const selectText of textList) {
     let locator = page.getByLabel(selectText);
     await locator.click();
+    // Workaround for bug https://github.com/jupyterlab/jupyterlab/issues/18458
+    await page.waitForTimeout(50);
     locators.push(locator);
   }
   for (const locator of locators) {
