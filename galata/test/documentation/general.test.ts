@@ -145,6 +145,9 @@ test.describe('General', () => {
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18460
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toBeEmpty();
