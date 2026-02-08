@@ -43,6 +43,11 @@ const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
 const BREADCRUMB_ELLIPSIS_CLASS = 'jp-BreadCrumbs-ellipsis';
 
 /**
+ * The class name for the breadcrumbs separator node
+ */
+const BREADCRUMB_SEPARATOR_CLASS = 'jp-BreadCrumbs-separator';
+
+/**
  * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -447,7 +452,9 @@ export class BreadCrumbs extends Widget {
     const preferred = this._crumbs[Private.Crumb.Preferred];
 
     // Find first separator
-    const separators = this.node.querySelectorAll(':scope > span:not([class])');
+    const separators = this.node.querySelectorAll(
+      `.${BREADCRUMB_SEPARATOR_CLASS}`
+    );
     const separator = separators.length > 0 ? separators[0] : null;
 
     // Measure each rendered breadcrumb item, keyed by path segment index
@@ -769,6 +776,7 @@ namespace Private {
    */
   export function createCrumbSeparator(): HTMLElement {
     const item = document.createElement('span');
+    item.className = BREADCRUMB_SEPARATOR_CLASS;
     item.textContent = '/';
     return item;
   }
