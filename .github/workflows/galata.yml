@@ -273,7 +273,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test:doc --reporter list,html
+          jlpm run test:doc --reporter github,list,html
         working-directory: core
 
       - name: Upload Galata Test assets
