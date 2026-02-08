@@ -63,6 +63,16 @@ test.describe('General', () => {
     const cell = page.locator(
       '[aria-label="Code Cell Content with Output"] >> text=interactive(solve_lorenz'
     );
+
+    // Enforce position of the cell we are after by moving up
+    // and down to invoke cell/viewport alignement logic.
+    await cell.click();
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Down');
+    await page.keyboard.press('Down');
+    await page.keyboard.press('Up');
+    await page.keyboard.press('Up');
+
     await cell.click();
     await page.keyboard.press('ContextMenu');
     await page.click('text=Create New View for Cell Output');

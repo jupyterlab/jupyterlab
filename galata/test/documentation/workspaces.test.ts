@@ -35,7 +35,10 @@ test.describe('Workspaces sidebar', () => {
     await page.dblclick(
       `.jp-DirListing-item span:has-text("${testWorkspace}")`
     );
-    await page.getByRole('treeitem', { name: workspaceName }).waitFor();
+    // This is flaky for unknown reasons - a timeout is used to retry sooner than later
+    await page
+      .getByRole('treeitem', { name: workspaceName })
+      .waitFor({ timeout: 15000 });
 
     await galata.Mock.mockRunners(page, new Map(), 'sessions');
 
