@@ -40,7 +40,7 @@ To learn more about extensions, see the [user documentation](https://jupyterlab.
 Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
 
 > [!IMPORTANT]
-> JupyterLab 3 reached its end of maintenance date on May 15, 2024. Fixes for critical issues will still be backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
+> JupyterLab 3 reached its end of maintenance date on May 15, 2024. Fixes for critical issues were backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
 
 ---
 

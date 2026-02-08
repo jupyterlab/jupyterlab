@@ -43,7 +43,8 @@ repos:
     hooks:
       - id: prettier
         name: prettier
-        entry: 'npm run prettier:files'
+        entry: jlpm
+        args: [run, 'prettier:files']
         language: node
         types_or: [json, ts, tsx, javascript, jsx, css]
         exclude: \.ipynb$

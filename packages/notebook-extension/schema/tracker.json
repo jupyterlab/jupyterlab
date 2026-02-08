@@ -866,6 +866,12 @@
       "description": "Whether to use the system clipboard for copy/cut/paste of cells. When enabled, cell contents are copied to the system clipboard, allowing copy/cut/paste between different notebook tabs or browser windows.",
       "type": "boolean",
       "default": false
+    },
+    "pasteCodeCellsWithoutOutput": {
+      "title": "Paste code cells without output",
+      "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,
