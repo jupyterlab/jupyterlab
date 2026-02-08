@@ -26,12 +26,17 @@ test.describe('Completer', () => {
       await page.notebook.enterCellEditingMode(1);
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
+
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
@@ -45,11 +50,8 @@ test.describe('Completer', () => {
       // Completer shouldn't show up, but Completer should be enabled
       await page.keyboard.press('Enter');
       await page.keyboard.press('Tab');
-      let locator = page.locator(
-        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
-      );
-      await expect(locator).toHaveCount(1);
-      await expect(locator).toHaveClass(/jp-mod-completer-enabled/);
+      await expect(editor).toHaveCount(1);
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
       completer = page.locator(COMPLETER_SELECTOR);
 
       await expect(completer).toBeHidden();
@@ -82,7 +84,11 @@ test.describe('Completer', () => {
       await page.notebook.enterCellEditingMode(1);
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
@@ -125,7 +131,11 @@ test.describe('Completer', () => {
       await page.keyboard.press('End');
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
@@ -151,7 +161,10 @@ test.describe('Completer', () => {
       await page.notebook.enterCellEditingMode(1);
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
       await page.keyboard.press('Tab');
 
       let completer = page.locator(COMPLETER_SELECTOR);
