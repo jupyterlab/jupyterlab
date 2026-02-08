@@ -777,6 +777,9 @@ test.describe('Auto search in any selection', async () => {
     await page.keyboard.press('Control+Home');
     await page.keyboard.press('Shift+End');
 
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18462
+    await page.waitForTimeout(200);
+
     // Open search box (filters should already be shown)
     await page.keyboard.press('Control+f');
     // Expect search in selection to be enabled as 1 line is selected.
