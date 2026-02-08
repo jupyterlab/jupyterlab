@@ -629,6 +629,31 @@ test.describe('General', () => {
     );
     await freeezeKernelIds(dialog, mockedKernelIds);
 
+    // Freeze `terminal/X` identifier because under concurrent execution the
+    // server migt be tracking another terminal already so instead of
+    // `terminal/1` the screenshot would show e.g. `terminal/2`.
+    // Changing this via mocks would involve both intercepting terminal REST
+    // API and then rewiring websocket conneections which does not work
+    // reliably in galata as of now.
+    await dialog.evaluate(node => {
+      let changed = false;
+      for (let [_, entry] of node
+        .querySelectorAll('.jp-RunningSessions-itemLabel')
+        .entries()) {
+        const label = entry.textContent ?? '';
+        if (/terminals\/\d+/i.test(label)) {
+          entry.textContent = label.replace(/terminals\/\d+/gi, 'terminals/1');
+          changed = true;
+          break;
+        }
+      }
+      if (!changed) {
+        throw Error(
+          'Expected to find at least on terminal entry in the dialog.'
+        );
+      }
+    });
+
     expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');
   });
 
