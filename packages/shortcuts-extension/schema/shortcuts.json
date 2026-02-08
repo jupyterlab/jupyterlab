@@ -37,65 +37,10 @@
   "additionalProperties": false,
   "properties": {
     "shortcuts": {
-      "description": "The list of keyboard shortcuts. Use 'Accel Alt [1-9]' to switch to specific tabs by index, where 'Accel Alt 9' switches to the last tab.",
+      "description": "The list of keyboard shortcuts.",
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",
-      "default": [
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 1"],
-          "selector": "body",
-          "args": { "index": 1 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 2"],
-          "selector": "body",
-          "args": { "index": 2 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 3"],
-          "selector": "body",
-          "args": { "index": 3 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 4"],
-          "selector": "body",
-          "args": { "index": 4 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 5"],
-          "selector": "body",
-          "args": { "index": 5 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 6"],
-          "selector": "body",
-          "args": { "index": 6 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 7"],
-          "selector": "body",
-          "args": { "index": 7 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 8"],
-          "selector": "body",
-          "args": { "index": 8 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 9"],
-          "selector": "body",
-          "args": { "index": 0 }
-        }
-      ]
+      "default": []
     }
   },
   "definitions": {
