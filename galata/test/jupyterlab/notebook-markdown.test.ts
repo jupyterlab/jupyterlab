@@ -83,6 +83,8 @@ test.describe('Notebook Markdown', () => {
     const imageName = 'render-mermaid-flowchart.png';
     const cell = await page.notebook.getCellLocator(3);
     await cell!.scrollIntoViewIfNeeded();
+    const output = cell!.locator('.jp-RenderedMermaid');
+    await output.waitFor();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -90,6 +92,8 @@ test.describe('Notebook Markdown', () => {
     const imageName = 'render-mermaid-error.png';
     const cell = await page.notebook.getCellLocator(4);
     await cell!.scrollIntoViewIfNeeded();
+    const output = cell!.locator('.jp-RenderedMermaid');
+    await output.waitFor();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 });
