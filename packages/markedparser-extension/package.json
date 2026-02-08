@@ -40,7 +40,6 @@
     "@jupyterlab/coreutils": "^6.6.0-alpha.2",
     "@jupyterlab/mermaid": "^4.6.0-alpha.2",
     "@jupyterlab/rendermime": "^4.6.0-alpha.2",
-    "@jupyterlab/rendermime-interfaces": "^3.14.0-alpha.2",
     "@lumino/coreutils": "^2.2.2",
     "marked": "^16.2.1",
     "marked-gfm-heading-id": "^4.1.2",

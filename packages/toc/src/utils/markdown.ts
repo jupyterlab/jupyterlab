@@ -79,8 +79,10 @@ export async function parseHeadings(
   markdownText: string,
   parser: IMarkdownParser | null
 ): Promise<IMarkdownHeading[]> {
-  if (!parser) {
-    console.warn("Couldn't parse headings; Markdown parser is null");
+  if (!parser || !parser.getHeadingTokens) {
+    console.warn(
+      'Unable to parse headings; Markdown parser is missing or does not implement getHeadingTokens().'
+    );
     return [];
   }
 

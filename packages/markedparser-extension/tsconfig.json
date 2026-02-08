@@ -20,9 +20,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../rendermime-interfaces"
     }
   ]
 }

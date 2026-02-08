@@ -16,7 +16,7 @@ import type {
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
-import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type {
@@ -63,9 +63,7 @@ export function createMarkdownParser(
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
     },
-    getHeadingTokens: (
-      content: string
-    ): Promise<IRenderMime.IMarkdownHeadingToken[]> => {
+    getHeadingTokens: (content: string): Promise<IMarkdownHeadingToken[]> => {
       return Private.getHeadingTokens(content, options);
     }
   };
@@ -267,11 +265,11 @@ namespace Private {
   export async function getHeadingTokens(
     content: string,
     options?: IRenderOptions
-  ): Promise<IRenderMime.IMarkdownHeadingToken[]> {
+  ): Promise<IMarkdownHeadingToken[]> {
     if (!_marked) {
       _marked = await initializeMarked(options);
     }
-    const headings = new Array<IRenderMime.IMarkdownHeadingToken>();
+    const headings = new Array<IMarkdownHeadingToken>();
     const tokens = _marked.lexer(content);
 
     // Extract heading tokens and compute line numbers

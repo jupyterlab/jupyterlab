@@ -570,29 +570,6 @@ export namespace IRenderMime {
      * @returns - A promise of the string containing HTML which may require sanitization.
      */
     render(source: string): Promise<string>;
-
-    /**
-     * Parse markdown and extract heading metadata.
-     *
-     * @param source - The markdown string to parse.
-     * @returns - A promise of heading metadata.
-     */
-    getHeadingTokens(source: string): Promise<IMarkdownHeadingToken[]>;
-  }
-
-  /**
-   * Markdown heading metadata.
-   */
-  export interface IMarkdownHeadingToken {
-    /**
-     * Line number in source markdown (0-based)
-     */
-    line: number;
-
-    /**
-     * Raw markdown text of the heading
-     */
-    raw: string;
   }
 
   // ********************** //

@@ -4132,7 +4132,6 @@ __metadata:
     "@jupyterlab/coreutils": ^6.6.0-alpha.2
     "@jupyterlab/mermaid": ^4.6.0-alpha.2
     "@jupyterlab/rendermime": ^4.6.0-alpha.2
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.2
     "@lumino/coreutils": ^2.2.2
     "@types/d3": ^7.4.0
     "@types/dompurify": ^2.4.0
