@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser,
+  IRenderMime
+} from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,
@@ -296,7 +300,7 @@ describe('rendermime/factories', () => {
             Promise.resolve(content),
           getHeadingTokens: (
             content: string
-          ): Promise<IRenderMime.IMarkdownHeadingToken[]> => Promise.resolve([])
+          ): Promise<IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 
