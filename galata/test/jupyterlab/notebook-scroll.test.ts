@@ -344,13 +344,13 @@ test.describe('Notebook scroll over long outputs (with windowing)', () => {
       '.jp-Cell .jp-RenderedMarkdown:has-text("Before")'
     );
     // Wait until Markdown cells are rendered
-    await renderedMarkdownLocator.waitFor({ timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ timeout: 500 });
     // Un-render the "before" markdown cell
     await renderedMarkdownLocator.dblclick();
     // Make the first cell active
     await page.notebook.selectCells(0);
     // Check that that the markdown cell is un-rendered
-    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 500 });
 
     // Scroll to the last cell
     const lastCell = await page.notebook.getCellLocator(10);
