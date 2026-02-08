@@ -51,7 +51,9 @@
     "id": "application:activate-tab-index",
     "label": "Activate Tab by Index",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl Alt 1"
+    ],
     "args": {
       "type": "object",
       "properties": {
