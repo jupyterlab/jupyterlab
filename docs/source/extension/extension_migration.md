@@ -23,6 +23,17 @@ Webpack config to Rspack.
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
 - The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
 
+### Testing with Galata
+
+- The `runCell()` method of notebook helper now takes `options: {inplace?: boolean; wait?: boolean}` as a second argument.
+  Setting the `wait` option to `false` allows to skip awaiting for the result, while but still awaiting for scheduling
+  of cell execution to be triggered.
+- When `autoGoto` is enabled, the workspace is now reset automatically; to opt out, set `resetWorkspace` fixture to `false`.
+- The galata's `page.waitForCondition()` now uses a default timeout of 15 seconds, simplifying debugging and reducing time to retry.
+  The `timeout` argument can be used to control the tiemout duration.
+- Errors after page fixture teardown are now gracefully ignored to prevent the errors from delayed server requests
+  from failing tests during the teardown phase.
+
 ## JupyterLab 4.5.0 to 4.5.1
 
 ### IDefaultContentProvider
