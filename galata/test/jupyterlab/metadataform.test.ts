@@ -511,6 +511,9 @@ test.describe('Notebook level and cell type metadata', () => {
     let nbMetadata = await getNotebookMetadata(page);
     expect(nbMetadata['nb-nested']).toBeUndefined();
 
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
     // Fill the first level nested metadata.
     await formGroup.locator('input').first().fill('Cell input');
     await formGroup.locator('input').last().fill('Notebook input');
