@@ -1594,6 +1594,77 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Plugin to register tab switching shortcuts based on setting.
+ */
+const tabSwitchShortcuts: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:tab-switch-shortcuts',
+  description: 'Registers tab switching shortcuts based on user setting.',
+  autoStart: true,
+  requires: [ISettingRegistry, ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    labShell: ILabShell
+  ): void => {
+    const { commands } = app;
+    let disposables = new DisposableSet();
+
+    /**
+     * Update the tab switch shortcuts based on the current modifier setting.
+     */
+    function updateShortcuts(modifier: string): void {
+      // Clear existing shortcuts
+      disposables.dispose();
+      disposables = new DisposableSet();
+
+      if (modifier === 'disabled') {
+        return;
+      }
+
+      // Register shortcuts for tabs 1-8
+      for (let i = 1; i <= 8; i++) {
+        const binding = commands.addKeyBinding({
+          command: CommandIDs.activateTabIndex,
+          args: { index: i },
+          keys: [`${modifier} ${i}`],
+          selector: 'body'
+        });
+        disposables.add(binding);
+      }
+
+      // Register shortcut for tab 9 (last tab)
+      const lastTabBinding = commands.addKeyBinding({
+        command: CommandIDs.activateTabIndex,
+        args: { index: 0 },
+        keys: [`${modifier} 9`],
+        selector: 'body'
+      });
+      disposables.add(lastTabBinding);
+    }
+
+    // Load setting and watch for changes
+    const PLUGIN_ID = '@jupyterlab/application-extension:commands';
+    settingRegistry
+      .load(PLUGIN_ID)
+      .then(settings => {
+        const updateFromSettings = () => {
+          const modifier = settings.get('tabSwitchModifier')
+            .composite as string;
+          updateShortcuts(modifier);
+        };
+        settings.changed.connect(updateFromSettings);
+        updateFromSettings();
+      })
+      .catch(reason => {
+        console.error(
+          'Failed to load settings for tab switch shortcuts.',
+          reason
+        );
+      });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1613,6 +1684,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paths,
   propertyInspector,
   jupyterLogo,
+  tabSwitchShortcuts,
   topbar
 ];
 
