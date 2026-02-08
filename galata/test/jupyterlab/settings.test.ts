@@ -515,13 +515,13 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
     })
   );
 
-  const settingContainer = page.locator(
-    '.form-group:has-text("Show Filter Bar by Default")'
+  const settingsForm = page.locator('.jp-SettingsForm');
+  const settingCheckbox = settingsForm.getByLabel(
+    'Show Filter Bar by Default',
+    { exact: true }
   );
-
-  const settingLabel = settingContainer.locator('label');
-  const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
-  await settingLabel.click();
+  const modifiedIndicator = settingsForm.locator('.jp-modifiedIndicator');
+  await settingCheckbox.click();
   await page.locator('button.jp-RestoreButton').waitFor();
   await expect(modifiedIndicator).toBeVisible();
 
@@ -534,7 +534,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   );
 
   // turn the setting OFF
-  await settingLabel.click();
+  await settingCheckbox.click();
   await page.locator('button.jp-RestoreButton').waitFor({ state: 'hidden' });
   await expect(modifiedIndicator).toBeHidden();
   await page.reload({ waitForIsReady: false });
