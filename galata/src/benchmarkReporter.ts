@@ -574,13 +574,11 @@ class BenchmarkReporter implements Reporter {
 
     let header = '| Test file |';
     let nFiles = 0;
-    for (const [file] of groups
-      .values()
-      .next()
-      .value.values()
-      .next()
-      .value.values()
-      .next().value) {
+    // groups is non-empty (checked above), so all nested maps have at least one entry
+    const firstTestGroup = groups.values().next().value!;
+    const firstBrowserGroup = firstTestGroup.values().next().value!;
+    const firstFileGroup = firstBrowserGroup.values().next().value!;
+    for (const [file] of firstFileGroup) {
       header += ` ${file} |`;
       nFiles++;
     }

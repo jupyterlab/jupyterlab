@@ -121,9 +121,7 @@ describe('filebrowser/browser', () => {
         simulate(
           fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
           'mousedown',
-          {
-            shiftKey: true
-          }
+          { shiftKey: true }
         );
         await selectionChanged;
 

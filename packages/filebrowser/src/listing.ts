@@ -350,6 +350,7 @@ export class DirListing extends Widget {
       this.model.items(),
       state,
       this._sortNotebooksFirst,
+      this._sortFileNamesNaturally,
       this.translator
     );
     this._sortState = state;
@@ -956,8 +957,8 @@ export class DirListing extends Widget {
       this._modifiedWidth < 100
         ? 'narrow'
         : this._modifiedWidth > 120
-        ? 'long'
-        : 'short';
+          ? 'long'
+          : 'short';
   }
 
   /**
@@ -1351,6 +1352,19 @@ export class DirListing extends Widget {
     let previousValue = this._sortNotebooksFirst;
     this._sortNotebooksFirst = isEnabled;
     if (this._sortNotebooksFirst !== previousValue) {
+      this.sort(this._sortState);
+    }
+  }
+
+  /**
+   * Update the setting to sort file names naturally
+   * vs lexicographically. Default is true (natural).
+   * This sorts the items again if the internal value is modified.
+   */
+  setSortFileNamesNaturally(natural: boolean): void {
+    const previousValue = this._sortFileNamesNaturally;
+    this._sortFileNamesNaturally = natural;
+    if (this._sortFileNamesNaturally !== previousValue) {
       this.sort(this._sortState);
     }
   }
@@ -2639,6 +2653,7 @@ export class DirListing extends Widget {
     last_modified: null
   };
   private _sortNotebooksFirst = false;
+  private _sortFileNamesNaturally = true;
   private _allowSingleClick = false;
   private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
@@ -3673,6 +3688,7 @@ namespace Private {
     items: Iterable<Contents.IModel>,
     state: DirListing.ISortState,
     sortNotebooksFirst: boolean = false,
+    sortFileNamesNaturally: boolean = true,
     translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
@@ -3704,6 +3720,7 @@ namespace Private {
 
     /**
      * Compare two items by their name using `translator.languageCode`, with fallback to `navigator.language`.
+     * When sortFileNamesNaturally is true, uses natural order.
      */
     function compareByName(a: Contents.IModel, b: Contents.IModel) {
       // Wokaround for Chromium invalid language code on CI, see
@@ -3712,19 +3729,17 @@ namespace Private {
       const languageCode = (
         translator.languageCode ?? navigatorLanguage
       ).replace('_', '-');
+      const localeOptions: Intl.CollatorOptions = {
+        numeric: sortFileNamesNaturally,
+        sensitivity: 'base'
+      };
       try {
-        return a.name.localeCompare(b.name, languageCode, {
-          numeric: true,
-          sensitivity: 'base'
-        });
+        return a.name.localeCompare(b.name, languageCode, localeOptions);
       } catch (e) {
         console.warn(
           `localeCompare failed to compare ${a.name} and ${b.name} under languageCode: ${languageCode}`
         );
-        return a.name.localeCompare(b.name, navigatorLanguage, {
-          numeric: true,
-          sensitivity: 'base'
-        });
+        return a.name.localeCompare(b.name, navigatorLanguage, localeOptions);
       }
     }
 

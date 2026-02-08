@@ -21,6 +21,11 @@ jobs:
             upload-output: true
           - group: release_test
             upload-output: true
+          - group: lint
+            cache-path: |
+              ./.eslintcache
+              ./.prettiercache
+              ./.stylelintcache
         exclude:
           - group: integrity
             python-version: "3.10"
@@ -62,6 +67,14 @@ jobs:
           key: playwright-browsers-${{ runner.os }}-v1
           restore-keys: |
             playwright-browsers-${{ runner.os }}-
+
+      - name: Restore ${{ matrix.group }} cache
+        if: ${{ matrix.cache-path }}
+        uses: actions/cache@v5
+        with:
+          path: ${{ matrix.cache-path }}
+          key: |-
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version  }}
 
       - name: Install dependencies
         env:
