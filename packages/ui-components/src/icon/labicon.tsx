@@ -925,7 +925,6 @@ namespace Private {
       protected _rendererOptions?: LabIcon.IRendererOptions
     ) {}
 
-
     render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {}
     unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
   }

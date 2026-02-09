@@ -16,7 +16,6 @@
 
 // The implementation below uses case fallthrough as part of the algorithm.
 
-
 const m = 0x5bd1e995;
 const encoder = new TextEncoder();
 

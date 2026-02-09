@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-
 export function log(content: any): void {
   const el = document.getElementById('output');
   if (typeof content !== 'string') {

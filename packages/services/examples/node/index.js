@@ -16,7 +16,6 @@ const options = {
   }
 };
 
-
 console.log('Starting session…');
 const kernelManager = new services.KernelManager();
 const sessionManager = new services.SessionManager({ kernelManager });

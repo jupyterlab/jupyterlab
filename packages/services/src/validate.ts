@@ -6,7 +6,6 @@
  * of a given type and among a given set of values.
  */
 export function validateProperty(
-
   object: any,
   name: string,
   typeName?: string,

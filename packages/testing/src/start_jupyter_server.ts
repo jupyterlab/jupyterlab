@@ -368,7 +368,6 @@ namespace Private {
     baseUrl: string,
     startDelegate: PromiseDelegate<string>
   ): Promise<void> {
-
     while (true) {
       try {
         await fetch(URLExt.join(baseUrl, 'api'));

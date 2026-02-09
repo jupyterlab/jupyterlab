@@ -17,7 +17,6 @@ function evalInContext(
   document: Document,
   window: Window
 ) {
-
   return eval(code);
 }
 

@@ -29,7 +29,6 @@ if (require.main === module) {
   const jsonPath = path.join(dest, 'package.json');
   const data = utils.readJSONFile(jsonPath);
   if (name.indexOf('@jupyterlab/') === -1) {
-
     name = '@jupyterlab/test-' + name;
   }
   data.name = name;
