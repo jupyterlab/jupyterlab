@@ -70,15 +70,15 @@ if (outputDir !== buildDir) {
 // Set up variables for the watch mode ignore plugins
 const watched = {};
 const ignoreCache = Object.create(null);
-let watchNodeModules = false;
+let watchNodeModules = false; // eslint-disable-line no-unused-vars
 Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
-  let localPkgPath = '';
+  let localPkgPath = ''; // eslint-disable-line no-useless-assignment
   try {
     localPkgPath = require.resolve(path.join(name, 'package.json'));
-  } catch (e) {
+  } catch {
     return;
   }
   watched[name] = path.dirname(localPkgPath);
@@ -102,7 +102,7 @@ function maybeSync(localPath, name, rest) {
   let stats;
   try {
     stats = fs.statSync(localPath);
-  } catch (e) {
+  } catch {
     return;
   }
 

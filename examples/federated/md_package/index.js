@@ -45,6 +45,7 @@ const plugin = {
 /**
  * Activate the markdown viewer plugin.
  */
+// eslint-disable-next-line no-unused-vars
 function activate(app, restorer, rendermime, settingRegistry, middleToken) {
   const { commands, docRegistry } = app;
   // Add the markdown renderer factory.

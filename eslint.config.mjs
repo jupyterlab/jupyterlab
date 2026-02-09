@@ -248,9 +248,13 @@ export default defineConfig([
       '@typescript-eslint/no-non-null-asserted-optional-chain': 'warn',
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/no-empty-interface': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/triple-slash-reference': 'warn',
       '@typescript-eslint/no-inferrable-types': 'off',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      '@typescript-eslint/no-unsafe-function-type': 'warn',
+      '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-require-imports': 'warn',
 
       camelcase: [
         'error',
@@ -394,6 +398,7 @@ export default defineConfig([
     },
 
     rules: {
+      '@typescript-eslint/no-require-imports': 'off',
       ...jestPlugin.configs.recommended.rules,
       'jest/no-conditional-expect': 'warn',
       'jest/valid-title': 'warn',
