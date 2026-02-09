@@ -368,7 +368,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       }}
     >
       <span className="jp-DebuggerVariables-name">{variable.name}</span>
-      {details && (
+      {details != null && (
         <span className="jp-DebuggerVariables-detail">{details}</span>
       )}
       {hasMimeRenderer && showDetailsButton && (
