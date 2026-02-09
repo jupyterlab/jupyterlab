@@ -78,8 +78,8 @@ test.describe('Console Input Auto-Resize', () => {
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const multiLineCode = `def hello_world():
 print("Hello")
@@ -88,9 +88,9 @@ return "Done"`;
 
     await page.keyboard.type(multiLineCode);
 
-    const afterTypingHeight = await codeConsoleInput.boundingBox();
-    expect(afterTypingHeight).not.toBeNull();
-    expect(afterTypingHeight!.height).toBeGreaterThan(initialHeight!.height);
+    const afterTypingHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(afterTypingHeight).toBeGreaterThan(0);
+    expect(afterTypingHeight).toBeGreaterThan(initialHeight);
   });
 
   test('Input prompt auto-resize works with paste operations', async ({
@@ -98,8 +98,8 @@ return "Done"`;
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const pastedCode = `import numpy as np
 import pandas as pd
@@ -117,9 +117,9 @@ print(data.head())`;
 
     await page.keyboard.press('ControlOrMeta+v');
 
-    const afterPasteHeight = await codeConsoleInput.boundingBox();
-    expect(afterPasteHeight).not.toBeNull();
-    expect(afterPasteHeight!.height).toBeGreaterThan(initialHeight!.height);
+    const afterPasteHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(afterPasteHeight).toBeGreaterThan(0);
+    expect(afterPasteHeight).toBeGreaterThan(initialHeight);
   });
 
   test('Input prompt maintains auto-resize height when moved from bottom to top', async ({
@@ -162,8 +162,8 @@ print(data.head())`;
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const multiLineCode = `def test_function():
     print("Line 1")
@@ -172,11 +172,12 @@ print(data.head())`;
 
     await page.keyboard.type(multiLineCode);
 
-    const heightBeforeExecution = await codeConsoleInput.boundingBox();
-    expect(heightBeforeExecution).not.toBeNull();
-    expect(heightBeforeExecution!.height).toBeGreaterThan(
-      initialHeight!.height
+    const heightBeforeExecution = await getStabilisedHeight(
+      page,
+      codeConsoleInput
     );
+    expect(heightBeforeExecution).toBeGreaterThan(0);
+    expect(heightBeforeExecution).toBeGreaterThan(initialHeight);
 
     // Execute the code
     await page.keyboard.press('Shift+Enter');
@@ -184,9 +185,12 @@ print(data.head())`;
     await page.locator('text=| Idle').waitFor();
 
     // Check that the new empty input cell has shrunk back to original size
-    const heightAfterExecution = await codeConsoleInput.boundingBox();
-    expect(heightAfterExecution).not.toBeNull();
-    expect(heightAfterExecution!.height).toBe(initialHeight!.height);
+    const heightAfterExecution = await getStabilisedHeight(
+      page,
+      codeConsoleInput
+    );
+    expect(heightAfterExecution).toBeGreaterThan(0);
+    expect(heightAfterExecution).toBe(initialHeight);
 
     // Type new multi-line code in the new prompt cell
     const moreCode = `import os
@@ -196,20 +200,18 @@ print("After execution")`;
 
     await page.keyboard.type(moreCode);
 
-    const heightAfterTyping = await codeConsoleInput.boundingBox();
-    expect(heightAfterTyping).not.toBeNull();
+    const heightAfterTyping = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAfterTyping).toBeGreaterThan(0);
 
     // The input should have grown again for the new multi-line content
-    expect(heightAfterTyping!.height).toBeGreaterThan(
-      heightAfterExecution!.height
-    );
+    expect(heightAfterTyping).toBeGreaterThan(heightAfterExecution!);
   });
 
   test('Input prompt shrinks when content is cleared', async ({ page }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const multiLineCode = `def multi_line_function():
     print("This is line 1")
@@ -221,17 +223,17 @@ print("After execution")`;
 
     await page.keyboard.type(multiLineCode);
 
-    const expandedHeight = await codeConsoleInput.boundingBox();
-    expect(expandedHeight).not.toBeNull();
-    expect(expandedHeight!.height).toBeGreaterThan(initialHeight!.height);
+    const expandedHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(expandedHeight).toBeGreaterThan(0);
+    expect(expandedHeight).toBeGreaterThan(initialHeight);
 
     // Clear the input using Ctrl+A followed by Delete
     await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.press('Delete');
 
-    const shrunkHeight = await codeConsoleInput.boundingBox();
-    expect(shrunkHeight).not.toBeNull();
-    expect(shrunkHeight!.height).toBe(initialHeight!.height);
+    const shrunkHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(shrunkHeight).toBeGreaterThan(0);
+    expect(shrunkHeight).toBe(initialHeight);
   });
 });
 
