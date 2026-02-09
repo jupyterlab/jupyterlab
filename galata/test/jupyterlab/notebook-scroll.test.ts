@@ -465,11 +465,11 @@ test.describe('Jump to execution button', () => {
     // Start executing the first cell (with 2 second sleep)
     await page.notebook.runCell(0, { inplace: false });
 
-    // Add a cell at the end, it will have index 3 (forth cell)
+    // Add a cell at the end, it will have index 3 (fourth cell)
     await page.notebook.addCell('code', '1');
 
     // Schedule run of the last (fourth) cell we just added.
-    // Because runCell as relies on selection and jump action
+    // Because runCell relies on selection and jump action
     // does change selection in the meantime (which was causing
     // this test to randomly fail) we await for run but create
     // a promise to await for result manually.

@@ -65,7 +65,7 @@ test.describe('General', () => {
     );
 
     // Enforce position of the cell we are after by moving up
-    // and down to invoke cell/viewport alignement logic.
+    // and down to invoke cell/viewport alignment logic.
     await cell.click();
     await page.keyboard.press('Escape');
     await page.keyboard.press('ArrowDown');
@@ -630,10 +630,10 @@ test.describe('General', () => {
     await freeezeKernelIds(dialog, mockedKernelIds);
 
     // Freeze `terminal/X` identifier because under concurrent execution the
-    // server migt be tracking another terminal already so instead of
+    // server might be tracking another terminal already so instead of
     // `terminal/1` the screenshot would show e.g. `terminal/2`.
     // Changing this via mocks would involve both intercepting terminal REST
-    // API and then rewiring websocket conneections which does not work
+    // API and then rewiring websocket connections which does not work
     // reliably in galata as of now.
     await dialog.evaluate(node => {
       let changed = false;
@@ -649,7 +649,7 @@ test.describe('General', () => {
       }
       if (!changed) {
         throw Error(
-          'Expected to find at least on terminal entry in the dialog.'
+          'Expected to find at least one terminal entry in the dialog.'
         );
       }
     });
