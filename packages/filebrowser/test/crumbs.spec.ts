@@ -407,6 +407,9 @@ describe('filebrowser/model', () => {
         let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
         const narrowItemCount = items.length;
 
+        // Force truncation in narrow mode by ensuring it's very small if needed
+        // But with 150px and the setup, it should be small.
+
         Object.defineProperty(customCrumbs.node, 'clientWidth', {
           configurable: true,
           get: () => 1000
@@ -422,16 +425,12 @@ describe('filebrowser/model', () => {
         items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
         const wideItemCount = items.length;
 
-        // With sufficient width (1000px), it should show all items
-        expect(wideItemCount).toBeGreaterThanOrEqual(narrowItemCount);
+        // With sufficient width (1000px), it should show MORE items than the constricted 150px case
+        expect(wideItemCount).toBeGreaterThan(narrowItemCount);
 
         // Restore original clientWidth descriptor if it existed
         if (originalClientWidth) {
-          Object.defineProperty(
-            HTMLElement.prototype,
-            'clientWidth',
-            originalClientWidth
-          );
+          delete (customCrumbs.node as any).clientWidth;
         }
 
         Widget.detach(customCrumbs);

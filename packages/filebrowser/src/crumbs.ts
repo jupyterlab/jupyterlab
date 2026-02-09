@@ -198,6 +198,16 @@ export class BreadCrumbs extends Widget {
     // Invalidate cached widths if the local path (and thus breadcrumb labels) changed
     if (this._previousState && this._previousState.path !== localPath) {
       this._cachedWidths = null;
+      // Force update with default widths first
+      this._previousState = null;
+      // Schedule measurement to capture new label widths
+      requestAnimationFrame(() => {
+        if (this.isDisposed || !this.isAttached) {
+          return;
+        }
+        this._measureElementWidths();
+        this.update();
+      });
     }
 
     // Calculate adaptive items based on available width
@@ -718,9 +728,7 @@ namespace Private {
         const elemPath = parts.slice(0, i + 1).join('/');
         const elem = createBreadcrumbElement(parts[i], elemPath);
         node.appendChild(elem);
-        const separator = document.createElement('span');
-        separator.textContent = '/';
-        node.appendChild(separator);
+        node.appendChild(createCrumbSeparator());
       }
     }
   }
