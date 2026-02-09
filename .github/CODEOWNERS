@@ -23,7 +23,9 @@
 /packages/completer @krassowski
 /packages/completer-extension @krassowski
 /packages/lsp @krassowski
+/packages/filebrowser @MUFFANUJ 
+/packages/filebrowser-extension @MUFFANUJ 
 
 # Add yourself in both (or only one) line below if you would like to review docs PRs
-/docs/ @krassowski
-*.md @krassowski
+/docs/ @krassowski @MUFFANUJ 
+*.md @krassowski @MUFFANUJ 
