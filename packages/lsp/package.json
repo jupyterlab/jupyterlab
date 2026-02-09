@@ -51,7 +51,7 @@
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
     "@lumino/signaling": "^2.1.5",
-    "@lumino/widgets": "^2.7.3",
+    "@lumino/widgets": "^2.7.5",
     "lodash.mergewith": "^4.6.1",
     "vscode-jsonrpc": "^8.2.0",
     "vscode-languageserver-protocol": "^3.17.0",

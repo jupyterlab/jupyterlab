@@ -51,7 +51,7 @@
     "@lumino/coreutils": "^2.2.2",
     "@lumino/messaging": "^2.0.4",
     "@lumino/signaling": "^2.1.5",
-    "@lumino/widgets": "^2.7.3",
+    "@lumino/widgets": "^2.7.5",
     "lodash.escape": "^4.0.1"
   },
   "devDependencies": {
