@@ -6344,92 +6344,92 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-arm64@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-darwin-arm64@npm:2.0.0-canary-20260116"
+"@rspack/binding-darwin-arm64@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-darwin-arm64@npm:2.0.0-beta.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-x64@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-darwin-x64@npm:2.0.0-canary-20260116"
+"@rspack/binding-darwin-x64@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-darwin-x64@npm:2.0.0-beta.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-gnu@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-linux-arm64-gnu@npm:2.0.0-canary-20260116"
+"@rspack/binding-linux-arm64-gnu@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-linux-arm64-gnu@npm:2.0.0-beta.0"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-musl@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-linux-arm64-musl@npm:2.0.0-canary-20260116"
+"@rspack/binding-linux-arm64-musl@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-linux-arm64-musl@npm:2.0.0-beta.0"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-gnu@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-linux-x64-gnu@npm:2.0.0-canary-20260116"
+"@rspack/binding-linux-x64-gnu@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-linux-x64-gnu@npm:2.0.0-beta.0"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-musl@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-linux-x64-musl@npm:2.0.0-canary-20260116"
+"@rspack/binding-linux-x64-musl@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-linux-x64-musl@npm:2.0.0-beta.0"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-wasm32-wasi@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-wasm32-wasi@npm:2.0.0-canary-20260116"
+"@rspack/binding-wasm32-wasi@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-wasm32-wasi@npm:2.0.0-beta.0"
   dependencies:
     "@napi-rs/wasm-runtime": 1.0.7
   conditions: cpu=wasm32
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-arm64-msvc@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-win32-arm64-msvc@npm:2.0.0-canary-20260116"
+"@rspack/binding-win32-arm64-msvc@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-win32-arm64-msvc@npm:2.0.0-beta.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-ia32-msvc@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-win32-ia32-msvc@npm:2.0.0-canary-20260116"
+"@rspack/binding-win32-ia32-msvc@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-win32-ia32-msvc@npm:2.0.0-beta.0"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-x64-msvc@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding-win32-x64-msvc@npm:2.0.0-canary-20260116"
+"@rspack/binding-win32-x64-msvc@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding-win32-x64-msvc@npm:2.0.0-beta.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding@npm:2.0.0-canary-20260116":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/binding@npm:2.0.0-canary-20260116"
+"@rspack/binding@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/binding@npm:2.0.0-beta.0"
   dependencies:
-    "@rspack/binding-darwin-arm64": 2.0.0-canary-20260116
-    "@rspack/binding-darwin-x64": 2.0.0-canary-20260116
-    "@rspack/binding-linux-arm64-gnu": 2.0.0-canary-20260116
-    "@rspack/binding-linux-arm64-musl": 2.0.0-canary-20260116
-    "@rspack/binding-linux-x64-gnu": 2.0.0-canary-20260116
-    "@rspack/binding-linux-x64-musl": 2.0.0-canary-20260116
-    "@rspack/binding-wasm32-wasi": 2.0.0-canary-20260116
-    "@rspack/binding-win32-arm64-msvc": 2.0.0-canary-20260116
-    "@rspack/binding-win32-ia32-msvc": 2.0.0-canary-20260116
-    "@rspack/binding-win32-x64-msvc": 2.0.0-canary-20260116
+    "@rspack/binding-darwin-arm64": 2.0.0-beta.0
+    "@rspack/binding-darwin-x64": 2.0.0-beta.0
+    "@rspack/binding-linux-arm64-gnu": 2.0.0-beta.0
+    "@rspack/binding-linux-arm64-musl": 2.0.0-beta.0
+    "@rspack/binding-linux-x64-gnu": 2.0.0-beta.0
+    "@rspack/binding-linux-x64-musl": 2.0.0-beta.0
+    "@rspack/binding-wasm32-wasi": 2.0.0-beta.0
+    "@rspack/binding-win32-arm64-msvc": 2.0.0-beta.0
+    "@rspack/binding-win32-ia32-msvc": 2.0.0-beta.0
+    "@rspack/binding-win32-x64-msvc": 2.0.0-beta.0
   dependenciesMeta:
     "@rspack/binding-darwin-arm64":
       optional: true
@@ -6451,33 +6451,33 @@ __metadata:
       optional: true
     "@rspack/binding-win32-x64-msvc":
       optional: true
-  checksum: d0870300e868d8a774604236a5e7d9125426c9fa21cbffb97cb79ea578bbe77ad3c9be23631648a0f2c74b4e90f4915db3019129bb977896a680389db65cb2f5
+  checksum: efb8f1429356787a36f32f282989b703939da1cae3e6f07009e5dffe4eeb4f94541792d8ee36741a1a861a088492cda15e508189b368565b9da112a241b3145b
   languageName: node
   linkType: hard
 
-"@rspack/cli@npm:^2.0.0-beta.0":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/cli@npm:2.0.0-canary-20260116"
+"@rspack/cli@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/cli@npm:2.0.0-beta.0"
   dependencies:
     "@discoveryjs/json-ext": ^0.5.7
     exit-hook: ^4.0.0
   peerDependencies:
-    "@rspack/core": ^1.0.0-alpha || ^1.x
-    "@rspack/dev-server": ~1.1.5
+    "@rspack/core": ^2.0.0-0
+    "@rspack/dev-server": ~1.2.1
   peerDependenciesMeta:
     "@rspack/dev-server":
       optional: true
   bin:
     rspack: bin/rspack.js
-  checksum: 4ea848a999a0d5baa0cdc2a592e3e4955b79f2f88a8cca47788af2bad66b21c7871ea096ea291fa356a1d4954d4338db4667be4ef81626f3af0d1a90a137a4c0
+  checksum: 4d6c7097c04399012cfbbffd3533aadc8afbdcbe1039cb7e8f7dc55b77e14cb53401251411ccffddc77ae9f7b61964a452c5a0e7101715d3c58d9d9246bc9543
   languageName: node
   linkType: hard
 
-"@rspack/core@npm:^2.0.0-beta.0":
-  version: 2.0.0-canary-20260116
-  resolution: "@rspack/core@npm:2.0.0-canary-20260116"
+"@rspack/core@npm:2.0.0-beta.0":
+  version: 2.0.0-beta.0
+  resolution: "@rspack/core@npm:2.0.0-beta.0"
   dependencies:
-    "@rspack/binding": 2.0.0-canary-20260116
+    "@rspack/binding": 2.0.0-beta.0
     "@rspack/lite-tapable": 1.1.0
   peerDependencies:
     "@module-federation/runtime-tools": ">=0.22.0"
@@ -6487,7 +6487,7 @@ __metadata:
       optional: true
     "@swc/helpers":
       optional: true
-  checksum: f72eec8d85cdc0df9c8f69d1aaddeabac6a214363b57a69348af4f6b483fac08df9d474f46b14512f196ccd301a3f0ce15061b4a6244c776f47e7805470117de
+  checksum: 5a008d0b3a6c920b47622187c28396883b787a63e9919987556b56b70f2b27d2592e54d3110e31d5b98fd5f577520d71917ca91dbda9badcde36b67a08985bcb
   languageName: node
   linkType: hard
 
