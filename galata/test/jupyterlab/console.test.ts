@@ -242,10 +242,15 @@ async function getStabilisedHeight(
   // Wait for the height to stabilize over 100ms
   let lastBox: { height: number } | null = null;
   let currentBox: { height: number } | null = null;
+  let attempts = 0;
   do {
     lastBox = currentBox;
     await page.waitForTimeout(100);
     currentBox = await element.boundingBox();
+    attempts += 1;
+    if (attempts >= 100) {
+      throw new Error('Height did not stabilize after 100 attempts');
+    }
   } while (!(currentBox && lastBox && currentBox.height === lastBox.height));
   return currentBox.height;
 }

@@ -1290,7 +1290,9 @@ export class NotebookHelper {
         let framesWithoutChange = 0;
         let previousContent = cell.querySelector('.cm-content')!.innerHTML;
         let newContent: string | null = null;
+        let cancelled = false;
         const timeoutId = window.setTimeout(() => {
+          cancelled = true;
           _reject(
             `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${previousContent}; Current innerHTML: ${newContent}`
           );
@@ -1305,7 +1307,9 @@ export class NotebookHelper {
             }
             previousContent = newContent;
             if (framesWithoutChange < 10) {
-              waitUntilNextFrame();
+              if (!cancelled) {
+                waitUntilNextFrame();
+              }
             } else {
               window.clearTimeout(timeoutId);
               _resolve();
