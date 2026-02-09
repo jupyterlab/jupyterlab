@@ -329,11 +329,20 @@ class PyPIExtensionManager(ExtensionManager):
 
             # Check Python version compatibility
             requires_python = data.get("requires_python")
-            python_compatible = _check_python_version_compatible(requires_python)
+            python_compatible, version_explanation = _check_python_version_compatible(
+                requires_python
+            )
+
+            description = data.get("summary")
+            if version_explanation:
+                if description:
+                    description += f" ({version_explanation})"
+                else:
+                    description = version_explanation
 
             extension = ExtensionPackage(
                 name=normalized_name,
-                description=data.get("summary"),
+                description=description,
                 homepage_url=best_guess_home_url,
                 author=data.get("author"),
                 license=data.get("license"),
