@@ -15,7 +15,7 @@
 //  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // The implementation below uses case fallthrough as part of the algorithm.
-/* eslint-disable no-fallthrough */
+
 
 const m = 0x5bd1e995;
 const encoder = new TextEncoder();

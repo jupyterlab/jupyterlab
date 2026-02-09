@@ -17,7 +17,7 @@ function evalInContext(
   document: Document,
   window: Window
 ) {
-  // eslint-disable-next-line
+
   return eval(code);
 }
 

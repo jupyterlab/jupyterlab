@@ -2032,7 +2032,7 @@ export class Notebook extends StaticNotebook {
       this._selectionChanged.emit(void 0);
     }
     // Make sure we have a valid active cell.
-    this.activeCellIndex = this.activeCellIndex; // eslint-disable-line
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 

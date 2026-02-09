@@ -173,7 +173,7 @@ describe('Logger', () => {
 
     it('setting to its current value has no effect', () => {
       const s = new SignalLogger(logger.stateChanged);
-      logger.level = logger.level; // eslint-disable-line
+      logger.level = logger.level;
       expect(s.args.length).toBe(0);
       expect(logger.length).toBe(0);
       s.dispose();
@@ -227,7 +227,7 @@ describe('Logger', () => {
     it('setting to current value has no effect', () => {
       logger.rendermime = new RenderMimeRegistry();
       const s = new SignalLogger(logger.stateChanged);
-      logger.rendermime = logger.rendermime; // eslint-disable-line
+      logger.rendermime = logger.rendermime;
       expect(s.args).toEqual([]);
       s.dispose();
     });

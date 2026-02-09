@@ -28,7 +28,7 @@ module.exports = {
         test: /\.js$/,
         use: ['source-map-loader'],
         enforce: 'pre',
-        // eslint-disable-next-line no-undef
+
         exclude: /node_modules/
       },
       { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },

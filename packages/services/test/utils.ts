@@ -90,7 +90,7 @@ export const KERNELSPECS: JSONObject = {
  */
 export function getRequestHandler(
   status: number,
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
   body: any
 ): ServerConnection.ISettings {
   const customFetch = (info: RequestInfo, init?: RequestInit) => {
@@ -114,7 +114,7 @@ export interface IService {
 /**
  * Handle a single request with a mock response.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
 export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;
