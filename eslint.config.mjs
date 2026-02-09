@@ -1,4 +1,5 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
+import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
@@ -51,7 +52,7 @@ export default defineConfig([
   ]),
   {
     files: ['**/*.js', '**/*.jsx'],
-
+    extends: [js.configs.recommended],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -177,6 +178,7 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
+    extends: [tseslint.configs.recommended],
 
     plugins: {
       '@typescript-eslint': tseslint.plugin,
