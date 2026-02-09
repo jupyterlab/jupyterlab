@@ -61,7 +61,7 @@ export type GalataOptions = {
    *
    * Default: true.
    */
-  resetWorkspace: [true, { option: true }];
+  resetWorkspace: boolean;
   /**
    * Kernels created during the test.
    *
@@ -399,6 +399,7 @@ export const test: TestType<
       mockState,
       mockUser,
       page,
+      resetWorkspace,
       sessions,
       terminals,
       tmpPath,
@@ -421,7 +422,8 @@ export const test: TestType<
           terminals,
           tmpPath,
           waitForApplication,
-          kernels
+          kernels,
+          resetWorkspace
         )
       );
     } finally {

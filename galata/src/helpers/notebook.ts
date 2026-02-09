@@ -1410,11 +1410,11 @@ export class NotebookHelper {
   /**
    * Run a given cell.
    *
-   * Note: cell exectuion relies on cell selection, thus this method
+   * Note: cell execution relies on cell selection, thus this method
    * is not reliable if cell selection changes before the cell gets run.
    *
    * @param cellIndex Cell index
-   * @param options Options for runninng cell; for compatibility a boolean can be passed as shorthand for `inplace`
+   * @param options Options for running cell; for compatibility a boolean can be passed as shorthand for `inplace`
    * @param options.inplace Whether to stay on the cell or select the next one (default `false`)
    * @param options.wait Whether to wait for the completion (default `true`)
    * @returns Action success status

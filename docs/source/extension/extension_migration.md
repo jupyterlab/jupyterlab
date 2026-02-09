@@ -26,11 +26,11 @@ Webpack config to Rspack.
 ### Testing with Galata
 
 - The `runCell()` method of notebook helper now takes `options: {inplace?: boolean; wait?: boolean}` as a second argument.
-  Setting the `wait` option to `false` allows to skip awaiting for the result, while but still awaiting for scheduling
-  of cell execution to be triggered.
+  Setting the `wait` option to `false` skips waiting for the cell execution to finish, but still waits until the execution
+  has been scheduled.
 - When `autoGoto` is enabled, the workspace is now reset automatically; to opt out, set `resetWorkspace` fixture to `false`.
 - The galata's `page.waitForCondition()` now uses a default timeout of 15 seconds, simplifying debugging and reducing time to retry.
-  The `timeout` argument can be used to control the tiemout duration.
+  The `timeout` argument can be used to control the timeout duration.
 - Errors after page fixture teardown are now gracefully ignored to prevent the errors from delayed server requests
   from failing tests during the teardown phase.
 

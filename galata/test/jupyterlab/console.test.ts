@@ -139,8 +139,8 @@ print(data.head())`;
       await navigator.clipboard.writeText(code);
     }, pastedCode);
 
-    // Since neither paste, nor intialization of CodeMirror editor
-    // (after moving the prompt position) is instantanious, we only
+    // Since neither paste, nor initialization of CodeMirror editor
+    // (after moving the prompt position) is instantaneous, we only
     // record height once it stabilised for both before and after.
 
     await page.keyboard.press('ControlOrMeta+v');
