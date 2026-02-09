@@ -29,14 +29,14 @@ from . import fake_client_factory
 )
 def test_check_python_version_compatible(requires_python, expected):
     """Test the Python version compatibility check function."""
-    result = _check_python_version_compatible(requires_python)
+    result, _ = _check_python_version_compatible(requires_python)
     assert result == expected
 
 
 def test_check_python_version_compatible_current_version():
     """Test that current Python version is compatible with its own specifier."""
     current = f">={sys.version_info.major}.{sys.version_info.minor}"
-    assert _check_python_version_compatible(current) is True
+    assert _check_python_version_compatible(current)[0] is True
 
 
 @pytest.mark.parametrize(
@@ -72,6 +72,10 @@ async def test_extension_package_allowed_set_from_python_compatibility(
     ext = extensions[0]
     assert ext.name == "test-extension"
     assert ext.allowed == expected_allowed
+    if not expected_allowed:
+        assert "Requires Python" in ext.description
+    else:
+        assert ext.description == "A test extension"
 
 
 @pytest.mark.parametrize(

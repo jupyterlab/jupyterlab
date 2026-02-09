@@ -89,26 +89,29 @@ if http_proxy_url:
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
-def _check_python_version_compatible(requires_python: str | None) -> bool:
+def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
     """Check if the current Python version satisfies the requires_python specifier.
 
     Args:
         requires_python: The requires_python specifier string from PyPI (e.g., ">=3.10")
 
     Returns:
-        True if compatible or if requires_python is None/empty, False otherwise.
+        (compatible, explanation)
+        compatible: True if compatible or if requires_python is None/empty, False otherwise.
+        explanation: A string explaining the mismatch if incompatible, otherwise None.
     """
     if not requires_python:
-        return True
+        return True, None
     try:
-        current_version = Version(
-            f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        )
+        current_version_str = sys.version.split()[0]
+        current_version = Version(current_version_str)
         specifier = SpecifierSet(requires_python)
-        return current_version in specifier
+        if current_version in specifier:
+            return True, None
+        return False, f"Requires Python {requires_python} but detected Python {current_version}"
     except (InvalidSpecifier, InvalidVersion):
         # If parsing fails, assume compatible to avoid false negatives
-        return True
+        return True, None
 
 
 async def _fetch_package_metadata(
