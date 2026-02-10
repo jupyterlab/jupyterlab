@@ -76,7 +76,11 @@ const UNUSED: Dict<string[]> = {
     'source-map-loader',
 
     // Peer dependency of @rspack/core, required at runtime by ModuleFederationPlugin.
-    '@module-federation/runtime-tools'
+    '@module-federation/runtime-tools',
+
+    // TODO: remove
+    // Transitive dependency of @rspack/core, needed at runtime.
+    '@rspack/lite-tapable'
   ],
   '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
   '@jupyterlab/codemirror': [
