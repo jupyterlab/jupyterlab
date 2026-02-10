@@ -112,9 +112,9 @@ test.describe('upload auto-open behavior', () => {
 
     expect(await page.activity.isTabActive(bigName)).toBe(false);
     await page.getByRole('button', { name: 'Upload', exact: true }).click();
-    // Wait for max 5 seconds for upload to finish
+    // Wait for max 15 seconds for upload to finish
     await expect(page.getByText(/Uploaded big\.ipynb.*/)).toBeVisible({
-      timeout: 10000
+      timeout: 15000
     });
   });
 });

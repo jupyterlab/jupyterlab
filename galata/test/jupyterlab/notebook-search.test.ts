@@ -361,7 +361,7 @@ test.describe('Notebook Search', () => {
     // Wait for the counter to be properly updated
     await page
       .locator('.jp-DocumentSearch-index-counter:has-text("1/10")')
-      .waitFor();
+      .waitFor({ timeout: 10000 });
 
     // Select cell above
     await page.keyboard.press('Shift+ArrowUp');
@@ -776,6 +776,9 @@ test.describe('Auto search in any selection', async () => {
     await editor.click();
     await page.keyboard.press('Control+Home');
     await page.keyboard.press('Shift+End');
+
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18462
+    await page.waitForTimeout(200);
 
     // Open search box (filters should already be shown)
     await page.keyboard.press('Control+f');

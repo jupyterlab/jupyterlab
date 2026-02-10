@@ -398,6 +398,10 @@ test.describe('Reactive toolbar', () => {
     const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
     await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
 
+    // Wait for bug button to settle before taking a snapshot
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
     expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
   });
 });

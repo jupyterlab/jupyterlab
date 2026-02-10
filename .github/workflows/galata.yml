@@ -33,6 +33,7 @@ jobs:
             suite: jupyterlab
           - browser: chromium
             project: galata
+            suite: galata
             shard: 1
             shards: 2
           - browser: chromium
@@ -272,7 +273,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test:doc
+          jlpm run test:doc --reporter github,list,html
         working-directory: core
 
       - name: Upload Galata Test assets
@@ -289,7 +290,7 @@ jobs:
         with:
           name: documentation-report
           path: core/galata/playwright-report
-          if-no-files-found: ignore  # expected when no tests fail (after retries)
+          if-no-files-found: error
 
       - name: Stop JupyterLab
         if: always()
