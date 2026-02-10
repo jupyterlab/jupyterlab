@@ -361,7 +361,7 @@ test.describe('Notebook Search', () => {
     // Wait for the counter to be properly updated
     await page
       .locator('.jp-DocumentSearch-index-counter:has-text("1/10")')
-      .waitFor();
+      .waitFor({ timeout: 10000 });
 
     // Select cell above
     await page.keyboard.press('Shift+ArrowUp');
