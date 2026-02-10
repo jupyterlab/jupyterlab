@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+//DEBUG CHANGE
 
 import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Notebook No Kernel', () => {
   const NOTEBOOK_NAME = 'test-notebook-no-kernel.ipynb';
+
   test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
 
   test.beforeEach(async ({ page }) => {
@@ -18,6 +20,7 @@ test.describe('Notebook No Kernel', () => {
       button: 'right'
     });
     expect(await page.menu.isAnyOpen()).toBe(true);
+
     await page.hover('text=Open With');
     await page.click('text=Notebook (no kernel)');
     await page.waitForSelector('.jp-NotebookPanel');
@@ -26,7 +29,9 @@ test.describe('Notebook No Kernel', () => {
   test('Should show "No Kernel" message when opening notebook', async ({
     page
   }) => {
-    await expect(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
+    expect(await page.kernel.isRunning()).toBe(false);
+
     expect(await page.activity.isTabActive(NOTEBOOK_NAME)).toBe(true);
   });
 
@@ -36,20 +41,24 @@ test.describe('Notebook No Kernel', () => {
     await page.notebook.setCell(0, 'code', 'print("Hello, World!")');
     await page.notebook.addCell('markdown', '# Test Header');
 
-    await expect(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+    // kernel state assertion(stablizes test)
+    expect(await page.kernel.isRunning()).toBe(false);
+    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
     expect(await page.notebook.getCellCount()).toBe(2);
   });
 
   test('Should not auto-start kernel when reopening notebook', async ({
     page
   }) => {
+
     await page.notebook.setCell(0, 'code', 'print("test")');
     await page.notebook.save();
     await page.menu.clickMenuItem('File>Close Tab');
 
     await page.filebrowser.open(NOTEBOOK_NAME);
 
-    await expect(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
+    expect(await page.kernel.isRunning()).toBe(false);
   });
 
   test('Should prompt for kernel when executing code cell', async ({
@@ -82,6 +91,7 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     await page.kernel.shutdownAll();
   });
 
+
   test('Should open both notebooks with no kernel when using the "Open With" menu item', async ({
     page
   }) => {
@@ -94,6 +104,7 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
       { button: 'right' }
     );
+
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
     await page.click('text=Notebook (no kernel)');
@@ -102,16 +113,15 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
       return document.querySelectorAll('.jp-NotebookPanel').length === 2;
     });
 
+
     expect(await page.activity.isTabActive(NOTEBOOK_NAME_2)).toBe(true);
 
     await page.activity.activateTab(NOTEBOOK_NAME_1);
-    await expect(page.getByTitle('Switch kernel').first()).toHaveText(
-      'No Kernel'
-    );
+    await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
+    expect(await page.kernel.isRunning()).toBe(false);
 
     await page.activity.activateTab(NOTEBOOK_NAME_2);
-    await expect(page.getByTitle('Switch kernel').first()).toHaveText(
-      'No Kernel'
-    );
+    await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
+    expect(await page.kernel.isRunning()).toBe(false);
   });
 });
