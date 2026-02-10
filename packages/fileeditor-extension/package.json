@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.10.1",
+    "@codemirror/commands": "^6.10.2",
     "@codemirror/search": "^6.6.0",
     "@jupyterlab/application": "^4.6.0-alpha.2",
     "@jupyterlab/apputils": "^4.7.0-alpha.2",
