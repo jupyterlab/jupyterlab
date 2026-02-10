@@ -2481,6 +2481,7 @@ __metadata:
     "@lumino/widgets": ^2.7.5
     "@module-federation/runtime-tools": ^2.0.0
     "@rspack/core": ^2.0.0-beta.1
+    "@rspack/lite-tapable": 1.1.0
     "@types/fs-extra": ^9.0.1
     "@types/glob": ^7.1.1
     "@types/node": ^20.14.8
@@ -6487,6 +6488,13 @@ __metadata:
     "@swc/helpers":
       optional: true
   checksum: 4d0082a7e73751f8d35eca1ccebdb42ff1cf1db1ed1240ab8c1f6483b629080329895921d80c41757166f4efc939b61e08c83ae7bacc5c16aa4eebde4744f79a
+  languageName: node
+  linkType: hard
+
+"@rspack/lite-tapable@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@rspack/lite-tapable@npm:1.1.0"
+  checksum: 7b74b5577cca5fb5be52bee8ce5c4415383ab84bdbb1eaa910b5a20aa3a6bbecd822c4d140239320d311153a3de56f3388c109c04da09d52d6c103c8e9439588
   languageName: node
   linkType: hard
 
