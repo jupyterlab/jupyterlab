@@ -193,6 +193,11 @@ test.describe('Notebook Edit', () => {
       .locator('.jp-mod-active .jp-cell-toolbar')
       .waitFor({ state: 'hidden' });
 
+    // Also wait for the heading collapser icon to appear
+    await nbPanel!
+      .locator('.jp-mod-active .jp-collapseHeadingButton')
+      .waitFor();
+
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
