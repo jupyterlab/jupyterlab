@@ -156,9 +156,21 @@ test('Terminal web link', async ({ page, tmpPath, browserName }) => {
 });
 
 test.describe('Open in Terminal from File Browser', () => {
+  test.use({
+    mockSettings: {
+      '@jupyterlab/terminal-extension:plugin': {
+        screenReaderMode: true
+      }
+    }
+  });
+
   // Ensure a clean state before each test
   test.beforeEach(async ({ page }) => {
     await page.activity.closeAll();
+  });
+
+  test.afterEach(async ({ page }) => {
+    await page.unrouteAll({ behavior: 'ignoreErrors' });
   });
 
   test('should open one terminal for a single selected directory', async ({
@@ -189,21 +201,139 @@ test.describe('Open in Terminal from File Browser', () => {
 
     // Wait for terminal body to be ready
     await terminalPanelLocator!.locator('.jp-Terminal-body').waitFor();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     await terminalPanelLocator!.click();
-
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(200);
 
     await page.keyboard.type('pwd');
     await page.keyboard.press('Enter');
 
-    // Wait for command to execute and output to appear
-    await page.waitForTimeout(1000);
-
     await expect(terminalPanelLocator!).toContainText(folderName, {
       timeout: 5000
     });
+  });
+
+  test('should open multiple terminals for multiple selected directories', async ({
+    page,
+    tmpPath
+  }) => {
+    // Create two test directories
+    const folderA = 'multi-dir-a';
+    const folderB = 'multi-dir-b';
+    await page.contents.createDirectory(`${tmpPath}/${folderA}`);
+    await page.contents.createDirectory(`${tmpPath}/${folderB}`);
+    await page.filebrowser.openDirectory(tmpPath);
+    await page.filebrowser.refresh();
+
+    // Select both directories using name-based lookup and Shift-click
+    const folderALocator = page.locator(
+      `.jp-DirListing-item:has-text("${folderA}")`
+    );
+    const folderBLocator = page.locator(
+      `.jp-DirListing-item:has-text("${folderB}")`
+    );
+
+    // Click first item
+    await folderALocator.waitFor({ state: 'visible' });
+    await folderALocator.click();
+
+    // Shift-click second item to select range (A, B)
+    await folderBLocator.waitFor({ state: 'visible' });
+    await folderBLocator.click({ modifiers: ['Shift'] });
+
+    // Right-click to open context menu on selection
+    await folderBLocator.click({ button: 'right' });
+
+    // Open in Terminal
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Check that two terminal tabs opened in the dock panel
+    const tabs = page.locator(
+      '.lm-DockPanel-tabBar .lm-TabBar-tab:has-text("Terminal")'
+    );
+    await expect(tabs).toHaveCount(2, { timeout: 10000 });
+
+    // Iterate through tabs, activate each, and check content
+    for (let i = 0; i < 2; i++) {
+      await tabs.nth(i).click();
+      await page.waitForTimeout(500);
+
+      // Find the currently visible terminal body
+      const activeTerminal = page.locator('.jp-Terminal-body:visible');
+      await expect(activeTerminal).toHaveCount(1);
+
+      await activeTerminal.click();
+      await page.keyboard.type('pwd');
+      await page.keyboard.press('Enter');
+
+      await expect(activeTerminal).toContainText(
+        new RegExp(`${folderA}|${folderB}`),
+        { timeout: 10000 }
+      );
+
+      // Double check specifically that one of them is present
+      const text = await activeTerminal.textContent();
+      expect(text?.includes(folderA) || text?.includes(folderB)).toBeTruthy();
+    }
+  });
+
+  test('should open terminal for directory in mixed selection', async ({
+    page,
+    tmpPath
+  }) => {
+    // Create Dir A and File B
+    const folderName = 'mixed-dir';
+    const fileName = 'mixed-file.txt';
+    await page.contents.createDirectory(`${tmpPath}/${folderName}`);
+
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.contents.renameFile(
+      `${tmpPath}/untitled.txt`,
+      `${tmpPath}/${fileName}`
+    );
+    await page.filebrowser.refresh();
+
+    // Select both using Shift-click
+    const folderLocator = page.locator(
+      `.jp-DirListing-item:has-text("${folderName}")`
+    );
+    const fileLocator = page.locator(
+      `.jp-DirListing-item:has-text("${fileName}")`
+    );
+
+    await folderLocator.waitFor({ state: 'visible' });
+    await folderLocator.click();
+
+    await fileLocator.waitFor({ state: 'visible' });
+    // Use Shift for consistent multi-selection
+    await fileLocator.click({ modifiers: ['Shift'] });
+
+    // Right-click the folder to trigger context menu on multiselection
+    await folderLocator.click({ button: 'right' });
+
+    // Open in Terminal
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Expect exactly 1 terminal (for the folder)
+    const tabs = page.locator(
+      '.lm-DockPanel-tabBar .lm-TabBar-tab:has-text("Terminal")'
+    );
+    await expect(tabs).toHaveCount(1, { timeout: 10000 });
+
+    // Verify content is the directory
+    const activeTerminal = page.locator('.jp-Terminal-body:visible');
+
+    if ((await tabs.count()) > 0) {
+      await tabs.first().click();
+    }
+    await page.waitForTimeout(500);
+
+    await activeTerminal.click();
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+
+    await expect(activeTerminal).toContainText(folderName, { timeout: 5000 });
   });
 
   test('should not show the context menu item for files', async ({
