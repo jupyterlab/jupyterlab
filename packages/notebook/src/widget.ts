@@ -1891,7 +1891,7 @@ export class Notebook extends StaticNotebook {
    * @param interaction - the clipboard interaction (copy, cut or paste).
    * @param cells - the cells copied, cut or pasted.
    */
-  cellClipboardInteraction(
+  recordCellClipboardInteraction(
     interaction: 'copy' | 'cut' | 'paste' | null,
     cells: nbformat.IBaseCell[]
   ) {

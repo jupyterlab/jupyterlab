@@ -1513,7 +1513,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = prevActiveCellIndex + values.length;
     notebook.deselectAll();
     if (cellsFromClipboard) {
-      notebook.cellClipboardInteraction('paste', values);
+      notebook.recordCellClipboardInteraction('paste', values);
     }
     void Private.handleState(notebook, state, true);
   }
@@ -2752,9 +2752,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.cellClipboardInteraction('cut', data);
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.cellClipboardInteraction('copy', data);
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
@@ -2789,9 +2789,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.cellClipboardInteraction('cut', data);
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.cellClipboardInteraction('copy', data);
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
