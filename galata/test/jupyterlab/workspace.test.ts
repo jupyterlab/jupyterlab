@@ -413,11 +413,6 @@ test.describe('Restore non-default-type editor', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   // Use non-default state to have the running session panel displayed
   test.use({
     mockState: {
