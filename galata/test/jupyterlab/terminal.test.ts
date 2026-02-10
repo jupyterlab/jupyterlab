@@ -260,6 +260,7 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
+    const foundFolders = new Set<string>();
     for (let i = 0; i < 2; i++) {
       await tabs.nth(i).click();
       await page.waitForTimeout(500);
@@ -277,10 +278,17 @@ test.describe('Open in Terminal from File Browser', () => {
         { timeout: 10000 }
       );
 
-      // Double check specifically that one of them is present
       const text = await activeTerminal.textContent();
-      expect(text?.includes(folderA) || text?.includes(folderB)).toBeTruthy();
+      if (text?.includes(folderA)) {
+        foundFolders.add(folderA);
+      }
+      if (text?.includes(folderB)) {
+        foundFolders.add(folderB);
+      }
     }
+    expect(foundFolders.size).toBe(2);
+    expect(foundFolders.has(folderA)).toBe(true);
+    expect(foundFolders.has(folderB)).toBe(true);
   });
 
   test('should open terminal for directory in mixed selection', async ({
@@ -360,6 +368,9 @@ test.describe('Open in Terminal from File Browser', () => {
     );
     await fileLocator.waitFor({ state: 'visible' });
     await fileLocator.click({ button: 'right' });
+
+    // Assert: The context menu is open (checking for a known item like "Rename")
+    await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
 
     // Assert: The "Open in Terminal" menu item should NOT be visible
     await expect(

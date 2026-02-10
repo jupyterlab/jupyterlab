@@ -93,13 +93,17 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
 const openInTerminalForBrowserPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/terminal-extension:open-in-terminal-for-browser',
   description: 'Adds an "Open in Terminal" command for the file browser.',
-  requires: [IFileBrowserFactory, ITranslator],
+  requires: [IFileBrowserFactory, ITranslator, ITerminalTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
-    translator: ITranslator
+    translator: ITranslator,
+    tracker: ITerminalTracker
   ): void => {
+    if (!app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
     const { commands } = app;
     const trans = translator.load('jupyterlab');
 
@@ -125,7 +129,7 @@ const openInTerminalForBrowserPlugin: JupyterFrontEndPlugin<void> = {
           }
           try {
             // Open one terminal for each selected directory.
-            await commands.execute('terminal:create-new', {
+            await commands.execute(CommandIDs.createNew, {
               cwd: item.path
             });
           } catch (error) {
