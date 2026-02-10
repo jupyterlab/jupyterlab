@@ -436,6 +436,11 @@ export class NotebookHelper {
         .locator('[data-icon="ui-components:not-trusted"]')
         .count()) === 1
     ) {
+      // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+      await this.page
+        .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+        .waitFor();
+
       await this.page.keyboard.press('Control+Shift+C');
       await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
       await this.page.getByText('Trust Notebook').click();
