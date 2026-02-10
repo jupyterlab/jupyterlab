@@ -7,6 +7,11 @@ import * as path from 'path';
 const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-Completer';
 
+// Completer is performance-critical; it must show up quickly.
+// If it does not, the test can fail rather than wait
+// for the 60-second test-wide timeout to lapse.
+const COMPLETER_TIMEOUT = 15000;
+
 test.describe('Completer', () => {
   test.describe('Notebook', () => {
     test.beforeEach(async ({ page }) => {
@@ -33,14 +38,14 @@ test.describe('Completer', () => {
 
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
 
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       const imageName = 'completer.png';
       expect.soft(await completer.screenshot()).toMatchSnapshot(imageName);
       // Accept the completion
@@ -91,7 +96,7 @@ test.describe('Completer', () => {
 
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
@@ -105,7 +110,7 @@ test.describe('Completer', () => {
 
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page
         .locator('.jp-Completer-loading-bar')
         .waitFor({ state: 'detached' });
@@ -138,13 +143,13 @@ test.describe('Completer', () => {
 
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       const imageName = 'token-completer.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
@@ -168,13 +173,13 @@ test.describe('Completer', () => {
       await page.keyboard.press('Tab');
 
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.type('g', { delay: 50 });
 
       const imageName = 'completer-filter.png';
@@ -199,7 +204,7 @@ test.describe('Completer', () => {
 
     test('Open completer on console', async ({ page }) => {
       const completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
 
       const imageName = 'completer-console.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
@@ -207,7 +212,7 @@ test.describe('Completer', () => {
 
     test('Filter console completer suggestions by typing', async ({ page }) => {
       const completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
 
       await page.keyboard.type('g', { delay: 10 });
 
