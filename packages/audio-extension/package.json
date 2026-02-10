@@ -42,7 +42,7 @@
     "@jupyterlab/docregistry": "^4.5.3",
     "@jupyterlab/services": "^7.5.3",
     "@jupyterlab/translation": "^4.5.3",
-    "@lumino/widgets": "^2.7.3"
+    "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.5.3",
