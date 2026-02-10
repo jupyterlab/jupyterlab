@@ -29,6 +29,7 @@ test.describe('Terminal', () => {
         TERMINAL_THEME_ATTRIBUTE,
         'inherit'
       );
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'light-term-inherit.png'
       );
@@ -49,6 +50,7 @@ test.describe('Terminal', () => {
       await terminal.waitFor();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'light-term-dark.png'
       );
@@ -62,6 +64,7 @@ test.describe('Terminal', () => {
         TERMINAL_THEME_ATTRIBUTE,
         'inherit'
       );
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'dark-term-inherit.png'
       );
@@ -73,6 +76,7 @@ test.describe('Terminal', () => {
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'dark-term-light.png'
       );
@@ -84,6 +88,7 @@ test.describe('Terminal', () => {
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot('dark-term-dark.png');
     });
   });

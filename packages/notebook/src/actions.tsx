@@ -25,7 +25,7 @@ import {
 } from '@jupyterlab/cells';
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
-import type * as nbformat from '@jupyterlab/nbformat';
+import * as nbformat from '@jupyterlab/nbformat';
 import type { KernelMessage } from '@jupyterlab/services';
 import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -1316,6 +1316,8 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param options - Optional. Set `stripOutputs: true` to paste code cells without their outputs.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
@@ -1323,7 +1325,8 @@ export namespace NotebookActions {
    */
   export function paste(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { stripOutputs?: boolean }
   ): void {
     const clipboard = Clipboard.getInstance();
 
@@ -1331,7 +1334,10 @@ export namespace NotebookActions {
       return;
     }
 
-    const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    if (options?.stripOutputs) {
+      values = Private.stripCodeCellOutputs(values);
+    }
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -1348,6 +1354,8 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param options - Optional. Set `stripOutputs: true` to paste code cells without their outputs.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
@@ -1355,7 +1363,8 @@ export namespace NotebookActions {
    */
   export async function pasteFromSystemClipboard(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { stripOutputs?: boolean }
   ): Promise<void> {
     const clipboard = SystemClipboard.getInstance();
 
@@ -1364,7 +1373,10 @@ export namespace NotebookActions {
       return;
     }
 
-    const values = stored as nbformat.IBaseCell[];
+    let values = stored as nbformat.IBaseCell[];
+    if (options?.stripOutputs) {
+      values = Private.stripCodeCellOutputs(values);
+    }
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -1501,7 +1513,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = prevActiveCellIndex + values.length;
     notebook.deselectAll();
     if (cellsFromClipboard) {
-      notebook.lastClipboardInteraction = 'paste';
+      notebook.recordCellClipboardInteraction('paste', values);
     }
     void Private.handleState(notebook, state, true);
   }
@@ -2545,9 +2557,7 @@ namespace Private {
               `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
             ),
             'warning',
-            {
-              autoClose: false
-            }
+            { autoClose: false }
           );
           return Promise.resolve(false);
         }
@@ -2678,6 +2688,25 @@ namespace Private {
   }
 
   /**
+   * Return a deep copy of cells with code cell outputs and execution_count cleared.
+   *
+   * @param cells - The cells to process.
+   * @returns New cell objects.
+   */
+  export function stripCodeCellOutputs(
+    cells: nbformat.IBaseCell[]
+  ): nbformat.IBaseCell[] {
+    return cells.map(cell => {
+      const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
+      if (copy && nbformat.isCode(copy)) {
+        copy.outputs = [];
+        copy.execution_count = null;
+      }
+      return copy;
+    });
+  }
+
+  /**
    * Get the selected cell(s) without affecting the clipboard.
    *
    * @param notebook - The target notebook widget.
@@ -2723,9 +2752,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
@@ -2760,9 +2789,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }

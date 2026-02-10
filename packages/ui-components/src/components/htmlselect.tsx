@@ -33,7 +33,8 @@ export interface IOptionProps {
 }
 
 export interface IHTMLSelectProps
-  extends IElementRefProps<HTMLSelectElement>,
+  extends
+    IElementRefProps<HTMLSelectElement>,
     React.SelectHTMLAttributes<HTMLSelectElement> {
   defaultStyle?: boolean;
 
@@ -59,9 +60,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
 
     const cls = classes(
       HTML_SELECT_CLASS,
-      {
-        [DEFAULT_STYLE_CLASS]: defaultStyle
-      },
+      { [DEFAULT_STYLE_CLASS]: defaultStyle },
       className
     );
 
