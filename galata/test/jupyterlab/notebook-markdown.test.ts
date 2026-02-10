@@ -29,6 +29,12 @@ async function enterEditingModeForScreenshot(
     // Wait a bit if the bounding box have changed
     await page.waitForTimeout(100);
   }
+  // Scroll the cell into the middle of the viewport to ensure we do not include
+  // notebook/shell borders in the screenshot boundary.
+  await cell!.evaluate(element => {
+    element.scrollIntoView({ block: 'center', inline: 'nearest' });
+  });
+  await page.waitForTimeout(50);
 }
 
 test.describe('Notebook Markdown', () => {
