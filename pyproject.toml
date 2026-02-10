@@ -104,6 +104,7 @@ test = [
     "pytest-jupyter>=0.5.3",
     "pytest-timeout",
     "pytest-tornasync",
+    "pytest-xdist",
     "requests",
     "requests_cache",
     "virtualenv",

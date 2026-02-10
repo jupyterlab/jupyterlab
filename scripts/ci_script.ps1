@@ -17,7 +17,7 @@ if ($Env:GROUP -eq "python") {
     Remove-Item Env:\YARN_ENABLE_IMMUTABLE_INSTALLS
 
     # Run the python tests
-    python -m pytest
+    python -m pytest -n 2
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 }
 
