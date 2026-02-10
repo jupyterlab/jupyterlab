@@ -106,8 +106,8 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
-    "@rspack/cli": "2.0.0-beta.0",
-    "@rspack/core": "2.0.0-beta.0",
+    "@rspack/cli": "2.0.0-beta.1",
+    "@rspack/core": "2.0.0-beta.1",
     "@types/react": "^18.0.26",
     "lodash": "^4.17.23",
     "lodash-es": "^4.17.23",
