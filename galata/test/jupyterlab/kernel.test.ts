@@ -236,7 +236,7 @@ test.describe('Kernel', () => {
     await statusBar.getByText('Idle').waitFor();
 
     // Execute the long running cell without waiting
-    void page.notebook.runCell(0);
+    await page.notebook.runCell(0, { wait: false });
     await statusBar.getByText('Busy').waitFor();
 
     await page.menu.clickMenuItem('File>New>Notebook');

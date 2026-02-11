@@ -28,6 +28,7 @@ jobs:
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
+          OPTIONAL_DEPENDENCIES: test
         run: .\scripts\ci_install
         shell: pwsh
 
