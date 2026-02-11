@@ -177,24 +177,6 @@ jobs:
                 return;
               }
 
-              // Also check commit statuses (some CI uses the status API)
-              const { data: status } = await github.rest.repos.getCombinedStatusForRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: pr.head.sha
-              });
-
-              if (status.state === 'failure' || status.state === 'error') {
-                console.log(`  Commit status: ${status.state}, removing label`);
-                await removeLabel(prNumber);
-                return;
-              }
-
-              if (status.state === 'pending' && status.statuses.length > 0) {
-                console.log('  Commit statuses pending, skipping');
-                return;
-              }
-
               // Check mergeability
               if (pr.mergeable === false) {
                 console.log('  PR has merge conflicts, removing label');
