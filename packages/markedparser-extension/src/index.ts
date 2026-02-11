@@ -31,6 +31,8 @@ import type {
 // highlight cache key separator
 const FENCE = '```~~~';
 
+const HEADING_TAG_REGEX = /^<h[1-6]\b[^>]*>/i;
+
 /**
  * An interface for fenced code block renderers.
  */
@@ -273,12 +275,16 @@ namespace Private {
     const tokens = _marked.lexer(content);
 
     // Extract heading tokens and compute line numbers
+    // Include three token types that may contain headings:
+    // - heading: Standard markdown headings (# Title)
+    // - html: Standalone HTML heading blocks (<h1>Title</h1>)
+    // - paragraph: Only paragraphs with nested HTML tokens (inline html tags) that might contain embedded headings (<span><h1>Title</h1></span>)
     let currentLine = 0;
     for (const token of tokens) {
       if (
         token.type === 'heading' ||
-        token.type === 'html' ||
-        token.type === 'paragraph'
+        (token.type === 'html' && containsHeadingTag(token.raw)) ||
+        (token.type === 'paragraph' && containsInlineHeading(token))
       ) {
         headings.push({
           raw: token.raw,
@@ -289,5 +295,17 @@ namespace Private {
     }
 
     return headings;
+  }
+
+  function containsHeadingTag(raw: any) {
+    return HEADING_TAG_REGEX.test(raw);
+  }
+
+  function containsInlineHeading(token: Tokens.Generic): boolean {
+    if (!token.tokens) return false;
+
+    return token.tokens.some(
+      (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
+    );
   }
 }

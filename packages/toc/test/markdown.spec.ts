@@ -213,6 +213,19 @@ describe('TableOfContentsUtils', () => {
             }
           ]
         ],
+        [
+          '<span><h1>Nested Title</h1></span>',
+          [
+            {
+              text: 'Nested Title',
+              level: 1,
+              line: 0,
+              raw: '<span><h1>Nested Title</h1></span>',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
         ['\nTitle\n\n==', []],
         ['\nTitle\n\n--', []],
         ['```\n# Title\n```', []],
