@@ -186,6 +186,12 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: prNumber
                 });
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: 'This PR was automatically merged after the 24-hour delayed merge period.'
+                });
               } catch (mergeError) {
                 console.log(`  Merge failed: ${mergeError.message}`);
                 await github.rest.issues.createComment({
