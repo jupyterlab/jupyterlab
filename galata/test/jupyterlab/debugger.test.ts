@@ -127,7 +127,7 @@ test('Rich variables inspector', async ({ page, tmpPath }) => {
   await page.notebook.clickCellGutter(0, 8);
   await page.notebook.clickCellGutter(0, 11);
 
-    // don't add await, run will be blocked by the breakpoint
+  // don't add await, run will be blocked by the breakpoint
   void page.notebook.run().then();
   await page.debugger.waitForCallStack();
 
@@ -139,7 +139,6 @@ test('Rich variables inspector', async ({ page, tmpPath }) => {
   expect
     .soft(await variablesPanel.screenshot())
     .toMatchSnapshot('image-debug-session-global-variables.png');
-
 
   await page.debugger.renderVariable(globalVar);
   let richVariableTab = await page.activity.getPanelLocator(

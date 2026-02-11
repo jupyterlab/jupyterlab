@@ -352,7 +352,7 @@ test.describe('Debugger', () => {
       clip: { y: 478, x: 998, width: 280, height: 138 },
       path: 'test/documentation/screenshots/debugger-source.png'
     });
-  })
+  });
 
   test.describe('Show sources', () => {
     test.describe('showSourcesInMainArea = false', () => {
@@ -443,23 +443,23 @@ test.describe('Debugger', () => {
       });
     });
   });
-})
-  async function createNotebook(page: IJupyterLabPageFixture) {
-    await page.notebook.createNew();
+});
+async function createNotebook(page: IJupyterLabPageFixture) {
+  await page.notebook.createNew();
 
-    await page.sidebar.setWidth();
+  await page.sidebar.setWidth();
 
-    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
-  }
+  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+}
 
-  async function setBreakpoint(page: IJupyterLabPageFixture) {
-    await page.notebook.setCell(
-      0,
-      'code',
-      'def add(a, b):\nres = a + b\nreturn res'
-    );
-    await page.notebook.run();
-    await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
+async function setBreakpoint(page: IJupyterLabPageFixture) {
+  await page.notebook.setCell(
+    0,
+    'code',
+    'def add(a, b):\nres = a + b\nreturn res'
+  );
+  await page.notebook.run();
+  await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
 
-    await page.notebook.clickCellGutter(0, 2);
-  }
+  await page.notebook.clickCellGutter(0, 2);
+}
