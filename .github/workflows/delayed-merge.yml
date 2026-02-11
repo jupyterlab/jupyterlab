@@ -114,68 +114,21 @@ jobs:
 
               // --- Check for activity after the label was added ---
 
-              // New commits
-              const { data: headCommit } = await github.rest.repos.getCommit({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: pr.head.sha
-              });
-              if (new Date(headCommit.commit.committer.date) > labeledAt) {
-                console.log('  New commits detected, removing label');
-                await removeLabel(prNumber);
-                return;
-              }
-
-              // New comments (excluding bot)
-              const { data: comments } = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                since: labelEvent.created_at,
-                per_page: 100
-              });
-              if (comments.some(c =>
-                c.user.login !== 'github-actions[bot]' &&
-                new Date(c.created_at) > labeledAt
-              )) {
-                console.log('  New comments detected, removing label');
-                await removeLabel(prNumber);
-                return;
-              }
-
-              // New reviews
-              const { data: reviews } = await github.rest.pulls.listReviews({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-                per_page: 100
-              });
-              if (reviews.some(r => new Date(r.submitted_at) > labeledAt)) {
-                console.log('  New reviews detected, removing label');
-                await removeLabel(prNumber);
-                return;
-              }
-
-              // New inline review comments
-              const { data: reviewComments } = await github.rest.pulls.listReviewComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-                since: labelEvent.created_at,
-                per_page: 100
-              });
-              if (reviewComments.some(c =>
-                c.user.login !== 'github-actions[bot]' &&
-                new Date(c.created_at) > labeledAt
-              )) {
-                console.log('  New review comments detected, removing label');
+              if (new Date(pr.updated_at) > labeledAt) {
+                console.log('  Activity detected after label, removing');
                 await removeLabel(prNumber);
                 return;
               }
 
               // --- Check for at least one approval ---
 
-              // Determine each reviewer's latest review state
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                per_page: 100
+              });
+
               const latestReviewByUser = new Map();
               for (const review of reviews) {
                 if (review.state !== 'APPROVED' && review.state !== 'CHANGES_REQUESTED' && review.state !== 'DISMISSED') {
