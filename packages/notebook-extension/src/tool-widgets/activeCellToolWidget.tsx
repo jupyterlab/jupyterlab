@@ -73,15 +73,21 @@ export class ActiveCellTool extends NotebookTools.Tool {
 
     const update = async () => {
       this._editorEl.innerHTML = '';
-      if (this._cellModel?.type === 'code') {
-        this._inputPrompt.executionCount = `${
-          (this._cellModel as CodeCellModel).executionCount ?? ''
-        }`;
-        this._inputPrompt.show();
-      } else {
-        this._inputPrompt.executionCount = null;
-        this._inputPrompt.hide();
+      const currentType = this._cellModel?.type ?? null;
+
+      if (currentType !== this._previousCellType) {
+        if (currentType === 'code') {
+          this._inputPrompt.executionCount = `${
+            (this._cellModel as CodeCellModel).executionCount ?? ''
+          }`;
+          this._inputPrompt.show();
+        } else {
+          this._inputPrompt.executionCount = null;
+          this._inputPrompt.hide();
+        }
       }
+
+      this._previousCellType = currentType;
 
       if (this._cellModel) {
         await languages.highlight(
@@ -97,15 +103,20 @@ export class ActiveCellTool extends NotebookTools.Tool {
 
   render(props: FieldProps): JSX.Element {
     const activeCell = this._tracker.activeCell;
-    if (activeCell) this._cellModel = activeCell?.model || null;
+    if (activeCell) {
+      this._cellModel = activeCell.model || null;
+    }
+
     (this._cellModel?.sharedModel as ISharedText).changed.connect(
       this.refresh,
       this
     );
     this._cellModel?.mimeTypeChanged.connect(this.refresh, this);
+
     this.refresh()
       .then(() => undefined)
       .catch(() => undefined);
+
     return <div ref={ref => ref?.appendChild(this.node)}></div>;
   }
 
@@ -118,4 +129,5 @@ export class ActiveCellTool extends NotebookTools.Tool {
   private _refreshDebouncer: Debouncer<void, void, null[]>;
   private _editorEl: HTMLPreElement;
   private _inputPrompt: InputPrompt;
+  private _previousCellType: ICellModel['type'] | null = null;
 }
