@@ -632,21 +632,48 @@ test.describe('Notebook scroll with line wrapping', () => {
       `${tmpPath}/${scrollJumpNotebook}`
     );
     // Test against https://github.com/jupyterlab/jupyterlab/issues/18470
-    const attempts = 10;
+    const attempts = 20;
     for (let i = 0; i < attempts; i++) {
       console.debug(`Attempt: ${i}/${attempts}`);
       await page.sidebar.setWidth(50);
       await page.notebook.openByPath(`${tmpPath}/${scrollJumpNotebook}`);
       await page.notebook.activate(scrollJumpNotebook);
+      await page.waitForTimeout(100);
 
-      await page.sidebar.setWidth(425);
-      const firstCell = await page.notebook.getCellLocator(0);
-      await firstCell!.waitFor();
+      await page.sidebar.setWidth(400 + i * 5);
+      const initialCell = await page.notebook.getCellLocator(0);
+      await initialCell!.waitFor();
+      await page.waitForTimeout(100);
 
-      // Hover includes a stability check which means it will fail on jirter
-      // (see https://playwright.dev/docs/actionability#stable). However, it
-      // seems to only fail if we include a position within the cell.
-      await firstCell!.hover({ position: { x: 5, y: 10 }, timeout: 500 });
+      await page.keyboard.press('a');
+      await page.waitForTimeout(100);
+      const insertedCell = await page.notebook.getCellLocator(0);
+      await insertedCell!.waitFor();
+      const deleteCellButton = insertedCell!.locator(
+        '[data-command="cell-toolbar:delete"]'
+      );
+      await deleteCellButton.click({ timeout: 1000 });
+      await page.locator('.jp-Dialog').waitFor();
+      await page.click('.jp-Dialog .jp-mod-accept');
+
+      const duration = 2000;
+      const sampleInterval = 100;
+      const NOTEBOOK_SCROLLER = '.jp-WindowedPanel-outer';
+      const scroller = page.locator(NOTEBOOK_SCROLLER);
+
+      const samples = Math.floor(duration / sampleInterval);
+
+      //await page.pause();
+
+      let previous = await scroller.evaluate(node => node.scrollTop);
+
+      for (let i = 0; i < samples; i++) {
+        await page.waitForTimeout(sampleInterval);
+        const current = await scroller.evaluate(node => node.scrollTop);
+
+        expect(current).toEqual(previous);
+        previous = current;
+      }
 
       await page.notebook.close();
     }
