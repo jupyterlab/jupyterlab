@@ -86,8 +86,11 @@ jobs:
                 return;
               }
 
-              // --- Check that the label was added by someone with write access ---
+              const labeledAt = new Date(labelEvent.created_at);
 
+              // --- Fail fast: remove label immediately for these conditions ---
+
+              // Label must be added by someone with write access
               const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -101,27 +104,21 @@ jobs:
                 return;
               }
 
-              // --- Check 24h have elapsed ---
-
-              const labeledAt = new Date(labelEvent.created_at);
-              const now = new Date();
-              const hoursSinceLabel = (now - labeledAt) / (1000 * 60 * 60);
-
-              if (hoursSinceLabel < 24) {
-                console.log(`  ${hoursSinceLabel.toFixed(1)}h elapsed (need 24h), skipping`);
-                return;
-              }
-
-              // --- Check for activity after the label was added ---
-
+              // Any activity after the label was added cancels the merge
               if (new Date(pr.updated_at) > labeledAt) {
                 console.log('  Activity detected after label, removing');
                 await removeLabel(prNumber);
                 return;
               }
 
-              // --- Check for at least one approval ---
+              // Must have merge conflicts resolved
+              if (pr.mergeable === false) {
+                console.log('  PR has merge conflicts, removing label');
+                await removeLabel(prNumber);
+                return;
+              }
 
+              // Must have at least one approval
               const { data: reviews } = await github.rest.pulls.listReviews({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -141,14 +138,13 @@ jobs:
                 }
               }
 
-              const hasApproval = [...latestReviewByUser.values()].some(r => r.state === 'APPROVED');
-              if (!hasApproval) {
-                console.log('  No approval found, skipping');
+              if (![...latestReviewByUser.values()].some(r => r.state === 'APPROVED')) {
+                console.log('  No approval found, removing label');
+                await removeLabel(prNumber);
                 return;
               }
 
-              // --- Check CI status ---
-
+              // CI must pass
               const { data: checkSuites } = await github.rest.checks.listForRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -156,17 +152,8 @@ jobs:
               });
 
               const checkRuns = checkSuites.check_runs;
-              if (checkRuns.length === 0) {
-                console.log('  No check runs found, skipping');
-                return;
-              }
-
-              if (checkRuns.some(r => r.status !== 'completed')) {
-                console.log('  Checks still running, skipping');
-                return;
-              }
-
               const failedChecks = checkRuns.filter(r =>
+                r.status === 'completed' &&
                 r.conclusion !== 'success' &&
                 r.conclusion !== 'skipped' &&
                 r.conclusion !== 'neutral'
@@ -177,10 +164,16 @@ jobs:
                 return;
               }
 
-              // Check mergeability
-              if (pr.mergeable === false) {
-                console.log('  PR has merge conflicts, removing label');
-                await removeLabel(prNumber);
+              // --- Wait conditions: skip but keep the label ---
+
+              if (checkRuns.length === 0 || checkRuns.some(r => r.status !== 'completed')) {
+                console.log('  Checks still running, skipping');
+                return;
+              }
+
+              const hoursSinceLabel = (new Date() - labeledAt) / (1000 * 60 * 60);
+              if (hoursSinceLabel < 24) {
+                console.log(`  ${hoursSinceLabel.toFixed(1)}h elapsed (need 24h), skipping`);
                 return;
               }
 
