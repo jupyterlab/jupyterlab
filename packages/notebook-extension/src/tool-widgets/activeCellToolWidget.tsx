@@ -105,7 +105,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
     this._cellModel?.mimeTypeChanged.connect(this.refresh, this);
     this.refresh()
       .then(() => undefined)
-      .catch(() => undefined);
+      .catch(console.warn);
     return <div ref={ref => ref?.appendChild(this.node)}></div>;
   }
 
