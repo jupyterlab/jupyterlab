@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.5.3",
+  "version": "7.5.4",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -46,10 +46,10 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "^3.1.0",
-    "@jupyterlab/coreutils": "^6.5.3",
-    "@jupyterlab/nbformat": "^4.5.3",
-    "@jupyterlab/settingregistry": "^4.5.3",
-    "@jupyterlab/statedb": "^4.5.3",
+    "@jupyterlab/coreutils": "^6.5.4",
+    "@jupyterlab/nbformat": "^4.5.4",
+    "@jupyterlab/settingregistry": "^4.5.4",
+    "@jupyterlab/statedb": "^4.5.4",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
     "@lumino/polling": "^2.1.5",
@@ -58,7 +58,7 @@
     "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.5.3",
+    "@jupyterlab/testing": "^4.5.4",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
     "jest": "^29.2.0",
