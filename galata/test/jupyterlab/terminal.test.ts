@@ -300,9 +300,9 @@ test.describe('Open in Terminal from File Browser', () => {
     const fileName = 'mixed-file.txt';
     await page.contents.createDirectory(`${tmpPath}/${folderName}`);
 
-    await page.menu.clickMenuItem('File>New>Text File');
-    await page.contents.renameFile(
-      `${tmpPath}/untitled.txt`,
+    await page.contents.uploadContent(
+      'content',
+      'text',
       `${tmpPath}/${fileName}`
     );
     await page.filebrowser.refresh();
@@ -358,8 +358,7 @@ test.describe('Open in Terminal from File Browser', () => {
     const fullPath = `${tmpPath}/${fileName}`;
     await page.filebrowser.openDirectory(tmpPath);
 
-    await page.menu.clickMenuItem('File>New>Text File');
-    await page.contents.renameFile(`${tmpPath}/untitled.txt`, fullPath);
+    await page.contents.uploadContent('content', 'text', fullPath);
     await page.filebrowser.refresh();
 
     // Right-click the file
