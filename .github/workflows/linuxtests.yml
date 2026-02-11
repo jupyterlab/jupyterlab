@@ -145,6 +145,8 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Download sdist
         uses: actions/download-artifact@v7
+        with:
+          path: "sdist"
       - name: Install From SDist
         run: |
           set -ex
