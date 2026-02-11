@@ -133,10 +133,11 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 JupyterLab is part of [Project Jupyter](https://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole. JupyterLab falls under the [Jupyter Frontends Council](https://jupyterlab-team-compass.readthedocs.io/en/latest/index.html).
 
-Meet the current team:
+The team of maintainers includes:
 
-- code owners are listed in the [`CODEOWNERS`](.github/CODEOWNERS) file,
-- decision-making contributors are listed on the [council team members](https://jupyterlab-team-compass.readthedocs.io/en/latest/team.html) page
+- decision-making contributors listed on the [council team members](https://jupyterlab-team-compass.readthedocs.io/en/latest/team.html) page
+- code contributors listed on the [contributors graph](https://github.com/jupyterlab/jupyterlab/graphs/contributors) page
+- code owners listed in the [`CODEOWNERS`](.github/CODEOWNERS) file
 
 <details>
 
