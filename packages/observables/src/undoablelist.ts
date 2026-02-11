@@ -241,7 +241,7 @@ export class ObservableUndoableList<T>
       case 'set':
         index = change.newIndex;
         for (const value of change.newValues) {
-          this.set(change.newIndex++, serializer.fromJSON(value));
+          this.set(index++, serializer.fromJSON(value));
         }
         break;
       case 'remove':
