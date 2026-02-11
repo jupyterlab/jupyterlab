@@ -1,0 +1,276 @@
+name: Delayed Merge
+
+#####
+# Implements delayed merging of PRs via the "delayed-merge" label.
+#
+# When a user with write access adds the label, the PR will be merged
+# after 24 hours if: it has at least one approval, CI passes, and no
+# new activity (commits, comments, reviews) occurs.
+#
+# Runs hourly. If the label was added by someone without write access,
+# or if activity is detected, the label is removed.
+#####
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+
+jobs:
+  check-and-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find and merge eligible PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'delayed-merge',
+              state: 'open',
+              per_page: 100
+            });
+
+            const prs = issues.filter(i => i.pull_request);
+            console.log(`Found ${prs.length} open PRs with delayed-merge label`);
+
+            for (const issue of prs) {
+              try {
+                await processPR(issue.number);
+              } catch (error) {
+                console.log(`  Error processing PR #${issue.number}: ${error.message}`);
+              }
+            }
+
+            async function removeLabel(prNumber) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: 'delayed-merge'
+                });
+              } catch (e) {}
+            }
+
+            async function processPR(prNumber) {
+              console.log(`\nProcessing PR #${prNumber}...`);
+
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+
+              // Find when the delayed-merge label was most recently added
+              const { data: events } = await github.rest.issues.listEvents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                per_page: 100
+              });
+
+              const labelEvent = events
+                .filter(e => e.event === 'labeled' && e.label?.name === 'delayed-merge')
+                .pop();
+
+              if (!labelEvent) {
+                console.log('  No label event found, skipping');
+                return;
+              }
+
+              // --- Check that the label was added by someone with write access ---
+
+              const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: labelEvent.actor.login
+              });
+
+              const level = permission.permission;
+              if (level !== 'admin' && level !== 'write' && level !== 'maintain') {
+                console.log(`  Label added by ${labelEvent.actor.login} (${level}), removing`);
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // --- Check 24h have elapsed ---
+
+              const labeledAt = new Date(labelEvent.created_at);
+              const now = new Date();
+              const hoursSinceLabel = (now - labeledAt) / (1000 * 60 * 60);
+
+              if (hoursSinceLabel < 24) {
+                console.log(`  ${hoursSinceLabel.toFixed(1)}h elapsed (need 24h), skipping`);
+                return;
+              }
+
+              // --- Check for activity after the label was added ---
+
+              // New commits
+              const { data: headCommit } = await github.rest.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+              if (new Date(headCommit.commit.committer.date) > labeledAt) {
+                console.log('  New commits detected, removing label');
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // New comments (excluding bot)
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                since: labelEvent.created_at,
+                per_page: 100
+              });
+              if (comments.some(c =>
+                c.user.login !== 'github-actions[bot]' &&
+                new Date(c.created_at) > labeledAt
+              )) {
+                console.log('  New comments detected, removing label');
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // New reviews
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                per_page: 100
+              });
+              if (reviews.some(r => new Date(r.submitted_at) > labeledAt)) {
+                console.log('  New reviews detected, removing label');
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // New inline review comments
+              const { data: reviewComments } = await github.rest.pulls.listReviewComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                since: labelEvent.created_at,
+                per_page: 100
+              });
+              if (reviewComments.some(c =>
+                c.user.login !== 'github-actions[bot]' &&
+                new Date(c.created_at) > labeledAt
+              )) {
+                console.log('  New review comments detected, removing label');
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // --- Check for at least one approval ---
+
+              // Determine each reviewer's latest review state
+              const latestReviewByUser = new Map();
+              for (const review of reviews) {
+                if (review.state !== 'APPROVED' && review.state !== 'CHANGES_REQUESTED' && review.state !== 'DISMISSED') {
+                  continue;
+                }
+                const login = review.user.login;
+                const existing = latestReviewByUser.get(login);
+                if (!existing || new Date(review.submitted_at) > new Date(existing.submitted_at)) {
+                  latestReviewByUser.set(login, review);
+                }
+              }
+
+              const hasApproval = [...latestReviewByUser.values()].some(r => r.state === 'APPROVED');
+              if (!hasApproval) {
+                console.log('  No approval found, skipping');
+                return;
+              }
+
+              // --- Check CI status ---
+
+              const { data: checkSuites } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+
+              const checkRuns = checkSuites.check_runs;
+              if (checkRuns.length === 0) {
+                console.log('  No check runs found, skipping');
+                return;
+              }
+
+              if (checkRuns.some(r => r.status !== 'completed')) {
+                console.log('  Checks still running, skipping');
+                return;
+              }
+
+              const failedChecks = checkRuns.filter(r =>
+                r.conclusion !== 'success' &&
+                r.conclusion !== 'skipped' &&
+                r.conclusion !== 'neutral'
+              );
+              if (failedChecks.length > 0) {
+                console.log(`  Failed checks: ${failedChecks.map(r => r.name).join(', ')}, removing label`);
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // Also check commit statuses (some CI uses the status API)
+              const { data: status } = await github.rest.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+
+              if (status.state === 'failure' || status.state === 'error') {
+                console.log(`  Commit status: ${status.state}, removing label`);
+                await removeLabel(prNumber);
+                return;
+              }
+
+              if (status.state === 'pending' && status.statuses.length > 0) {
+                console.log('  Commit statuses pending, skipping');
+                return;
+              }
+
+              // Check mergeability
+              if (pr.mergeable === false) {
+                console.log('  PR has merge conflicts, removing label');
+                await removeLabel(prNumber);
+                return;
+              }
+
+              // --- All conditions met, merge ---
+
+              console.log(`  Merging PR #${prNumber}`);
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                });
+                await removeLabel(prNumber);
+              } catch (mergeError) {
+                console.log(`  Merge failed: ${mergeError.message}`);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: [
+                    `**Delayed merge failed:** ${mergeError.message}`,
+                    '',
+                    'The `delayed-merge` label has been removed. Resolve the issue and re-add the label to try again.'
+                  ].join('\n')
+                });
+                await removeLabel(prNumber);
+              }
+            }
