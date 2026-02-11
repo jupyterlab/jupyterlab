@@ -478,8 +478,7 @@ export namespace CSVDocumentWidget {
   // using something like https://stackoverflow.com/a/46941824, instead of
   // inheriting from this IOptionsOptionalContent.
 
-  export interface IOptions
-    extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
+  export interface IOptions extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
     /**
      * Data delimiter character
      */

@@ -12,9 +12,9 @@ import { TableOfContents } from './tokens';
  * Abstract table of contents model.
  */
 export abstract class TableOfContentsModel<
-    H extends TableOfContents.IHeading,
-    T extends Widget = Widget
-  >
+  H extends TableOfContents.IHeading,
+  T extends Widget = Widget
+>
   extends VDomModel
   implements TableOfContents.IModel<H>
 {

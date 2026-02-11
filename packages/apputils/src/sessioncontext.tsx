@@ -1857,9 +1857,7 @@ namespace Private {
 
     const body = document.createElement('div');
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${
-      sessionContext.name
-    }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name}"`;
     body.appendChild(text);
 
     const select = document.createElement('select');
