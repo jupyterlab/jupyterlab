@@ -186,7 +186,6 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: prNumber
                 });
-                await removeLabel(prNumber);
               } catch (mergeError) {
                 console.log(`  Merge failed: ${mergeError.message}`);
                 await github.rest.issues.createComment({
@@ -199,6 +198,7 @@ jobs:
                     'The `delayed-merge` label has been removed. Resolve the issue and re-add the label to try again.'
                   ].join('\n')
                 });
+              } finally {
                 await removeLabel(prNumber);
               }
             }
