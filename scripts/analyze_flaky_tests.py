@@ -96,13 +96,15 @@ def get_workflow_runs(
     since: str | None = None,
     owner: str = "",
     name: str = "",
+    verbose: bool = False,
 ) -> List[Dict]:
     """Fetch recent workflow runs via REST API (includes node_id for GraphQL).
 
     Uses gh api directly instead of gh run list to get node_id, which enables
     efficient batch GraphQL queries for check run data.
     """
-    print(f"Fetching the last {num_runs} Galata workflow runs...")
+    if verbose:
+        print(f"Fetching the last {num_runs} Galata workflow runs...")
 
     all_runs: list[dict] = []
     page = 1
@@ -146,12 +148,14 @@ def get_workflow_runs(
         page += 1
 
     if commit:
-        print(f"Filtering to runs containing commit {commit}...")
+        if verbose:
+            print(f"Filtering to runs containing commit {commit}...")
         all_runs = [
             run for run in all_runs if run_contains_commit(owner, name, commit, run["headSha"])
         ]
 
-    print(f"Found {len(all_runs)} completed runs\n")
+    if verbose:
+        print(f"Found {len(all_runs)} completed runs\n")
     return all_runs
 
 
@@ -270,7 +274,9 @@ def batch_fetch_check_data(runs: list[dict]) -> dict[str, dict]:
     return results
 
 
-def analyze_runs(runs: list[dict], check_data: dict[str, dict]) -> dict[str, TestResult]:
+def analyze_runs(
+    runs: list[dict], check_data: dict[str, dict], verbose: bool = False
+) -> dict[str, TestResult]:
     """Analyze all runs using pre-fetched GraphQL data"""
     test_results = defaultdict(lambda: TestResult(set(), set()))
 
@@ -279,40 +285,33 @@ def analyze_runs(runs: list[dict], check_data: dict[str, dict]) -> dict[str, Tes
         conclusion = run["conclusion"]
         created_at = run["createdAt"].split("T")[0]
         head_sha = run["headSha"][:7]
-        title = run.get("displayTitle", "")
-        event = run.get("event", "")
-        branch = run.get("headBranch", "")
-        url = run.get("url", "")
-
-        print(f"[{idx}/{len(runs)}] Run {run_id} ({created_at}, {head_sha}) - {conclusion}")
-        print(f"  {event} on {branch}: {title}")
-        print(f"  {url}")
 
         data = check_data.get(run_id)
-        if not data:
-            print("  No check data found")
-            print()
-            continue
+        summary = data.get("summary") if data else None
+        failed_tests, flaky_tests = [], []
 
-        if data["failed_jobs"]:
-            print(f"  Failed jobs: {', '.join(data['failed_jobs'])}")
-
-        summary = data.get("summary")
         if summary:
             failed_tests, flaky_tests = parse_playwright_summary(summary)
-
             for test in failed_tests:
                 test_results[test].hard_failures.add(run_id)
-
             for test in flaky_tests:
                 test_results[test].flaky.add(run_id)
 
+        if verbose:
+            print(f"[{idx}/{len(runs)}] Run {run_id} ({created_at}, {head_sha}) - {conclusion}")
+            print(
+                f"  {run.get('event', '')} on {run.get('headBranch', '')}: {run.get('displayTitle', '')}"
+            )
+            print(f"  {run.get('url', '')}")
+            if not data:
+                print("  No check data found")
+            elif data["failed_jobs"]:
+                print(f"  Failed jobs: {', '.join(data['failed_jobs'])}")
             if failed_tests or flaky_tests:
                 print(f"  Summary: {len(failed_tests)} failed, {len(flaky_tests)} flaky")
-        else:
-            print("  No Playwright summary found")
-
-        print()
+            elif data and not summary:
+                print("  No Playwright summary found")
+            print()
 
     return dict(test_results)
 
@@ -421,6 +420,9 @@ def main():
         default=None,
         help="Only consider runs created on or after this date (YYYY-MM-DD). Defaults to commit date if --commit is used.",
     )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show per-run details during analysis"
+    )
     args = parser.parse_args()
 
     num_runs = args.num_runs
@@ -431,25 +433,23 @@ def main():
 
     if commit and not since:
         since = get_commit_date(owner, name, commit)
-        print(f"Using commit date {since} as --since default")
 
+    # Print query description immediately
+    parts = [f"Analyzing up to {num_runs} runs"]
     if commit:
-        print(f"Analyzing runs containing commit {commit} (since {since})...")
-    elif since:
-        print(f"Analyzing runs since {since}...")
-    else:
-        print(f"Analyzing the last {num_runs} Galata workflow runs for flaky tests...")
-    print("=" * 80)
+        parts.append(f"containing commit {commit[:7]}")
+    if since:
+        parts.append(f"since {since}")
+    print(" ".join(parts) + "...")
+
+    verbose = args.verbose
+    runs = get_workflow_runs(num_runs, commit, since, owner, name, verbose=verbose)
+    check_data = batch_fetch_check_data(runs)
+
+    print(f"Found {len(runs)} matching runs")
     print()
 
-    runs = get_workflow_runs(num_runs, commit, since, owner, name)
-
-    # Batch-fetch all check data via GraphQL (replaces 2N REST calls)
-    print(f"Fetching check data for {len(runs)} runs via GraphQL...")
-    check_data = batch_fetch_check_data(runs)
-    print(f"Retrieved data for {len(check_data)} runs\n")
-
-    test_results = analyze_runs(runs, check_data)
+    test_results = analyze_runs(runs, check_data, verbose=verbose)
     print_results(test_results, len(runs))
 
 
