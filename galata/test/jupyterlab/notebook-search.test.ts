@@ -346,14 +346,20 @@ test.describe('Notebook Search', () => {
     let cell = await page.notebook.getCellLocator(0);
     await cell!.locator('.jp-InputPrompt').click();
 
-    // Select two cells below
+    // Select three cells below
+    await page.keyboard.press('Shift+ArrowDown');
     await page.keyboard.press('Shift+ArrowDown');
     await page.keyboard.press('Shift+ArrowDown');
 
     // Expect the filter text to be updated
-    await page.locator('text=Search in 3 Selected Cells').waitFor();
+    await page.locator('text=Search in 4 Selected Cells').waitFor();
 
-    // Reset selection, switch to third cell, preserving command mode
+    // Wait for the counter to be properly updated
+    await page
+      .locator('.jp-DocumentSearch-index-counter:has-text("1/19")')
+      .waitFor({ timeout: 10000 });
+
+    // Reset selection, switch to a middle cell, preserving command mode.
     cell = await page.notebook.getCellLocator(2);
     await cell!.locator('.jp-InputPrompt').click();
 
