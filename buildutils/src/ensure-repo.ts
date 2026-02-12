@@ -73,7 +73,10 @@ const UNUSED: Dict<string[]> = {
     'process',
     'style-loader',
     'worker-loader',
-    'source-map-loader'
+    'source-map-loader',
+
+    // Peer dependency of @rspack/core, required at runtime by ModuleFederationPlugin.
+    '@module-federation/runtime-tools'
   ],
   '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
   '@jupyterlab/codemirror': [
