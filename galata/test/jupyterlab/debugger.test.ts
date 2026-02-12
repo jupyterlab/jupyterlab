@@ -63,7 +63,7 @@ test.describe('Debugger Tests', () => {
         }
       });
 
-      test(`Start debug session (${c.name})`, async ({ page, tmpPath }) => {
+      test('Start debug session', async ({ page, tmpPath }) => {
         await openNotebook(page, tmpPath, 'code_notebook.ipynb');
 
         await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
@@ -236,10 +236,7 @@ for (const c of showSourcesCases) {
       );
     });
 
-    test(`Start debug session (Script) ${c.name}`, async ({
-      page,
-      tmpPath
-    }) => {
+    test('Start debug session (Script)', async ({ page, tmpPath }) => {
       await openNotebook(page, tmpPath, 'code_script.py');
 
       // Open context menu on editor
