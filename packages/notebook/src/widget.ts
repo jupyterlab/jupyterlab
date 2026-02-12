@@ -283,6 +283,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   /**
+   * Whether the notebook is currently in a search operation.
+   */
+  isSearchActive = false;
+
+  /**
    * The cell factory used by the widget.
    */
   readonly contentFactory: StaticNotebook.IContentFactory;
@@ -3394,8 +3399,11 @@ export class Notebook extends StaticNotebook {
         if (!cell.model.isDisposed && cell.editor) {
           cell.model.selections.delete(cell.editor.uuid);
           // clear the editor's visual selection to avoid
-          // multiple cells showing highlighted text.
-          cell.editor.setSelections([]);
+          // multiple cells showing highlighted text,
+          // but not during search to avoid interfering with search decorations.
+          if (!this.isSearchActive) {
+            cell.editor.setSelections([]);
+          }
         }
       }
     }

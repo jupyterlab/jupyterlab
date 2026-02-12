@@ -351,6 +351,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
     await this.endQuery();
     this._searchActive = true;
+    this.widget.content.isSearchActive = true;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -420,6 +421,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
 
     this._searchActive = false;
+    this.widget.content.isSearchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
   }
