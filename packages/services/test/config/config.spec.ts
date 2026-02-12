@@ -40,10 +40,12 @@ describe('config', () => {
     });
 
     it('should accept server settings', async () => {
-      const config = await configSectionManager.create({
+      const serverSettings = getRequestHandler(200, { foo: 'bar' });
+      const manager = new ConfigSectionManager({ serverSettings });
+      const config = await manager.create({
         name: randomName()
       });
-      expect(Object.keys(config.data).length).toBe(0);
+      expect(config.data['foo']).toBe('bar');
     });
 
     it('should fail for an incorrect response', async () => {
