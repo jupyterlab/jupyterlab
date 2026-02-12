@@ -173,7 +173,7 @@ export async function getToken(page: Page): Promise<string> {
  */
 export async function waitForCondition(
   fn: () => boolean | Promise<boolean>,
-  timeout?: number
+  timeout: number = 15000
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let checkTimer: NodeJS.Timeout | null = null;
@@ -192,15 +192,13 @@ export async function waitForCondition(
 
     void check();
 
-    if (timeout) {
-      timeoutTimer = setTimeout(() => {
-        timeoutTimer = null;
-        if (checkTimer) {
-          clearTimeout(checkTimer);
-        }
-        reject(new Error('Timed out waiting for condition to be fulfilled.'));
-      }, timeout);
-    }
+    timeoutTimer = setTimeout(() => {
+      timeoutTimer = null;
+      if (checkTimer) {
+        clearTimeout(checkTimer);
+      }
+      reject(new Error('Timed out waiting for condition to be fulfilled.'));
+    }, timeout);
   });
 }
 

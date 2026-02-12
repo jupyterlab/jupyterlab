@@ -276,7 +276,7 @@ const files: JupyterFrontEndPlugin<void> = {
         const editor = anchor?.editor;
 
         // If all components necessary for rendering exist, create a tooltip.
-        if (!!editor && !!kernel && !!rendermime) {
+        if (!!editor && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
         }
       },

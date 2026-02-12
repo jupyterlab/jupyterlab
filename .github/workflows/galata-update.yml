@@ -80,13 +80,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout JupyterLab
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
