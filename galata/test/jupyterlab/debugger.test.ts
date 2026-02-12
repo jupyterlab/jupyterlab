@@ -26,6 +26,10 @@ test('Open Debugger on right', async ({ page }) => {
 });
 
 test.describe('Debugger Tests', () => {
+  // Workaround for `Rich variables inspector` test being flaky
+  // see https://github.com/jupyterlab/jupyterlab/issues/18461
+  test.describe.configure({ retries: 4 });
+
   test.afterEach(async ({ page }) => {
     await page.debugger.switchOff();
     await page.waitForTimeout(500);
