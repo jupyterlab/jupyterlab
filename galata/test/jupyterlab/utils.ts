@@ -116,7 +116,5 @@ export async function changeCodeFontSize(
   page: IJupyterLabPageFixture,
   menuOption: string
 ): Promise<void> {
-  await page.click('text=Settings');
-  await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-  await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
+  await page.menu.clickMenuItem(`Settings>Theme>${menuOption}`);
 }

@@ -2129,7 +2129,7 @@ export class DirListing extends Widget {
       } as DirListing.IContentsThunk);
     }
 
-    if (item && item.type !== 'directory') {
+    if (item.type !== 'directory') {
       const otherPaths = selectedPaths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         if (!item) {
