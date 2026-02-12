@@ -19,25 +19,39 @@ class TestResult:
 
     hard_failures: Set[str]  # Run IDs where test failed both attempts (0/2)
     flaky: Set[str]  # Run IDs where test failed once, passed on retry (1/2)
-    browser_hard: dict[str, int] = field(default_factory=lambda: defaultdict(int))
-    browser_flaky: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    browser_hard: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
+    browser_flaky: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
 
     def total_runs(self) -> int:
         """Total number of runs where this test appeared"""
         return len(self.hard_failures) + len(self.flaky)
 
     def total_attempts(self, total_runs: int) -> int:
-        """Total test attempts across all runs"""
-        hard = len(self.hard_failures) * 2  # 2 attempts each
-        flaky = len(self.flaky) * 2  # 2 attempts each
-        success = (total_runs - len(self.hard_failures) - len(self.flaky)) * 1  # 1 attempt each
-        return hard + flaky + success
+        """Total test attempts across all runs and browsers.
+
+        Each run tests in every browser. Per browser-run:
+          hard failure = 2 attempts, flaky = 2 attempts, success = 1 attempt.
+        """
+        total = 0
+        for b in ALL_BROWSERS:
+            hard_b = len(self.browser_hard.get(b, set()))
+            flaky_b = len(self.browser_flaky.get(b, set()))
+            success_b = total_runs - hard_b - flaky_b
+            total += hard_b * 2 + flaky_b * 2 + success_b
+        return total
 
     def total_successes(self, total_runs: int) -> int:
-        """Total successful attempts across all runs"""
-        flaky = len(self.flaky) * 1  # 1 success each
-        success = (total_runs - len(self.hard_failures) - len(self.flaky)) * 1  # 1 success each
-        return flaky + success
+        """Total successful attempts across all runs and browsers.
+
+        Per browser-run:
+          hard failure = 0 successes, flaky = 1 success, success = 1 success.
+        """
+        total = 0
+        for b in ALL_BROWSERS:
+            flaky_b = len(self.browser_flaky.get(b, set()))
+            success_b = total_runs - len(self.browser_hard.get(b, set())) - flaky_b
+            total += flaky_b + success_b
+        return total
 
     def failure_rate(self, total_runs: int) -> float:
         """Calculate failure rate as percentage"""
@@ -48,21 +62,41 @@ class TestResult:
         failures = attempts - successes
         return (failures / attempts) * 100
 
-    def browser_summary(self) -> str:
-        """Format browser failure distribution across hard failures + flaky"""
-        combined: dict[str, int] = defaultdict(int)
-        for b, count in self.browser_hard.items():
-            combined[b] += count
-        for b, count in self.browser_flaky.items():
-            combined[b] += count
-        total = sum(combined.values())
+    def browser_summary(self, mode: str = "all", total_runs: int = 0) -> str:
+        """Format browser failure distribution.
+
+        mode: "all" shows per-browser failure rate (failures/attempts),
+              "hard" / "flaky" show run counts relative to affected runs.
+        total_runs: required for mode="all" to compute per-browser attempts.
+        """
+        if mode == "all":
+            # Per-browser failure rate to show if a test is browser-specific.
+            parts = []
+            for b in ALL_BROWSERS:
+                hard_b = len(self.browser_hard.get(b, set()))
+                flaky_b = len(self.browser_flaky.get(b, set()))
+                success_b = total_runs - hard_b - flaky_b
+                attempts_b = hard_b * 2 + flaky_b * 2 + success_b
+                failures_b = hard_b * 2 + flaky_b
+                if attempts_b:
+                    rate = failures_b / attempts_b * 100
+                    parts.append((failures_b, f"{b} {rate:2.0f}% ({failures_b:2d}/{attempts_b:2d})"))
+            parts.sort(key=lambda x: x[1])
+            return ", ".join(p[1] for p in parts)
+
+        if mode == "hard":
+            data = self.browser_hard
+            total = len(self.hard_failures)
+        else:
+            data = self.browser_flaky
+            total = len(self.flaky)
         if not total:
             return ""
         parts = []
-        for browser in sorted(combined, key=combined.get, reverse=True):
-            count = combined[browser]
+        for browser in sorted(data):
+            count = len(data[browser])
             pct = count / total * 100
-            parts.append(f"{browser}: {pct:.0f}% ({count})")
+            parts.append(f"{browser} {pct:2.0f}% ({count:2d})")
         return ", ".join(parts)
 
 
@@ -188,6 +222,7 @@ PROJECT_TO_BROWSER = {
     "jupyterlab": "chromium",
     "jupyterlab-firefox": "firefox",
 }
+ALL_BROWSERS = set(PROJECT_TO_BROWSER.values())
 
 
 def extract_browser(test_name: str) -> tuple[str, str | None]:
@@ -337,11 +372,11 @@ def analyze_runs(
             for test, browser in failed_tests:
                 test_results[test].hard_failures.add(run_id)
                 if browser:
-                    test_results[test].browser_hard[browser] += 1
+                    test_results[test].browser_hard[browser].add(run_id)
             for test, browser in flaky_tests:
                 test_results[test].flaky.add(run_id)
                 if browser:
-                    test_results[test].browser_flaky[browser] += 1
+                    test_results[test].browser_flaky[browser].add(run_id)
 
         if verbose:
             print(f"[{idx}/{len(runs)}] Run {run_id} ({created_at}, {head_sha}) - {conclusion}")
@@ -369,11 +404,8 @@ def analyze_runs(
     return dict(test_results)
 
 
-def print_results(test_results: Dict[str, TestResult], total_runs: int):
+def print_results(test_results: Dict[str, TestResult], total_runs: int, verbose: bool = False):
     """Print analysis results"""
-    print("=" * 80)
-    print("Test Failure Analysis")
-    print("=" * 80)
     print()
 
     # Calculate failure rates and sort
@@ -387,8 +419,9 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
     # Print top tests by failure rate
     print("Top 20 Tests by Overall Failure Rate:")
     print("=" * 80)
-    print("(Hard: 0/2, Flaky: 1/2, Success: 1/1 per run)")
-    print()
+    if verbose:
+        print("(Hard: 0/2, Flaky: 1/2, Success: 1/1 per run)")
+        print()
 
     for failure_rate, result, test_name in test_scores[:20]:
         attempts = result.total_attempts(total_runs)
@@ -397,19 +430,19 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
         flaky_count = len(result.flaky)
         success_count = total_runs - hard_count - flaky_count
 
-        print(f"[{failures}/{attempts} attempts = {failure_rate:.1f}% failure] {test_name}")
-        print(
-            f"  Hard failures: {hard_count} runs (0/2), Flaky: {flaky_count} runs (1/2), Success: {success_count} runs (1/1)"
-        )
-
-        if result.hard_failures:
+        browser_info = result.browser_summary(total_runs=total_runs)
+        browser_suffix = f"; {browser_info}" if browser_info else ""
+        print(f"[{failure_rate:2.0f}% ({failures:2d}/{attempts}){browser_suffix}] {test_name}")
+        if verbose:
+            print(
+                f"  Hard failures: {hard_count} runs (0/2), Flaky: {flaky_count} runs (1/2), Success: {success_count} runs (1/1)"
+            )
+        if verbose and result.hard_failures:
             print(f"  Hard failed in runs: {' '.join(sorted(result.hard_failures))}")
-        if result.flaky:
+        if verbose and result.flaky:
             print(f"  Flaky in runs: {' '.join(sorted(result.flaky))}")
-        browser_info = result.browser_summary()
-        if browser_info:
-            print(f"  Browsers: {browser_info}")
-        print()
+        if verbose:
+            print()
 
     print()
     print("=" * 80)
@@ -425,12 +458,12 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
 
     for count, test_name, result in hard_only[:20]:
         percentage = (count / total_runs) * 100
-        print(f"[{count}/{total_runs} runs = {percentage:.1f}%] {test_name}")
-        print(f"  Failed in runs: {' '.join(sorted(result.hard_failures))}")
-        browser_info = result.browser_summary()
-        if browser_info:
-            print(f"  Browsers: {browser_info}")
-        print()
+        browser_info = result.browser_summary("hard")
+        browser_suffix = f"; {browser_info}" if browser_info else ""
+        print(f"[{percentage:2.0f}% ({count:2d}/{total_runs} runs){browser_suffix}] {test_name}")
+        if verbose:
+            print(f"  Failed in runs: {' '.join(sorted(result.hard_failures))}")
+            print()
 
     print(f"Total unique hard-failing tests: {len(hard_only)}")
     print(f"Total hard failures: {sum(len(r.hard_failures) for r in test_results.values())}")
@@ -448,12 +481,12 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
 
     for count, test_name, result in flaky_only[:20]:
         percentage = (count / total_runs) * 100
-        print(f"[{count}/{total_runs} runs = {percentage:.1f}%] {test_name}")
-        print(f"  Flaky in runs: {' '.join(sorted(result.flaky))}")
-        browser_info = result.browser_summary()
-        if browser_info:
-            print(f"  Browsers: {browser_info}")
-        print()
+        browser_info = result.browser_summary("flaky")
+        browser_suffix = f"; {browser_info}" if browser_info else ""
+        print(f"[{percentage:2.0f}% ({count:2d}/{total_runs} runs){browser_suffix}] {test_name}")
+        if verbose:
+            print(f"  Flaky in runs: {' '.join(sorted(result.flaky))}")
+            print()
 
     print(f"Total unique flaky tests: {len(flaky_only)}")
     print(f"Total flaky occurrences: {sum(len(r.flaky) for r in test_results.values())}")
@@ -486,6 +519,7 @@ def main():
     num_runs = args.num_runs
     commit = args.commit
     since = args.since
+    verbose = args.verbose
 
     owner, name = get_repo_info()
 
@@ -498,17 +532,18 @@ def main():
         parts.append(f"containing commit {commit[:7]}")
     if since:
         parts.append(f"since {since}")
-    print(" ".join(parts) + "...")
+    if verbose:
+        print(" ".join(parts) + "...")
 
-    verbose = args.verbose
     runs = get_workflow_runs(num_runs, commit, since, owner, name, verbose=verbose)
     check_data = batch_fetch_check_data(runs)
 
-    print(f"Found {len(runs)} matching runs")
-    print()
+    if verbose:
+        print(f"Found {len(runs)} matching runs")
+        print()
 
     test_results = analyze_runs(runs, check_data, verbose=verbose)
-    print_results(test_results, len(runs))
+    print_results(test_results, len(runs), verbose=verbose)
 
 
 if __name__ == "__main__":
