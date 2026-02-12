@@ -932,10 +932,6 @@ export class WindowedList<
     if (options.scrollbar) {
       node.classList.add('jp-mod-virtual-scrollbar');
     }
-    node.classList.toggle(
-      'jp-mod-windowing-active',
-      this.viewModel.windowingActive
-    );
 
     this.viewModel.stateChanged.connect(this.onStateChanged, this);
   }
@@ -1375,7 +1371,7 @@ export class WindowedList<
    * Turn off windowing related styles in the viewport.
    */
   private _applyNoWindowingStyles() {
-    this.node.classList.remove('jp-mod-windowing-active');
+    this._outerElement.style.removeProperty('overflow-anchor');
     this._viewport.style.position = 'relative';
     this._viewport.style.contain = '';
     this._viewport.style.top = '0px';
@@ -1386,7 +1382,7 @@ export class WindowedList<
    * Turn on windowing related styles in the viewport.
    */
   private _applyWindowingStyles() {
-    this.node.classList.add('jp-mod-windowing-active');
+    this._outerElement.style.setProperty('overflow-anchor', 'none');
     this._viewport.style.position = 'absolute';
     this._viewport.style.contain = 'layout';
   }

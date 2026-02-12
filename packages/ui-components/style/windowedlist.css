@@ -9,10 +9,6 @@
   overflow: auto;
 }
 
-.jp-WindowedPanel.jp-mod-windowing-active > .jp-WindowedPanel-outer {
-  overflow-anchor: none;
-}
-
 .jp-WindowedPanel-inner {
   position: relative;
 }
