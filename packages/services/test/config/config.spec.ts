@@ -70,7 +70,7 @@ describe('config', () => {
       const config = await configSectionManager.create({
         name: randomName()
       });
-      const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
+      const data: JSONObject = await config.update({ foo: 'baz', spam: 'eggs' });
       expect(data.foo).toBe('baz');
       expect(config.data['foo']).toBe('baz');
       expect(data['spam']).toBe('eggs');
