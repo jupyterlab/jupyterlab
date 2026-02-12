@@ -7,6 +7,9 @@
   height: 100%;
   position: relative;
   overflow: auto;
+}
+
+.jp-WindowedPanel.jp-mod-windowing-active > .jp-WindowedPanel-outer {
   overflow-anchor: none;
 }
 
