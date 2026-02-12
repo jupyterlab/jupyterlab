@@ -353,7 +353,13 @@ test.describe('Notebook Search', () => {
     // Expect the filter text to be updated
     await page.locator('text=Search in 3 Selected Cells').waitFor();
 
-    // Reset selection, switch to third cell, preserving command mode
+    // Reset selection, switch to first cell, preserving command mode
+    // Switch to the first cell to avoid https://github.com/jupyterlab/jupyterlab/issues/18487
+    cell = await page.notebook.getCellLocator(0);
+    await cell!.locator('.jp-InputPrompt').click();
+
+    await page.locator('text=Search in 1 Selected Cell').waitFor();
+
     cell = await page.notebook.getCellLocator(2);
     await cell!.locator('.jp-InputPrompt').click();
 
