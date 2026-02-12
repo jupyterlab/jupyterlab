@@ -136,14 +136,12 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
     it('should get a default config value with no class', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
-      const className = 'testclass';
       const section = await configSectionManager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
         section,
-        defaults,
-        className
+        defaults
       });
       const data = config.get('spam');
       expect(data).toBe('eggs');
