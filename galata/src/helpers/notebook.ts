@@ -69,8 +69,13 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async open(name: string): Promise<boolean> {
-    const isListed = await this.filebrowser.isFileListedInBrowser(name);
-    if (!isListed) {
+    try {
+      // The notebook may not be listed if upload has not finished yet
+      Utils.waitForCondition(async () => {
+        const isListed = await this.filebrowser.isFileListedInBrowser(name);
+        return isListed;
+      });
+    } catch {
       return false;
     }
 
