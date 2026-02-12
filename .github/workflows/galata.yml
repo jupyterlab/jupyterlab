@@ -63,6 +63,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
 
       - name: Install dependencies
+        env:
+          OPTIONAL_DEPENDENCIES: ""
         run: |
           bash ./scripts/ci_install.sh
 
@@ -226,7 +228,7 @@ jobs:
 
       - name: Install dependencies
         env:
-          OPTIONAL_DEPENDENCIES: "dev,docs-screenshots"
+          OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
           # Install fonts for consistent documentation snapshots

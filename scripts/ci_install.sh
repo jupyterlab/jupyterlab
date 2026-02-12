@@ -44,22 +44,6 @@ fi
 # Show a verbose install if the install fails, for debugging
 pip install -e "${SPEC}" || pip install -v -e "${SPEC}"
 
-# Install patched CodeMirror for testing
-git clone --depth 1 https://github.com/codemirror/view.git ../codemirror-view
-ls
-cd ../codemirror-view
-git fetch --depth 1 origin 754829bf29e9a8156f45bc3fdeb2b5443300bec0
-git checkout 754829bf29e9a8156f45bc3fdeb2b5443300bec0
-npm install
-npm run prepare
-cd -
-ls
-pwd
-
-jlpm link /home/runner/work/jupyterlab/codemirror-view --all
-jlpm install
-jlpm build
-
 node -p process.versions
 jlpm config
 
