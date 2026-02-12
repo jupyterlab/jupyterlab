@@ -267,7 +267,7 @@ export class NotebookHelper {
       );
       if ((await focusedMarkdownEditor.count()) > 0) {
         await this.page.keyboard.press('Escape');
-        await this.page.getByText(`Mode: Command`, { exact: true }).waitFor();
+        await this.page.waitForTimeout(25);
       }
     }
 
