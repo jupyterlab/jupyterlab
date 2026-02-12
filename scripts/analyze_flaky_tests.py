@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
 Script to analyze Galata test runs and identify flaky tests via GitHub CLI.
-Usage: ./scripts/analyze_flaky_tests.py [number_of_runs]
+Usage: ./scripts/analyze_flaky_tests.py [number_of_runs] [--commit SHA] [--since YYYY-MM-DD]
 """
 
+import argparse
 import json
 import re
 import subprocess
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Set
@@ -65,8 +65,40 @@ def get_repo_info() -> tuple[str, str]:
     return owner, name
 
 
-def get_workflow_runs(num_runs: int) -> List[Dict]:
-    """Fetch recent workflow runs"""
+def run_contains_commit(owner: str, name: str, commit: str, head_sha: str) -> bool:
+    """Check if a run's head commit is a descendant of (or equal to) the given commit"""
+    cmd = [
+        "gh",
+        "api",
+        f"repos/{owner}/{name}/compare/{commit}...{head_sha}",
+        "--jq",
+        ".status",
+    ]
+    status = run_command(cmd)
+    return status in ("ahead", "identical")
+
+
+def get_commit_date(owner: str, name: str, commit: str) -> str:
+    """Get the date of a commit in YYYY-MM-DD format"""
+    cmd = [
+        "gh",
+        "api",
+        f"repos/{owner}/{name}/commits/{commit}",
+        "--jq",
+        ".commit.committer.date",
+    ]
+    date_str = run_command(cmd)
+    return date_str.split("T")[0]
+
+
+def get_workflow_runs(
+    num_runs: int,
+    commit: str | None = None,
+    since: str | None = None,
+    owner: str = "",
+    name: str = "",
+) -> List[Dict]:
+    """Fetch recent workflow runs, optionally filtering to those containing a specific commit"""
     print(f"Fetching the last {num_runs} Galata workflow runs...")
     cmd = [
         "gh",
@@ -74,17 +106,23 @@ def get_workflow_runs(num_runs: int) -> List[Dict]:
         "list",
         "--workflow=galata.yml",
         "--branch=main",
+        "--status=completed",
         f"--limit={num_runs}",
         "--json",
-        "databaseId,status,conclusion,createdAt,headSha",
+        "databaseId,conclusion,createdAt,headSha,displayTitle,event,headBranch,url",
     ]
+    if since:
+        cmd.extend(["--created", f">={since}"])
     output = run_command(cmd)
-    runs = json.loads(output)
+    completed_runs = [r for r in json.loads(output) if r["conclusion"] in ("success", "failure")]
 
-    # Filter for completed runs with success or failure
-    completed_runs = [
-        r for r in runs if r["status"] == "completed" and r["conclusion"] in ["success", "failure"]
-    ]
+    if commit:
+        print(f"Filtering to runs containing commit {commit}...")
+        filtered = []
+        for run in completed_runs:
+            if run_contains_commit(owner, name, commit, run["headSha"]):
+                filtered.append(run)
+        completed_runs = filtered
 
     print(f"Found {len(completed_runs)} completed runs\n")
     return completed_runs
@@ -152,8 +190,14 @@ def analyze_runs(owner: str, name: str, runs: List[Dict]) -> Dict[str, TestResul
         conclusion = run["conclusion"]
         created_at = run["createdAt"].split("T")[0]
         head_sha = run["headSha"][:7]
+        title = run.get("displayTitle", "")
+        event = run.get("event", "")
+        branch = run.get("headBranch", "")
+        url = run.get("url", "")
 
         print(f"[{idx}/{len(runs)}] Run {run_id} ({created_at}, {head_sha}) - {conclusion}")
+        print(f"  {event} on {branch}: {title}")
+        print(f"  {url}")
 
         # Get jobs for this run
         jobs_cmd = ["gh", "run", "view", run_id, "--json", "jobs"]
@@ -165,14 +209,16 @@ def analyze_runs(owner: str, name: str, runs: List[Dict]) -> Dict[str, TestResul
 
         # Look for Merge Test Reports job which has the consolidated Playwright summary
         merge_job = None
+        failed_jobs = []
         for job in jobs_data.get("jobs", []):
             job_name = job.get("name", "")
             if "Merge" in job_name and "Report" in job_name:
                 merge_job = job
             elif job.get("conclusion") == "failure":
-                print(f"  ✗ {job_name} failed")
-            else:
-                print(f"  ✓ {job_name}")
+                failed_jobs.append(job_name)
+
+        if failed_jobs:
+            print(f"  Failed jobs: {', '.join(failed_jobs)}")
 
         if merge_job:
             merge_db_id = str(merge_job.get("databaseId", ""))
@@ -289,14 +335,41 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
 
 
 def main():
-    num_runs = int(sys.argv[1]) if len(sys.argv) > 1 else 100
+    parser = argparse.ArgumentParser(description="Analyze Galata test runs for flaky tests")
+    parser.add_argument(
+        "num_runs", nargs="?", type=int, default=100, help="Number of runs to analyze"
+    )
+    parser.add_argument(
+        "--commit", type=str, default=None, help="Only consider runs containing this commit"
+    )
+    parser.add_argument(
+        "--since",
+        type=str,
+        default=None,
+        help="Only consider runs created on or after this date (YYYY-MM-DD). Defaults to commit date if --commit is used.",
+    )
+    args = parser.parse_args()
 
-    print(f"Analyzing the last {num_runs} Galata workflow runs for flaky tests...")
+    num_runs = args.num_runs
+    commit = args.commit
+    since = args.since
+
+    owner, name = get_repo_info()
+
+    if commit and not since:
+        since = get_commit_date(owner, name, commit)
+        print(f"Using commit date {since} as --since default")
+
+    if commit:
+        print(f"Analyzing runs containing commit {commit} (since {since})...")
+    elif since:
+        print(f"Analyzing runs since {since}...")
+    else:
+        print(f"Analyzing the last {num_runs} Galata workflow runs for flaky tests...")
     print("=" * 80)
     print()
 
-    owner, name = get_repo_info()
-    runs = get_workflow_runs(num_runs)
+    runs = get_workflow_runs(num_runs, commit, since, owner, name)
 
     test_results = analyze_runs(owner, name, runs)
     print_results(test_results, len(runs))
