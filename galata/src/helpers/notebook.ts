@@ -70,8 +70,9 @@ export class NotebookHelper {
    */
   async open(name: string): Promise<boolean> {
     try {
-      // The notebook may not be listed if upload has not finished yet
-      Utils.waitForCondition(async () => {
+      // The notebook may not be rendered on the list if the upload
+      // has just completed but the listing was not refreshed yet.
+      await Utils.waitForCondition(async () => {
         const isListed = await this.filebrowser.isFileListedInBrowser(name);
         return isListed;
       });
