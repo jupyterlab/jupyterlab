@@ -60,9 +60,8 @@ def run_command(cmd: List[str]) -> str:
 
 def get_repo_info() -> tuple[str, str]:
     """Get repository owner and name"""
-    owner = json.loads(run_command(["gh", "repo", "view", "--json", "owner"]))["owner"]["login"]
-    name = json.loads(run_command(["gh", "repo", "view", "--json", "name"]))["name"]
-    return owner, name
+    data = json.loads(run_command(["gh", "repo", "view", "--json", "owner,name"]))
+    return data["owner"]["login"], data["name"]
 
 
 def run_contains_commit(owner: str, name: str, commit: str, head_sha: str) -> bool:
@@ -98,52 +97,68 @@ def get_workflow_runs(
     owner: str = "",
     name: str = "",
 ) -> List[Dict]:
-    """Fetch recent workflow runs, optionally filtering to those containing a specific commit"""
+    """Fetch recent workflow runs via REST API (includes node_id for GraphQL).
+
+    Uses gh api directly instead of gh run list to get node_id, which enables
+    efficient batch GraphQL queries for check run data.
+    """
     print(f"Fetching the last {num_runs} Galata workflow runs...")
-    cmd = [
-        "gh",
-        "run",
-        "list",
-        "--workflow=galata.yml",
-        "--branch=main",
-        "--status=completed",
-        f"--limit={num_runs}",
-        "--json",
-        "databaseId,conclusion,createdAt,headSha,displayTitle,event,headBranch,url",
-    ]
-    if since:
-        cmd.extend(["--created", f">={since}"])
-    output = run_command(cmd)
-    completed_runs = [r for r in json.loads(output) if r["conclusion"] in ("success", "failure")]
+
+    all_runs: list[dict] = []
+    page = 1
+
+    while len(all_runs) < num_runs:
+        per_page = min(100, num_runs - len(all_runs))
+        url = (
+            f"repos/{owner}/{name}/actions/workflows/galata.yml/runs"
+            f"?branch=main&status=completed&per_page={per_page}&page={page}"
+        )
+        if since:
+            url += f"&created=>={since}"
+
+        output = run_command(["gh", "api", url])
+        if not output:
+            break
+
+        data = json.loads(output)
+        runs = data.get("workflow_runs", [])
+        if not runs:
+            break
+
+        for r in runs:
+            if len(all_runs) >= num_runs:
+                break
+            if r["conclusion"] in ("success", "failure"):
+                all_runs.append(
+                    {
+                        "databaseId": r["id"],
+                        "nodeId": r["node_id"],
+                        "conclusion": r["conclusion"],
+                        "createdAt": r["created_at"],
+                        "headSha": r["head_sha"],
+                        "displayTitle": r.get("display_title", ""),
+                        "event": r.get("event", ""),
+                        "headBranch": r.get("head_branch", ""),
+                        "url": r.get("html_url", ""),
+                    }
+                )
+
+        page += 1
 
     if commit:
         print(f"Filtering to runs containing commit {commit}...")
-        filtered = []
-        for run in completed_runs:
-            if run_contains_commit(owner, name, commit, run["headSha"]):
-                filtered.append(run)
-        completed_runs = filtered
+        all_runs = [
+            run for run in all_runs if run_contains_commit(owner, name, commit, run["headSha"])
+        ]
 
-    print(f"Found {len(completed_runs)} completed runs\n")
-    return completed_runs
+    print(f"Found {len(all_runs)} completed runs\n")
+    return all_runs
 
 
 def strip_line_numbers(test_name: str) -> str:
     """Remove line numbers from test file paths"""
     # Remove :114:11 style line numbers
     return re.sub(r"\.test\.ts:\d+:\d+", ".test.ts", test_name)
-
-
-def get_playwright_summary(owner: str, name: str, check_run_id: str) -> str:
-    """Get the Playwright Run Summary annotation for a check run"""
-    cmd = [
-        "gh",
-        "api",
-        f"repos/{owner}/{name}/check-runs/{check_run_id}/annotations",
-        "--jq",
-        '.[] | select(.title == "🎭 Playwright Run Summary") | .message',
-    ]
-    return run_command(cmd)
 
 
 def parse_playwright_summary(summary: str) -> tuple[List[str], List[str]]:
@@ -181,8 +196,82 @@ def parse_playwright_summary(summary: str) -> tuple[List[str], List[str]]:
     return failed_tests, flaky_tests
 
 
-def analyze_runs(owner: str, name: str, runs: List[Dict]) -> Dict[str, TestResult]:
-    """Analyze all runs and collect test results"""
+def _extract_check_run_data(check_runs: list[dict]) -> dict:
+    """Extract Playwright summary and failed jobs from a list of check run nodes."""
+    summary = None
+    failed_jobs = []
+
+    for cr in check_runs:
+        cr_name = cr.get("name", "")
+        # GraphQL uses uppercase enum values for conclusion
+        if cr.get("conclusion") == "FAILURE":
+            failed_jobs.append(cr_name)
+
+        if "Merge" in cr_name and "Report" in cr_name:
+            for ann in cr.get("annotations", {}).get("nodes", []):
+                if ann.get("title") == "🎭 Playwright Run Summary":
+                    summary = ann.get("message", "")
+                    break
+
+    return {"summary": summary, "failed_jobs": failed_jobs}
+
+
+def batch_fetch_check_data(runs: list[dict]) -> dict[str, dict]:
+    """Batch-fetch check run data for all runs via GraphQL.
+
+    Uses the node_id from each run to directly query WorkflowRun -> CheckSuite,
+    avoiding the need to enumerate all check suites on a commit.
+
+    Returns dict mapping run databaseId (str) -> {
+        "summary": str | None (Playwright Run Summary message),
+        "failed_jobs": list[str] (names of failed check runs),
+    }
+    """
+    results: dict[str, dict] = {}
+    batch_size = 25
+
+    # Inline fragment for WorkflowRun check suite data
+    check_fields = (
+        "... on WorkflowRun { databaseId checkSuite {"
+        " checkRuns(first: 20) { nodes {"
+        " name conclusion"
+        " annotations(first: 10) { nodes { title message } }"
+        " } } } }"
+    )
+
+    for i in range(0, len(runs), batch_size):
+        batch = runs[i : i + batch_size]
+        aliases = " ".join(
+            f'run_{idx}: node(id: "{run["nodeId"]}") {{ {check_fields} }}'
+            for idx, run in enumerate(batch)
+        )
+        query = f"{{ {aliases} }}"
+
+        output = run_command(["gh", "api", "graphql", "-f", f"query={query}"])
+        if not output:
+            continue
+
+        data = json.loads(output)
+        if "errors" in data:
+            for err in data["errors"]:
+                print(f"  GraphQL error: {err.get('message', err)}")
+
+        gql_data = data.get("data", {})
+
+        for idx, batch_run in enumerate(batch):
+            node = gql_data.get(f"run_{idx}")
+            if not node or not node.get("checkSuite"):
+                continue
+
+            run_id = str(batch_run["databaseId"])
+            check_runs = node["checkSuite"].get("checkRuns", {}).get("nodes", [])
+            results[run_id] = _extract_check_run_data(check_runs)
+
+    return results
+
+
+def analyze_runs(runs: list[dict], check_data: dict[str, dict]) -> dict[str, TestResult]:
+    """Analyze all runs using pre-fetched GraphQL data"""
     test_results = defaultdict(lambda: TestResult(set(), set()))
 
     for idx, run in enumerate(runs, 1):
@@ -199,45 +288,29 @@ def analyze_runs(owner: str, name: str, runs: List[Dict]) -> Dict[str, TestResul
         print(f"  {event} on {branch}: {title}")
         print(f"  {url}")
 
-        # Get jobs for this run
-        jobs_cmd = ["gh", "run", "view", run_id, "--json", "jobs"]
-        jobs_output = run_command(jobs_cmd)
-        if not jobs_output:
+        data = check_data.get(run_id)
+        if not data:
+            print("  No check data found")
+            print()
             continue
 
-        jobs_data = json.loads(jobs_output)
+        if data["failed_jobs"]:
+            print(f"  Failed jobs: {', '.join(data['failed_jobs'])}")
 
-        # Look for Merge Test Reports job which has the consolidated Playwright summary
-        merge_job = None
-        failed_jobs = []
-        for job in jobs_data.get("jobs", []):
-            job_name = job.get("name", "")
-            if "Merge" in job_name and "Report" in job_name:
-                merge_job = job
-            elif job.get("conclusion") == "failure":
-                failed_jobs.append(job_name)
+        summary = data.get("summary")
+        if summary:
+            failed_tests, flaky_tests = parse_playwright_summary(summary)
 
-        if failed_jobs:
-            print(f"  Failed jobs: {', '.join(failed_jobs)}")
+            for test in failed_tests:
+                test_results[test].hard_failures.add(run_id)
 
-        if merge_job:
-            merge_db_id = str(merge_job.get("databaseId", ""))
-            summary = get_playwright_summary(owner, name, merge_db_id)
-            if summary:
-                failed_tests, flaky_tests = parse_playwright_summary(summary)
+            for test in flaky_tests:
+                test_results[test].flaky.add(run_id)
 
-                for test in failed_tests:
-                    test_results[test].hard_failures.add(run_id)
-
-                for test in flaky_tests:
-                    test_results[test].flaky.add(run_id)
-
-                if failed_tests or flaky_tests:
-                    print(f"  Summary: {len(failed_tests)} failed, {len(flaky_tests)} flaky")
-            else:
-                print("  No Playwright summary found")
+            if failed_tests or flaky_tests:
+                print(f"  Summary: {len(failed_tests)} failed, {len(flaky_tests)} flaky")
         else:
-            print("  No Merge Test Reports job found")
+            print("  No Playwright summary found")
 
         print()
 
@@ -371,7 +444,12 @@ def main():
 
     runs = get_workflow_runs(num_runs, commit, since, owner, name)
 
-    test_results = analyze_runs(owner, name, runs)
+    # Batch-fetch all check data via GraphQL (replaces 2N REST calls)
+    print(f"Fetching check data for {len(runs)} runs via GraphQL...")
+    check_data = batch_fetch_check_data(runs)
+    print(f"Retrieved data for {len(check_data)} runs\n")
+
+    test_results = analyze_runs(runs, check_data)
     print_results(test_results, len(runs))
 
 
