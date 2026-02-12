@@ -384,6 +384,8 @@ In addition to providing a command ID, you also provide a category in which to p
 
 ## Jupyter Front-End Shell
 
+![JupyterLab shell areas](../_static/shell-areas.png)
+
 The Jupyter front-end shell ({ts:interface}`application.JupyterFrontEnd.IShell`)
 is used to add and interact with content in the application. The {ts:interface}`application.JupyterFrontEnd.IShell`
 interface provides an `add()` method for adding widgets to the application.
