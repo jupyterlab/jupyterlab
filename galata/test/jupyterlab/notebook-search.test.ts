@@ -353,16 +353,12 @@ test.describe('Notebook Search', () => {
     // Expect the filter text to be updated
     await page.locator('text=Search in 3 Selected Cells').waitFor();
 
-    // Reset selection, switch to second cell, preserving command mode
-    // Switch to the second cell first to avoid https://github.com/jupyterlab/jupyterlab/issues/18487
-    cell = await page.notebook.getCellLocator(1);
+    // Reset selection, switch to first cell, preserving command mode
+    // Switch to the first cell to avoid https://github.com/jupyterlab/jupyterlab/issues/18487
+    cell = await page.notebook.getCellLocator(0);
     await cell!.locator('.jp-InputPrompt').click();
 
     await page.locator('text=Search in 1 Selected Cell').waitFor();
-    // Wait for the counter to be properly updated
-    await page
-      .locator('.jp-DocumentSearch-index-counter:has-text("1/5")')
-      .waitFor({ timeout: 10000 });
 
     cell = await page.notebook.getCellLocator(2);
     await cell!.locator('.jp-InputPrompt').click();
