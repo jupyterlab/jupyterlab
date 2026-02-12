@@ -163,30 +163,35 @@ def analyze_runs(owner: str, name: str, runs: List[Dict]) -> Dict[str, TestResul
 
         jobs_data = json.loads(jobs_output)
 
-        # Process Visual Regression and Documentation jobs
+        # Look for Merge Test Reports job which has the consolidated Playwright summary
+        merge_job = None
         for job in jobs_data.get("jobs", []):
             job_name = job.get("name", "")
-            if "Visual Regression" not in job_name and "Documentation" not in job_name:
-                continue
-
-            job_conclusion = job.get("conclusion", "")
-            job_db_id = str(job.get("databaseId", ""))
-
-            if job_conclusion == "failure":
+            if "Merge" in job_name and "Report" in job_name:
+                merge_job = job
+            elif job.get("conclusion") == "failure":
                 print(f"  ✗ {job_name} failed")
-
-                # Get Playwright summary
-                summary = get_playwright_summary(owner, name, job_db_id)
-                if summary:
-                    failed_tests, flaky_tests = parse_playwright_summary(summary)
-
-                    for test in failed_tests:
-                        test_results[test].hard_failures.add(run_id)
-
-                    for test in flaky_tests:
-                        test_results[test].flaky.add(run_id)
             else:
-                print(f"  ✓ {job_name} passed")
+                print(f"  ✓ {job_name}")
+
+        if merge_job:
+            merge_db_id = str(merge_job.get("databaseId", ""))
+            summary = get_playwright_summary(owner, name, merge_db_id)
+            if summary:
+                failed_tests, flaky_tests = parse_playwright_summary(summary)
+
+                for test in failed_tests:
+                    test_results[test].hard_failures.add(run_id)
+
+                for test in flaky_tests:
+                    test_results[test].flaky.add(run_id)
+
+                if failed_tests or flaky_tests:
+                    print(f"  Summary: {len(failed_tests)} failed, {len(flaky_tests)} flaky")
+            else:
+                print("  No Playwright summary found")
+        else:
+            print("  No Merge Test Reports job found")
 
         print()
 
