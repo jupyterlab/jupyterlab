@@ -351,7 +351,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
     await this.endQuery();
     this._searchActive = true;
-    this.widget.content.isSearchActive = true;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -421,7 +420,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
 
     this._searchActive = false;
-    this.widget.content.isSearchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
   }
@@ -775,9 +773,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         await this._updateCellSelection();
         // Clear highlight from previous provider
         await this.clearHighlight();
-        if (previousProviderCell?.editor) {
-          previousProviderCell.editor.setSelections([]);
-        }
         // If we are searching in all cells, we should not change the active
         // provider when switching active cell to preserve current match;
         // if we are searching within selected cells we should update
