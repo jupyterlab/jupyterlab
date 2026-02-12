@@ -326,31 +326,47 @@ test.describe('Debugger', () => {
     await page.click('jp-button[title^=Continue]');
   });
 
-  test('Source panel', async ({ page, tmpPath }) => {
-    await page.goto(`tree/${tmpPath}`);
+  test.describe('Source panel', () => {
+    test.describe('showSourcesInMainArea = false', () => {
+      test.use({
+        mockSettings: {
+          ...galata.DEFAULT_SETTINGS,
+          '@jupyterlab/debugger-extension:main': {
+            showSourcesInMainArea: false
+          }
+        }
+      });
 
-    await createNotebook(page);
+      test('should find the sources panel in the debugger panel', async ({
+        page,
+        tmpPath
+      }) => {
+        await page.goto(`tree/${tmpPath}`);
 
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
+        await createNotebook(page);
 
-    await setBreakpoint(page);
+        await page.debugger.switchOn();
+        await page.waitForCondition(() => page.debugger.isOpen());
+        await page.sidebar.setWidth(251, 'right');
 
-    // Don't wait as it will be blocked
-    await page.notebook.runCell(1, { wait: false });
+        await setBreakpoint(page);
 
-    // Wait to be stopped on the breakpoint
-    await page.debugger.waitForCallStack();
-    await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
-      'Cell ['
-    );
+        // Don't wait as it will be blocked
+        await page.notebook.runCell(1, { wait: false });
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 478, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-source.png'
+        // Wait to be stopped on the breakpoint
+        await page.debugger.waitForCallStack();
+
+        await expect(
+          page.locator('.jp-DebuggerSources-header-path')
+        ).toContainText('Cell [');
+
+        // Don't compare screenshot as the kernel id varies
+        await page.screenshot({
+          clip: { y: 478, x: 998, width: 280, height: 138 },
+          path: 'test/documentation/screenshots/debugger-source.png'
+        });
+      });
     });
   });
 
