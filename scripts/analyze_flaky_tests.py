@@ -9,7 +9,7 @@ import json
 import re
 import subprocess
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Set
 
 
@@ -19,6 +19,8 @@ class TestResult:
 
     hard_failures: Set[str]  # Run IDs where test failed both attempts (0/2)
     flaky: Set[str]  # Run IDs where test failed once, passed on retry (1/2)
+    browser_hard: dict[str, int] = field(default_factory=lambda: defaultdict(int))
+    browser_flaky: dict[str, int] = field(default_factory=lambda: defaultdict(int))
 
     def total_runs(self) -> int:
         """Total number of runs where this test appeared"""
@@ -45,6 +47,23 @@ class TestResult:
         successes = self.total_successes(total_runs)
         failures = attempts - successes
         return (failures / attempts) * 100
+
+    def browser_summary(self) -> str:
+        """Format browser failure distribution across hard failures + flaky"""
+        combined: dict[str, int] = defaultdict(int)
+        for b, count in self.browser_hard.items():
+            combined[b] += count
+        for b, count in self.browser_flaky.items():
+            combined[b] += count
+        total = sum(combined.values())
+        if not total:
+            return ""
+        parts = []
+        for browser in sorted(combined, key=combined.get, reverse=True):
+            count = combined[browser]
+            pct = count / total * 100
+            parts.append(f"{browser}: {pct:.0f}% ({count})")
+        return ", ".join(parts)
 
 
 def run_command(cmd: List[str]) -> str:
@@ -165,10 +184,32 @@ def strip_line_numbers(test_name: str) -> str:
     return re.sub(r"\.test\.ts:\d+:\d+", ".test.ts", test_name)
 
 
-def parse_playwright_summary(summary: str) -> tuple[List[str], List[str]]:
-    """Parse Playwright summary to extract failed and flaky tests"""
-    failed_tests = []
-    flaky_tests = []
+PROJECT_TO_BROWSER = {
+    "jupyterlab": "chromium",
+    "jupyterlab-firefox": "firefox",
+}
+
+
+def extract_browser(test_name: str) -> tuple[str, str | None]:
+    """Extract browser from Playwright project prefix like '[jupyterlab] > ...'"""
+    match = re.match(r"^\[([^\]]+)\]\s*\u203a\s*", test_name)
+    if match:
+        project = match.group(1)
+        browser = PROJECT_TO_BROWSER.get(project, project)
+        return test_name[match.end() :], browser
+    return test_name, None
+
+
+def parse_playwright_summary(
+    summary: str,
+) -> tuple[list[tuple[str, str | None]], list[tuple[str, str | None]]]:
+    """Parse Playwright summary to extract failed and flaky tests.
+
+    Returns (failed, flaky) where each entry is (test_name, browser).
+    The browser is extracted from the project prefix (e.g. [jupyterlab]).
+    """
+    failed_tests: list[tuple[str, str | None]] = []
+    flaky_tests: list[tuple[str, str | None]] = []
 
     lines = summary.split("\n")
     in_failed = False
@@ -191,11 +232,12 @@ def parse_playwright_summary(summary: str) -> tuple[List[str], List[str]]:
 
         # Extract test lines
         if (in_failed or in_flaky) and r"› " in line and ".test.ts" in line:
-            test_name = strip_line_numbers(line.strip())
+            raw_name = strip_line_numbers(line.strip())
+            test_name, browser = extract_browser(raw_name)
             if in_failed:
-                failed_tests.append(test_name)
+                failed_tests.append((test_name, browser))
             else:
-                flaky_tests.append(test_name)
+                flaky_tests.append((test_name, browser))
 
     return failed_tests, flaky_tests
 
@@ -292,10 +334,14 @@ def analyze_runs(
 
         if summary:
             failed_tests, flaky_tests = parse_playwright_summary(summary)
-            for test in failed_tests:
+            for test, browser in failed_tests:
                 test_results[test].hard_failures.add(run_id)
-            for test in flaky_tests:
+                if browser:
+                    test_results[test].browser_hard[browser] += 1
+            for test, browser in flaky_tests:
                 test_results[test].flaky.add(run_id)
+                if browser:
+                    test_results[test].browser_flaky[browser] += 1
 
         if verbose:
             print(f"[{idx}/{len(runs)}] Run {run_id} ({created_at}, {head_sha}) - {conclusion}")
@@ -305,12 +351,19 @@ def analyze_runs(
             print(f"  {run.get('url', '')}")
             if not data:
                 print("  No check data found")
-            elif data["failed_jobs"]:
-                print(f"  Failed jobs: {', '.join(data['failed_jobs'])}")
-            if failed_tests or flaky_tests:
-                print(f"  Summary: {len(failed_tests)} failed, {len(flaky_tests)} flaky")
-            elif data and not summary:
-                print("  No Playwright summary found")
+            elif failed_tests:
+                for t, browser in failed_tests:
+                    tag = f"[{browser}] " if browser else ""
+                    print(f"  FAILED: {tag}{t}")
+            if flaky_tests:
+                for t, browser in flaky_tests:
+                    tag = f"[{browser}] " if browser else ""
+                    print(f"  FLAKY:  {tag}{t}")
+            if data and not failed_tests and not flaky_tests:
+                if not summary:
+                    print("  No Playwright summary found")
+                else:
+                    print("  All tests passed")
             print()
 
     return dict(test_results)
@@ -353,6 +406,9 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
             print(f"  Hard failed in runs: {' '.join(sorted(result.hard_failures))}")
         if result.flaky:
             print(f"  Flaky in runs: {' '.join(sorted(result.flaky))}")
+        browser_info = result.browser_summary()
+        if browser_info:
+            print(f"  Browsers: {browser_info}")
         print()
 
     print()
@@ -371,6 +427,9 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
         percentage = (count / total_runs) * 100
         print(f"[{count}/{total_runs} runs = {percentage:.1f}%] {test_name}")
         print(f"  Failed in runs: {' '.join(sorted(result.hard_failures))}")
+        browser_info = result.browser_summary()
+        if browser_info:
+            print(f"  Browsers: {browser_info}")
         print()
 
     print(f"Total unique hard-failing tests: {len(hard_only)}")
@@ -391,6 +450,9 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
         percentage = (count / total_runs) * 100
         print(f"[{count}/{total_runs} runs = {percentage:.1f}%] {test_name}")
         print(f"  Flaky in runs: {' '.join(sorted(result.flaky))}")
+        browser_info = result.browser_summary()
+        if browser_info:
+            print(f"  Browsers: {browser_info}")
         print()
 
     print(f"Total unique flaky tests: {len(flaky_only)}")
@@ -400,10 +462,6 @@ def print_results(test_results: Dict[str, TestResult], total_runs: int):
     print()
     print("To view details of a specific run:")
     print("  gh run view <RUN_ID> --log-failed")
-    print()
-    print("To see all runs:")
-    print("  gh run list --workflow=galata.yml --branch=main")
-    print()
 
 
 def main():
