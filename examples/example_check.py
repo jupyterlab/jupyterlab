@@ -59,10 +59,10 @@ def main():
             run_test(self.serverapp, run_browser)
             super().initialize_settings()
 
-        def _jupyter_server_extension_points():
-            return [{"module": __name__, "app": App}]
+    def _jupyter_server_extension_points():
+        return [{"module": __name__, "app": App}]
 
-        mod._jupyter_server_extension_points = _jupyter_server_extension_points
+    mod._jupyter_server_extension_points = _jupyter_server_extension_points
 
     App.__name__ = example_dir.name.capitalize() + "Test"
     App.launch_instance()
