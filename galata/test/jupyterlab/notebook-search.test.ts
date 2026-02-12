@@ -282,7 +282,7 @@ test.describe('Notebook Search', () => {
 
     // First escape should NOT close the search box (but leave the editing mode)
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(250);
+    await page.getByText(`Mode: Command`, { exact: true }).waitFor();
     expect(await page.notebook.isCellInEditingMode(0)).toBeFalsy();
     expect(await page.isVisible('.jp-DocumentSearch-overlay')).toBeTruthy();
 

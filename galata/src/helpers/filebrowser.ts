@@ -175,6 +175,11 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openDirectory(dirPath: string): Promise<boolean> {
+    if ((await this.getCurrentDirectory()) === dirPath) {
+      // Save some time (~0.5s) by short-ciruting if already there.
+      return true;
+    }
+
     if (!(await this.openHomeDirectory())) {
       return false;
     }
