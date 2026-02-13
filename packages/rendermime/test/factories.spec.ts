@@ -6,6 +6,7 @@ import {
   errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
+  IMarkdownHeadingToken,
   IMarkdownParser,
   IRenderMime,
   latexRendererFactory,
@@ -293,7 +294,11 @@ describe('rendermime/factories', () => {
 
       beforeAll(() => {
         markdownParser = {
-          render: (content: string): Promise<string> => Promise.resolve(content)
+          render: (content: string): Promise<string> =>
+            Promise.resolve(content),
+          getHeadingTokens: (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 
