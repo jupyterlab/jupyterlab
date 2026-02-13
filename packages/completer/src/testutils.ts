@@ -24,11 +24,15 @@ export function createEditorWidget(): CodeEditorWrapper {
 }
 
 /**
- * jsdom mock for getBoundingClientRect returns zeros for all fields,
- * see https://github.com/jsdom/jsdom/issues/653. We can do better,
- * and need to do better to get meaningful tests for rendering.
+ * jsdom mock for getBoundingClientRect returns zeros for all fields, see
+ * https://github.com/jsdom/jsdom/issues/653. We can do better, and need to do
+ * better to get meaningful tests for rendering.
+ *
+ * For Typescript, we use `this: Element` to type the `this` context
+ * appropriately; see
+ * https://www.typescriptlang.org/docs/handbook/2/functions.html#declaring-this-in-a-function)
  */
-export function getBoundingClientRectMock() {
+export function getBoundingClientRectMock(this: Element) {
   const style = window.getComputedStyle(this);
   const top = parseFloat(style.top) || 0;
   const left = parseFloat(style.left) || 0;

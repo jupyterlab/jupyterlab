@@ -3,11 +3,10 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { Document, ILSPCodeExtractorsManager } from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
-  Document,
-  ILSPCodeExtractorsManager,
   isWithinRange,
   TextForeignCodeExtractor,
   VirtualDocument

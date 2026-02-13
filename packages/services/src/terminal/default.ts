@@ -3,13 +3,15 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
+import type { JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
+import type * as Terminal from './terminal';
 import { TerminalAPIClient } from './restapi';
 
 /**
@@ -193,9 +195,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.error(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       this._reconnectTimeout = setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;

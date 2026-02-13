@@ -23,8 +23,7 @@ header.tsd-page-toolbar .title {
 #tsd-toolbar-links {
   --favicon-size: 16px;
 }
-#tsd-toolbar-links a[href="https://jupyter.org"]
-{
+#tsd-toolbar-links a[href='https://jupyter.org'] {
   background: url(../../_static/jupyter_logo.svg) left center /
     var(--favicon-size) no-repeat;
   color: transparent;

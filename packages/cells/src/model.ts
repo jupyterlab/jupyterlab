@@ -3,24 +3,28 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { AttachmentsModel, IAttachmentsModel } from '@jupyterlab/attachments';
+import type { IAttachmentsModel } from '@jupyterlab/attachments';
+import { AttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableString, ObservableValue } from '@jupyterlab/observables';
+import type {
+  IObservableString,
+  ObservableValue
+} from '@jupyterlab/observables';
 
-import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+import type { IOutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import {
+import type {
   CellChange,
-  createMutex,
-  createStandaloneCell,
   IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
@@ -30,6 +34,7 @@ import {
   ISharedRawCell,
   YCodeCell
 } from '@jupyter/ydoc';
+import { createMutex, createStandaloneCell } from '@jupyter/ydoc';
 
 const globalModelDBMutex = createMutex();
 
@@ -496,8 +501,9 @@ export namespace AttachmentsCellModel {
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
-  export interface IOptions<T extends ISharedCell>
-    extends CellModel.IOptions<T> {
+  export interface IOptions<
+    T extends ISharedCell
+  > extends CellModel.IOptions<T> {
     /**
      * The factory for attachment model creation.
      */
@@ -925,8 +931,10 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions
-    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
+  export interface IOptions extends Omit<
+    CellModel.IOptions<ISharedCodeCell>,
+    'cell_type'
+  > {
     /**
      * The factory for output area model creation.
      */

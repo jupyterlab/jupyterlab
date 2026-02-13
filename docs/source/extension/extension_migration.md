@@ -21,6 +21,18 @@ Webpack config to Rspack.
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
+- The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
+
+### Testing with Galata
+
+- The `runCell()` method of notebook helper now takes `options: {inplace?: boolean; wait?: boolean}` as a second argument.
+  Setting the `wait` option to `false` skips waiting for the cell execution to finish, but still waits until the execution
+  has been scheduled.
+- When `autoGoto` is enabled, the workspace is now reset automatically; to opt out, set `resetWorkspace` fixture to `false`.
+- The galata's `page.waitForCondition()` now uses a default timeout of 15 seconds, simplifying debugging and reducing time to retry.
+  The `timeout` argument can be used to control the timeout duration.
+- Errors after page fixture teardown are now gracefully ignored to prevent the errors from delayed server requests
+  from failing tests during the teardown phase.
 
 ## JupyterLab 4.5.0 to 4.5.1
 
@@ -281,7 +293,6 @@ and is based on [FAST](https://www.fast.design/) library by Microsoft.
 See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more context on the change.
 
 - Changes the selectors of the `Toolbar` and `ToolbarButtonComponent`.
-
   - The DOM of `Toolbar` is now a `jp-toolbar` component instead of a `div`.
 
   - The DOM of `ToolbarButtonComponent` is now `jp-button` element instead of a `button`.
@@ -311,7 +322,7 @@ See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more c
 
 - Some CSS rules for `button` with the class `.jp-ToolbarButtonComponent` has been kept for backward compatibility.
 
-  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  These rules are now **deprecated** and will be removed in JupyterLab 5.
   The `button` elements in toolbars must be updated to `jp-button`, from
   [jupyter-ui-toolkit](https://github.com/jupyterlab-contrib/jupyter-ui-toolkit).
 
@@ -528,7 +539,6 @@ bumped their major version (following semver convention). We want to point out p
     \- `@jupyterlab/codemirror-extension:editor-syntax-status` -> `@jupyterlab/fileeditor-extension:editor-syntax-status`
 - `@jupyterlab/completer` from 3.x to 4.x
   : Major version was bumped following major refactor aimed at performance improvements and enabling easier third-party integration.
-
   - Adding custom completion suggestions (items):
     : - In 3.x and earlier adding custom completion items required re-registering the completer connector for each file/cell
     using `register` method of old manager provided by `ICompletionManager` token; in 4.x this token and associated
@@ -595,7 +605,6 @@ bumped their major version (following semver convention). We want to point out p
   - The method `TextModelFactory.createNew` receives a parameter `DocumentModel.IOptions`.
 - `@jupyterlab/documentsearch` from 3.x to 4.x
   : - `@jupyterlab/documentsearch:plugin` has been renamed to `@jupyterlab/documentsearch-extension:plugin`
-
   - `@jupyterlab/documentsearch:labShellWidgetListener` has been renamed to `@jupyterlab/documentsearch-extension:labShellWidgetListener`
 
   This may impact application configuration (for instance if the plugin was disabled).
@@ -720,6 +729,50 @@ bumped their major version (following semver convention). We want to point out p
 - React 18.2.0 update
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the [migration to react 18](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html).
+
+#### Code editor text handling
+
+In JupyterLab 4.x, extension authors should no longer update editor text
+by mutating `model.value.text` directly.
+
+In JupyterLab 3.x, the following pattern was commonly used:
+
+```ts
+widget.content.model.value.text = 'some text';
+```
+
+In JupyterLab 4.x, extensions should update editor contents exclusively through
+the shared model APIs to ensure correct synchronization and collaboration, e.g.:
+
+```ts
+widget.content.model.sharedModel.setSource('some text');
+```
+
+#### Notebook and cell metadata API changes
+
+In JupyterLab 4.x, access patterns for notebook and cell metadata have changed.
+Direct mutation of metadata objects is no longer supported.
+
+In JupyterLab 3.x, extensions commonly accessed metadata like:
+
+```ts
+cellModel.metadata.has(key);
+cellModel.metadata.get(key);
+cellModel.metadata.set(key, value);
+```
+
+In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
+model APIs instead:
+
+```ts
+cellModel.getMetadata(key);
+cellModel.setMetadata(key, value);
+cellModel.deleteMetadata(key);
+
+cellModel.metadataChanged.connect((sender, args) => {
+  // react to metadata updates
+});
+```
 
 ### Testing with Jest
 

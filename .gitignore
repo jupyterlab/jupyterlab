@@ -2,6 +2,7 @@
 coverage/
 .eslintcache
 .stylelintcache
+.prettiercache
 
 dev_mode/listings
 dev_mode/schemas
@@ -12,8 +13,8 @@ dev_mode/stats.json
 
 docs/_build
 docs/source/user/commands_list.md
-docs/source/extension/plugins_list.rst
-docs/source/extension/tokens_list.rst
+docs/source/extension/plugins_list.md
+docs/source/extension/tokens_list.md
 docs/source/api
 **/docs/source/_build
 

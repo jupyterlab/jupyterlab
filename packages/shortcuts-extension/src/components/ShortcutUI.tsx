@@ -3,13 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ArrayExt, StringExt } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
-import {
+import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutsSettingsLayout,
@@ -363,9 +363,7 @@ export class ShortcutUI
         JSONExt.deepEqual(keybinding.keys, shortcut.keys)
       ) {
         const matchesDefault =
-          keybinding &&
-          keybinding.isDefault &&
-          JSONExt.deepEqual(keybinding.keys, keys);
+          keybinding.isDefault && JSONExt.deepEqual(keybinding.keys, keys);
 
         // If the new `keys` are empty, do not copy this one over.
         // Also, if the keybinding is a default keybinding and the desired

@@ -144,7 +144,7 @@ test.describe('Notebook scroll on dragging cells (no windowing)', () => {
     const scroller = page.locator(NOTEBOOK_SCROLLER);
     await firstCellLocator.scrollIntoViewIfNeeded();
 
-    const scrollerBBox = await scroller.boundingBox();
+    const scrollerBBox = (await scroller.boundingBox())!;
     const notebookContentHeight = (
       await page.locator(NOTEBOOK_CONTENT).boundingBox()
     ).height;
@@ -183,7 +183,7 @@ test.describe('Notebook scroll on dragging cells (no windowing)', () => {
     );
 
     const scroller = page.locator(NOTEBOOK_SCROLLER);
-    const scrollerBBox = await scroller.boundingBox();
+    const scrollerBBox = (await scroller.boundingBox())!;
     const notebookContentHeight = (
       await page.locator(NOTEBOOK_CONTENT).boundingBox()
     ).height;
@@ -344,13 +344,13 @@ test.describe('Notebook scroll over long outputs (no windowing)', () => {
       '.jp-Cell .jp-RenderedMarkdown:has-text("Before")'
     );
     // Wait until Markdown cells are rendered
-    await renderedMarkdownLocator.waitFor({ timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ timeout: 500 });
     // Un-render the "before" markdown cell
     await renderedMarkdownLocator.dblclick();
     // Make the first cell active
     await page.notebook.selectCells(0);
     // Check that that the markdown cell is un-rendered
-    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 500 });
 
     // Scroll to the last cell
     const lastCell = await page.notebook.getCellLocator(10);
@@ -361,6 +361,15 @@ test.describe('Notebook scroll over long outputs (no windowing)', () => {
 
     let previousOffset = await outer.evaluate(node => node.scrollTop);
     expect(previousOffset).toBeGreaterThan(1000);
+
+    const nbPanel = (await page.notebook.getNotebookInPanelLocator())!;
+    const bbox = (await nbPanel.boundingBox())!;
+
+    // Position mouse for scrolling
+    await page.mouse.move(
+      bbox.x + 0.5 * bbox.width,
+      bbox.y + 0.5 * bbox.height
+    );
 
     // Scroll piece by piece checking that there is no jump
     while (previousOffset > 75) {

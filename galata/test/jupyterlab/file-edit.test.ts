@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { test } from '@jupyterlab/galata';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 const DEFAULT_NAME = 'untitled.py';
@@ -32,6 +32,9 @@ test.describe('File Edit Operations', () => {
   });
   test('Should toggle a block comment on Alt + A', async ({ page }) => {
     const currentDir = await page.filebrowser.getCurrentDirectory();
+    // Wait a short while as the file initializes before renaming, see
+    // https://github.com/jupyterlab/jupyterlab/issues/18455
+    await page.waitForTimeout(100);
     await page.contents.renameFile(
       `${currentDir}/${DEFAULT_NAME}`,
       `${currentDir}/untitled.js`
@@ -76,7 +79,7 @@ async function getEditorText(page: Page): Promise<string> {
   try {
     await page.context().grantPermissions(['clipboard-read']);
   } catch {
-    // Firefox does not support clipboard-read but does not it it either
+    // Firefox does not support clipboard-read but does not need it either
   }
   const handle = await page.evaluateHandle(() =>
     navigator.clipboard.readText()

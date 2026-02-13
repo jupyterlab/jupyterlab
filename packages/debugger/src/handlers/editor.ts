@@ -1,38 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 
+import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
   Compartment,
-  Line,
   Prec,
-  Range,
   RangeSet,
   StateEffect,
-  StateEffectType,
   StateField
 } from '@codemirror/state';
 
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  gutter,
-  GutterMarker
-} from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, gutter, GutterMarker } from '@codemirror/view';
 
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
 import {
   breakpointIcon,
   selectedBreakpointIcon
@@ -79,7 +72,7 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
       const editor = this.editor;
@@ -87,13 +80,14 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
-      }
+      },
+      this
     );
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(
@@ -113,7 +107,8 @@ export class EditorHandler implements IDisposable {
             }
           }
         }
-      }
+      },
+      this
     );
 
     this._breakpointEffect = StateEffect.define<
@@ -304,8 +299,7 @@ export class EditorHandler implements IDisposable {
     let clickedLine = editor.state.doc.lineAt(position);
     let clickedLineNumber = clickedLine.number;
     let targetLine: Line | undefined = undefined;
-    let isLineEmpty: boolean =
-      false; /* is true is the clicked line of code is empty */
+    let isLineEmpty: boolean = false; /* is true is the clicked line of code is empty */
     if (clickedLine.text.trim() === '') {
       isLineEmpty = true;
       while (clickedLineNumber > 1) {
