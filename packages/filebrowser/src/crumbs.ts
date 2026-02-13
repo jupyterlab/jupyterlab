@@ -195,19 +195,9 @@ export class BreadCrumbs extends Widget {
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
 
-    // Invalidate cached widths if the local path (and thus breadcrumb labels) changed
+    // Invalidate cached widths if the path changed
     if (this._previousState && this._previousState.path !== localPath) {
       this._cachedWidths = null;
-      // Force update with default widths first
-      this._previousState = null;
-      // Schedule measurement to capture new label widths
-      requestAnimationFrame(() => {
-        if (this.isDisposed || !this.isAttached) {
-          return;
-        }
-        this._measureElementWidths();
-        this.update();
-      });
     }
 
     // Calculate adaptive items based on available width
@@ -218,8 +208,7 @@ export class BreadCrumbs extends Widget {
       hasPreferred: this._hasPreferred,
       fullPath: this._fullPath,
       minimumLeftItems: adaptiveItems.left,
-      minimumRightItems: adaptiveItems.right,
-      containerWidth: this._lastContainerWidth
+      minimumRightItems: adaptiveItems.right
     };
     if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
       return;
@@ -434,57 +423,54 @@ export class BreadCrumbs extends Widget {
       if (this.isDisposed || !this.isAttached) {
         return;
       }
-      const newWidth = this.node.clientWidth;
-      if (newWidth !== this._lastContainerWidth) {
-        this._lastContainerWidth = newWidth;
-        // Invalidate cached widths on resize
-        this._cachedWidths = null;
-        // Force recalculation by clearing previous state
-        this._previousState = null;
-        // Schedule measurement in next animation frame
-        requestAnimationFrame(() => {
-          if (this.isDisposed || !this.isAttached) {
-            return;
-          }
-          this._measureElementWidths();
-          this.update();
-        });
-      }
+      // Force recalculation by clearing previous state
+      this._previousState = null;
+      this.update();
     }, 100);
   }
 
   /**
-   * Measure element widths from the DOM and cache them.
+   * Measure ALL breadcrumb item widths by rendering them off-screen.
+   * This ensures we have accurate widths for every path segment,
+   * including those currently hidden behind the ellipsis.
    */
-  private _measureElementWidths(): void {
+  private _measureAllItemWidths(parts: string[]): void {
+    const node = this.node;
+
+    // Measure fixed elements that are already in the DOM
     const home = this._crumbs[Private.Crumb.Home];
     const ellipsis = this._crumbs[Private.Crumb.Ellipsis];
     const preferred = this._crumbs[Private.Crumb.Preferred];
-
-    // Find first separator
-    const separators = this.node.querySelectorAll(
-      `.${BREADCRUMB_SEPARATOR_CLASS}`
-    );
+    const separators = node.querySelectorAll(`.${BREADCRUMB_SEPARATOR_CLASS}`);
     const separator = separators.length > 0 ? separators[0] : null;
 
-    // Measure each rendered breadcrumb item, keyed by path segment index
-    const items = this.node.querySelectorAll(
-      `.${BREADCRUMB_ITEM_CLASS}:not(.${BREADCRUMB_ELLIPSIS_CLASS})`
-    );
-    const itemWidthsByIndex: Map<number, number> = new Map();
-    items.forEach(item => {
-      const htmlItem = item as HTMLElement;
-      const itemPath = htmlItem.dataset.path;
-      if (itemPath) {
-        // Derive path segment index from the item's full path
-        const segmentIndex =
-          itemPath.split('/').filter(p => p !== '').length - 1;
-        itemWidthsByIndex.set(
-          segmentIndex,
-          htmlItem.getBoundingClientRect().width
-        );
-      }
-    });
+    // Create an off-screen container to measure all items
+    const measurer = document.createElement('div');
+    measurer.style.position = 'absolute';
+    measurer.style.visibility = 'hidden';
+    measurer.style.height = '0';
+    measurer.style.overflow = 'hidden';
+    measurer.style.whiteSpace = 'nowrap';
+    // Inherit font styles from the breadcrumb node
+    measurer.className = BREADCRUMB_CLASS;
+    node.appendChild(measurer);
+
+    // Create and measure each breadcrumb item for every path segment
+    const itemWidths: number[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      const elem = document.createElement('span');
+      elem.className = BREADCRUMB_ITEM_CLASS;
+      elem.textContent = parts[i];
+      measurer.appendChild(elem);
+      const measured = elem.getBoundingClientRect().width;
+      // Fall back to a character-based estimate if layout is not available
+      itemWidths.push(
+        measured > 0 ? measured : Math.max(parts[i].length * 8, 20)
+      );
+    }
+
+    // Clean up
+    node.removeChild(measurer);
 
     this._cachedWidths = {
       home: home.getBoundingClientRect().width || 22,
@@ -493,7 +479,7 @@ export class BreadCrumbs extends Widget {
       preferred: this._hasPreferred
         ? preferred.getBoundingClientRect().width || 22
         : 0,
-      itemWidthsByIndex: itemWidthsByIndex
+      itemWidths: itemWidths
     };
   }
 
@@ -523,43 +509,54 @@ export class BreadCrumbs extends Widget {
       return { left: this._minimumLeftItems, right: this._minimumRightItems };
     }
 
-    // Get measurements (cached or defaults)
-    const homeWidth = this._cachedWidths?.home ?? 22;
-    const separatorWidth = this._cachedWidths?.separator ?? 4;
-    const ellipsisWidth = this._cachedWidths?.ellipsis ?? 28;
-    const preferredWidth = this._cachedWidths?.preferred ?? 0;
-    const itemWidthsByIndex =
-      this._cachedWidths?.itemWidthsByIndex ?? new Map();
-    const defaultItemWidth = 88;
+    // Ensure we have accurate measurements for ALL items
+    if (
+      !this._cachedWidths ||
+      this._cachedWidths.itemWidths.length !== totalParts
+    ) {
+      this._measureAllItemWidths(parts);
+    }
 
-    const getItemWidth = (i: number): number =>
-      itemWidthsByIndex.get(i) ?? defaultItemWidth;
+    const homeWidth = this._cachedWidths!.home;
+    const separatorWidth = this._cachedWidths!.separator;
+    const ellipsisWidth = this._cachedWidths!.ellipsis;
+    const preferredWidth = this._cachedWidths!.preferred;
+    const itemWidths = this._cachedWidths!.itemWidths;
 
-    // Calculate available space, including preferred crumb if enabled
+    // Calculate available space for items
     let fixedOverhead = homeWidth + separatorWidth;
     if (this._hasPreferred) {
       fixedOverhead += preferredWidth + separatorWidth;
     }
     const availableForItems = containerWidth - fixedOverhead;
 
-    // If all parts can fit, show all (no ellipsis needed)
+    // Check if all parts can fit without ellipsis
     let totalWidth = 0;
     for (let i = 0; i < totalParts; i++) {
-      totalWidth += getItemWidth(i) + separatorWidth;
+      totalWidth += itemWidths[i] + separatorWidth;
     }
     if (totalWidth <= availableForItems) {
       return { left: totalParts, right: 0 };
     }
 
-    // Calculate items that can fit with ellipsis
+    // calculate how many right items fit
     const ellipsisOverhead = ellipsisWidth + separatorWidth;
     const availableWithEllipsis = availableForItems - ellipsisOverhead;
 
+    // Account for left items first
+    let leftUsed = 0;
+    for (let i = 0; i < this._minimumLeftItems && i < totalParts; i++) {
+      leftUsed += itemWidths[i] + separatorWidth;
+    }
+
+    const availableForRight = availableWithEllipsis - leftUsed;
+
+    // Fill right items from the end
     let rightItems = 0;
     let usedWidth = 0;
-    for (let i = totalParts - 1; i >= 0; i--) {
-      const w = getItemWidth(i) + separatorWidth;
-      if (usedWidth + w <= availableWithEllipsis) {
+    for (let i = totalParts - 1; i >= this._minimumLeftItems; i--) {
+      const w = itemWidths[i] + separatorWidth;
+      if (usedWidth + w <= availableForRight) {
         usedWidth += w;
         rightItems++;
       } else {
@@ -584,14 +581,13 @@ export class BreadCrumbs extends Widget {
   private _minimumLeftItems: number;
   private _minimumRightItems: number;
   private _resizeObserver: ResizeObserver;
-  private _lastContainerWidth: number = 0;
   private _resizeTimeout: ReturnType<typeof setTimeout> | null = null;
   private _cachedWidths: {
     home: number;
     separator: number;
     ellipsis: number;
     preferred: number;
-    itemWidthsByIndex: Map<number, number>;
+    itemWidths: number[];
   } | null = null;
 }
 
@@ -653,7 +649,6 @@ namespace Private {
     fullPath: boolean;
     minimumLeftItems: number;
     minimumRightItems: number;
-    containerWidth: number;
   }
 
   /**
