@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to analyze Galata test runs and identify flaky tests via GitHub CLI.
-Usage: ./scripts/analyze_flaky_tests.py [number_of_runs] [--commit SHA] [--since YYYY-MM-DD]
+Usage: ./scripts/analyze_flaky_tests.py [number_of_runs] [--commit SHA] [--since YYYY-MM-DD] [--branch BRANCH]
 """
 
 import argparse
@@ -80,7 +80,9 @@ class TestResult:
                 failures_b = hard_b * 2 + flaky_b
                 if attempts_b:
                     rate = failures_b / attempts_b * 100
-                    parts.append((failures_b, f"{b} {rate:2.0f}% ({failures_b:2d}/{attempts_b:2d})"))
+                    parts.append(
+                        (failures_b, f"{b} {rate:2.0f}% ({failures_b:2d}/{attempts_b:2d})")
+                    )
             parts.sort(key=lambda x: x[1])
             return ", ".join(p[1] for p in parts)
 
@@ -150,6 +152,7 @@ def get_workflow_runs(
     owner: str = "",
     name: str = "",
     verbose: bool = False,
+    branch: str | None = None,
 ) -> List[Dict]:
     """Fetch recent workflow runs via REST API (includes node_id for GraphQL).
 
@@ -166,8 +169,10 @@ def get_workflow_runs(
         per_page = min(100, num_runs - len(all_runs))
         url = (
             f"repos/{owner}/{name}/actions/workflows/galata.yml/runs"
-            f"?branch=main&status=completed&per_page={per_page}&page={page}"
+            f"?status=completed&per_page={per_page}&page={page}"
         )
+        if branch:
+            url += f"&branch={branch}"
         if since:
             url += f"&created=>={since}"
 
@@ -512,6 +517,12 @@ def main():
         help="Only consider runs created on or after this date (YYYY-MM-DD). Defaults to commit date if --commit is used.",
     )
     parser.add_argument(
+        "--branch",
+        type=str,
+        default=None,
+        help="Only consider runs on this branch (default: all branches)",
+    )
+    parser.add_argument(
         "--verbose", "-v", action="store_true", help="Show per-run details during analysis"
     )
     args = parser.parse_args()
@@ -519,6 +530,7 @@ def main():
     num_runs = args.num_runs
     commit = args.commit
     since = args.since
+    branch = args.branch
     verbose = args.verbose
 
     owner, name = get_repo_info()
@@ -527,7 +539,8 @@ def main():
         since = get_commit_date(owner, name, commit)
 
     # Print query description immediately
-    parts = [f"Analyzing up to {num_runs} runs"]
+    branch_desc = f" on {branch}" if branch else ""
+    parts = [f"Analyzing up to {num_runs} runs{branch_desc}"]
     if commit:
         parts.append(f"containing commit {commit[:7]}")
     if since:
@@ -535,7 +548,7 @@ def main():
     if verbose:
         print(" ".join(parts) + "...")
 
-    runs = get_workflow_runs(num_runs, commit, since, owner, name, verbose=verbose)
+    runs = get_workflow_runs(num_runs, commit, since, owner, name, verbose=verbose, branch=branch)
     check_data = batch_fetch_check_data(runs)
 
     if verbose:
