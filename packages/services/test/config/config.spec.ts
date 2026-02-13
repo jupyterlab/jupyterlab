@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expectFailure, JupyterServer } from '@jupyterlab/testing';
-import { JSONObject, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import { ConfigSectionManager, ConfigWithDefaults } from '../../src';
 import { getRequestHandler, handleRequest, makeSettings } from '../utils';
 
@@ -171,8 +172,8 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       const className = 'testclass';
       const section = await configSectionManager.create({ name: randomName() });
       const config = new ConfigWithDefaults({ section, className });
-      let data: any = await config.set('foo', 'bar');
-      data = section.data['testclass'] as JSONObject;
+      await config.set('foo', 'bar');
+      const data = section.data['testclass'] as JSONObject;
       expect(data['foo']).toBe('bar');
     });
 

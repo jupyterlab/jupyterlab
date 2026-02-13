@@ -3,26 +3,25 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { CommsOverSubshells, ServerConnection } from '..';
 
 import { CommHandler } from './comm';
 
-import * as Kernel from './kernel';
+import type * as Kernel from './kernel';
 
 import * as KernelMessage from './messages';
 
-import {
-  KernelControlFutureHandler,
-  KernelFutureHandler,
-  KernelShellFutureHandler
-} from './future';
+import type { KernelFutureHandler } from './future';
+import { KernelControlFutureHandler, KernelShellFutureHandler } from './future';
 
 import * as validate from './validate';
-import { KernelSpec } from '../kernelspec';
+import type { KernelSpec } from '../kernelspec';
 
 import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
@@ -1712,9 +1711,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.warn(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       // Try reconnection with subprotocols if the server had supported them.
       // Otherwise, try reconnection without subprotocols.
