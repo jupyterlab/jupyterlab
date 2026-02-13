@@ -206,6 +206,14 @@ export class ThemeManager implements IThemeManager {
       }
     });
 
+    // If content-font-size1 is set but code-font-size is not explicitly
+    // set by the user, derive code-font-size from content-font-size1 so
+    // that code cell output font size scales with the content font size.
+    // This fixes the issue where setting content-font-size1 would change
+    // markdown output font size but not code cell output font size.
+    // See https://github.com/jupyterlab/jupyterlab/issues/12178
+    this._syncCodeFontSizeWithContent(newOverrides);
+
     // replace the current overrides with the new ones
     this._overrides = newOverrides;
   }
@@ -385,6 +393,66 @@ export class ThemeManager implements IThemeManager {
 
     // increment the font size and set it as an override
     return this.setCSSOverride(key, `${Number(parts[0]) + incr}${parts[1]}`);
+  }
+
+  /**
+   * Sync code font size with content font size when only content-font-size1
+   * is explicitly set by the user. This ensures that code cell output scales
+   * alongside content output when the user adjusts the content font size.
+   *
+   * The default theme ratio between code font size (13px) and content font
+   * size (14px) is preserved when computing the derived value.
+   */
+  private _syncCodeFontSizeWithContent(
+    overrides: Dict<string | ThemedProp<string>>
+  ): void {
+    // Resolve the content-font-size1 override value
+    let contentFontSize = overrides['content-font-size1'];
+    if (contentFontSize && typeof contentFontSize !== 'string') {
+      const isLight = this._current ? this.isLight(this._current) : true;
+      contentFontSize = isLight ? contentFontSize.light : contentFontSize.dark;
+    }
+
+    // Resolve the code-font-size override value
+    let codeFontSize = overrides['code-font-size'];
+    if (codeFontSize && typeof codeFontSize !== 'string') {
+      const isLight = this._current ? this.isLight(this._current) : true;
+      codeFontSize = isLight ? codeFontSize.light : codeFontSize.dark;
+    }
+
+    if (contentFontSize && typeof contentFontSize === 'string' && !codeFontSize) {
+      // Parse the content font size value
+      const match = contentFontSize.match(/^(\d+(?:\.\d+)?)(px|rem|em|pt)$/);
+      if (match) {
+        const contentSize = parseFloat(match[1]);
+        const unit = match[2];
+
+        // Default theme values: code = 13px, content = 14px
+        // Maintain the ratio: code = content * (13/14)
+        const DEFAULT_CODE_FONT_SIZE = 13;
+        const DEFAULT_CONTENT_FONT_SIZE = 14;
+        const derivedCodeSize =
+          contentSize * (DEFAULT_CODE_FONT_SIZE / DEFAULT_CONTENT_FONT_SIZE);
+
+        // Round to 1 decimal place for clean values
+        const roundedSize = Math.round(derivedCodeSize * 10) / 10;
+        const derivedVal = `${roundedSize}${unit}`;
+
+        if (this.validateCSS('code-font-size', derivedVal)) {
+          document.documentElement.style.setProperty(
+            '--jp-code-font-size',
+            derivedVal
+          );
+          this._codeFontSizeDerived = true;
+        }
+      }
+    } else if (this._codeFontSizeDerived && !contentFontSize && !codeFontSize) {
+      // If content-font-size1 was removed and code-font-size is not
+      // explicitly set, remove the derived code-font-size override
+      // so it falls back to the theme default.
+      document.documentElement.style.removeProperty('--jp-code-font-size');
+      this._codeFontSizeDerived = false;
+    }
   }
 
   /**
@@ -575,6 +643,7 @@ export class ThemeManager implements IThemeManager {
   private _current: string | null = null;
   private _host: Widget;
   private _links: HTMLLinkElement[] = [];
+  private _codeFontSizeDerived = false;
   private _overrides: Dict<string | ThemedProp<string>> = {};
   private _overrideProps: Dict<string> = {};
   private _outstanding: Promise<void> | null = null;
