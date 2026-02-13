@@ -10,15 +10,14 @@ import re
 import subprocess
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Set
 
 
 @dataclass
 class TestResult:
     """Represents test results across all runs"""
 
-    hard_failures: Set[str]  # Run IDs where test failed both attempts (0/2)
-    flaky: Set[str]  # Run IDs where test failed once, passed on retry (1/2)
+    hard_failures: set[str]  # Run IDs where test failed both attempts (0/2)
+    flaky: set[str]  # Run IDs where test failed once, passed on retry (1/2)
     browser_hard: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
     browser_flaky: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
 
@@ -102,7 +101,7 @@ class TestResult:
         return ", ".join(parts)
 
 
-def run_command(cmd: List[str]) -> str:
+def run_command(cmd: list[str]) -> str:
     """Run a shell command and return output"""
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -153,7 +152,7 @@ def get_workflow_runs(
     name: str = "",
     verbose: bool = False,
     branch: str | None = None,
-) -> List[Dict]:
+) -> list[dict]:
     """Fetch recent workflow runs via REST API (includes node_id for GraphQL).
 
     Uses gh api directly instead of gh run list to get node_id, which enables
@@ -409,7 +408,7 @@ def analyze_runs(
     return dict(test_results)
 
 
-def print_results(test_results: Dict[str, TestResult], total_runs: int, verbose: bool = False):
+def print_results(test_results: dict[str, TestResult], total_runs: int, verbose: bool = False):
     """Print analysis results"""
     print()
 
