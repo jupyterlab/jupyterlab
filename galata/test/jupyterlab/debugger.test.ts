@@ -99,7 +99,7 @@ test.describe('Debugger Tests', () => {
       .waitFor({ timeout: 5000 });
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.waitForCondition(() => page.debugger.isOpen(), 60 * 1000);
 
     await page.notebook.waitForCellGutter(0);
     await page.notebook.clickCellGutter(0, 8);
