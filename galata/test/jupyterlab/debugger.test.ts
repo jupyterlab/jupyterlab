@@ -26,10 +26,6 @@ test('Open Debugger on right', async ({ page }) => {
 });
 
 test.describe('Debugger Tests', () => {
-  // Workaround for `Rich variables inspector` test being flaky
-  // see https://github.com/jupyterlab/jupyterlab/issues/18461
-  test.describe.configure({ retries: 4 });
-
   test.afterEach(async ({ page }) => {
     await page.debugger.switchOff();
     await page.waitForTimeout(500);
@@ -88,6 +84,20 @@ test.describe('Debugger Tests', () => {
     await openNotebook(page, tmpPath, notebookName);
 
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
+    // Switch to xeus-python kernel
+    await page.getByTitle('Switch kernel').click({ timeout: 5000 });
+    await page
+      .locator('.jp-Dialog select')
+      .selectOption({ label: 'Python . (XPython)' }, { timeout: 5000 });
+    await page
+      .locator('.jp-Dialog')
+      .getByRole('button', { name: 'Select Kernel', exact: true })
+      .click();
+    await page
+      .getByText('Python . (XPython) | Idle')
+      .waitFor({ timeout: 5000 });
+
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
 
