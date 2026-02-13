@@ -47,7 +47,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       manager,
       modelFactory,
       sessionContext,
-      translator
+      translator,
+      preventTitleUpdate
     } = options;
     this.translator = translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
@@ -95,13 +96,17 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
         ).selectKernel(sessionContext!);
       }
       this._connected = new Date();
-      this._updateTitlePanel();
+      if (!preventTitleUpdate) {
+        this._updateTitlePanel();
+      }
     });
 
     this.console.executed.connect(this._onExecuted, this);
     this._updateTitlePanel();
-    sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
-    sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
+    if (!preventTitleUpdate) {
+      sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
+      sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
+    }
 
     this.title.icon = consoleIcon;
     this.title.closable = true;
@@ -250,6 +255,11 @@ export namespace ConsolePanel {
      * A function to call when the kernel is busy.
      */
     setBusy?: () => IDisposable;
+
+    /**
+     * Whether to update the panel title on events or not.
+     */
+    preventTitleUpdate?: boolean;
   }
 
   /**
