@@ -40,6 +40,7 @@
     "@jupyterlab/application": "^4.6.0-alpha.2",
     "@jupyterlab/apputils": "^4.7.0-alpha.2",
     "@jupyterlab/documentsearch": "^4.6.0-alpha.2",
+    "@jupyterlab/filebrowser": "^4.6.0-alpha.2",
     "@jupyterlab/launcher": "^4.6.0-alpha.2",
     "@jupyterlab/mainmenu": "^4.6.0-alpha.2",
     "@jupyterlab/running": "^4.6.0-alpha.2",
