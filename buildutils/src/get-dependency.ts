@@ -24,7 +24,7 @@ export async function getDependency(name: string): Promise<string> {
   allDeps = [];
   allDevDeps = [];
 
-  utils.getLernaPaths().forEach(pkgRoot => {
+  utils.getYarnPaths().forEach(pkgRoot => {
     // Read in the package.json.
     const packagePath = path.join(pkgRoot, 'package.json');
     let data: any;

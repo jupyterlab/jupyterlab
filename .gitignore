@@ -62,7 +62,6 @@ lib
 node_modules
 
 *.tsbuildinfo
-lerna-debug.log
 yarn-error.log
 
 # python
@@ -111,11 +110,11 @@ examples/app/themes
 examples/app/schemas
 iframe_figures/
 
-lerna-debug.log
 yarn-error.log
 
 # yarn >=2.x local files
 .yarn/*
+!.yarn/plugins
 .pnp.*
 jupyterlab/staging/.yarn/*
 jupyterlab/staging/.pnp.*

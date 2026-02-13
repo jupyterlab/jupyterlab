@@ -637,7 +637,7 @@ function ensureJupyterlab(): string[] {
   });
 
   corePackage.jupyterlab.linkedPackages = {};
-  utils.getLernaPaths().forEach(pkgPath => {
+  utils.getYarnPaths().forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
@@ -709,7 +709,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Pick up all the package versions.
-  const paths = utils.getLernaPaths();
+  const paths = utils.getYarnPaths();
 
   // This package is not part of the workspaces but should be kept in sync.
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');

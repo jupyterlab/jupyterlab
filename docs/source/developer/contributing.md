@@ -814,7 +814,7 @@ provides additional architecture information.
 ## The NPM Packages
 
 The repository consists of many npm packages that are managed using the
-lerna build tool. The npm package source files are in the `packages/`
+yarn build tool. The npm package source files are in the `packages/`
 subdirectory.
 
 ### Build the NPM Packages from Source

@@ -33,7 +33,6 @@ export function getDeps(
 commander
   .description('Bump the major version of JS package(s)')
   .arguments('<package> [others...]')
-  .option('--force', 'Force the upgrade')
   .option('--dry-run', 'Show what would be executed')
   .action((pkg: string, others: Array<string>, options: any) => {
     utils.exitOnUncaughtException();
@@ -89,10 +88,8 @@ commander
       );
     }
     const pkgs = Array.from(toBump).join(',');
-    let cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
-    if (options.force) {
-      cmd += ' --yes';
-    }
+    let cmd = `jlpm workspaces foreach --include "${pkgs}" run`;
+    cmd += ` npm version premajor --preid=${preId}`;
 
     if (options.dryRun) {
       console.debug('Would run:');

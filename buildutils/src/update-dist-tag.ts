@@ -88,13 +88,21 @@ so that 'latest' points to the latest stable release and 'next'
 points to the latest prerelease after it.`
   )
   .option('--lerna', 'Update dist-tags in all lerna packages')
+  .option('--yarn', 'Update dist-tags in all yarn packages')
   .option('--path [path]', 'Path to package or monorepo to update')
   .action(async (args: any) => {
     const basePath = path.resolve(args.path || '.');
     let cmds: string[][] = [];
     let paths: string[] = [];
+
     if (args.lerna) {
-      paths = utils.getLernaPaths(basePath).sort();
+      paths.push(...utils.getLernaPaths(basePath));
+    } else if (args.yarn) {
+      paths.push(...utils.getYarnPaths(basePath));
+    }
+
+    if (paths.length) {
+      paths.sort();
       cmds = await Promise.all(paths.map(handlePackage));
     }
     cmds.push(await handlePackage(basePath));
