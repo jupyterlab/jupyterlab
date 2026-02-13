@@ -72,10 +72,9 @@ export class NotebookHelper {
     try {
       // The notebook may not be rendered on the list if the upload
       // has just completed but the listing was not refreshed yet.
-      await Utils.waitForCondition(async () => {
-        const isListed = await this.filebrowser.isFileListedInBrowser(name);
-        return isListed;
-      });
+      await Utils.waitForCondition(() =>
+        this.filebrowser.isFileListedInBrowser(name)
+      );
     } catch {
       return false;
     }
