@@ -69,8 +69,13 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async open(name: string): Promise<boolean> {
-    const isListed = await this.filebrowser.isFileListedInBrowser(name);
-    if (!isListed) {
+    try {
+      // The notebook may not be rendered on the list if the upload
+      // has just completed but the listing was not refreshed yet.
+      await Utils.waitForCondition(() =>
+        this.filebrowser.isFileListedInBrowser(name)
+      );
+    } catch {
       return false;
     }
 
@@ -261,7 +266,7 @@ export class NotebookHelper {
       );
       if ((await focusedMarkdownEditor.count()) > 0) {
         await this.page.keyboard.press('Escape');
-        await this.page.waitForTimeout(50);
+        await this.page.waitForTimeout(25);
       }
     }
 

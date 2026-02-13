@@ -6,6 +6,7 @@
 import { expect, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
+const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
 const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
 test.describe('Terminal', () => {
@@ -17,7 +18,10 @@ test.describe('Terminal', () => {
   test.describe('Open', () => {
     test('should appear in the sidebar', async ({ page }) => {
       await page.sidebar.openTab('jp-running-sessions');
-      await expect(page.locator('text=terminals/1')).toBeVisible();
+      // The number at the end is the identifier of the terminal.
+      // We allow any because concurrent execution of tests means
+      // that server can assign an identifier different than `1`.
+      await expect(page.locator('text=/terminals\\/\\d+/')).toBeVisible();
     });
   });
 
@@ -112,7 +116,7 @@ test.describe('Terminal', () => {
       }, searchText);
 
       // Wait for search to be performed and terminal canvas rerendered.
-      await page.waitForTimeout(500);
+      await page.waitForSelector('.xterm-find-active-result-decoration');
 
       expect(await terminal.screenshot()).toMatchSnapshot('search.png');
     });
@@ -127,7 +131,7 @@ test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
   const terminal = page.locator(TERMINAL_SELECTOR);
   await terminal.waitFor();
 
-  await page.waitForTimeout(1000);
+  await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
   await page.keyboard.type('basename $PWD');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(1000);
@@ -144,7 +148,7 @@ test('Terminal web link', async ({ page, tmpPath, browserName }) => {
   const terminal = page.locator(TERMINAL_SELECTOR);
   await terminal.waitFor();
 
-  await page.waitForTimeout(1000);
+  await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
   await page.keyboard.type('echo https://jupyter.org/');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(1000);
