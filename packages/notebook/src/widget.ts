@@ -3395,6 +3395,10 @@ export class Notebook extends StaticNotebook {
         const cell = this.widgets[i];
         if (!cell.model.isDisposed && cell.editor) {
           cell.model.selections.delete(cell.editor.uuid);
+          // Collapse the editor's visual selection to the cursor position
+          // to avoid multiple cells showing highlighted text.
+          const cursor = cell.editor.getCursorPosition();
+          cell.editor.setCursorPosition(cursor, { scroll: false });
         }
       }
     }
