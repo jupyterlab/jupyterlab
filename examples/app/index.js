@@ -59,6 +59,22 @@ const mimeExtensions = [
   import('@jupyterlab/pdf-extension')
 ];
 
+/**
+ * Get the plugins from an extension.
+ */
+function getPlugins(extension) {
+  // Handle commonjs or es2015 modules
+  let exports;
+  if (extension.hasOwnProperty('__esModule')) {
+    exports = extension.default;
+  } else {
+    // CommonJS exports.
+    exports = extension;
+  }
+
+  return Array.isArray(exports) ? exports : [exports];
+}
+
 window.addEventListener('load', async function () {
   // Make sure the styles have loaded
   await styles;
