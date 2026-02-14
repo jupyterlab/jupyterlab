@@ -493,7 +493,7 @@ describe('@jupyter/notebook', () => {
       it('should not be called if the model does not change', () => {
         const widget = createWidget();
         widget.methods = [];
-        widget.model = widget.model; // eslint-disable-line
+        widget.model = widget.model;
         expect(widget.methods).toEqual(
           expect.not.arrayContaining(['onModelChanged'])
         );
@@ -636,7 +636,7 @@ describe('@jupyter/notebook', () => {
         widget.activeCellChanged.connect(() => {
           called = true;
         });
-        widget.activeCellIndex = widget.activeCellIndex; // eslint-disable-line
+        widget.activeCellIndex = widget.activeCellIndex;
         expect(called).toBe(false);
       });
     });

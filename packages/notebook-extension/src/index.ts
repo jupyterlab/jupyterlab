@@ -1613,7 +1613,7 @@ function activateCodeConsole(
         let fromFirst = curLine > 0;
         let firstLine = 0;
         let lastLine = firstLine + 1;
-        // eslint-disable-next-line
+
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
           const reply =

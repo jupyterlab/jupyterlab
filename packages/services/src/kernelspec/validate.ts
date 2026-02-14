@@ -7,7 +7,7 @@ import { validateProperty } from '../validate';
 /**
  * Validate a server kernelspec model to a client side model.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
 export function validateSpecModel(data: any): ISpecModel {
   const spec = data.spec;
   if (!spec) {
@@ -48,7 +48,7 @@ export function validateSpecModel(data: any): ISpecModel {
 /**
  * Validate a `Kernel.ISpecModels` object.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
 export function validateSpecModels(data: any): ISpecModels {
   if (!data.hasOwnProperty('kernelspecs')) {
     throw new Error('No kernelspecs found');

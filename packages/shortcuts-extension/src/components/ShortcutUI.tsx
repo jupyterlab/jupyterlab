@@ -74,7 +74,7 @@ function fuzzySearch(
   const rgx = /\b\w/g;
 
   // Search the source by word boundary.
-  // eslint-disable-next-line
+
   while (true) {
     // Find the next word boundary in the source.
     const rgxMatch = rgx.exec(source);
