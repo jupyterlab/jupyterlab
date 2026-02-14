@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterLab } from '@jupyterlab/application';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, JupyterPluginRegistry } from '@jupyterlab/coreutils';
+import { IConnectionStatus, IServiceManager } from '@jupyterlab/services';
 
 import('./style.js');
 
@@ -154,8 +155,16 @@ export async function main() {
      console.error(reason);
     });
 
-  // Create a new JupyterLab object and start it
+  var pluginRegistry = new JupyterPluginRegistry();
+  pluginRegistry.registerPlugins(pluginsToRegister);
+
+  const connectionStatus = await pluginRegistry.resolveOptionalService(IConnectionStatus);
+  const serviceManager = await pluginRegistry.resolveRequiredService(IServiceManager);
+
   const lab = new JupyterLab({
+    pluginRegistry,
+    serviceManager,
+    connectionStatus,
     mimeExtensions,
     disabled: {
       matches: disabled,
@@ -169,7 +178,6 @@ export async function main() {
     },
   });
 
-  lab.registerPluginModules(pluginsToRegister);
   lab.start({ ignorePlugins });
   lab.restored.then(() => {
     console.debug('Example started!');
