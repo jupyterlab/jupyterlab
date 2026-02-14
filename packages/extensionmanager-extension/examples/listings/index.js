@@ -68,8 +68,10 @@ window.addEventListener('load', async function () {
   }
   pluginRegistry.registerPlugins(plugins);
 
-  var connectionStatus = await pluginRegistry.resolveOptionalService(IConnectionStatus);
-  var serviceManager = await pluginRegistry.resolveRequiredService(IServiceManager);
+  var connectionStatus =
+    await pluginRegistry.resolveOptionalService(IConnectionStatus);
+  var serviceManager =
+    await pluginRegistry.resolveRequiredService(IServiceManager);
 
   var lab = new JupyterLab({
     pluginRegistry,
