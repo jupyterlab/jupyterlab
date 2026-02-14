@@ -126,6 +126,12 @@
       "description": "Show an overlay on the editor or notebook when execution is paused in the debugger.",
       "type": "boolean",
       "default": true
+    },
+    "showSourcesInMainArea": {
+      "title": "Show Sources in Main Area",
+      "description": "If true, open debugger sources in main area editors instead of the sources panel.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,
