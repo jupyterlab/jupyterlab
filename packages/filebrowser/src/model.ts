@@ -251,6 +251,7 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise with the contents of the directory.
    */
   async cd(path = '.'): Promise<void> {
+    const isRefresh = path === '.';
     if (path !== '.') {
       path = this.manager.services.contents.resolvePath(this._model.path, path);
     } else {
@@ -258,7 +259,12 @@ export class FileBrowserModel implements IDisposable {
     }
     // Check if navigation is restricted and the path is outside the root
     if (this._root && !this._isPathWithinRoot(path)) {
-      return;
+      if (isRefresh) {
+        // During refresh, if current path is outside root, navigate to root
+        path = this._root;
+      } else {
+        return;
+      }
     }
     if (this._pending) {
       // Collapse requests to the same directory.
