@@ -957,8 +957,8 @@ export class DirListing extends Widget {
       this._modifiedWidth < 100
         ? 'narrow'
         : this._modifiedWidth > 120
-        ? 'long'
-        : 'short';
+          ? 'long'
+          : 'short';
   }
 
   /**
