@@ -92,8 +92,9 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
  *
  * @typeparam T - The type of object held in the pool.
  */
-export interface IObjectPool<T extends IObservableDisposable>
-  extends IDisposable {
+export interface IObjectPool<
+  T extends IObservableDisposable
+> extends IDisposable {
   /**
    * A signal emitted when an object is added.
    *
@@ -254,8 +255,9 @@ export namespace IRestorable {
    *
    * @typeparam T - The type of object held by the restorable collection.
    */
-  export interface IOptions<T extends IObservableDisposable>
-    extends IRestorer.IOptions<T> {
+  export interface IOptions<
+    T extends IObservableDisposable
+  > extends IRestorer.IOptions<T> {
     /**
      * The data connector to fetch restore data.
      */

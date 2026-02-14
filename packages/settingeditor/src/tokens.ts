@@ -29,11 +29,13 @@ export const IJSONSettingEditorTracker = new Token<IJSONSettingEditorTracker>(
 /**
  * A class that tracks the setting editor.
  */
-export interface IJSONSettingEditorTracker
-  extends IWidgetTracker<MainAreaWidget<JSONSettingEditor>> {}
+export interface IJSONSettingEditorTracker extends IWidgetTracker<
+  MainAreaWidget<JSONSettingEditor>
+> {}
 
 /**
  * A class that tracks the setting editor.
  */
-export interface ISettingEditorTracker
-  extends IWidgetTracker<MainAreaWidget<SettingsEditor>> {}
+export interface ISettingEditorTracker extends IWidgetTracker<
+  MainAreaWidget<SettingsEditor>
+> {}

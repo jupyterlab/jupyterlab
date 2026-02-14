@@ -882,8 +882,7 @@ export namespace Cell {
    * widgets.
    */
   export interface IContentFactory
-    extends OutputArea.IContentFactory,
-      InputArea.IContentFactory {
+    extends OutputArea.IContentFactory, InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */

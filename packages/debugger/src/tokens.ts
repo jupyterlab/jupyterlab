@@ -759,11 +759,10 @@ export namespace IDebugger {
    * #### Notes
    * This is experimental API
    */
-  export interface IVariableSelection
-    extends Pick<
-      DebugProtocol.Variable,
-      'name' | 'type' | 'variablesReference' | 'value'
-    > {}
+  export interface IVariableSelection extends Pick<
+    DebugProtocol.Variable,
+    'name' | 'type' | 'variablesReference' | 'value'
+  > {}
 
   /**
    * Debugger sidebar interface.

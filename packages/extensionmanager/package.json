@@ -43,7 +43,7 @@
     "@jupyterlab/ui-components": "^4.6.0-alpha.2",
     "@lumino/messaging": "^2.0.4",
     "@lumino/polling": "^2.1.5",
-    "@lumino/widgets": "^2.7.3",
+    "@lumino/widgets": "^2.7.5",
     "react": "^18.2.0",
     "react-paginate": "^6.3.2",
     "semver": "^7.5.2"

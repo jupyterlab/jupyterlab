@@ -678,7 +678,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         );
 
         const attribute =
-          this.sanitizer.allowNamedProperties ?? false
+          (this.sanitizer.allowNamedProperties ?? false)
             ? 'id'
             : 'data-jupyter-id';
         const selector = elementId

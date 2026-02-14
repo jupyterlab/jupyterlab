@@ -475,7 +475,10 @@ export class DocumentWidgetManager implements IDisposable {
     // Ask confirmation
     if (this.confirmClosingDocument) {
       const { shouldClose, ignoreSave, doNotAskAgain } =
-        await dialogs.confirmClose({ fileName, isDirty });
+        await dialogs.confirmClose({
+          fileName,
+          isDirty
+        });
 
       if (doNotAskAgain) {
         this.confirmClosingDocument = false;

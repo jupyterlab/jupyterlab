@@ -27,13 +27,13 @@ repos:
         exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.36.0
+    rev: 0.36.1
     hooks:
       - id: check-github-workflows
 
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: v0.14.14
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -43,7 +43,8 @@ repos:
     hooks:
       - id: prettier
         name: prettier
-        entry: 'npm run prettier:files'
+        entry: jlpm
+        args: [run, 'prettier:files']
         language: node
         types_or: [json, ts, tsx, javascript, jsx, css]
         exclude: \.ipynb$

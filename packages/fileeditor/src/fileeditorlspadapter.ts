@@ -79,7 +79,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   get mimeType(): string {
     const mimeTypeFromModel = this.editor.model.mimeType;
     const codeMirrorMimeType: string = Array.isArray(mimeTypeFromModel)
-      ? mimeTypeFromModel[0] ?? IEditorMimeTypeService.defaultMimeType
+      ? (mimeTypeFromModel[0] ?? IEditorMimeTypeService.defaultMimeType)
       : mimeTypeFromModel;
     const contentsModel = this.editor.context.contentsModel;
 

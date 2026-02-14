@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@lumino/coreutils": "^1.11.0 || ^2.2.2",
-    "@lumino/widgets": "^1.37.2 || ^2.7.3"
+    "@lumino/widgets": "^1.37.2 || ^2.7.5"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

@@ -68,7 +68,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       mimeType = languageMetadata.mimetype;
     }
     return Array.isArray(mimeType)
-      ? mimeType[0] ?? IEditorMimeTypeService.defaultMimeType
+      ? (mimeType[0] ?? IEditorMimeTypeService.defaultMimeType)
       : mimeType;
   }
 

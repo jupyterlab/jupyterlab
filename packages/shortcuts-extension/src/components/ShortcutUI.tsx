@@ -363,9 +363,7 @@ export class ShortcutUI
         JSONExt.deepEqual(keybinding.keys, shortcut.keys)
       ) {
         const matchesDefault =
-          keybinding &&
-          keybinding.isDefault &&
-          JSONExt.deepEqual(keybinding.keys, keys);
+          keybinding.isDefault && JSONExt.deepEqual(keybinding.keys, keys);
 
         // If the new `keys` are empty, do not copy this one over.
         // Also, if the keybinding is a default keybinding and the desired

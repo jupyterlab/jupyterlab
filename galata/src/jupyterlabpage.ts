@@ -26,8 +26,7 @@ import * as Utils from './utils';
  * JupyterLab page interface
  */
 export interface IJupyterLabPageFixture
-  extends Omit<Page, 'goto'>,
-    IJupyterLabPage {}
+  extends Omit<Page, 'goto'>, IJupyterLabPage {}
 
 /**
  * JupyterLab specific helpers interface

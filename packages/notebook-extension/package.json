@@ -73,7 +73,7 @@
     "@lumino/disposable": "^2.1.5",
     "@lumino/messaging": "^2.0.4",
     "@lumino/polling": "^2.1.5",
-    "@lumino/widgets": "^2.7.3",
+    "@lumino/widgets": "^2.7.5",
     "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0"
   },
