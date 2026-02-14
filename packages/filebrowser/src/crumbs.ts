@@ -465,7 +465,7 @@ export class BreadCrumbs extends Widget {
       const measured = elem.getBoundingClientRect().width;
       // Fall back to a character-based estimate if layout is not available
       itemWidths.push(
-        measured > 0 ? measured : Math.max(parts[i].length * 8, 20)
+        (measured > 0 ? measured : Math.max(parts[i].length * 8, 20)) + 4
       );
     }
 
