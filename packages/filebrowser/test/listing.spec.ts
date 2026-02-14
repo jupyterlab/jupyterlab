@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { InputDialog } from '@jupyterlab/apputils';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
@@ -234,6 +235,57 @@ describe('filebrowser/listing', () => {
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#bulkRename', () => {
+      it('should rename multiple files preserving extensions', async () => {
+        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
+          button: { accept: true },
+          value: 'bulk_renamed'
+        } as any);
+
+        await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await signalToPromise(dirListing.updated);
+
+        await dirListing.selectAll();
+        expect([...dirListing.selectedItems()].length).toBeGreaterThan(1);
+
+        await dirListing.rename();
+        await dirListing.model.refresh();
+
+        const itemNames = [...dirListing.sortedItems()].map(item => item.name);
+
+        expect(itemNames).toContain('bulk_renamed.txt');
+        expect(itemNames).toContain('bulk_renamed.py');
+
+        spy.mockRestore();
+      });
+
+      it('should not rename if dialog is cancelled', async () => {
+        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
+          button: { accept: false },
+          value: 'bulk_renamed'
+        } as any);
+
+        dirListing.selectNext();
+        dirListing.selectNext(true);
+
+        const beforeNames = [...dirListing.sortedItems()].map(
+          item => item.name
+        );
+
+        await dirListing.rename();
+        await dirListing.model.refresh();
+
+        const afterNames = [...dirListing.sortedItems()].map(item => item.name);
+
+        expect(afterNames).toEqual(beforeNames);
+
+        spy.mockRestore();
       });
     });
 
