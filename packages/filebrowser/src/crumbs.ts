@@ -463,7 +463,7 @@ export class BreadCrumbs extends Widget {
       elem.textContent = parts[i];
       measurer.appendChild(elem);
       const measured = elem.getBoundingClientRect().width;
-      // Fall back to a character-based estimate if layout is not available
+      // Fall back to a character-based estimate if layout is not available.
       itemWidths.push(
         (measured > 0 ? measured : Math.max(parts[i].length * 8, 20)) + 4
       );
@@ -473,11 +473,11 @@ export class BreadCrumbs extends Widget {
     node.removeChild(measurer);
 
     this._cachedWidths = {
-      home: home.getBoundingClientRect().width || 22,
-      ellipsis: ellipsis.getBoundingClientRect().width || 28,
+      home: home.getBoundingClientRect().width + 2 || 24,
+      ellipsis: ellipsis.getBoundingClientRect().width + 4 || 32,
       separator: separator?.getBoundingClientRect().width || 4,
       preferred: this._hasPreferred
-        ? preferred.getBoundingClientRect().width || 22
+        ? preferred.getBoundingClientRect().width + 4 || 26
         : 0,
       itemWidths: itemWidths
     };
