@@ -473,11 +473,11 @@ export class BreadCrumbs extends Widget {
     node.removeChild(measurer);
 
     this._cachedWidths = {
-      home: home.getBoundingClientRect().width + 2 || 24,
-      ellipsis: ellipsis.getBoundingClientRect().width + 4 || 32,
+      home: (home.getBoundingClientRect().width || 22) + 4,
+      ellipsis: (ellipsis.getBoundingClientRect().width || 28) + 4,
       separator: separator?.getBoundingClientRect().width || 4,
       preferred: this._hasPreferred
-        ? preferred.getBoundingClientRect().width + 4 || 26
+        ? (preferred.getBoundingClientRect().width || 22) + 4
         : 0,
       itemWidths: itemWidths
     };
