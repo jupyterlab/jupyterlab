@@ -44,7 +44,9 @@ export interface IOptions {
   activeElement?: Element;
 }
 
-export function displayShortcuts(options: IOptions) {
+export function displayShortcuts(
+  options: IOptions
+): Promise<Dialog.IResult<any>> {
   const { commands, trans, activeElement } = options;
   const elt = activeElement ?? document.activeElement;
 
@@ -184,18 +186,41 @@ export function displayShortcuts(options: IOptions) {
   }
 
   const body = (
+    <div
+      id="shortcut-dialog-table"
+      tabIndex={0}
+      className="jp-Shortcuts-Container"
+      > 
     <table>
+      <caption>{trans.__('Keyboard Shortcuts')}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{trans.__('Command')}</th>
+          <th scope="col">{trans.__('Keybinding')}</th>
+        </tr>
+      </thead>
       <tbody>{bindingTable}</tbody>
     </table>
+    </div>
   );
 
-  return showDialog({
+  const dialogPromise = showDialog({
     title: trans.__('Keyboard Shortcuts'),
     body,
     buttons: [
       Dialog.cancelButton({
         label: trans.__('Close')
       })
-    ]
+    ],
+    defaultButton: -1   // prevent close button auto-focus
   });
+
+   requestAnimationFrame(() => {    // focus to dialog body for arrow key navigation
+    const dialogBody = document.querySelector('.jp-Dialog-body') as HTMLElement | null;
+    if (dialogBody) {
+      dialogBody.focus();
+    }
+  });
+  
+  return dialogPromise;
 }
