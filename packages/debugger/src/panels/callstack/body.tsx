@@ -3,7 +3,7 @@
 
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 /**
  * The body for a Callstack Panel.

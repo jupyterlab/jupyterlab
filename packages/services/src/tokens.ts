@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   ConfigSection,
   Contents,
   Event,
@@ -16,7 +16,7 @@ import {
   User,
   Workspace
 } from '.';
-import { ServiceManager } from './manager';
+import type { ServiceManager } from './manager';
 
 import { type IPlugin, Token } from '@lumino/coreutils';
 

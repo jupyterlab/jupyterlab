@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  IChangedArgs as IChangedArgsGeneric,
-  PathExt
-} from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Contents, Kernel } from '@jupyterlab/services';
-import { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IChangedArgs as IChangedArgsGeneric } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Contents, Kernel } from '@jupyterlab/services';
+import type { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
   audioIcon,
   fileIcon,
@@ -19,22 +19,25 @@ import {
   imageIcon,
   jsonIcon,
   juliaIcon,
-  LabIcon,
   markdownIcon,
   notebookIcon,
   pdfIcon,
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
-  Toolbar,
   videoIcon,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find } from '@lumino/algorithm';
-import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { DockLayout, Widget } from '@lumino/widgets';
+import type {
+  PartialJSONValue,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { DockLayout, Widget } from '@lumino/widgets';
 import { TextModelFactory } from './default';
 
 /**
@@ -669,7 +672,7 @@ export class DocumentRegistry implements IDisposable {
     let ft: DocumentRegistry.IFileType | null = null;
     if (model.name || model.path) {
       const name = model.name || PathExt.basename(model.path!);
-      const fts = this.getFileTypesForPath(name);
+      const fts = this._getFileTypesForPath(name, model.type);
       if (fts.length > 0) {
         ft = fts[0];
       }
@@ -711,12 +714,23 @@ export class DocumentRegistry implements IDisposable {
    * @returns An ordered list of matching file types.
    */
   getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+    return this._getFileTypesForPath(path);
+  }
+
+  private _getFileTypesForPath(
+    path: string,
+    type?: string
+  ): DocumentRegistry.IFileType[] {
     const fts: DocumentRegistry.IFileType[] = [];
     const name = PathExt.basename(path);
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return !!(ft.pattern && name.match(ft.pattern) !== null);
+      return !!(
+        (!type || ft.contentType == type) &&
+        ft.pattern &&
+        name.match(ft.pattern) !== null
+      );
     });
     if (ft) {
       fts.push(ft);
@@ -725,9 +739,11 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      const ftSubset = this._fileTypes.filter(ft =>
-        // In Private.extname, the extension is transformed to lower case
-        ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
+      const ftSubset = this._fileTypes.filter(
+        ft =>
+          // In Private.extname, the extension is transformed to lower case
+          (!type || ft.contentType == type) &&
+          ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
       );
       fts.push(...ftSubset);
       ext = '.' + ext.split('.').slice(2).join('.');
@@ -1050,11 +1066,12 @@ export namespace DocumentRegistry {
   /**
    * The options used to initialize a widget factory.
    */
-  export interface IWidgetFactoryOptions<T extends Widget = Widget>
-    extends Omit<
-      IRenderMime.IDocumentWidgetFactoryOptions,
-      'primaryFileType' | 'toolbarFactory'
-    > {
+  export interface IWidgetFactoryOptions<
+    T extends Widget = Widget
+  > extends Omit<
+    IRenderMime.IDocumentWidgetFactoryOptions,
+    'primaryFileType' | 'toolbarFactory'
+  > {
     /**
      * Whether to automatically start the preferred kernel
      */
@@ -1142,8 +1159,7 @@ export namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
-    extends IDisposable,
-      IWidgetFactoryOptions {
+    extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */

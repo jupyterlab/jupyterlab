@@ -22,7 +22,7 @@ import {
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';

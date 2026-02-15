@@ -1,43 +1,43 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DOMUtils, SystemClipboard } from '@jupyterlab/apputils';
-import {
-  Cell,
-  CodeCell,
+import { DOMUtils } from '@jupyterlab/apputils';
+import type {
   ICellModel,
   ICodeCellModel,
   IMarkdownCellModel,
-  IRawCellModel,
-  MarkdownCell,
-  RawCell
+  IRawCellModel
 } from '@jupyterlab/cells';
-import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';
 import { ArrayExt, findIndex } from '@lumino/algorithm';
 import { JSONExt, MimeData } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
-import { CellList } from './celllist';
+import type { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
-import { INotebookHistory } from './history';
-import { INotebookModel } from './model';
+import type { INotebookHistory } from './history';
+import type { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
-import { CodeCellModel } from '../../cells/src/model';
+import type { CodeCellModel } from '../../cells/src/model';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -873,9 +873,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
                 : deadline.timeRemaining()
             );
           },
-          {
-            timeout: 3000
-          }
+          { timeout: 3000 }
         );
       }
     }
@@ -1884,38 +1882,40 @@ export class Notebook extends StaticNotebook {
     return this._lastClipboardInteraction;
   }
   set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
-    const clipboard = SystemClipboard.getInstance();
+    this._lastClipboardInteraction = newValue;
+  }
+
+  /**
+   * This function should be called when a clipboard interaction involve notebook cells.
+   *
+   * @param interaction - the clipboard interaction (copy, cut or paste).
+   * @param cells - the cells copied, cut or pasted.
+   */
+  recordCellClipboardInteraction(
+    interaction: 'copy' | 'cut' | 'paste' | null,
+    cells: nbformat.IBaseCell[]
+  ) {
     const lastInteraction = this._lastClipboardInteraction;
-    clipboard
-      .getData(JUPYTER_CELL_MIME)
-      .then(data => {
-        if (data !== null) {
-          if (newValue === 'copy' || newValue === 'cut') {
-            this._localCopy = data as nbformat.IBaseCell[];
-          } else if (newValue === 'paste') {
-            const pasted = data as nbformat.IBaseCell[];
+    if (interaction === 'copy' || interaction === 'cut') {
+      this._localCopy = cells;
+    } else if (interaction === 'paste') {
+      const pasted = cells;
+      // Check if the current clipboard match the previously copied/cut cells.
+      const isLocal = ArrayExt.shallowEqual(
+        pasted,
+        this._localCopy,
+        JSONExt.deepEqual
+      );
 
-            // Check if the current clipboard match the previously copied/cut cells.
-            const isLocal = ArrayExt.shallowEqual(
-              pasted,
-              this._localCopy,
-              JSONExt.deepEqual
-            );
-
-            // Emit a signal with the last interaction and the number of pasted cells.
-            this._cellsPasted.emit({
-              previousInteraction: isLocal ? lastInteraction : null,
-              cellCount: pasted.length
-            });
-          }
-        }
-      })
-      .catch(() => {
-        // This is a no-op if the clipboard is not available.
+      // Emit a signal with the last interaction and the number of pasted cells.
+      this._cellsPasted.emit({
+        previousInteraction: isLocal ? lastInteraction : null,
+        cellCount: pasted.length
       });
+    }
 
     // Update the last clipboard interaction.
-    this._lastClipboardInteraction = newValue;
+    this.lastClipboardInteraction = interaction;
   }
 
   /**
@@ -2740,7 +2740,7 @@ export class Notebook extends StaticNotebook {
         }
         if (id === queryId) {
           const attribute =
-            this.rendermime.sanitizer.allowNamedProperties ?? false
+            (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
               : 'data-jupyter-id';
           const element = this.node.querySelector(
@@ -2790,7 +2790,7 @@ export class Notebook extends StaticNotebook {
       }
 
       const attribute =
-        this.rendermime.sanitizer.allowNamedProperties ?? false
+        (this.rendermime.sanitizer.allowNamedProperties ?? false)
           ? 'id'
           : 'data-jupyter-id';
       const element = cell.node.querySelector(

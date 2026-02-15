@@ -3,16 +3,15 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {
-  ConnectionStatus,
-  IConnectionStatus,
-  ServiceManager
-} from '@jupyterlab/services';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IConnectionStatus } from '@jupyterlab/services';
+import { ConnectionStatus, ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
+import type { JupyterFrontEndPlugin } from './frontend';
+import { JupyterFrontEnd } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
-import { ILabShell, LabShell } from './shell';
+import type { ILabShell } from './shell';
+import { LabShell } from './shell';
 import { LabStatus } from './status';
 
 /**
@@ -311,8 +310,7 @@ export namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export interface IOptions
-    extends Partial<JupyterFrontEnd.IOptions<ILabShell>>,
-      Partial<IInfo> {
+    extends Partial<JupyterFrontEnd.IOptions<ILabShell>>, Partial<IInfo> {
     /**
      * URL and directory paths used by a Jupyter front-end.
      */
@@ -480,8 +478,9 @@ export namespace JupyterLab {
   /*
    * A read-only subset of the `Token`.
    */
-  export interface IToken
-    extends Readonly<Pick<Token<any>, 'name' | 'description'>> {
+  export interface IToken extends Readonly<
+    Pick<Token<any>, 'name' | 'description'>
+  > {
     // no-op
   }
 
@@ -489,10 +488,9 @@ export namespace JupyterLab {
    * A readonly subset of lumino plugin bundle (excluding activation function,
    * service, and state information, and runtime token details).
    */
-  interface ILuminoPluginData
-    extends Readonly<
-      Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>
-    > {
+  interface ILuminoPluginData extends Readonly<
+    Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>
+  > {
     /**
      * The types of required services for the plugin, or `[]`.
      */

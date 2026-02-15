@@ -2,21 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
-import { Contents, KernelSpec, Session } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { shouldOverwrite } from '@jupyterlab/docmanager';
+import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
-import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -633,10 +634,10 @@ export class FileBrowserModel implements IDisposable {
       prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue &&
-          newValue.path &&
-          prefix + PathExt.dirname(newValue.path) === path
-        ? newValue
-        : undefined;
+            newValue.path &&
+            prefix + PathExt.dirname(newValue.path) === path
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
