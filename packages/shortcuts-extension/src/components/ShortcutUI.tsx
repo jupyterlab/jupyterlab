@@ -74,7 +74,6 @@ function fuzzySearch(
   const rgx = /\b\w/g;
 
   // Search the source by word boundary.
-
   while (true) {
     // Find the next word boundary in the source.
     const rgxMatch = rgx.exec(source);

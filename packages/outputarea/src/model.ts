@@ -565,8 +565,6 @@ namespace Private {
     let idx1: number = -1;
     let lastEnd: number = 0;
     const regex = /[\n\b\r]/;
-    // TODO: once we upgrade eslint to 9.1.0 we can toggle `allExceptWhileTrue`
-    // option and remove the ignore rule below.
 
     while (true) {
       idx1 = indexOfAny(newText, regex, lastEnd);

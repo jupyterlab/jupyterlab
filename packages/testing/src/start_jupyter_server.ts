@@ -184,7 +184,6 @@ namespace Private {
   /**
    * Install a spec in the data directory.
    */
-
   export function installSpec(dataDir: string, name: string, spec: any): void {
     const specDir = path.join(dataDir, 'kernels', name);
     fs.mkdirSync(specDir, { recursive: true });

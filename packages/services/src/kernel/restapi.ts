@@ -31,7 +31,6 @@ export interface IModel {
   /**
    * The timestamp of the last activity on the kernel.
    */
-
   readonly last_activity?: string;
 
   /**
