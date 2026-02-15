@@ -190,7 +190,7 @@ export function displayShortcuts(
       id="shortcut-dialog-table"
       tabIndex={0}
       className="jp-Shortcuts-Container"
-      > 
+      >
     <table>
       <caption>{trans.__('Keyboard Shortcuts')}</caption>
       <thead>
@@ -221,6 +221,6 @@ export function displayShortcuts(
       dialogBody.focus();
     }
   });
-  
+
   return dialogPromise;
 }
