@@ -4761,7 +4761,6 @@ __metadata:
     eslint-plugin-jest: ^28.0.0
     eslint-plugin-prettier: ^5.0.0
     eslint-plugin-react: ^7.37.0
-    globals: ^16.0.0
     lerna: ^7.1.4
     prettier: ~3.0.0
     stylelint: ^15.10.1
@@ -13631,13 +13630,6 @@ __metadata:
   version: 15.15.0
   resolution: "globals@npm:15.15.0"
   checksum: a2a92199a112db00562a2f85eeef2a7e3943e171f7f7d9b17dfa9231e35fd612588f3c199d1509ab1757273467e413b08c80424cf6e399e96acdaf93deb3ee88
-  languageName: node
-  linkType: hard
-
-"globals@npm:^16.0.0":
-  version: 16.5.0
-  resolution: "globals@npm:16.5.0"
-  checksum: e0363245cfc6e36ac6bf940415160a05d66e7985fa3856d5383ad49292b6d249d80fd03759e09d6491109648a121849b23b77c7391a11862923e6995268a7cd6
   languageName: node
   linkType: hard
 

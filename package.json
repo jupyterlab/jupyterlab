@@ -122,7 +122,6 @@
     "eslint-plugin-jest": "^28.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react": "^7.37.0",
-    "globals": "^16.0.0",
     "prettier": "~3.0.0",
     "stylelint": "^15.10.1",
     "stylelint-config-prettier": "^9.0.3",
