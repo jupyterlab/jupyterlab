@@ -341,7 +341,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const toggleDebugging = async (): Promise<void> => {
-      // bail if the widget doesn't have focus
       if (!hasFocus()) {
         return;
       }
@@ -357,9 +356,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
-    addToolbarButton(false);
+    const debuggingEnabled = await this._service.isAvailable(connection);
+    addToolbarButton(debuggingEnabled);
 
-    // listen to the disposed signals
     widget.disposed.connect(async () => {
       if (isDebuggerOn()) {
         await stopDebugger();
@@ -369,10 +368,12 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       delete this._contextKernelChangedHandlers[widget.id];
     });
 
-    const debuggingEnabled = await this._service.isAvailable(connection);
     if (!debuggingEnabled) {
       removeHandlers();
-      updateIconButtonState(this._iconButtons[widget.id]!, false, false);
+      const debugButton = this._iconButtons[widget.id];
+      if (debugButton) {
+        updateIconButtonState(debugButton, false, false);
+      }
       return;
     }
 
