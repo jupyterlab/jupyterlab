@@ -357,6 +357,20 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
+    if (!connection.kernel) {
+      widget.disposed.connect(() => {
+        this._service.stopped.disconnect(onDebuggerStopped);
+        const kch = this._kernelChangedHandlers[widget.id];
+        if (kch) connection.kernelChanged.disconnect(kch);
+        const sch = this._statusChangedHandlers[widget.id];
+        if (sch) connection.statusChanged.disconnect(sch);
+        delete this._kernelChangedHandlers[widget.id];
+        delete this._statusChangedHandlers[widget.id];
+        delete this._contextKernelChangedHandlers[widget.id];
+      });
+      return;
+    }
+
     const debuggingEnabled = await this._service.isAvailable(connection);
     addToolbarButton(debuggingEnabled);
 
