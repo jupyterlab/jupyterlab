@@ -42,7 +42,11 @@ function createMockConnection(): Session.ISessionConnection {
 function createMockWidget(buttonCapture: { current: ToolbarButton | null }) {
   const disposed = new Signal<unknown, void>({ id: 'widget-1' });
   const toolbar = {
-    insertBefore: (_at: string, name: string, widget: ToolbarButton): boolean => {
+    insertBefore: (
+      _at: string,
+      name: string,
+      widget: ToolbarButton
+    ): boolean => {
       if (name === DEBUGGER_ITEM_NAME) {
         buttonCapture.current = widget;
       }
@@ -101,7 +105,9 @@ function createMockService(
 describe('DebuggerHandler', () => {
   describe('#updateWidget toolbar button state', () => {
     it('should add debugger button as enabled when kernel supports debugging', async () => {
-      const buttonCapture: { current: ToolbarButton | null } = { current: null };
+      const buttonCapture: { current: ToolbarButton | null } = {
+        current: null
+      };
       const widget = createMockWidget(buttonCapture);
       const connection = createMockConnection();
       const service = createMockService(true, { withSession: true });
@@ -119,7 +125,9 @@ describe('DebuggerHandler', () => {
     });
 
     it('should add debugger button as disabled when kernel does not support debugging', async () => {
-      const buttonCapture: { current: ToolbarButton | null } = { current: null };
+      const buttonCapture: { current: ToolbarButton | null } = {
+        current: null
+      };
       const widget = createMockWidget(buttonCapture);
       const connection = createMockConnection();
       const service = createMockService(false);
@@ -137,7 +145,9 @@ describe('DebuggerHandler', () => {
     });
 
     it('should resolve isAvailable before showing button (no disabled-then-enabled flicker)', async () => {
-      const buttonCapture: { current: ToolbarButton | null } = { current: null };
+      const buttonCapture: { current: ToolbarButton | null } = {
+        current: null
+      };
       const widget = createMockWidget(buttonCapture);
       const connection = createMockConnection();
       const service = createMockService(true, { withSession: true });
