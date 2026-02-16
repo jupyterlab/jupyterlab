@@ -2,18 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 //
 // Tests for DebuggerHandler toolbar button state (fixes #18514 - icon flicker).
-// Mocks ../src/debugger to avoid circular import (debugger.ts imports handler.ts).
 // Run: cd packages/debugger && ../../node_modules/.bin/jest --testPathPattern=handler.spec -i
-
-jest.mock('../src/debugger', () => ({
-  Debugger: { Session: class {} }
-}));
 
 import type { Session } from '@jupyterlab/services';
 import { Signal } from '@lumino/signaling';
 import { UUID } from '@lumino/coreutils';
 import type { ToolbarButton } from '@jupyterlab/ui-components';
-import { DebuggerHandler } from '../src/handler';
+import { Debugger } from '../src';
+import type { DebuggerHandler } from '../src/handler';
 import type { IDebugger } from '../src/tokens';
 
 const DEBUGGER_ITEM_NAME = 'debugger-icon';
@@ -112,7 +108,7 @@ describe('DebuggerHandler', () => {
       const connection = createMockConnection();
       const service = createMockService(true, { withSession: true });
 
-      const handler = new DebuggerHandler({
+      const handler = new Debugger.Handler({
         type: 'notebook',
         shell: { currentWidget: widget },
         service
@@ -132,7 +128,7 @@ describe('DebuggerHandler', () => {
       const connection = createMockConnection();
       const service = createMockService(false);
 
-      const handler = new DebuggerHandler({
+      const handler = new Debugger.Handler({
         type: 'notebook',
         shell: { currentWidget: widget },
         service
@@ -152,7 +148,7 @@ describe('DebuggerHandler', () => {
       const connection = createMockConnection();
       const service = createMockService(true, { withSession: true });
 
-      const handler = new DebuggerHandler({
+      const handler = new Debugger.Handler({
         type: 'notebook',
         shell: { currentWidget: widget },
         service
