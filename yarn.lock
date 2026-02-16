@@ -1631,15 +1631,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.37.0, @codemirror/view@npm:^6.39.13":
-  version: 6.39.13
-  resolution: "@codemirror/view@npm:6.39.13"
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.37.0, @codemirror/view@npm:^6.39.14":
+  version: 6.39.14
+  resolution: "@codemirror/view@npm:6.39.14"
   dependencies:
     "@codemirror/state": ^6.5.0
     crelt: ^1.0.6
     style-mod: ^4.1.0
     w3c-keyname: ^2.2.4
-  checksum: ff50b788ac5cbcdfd6eda5ff2a0d79319932d6284a9f814c776e393e11b99f6995b51e2f5e3fc1597a359cff7067e11577bb4bb8227ba40f7bc65750fa522544
+  checksum: cbd91511af189c53b3aca722f62f03b9941086edaa07f3a068d6c491d2f7a6f53b651cf1250aa00002dfd2a58343146611547993030a3fcc0d7e4ca92f3877f4
   languageName: node
   linkType: hard
 
@@ -2563,7 +2563,7 @@ __metadata:
   resolution: "@jupyterlab/cells@workspace:packages/cells"
   dependencies:
     "@codemirror/state": ^6.5.4
-    "@codemirror/view": ^6.39.13
+    "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.4
     "@jupyterlab/attachments": ^4.5.4
@@ -2652,7 +2652,7 @@ __metadata:
     "@codemirror/language": ^6.12.1
     "@codemirror/legacy-modes": ^6.5.2
     "@codemirror/search": ^6.6.0
-    "@codemirror/view": ^6.39.13
+    "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.4
     "@jupyterlab/apputils": ^4.6.4
@@ -2697,7 +2697,7 @@ __metadata:
     "@codemirror/legacy-modes": ^6.5.2
     "@codemirror/search": ^6.6.0
     "@codemirror/state": ^6.5.4
-    "@codemirror/view": ^6.39.13
+    "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/codeeditor": ^4.5.4
     "@jupyterlab/coreutils": ^6.5.4
@@ -2745,7 +2745,7 @@ __metadata:
   resolution: "@jupyterlab/completer@workspace:packages/completer"
   dependencies:
     "@codemirror/state": ^6.5.4
-    "@codemirror/view": ^6.39.13
+    "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.4
     "@jupyterlab/codeeditor": ^4.5.4
@@ -2930,7 +2930,7 @@ __metadata:
   resolution: "@jupyterlab/debugger@workspace:packages/debugger"
   dependencies:
     "@codemirror/state": ^6.5.4
-    "@codemirror/view": ^6.39.13
+    "@codemirror/view": ^6.39.14
     "@jupyter/react-components": ^0.16.6
     "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.4
@@ -4712,7 +4712,7 @@ __metadata:
   resolution: "@jupyterlab/settingeditor-extension@workspace:packages/settingeditor-extension"
   dependencies:
     "@codemirror/commands": ^6.10.2
-    "@codemirror/view": ^6.39.13
+    "@codemirror/view": ^6.39.14
     "@jupyterlab/application": ^4.5.4
     "@jupyterlab/apputils": ^4.6.4
     "@jupyterlab/codeeditor": ^4.5.4
