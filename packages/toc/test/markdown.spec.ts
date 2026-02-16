@@ -38,7 +38,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 1,
               line: 0,
-              raw: '<h1>Title</h1>',
+              raw: '# Title',
               prefix: '1. ',
               skip: false
             }
@@ -51,7 +51,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 2,
               line: 0,
-              raw: '<h2>Title</h2>',
+              raw: '## Title',
               prefix: '0.1. ',
               skip: false
             }
@@ -64,7 +64,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 3,
               line: 0,
-              raw: '<h3>Title</h3>',
+              raw: '### Title',
               prefix: '0.0.1. ',
               skip: false
             }
@@ -77,7 +77,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 4,
               line: 0,
-              raw: '<h4>Title</h4>',
+              raw: '#### Title',
               prefix: '0.0.0.1. ',
               skip: false
             }
@@ -90,7 +90,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 5,
               line: 0,
-              raw: '<h5>Title</h5>',
+              raw: '##### Title',
               prefix: '0.0.0.0.1. ',
               skip: false
             }
@@ -103,7 +103,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 6,
               line: 0,
-              raw: '<h6>Title</h6>',
+              raw: '###### Title',
               prefix: '0.0.0.0.0.1. ',
               skip: false
             }
@@ -116,7 +116,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 1,
               line: 0,
-              raw: '<h1>Title</h1>',
+              raw: 'Title\n==',
               prefix: '1. ',
               skip: false
             }
@@ -129,7 +129,7 @@ describe('TableOfContentsUtils', () => {
               text: 'Title',
               level: 2,
               line: 0,
-              raw: '<h2>Title</h2>',
+              raw: 'Title\n--',
               prefix: '0.1. ',
               skip: false
             }
@@ -213,6 +213,19 @@ describe('TableOfContentsUtils', () => {
             }
           ]
         ],
+        [
+          '<span><h1>Nested Title</h1></span>',
+          [
+            {
+              text: 'Nested Title',
+              level: 1,
+              line: 0,
+              raw: '<span><h1>Nested Title</h1></span>',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
         ['\nTitle\n\n==', []],
         ['\nTitle\n\n--', []],
         ['```\n# Title\n```', []],
@@ -227,9 +240,9 @@ describe('TableOfContentsUtils', () => {
           [
             {
               level: 1,
-              line: 0,
+              line: 1,
               prefix: '1. ',
-              raw: '<h1>Title</h1>',
+              raw: '<h1>Title</h1>\n---',
               skip: false,
               text: 'Title'
             }
@@ -240,9 +253,9 @@ describe('TableOfContentsUtils', () => {
           [
             {
               level: 1,
-              line: 0,
+              line: 1,
               prefix: '1. ',
-              raw: '<h1>Title</h1>',
+              raw: '# Title',
               skip: false,
               text: 'Title'
             }
@@ -257,8 +270,8 @@ describe('TableOfContentsUtils', () => {
             {
               text: 'Ignored',
               level: 1,
-              line: 0,
-              raw: '<h1>Ignored</h1>',
+              line: 1,
+              raw: '<h1>Ignored</h1>\n---\n# Title',
               prefix: '1. ',
               skip: false
             }
@@ -275,17 +288,17 @@ front: matter
           [
             {
               level: 2,
-              line: 0,
+              line: 1,
               prefix: '0.1. ',
-              raw: '<h2>front: matter</h2>',
+              raw: 'front: matter\n---',
               skip: false,
               text: 'front: matter'
             },
             {
               text: 'Header',
               level: 1,
-              line: 1,
-              raw: '<h1>Header</h1>',
+              line: 4,
+              raw: '# Header',
               prefix: '1. ',
               skip: false
             }
@@ -305,33 +318,33 @@ front: matter
           [
             {
               level: 2,
-              line: 0,
+              line: 1,
               prefix: '0.1. ',
-              raw: '<h2>front: matter</h2>',
+              raw: 'front: matter\n---',
               skip: false,
               text: 'front: matter'
             },
             {
               text: 'Header',
               level: 1,
-              line: 1,
-              raw: '<h1>Header</h1>',
+              line: 3,
+              raw: '# Header',
               prefix: '1. ',
               skip: false
             },
             {
               text: 'Header between horizontal rules',
               level: 1,
-              line: 2,
-              raw: '<h1>Header between horizontal rules</h1>',
+              line: 6,
+              raw: '# Header between horizontal rules',
               prefix: '2. ',
               skip: false
             },
             {
               text: 'Header after horizontal rules',
               level: 1,
-              line: 3,
-              raw: '<h1>Header after horizontal rules</h1>',
+              line: 9,
+              raw: '# Header after horizontal rules',
               prefix: '3. ',
               skip: false
             }
@@ -344,8 +357,8 @@ front: matter
             {
               text: 'Header',
               level: 1,
-              line: 0,
-              raw: '<h1>Header</h1>',
+              line: 1,
+              raw: '# Header',
               prefix: '1. ',
               skip: false
             }
@@ -358,7 +371,7 @@ front: matter
               text: 'Initialization',
               level: 2,
               line: 0,
-              raw: '<h2><span style="background :darkviolet"><span style="color:White"> Initialization</span></span></h2>',
+              raw: "## <span style='background :darkviolet' ><span style='color:White'> Initialization",
               prefix: '0.1. ',
               skip: false
             }
@@ -371,7 +384,7 @@ front: matter
               text: 'Title 1',
               level: 1,
               line: 0,
-              raw: '<h1><div>Title</div> 1</h1>',
+              raw: '# <div>Title</div> 1',
               prefix: '1. ',
               skip: false
             }
@@ -384,7 +397,7 @@ front: matter
               text: 'Title',
               level: 1,
               line: 0,
-              raw: '<h1>Title</h1>',
+              raw: '<h1>Title</h1>\n--',
               prefix: '1. ',
               skip: false
             }
@@ -416,7 +429,7 @@ front: matter
             text: 'Title',
             level: 1,
             line: 0,
-            raw: '<h1>Title</h1>',
+            raw: '# Title',
             prefix: '1. ',
             skip: false
           }
@@ -434,8 +447,8 @@ front: matter
           {
             text: 'Title-2',
             level: 1,
-            line: 0,
-            raw: '<h1>Title-2</h1>',
+            line: 4,
+            raw: '# Title-2',
             prefix: '1. ',
             skip: false
           }
@@ -480,22 +493,43 @@ front: matter
       expect(headings[0].skip).toEqual(true);
     });
 
-    it('should clean the title', async () => {
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+      [
+        '## Title [with](https://jupyter.org "title") link',
+        [
+          {
+            level: 2,
+            text: 'Title with link',
+            line: 0,
+            raw: '## Title [with](https://jupyter.org "title") link',
+            skip: false
+          }
+        ]
+      ],
+      [
+        '<h1>Title <a href="https://jupyter.org" title="title">with</a> link</h1>',
+        [
+          {
+            level: 1,
+            text: 'Title with link',
+            line: 0,
+            raw: '<h1>Title <a href="https://jupyter.org" title="title">with</a> link</h1>',
+            skip: false
+          }
+        ]
+      ]
+    ])('should clean the title', async (src, headers) => {
       const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
       const parser: IMarkdownParser = createMarkdownParser(languages);
-      const src = '## Title [with](https://jupyter.org "title") link';
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
         src,
         parser
       );
-      expect(headings).toHaveLength(1);
-      expect(headings[0]).toEqual({
-        level: 2,
-        text: 'Title with link',
-        line: 0,
-        raw: '<h2>Title <a href="https://jupyter.org" title="title">with</a> link</h2>',
-        skip: false
-      });
+
+      expect(headings).toHaveLength(headers.length);
+      for (let i = 0; i < headers.length; i++) {
+        expect(headings[i]).toEqual(headers[i]);
+      }
     });
 
     it.each<[number]>([[1], [2], [3], [4], [5], [6]])(
@@ -511,9 +545,7 @@ front: matter
         const parser: IMarkdownParser = createMarkdownParser(languages);
         const headings = TableOfContentsUtils.filterHeadings(
           await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            maximalDepth
-          }
+          { maximalDepth }
         );
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
@@ -529,9 +561,7 @@ front: matter
 
         const headings = TableOfContentsUtils.filterHeadings(
           await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            numberHeaders
-          }
+          { numberHeaders }
         );
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberHeaders ? '0.0.1. ' : '');

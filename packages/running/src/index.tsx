@@ -609,9 +609,7 @@ class Section extends PanelWithToolbar {
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
-      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
-        !enabled ? ' jp-mod-disabled' : ''
-      }`,
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${!enabled ? ' jp-mod-disabled' : ''}`,
       enabled,
       onClick: onShutdown.bind(this)
     });

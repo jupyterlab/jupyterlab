@@ -32,16 +32,15 @@ export namespace FileDialog {
   /**
    * Options for the open directory dialog
    */
-  export interface IDirectoryOptions
-    extends Partial<
-      Pick<
-        Dialog.IOptions<Promise<Contents.IModel[]>>,
-        Exclude<
-          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-          'body' | 'buttons' | 'defaultButton'
-        >
+  export interface IDirectoryOptions extends Partial<
+    Pick<
+      Dialog.IOptions<Promise<Contents.IModel[]>>,
+      Exclude<
+        keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+        'body' | 'buttons' | 'defaultButton'
       >
-    > {
+    >
+  > {
     /**
      * Document manager
      */

@@ -957,8 +957,8 @@ export class DirListing extends Widget {
       this._modifiedWidth < 100
         ? 'narrow'
         : this._modifiedWidth > 120
-        ? 'long'
-        : 'short';
+          ? 'long'
+          : 'short';
   }
 
   /**
@@ -2129,7 +2129,7 @@ export class DirListing extends Widget {
       } as DirListing.IContentsThunk);
     }
 
-    if (item && item.type !== 'directory') {
+    if (item.type !== 'directory') {
       const otherPaths = selectedPaths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         if (!item) {
@@ -2549,6 +2549,9 @@ export class DirListing extends Widget {
    * Handle a `pathChanged` signal from the model.
    */
   private _onPathChanged(): void {
+    // Check if the directory listing (or any of its children) has focus.
+    const hasFocus = this.node.contains(document.activeElement);
+
     // Reset the selection.
     this.clearSelectedItems();
     // Update the sorted items.
@@ -2556,7 +2559,16 @@ export class DirListing extends Widget {
     // Reset focus. But wait until the DOM has been updated (hence
     // `requestAnimationFrame`).
     requestAnimationFrame(() => {
-      this._focusItem(0);
+      if (this.isDisposed) {
+        return;
+      }
+      // Only focus the first item if the listing (or a child) previously had focus.
+      if (hasFocus) {
+        this._focusItem(0);
+      } else {
+        // Otherwise, just reset the internal focus index without moving DOM focus.
+        this._focusIndex = 0;
+      }
     });
   }
 

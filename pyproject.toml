@@ -104,6 +104,7 @@ test = [
     "pytest-jupyter>=0.5.3",
     "pytest-timeout",
     "pytest-tornasync",
+    "pytest-xdist",
     "requests",
     "requests_cache",
     "virtualenv",
@@ -116,7 +117,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.14.10",
+    "ruff==0.14.14",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -219,7 +220,7 @@ npm = ["node", "yarn.js"]
 [tool.pytest.ini_options]
 testpaths = "jupyterlab/tests"
 norecursedirs = "node_modules .git _build .ipynb_checkpoints"
-addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
+addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml --durations=3"
 ignore = "tests examples"
 
 [tool.jupyter-releaser.options]

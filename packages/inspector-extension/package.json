@@ -45,7 +45,7 @@
     "@jupyterlab/notebook": "^4.6.0-alpha.2",
     "@jupyterlab/translation": "^4.6.0-alpha.2",
     "@jupyterlab/ui-components": "^4.6.0-alpha.2",
-    "@lumino/widgets": "^2.7.3"
+    "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

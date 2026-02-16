@@ -10,8 +10,9 @@ import type { Widget } from '@lumino/widgets';
 /**
  * A class that tracks editor widgets.
  */
-export interface ITerminalTracker
-  extends IWidgetTracker<MainAreaWidget<ITerminal.ITerminal>> {}
+export interface ITerminalTracker extends IWidgetTracker<
+  MainAreaWidget<ITerminal.ITerminal>
+> {}
 
 /**
  * The editor tracker token.
