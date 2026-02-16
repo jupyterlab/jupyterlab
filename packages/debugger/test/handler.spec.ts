@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 //
 // Tests for DebuggerHandler toolbar button state (fixes #18514 - icon flicker).
-// Run: cd packages/debugger && ../../node_modules/.bin/jest --testPathPattern=handler.spec -i
 
 import type { Session } from '@jupyterlab/services';
 import { Signal } from '@lumino/signaling';
