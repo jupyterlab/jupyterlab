@@ -3,36 +3,14 @@
 //
 // Tests for DebuggerHandler toolbar button state (fixes #18514 - icon flicker).
 
-import type { Session } from '@jupyterlab/services';
+import { SessionConnectionMock } from '@jupyterlab/services/lib/testutils';
 import { Signal } from '@lumino/signaling';
-import { UUID } from '@lumino/coreutils';
 import type { ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from '../src';
 import type { DebuggerHandler } from '../src/handler';
 import type { IDebugger } from '../src/tokens';
 
 const DEBUGGER_ITEM_NAME = 'debugger-icon';
-
-function createMockConnection(): Session.ISessionConnection {
-  return {
-    id: UUID.uuid4(),
-    path: '/test/path',
-    kernel: null,
-    type: 'test',
-    name: 'test',
-    model: { id: UUID.uuid4(), name: '', path: '', type: 'test' },
-    kernelChanged: new Signal({} as any),
-    statusChanged: new Signal({} as any),
-    connectionStatusChanged: new Signal({} as any),
-    iopubMessage: new Signal({} as any),
-    unhandledMessage: new Signal({} as any),
-    anyMessage: new Signal({} as any),
-    dispose: () => undefined,
-    isDisposed: false,
-    changeKernel: async () => undefined,
-    shutdown: async () => undefined
-  } as unknown as Session.ISessionConnection;
-}
 
 function createMockWidget(buttonCapture: { current: ToolbarButton | null }) {
   const disposed = new Signal<unknown, void>({ id: 'widget-1' });
@@ -67,7 +45,7 @@ function createMockService(
   isAvailableResult: boolean,
   options: { withSession?: boolean } = {}
 ): IDebugger {
-  const connection = createMockConnection();
+  const connection = new SessionConnectionMock({}, null);
   const stopped = new Signal<IDebugger, void>({} as IDebugger);
   const session = options.withSession
     ? ({
@@ -104,7 +82,7 @@ describe('DebuggerHandler', () => {
         current: null
       };
       const widget = createMockWidget(buttonCapture);
-      const connection = createMockConnection();
+      const connection = new SessionConnectionMock({}, null);
       const service = createMockService(true, { withSession: true });
 
       const handler = new Debugger.Handler({
@@ -124,7 +102,7 @@ describe('DebuggerHandler', () => {
         current: null
       };
       const widget = createMockWidget(buttonCapture);
-      const connection = createMockConnection();
+      const connection = new SessionConnectionMock({}, null);
       const service = createMockService(false);
 
       const handler = new Debugger.Handler({
@@ -144,7 +122,7 @@ describe('DebuggerHandler', () => {
         current: null
       };
       const widget = createMockWidget(buttonCapture);
-      const connection = createMockConnection();
+      const connection = new SessionConnectionMock({}, null);
       const service = createMockService(true, { withSession: true });
 
       const handler = new Debugger.Handler({
