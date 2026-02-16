@@ -341,6 +341,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const toggleDebugging = async (): Promise<void> => {
+      // bail if the widget doesn't have focus
       if (!hasFocus()) {
         return;
       }
@@ -359,6 +360,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     const debuggingEnabled = await this._service.isAvailable(connection);
     addToolbarButton(debuggingEnabled);
 
+    // listen to the disposed signals
     widget.disposed.connect(async () => {
       if (isDebuggerOn()) {
         await stopDebugger();
