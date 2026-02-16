@@ -56,7 +56,7 @@ _Disclaimed Status_. The user can change their preference later.
 Users can also disable the plugin by executing:
 
 ```bash
-jupyter labextension disable "@jupyterlab/extensionmanager-extension:plugin"
+jupyter labextension enable "@jupyterlab/extensionmanager-extension:plugin"
 ```
 
 ## External web services
