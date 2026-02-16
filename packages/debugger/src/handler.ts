@@ -375,6 +375,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       const debugButton = this._iconButtons[widget.id];
       if (debugButton) {
         updateIconButtonState(debugButton, false, false);
+      } else {
+        console.warn('Debugger button not found');
       }
       return;
     }
