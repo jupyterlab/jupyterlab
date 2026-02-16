@@ -411,11 +411,15 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       // Send Shift+Enter as a line feed (\n) rather than carriage
       // return (\r), so terminal applications can distinguish
       // between Enter (execute) and Shift+Enter (newline).
-      if (event.shiftKey && event.key === 'Enter' && event.type === 'keydown') {
-        this.session.send({
-          type: 'stdin',
-          content: ['\n']
-        });
+      // Block all event types (keydown, keypress, keyup) to prevent
+      // xterm.js from also sending \r on the keypress event.
+      if (event.shiftKey && event.key === 'Enter') {
+        if (event.type === 'keydown') {
+          this.session.send({
+            type: 'stdin',
+            content: ['\n']
+          });
+        }
         return false;
       }
 
