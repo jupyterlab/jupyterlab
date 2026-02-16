@@ -1,11 +1,6 @@
 name: UI Tests
 
 on:
-  # We currently turned off Galata snapshot updates via issue comments
-  # We comment this trigger so the workflow runs are not swamped by comments triggering skipped runs
-  # TODO: re-enable once snapshot updates via comments are enabled again
-  # issue_comment:
-  #   types: [created]
   push:
     branches:
       - main
@@ -20,37 +15,58 @@ env:
 
 jobs:
   test:
-    name: Visual Regression Tests (${{ matrix.browser }})
-    if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
-    timeout-minutes: 260
+    name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
+    timeout-minutes: 30
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
+        browser: [chromium, firefox]
+        shard: [1, 2, 3, 4, 5, 6]
+        shards: [6]
         include:
-          - project: 'jupyterlab'
-            browser: 'chromium'
-          - project: 'jupyterlab-firefox'
-            browser: 'firefox'
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+          - browser: firefox
+            project: jupyterlab-firefox
+            suite: jupyterlab
+          - browser: chromium
+            project: galata
+            suite: galata
+            shard: 1
+            shards: 2
+          - browser: chromium
+            project: galata
+            suite: galata
+            shard: 2
+            shards: 2
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+
       - name: Set up browser cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ github.workspace }}/pw-browsers
-          key: ${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('ui-tests/yarn.lock') }}
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
 
       - name: Install dependencies
+        env:
+          OPTIONAL_DEPENDENCIES: ""
         run: |
           bash ./scripts/ci_install.sh
-          # Build dev-mode
-          jlpm run build
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
         run: |
@@ -63,60 +79,112 @@ jobs:
 
       - name: Install browser
         run: |
+          set -ex
           cd galata
-          jlpm playwright install-deps
           # Install only the relevant browser for this matrix job
-          jlpm playwright install ${{ matrix.browser }}
+          jlpm playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Build galata
+        run: |
+          set -ex
+          cd galata
           jlpm run build
 
       - name: Wait for JupyterLab
-        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
+        run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
         run: |
           cd galata
-          jlpm run test --project ${{ matrix.project }}
-          mv playwright-report playwright-report-${{ matrix.project }} || true
-          if [[ "${{ matrix.browser }}" == "chromium" ]]; then
-            jlpm run test --project galata
-            mv playwright-report playwright-report-galata || true
-            mv galata/test-results galata/test-jupyterlab-results || true
+          jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
 
-            # Run benchmark tests once to ensure they have no regression
+          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+            # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
-            # Move benchmark report
-            mv playwright-report playwright-report-benchmark || true
           fi
-
-      - name: Upload Galata Test assets
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Upload test assets
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
         with:
-          name: jupyterlab-galata-test-assets-${{ matrix.browser }}
-          path: |
-            galata/test-${{ matrix.project }}-results
-            galata/test-results
+          name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
+          path: galata/test-results
+          if-no-files-found: ignore  # expected when no tests fail
 
-      - name: Upload Galata Test report
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Upload test report blob
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
         with:
-          name: jupyterlab-galata-report-${{ matrix.browser }}
-          path: |
-            galata/playwright-report*
+          name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
+          path: galata/blob-report
+          retention-days: 1
+          compression-level: 1
 
       - name: Print JupyterLab logs
         if: always()
         run: |
           cat /tmp/jupyterlab_server.log
 
+  merge-reports:
+    name: Merge Test Reports and Results
+    if: ${{ !cancelled() }}
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+          pattern: galata-blobs-*
+          merge-multiple: true
+
+      - name: Merge Playwright reports
+        run: |
+          npx playwright merge-reports --reporter html,github ./artifacts/
+
+      - name: Upload merged reports
+        uses: actions/upload-artifact@v6
+        with:
+          name: visual-regression-report
+          path: playwright-report
+
+      - name: Check for test assets
+        id: check-assets
+        run: |
+          COUNT=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+            --paginate \
+            -q '.artifacts[] | select(.name | startswith("galata-test-assets-")) | .name' \
+            | wc -l)
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "Found $COUNT test asset artifacts"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Merge and upload test results
+        if: ${{ !cancelled() && steps.check-assets.outputs.count > 0 }}
+        uses: actions/upload-artifact/merge@v6
+        with:
+          # The name matches the pattern so that it is picked again on re-runs
+          name: galata-test-assets-merged
+          pattern: galata-test-assets-*
+          delete-merged: true
+
+      - name: Merge blobs and delete individual shards
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact/merge@v6
+        with:
+          # The name matches the pattern so that it is picked again on re-runs
+          name: galata-blobs-merged
+          pattern: galata-blobs-*
+          delete-merged: true
+          retention-days: 1
+          compression-level: 1
+
   test-documentation:
     name: Visual Regression Documentation
-    if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Documentation snapshots updated.'))) }}
     # Python version is frozen through strategy.matrix.python-version
     # Python dependencies are frozen in the installation step
     # Note: IPython is among the frozen package
-    timeout-minutes: 80
+    timeout-minutes: 30
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -124,12 +192,12 @@ jobs:
         python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -143,28 +211,34 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+        working-directory: core
+
       - name: Set up browser cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ github.workspace }}/pw-browsers
-          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ steps.pw-version.outputs.version }}
 
       - name: Install dependencies
+        env:
+          OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Install chinese font
-          sudo apt-get update
+          # Install fonts for consistent documentation snapshots
           sudo apt-get install fonts-dejavu fonts-noto
 
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
-          pip install .[docs-screenshots] 'ipykernel<7.0'
+          pip install 'ipykernel<7.0'
           bash ./scripts/ci_install.sh
-
-          # Build dev-mode
-          jlpm run build
         working-directory: core
 
       - name: Launch JupyterLab
@@ -182,36 +256,41 @@ jobs:
         run: |
           set -ex
           cd galata
-          jlpm playwright install-deps
           # Install only Chromium browser
-          jlpm playwright install chromium
+          jlpm playwright install --with-deps chromium
+        working-directory: core
+
+      - name: Build galata
+        run: |
+          set -ex
+          cd galata
           jlpm run build
         working-directory: core
 
       - name: Wait for JupyterLab
-        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
+        run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
         run: |
           cd galata
-          jlpm run test:doc
+          jlpm run test:doc --reporter github,list,html
         working-directory: core
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: jupyterlab-documentation-test-assets
-          path: |
-            core/galata/test-results
+          name: documentation-test-assets
+          path: core/galata/test-results
+          if-no-files-found: ignore  # expected when no tests fail (at all)
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: jupyterlab-documentation-report
-          path: |
-            core/galata/playwright-report
+          name: documentation-report
+          path: core/galata/playwright-report
+          if-no-files-found: error
 
       - name: Stop JupyterLab
         if: always()

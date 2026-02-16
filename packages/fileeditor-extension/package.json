@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.10.1",
+    "@codemirror/commands": "^6.10.2",
     "@codemirror/search": "^6.6.0",
     "@jupyterlab/application": "^4.6.0-alpha.2",
     "@jupyterlab/apputils": "^4.7.0-alpha.2",
@@ -66,7 +66,7 @@
     "@lumino/commands": "^2.3.3",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
-    "@lumino/widgets": "^2.7.3"
+    "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

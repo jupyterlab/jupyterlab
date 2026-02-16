@@ -29,11 +29,6 @@ test.describe('ToC Running indicator', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should display running indicators', async ({ page }) => {
     const tocPanel = page.sidebar.getContentPanelLocator(
       (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined

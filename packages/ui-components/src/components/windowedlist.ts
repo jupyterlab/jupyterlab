@@ -1354,8 +1354,8 @@ export class WindowedList<
     }
     for (const widget of this.layout.widgets) {
       this._itemsResizeObserver.observe(widget.node);
-      widget.disposed.connect(
-        () => this._itemsResizeObserver?.unobserve(widget.node)
+      widget.disposed.connect(() =>
+        this._itemsResizeObserver?.unobserve(widget.node)
       );
     }
     if (!this._areaResizeObserver) {
@@ -1371,6 +1371,7 @@ export class WindowedList<
    * Turn off windowing related styles in the viewport.
    */
   private _applyNoWindowingStyles() {
+    this._outerElement.style.removeProperty('overflow-anchor');
     this._viewport.style.position = 'relative';
     this._viewport.style.contain = '';
     this._viewport.style.top = '0px';
@@ -1381,6 +1382,7 @@ export class WindowedList<
    * Turn on windowing related styles in the viewport.
    */
   private _applyWindowingStyles() {
+    this._outerElement.style.setProperty('overflow-anchor', 'none');
     this._viewport.style.position = 'absolute';
     this._viewport.style.contain = 'layout';
   }
@@ -1436,8 +1438,8 @@ export class WindowedList<
         const item = toAdd[index];
         if (this._itemsResizeObserver && !this.layout.widgets.includes(item)) {
           this._itemsResizeObserver.observe(item.node);
-          item.disposed.connect(
-            () => this._itemsResizeObserver?.unobserve(item.node)
+          item.disposed.connect(() =>
+            this._itemsResizeObserver?.unobserve(item.node)
           );
         }
 

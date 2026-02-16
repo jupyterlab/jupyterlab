@@ -57,6 +57,7 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
+    await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-variables.png'
     );
@@ -96,6 +97,9 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
+    await variablesPanel
+      .getByRole('treeitem', { name: `${globalVar}:` })
+      .waitFor();
     expect
       .soft(await variablesPanel.screenshot())
       .toMatchSnapshot('image-debug-session-global-variables.png');
@@ -220,7 +224,7 @@ test.describe('Debugger Variables', () => {
     });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
@@ -268,7 +272,7 @@ test.describe('Debugger Variables', () => {
     });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
@@ -297,7 +301,7 @@ test.describe('Debugger Variables', () => {
     await init({ page, tmpPath });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();

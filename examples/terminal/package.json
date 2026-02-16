@@ -13,11 +13,11 @@
     "@jupyterlab/services": "^7.6.0-alpha.2",
     "@jupyterlab/terminal": "^4.6.0-alpha.2",
     "@jupyterlab/theme-light-extension": "^4.6.0-alpha.2",
-    "@lumino/widgets": "^2.7.3"
+    "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.7.3",
-    "@rspack/core": "^1.7.3",
+    "@rspack/cli": "^1.7.5",
+    "@rspack/core": "^1.7.5",
     "css-loader": "^6.7.1",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
