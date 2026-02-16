@@ -30,6 +30,28 @@ import { PanelLayout, Widget } from '@lumino/widgets';
  */
 const MAXIMUM_TIME_REMAINING = 100;
 
+/**
+ * Maximum number of consecutive scroll-back-to-item corrections
+ * triggered by area resize events before giving up.
+ *
+ * This prevents infinite loops caused by transient size changes
+ * (e.g. CodeMirror incremental rendering with line wrapping)
+ * where each scroll correction triggers another resize which
+ * triggers another correction.
+ */
+const MAXIMUM_SCROLL_BACK_RETRIES = 2;
+
+/**
+ * Number of consecutive animation frames with no new resize events
+ * required before acting on an area resize.
+ *
+ * This prevents reacting to transient size changes from e.g.
+ * CodeMirror incremental rendering with line wrapping, where the
+ * inner element resizes multiple times over several frames before
+ * reaching its final size.
+ */
+const AREA_RESIZE_QUIET_FRAMES = 3;
+
 /*
  * Feature detection
  *
@@ -1003,6 +1025,10 @@ export class WindowedList<
    * Dispose the windowed list.
    */
   dispose(): void {
+    if (this._areaResizeRAF !== null) {
+      cancelAnimationFrame(this._areaResizeRAF);
+      this._areaResizeRAF = null;
+    }
     this._updater.dispose();
     super.dispose();
   }
@@ -1095,6 +1121,8 @@ export class WindowedList<
       }
 
       this._isScrolling = new PromiseDelegate<void>();
+      // New scroll target: refresh the retry budget for scroll-back corrections.
+      this._scrollBackRetries = 0;
       // Catch the internal reject, as otherwise this will
       // result in an unhandled promise rejection in test.
       this._isScrolling.promise.catch(console.debug);
@@ -1392,6 +1420,10 @@ export class WindowedList<
    */
   private _removeListeners() {
     this._outerElement.removeEventListener('scroll', this);
+    if (this._areaResizeRAF !== null) {
+      cancelAnimationFrame(this._areaResizeRAF);
+      this._areaResizeRAF = null;
+    }
     this._areaResizeObserver?.disconnect();
     this._areaResizeObserver = null;
     this._itemsResizeObserver?.disconnect();
@@ -1490,15 +1522,45 @@ export class WindowedList<
 
   /**
    * Handle viewport area resize.
+   *
+   * Waits for the inner element size to stabilize (no new resize events
+   * for several consecutive animation frames) before triggering a
+   * scroll-back correction. This prevents reacting to transient size
+   * changes from e.g. CodeMirror incremental rendering with line wrapping.
    */
   private _onAreaResize(_entries: ResizeObserverEntry[]): void {
-    this._scrollBackToItemOnResize();
+    // A new resize arrived - reset the quiet-frame counter and restart.
+    this._areaResizeQuietFrames = 0;
+    if (this._areaResizeRAF !== null) {
+      cancelAnimationFrame(this._areaResizeRAF);
+    }
+    this._waitForAreaResizeStabilization();
+  }
+
+  /**
+   * Wait for several consecutive animation frames with no new resize
+   * events before acting on the area resize.
+   */
+  private _waitForAreaResizeStabilization(): void {
+    this._areaResizeRAF = requestAnimationFrame(() => {
+      this._areaResizeQuietFrames++;
+      if (this._areaResizeQuietFrames >= AREA_RESIZE_QUIET_FRAMES) {
+        // Size has been stable for enough frames.
+        this._areaResizeRAF = null;
+        this._scrollBackToItemOnResize();
+      } else {
+        // Wait another frame to confirm stability.
+        this._waitForAreaResizeStabilization();
+      }
+    });
   }
 
   /**
    * Handle viewport content (i.e. items) resize.
    */
   private _onItemResize(entries: ResizeObserverEntry[]): void {
+    // Item resize is a legitimate size change; refresh retry budget.
+    this._scrollBackRetries = 0;
     this._resetScrollToItem();
 
     if (this.isHidden || this.isParentHidden) {
@@ -1549,6 +1611,22 @@ export class WindowedList<
    */
   private _scrollBackToItemOnResize() {
     if (!this._scrollToItem) {
+      return;
+    }
+    this._scrollBackRetries++;
+    if (this._scrollBackRetries > MAXIMUM_SCROLL_BACK_RETRIES) {
+      // Too many consecutive scroll-back corrections; this likely
+      // indicates an infinite loop caused by transient size changes
+      // (e.g. CodeMirror incremental rendering with line wrapping).
+      // Clear the scroll target to break the cycle.
+      console.debug(
+        `WindowedList: scroll-back-to-item exceeded ${MAXIMUM_SCROLL_BACK_RETRIES} retries, aborting to prevent infinite loop.`
+      );
+      this._scrollToItem = null;
+      if (this._isScrolling) {
+        this._isScrolling.resolve();
+        this._isScrolling = null;
+      }
       return;
     }
     this.scrollToItem(...this._scrollToItem).catch(reason => {
@@ -1726,6 +1804,9 @@ export class WindowedList<
   private _resetScrollToItemTimeout: number | null;
   private _requiresTotalSizeUpdate: boolean = false;
   private _areaResizeObserver: ResizeObserver | null;
+  private _areaResizeRAF: number | null = null;
+  private _areaResizeQuietFrames: number = 0;
+  private _scrollBackRetries: number = 0;
   private _itemsResizeObserver: ResizeObserver | null;
   private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
