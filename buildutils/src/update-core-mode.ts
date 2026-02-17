@@ -34,6 +34,11 @@ fs.ensureFileSync(path.join(staging, 'package.json'));
 
 utils.writePackageData(path.join(staging, 'package.json'), data);
 
+fs.copySync(
+  path.join(staging, 'package.json'),
+  path.join('packages', 'core-meta', 'core.package.json')
+);
+
 // Update our staging files.
 const notice =
   '// This file is auto-generated from the corresponding file in /dev_mode\n';

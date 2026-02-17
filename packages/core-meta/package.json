@@ -1,0 +1,17 @@
+{
+  "name": "@jupyterlab/core-meta",
+  "version": "4.6.0-alpha.2",
+  "description": "JupyterLab core metadata snapshot",
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "core.package.json"
+  ],
+  "scripts": {
+    "build": "echo 'core-meta has no build step'",
+    "build:all": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
