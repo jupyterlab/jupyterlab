@@ -58,7 +58,9 @@ for (const c of showSourcesCases) {
     });
 
     test.afterEach(async ({ page }) => {
+      await page.click('jp-button[title^=Continue]');
       await page.debugger.switchOff();
+      await page.waitForTimeout(500);
       await page.notebook.close();
     });
 
@@ -228,6 +230,7 @@ for (const c of showSourcesCases) {
 /* Non parametrized tests */
 test.describe('Debugger Tests', () => {
   test.afterEach(async ({ page }) => {
+    await page.click('jp-button[title^=Continue]');
     await page.debugger.switchOff();
     await page.waitForTimeout(500);
     await page.notebook.close();
