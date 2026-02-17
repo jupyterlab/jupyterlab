@@ -23,7 +23,6 @@ export default defineConfig([
     '**/node_modules',
     '**/build',
     '**/lib',
-    '**/node_modules',
     '**/mock_packages',
     '**/static',
     '**/typings',
