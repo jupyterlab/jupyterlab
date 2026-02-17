@@ -7,6 +7,17 @@ import prettierPlugin from 'eslint-plugin-prettier';
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 
+// Filter globals to remove any with leading/trailing whitespace
+const cleanGlobals = globalsObj => {
+  const cleaned = {};
+  for (const [key, value] of Object.entries(globalsObj)) {
+    if (key === key.trim()) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned;
+};
+
 export default defineConfig([
   globalIgnores([
     '**/node_modules',
@@ -55,10 +66,10 @@ export default defineConfig([
     extends: [js.configs.recommended],
     languageOptions: {
       globals: {
-        ...globals.browser,
-        ...globals.commonjs,
-        ...globals.node,
-        ...globals.jest,
+        ...cleanGlobals(globals.browser),
+        ...cleanGlobals(globals.commonjs),
+        ...cleanGlobals(globals.node),
+        ...cleanGlobals(globals.jest),
         BigInt: 'readonly',
         HTMLCollectionOf: 'readonly',
         JSX: 'readonly',
@@ -189,10 +200,10 @@ export default defineConfig([
 
     languageOptions: {
       globals: {
-        ...globals.browser,
-        ...globals.commonjs,
-        ...globals.node,
-        ...globals.jest,
+        ...cleanGlobals(globals.browser),
+        ...cleanGlobals(globals.commonjs),
+        ...cleanGlobals(globals.node),
+        ...cleanGlobals(globals.jest),
         BigInt: 'readonly',
         HTMLCollectionOf: 'readonly',
         JSX: 'readonly',
