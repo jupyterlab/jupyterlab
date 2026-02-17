@@ -17,7 +17,7 @@ export function validateProperty(
   const value = object[name];
 
   if (typeName !== void 0) {
-    let valid = true;
+    let valid;
     switch (typeName) {
       case 'array':
         valid = Array.isArray(value);
@@ -33,7 +33,7 @@ export function validateProperty(
     }
 
     if (values.length > 0) {
-      let valid = true;
+      let valid;
       switch (typeName) {
         case 'string':
         case 'number':
