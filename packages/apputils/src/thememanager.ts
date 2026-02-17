@@ -395,23 +395,35 @@ export class ThemeManager implements IThemeManager {
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {
-      // override validation is against the CSS property in the description
-      // field. Example: for key ui-font-family, .description is font-family
-      let description;
+      // Map each override key to its corresponding CSS property for
+      // validation via CSS.supports(). These must be hardcoded rather
+      // than read from schema description fields, which get translated
+      // by the i18n system and break CSS validation in non-English locales.
+      let cssProp;
       switch (key) {
+        case 'code-font-family':
+        case 'content-font-family':
+        case 'ui-font-family':
+          cssProp = 'font-family';
+          break;
         case 'code-font-size':
         case 'content-font-size1':
         case 'ui-font-size1':
-          description = 'font-size';
+          cssProp = 'font-size';
           break;
         case 'rendermime-error-background':
-          description = 'background';
+          cssProp = 'background';
           break;
         default:
-          description = overidesSchema[key].description;
+          console.warn(
+            `No CSS property mapping for override key '${key}'. ` +
+              'CSS validation will be skipped for this key.'
+          );
           break;
       }
-      this._overrideProps[key] = description;
+      if (cssProp) {
+        this._overrideProps[key] = cssProp;
+      }
     });
   }
 
