@@ -189,7 +189,7 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
-    extends: [tseslint.configs.recommended],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
 
     plugins: {
       '@typescript-eslint': tseslint.plugin,
@@ -266,6 +266,8 @@ export default defineConfig([
       '@typescript-eslint/no-unsafe-function-type': 'warn',
       '@typescript-eslint/no-unused-expressions': 'warn',
       '@typescript-eslint/no-require-imports': 'warn',
+      'preserve-caught-error': 'off',
+      'no-useless-assignment': 'warn',
 
       camelcase: [
         'error',

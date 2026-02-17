@@ -2412,6 +2412,7 @@ namespace Private {
   /**
    * Notebook cell executor
    */
+  // eslint-disable-next-line no-unassigned-vars
   export let executor: INotebookCellExecutor;
 
   /**
