@@ -94,11 +94,13 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     }
     const closePromise = this._maybeCloseSubshells(this._commsOverSubshells);
     this._commsOverSubshells = value;
-    closePromise.then(() => {
-      if (this._commsOverSubshells !== CommsOverSubshells.Disabled) {
-        void this._maybeStartSubshell();
-      }
-    });
+    closePromise
+      .then(() => {
+        if (this._commsOverSubshells !== CommsOverSubshells.Disabled) {
+          void this._maybeStartSubshell();
+        }
+      })
+      .catch(console.warn);
   }
 
   /**
