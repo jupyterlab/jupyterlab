@@ -15,5 +15,5 @@ same version of JupyterLab.
 
 ## Contents
 
-* `core.package.json` — copied from
+- `core.package.json` — copied from
   `jupyterlab/staging/package.json` of the matching JupyterLab release.
