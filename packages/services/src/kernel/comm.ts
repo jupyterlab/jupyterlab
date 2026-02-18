@@ -92,7 +92,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       // Do nothing if the value is not changing.
       return;
     }
-    const closePromise = this._maybeCloseSubshells(this._commsOverSubshells);
+    const closePromise = this._maybeCloseSubshell(this._commsOverSubshells);
     this._commsOverSubshells = value;
     closePromise
       .then(() => {
@@ -275,7 +275,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   dispose(): void {
-    void this._maybeCloseSubshells(this._commsOverSubshells);
+    void this._maybeCloseSubshell(this._commsOverSubshells);
 
     super.dispose();
   }
@@ -323,11 +323,50 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       referenceCount: 1
     };
     kernelCommTargetSubShells[this._target] = entry;
-    this._subshellId = await entry.subshellId;
-    this._subshellStarted.resolve();
+    const subshellStarted = this._subshellStarted;
+    try {
+      this._subshellId = await entry.subshellId;
+      subshellStarted.resolve();
+    } catch (e) {
+      // If the future rejected we need to close the subshell to avoid leaks
+      await this._closePerComTargetSubhell(false);
+      subshellStarted.reject(`Per comm-target subshell creation failed: ${e}`);
+    }
   }
 
-  private async _maybeCloseSubshells(mode: CommsOverSubshells) {
+  private async _closePerComTargetSubhell(shouldAskKernelToDelete = true) {
+    const kernelId = this._kernel.id;
+    const target = this._target;
+    if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
+      // Close the subshell for this target if this is the last comm.
+      const kernelTargets = CommHandler._commTargetSubShellsId[kernelId];
+      const entry = kernelTargets[target];
+      if (entry) {
+        entry.referenceCount -= 1;
+        if (entry.referenceCount <= 0) {
+          if (shouldAskKernelToDelete) {
+            const subshellId = await entry.subshellId;
+            if (subshellId !== null) {
+              this._kernel.requestDeleteSubshell(
+                { subshell_id: subshellId },
+                true
+              );
+            }
+          }
+          delete kernelTargets[target];
+        }
+      }
+      if (Object.keys(kernelTargets).length === 0) {
+        delete CommHandler._commTargetSubShellsId[kernelId];
+      }
+      // Clear identifier
+      this._subshellId = null;
+    }
+    // Restart promise delegate to subsequent startup
+    this._subshellStarted = new PromiseDelegate<void>();
+  }
+
+  private async _maybeCloseSubshell(mode: CommsOverSubshells) {
     if (this._kernel.status === 'dead') {
       return;
     }
@@ -347,33 +386,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         break;
       }
       case CommsOverSubshells.PerCommTarget: {
-        const kernelId = this._kernel.id;
-        const target = this._target;
-        if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
-          // Close the subshell for this target if this is the last comm.
-          const kernelTargets = CommHandler._commTargetSubShellsId[kernelId];
-          const entry = kernelTargets[target];
-          if (entry) {
-            entry.referenceCount -= 1;
-            if (entry.referenceCount <= 0) {
-              const subshellId = await entry.subshellId;
-              if (subshellId) {
-                this._kernel.requestDeleteSubshell(
-                  { subshell_id: subshellId },
-                  true
-                );
-              }
-              delete kernelTargets[target];
-            }
-          }
-          if (Object.keys(kernelTargets).length === 0) {
-            delete CommHandler._commTargetSubShellsId[kernelId];
-          }
-          // Clear identifier
-          this._subshellId = null;
-        }
-        // Restart promise delegate to subsequent startup
-        this._subshellStarted = new PromiseDelegate<void>();
+        await this._closePerComTargetSubhell();
         break;
       }
       case CommsOverSubshells.Disabled: {
