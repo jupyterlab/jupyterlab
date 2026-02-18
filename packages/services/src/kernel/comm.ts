@@ -369,6 +369,8 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
           if (Object.keys(kernelTargets).length === 0) {
             delete CommHandler._commTargetSubShellsId[kernelId];
           }
+          // Clear identifier
+          this._subshellId = null;
         }
         // Restart promise delegate to subsequent startup
         this._subshellStarted = new PromiseDelegate<void>();

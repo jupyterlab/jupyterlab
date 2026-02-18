@@ -502,7 +502,7 @@ describe('jupyter.services - Comm', () => {
         expect(comm1.subshellId).not.toBeNull();
         expect(comm2.subshellId).not.toBeNull();
 
-        // They will use the same subhsell
+        // They will use the same subshell
         expect(comm1.subshellId).toBe(comm2.subshellId);
         const sharedSubshellId = comm1.subshellId;
         const initialReply = await echoKernel.requestListSubshell({}).done;
@@ -692,18 +692,20 @@ const waitForSubshellDeletion = async (
       }
       return requestDeleteSubshell(content, disposeOnDone);
     });
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(
+      () => reject(`Did not delete ${count} subshell(s) in ${timeout}ms`),
+      timeout
+    );
+  });
   try {
-    await Promise.race([
-      subshellDeleted.promise,
-      new Promise((_, reject) =>
-        setTimeout(
-          () => reject(`Did not delete ${count} subshell(s) in ${timeout}ms`),
-          timeout
-        )
-      )
-    ]);
+    await Promise.race([subshellDeleted.promise, timeoutPromise]);
   } finally {
     spy.mockRestore();
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
   }
 };
 
