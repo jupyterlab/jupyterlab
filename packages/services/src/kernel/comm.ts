@@ -302,6 +302,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     }
 
     // One shell per comm-target
+    const subshellStarted = this._subshellStarted;
     const kernelId = this._kernel.id;
     if (!CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
       CommHandler._commTargetSubShellsId[kernelId] = {};
@@ -311,8 +312,16 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     const existingEntry = kernelCommTargetSubShells[this._target];
     if (existingEntry) {
       existingEntry.referenceCount += 1;
-      this._subshellId = await existingEntry.subshellId;
-      this._subshellStarted.resolve();
+      try {
+        this._subshellId = await existingEntry.subshellId;
+        subshellStarted.resolve();
+      } catch (e) {
+        // If the future rejected we need to close the subshell to avoid leaks
+        await this._closePerComTargetSubshell(false);
+        subshellStarted.reject(
+          `Per comm-target subshell creation failed: ${e}`
+        );
+      }
       return;
     }
 
@@ -323,18 +332,17 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       referenceCount: 1
     };
     kernelCommTargetSubShells[this._target] = entry;
-    const subshellStarted = this._subshellStarted;
     try {
       this._subshellId = await entry.subshellId;
       subshellStarted.resolve();
     } catch (e) {
       // If the future rejected we need to close the subshell to avoid leaks
-      await this._closePerComTargetSubhell(false);
+      await this._closePerComTargetSubshell(false);
       subshellStarted.reject(`Per comm-target subshell creation failed: ${e}`);
     }
   }
 
-  private async _closePerComTargetSubhell(shouldAskKernelToDelete = true) {
+  private async _closePerComTargetSubshell(shouldAskKernelToDelete = true) {
     const kernelId = this._kernel.id;
     const target = this._target;
     if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
@@ -345,7 +353,14 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         entry.referenceCount -= 1;
         if (entry.referenceCount <= 0) {
           if (shouldAskKernelToDelete) {
-            const subshellId = await entry.subshellId;
+            let subshellId: string | null = null;
+            try {
+              subshellId = await entry.subshellId;
+            } catch (e) {
+              console.warn(
+                `Subshell identifier not available in the closeout sequence, will not request deletion: ${e}`
+              );
+            }
             if (subshellId !== null) {
               this._kernel.requestDeleteSubshell(
                 { subshell_id: subshellId },
@@ -386,7 +401,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         break;
       }
       case CommsOverSubshells.PerCommTarget: {
-        await this._closePerComTargetSubhell();
+        await this._closePerComTargetSubshell();
         break;
       }
       case CommsOverSubshells.Disabled: {

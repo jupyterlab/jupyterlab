@@ -79,6 +79,8 @@ describe('jupyter.services - Comm', () => {
       it('should not spawn a subshell by default', () => {
         const comm = echoKernel.createComm('test') as CommHandler;
         expect(comm.subshellId).toBeNull();
+
+        comm.dispose();
       });
 
       it('should spawn a subshell per-comm', async () => {
@@ -103,6 +105,9 @@ describe('jupyter.services - Comm', () => {
         expect(comm2.subshellId).not.toBeNull();
 
         expect(comm.subshellId).not.toEqual(comm2.subshellId);
+
+        comm.dispose();
+        comm2.dispose();
       });
 
       it('should spawn a subshell per-comm-target', async () => {
