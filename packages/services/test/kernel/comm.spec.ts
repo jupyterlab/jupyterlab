@@ -105,29 +105,6 @@ describe('jupyter.services - Comm', () => {
         expect(comm.subshellId).not.toEqual(comm2.subshellId);
       });
 
-      it('should dispose the subshell per-comm', async () => {
-        await echoKernel.info;
-
-        expect(echoKernel.supportsSubshells).toBeTruthy();
-
-        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
-
-        const comm = echoKernel.createComm('testTarget') as CommHandler;
-        await comm.subshellStarted;
-        expect(comm.subshellId).not.toBeNull();
-
-        const replyMsg = await echoKernel.requestListSubshell({}).done;
-        const before = replyMsg.content.subshell_id.length;
-
-        comm.dispose();
-
-        const replyMsg2 = await echoKernel.requestListSubshell({}).done;
-        const after = replyMsg2.content.subshell_id.length;
-
-        // We should have less subshells after the comm disposal than before
-        expect(after).toBeLessThan(before);
-      });
-
       it('should spawn a subshell per-comm-target', async () => {
         await echoKernel.info;
 
@@ -151,6 +128,91 @@ describe('jupyter.services - Comm', () => {
 
         // We shouldn't have more subshells before and after the second comm creation
         expect(before).toEqual(after);
+
+        comm.dispose();
+        comm2.dispose();
+      });
+
+      it('should close subshells when switching comm modes', async () => {
+        await echoKernel.info;
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm1 = echoKernel.createComm('switchTarget') as CommHandler;
+        const comm2 = echoKernel.createComm('switchTarget') as CommHandler;
+
+        await comm1.subshellStarted;
+        await comm2.subshellStarted;
+
+        expect(comm1.subshellId).not.toBeNull();
+        expect(comm2.subshellId).not.toBeNull();
+        expect(comm1.subshellId).not.toEqual(comm2.subshellId);
+
+        const perCommSubshellIds = [comm1.subshellId!, comm2.subshellId!];
+
+        // Switch to per-comm-target, two subshells should be deleted
+        let subshellDeleted = waitForSubshellDeletion(echoKernel, 2);
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
+        await subshellDeleted;
+
+        const comm3 = echoKernel.createComm('switchTarget') as CommHandler;
+        await comm3.subshellStarted;
+
+        const perTargetSubshellId = comm3.subshellId as string;
+        expect(perTargetSubshellId).not.toBeNull();
+
+        const afterPerTarget = await getSubshellIds(echoKernel);
+
+        expect(afterPerTarget).toEqual(
+          expect.not.arrayContaining(perCommSubshellIds)
+        );
+        expect(afterPerTarget).toContain(perTargetSubshellId);
+
+        // Switch back to per-comm
+        subshellDeleted = waitForSubshellDeletion(echoKernel);
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+        await subshellDeleted;
+
+        const comm4 = echoKernel.createComm('switchTarget') as CommHandler;
+        await comm4.subshellStarted;
+
+        expect(comm4.subshellId).not.toBeNull();
+        expect(comm4.subshellId).not.toEqual(perTargetSubshellId);
+
+        const afterPerComm = await getSubshellIds(echoKernel);
+
+        expect(afterPerComm).toEqual(
+          expect.not.arrayContaining([perTargetSubshellId])
+        );
+        expect(afterPerComm).toContain(comm4.subshellId as string);
+
+        comm1.dispose();
+        comm2.dispose();
+        comm3.dispose();
+        comm4.dispose();
+      });
+
+      it('should not close subshells when comm mode stays the same', async () => {
+        await echoKernel.info;
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm = echoKernel.createComm('switchTarget') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        const subshellIdsBefore = await getSubshellIds(echoKernel);
+        expect(subshellIdsBefore).toStrictEqual(
+          expect.arrayContaining([comm.subshellId])
+        );
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+        const subshellIdsAfter = await getSubshellIds(echoKernel);
+        expect(subshellIdsAfter).toStrictEqual(
+          expect.arrayContaining(subshellIdsBefore)
+        );
+
+        comm.dispose();
       });
 
       it('should spawn a subshell per-comm-target per kernel', async () => {
@@ -174,6 +236,9 @@ describe('jupyter.services - Comm', () => {
         expect(comm2.subshellId).not.toBeNull();
 
         expect(comm.subshellId).not.toEqual(comm2.subshellId);
+
+        comm.dispose();
+        comm2.dispose();
       });
 
       it('should use the given id', () => {
@@ -327,6 +392,57 @@ describe('jupyter.services - Comm', () => {
         comm.dispose();
         expect(comm.isDisposed).toBe(true);
       });
+
+      it('should dispose the subshell per-comm', async () => {
+        await echoKernel.info;
+
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        const replyMsg = await echoKernel.requestListSubshell({}).done;
+        const before = replyMsg.content.subshell_id.length;
+
+        comm.dispose();
+
+        const replyMsg2 = await echoKernel.requestListSubshell({}).done;
+        const after = replyMsg2.content.subshell_id.length;
+
+        // We should have less subshells after the comm disposal than before
+        expect(after).toBeLessThan(before);
+      });
+
+      it('should dispose the subshell per-target', async () => {
+        await echoKernel.info;
+
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
+
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        const replyMsg = await echoKernel.requestListSubshell({}).done;
+        const before = replyMsg.content.subshell_id.length;
+
+        const subshellDeleted = waitForSubshellDeletion(echoKernel);
+
+        comm.dispose();
+
+        // We need to await because disposal of per-comm target subshells is async
+        await subshellDeleted;
+
+        const replyMsg2 = await echoKernel.requestListSubshell({}).done;
+        const after = replyMsg2.content.subshell_id.length;
+
+        // We should have less subshells after the comm disposal than before
+        expect(after).toBeLessThan(before);
+      });
     });
   });
 
@@ -466,3 +582,32 @@ describe('jupyter.services - Comm', () => {
     });
   });
 });
+
+const waitForSubshellDeletion = async (
+  kernel: Kernel.IKernelConnection,
+  count = 1
+) => {
+  const subshellDeleted = new PromiseDelegate<void>();
+  const requestDeleteSubshell = kernel.requestDeleteSubshell.bind(kernel);
+  const spy = jest
+    .spyOn(kernel, 'requestDeleteSubshell')
+    .mockImplementation((content, disposeOnDone) => {
+      count -= 1;
+      if (count <= 0) {
+        subshellDeleted.resolve();
+      }
+      return requestDeleteSubshell(content, disposeOnDone);
+    });
+  try {
+    await subshellDeleted.promise;
+  } finally {
+    spy.mockRestore();
+  }
+};
+
+const getSubshellIds = async (
+  kernel: Kernel.IKernelConnection
+): Promise<string[]> => {
+  const reply = await kernel.requestListSubshell({}).done;
+  return reply.content.subshell_id;
+};
