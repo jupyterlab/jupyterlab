@@ -231,7 +231,7 @@ describe('jupyter.services - Comm', () => {
         expect(beforeSubshellIdB).not.toBeNull();
         expect(beforeSubshellIdA).not.toEqual(beforeSubshellIdB);
 
-        // Switch commA to per-comm, only one subshells should be deleted
+        // Switch commA to per-comm, only one subshell should be deleted
         let subshellDeleted = waitForSubshellDeletion(echoKernel);
         // Note: switching mode at the comm level, not at the kernel level
         commA.commsOverSubshells = CommsOverSubshells.PerComm;
