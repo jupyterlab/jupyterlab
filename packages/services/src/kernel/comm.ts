@@ -88,12 +88,17 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * Set whether comms are running on subshells, or not
    */
   set commsOverSubshells(value: CommsOverSubshells) {
-    this._commsOverSubshells = value;
-    if (this._commsOverSubshells === CommsOverSubshells.Disabled) {
-      this._maybeCloseSubshell();
-    } else {
-      void this._maybeStartSubshell();
+    if (value === this._commsOverSubshells) {
+      // Do nothing if the value is not changing.
+      return;
     }
+    const closePromise = this._maybeCloseSubshells(this._commsOverSubshells);
+    this._commsOverSubshells = value;
+    closePromise.then(() => {
+      if (this._commsOverSubshells !== CommsOverSubshells.Disabled) {
+        void this._maybeStartSubshell();
+      }
+    });
   }
 
   /**
@@ -268,7 +273,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   dispose(): void {
-    this._maybeCloseSubshell();
+    void this._maybeCloseSubshells(this._commsOverSubshells);
 
     super.dispose();
   }
@@ -317,20 +322,49 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     }
   }
 
-  private _maybeCloseSubshell() {
-    // Only close subshell if we have one subshell per comm
-    if (this._commsOverSubshells !== CommsOverSubshells.PerComm) {
-      this._subshellId = null;
+  private async _maybeCloseSubshells(mode: CommsOverSubshells) {
+    if (this._kernel.status === 'dead') {
       return;
     }
-
-    if (this._subshellId && this._kernel.status !== 'dead') {
-      this._kernel.requestDeleteSubshell(
-        { subshell_id: this._subshellId },
-        true
-      );
+    switch (mode) {
+      case CommsOverSubshells.PerComm: {
+        if (this._subshellId) {
+          // Close the only subshell
+          this._kernel.requestDeleteSubshell(
+            { subshell_id: this._subshellId },
+            true
+          );
+          // Clear identifier
+          this._subshellId = null;
+        }
+        break;
+      }
+      case CommsOverSubshells.PerCommTarget: {
+        const kernelId = this._kernel.id;
+        if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
+          // Close the subshells
+          for (const [_, subshellPromise] of Object.entries(
+            CommHandler._commTargetSubShellsId[kernelId]
+          )) {
+            const subshellId = await subshellPromise;
+            if (!subshellId) {
+              continue;
+            }
+            this._kernel.requestDeleteSubshell(
+              { subshell_id: subshellId },
+              true
+            );
+          }
+          // Clear identifiers
+          delete CommHandler._commTargetSubShellsId[kernelId];
+        }
+        break;
+      }
+      case CommsOverSubshells.Disabled: {
+        // no-op
+        break;
+      }
     }
-    this._subshellId = null;
   }
 
   private _subshellStarted = new PromiseDelegate<void>();
