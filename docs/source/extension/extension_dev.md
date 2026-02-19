@@ -785,7 +785,7 @@ If your JavaScript is written in any other dialect than
 EMCAScript 6 (2015) it should be converted using an appropriate tool.
 You can use Rspack or Webpack to pre-build your extension to use any of it's features
 not enabled in our build configuration. To build a compatible package, set
-`output.libraryTarget` to `"commonjs2"` in your Webpack or Rspack configuration.
+`output.library.type` to `"commonjs2"` in your Webpack or Rspack configuration.
 (see [this](https://github.com/saulshanabrook/jupyterlab-webpack) example repo).
 
 If you publish your extension on `npm.org`, users will be able to install
