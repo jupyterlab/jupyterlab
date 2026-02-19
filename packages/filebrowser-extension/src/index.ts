@@ -148,6 +148,8 @@ namespace CommandIDs {
 
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
+  export const toggleDateCreated = 'filebrowser:toggle-date-created';
+
   export const toggleSortNotebooksFirst =
     'filebrowser:toggle-sort-notebooks-first';
 
@@ -260,6 +262,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           singleClickNavigation: false,
           showLastModifiedColumn: true,
           showFileSizeColumn: false,
+          showDateCreatedColumn: false,
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
@@ -1798,6 +1801,29 @@ function addCommands(
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
+          });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleDateCreated, {
+    label: trans.__('Show Date Created Column'),
+    isToggled: () => browser.showDateCreatedColumn,
+    execute: () => {
+      const value = !browser.showDateCreatedColumn;
+      const key = 'showDateCreatedColumn';
+      // Silent no-op when settingRegistry unavailable, consistent with other toggle commands
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: unknown) => {
+            console.error(`Failed to set ${key} setting:`, reason);
           });
       }
     },

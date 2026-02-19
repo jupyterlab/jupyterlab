@@ -186,11 +186,17 @@
 }
 
 .jp-DirListing-headerItem.jp-id-modified,
-.jp-DirListing-headerItem.jp-id-filesize {
+.jp-DirListing-headerItem.jp-id-filesize,
+.jp-DirListing-headerItem.jp-id-created {
   text-align: right;
   /* stylelint-disable */
   container-type: inline-size;
   /* stylelint-enable */
+}
+
+.jp-DirListing-headerItem.jp-id-created:not([style*='width']) {
+  /* default width before user resizes this column */
+  flex: 0.5 0 70px;
 }
 
 /**
@@ -203,6 +209,8 @@
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-small {
     display: inline;
   }
@@ -210,6 +218,8 @@
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-large,
   .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-large {
     display: none;
   }
@@ -219,11 +229,15 @@
 @container (min-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-small {
     display: none;
   }
 
   .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-large {
     display: inline;
   }
@@ -382,7 +396,8 @@
 
 .jp-DirListing-itemText,
 .jp-DirListing-itemModified,
-.jp-DirListing-itemFileSize {
+.jp-DirListing-itemFileSize,
+.jp-DirListing-itemCreated {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -414,6 +429,10 @@
 }
 
 .jp-DirListing-itemFileSize {
+  text-align: right;
+}
+
+.jp-DirListing-itemCreated {
   text-align: right;
 }
 
