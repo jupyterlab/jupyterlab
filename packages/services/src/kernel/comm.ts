@@ -401,7 +401,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         break;
       }
       case CommsOverSubshells.PerCommTarget: {
-        await this._closePerComTargetSubshell();
+        await this._closePerCommTargetSubshell();
         break;
       }
       case CommsOverSubshells.Disabled: {
