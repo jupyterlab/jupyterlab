@@ -247,6 +247,8 @@ namespace CommandIDs {
 
   export const extendBottom = 'notebook:extend-marked-cells-bottom';
 
+  export const jumpToLastCell = 'notebook:jump-to-last-cell';
+
   export const selectAll = 'notebook:select-all';
 
   export const deselectAll = 'notebook:deselect-all';
@@ -3709,6 +3711,45 @@ function addCommands(
       args: {
         type: 'object',
         properties: {}
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.jumpToLastCell, {
+    label: trans.__('Jump to Last Cell'),
+    caption: trans.__('Scroll to and activate the last cell in the notebook'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        const notebook = current.content;
+        const cellCount = notebook.widgets.length;
+
+        if (cellCount > 0) {
+          const lastIndex = cellCount - 1;
+          await notebook.scrollToItem(lastIndex).catch(() => {});
+          notebook.activeCellIndex = lastIndex;
+          const lastCell = notebook.widgets[lastIndex];
+          notebook.deselectAll();
+          notebook.select(lastCell);
+          lastCell.activate();
+        }
+      }
+    },
+    isEnabled: () => {
+      const current = tracker.currentWidget;
+      return current !== null && current.content.widgets.length > 0;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
       }
     }
   });
