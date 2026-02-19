@@ -84,7 +84,7 @@ export class BreadCrumbs extends Widget {
     }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
-    this._resizeThrottler = new Throttler(() => this._onResize(), 100);
+    this._resizeThrottler = new Throttler(() => this._onResize(), 50);
     this._resizeObserver = new ResizeObserver(() => {
       void this._resizeThrottler.invoke();
     });
