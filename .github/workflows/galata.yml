@@ -231,10 +231,8 @@ jobs:
           OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Freeze the packages to ensure consistent look and feel
-          # IPython is frozen because its version is displayed in
-          # the console header
-          pip install 'ipykernel<7.0'
+          # Note: any changes to dependency pins need should
+          # be done by updating the [docs-screenshots] group.
           bash ./scripts/ci_install.sh
         working-directory: core
 
