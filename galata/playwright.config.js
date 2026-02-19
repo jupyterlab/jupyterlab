@@ -19,7 +19,11 @@ module.exports = {
       use: {
         launchOptions: {
           // Force slow motion
-          slowMo: 30
+          slowMo: 30,
+          args: [
+            // Ensures that subpixel font rendering in Chrome is the same on CI as locally
+            '--disable-lcd-text'
+          ]
         }
       }
     },
@@ -35,6 +39,12 @@ module.exports = {
       use: {
         contextOptions: {
           permissions: ['clipboard-read', 'clipboard-write']
+        },
+        launchOptions: {
+          args: [
+            // Ensures that subpixel font rendering in Chrome is the same on CI as locally
+            '--disable-lcd-text'
+          ]
         }
       }
     },
