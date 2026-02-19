@@ -1795,6 +1795,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/ubuntu@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource/ubuntu@npm:5.2.8"
+  checksum: b657bfc9cdd8895d26f8bca33644fb6444b7c0b06cfca61f916af742ba148b8091007ae77b84d51ffa3476615caf242c1a70066df9474a7fd87b92cad947611e
+  languageName: node
+  linkType: hard
+
 "@fortawesome/fontawesome-free@npm:^5.12.0":
   version: 5.15.4
   resolution: "@fortawesome/fontawesome-free@npm:5.15.4"
@@ -3722,6 +3729,7 @@ __metadata:
   dependencies:
     "@fontsource/dejavu-mono": ^5.2.5
     "@fontsource/dejavu-sans": ^5.2.5
+    "@fontsource/ubuntu": ^5.2.8
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/coreutils": ^6.6.0-alpha.2

@@ -6,6 +6,7 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import '@fontsource/dejavu-sans';
+import '@fontsource/ubuntu';
 import '@fontsource/dejavu-mono';
 
 const STYLE = `
@@ -27,11 +28,16 @@ const STYLE = `
 export const fontsPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/galata-extension:fonts',
   autoStart: true,
-  activate: async (app: JupyterFrontEnd): Promise<void> => {
-    app.restored.then(() => {
+  description:
+    'Adds version-pinned fonts for consistent playwright screenshots',
+  activate: (app: JupyterFrontEnd): void => {
+    void app.restored.then(() => {
       const style = document.createElement('style');
       style.textContent = STYLE;
       app.shell.node.appendChild(style);
+      // Components created with jupyter-ui-toolkit do not respect variable overwrites
+      // as the toke system runs independently; we need to set --body-font manually
+      document.body.style.setProperty('--body-font', 'Ubuntu');
     });
   }
 };
