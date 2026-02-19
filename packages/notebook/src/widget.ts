@@ -598,18 +598,20 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
     this._updateMimetype();
     const cells = newValue.cells;
-    const collab = newValue.collaborative ?? false;
-    if (!collab && !cells.length) {
-      newValue.sharedModel.insertCell(0, {
-        cell_type: this.notebookConfig.defaultCell,
-        metadata:
-          this.notebookConfig.defaultCell === 'code'
-            ? {
-                // This is an empty cell created in empty notebook, thus is trusted
-                trusted: true
-              }
-            : {}
-      });
+    if (!this.notebookConfig.allowEmptyNotebook) {
+      const collab = newValue.collaborative ?? false;
+      if (!collab && !cells.length) {
+        newValue.sharedModel.insertCell(0, {
+          cell_type: this.notebookConfig.defaultCell,
+          metadata:
+            this.notebookConfig.defaultCell === 'code'
+              ? {
+                  // This is an empty cell created in empty notebook, thus is trusted
+                  trusted: true
+                }
+              : {}
+        });
+      }
     }
     let index = -1;
     for (const cell of cells) {
@@ -646,25 +648,31 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           args.oldIndex,
           -1 * args.oldValues.length
         );
-        // Add default cell if there are no cells remaining.
-        if (!sender.length) {
-          const model = this.model;
-          // Add the cell in a new context to avoid triggering another
-          // cell changed event during the handling of this signal.
-          requestAnimationFrame(() => {
-            if (model && !model.isDisposed && !model.sharedModel.cells.length) {
-              model.sharedModel.insertCell(0, {
-                cell_type: this.notebookConfig.defaultCell,
-                metadata:
-                  this.notebookConfig.defaultCell === 'code'
-                    ? {
-                        // This is an empty cell created in empty notebook, thus is trusted
-                        trusted: true
-                      }
-                    : {}
-              });
-            }
-          });
+        if (!this.notebookConfig.allowEmptyNotebook) {
+          // Add default cell if there are no cells remaining.
+          if (!sender.length) {
+            const model = this.model;
+            // Add the cell in a new context to avoid triggering another
+            // cell changed event during the handling of this signal.
+            requestAnimationFrame(() => {
+              if (
+                model &&
+                !model.isDisposed &&
+                !model.sharedModel.cells.length
+              ) {
+                model.sharedModel.insertCell(0, {
+                  cell_type: this.notebookConfig.defaultCell,
+                  metadata:
+                    this.notebookConfig.defaultCell === 'code'
+                      ? {
+                          // This is an empty cell created in empty notebook, thus is trusted
+                          trusted: true
+                        }
+                      : {}
+                });
+              }
+            });
+          }
         }
         break;
       default:
@@ -1243,6 +1251,11 @@ export namespace StaticNotebook {
    */
   export interface INotebookConfig {
     /**
+     * Whether not to show a cell when the notebook is empty.
+     */
+    allowEmptyNotebook: boolean;
+
+    /**
      * The default type for new notebook cells.
      */
     defaultCell: nbformat.CellType;
@@ -1356,6 +1369,7 @@ export namespace StaticNotebook {
     enableKernelInitNotification: false,
     showHiddenCellsButton: true,
     scrollPastEnd: true,
+    allowEmptyNotebook: false,
     defaultCell: 'code',
     recordTiming: false,
     inputHistoryScope: 'global',

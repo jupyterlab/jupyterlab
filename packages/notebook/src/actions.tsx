@@ -2916,20 +2916,22 @@ namespace Private {
           sharedModel.deleteCell(index);
         });
 
-        // Add a new cell if the notebook is empty. This is done
-        // within the compound operation to make the deletion of
-        // a notebook's last cell undoable.
-        if (sharedModel.cells.length == toDelete.length) {
-          sharedModel.insertCell(0, {
-            cell_type: notebook.notebookConfig.defaultCell,
-            metadata:
-              notebook.notebookConfig.defaultCell === 'code'
-                ? {
-                    // This is an empty cell created in empty notebook, thus is trusted
-                    trusted: true
-                  }
-                : {}
-          });
+        if (!notebook.notebookConfig.allowEmptyNotebook) {
+          // Add a new cell if the notebook is empty. This is done
+          // within the compound operation to make the deletion of
+          // a notebook's last cell undoable.
+          if (sharedModel.cells.length == toDelete.length) {
+            sharedModel.insertCell(0, {
+              cell_type: notebook.notebookConfig.defaultCell,
+              metadata:
+                notebook.notebookConfig.defaultCell === 'code'
+                  ? {
+                      // This is an empty cell created in empty notebook, thus is trusted
+                      trusted: true
+                    }
+                  : {}
+            });
+          }
         }
       });
       // Select the *first* interior cell not deleted or the cell
