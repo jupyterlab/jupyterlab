@@ -68,10 +68,6 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
 
-      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        run: |
-          pip install --upgrade --pre "ipykernel<=7.0.0a1"
-
       - name: Launch JupyterLab
         run: |
           cd galata
@@ -237,7 +233,6 @@ jobs:
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
-          pip install 'ipykernel<7.0'
           bash ./scripts/ci_install.sh
         working-directory: core
 

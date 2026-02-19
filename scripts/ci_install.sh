@@ -47,13 +47,6 @@ pip install -e "${SPEC}" || pip install -v -e "${SPEC}"
 node -p process.versions
 jlpm config
 
-if [[ $GROUP != js-services ]]; then
-    # Tests run much faster in ipykernel 6, so use that except for
-    # ikernel.spec.ts in js-services, which tests subshell compatibility in
-    # ipykernel 7.
-    pip install "ipykernel<7"
-fi
-
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
     pip install build
