@@ -12,6 +12,7 @@ import {
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
+import { Throttler } from '@lumino/polling';
 import type { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -83,8 +84,9 @@ export class BreadCrumbs extends Widget {
     }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
+    this._resizeThrottler = new Throttler(() => this._onResize(), 100);
     this._resizeObserver = new ResizeObserver(() => {
-      this._onResize();
+      void this._resizeThrottler.invoke();
     });
   }
 
@@ -180,11 +182,7 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
     this._resizeObserver.disconnect();
-    // Clear any pending resize timeout to prevent callbacks on detached widget
-    if (this._resizeTimeout) {
-      clearTimeout(this._resizeTimeout);
-      this._resizeTimeout = null;
-    }
+    this._resizeThrottler.dispose();
   }
 
   /**
@@ -413,20 +411,15 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Handle resize events with debouncing.
+   * Handle resize events with throttling.
    */
   private _onResize(): void {
-    if (this._resizeTimeout) {
-      clearTimeout(this._resizeTimeout);
+    if (this.isDisposed || !this.isAttached) {
+      return;
     }
-    this._resizeTimeout = setTimeout(() => {
-      if (this.isDisposed || !this.isAttached) {
-        return;
-      }
-      // Force recalculation by clearing previous state
-      this._previousState = null;
-      this.update();
-    }, 100);
+    // Force recalculation by clearing previous state
+    this._previousState = null;
+    this.update();
   }
 
   /**
@@ -441,7 +434,7 @@ export class BreadCrumbs extends Widget {
     const home = this._crumbs[Private.Crumb.Home];
     const ellipsis = this._crumbs[Private.Crumb.Ellipsis];
     const preferred = this._crumbs[Private.Crumb.Preferred];
-    const separators = node.querySelectorAll(`.${BREADCRUMB_SEPARATOR_CLASS}`);
+    const separators = node.getElementsByClassName(BREADCRUMB_SEPARATOR_CLASS);
     const separator = separators.length > 0 ? separators[0] : null;
 
     // Create an off-screen container to measure all items
@@ -581,7 +574,7 @@ export class BreadCrumbs extends Widget {
   private _minimumLeftItems: number;
   private _minimumRightItems: number;
   private _resizeObserver: ResizeObserver;
-  private _resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+  private _resizeThrottler: Throttler;
   private _cachedWidths: {
     home: number;
     separator: number;
