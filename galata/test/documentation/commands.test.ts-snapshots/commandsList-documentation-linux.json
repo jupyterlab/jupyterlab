@@ -5483,7 +5483,7 @@
     }
   },
   {
-    "id": "terminal:open-in-terminal-for-browser",
+    "id": "terminal:open-folder-in-terminal",
     "label": "Open in Terminal",
     "caption": "",
     "shortcuts": [],

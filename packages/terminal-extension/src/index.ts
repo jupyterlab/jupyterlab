@@ -62,8 +62,7 @@ namespace CommandIDs {
 
   export const shutdown = 'terminal:shut-down';
 
-  export const openInTerminalForBrowser =
-    'terminal:open-in-terminal-for-browser';
+  export const openFolderInTerminal = 'terminal:open-folder-in-terminal';
 }
 
 /**
@@ -90,8 +89,8 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
 /**
  * A plugin to add the "Open in Terminal" command to the file browser context menu.
  */
-const openInTerminalForBrowserPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/terminal-extension:open-in-terminal-for-browser',
+const openFolderInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/terminal-extension:open-folder-in-terminal',
   description: 'Adds an "Open in Terminal" command for the file browser.',
   requires: [IFileBrowserFactory, ITranslator, ITerminalTracker],
   autoStart: true,
@@ -107,7 +106,7 @@ const openInTerminalForBrowserPlugin: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
 
-    commands.addCommand(CommandIDs.openInTerminalForBrowser, {
+    commands.addCommand(CommandIDs.openFolderInTerminal, {
       label: trans.__('Open in Terminal'),
       icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
       execute: async () => {
@@ -153,7 +152,7 @@ const openInTerminalForBrowserPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-export default [plugin, openInTerminalForBrowserPlugin];
+export default [plugin, openFolderInTerminalPlugin];
 
 /**
  * Activate the terminal plugin.
