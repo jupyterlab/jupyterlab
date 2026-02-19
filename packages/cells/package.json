@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@codemirror/state": "^6.5.4",
-    "@codemirror/view": "^6.39.11",
+    "@codemirror/view": "^6.39.14",
     "@jupyter/ydoc": "^3.1.0",
     "@jupyterlab/apputils": "^4.7.0-alpha.2",
     "@jupyterlab/attachments": "^4.6.0-alpha.2",

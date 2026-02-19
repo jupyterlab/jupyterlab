@@ -486,14 +486,14 @@ class ExtensionManager(PluginManager):
             if self._listings_block_mode:
                 for name, ext in cache.items():
                     if name not in listing:
-                        extensions.append(replace(ext, allowed=True))
+                        extensions.append(ext)
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
             else:
                 for name, ext in cache.items():
                     if name in listing:
-                        extensions.append(replace(ext, allowed=True))
+                        extensions.append(ext)
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
