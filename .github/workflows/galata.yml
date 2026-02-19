@@ -231,9 +231,6 @@ jobs:
           OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Install fonts for consistent documentation snapshots
-          sudo apt-get install fonts-dejavu fonts-noto
-
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
