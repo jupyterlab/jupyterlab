@@ -145,9 +145,9 @@ namespace CommandIDs {
 
   export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
 
-  export const toggleFileSize = 'filebrowser:toggle-file-size';
-
   export const toggleDateCreated = 'filebrowser:toggle-date-created';
+
+  export const toggleFileSize = 'filebrowser:toggle-file-size';
 
   export const toggleSortNotebooksFirst =
     'filebrowser:toggle-sort-notebooks-first';
@@ -262,8 +262,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           navigateToCurrentDirectory: false,
           singleClickNavigation: false,
           showLastModifiedColumn: true,
-          showFileSizeColumn: false,
           showDateCreatedColumn: false,
+          showFileSizeColumn: false,
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
@@ -1776,28 +1776,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.toggleFileSize, {
-    label: trans.__('Show File Size Column'),
-    isToggled: () => browser.showFileSizeColumn,
-    execute: () => {
-      const value = !browser.showFileSizeColumn;
-      const key = 'showFileSizeColumn';
-      if (settingRegistry) {
-        return settingRegistry
-          .set(FILE_BROWSER_PLUGIN_ID, key, value)
-          .catch((reason: Error) => {
-            console.error(`Failed to set ${key} setting`);
-          });
-      }
-    },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
   commands.addCommand(CommandIDs.toggleDateCreated, {
     label: trans.__('Show Date Created Column'),
     isToggled: () => browser.showDateCreatedColumn,
@@ -1810,6 +1788,28 @@ function addCommands(
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: unknown) => {
             console.error(`Failed to set ${key} setting:`, reason);
+          });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleFileSize, {
+    label: trans.__('Show File Size Column'),
+    isToggled: () => browser.showFileSizeColumn,
+    execute: () => {
+      const value = !browser.showFileSizeColumn;
+      const key = 'showFileSizeColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
           });
       }
     },

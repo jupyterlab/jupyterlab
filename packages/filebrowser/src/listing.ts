@@ -3022,9 +3022,9 @@ export namespace DirListing {
       grow: 1
     },
     {
-      id: 'file_size' as const,
-      className: FILE_SIZE_ID_CLASS,
-      itemClassName: ITEM_FILE_SIZE_CLASS,
+      id: 'date_created' as const,
+      className: CREATED_ID_CLASS,
+      itemClassName: ITEM_CREATED_CLASS,
       minWidth: 60,
       resizable: true,
       sortable: true,
@@ -3032,9 +3032,9 @@ export namespace DirListing {
       grow: 0.5
     },
     {
-      id: 'date_created' as const,
-      className: CREATED_ID_CLASS,
-      itemClassName: ITEM_CREATED_CLASS,
+      id: 'file_size' as const,
+      className: FILE_SIZE_ID_CLASS,
+      itemClassName: ITEM_FILE_SIZE_CLASS,
       minWidth: 60,
       resizable: true,
       sortable: true,
