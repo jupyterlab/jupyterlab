@@ -1055,6 +1055,73 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
+    app.contextMenu.addItem({
+      selector: '.jp-DebuggerKernelSource-source',
+      rank: 1,
+      command: CommandIDs.openKernelSource
+    });
+
+    app.contextMenu.addItem({
+      selector: '.jp-DebuggerKernelSource-source',
+      rank: 2,
+      command: CommandIDs.copyKernelSourcePath
+    });
+
+    function isKernelSourceNode(node: HTMLElement): boolean {
+      return node.classList.contains('jp-DebuggerKernelSource-source');
+    }
+
+    commands.addCommand(CommandIDs.openKernelSource, {
+      label: 'Open',
+      execute: async () => {
+        const node = app.contextMenuHitTest(isKernelSourceNode);
+        if (!node) {
+          console.warn('No source node found from context menu');
+          return;
+        }
+
+        const path = node.getAttribute('title');
+        if (!path) {
+          console.warn('Source node missing title');
+          return;
+        }
+
+        const source = await service.getSource({
+          path
+        });
+
+        sourceViewer?.open(source);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.copyKernelSourcePath, {
+      label: 'Copy Path',
+      execute: async () => {
+        const node = app.contextMenuHitTest(isKernelSourceNode);
+        if (!node) {
+          console.warn('No source node found from context menu');
+          return;
+        }
+
+        const path = node.getAttribute('title');
+        if (!path) return;
+
+        await navigator.clipboard.writeText(path);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
