@@ -1,4 +1,4 @@
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const BREADCRUMB_SELECTOR = '.jp-BreadCrumbs';
 const SETTING_ID = '@jupyterlab/filebrowser-extension:browser';
@@ -6,6 +6,16 @@ const SETTING_ID = '@jupyterlab/filebrowser-extension:browser';
 test.use({ tmpPath: 'test-breadcrumbs' });
 
 test.describe('Adaptive Breadcrumbs Snapshots', () => {
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.createDirectory(tmpPath);
+  });
+
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
+  });
+
   test('should render correctly with wide sidebar', async ({
     page,
     tmpPath
