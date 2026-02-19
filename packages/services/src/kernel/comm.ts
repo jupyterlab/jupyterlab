@@ -307,9 +307,9 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     if (!CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
       CommHandler._commTargetSubShellsId[kernelId] = {};
     }
-    const kernelCommTargetSubShells =
+    const kernelCommTargetSubshells =
       CommHandler._commTargetSubShellsId[kernelId];
-    const existingEntry = kernelCommTargetSubShells[this._target];
+    const existingEntry = kernelCommTargetSubshells[this._target];
     if (existingEntry) {
       existingEntry.referenceCount += 1;
       try {
@@ -317,7 +317,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         subshellStarted.resolve();
       } catch (e) {
         // If the future rejected we need to close the subshell to avoid leaks
-        await this._closePerComTargetSubshell(false);
+        await this._closePerCommTargetSubshell(false);
         subshellStarted.reject(
           `Per comm-target subshell creation failed: ${e}`
         );
@@ -331,18 +331,18 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         .done.then(replyMsg => replyMsg.content.subshell_id),
       referenceCount: 1
     };
-    kernelCommTargetSubShells[this._target] = entry;
+    kernelCommTargetSubshells[this._target] = entry;
     try {
       this._subshellId = await entry.subshellId;
       subshellStarted.resolve();
     } catch (e) {
       // If the future rejected we need to close the subshell to avoid leaks
-      await this._closePerComTargetSubshell(false);
+      await this._closePerCommTargetSubshell(false);
       subshellStarted.reject(`Per comm-target subshell creation failed: ${e}`);
     }
   }
 
-  private async _closePerComTargetSubshell(shouldAskKernelToDelete = true) {
+  private async _closePerCommTargetSubshell(shouldAskKernelToDelete = true) {
     const kernelId = this._kernel.id;
     const target = this._target;
     if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
