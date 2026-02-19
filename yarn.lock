@@ -1781,6 +1781,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/dejavu-mono@npm:^5.2.5":
+  version: 5.2.5
+  resolution: "@fontsource/dejavu-mono@npm:5.2.5"
+  checksum: 669a44728068b81251d67aad4ab5ac4b04d86a033b1d5c2178ef6c3e1d1c903b3ead3787f26c4f9b5099b0296d653e2d84aaa62eba8fc1218ba7004fef825bd8
+  languageName: node
+  linkType: hard
+
+"@fontsource/dejavu-sans@npm:^5.2.5":
+  version: 5.2.5
+  resolution: "@fontsource/dejavu-sans@npm:5.2.5"
+  checksum: dc2c18df70a30dec9e4ef4338bdc31d31f478e47f1515837129e7a758da29b6600177244b94ab8b75ebc232ba7f74775531cc1a993534e1a309a3c0239dffc0b
+  languageName: node
+  linkType: hard
+
 "@fortawesome/fontawesome-free@npm:^5.12.0":
   version: 5.15.4
   resolution: "@fortawesome/fontawesome-free@npm:5.15.4"
@@ -3706,6 +3720,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata@workspace:galata"
   dependencies:
+    "@fontsource/dejavu-mono": ^5.2.5
+    "@fontsource/dejavu-sans": ^5.2.5
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/coreutils": ^6.6.0-alpha.2
