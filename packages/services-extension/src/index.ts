@@ -135,7 +135,7 @@ const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
 /**
  * Content provider plugin warning
  *
- * A plugin that errors out if users are overwritting the deprecated defaultContentProvider
+ * A plugin that errors out if users are overwriting the deprecated defaultContentProvider
  */
 const contentProviderWarning: ServiceManagerPlugin<void> = {
   id: '@jupyterlab/services-extension:content-provider-warning',

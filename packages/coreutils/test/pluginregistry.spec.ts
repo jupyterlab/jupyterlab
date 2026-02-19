@@ -51,7 +51,7 @@ describe('JupyterPluginRegistry', () => {
       expect.stringContaining('slow-plugin')
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('with 2 dependants')
+      expect.stringContaining('with 2 dependant')
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       expect.stringMatching(/5\d\d\.\d\dms/) // 550ms or slightly more
