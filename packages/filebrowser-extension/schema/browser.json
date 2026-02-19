@@ -107,6 +107,11 @@
         "rank": 15
       },
       {
+        "command": "filebrowser:toggle-date-created",
+        "selector": ".jp-DirListing-header",
+        "rank": 15.5
+      },
+      {
         "command": "filebrowser:toggle-file-checkboxes",
         "selector": ".jp-DirListing-header",
         "rank": 16
@@ -216,6 +221,12 @@
       "type": "boolean",
       "title": "Show file size column",
       "description": "Whether to show the file size column",
+      "default": false
+    },
+    "showDateCreatedColumn": {
+      "type": "boolean",
+      "title": "Show date created column",
+      "description": "Whether to show the date created column",
       "default": false
     },
     "showHiddenFiles": {

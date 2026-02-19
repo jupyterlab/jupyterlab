@@ -97,6 +97,11 @@ const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 const ITEM_FILE_SIZE_CLASS = 'jp-DirListing-itemFileSize';
 
 /**
+ * The class name added to the listing item created cell.
+ */
+const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
+
+/**
  * The class name added to the label element that wraps each item's checkbox and
  * the header's check-all checkbox.
  */
@@ -121,6 +126,11 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
  * The class name added to the file size column header cell.
  */
 const FILE_SIZE_ID_CLASS = 'jp-id-filesize';
+
+/**
+ * The class name added to the created column header cell.
+ */
+const CREATED_ID_CLASS = 'jp-id-created';
 
 /**
  * The mime type for a contents drag object.
@@ -245,6 +255,8 @@ export class DirListing extends Widget {
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     // hide the file size column by default
     this._hiddenColumns.add('file_size');
+    // hide the date created column by default
+    this._hiddenColumns.add('date_created');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
@@ -2650,7 +2662,9 @@ export class DirListing extends Widget {
     name: null,
     file_size: null,
     is_selected: null,
-    last_modified: null
+    last_modified: null,
+    // eslint-disable-next-line camelcase
+    date_created: null
   };
   private _sortNotebooksFirst = false;
   private _sortFileNamesNaturally = true;
@@ -2735,17 +2749,29 @@ export namespace DirListing {
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
+  export type ToggleableColumn =
+    | 'last_modified'
+    | 'is_selected'
+    | 'file_size'
+    | 'date_created';
 
   /**
    * Resizable columns.
    */
-  export type ResizableColumn = 'name' | 'last_modified' | 'file_size';
+  export type ResizableColumn =
+    | 'name'
+    | 'last_modified'
+    | 'file_size'
+    | 'date_created';
 
   /**
    * Sortable columns.
    */
-  export type SortableColumn = 'name' | 'last_modified' | 'file_size';
+  export type SortableColumn =
+    | 'name'
+    | 'last_modified'
+    | 'file_size'
+    | 'date_created';
 
   /**
    * A file contents model thunk.
@@ -2821,6 +2847,21 @@ export namespace DirListing {
       modified: HTMLElement,
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle
+    ): void;
+
+    /**
+     * Update an item's created date.
+     *
+     * @param created - Element containing the file's created date.
+     *
+     * @param createdDate - String representation of the created date.
+     *
+     * @param createdStyle - The date style for the created column: narrow, short, or long
+     */
+    updateItemCreated?(
+      created: HTMLElement,
+      createdDate: string,
+      createdStyle: Time.HumanStyle
     ): void;
 
     /**
@@ -2989,6 +3030,16 @@ export namespace DirListing {
       sortable: true,
       caretSide: 'left',
       grow: 0.5
+    },
+    {
+      id: 'date_created' as const,
+      className: CREATED_ID_CLASS,
+      itemClassName: ITEM_CREATED_CLASS,
+      minWidth: 60,
+      resizable: true,
+      sortable: true,
+      caretSide: 'left',
+      grow: 0.5
     }
   ];
 
@@ -3039,6 +3090,12 @@ export namespace DirListing {
           this._createHeaderItemNodeWithSizes({
             small: trans.__('Size'),
             large: trans.__('File Size')
+          }),
+        // eslint-disable-next-line camelcase
+        date_created: () =>
+          this._createHeaderItemNodeWithSizes({
+            small: trans.__('Created'),
+            large: trans.__('Date Created')
           }),
         is_selected: () =>
           this.createCheckboxWrapperNode({
@@ -3263,6 +3320,45 @@ export namespace DirListing {
     }
 
     /**
+     * Update an item's created date.
+     *
+     * @param created - Element containing the file's created date.
+     *
+     * @param createdDate - String representation of the created date.
+     *
+     * @param createdStyle - The date style for the created column: narrow, short, or long
+     */
+    updateItemCreated(
+      created: HTMLElement,
+      createdDate: string,
+      createdStyle: Time.HumanStyle
+    ): void {
+      // Formatting dates is expensive (0.1-0.2ms per call,
+      // so over 150 files can easily already choke the renderer),
+      // let's do the bare minimum check of comparing if an update
+      // is needed using a last update cache:
+      const previousUpdate = this._createdColumnLastUpdate.get(created);
+      if (
+        previousUpdate?.date === createdDate &&
+        previousUpdate?.style === createdStyle
+      ) {
+        return;
+      }
+
+      const parsedDate = new Date(createdDate);
+      // Render the date in one of multiple formats, depending on the container's size
+      const createdText = Time.formatHuman(parsedDate, createdStyle);
+      const createdTitle = Time.format(parsedDate);
+
+      created.textContent = createdText;
+      created.title = createdTitle;
+      this._createdColumnLastUpdate.set(created, {
+        date: createdDate,
+        style: createdStyle
+      });
+    }
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
@@ -3296,8 +3392,9 @@ export namespace DirListing {
         name: model.name,
         selected,
         lastModified: model.last_modified,
+        created: model.created,
         modifiedStyle,
-        hiddenColumns,
+        hiddenColumns: Array.from(hiddenColumns ?? []).sort(),
         columnsSizes,
         fileSize: model.size
       });
@@ -3324,6 +3421,9 @@ export namespace DirListing {
       let fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS) as
         | HTMLElement
         | undefined;
+      let created = DOMUtils.findElement(node, ITEM_CREATED_CLASS) as
+        | HTMLElement
+        | undefined;
 
       const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
@@ -3347,6 +3447,17 @@ export namespace DirListing {
       } else if (showFileSize && !fileSize) {
         fileSize = this.itemFactories.file_size();
         (modified ?? nameColumn).insertAdjacentElement('afterend', fileSize);
+      }
+
+      const showCreated = !hiddenColumns?.has('date_created');
+      if (created && !showCreated) {
+        node.removeChild(created);
+      } else if (showCreated && !created) {
+        created = this.itemFactories.date_created();
+        const insertAfter = fileSize ?? modified ?? nameColumn;
+        if (insertAfter) {
+          insertAfter.insertAdjacentElement('afterend', created);
+        }
       }
 
       // render the file item's icon
@@ -3465,6 +3576,18 @@ export namespace DirListing {
           modifiedStyle ?? 'short'
         );
       }
+
+      let created = DOMUtils.findElement(node, ITEM_CREATED_CLASS) as
+        | HTMLElement
+        | undefined;
+
+      if (model.created && created) {
+        this.updateItemCreated(
+          created,
+          model.created,
+          modifiedStyle ?? 'short'
+        );
+      }
     }
 
     /**
@@ -3569,6 +3692,12 @@ export namespace DirListing {
         fileSize.className = ITEM_FILE_SIZE_CLASS;
         return fileSize;
       },
+      // eslint-disable-next-line camelcase
+      date_created: () => {
+        const created = document.createElement('span');
+        created.className = ITEM_CREATED_CLASS;
+        return created;
+      },
       is_selected: () => this.createCheckboxWrapperNode()
     };
 
@@ -3615,6 +3744,14 @@ export namespace DirListing {
      * Register of most recent arguments for last modified column update.
      */
     private _modifiedColumnLastUpdate = new WeakMap<
+      HTMLElement,
+      { date: string; style: Time.HumanStyle }
+    >();
+
+    /**
+     * Register of most recent arguments for date created column update.
+     */
+    private _createdColumnLastUpdate = new WeakMap<
       HTMLElement,
       { date: string; style: Time.HumanStyle }
     >();
@@ -3692,6 +3829,9 @@ namespace Private {
     translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
+    // NOTE: The direction semantics are inverted from typical conventions:
+    // 'ascending' displays larger/newer values first, 'descending' displays smaller/older first.
+    // This is existing JupyterLab behavior (see https://github.com/jupyterlab/jupyterlab/issues/16779).
     const reverse = state.direction === 'descending' ? 1 : -1;
 
     /**
@@ -3778,6 +3918,16 @@ namespace Private {
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
           return (b.size ?? 0) - (a.size ?? 0);
+        })
+      );
+    } else if (state.key === 'date_created') {
+      // Sort by date created
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (
+            new Date(a.created ?? '').getTime() -
+            new Date(b.created ?? '').getTime()
+          );
         })
       );
     } else {
