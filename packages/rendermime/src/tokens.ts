@@ -205,7 +205,30 @@ export const IMarkdownParser = new Token<IRenderMime.IMarkdownParser>(
   'A service for rendering markdown syntax as HTML content.'
 );
 
-export interface IMarkdownParser extends IRenderMime.IMarkdownParser {}
+export interface IMarkdownParser extends IRenderMime.IMarkdownParser {
+  /**
+   * Parse markdown and extract heading metadata.
+   *
+   * @param source - The markdown string to parse.
+   * @returns - A promise of heading metadata.
+   */
+  getHeadingTokens?: (source: string) => Promise<IMarkdownHeadingToken[]>;
+}
+
+/**
+ * Markdown heading metadata.
+ */
+export interface IMarkdownHeadingToken {
+  /**
+   * Line number in source markdown (0-based)
+   */
+  line: number;
+
+  /**
+   * Raw markdown text of the heading
+   */
+  raw: string;
+}
 
 /**
  * The URL resolver factory.
