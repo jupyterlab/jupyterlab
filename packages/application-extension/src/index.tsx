@@ -83,6 +83,8 @@ namespace CommandIDs {
 
   export const closeAll: string = 'application:close-all';
 
+  export const moveWidget = 'application:move-widget';
+
   export const setMode: string = 'application:set-mode';
 
   export const showPropertyPanel: string = 'property-inspector:show-panel';
@@ -1560,6 +1562,124 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The widget mover plugin to allow moving widgets between different areas.
+ */
+const widgetMover: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:widget-mover',
+  description:
+    'Adds commands and context menu items to move widgets between areas.',
+  autoStart: true,
+  requires: [ILabShell, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    translator: ITranslator
+  ) => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const areas = ['main', 'left', 'right', 'down'] as const;
+
+    const contextMenuWidget = (): Widget | null => {
+      const test = (node: HTMLElement) => !!node.dataset.id;
+      const node = app.contextMenuHitTest(test);
+
+      if (!node) {
+        return null;
+      }
+
+      // Try to find the widget in all areas of interest
+      for (const area of areas) {
+        const widget = find(
+          labShell.widgets(area),
+          w => w.id === node.dataset.id
+        );
+        if (widget) {
+          return widget;
+        }
+      }
+
+      return null;
+    };
+
+    const getWidgetArea = (widget: Widget): ILabShell.Area | null => {
+      for (const area of areas) {
+        const widgetInArea = find(
+          labShell.widgets(area),
+          w => w.id === widget.id
+        );
+        if (widgetInArea) {
+          return area;
+        }
+      }
+      return null;
+    };
+
+    const moveWidgetToArea = (targetArea: ILabShell.Area) => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+
+      // Don't move if already in target area
+      const currentArea = getWidgetArea(widget);
+      if (currentArea === targetArea) {
+        return;
+      }
+
+      labShell.move(widget, targetArea);
+      labShell.activateById(widget.id);
+    };
+
+    // Add command for moving widgets to different areas
+    commands.addCommand(CommandIDs.moveWidget, {
+      label: args => {
+        const area = args?.area as ILabShell.Area;
+        switch (area) {
+          case 'main':
+            return trans.__('Move to Main Area');
+          case 'left':
+            return trans.__('Move to Left Sidebar');
+          case 'right':
+            return trans.__('Move to Right Sidebar');
+          case 'down':
+            return trans.__('Move to Down Area');
+          default:
+            return trans.__('Move Widget');
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            area: {
+              type: 'string',
+              enum: ['main', 'left', 'right', 'down'],
+              description: trans.__('The target area to move the widget to')
+            }
+          },
+          required: ['area']
+        }
+      },
+      isVisible: args => {
+        const area = args?.area as string;
+        return areas.includes(area as any);
+      },
+      isEnabled: args => {
+        const area = args?.area as ILabShell.Area;
+        const widget = contextMenuWidget();
+        return widget !== null && area && getWidgetArea(widget) !== area;
+      },
+      execute: args => {
+        const area = args?.area as ILabShell.Area;
+        if (area) {
+          moveWidgetToArea(area);
+        }
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1579,7 +1699,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paths,
   propertyInspector,
   jupyterLogo,
-  topbar
+  topbar,
+  widgetMover
 ];
 
 export default plugins;
