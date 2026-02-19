@@ -173,14 +173,15 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: var(--jp-flat-button-padding);
-  margin: 8px 0;
-  min-height: var(--jp-flat-button-height);
+  padding: 0 12px;
+  margin: 6px 0;
+  height: 27px;
+  min-width: 150px;
+  max-width: 220px;
   font-size: var(--jp-ui-font-size1);
   font-family: var(--jp-ui-font-family);
   background-color: var(--jp-layout-color1);
-  border: 1px solid var(--jp-border-color2);
+  border: 1px solid var(--jp-border-color1);
   color: var(--jp-ui-font-color1);
   cursor: pointer;
 }
