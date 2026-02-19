@@ -200,25 +200,26 @@ test.describe('Open in Terminal from File Browser', () => {
     await folderLocator.click({ button: 'right' });
     await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
 
-    // Check that one terminal opened in the correct path
-    const terminalTabLocator = page.activity.getTabLocator('Terminal 1');
-    await expect(terminalTabLocator).toBeVisible();
+    // Assert exactly one terminal tab opened
+    const terminalTabLocator = page.locator(
+      '.lm-DockPanel-tabBar .lm-TabBar-tab:has-text("Terminal")'
+    );
+    await expect(terminalTabLocator).toHaveCount(1);
 
-    const terminalPanelLocator =
-      await page.activity.getPanelLocator('Terminal 1');
-    expect(terminalPanelLocator).not.toBeNull();
+    // Get visible terminal panel
+    const terminalPanelLocator = page.locator(
+      '.lm-DockPanel .jp-Terminal:visible'
+    );
+    await expect(terminalPanelLocator).toHaveCount(1);
 
-    // Wait for terminal body to be ready
-    await terminalPanelLocator!.locator('.jp-Terminal-body').waitFor();
-    await page.waitForTimeout(200);
-
-    await terminalPanelLocator!.click();
-    await page.waitForTimeout(200);
+    // Wait for terminal to be ready
+    await terminalPanelLocator.locator('.jp-Terminal-body').waitFor();
+    await terminalPanelLocator.click();
 
     await page.keyboard.type('pwd');
     await page.keyboard.press('Enter');
 
-    await expect(terminalPanelLocator!).toContainText(folderName, {
+    await expect(terminalPanelLocator).toContainText(folderName, {
       timeout: 5000
     });
   });
@@ -264,13 +265,13 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
+    const activeTerminal = page.locator('.jp-Terminal-body:visible');
     const foundFolders = new Set<string>();
     for (let i = 0; i < 2; i++) {
       await tabs.nth(i).click();
-      await page.waitForTimeout(500);
+      await activeTerminal.waitFor({ state: 'visible' });
 
       // Find the currently visible terminal body
-      const activeTerminal = page.locator('.jp-Terminal-body:visible');
       await expect(activeTerminal).toHaveCount(1);
 
       await activeTerminal.click();
@@ -344,7 +345,7 @@ test.describe('Open in Terminal from File Browser', () => {
     if ((await tabs.count()) > 0) {
       await tabs.first().click();
     }
-    await page.waitForTimeout(500);
+    await activeTerminal.waitFor({ state: 'visible' });
 
     await activeTerminal.click();
     await page.keyboard.type('pwd');
