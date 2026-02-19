@@ -25,6 +25,7 @@ test.describe('Table of Contents', () => {
 
     await page
       .getByRole('button', { name: 'Show heading number in the' })
+      .first()
       .click();
   });
 
@@ -51,6 +52,7 @@ test.describe('Table of Contents', () => {
     const imageName = 'toggle-numbered-list.png';
     await page
       .getByRole('button', { name: 'Show heading number in the' })
+      .first()
       .click();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
