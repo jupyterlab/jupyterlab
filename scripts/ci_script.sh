@@ -132,24 +132,24 @@ if [[ $GROUP == integrity3 ]]; then
     git stash
     git checkout -b commit_${BUILD_SOURCEVERSION}
     git clean -df
-    jlpm bumpversion minor --force
-    jlpm bumpversion major --force
-    jlpm bumpversion release --force # switch to beta
-    jlpm bumpversion release --force # switch to rc
-    jlpm bumpversion build --force
-    jlpm bumpversion next --force
+    jlpm bumpversion minor
+    jlpm bumpversion major
+    jlpm bumpversion release # switch to beta
+    jlpm bumpversion release # switch to rc
+    jlpm bumpversion build
+    jlpm bumpversion next
     VERSION=$(hatch version)
     if [[ $VERSION != *rc2 ]]; then exit 1; fi
 
     # make sure we can patch release
-    jlpm bumpversion release --force  # switch to final
-    jlpm bumpversion patch --force
-    jlpm bumpversion next --force
+    jlpm bumpversion release # switch to final
+    jlpm bumpversion patch
+    jlpm bumpversion next
 
     # make sure we can bump major JS releases
-    jlpm bumpversion minor --force
-    jlpm bump:js:major console --force
-    jlpm bump:js:major console notebook --force
+    jlpm bumpversion minor
+    jlpm bump:js:major console
+    jlpm bump:js:major console notebook
 
     # Make sure that a prepublish would include the proper files.
     jlpm run prepublish:check
@@ -159,7 +159,7 @@ fi
 if [[ $GROUP == release_test ]]; then
     # bump the version
     git checkout -b test HEAD
-    jlpm bumpversion next --force
+    jlpm bumpversion next
 
     # Use verdaccio during publish
     node buildutils/lib/local-repository.js start

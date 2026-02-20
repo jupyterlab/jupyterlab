@@ -41,3 +41,4 @@ tests/**/.cache-loader
 
 **/node_modules
 .yarn
+!.yarn/plugins

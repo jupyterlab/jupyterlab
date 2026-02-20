@@ -10,8 +10,6 @@ import * as utils from './utils';
 commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
-  .option('--force', 'Force the upgrade')
-  .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
   .action((spec: any, opts: any) => {
     utils.exitOnUncaughtException();
@@ -30,13 +28,7 @@ commander
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
-      let cmd = 'jlpm run patch:release --all';
-      if (opts.force) {
-        cmd += ' --force';
-      }
-      if (opts.skipCommit) {
-        cmd += ' --skip-commit';
-      }
+      let cmd = 'jlpm run patch:release';
       utils.run(cmd);
       process.exit(0);
     }
@@ -80,10 +72,8 @@ commander
       lernaVersion += ' --preid=alpha';
     }
 
-    let cmd = `lerna version --no-git-tag-version --force-publish=* --no-push ${lernaVersion}`;
-    if (opts.force) {
-      cmd += ' --yes';
-    }
+    let cmd = `jlpm workspaces foreach run`;
+    cmd += ` npm version ${lernaVersion}`;
 
     const oldVersion = utils.getJSVersion('metapackage');
 
