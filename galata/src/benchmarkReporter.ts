@@ -15,7 +15,7 @@ import type {
 } from '@playwright/test/reporter';
 import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import fs from 'fs';
-import os from 'os';
+import os from 'node:os';
 import path from 'path';
 import * as vega from 'vega';
 import * as vl from 'vega-lite';
