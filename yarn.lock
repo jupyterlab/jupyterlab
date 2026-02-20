@@ -3722,7 +3722,6 @@ __metadata:
     json5: ^2.2.3
     path: ~0.12.7
     rimraf: ~5.0.5
-    systeminformation: ^5.8.6
     typescript: ~5.9.3
     vega: ^5.20.0
     vega-lite: ^5.6.1
@@ -21000,16 +20999,6 @@ __metadata:
     "@pkgr/utils": ^2.3.1
     tslib: ^2.5.0
   checksum: 8a9560e5d8f3d94dc3cf5f7b9c83490ffa30d320093560a37b88f59483040771fd1750e76b9939abfbb1b5a23fd6dfbae77f6b338abffe7cae7329cd9b9bb86b
-  languageName: node
-  linkType: hard
-
-"systeminformation@npm:^5.8.6":
-  version: 5.27.14
-  resolution: "systeminformation@npm:5.27.14"
-  bin:
-    systeminformation: lib/cli.js
-  checksum: a68728714c51a351f2d3dcd7ce26353916b137965e17b11889325bcec2df7ed618475146145c688fcb456d83b4c28a3ce90799e1515458701a6c9e7cf5123ad9
-  conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
   languageName: node
   linkType: hard
 
