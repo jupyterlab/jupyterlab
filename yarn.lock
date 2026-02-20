@@ -3706,6 +3706,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata-extension@workspace:galata/extension"
   dependencies:
+    "@fontsource/dejavu-mono": ^5.2.5
+    "@fontsource/dejavu-sans": ^5.2.5
+    "@fontsource/ubuntu": ^5.2.8
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/builder": ^4.6.0-alpha.2
@@ -3727,9 +3730,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata@workspace:galata"
   dependencies:
-    "@fontsource/dejavu-mono": ^5.2.5
-    "@fontsource/dejavu-sans": ^5.2.5
-    "@fontsource/ubuntu": ^5.2.8
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/coreutils": ^6.6.0-alpha.2

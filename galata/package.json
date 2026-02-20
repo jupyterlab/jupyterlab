@@ -44,9 +44,6 @@
     "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
   },
   "dependencies": {
-    "@fontsource/dejavu-mono": "^5.2.5",
-    "@fontsource/dejavu-sans": "^5.2.5",
-    "@fontsource/ubuntu": "^5.2.8",
     "@jupyterlab/application": "^4.6.0-alpha.2",
     "@jupyterlab/apputils": "^4.7.0-alpha.2",
     "@jupyterlab/coreutils": "^6.6.0-alpha.2",
