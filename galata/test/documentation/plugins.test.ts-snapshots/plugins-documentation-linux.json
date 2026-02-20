@@ -15,6 +15,7 @@
   "@jupyterlab/application-extension:router": "Provides the URL router",
   "@jupyterlab/application-extension:shell": "Provides the JupyterLab shell. It has an extended API compared to `app.shell`.",
   "@jupyterlab/application-extension:status": "Provides the application status.",
+  "@jupyterlab/application-extension:tab-switch-shortcuts": "Registers tab switching shortcuts based on user setting.",
   "@jupyterlab/application-extension:top-bar": "Adds a toolbar to the top area (next to the main menu bar).",
   "@jupyterlab/application-extension:tree-resolver": "Provides the tree route resolver",
   "@jupyterlab/apputils-extension:announcements": "Add the announcement feature. It will fetch news on the internet and check for application updates.",
