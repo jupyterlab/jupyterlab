@@ -74,33 +74,33 @@
     "cssOverrides": {
       "type": "object",
       "additionalProperties": false,
-      "description": "The description field of each item is the CSS property that will be used to validate an override's value",
+      "description": "CSS override properties for theming",
       "properties": {
         "code-font-family": {
           "type": ["string", "null"],
-          "description": "font-family"
+          "description": "Font family used for code"
         },
         "code-font-size": {
           "type": ["string", "null"],
-          "description": "font-size"
+          "description": "Font size used for code"
         },
 
         "content-font-family": {
           "type": ["string", "null"],
-          "description": "font-family"
+          "description": "Font family used for content"
         },
         "content-font-size1": {
           "type": ["string", "null"],
-          "description": "font-size"
+          "description": "Font size used for content"
         },
 
         "ui-font-family": {
           "type": ["string", "null"],
-          "description": "font-family"
+          "description": "Font family used for the UI"
         },
         "ui-font-size1": {
           "type": ["string", "null"],
-          "description": "font-size"
+          "description": "Font size used for the UI"
         }
       }
     }
