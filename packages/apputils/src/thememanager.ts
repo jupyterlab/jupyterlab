@@ -531,9 +531,15 @@ export class ThemeManager implements IThemeManager {
 
     const themeProps = this._settings.schema.properties?.theme;
     if (themeProps) {
-      themeProps.enum = Object.keys(themes).map(
-        value => themes[value].displayName ?? value
-      );
+      // Use oneOf with const/title so the stored value is always the
+      // untranslated theme name while the dropdown shows the translated
+      // displayName. Using enum with displayNames broke validation in
+      // non-English locales (see #18543).
+      delete themeProps.enum;
+      themeProps.oneOf = Object.keys(themes).map(value => ({
+        const: value,
+        title: themes[value].displayName ?? value
+      }));
     }
 
     // Unload the previously loaded theme.
