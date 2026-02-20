@@ -85,8 +85,15 @@ export class BreadCrumbs extends Widget {
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
     this._resizeThrottler = new Throttler(() => this._onResize(), 50);
-    this._resizeObserver = new ResizeObserver(() => {
-      void this._resizeThrottler.invoke();
+    this._resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width;
+        if (this._lastRenderedWidth > 0 && newWidth < this._lastRenderedWidth) {
+          this._onResize();
+        } else {
+          void this._resizeThrottler.invoke();
+        }
+      }
     });
   }
 
@@ -529,6 +536,7 @@ export class BreadCrumbs extends Widget {
       totalWidth += itemWidths[i] + separatorWidth;
     }
     if (totalWidth <= availableForItems) {
+      this._lastRenderedWidth = fixedOverhead + totalWidth;
       return { left: totalParts, right: 0 };
     }
 
@@ -558,9 +566,21 @@ export class BreadCrumbs extends Widget {
     }
 
     // Ensure minimums are respected
+    const finalRight = Math.max(rightItems, this._minimumRightItems);
+    // Track the total rendered width for the immediate-collapse check.
+    // If minimums forced extra items, recalculate; otherwise reuse usedWidth.
+    let rightUsed = usedWidth;
+    if (finalRight > rightItems) {
+      rightUsed = 0;
+      for (let i = totalParts - finalRight; i < totalParts; i++) {
+        rightUsed += itemWidths[i] + separatorWidth;
+      }
+    }
+    this._lastRenderedWidth =
+      fixedOverhead + ellipsisOverhead + leftUsed + rightUsed;
     return {
       left: this._minimumLeftItems,
-      right: Math.max(rightItems, this._minimumRightItems)
+      right: finalRight
     };
   }
 
@@ -582,6 +602,7 @@ export class BreadCrumbs extends Widget {
     preferred: number;
     itemWidths: number[];
   } | null = null;
+  private _lastRenderedWidth = 0;
 }
 
 /**
