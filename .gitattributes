@@ -1,3 +1,4 @@
 jupyterlab/staging/yarn.js binary
 # SCM syntax highlighting
 pixi.lock linguist-language=YAML linguist-generated=true
+*.png merge=ours
