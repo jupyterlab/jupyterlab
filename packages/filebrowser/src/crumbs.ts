@@ -86,13 +86,15 @@ export class BreadCrumbs extends Widget {
     this._model.refreshed.connect(this.update, this);
     this._resizeThrottler = new Throttler(() => this._onResize(), 50);
     this._resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const newWidth = entry.contentRect.width;
-        if (this._lastRenderedWidth > 0 && newWidth < this._lastRenderedWidth) {
-          this._onResize();
-        } else {
-          void this._resizeThrottler.invoke();
-        }
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      const newWidth = entry.contentRect.width;
+      if (this._lastRenderedWidth > 0 && newWidth < this._lastRenderedWidth) {
+        this._onResize();
+      } else {
+        void this._resizeThrottler.invoke();
       }
     });
   }
@@ -490,6 +492,9 @@ export class BreadCrumbs extends Widget {
     left: number;
     right: number;
   } {
+    // Reset last rendered width to avoid stale data on early returns
+    this._lastRenderedWidth = 0;
+
     const parts = path.split('/').filter(part => part !== '');
     const totalParts = parts.length;
 
