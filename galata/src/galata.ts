@@ -26,7 +26,8 @@ import { JupyterLabPage } from './jupyterlabpage';
 export namespace galata {
   /**
    * Default user settings:
-   * - Deactivate codemirror cursor blinking to avoid noise in screenshots
+   * - Deactivate cursor blinking to avoid noise in screenshots
+   * - Fix fonts to ensure consitent screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
@@ -43,6 +44,13 @@ export namespace galata {
     '@jupyterlab/terminal-extension:plugin': {
       cursorBlink: false,
       fontFamily: 'DejaVu Mono'
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        'code-font-family': 'DejaVu Mono',
+        'content-font-family': 'DejaVu Sans',
+        'ui-font-family': 'DejaVu Sans'
+      }
     }
   };
 

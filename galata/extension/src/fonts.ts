@@ -11,10 +11,7 @@ import '@fontsource/dejavu-mono';
 
 const STYLE = `
 :root {
-  /* Substitute fonts */
-  --jp-ui-font-family: 'DejaVu Sans' !important;
-  --jp-content-font-family: 'DejaVu Sans' !important;
-  --jp-code-font-family: 'DejaVu Mono' !important;
+  /* Substitute fonts which do not have theme overrides */
   --jp-code-font-family-default: 'DejaVu Mono' !important;
   /* Ensure we have kerning enabled */
   font-kerning: normal;
