@@ -87,12 +87,19 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * Set whether comms are running on subshells, or not
    */
   set commsOverSubshells(value: CommsOverSubshells) {
-    this._commsOverSubshells = value;
-    if (this._commsOverSubshells === CommsOverSubshells.Disabled) {
-      this._maybeCloseSubshell();
-    } else {
-      void this._maybeStartSubshell();
+    if (value === this._commsOverSubshells) {
+      // Do nothing if the value is not changing.
+      return;
     }
+    const closePromise = this._maybeCloseSubshell(this._commsOverSubshells);
+    this._commsOverSubshells = value;
+    closePromise
+      .then(() => {
+        if (this._commsOverSubshells !== CommsOverSubshells.Disabled) {
+          void this._maybeStartSubshell();
+        }
+      })
+      .catch(console.warn);
   }
 
   /**
@@ -267,7 +274,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   dispose(): void {
-    this._maybeCloseSubshell();
+    void this._maybeCloseSubshell(this._commsOverSubshells);
 
     super.dispose();
   }
@@ -294,48 +301,121 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     }
 
     // One shell per comm-target
+    const subshellStarted = this._subshellStarted;
     const kernelId = this._kernel.id;
     if (!CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
       CommHandler._commTargetSubShellsId[kernelId] = {};
     }
-    const kernelCommTargetSubShells =
+    const kernelCommTargetSubshells =
       CommHandler._commTargetSubShellsId[kernelId];
-    if (kernelCommTargetSubShells[this._target]) {
-      this._subshellId = await kernelCommTargetSubShells[this._target];
-      this._subshellStarted.resolve();
-    } else {
-      // Create subshell
-      kernelCommTargetSubShells[this._target] = this._kernel
-        .requestCreateSubshell({})
-        .done.then(replyMsg => {
-          this._subshellId = replyMsg.content.subshell_id;
-          return this._subshellId;
-        });
-      await kernelCommTargetSubShells[this._target];
-      this._subshellStarted.resolve();
-    }
-  }
-
-  private _maybeCloseSubshell() {
-    // Only close subshell if we have one subshell per comm
-    if (this._commsOverSubshells !== CommsOverSubshells.PerComm) {
-      this._subshellId = null;
+    const existingEntry = kernelCommTargetSubshells[this._target];
+    if (existingEntry) {
+      existingEntry.referenceCount += 1;
+      try {
+        this._subshellId = await existingEntry.subshellId;
+        subshellStarted.resolve();
+      } catch (e) {
+        // If the future rejected we need to close the subshell to avoid leaks
+        await this._closePerCommTargetSubshell(false);
+        subshellStarted.reject(
+          `Per comm-target subshell creation failed: ${e}`
+        );
+      }
       return;
     }
 
-    if (this._subshellId && this._kernel.status !== 'dead') {
-      this._kernel.requestDeleteSubshell(
-        { subshell_id: this._subshellId },
-        true
-      );
+    const entry: Private.ISubshellEntry = {
+      subshellId: this._kernel
+        .requestCreateSubshell({})
+        .done.then(replyMsg => replyMsg.content.subshell_id),
+      referenceCount: 1
+    };
+    kernelCommTargetSubshells[this._target] = entry;
+    try {
+      this._subshellId = await entry.subshellId;
+      subshellStarted.resolve();
+    } catch (e) {
+      // If the future rejected we need to close the subshell to avoid leaks
+      await this._closePerCommTargetSubshell(false);
+      subshellStarted.reject(`Per comm-target subshell creation failed: ${e}`);
     }
-    this._subshellId = null;
+  }
+
+  private async _closePerCommTargetSubshell(shouldAskKernelToDelete = true) {
+    const kernelId = this._kernel.id;
+    const target = this._target;
+    if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
+      // Close the subshell for this target if this is the last comm.
+      const kernelTargets = CommHandler._commTargetSubShellsId[kernelId];
+      const entry = kernelTargets[target];
+      if (entry) {
+        entry.referenceCount -= 1;
+        if (entry.referenceCount <= 0) {
+          if (shouldAskKernelToDelete) {
+            let subshellId: string | null = null;
+            try {
+              subshellId = await entry.subshellId;
+            } catch (e) {
+              console.warn(
+                `Subshell identifier not available in the closeout sequence, will not request deletion: ${e}`
+              );
+            }
+            if (subshellId !== null) {
+              this._kernel.requestDeleteSubshell(
+                { subshell_id: subshellId },
+                true
+              );
+            }
+          }
+          delete kernelTargets[target];
+        }
+      }
+      if (Object.keys(kernelTargets).length === 0) {
+        delete CommHandler._commTargetSubShellsId[kernelId];
+      }
+      // Clear identifier
+      this._subshellId = null;
+    }
+    // Restart promise delegate to subsequent startup
+    this._subshellStarted = new PromiseDelegate<void>();
+  }
+
+  private async _maybeCloseSubshell(mode: CommsOverSubshells) {
+    if (this._kernel.status === 'dead') {
+      return;
+    }
+    switch (mode) {
+      case CommsOverSubshells.PerComm: {
+        if (this._subshellId) {
+          // Close the only subshell
+          this._kernel.requestDeleteSubshell(
+            { subshell_id: this._subshellId },
+            true
+          );
+          // Clear identifier
+          this._subshellId = null;
+        }
+        // Restart promise delegate to subsequent startup
+        this._subshellStarted = new PromiseDelegate<void>();
+        break;
+      }
+      case CommsOverSubshells.PerCommTarget: {
+        await this._closePerCommTargetSubshell();
+        break;
+      }
+      case CommsOverSubshells.Disabled: {
+        // no-op
+        break;
+      }
+    }
   }
 
   private _subshellStarted = new PromiseDelegate<void>();
   private static _commTargetSubShellsId: {
     // One subshell per kernel per comm target.
-    [kernelId: string]: { [targetName: string]: Promise<string> | null };
+    [kernelId: string]: {
+      [targetName: string]: Private.ISubshellEntry;
+    };
   } = {};
 
   private _commsOverSubshells: CommsOverSubshells;
@@ -348,4 +428,25 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     msg: KernelMessage.ICommCloseMsg<'iopub'>
   ) => void | PromiseLike<void>;
   private _onMsg: (msg: KernelMessage.ICommMsgMsg) => void | PromiseLike<void>;
+}
+
+/**
+ * Private interfaces of comm handler.
+ */
+namespace Private {
+  /**
+   * Describes an entry in the static tracker of subshells used in per-comm-target mode.
+   */
+  export interface ISubshellEntry {
+    /**
+     * Promise which resolves with subshell identifier once it is known.
+     */
+    subshellId: Promise<string>;
+    /**
+     * Keeps track of the number of references to the subshell.
+     *
+     * This is used to guard subshells shared across comm targets from premature disposal.
+     */
+    referenceCount: number;
+  }
 }
