@@ -62,6 +62,13 @@
 
 .jp-Notebook .jp-Cell {
   overflow: visible;
+
+  /* Prevent scroll anchoring to inactive cells */
+  overflow-anchor: none;
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active {
+  overflow-anchor: auto;
 }
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
