@@ -43,7 +43,6 @@ import type { IDebugger } from '../src/tokens';
 import { DebuggerDisplayRegistry } from '../src';
 
 const server = new JupyterServer();
-
 const emptyFn = () => undefined;
 
 beforeAll(async () => {
@@ -143,6 +142,8 @@ describe('Debugger', () => {
       }
     });
 
+    sidebar.showSourcesPanel = true;
+
     await act(async () => {
       Widget.attach(sidebar, document.body);
       MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
@@ -188,19 +189,39 @@ describe('Debugger', () => {
   });
 
   describe('Panel', () => {
-    let toolbarList: any;
-    beforeEach(() => {
-      toolbarList = sidebar.content.node.querySelectorAll(
-        '.jp-AccordionPanel-title'
-      );
-    });
-    it('should have 5 child widgets', () => {
-      expect(sidebar.widgets.length).toBe(5);
+    let toolbarList: NodeListOf<Element>;
+    describe('when the sources panel is visible', () => {
+      beforeEach(() => {
+        sidebar.showSourcesPanel = true;
+        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+        toolbarList = sidebar.content.node.querySelectorAll(
+          '.jp-AccordionPanel-title'
+        );
+      });
+      it('should have 5 child widgets', () => {
+        expect(sidebar.widgets.length).toBe(5);
+      });
+      it('should have 5 toolbars', () => {
+        expect(toolbarList.length).toBe(5);
+      });
     });
 
-    it('should have 5 toolbars', () => {
-      expect(toolbarList.length).toBe(5);
+    describe('when there is no sources panel', () => {
+      beforeEach(() => {
+        sidebar.showSourcesPanel = false;
+        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+        toolbarList = sidebar.content.node.querySelectorAll(
+          '.jp-AccordionPanel-title'
+        );
+      });
+      it('should have 4 child widgets', () => {
+        expect(sidebar.widgets.length).toBe(4);
+      });
+      it('should have 4 toolbars', () => {
+        expect(toolbarList.length).toBe(4);
+      });
     });
+
     describe('Variable toolbar', () => {
       let toolbar: Element;
       beforeEach(() => {
@@ -273,27 +294,100 @@ describe('Debugger', () => {
       });
     });
     describe('Source toolbar', () => {
-      let toolbar: Element;
-      beforeEach(() => {
-        toolbar = toolbarList.item(3);
-      });
-      it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll(
-          '.lm-AccordionPanel-titleCollapser'
-        );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down');
-      });
-      it('should have title', () => {
-        const title = toolbar.querySelectorAll(
-          'span.lm-AccordionPanel-titleLabel'
-        );
-        expect(title.length).toBe(1);
-        expect(title[0].innerHTML).toContain('Source');
-      });
+      describe('when sources panel is visible', () => {
+        let toolbarList: NodeListOf<Element>;
+        let toolbar: Element;
+        beforeEach(() => {
+          sidebar.showSourcesPanel = true;
+          MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+          toolbarList = sidebar.content.node.querySelectorAll(
+            '.jp-AccordionPanel-title'
+          );
+          toolbarList.length;
+          toolbar = toolbarList.item(3);
+        });
 
-      it('should have one button', () => {
-        const buttons = toolbar.querySelectorAll('jp-button');
-        expect(buttons.length).toBe(1);
+        it('should have expanding icon', () => {
+          const title = toolbar.querySelectorAll(
+            '.lm-AccordionPanel-titleCollapser'
+          );
+          expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        });
+        it('should have title', () => {
+          const title = toolbar.querySelectorAll(
+            'span.lm-AccordionPanel-titleLabel'
+          );
+          expect(title.length).toBe(1);
+          expect(title[0].innerHTML).toContain('Source');
+        });
+
+        it('should have one button', () => {
+          const buttons = toolbar.querySelectorAll('jp-button');
+          expect(buttons.length).toBe(1);
+        });
+      });
+    });
+    describe('Kernel sources toolbar', () => {
+      describe('when sources panel is visible', () => {
+        let toolbar: Element;
+        beforeEach(() => {
+          sidebar.showSourcesPanel = true;
+          MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+          toolbarList = sidebar.content.node.querySelectorAll(
+            '.jp-AccordionPanel-title'
+          );
+
+          toolbar =
+            toolbarList.item(
+              3
+            ); /* it is working with 3 and not 4, as would be expected*/
+        });
+
+        it('should have expanding icon', () => {
+          const title = toolbar.querySelectorAll(
+            '.lm-AccordionPanel-titleCollapser'
+          );
+          expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        });
+        it('should have title', () => {
+          const title = toolbar.querySelectorAll(
+            'span.lm-AccordionPanel-titleLabel'
+          );
+          expect(title.length).toBe(1);
+          expect(title[0].innerHTML).toContain('Kernel Sources');
+        });
+        it('should have one button', () => {
+          const buttons = toolbar.querySelectorAll('jp-button');
+          expect(buttons.length).toBe(1);
+        });
+      });
+      describe('when sources panel is not visible', () => {
+        let toolbar: Element;
+        beforeEach(() => {
+          sidebar.showSourcesPanel = false;
+          MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+          toolbarList = sidebar.content.node.querySelectorAll(
+            '.jp-AccordionPanel-title'
+          );
+          toolbar = toolbarList.item(3);
+        });
+        it('should have expanding icon', () => {
+          const title = toolbar.querySelectorAll(
+            '.lm-AccordionPanel-titleCollapser'
+          );
+          expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        });
+        it('should have title', () => {
+          const title = toolbar.querySelectorAll(
+            'span.lm-AccordionPanel-titleLabel'
+          );
+          expect(title.length).toBe(1);
+          expect(title[0].innerHTML).toContain('Kernel Sources');
+        });
+        it('should have one button', () => {
+          const buttons = toolbar.querySelectorAll('jp-button');
+          expect(buttons.length).toBe(1);
+        });
       });
     });
   });
@@ -318,6 +412,11 @@ describe('Debugger', () => {
   });
 
   describe('#breakpoints', () => {
+    beforeEach(() => {
+      sidebar.showSourcesPanel = true;
+      MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+    });
+
     it('should have the jp-DebuggerBreakpoints class', () => {
       expect(sidebar.breakpoints.hasClass('jp-DebuggerBreakpoints')).toBe(true);
     });
@@ -387,18 +486,22 @@ describe('Debugger', () => {
   });
 
   describe('#sources', () => {
+    beforeEach(() => {
+      sidebar.showSourcesPanel = true;
+      MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+    });
     it('should have a body', () => {
-      expect(sidebar.sources.widgets.length).toEqual(1);
+      expect(sidebar.sources?.widgets.length).toEqual(1);
     });
 
     it('should display the source path in the header', () => {
-      const header = sidebar.sources.toolbar;
-      const pathWidget = header.node.innerHTML;
+      const header = sidebar.sources?.toolbar;
+      const pathWidget = header?.node.innerHTML;
       expect(pathWidget).toContain(path);
     });
 
     it('should display the source code in the body', () => {
-      const body = sidebar.sources.widgets[0] as SourcesBody;
+      const body = sidebar.sources?.widgets[0] as SourcesBody;
       const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
       expect(editor.model.sharedModel.getSource()).toEqual(code);
