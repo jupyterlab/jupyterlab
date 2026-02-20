@@ -5483,6 +5483,16 @@
     }
   },
   {
+    "id": "terminal:open-folder-in-terminal",
+    "label": "Open in Terminal",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "terminal:paste",
     "label": "Paste",
     "caption": "",
