@@ -17,7 +17,7 @@ jobs:
   test:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -185,7 +185,7 @@ jobs:
     # Python dependencies are frozen in the installation step
     # Note: IPython is among the frozen package
     timeout-minutes: 30
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
