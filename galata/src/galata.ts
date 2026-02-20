@@ -41,7 +41,8 @@ export namespace galata {
       }
     },
     '@jupyterlab/terminal-extension:plugin': {
-      cursorBlink: false
+      cursorBlink: false,
+      fontFamily: 'DejaVu Mono'
     }
   };
 
