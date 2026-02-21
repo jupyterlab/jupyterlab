@@ -35,7 +35,7 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -4808,14 +4808,17 @@ namespace Private {
     activate?: boolean,
     subshell?: boolean
   ): Promise<void> {
+    const kernel = widget.sessionContext.session?.kernel;
     const options = {
-      path: widget.context.path,
+      path: kernel ? undefined : widget.context.path,
       preferredLanguage: widget.context.model.defaultKernelLanguage,
       activate: activate,
       subshell: subshell,
       ref: widget.id,
       insertMode: 'split-bottom',
-      type: 'Linked Console'
+      type: 'Linked Console',
+      basePath: kernel ? PathExt.dirname(widget.context.path) : undefined,
+      kernelPreference: kernel ? { id: kernel.id } : undefined
     };
 
     return commands.execute('console:create', options);
