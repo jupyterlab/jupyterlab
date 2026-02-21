@@ -169,7 +169,7 @@ export namespace WPPlugin {
 
       compiler.hooks.run.tap(
         'NowatchDuplicatePackageCheckerPlugin',
-        compiler => {
+        (compiler: rspack.Compiler) => {
           const p = new DuplicatePackageCheckerPlugin(options);
           p.apply(compiler);
         }
