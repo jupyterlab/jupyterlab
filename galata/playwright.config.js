@@ -3,6 +3,11 @@
 
 var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
+var chromiumArgs = [
+  // Ensures that subpixel font rendering in Chrome is the same on CI as locally
+  '--disable-lcd-text'
+];
+
 module.exports = {
   ...baseConfig,
   reporter: process.env.CI
@@ -20,17 +25,19 @@ module.exports = {
         launchOptions: {
           // Force slow motion
           slowMo: 30,
-          args: [
-            // Ensures that subpixel font rendering in Chrome is the same on CI as locally
-            '--disable-lcd-text'
-          ]
+          args: chromiumArgs
         }
       }
     },
     {
       name: 'galata',
       testMatch: 'test/galata/**',
-      testIgnore: '**/.ipynb_checkpoints/**'
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
     },
     {
       name: 'jupyterlab',
@@ -41,10 +48,7 @@ module.exports = {
           permissions: ['clipboard-read', 'clipboard-write']
         },
         launchOptions: {
-          args: [
-            // Ensures that subpixel font rendering in Chrome is the same on CI as locally
-            '--disable-lcd-text'
-          ]
+          args: chromiumArgs
         }
       }
     },
