@@ -82,6 +82,7 @@ export class FileBrowser extends SidePanel {
     const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    model.pathChanged.connect(this._onPathChanged, this);
     this._manager = model.manager;
 
     this.toolbar.node.setAttribute(
@@ -415,6 +416,20 @@ export class FileBrowser extends SidePanel {
    */
   paste(): Promise<void> {
     return this.listing.paste();
+  }
+
+  /**
+   * Handle a `pathChanged` signal from the model.
+   */
+  private _onPathChanged(): void {
+    // Clear filter when user navigates to a new directory
+    this.model.setFilter(value => {
+      return {};
+    });
+
+    if (this._fileFilterRef.current) {
+      this._fileFilterRef.current.value = '';
+    }
   }
 
   private async _createNew(
