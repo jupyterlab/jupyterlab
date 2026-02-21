@@ -14,47 +14,23 @@ import type { CodeCellModel, ICellModel } from '@jupyterlab/cells';
 import { InputPrompt } from '@jupyterlab/cells';
 import { Debouncer } from '@lumino/polling';
 
-/**
- * The class name added to the ActiveCellTool.
- */
 const ACTIVE_CELL_TOOL_CLASS = 'jp-ActiveCellTool';
-/**
- * The class name added to the ActiveCellTool content.
- */
 const ACTIVE_CELL_TOOL_CONTENT_CLASS = 'jp-ActiveCellTool-Content';
-/**
- * The class name added to the ActiveCellTool cell content.
- */
 const ACTIVE_CELL_TOOL_CELL_CONTENT_CLASS = 'jp-ActiveCellTool-CellContent';
 
 namespace Private {
-  /**
-   * Custom active cell field options.
-   */
   export interface IOptions {
-    /**
-     * The tracker to the notebook panel.
-     */
     tracker: INotebookTracker;
-
-    /**
-     * Editor languages registry
-     */
     languages: IEditorLanguageRegistry;
   }
 }
 
-/**
- * The active cell field, displaying the first line and execution count of the active cell.
- *
- * ## Note
- * This field does not work as other metadata form fields, as it does not update metadata.
- */
 export class ActiveCellTool extends NotebookTools.Tool {
   constructor(options: Private.IOptions) {
     super();
-    const { languages } = options;
+
     this._tracker = options.tracker;
+    this._languages = options.languages;
 
     this.addClass(ACTIVE_CELL_TOOL_CLASS);
     this.layout = new PanelLayout();
@@ -62,24 +38,26 @@ export class ActiveCellTool extends NotebookTools.Tool {
     this._inputPrompt = new InputPrompt();
     (this.layout as PanelLayout).addWidget(this._inputPrompt);
 
-    // First code line container
     const node = document.createElement('div');
     node.classList.add(ACTIVE_CELL_TOOL_CONTENT_CLASS);
+
     const container = node.appendChild(document.createElement('div'));
-    const editor = container.appendChild(document.createElement('pre'));
     container.className = ACTIVE_CELL_TOOL_CELL_CONTENT_CLASS;
-    this._editorEl = editor;
+
+    this._editorEl = container.appendChild(document.createElement('pre'));
+
     (this.layout as PanelLayout).addWidget(new Widget({ node }));
 
     const update = async () => {
-      this._editorEl.innerHTML = '';
-      const currentType = this._cellModel?.type ?? null;
+      this._editorEl.textContent = '';
 
-      if (currentType !== this._previousCellType) {
-        if (currentType === 'code') {
-          this._inputPrompt.executionCount = `${
-            (this._cellModel as CodeCellModel).executionCount ?? ''
-          }`;
+      const model = this._cellModel;
+      const type = model?.type ?? null;
+
+      if (type !== this._previousCellType) {
+        if (type === 'code') {
+          this._inputPrompt.executionCount =
+            (model as CodeCellModel).executionCount ?? '';
           this._inputPrompt.show();
         } else {
           this._inputPrompt.executionCount = null;
@@ -87,36 +65,72 @@ export class ActiveCellTool extends NotebookTools.Tool {
         }
       }
 
-      this._previousCellType = currentType;
+      this._previousCellType = type;
 
-      if (this._cellModel) {
-        await languages.highlight(
-          this._cellModel.sharedModel.getSource().split('\n')[0],
-          languages.findByMIME(this._cellModel.mimeType),
-          this._editorEl
-        );
+      if (model) {
+        const lang = this._languages.findByMIME(model.mimeType);
+        if (lang) {
+          await this._languages.highlight(
+            model.sharedModel.getSource().split('\n')[0],
+            lang,
+            this._editorEl
+          );
+        }
       }
     };
 
-    this._refreshDebouncer = new Debouncer(update, 150);
+    this._refreshDebouncer = new Debouncer(update, 120);
   }
 
-  render(props: FieldProps): JSX.Element {
+  /**
+   * React render hook used ONLY as mount point for Lumino widget.
+   * Lumino owns DOM. React only provides host container.
+   */
+  render(_: FieldProps): JSX.Element {
     const activeCell = this._tracker.activeCell;
-    if (activeCell) {
-      this._cellModel = activeCell.model || null;
+    const newModel = activeCell?.model ?? null;
+
+    if (this._cellModel !== newModel) {
+      this._disconnectSignals();
+      this._cellModel = newModel;
+      this._connectSignals();
+      void this.refresh();
     }
 
-    (this._cellModel?.sharedModel as ISharedText).changed.connect(
+    return (
+      <div
+        ref={host => {
+          if (!host) {
+            return;
+          }
+
+          // Attach only once when not already attached
+          if (this.node.parentElement !== host) {
+            Widget.attach(this, host);
+          }
+        }}
+      />
+    );
+  }
+
+  private _connectSignals(): void {
+    if (!this._cellModel) return;
+
+    (this._cellModel.sharedModel as ISharedText).changed.connect(
       this.refresh,
       this
     );
-    this._cellModel?.mimeTypeChanged.connect(this.refresh, this);
+    this._cellModel.mimeTypeChanged.connect(this.refresh, this);
+  }
 
-    this.refresh()
-      .then(() => undefined)
+  private _disconnectSignals(): void {
+    if (!this._cellModel) return;
 
-    return <div ref={ref => ref?.appendChild(this.node)}></div>;
+    (this._cellModel.sharedModel as ISharedText).changed.disconnect(
+      this.refresh,
+      this
+    );
+    this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
   }
 
   private async refresh(): Promise<void> {
@@ -124,9 +138,10 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   private _tracker: INotebookTracker;
-  private _cellModel: ICellModel | null;
+  private _languages: IEditorLanguageRegistry;
+  private _cellModel: ICellModel | null = null;
+  private _previousCellType: ICellModel['type'] | null = null;
   private _refreshDebouncer: Debouncer<void, void, null[]>;
   private _editorEl: HTMLPreElement;
   private _inputPrompt: InputPrompt;
-  private _previousCellType: ICellModel['type'] | null = null;
 }
