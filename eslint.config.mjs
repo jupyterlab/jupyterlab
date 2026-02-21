@@ -50,6 +50,7 @@ export default defineConfig([
     'packages/codemirror/test/foo*.js',
     'packages/extensionmanager-extension/examples/listings',
     'packages/nbconvert-css/raw.js',
+    'packages/nbconvert-css/style/index.js',
     'packages/services/dist',
     'packages/ui-components/src/icon/iconimports.ts',
     '**/.idea/',
