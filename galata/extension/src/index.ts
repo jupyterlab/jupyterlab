@@ -9,6 +9,7 @@ import { Dialog, Notification } from '@jupyterlab/apputils';
 import { GalataInpage } from './global';
 import type { IGalataHelpers } from './tokens';
 import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
+import { fontsPlugin } from './fonts';
 
 export type {
   IGalataInpage,
@@ -40,4 +41,4 @@ const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
   }
 };
 
-export default galataPlugin;
+export default [galataPlugin, fontsPlugin];

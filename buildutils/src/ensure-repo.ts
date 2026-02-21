@@ -98,6 +98,11 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/galata': [
+    '@fontsource/dejavu-mono',
+    '@fontsource/dejavu-sans',
+    '@fontsource/ubuntu'
+  ],
   '@jupyterlab/markedparser-extension': [
     // only (but always) imported asynchronously
     'marked-gfm-heading-id',

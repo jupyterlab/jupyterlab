@@ -137,11 +137,13 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right.png');
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 

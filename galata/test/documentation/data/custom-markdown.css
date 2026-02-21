@@ -8,7 +8,7 @@ Distributed under the terms of the Modified BSD License.
 /* Headings */
 h1,
 h2 {
-  font-family: Impact, Charcoal, sans-serif;
+  font-family: Ubuntu, sans-serif;
   font-weight: bold;
   text-shadow: 2px 2px 4px #000;
 }
@@ -29,7 +29,7 @@ h2 {
 
 /* Block Quotes */
 blockquote {
-  font-family: Georgia, serif;
+  font-family: 'DejaVu Mono', serif;
   font-size: 16px;
   color: #19085c;
   border-left: 8px solid #effffc;
@@ -40,7 +40,7 @@ blockquote {
 /* Lists */
 ul,
 ol {
-  font-family: Verdana, Geneva, sans-serif;
+  font-family: Ubuntu, sans-serif;
   font-size: 18px;
   color: #333;
   margin-bottom: 24px;
