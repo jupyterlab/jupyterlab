@@ -216,6 +216,22 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show the date created column
+   */
+  get showDateCreatedColumn(): boolean {
+    return this._showDateCreatedColumn;
+  }
+
+  set showDateCreatedColumn(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('date_created', value);
+      this._showDateCreatedColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Whether to show the file size column
    */
   get showFileSizeColumn(): boolean {
@@ -613,6 +629,7 @@ export class FileBrowser extends SidePanel {
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
+  private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;

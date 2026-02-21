@@ -2631,6 +2631,16 @@
     }
   },
   {
+    "id": "filebrowser:toggle-date-created",
+    "label": "Show Date Created Column",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:toggle-file-filter",
     "label": "Toggle File Filter",
     "caption": "",

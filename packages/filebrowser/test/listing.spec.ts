@@ -844,6 +844,209 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('date created column', () => {
+      const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
+      const CREATED_ID_CLASS = 'jp-id-created';
+
+      it('should be hidden by default', () => {
+        const headerNode = dirListing.headerNode;
+        const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).toBeNull();
+      });
+
+      it('should show column when visibility is toggled on', async () => {
+        dirListing.setColumnVisibility('date_created', true);
+        // Trigger update to render the column cells
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        const headerNode = dirListing.headerNode;
+        const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).not.toBeNull();
+
+        // Check that items have the created cell
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const createdCell = itemNode.querySelector(`.${ITEM_CREATED_CLASS}`);
+        expect(createdCell).not.toBeNull();
+      });
+
+      it('should hide column when visibility is toggled off', async () => {
+        // First show the column
+        dirListing.setColumnVisibility('date_created', true);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        // Verify it's visible
+        let headerNode = dirListing.headerNode;
+        let createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).not.toBeNull();
+
+        // Now hide it
+        dirListing.setColumnVisibility('date_created', false);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        // Verify it's hidden
+        headerNode = dirListing.headerNode;
+        createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).toBeNull();
+      });
+
+      it('should display created date in item cells', async () => {
+        dirListing.setColumnVisibility('date_created', true);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const createdCell = itemNode.querySelector(
+          `.${ITEM_CREATED_CLASS}`
+        ) as HTMLElement;
+        expect(createdCell).not.toBeNull();
+        // The cell should have text content (formatted date) and a title (full date)
+        expect(createdCell.textContent).not.toBe('');
+        expect(createdCell.title).not.toBe('');
+      });
+
+      it('should sort by date created ascending', async () => {
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+
+        const itemsAsc = [...dirListing.sortedItems()];
+        expect(itemsAsc.length).toBeGreaterThan(0);
+
+        // NOTE: JupyterLab's direction semantics are inverted from typical conventions:
+        // 'ascending' displays larger/newer values first (see GitHub issue #16779).
+        // Verify items are sorted with larger dates first
+        for (let i = 1; i < itemsAsc.length; i++) {
+          const prevCreated = Date.parse(itemsAsc[i - 1].created ?? '');
+          const currCreated = Date.parse(itemsAsc[i].created ?? '');
+          // Skip comparison if either date is invalid
+          if (Number.isFinite(prevCreated) && Number.isFinite(currCreated)) {
+            expect(prevCreated).toBeGreaterThanOrEqual(currCreated);
+          }
+        }
+      });
+
+      it('should sort by date created descending', async () => {
+        dirListing.sort({
+          direction: 'descending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+
+        const itemsDesc = [...dirListing.sortedItems()];
+        expect(itemsDesc.length).toBeGreaterThan(0);
+
+        // NOTE: JupyterLab's direction semantics are inverted from typical conventions:
+        // 'descending' displays smaller/older values first (see GitHub issue #16779).
+        // Verify items are sorted with smaller dates first
+        for (let i = 1; i < itemsDesc.length; i++) {
+          const prevCreated = Date.parse(itemsDesc[i - 1].created ?? '');
+          const currCreated = Date.parse(itemsDesc[i].created ?? '');
+          // Skip comparison if either date is invalid
+          if (Number.isFinite(prevCreated) && Number.isFinite(currCreated)) {
+            expect(prevCreated).toBeLessThanOrEqual(currCreated);
+          }
+        }
+      });
+
+      it('should produce opposite order for ascending vs descending', async () => {
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const itemsAsc = [...dirListing.sortedItems()];
+        const itemsAscNames = itemsAsc.map(i => i.name);
+
+        dirListing.sort({
+          direction: 'descending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const itemsDesc = [...dirListing.sortedItems()];
+        const itemsDescNames = itemsDesc.map(i => i.name);
+
+        // Ascending and descending should produce reverse orders
+        // (excluding directories which are always sorted first)
+        expect(itemsAscNames.length).toBe(itemsDescNames.length);
+        expect(itemsAscNames.length).toBeGreaterThan(0);
+
+        // Count actual directories from the model data
+        const dirCount = itemsAsc.filter(i => i.type === 'directory').length;
+
+        // Verify the non-directory items are actually reversed
+        // Directories are always first, so compare items after directories
+        const ascNonDirs = itemsAsc.slice(dirCount);
+        const descNonDirs = itemsDesc.slice(dirCount);
+        const ascNonDirNames = ascNonDirs.map(i => i.name);
+        const descNonDirNames = descNonDirs.map(i => i.name);
+
+        // Check if items have different created dates
+        // If all dates are the same/invalid, items fall back to alphabetical sort
+        const ascDates = ascNonDirs.map(i => Date.parse(i.created ?? ''));
+        const hasDistinctDates =
+          ascDates.length > 1 &&
+          ascDates.some(
+            (d, i) => i > 0 && Number.isFinite(d) && d !== ascDates[i - 1]
+          );
+
+        if (ascNonDirNames.length > 1 && hasDistinctDates) {
+          // Only expect reversal when items have different valid dates
+          // Use spread to avoid mutating descNonDirNames
+          expect(ascNonDirNames).toEqual([...descNonDirNames].reverse());
+        } else {
+          // When dates are identical, both directions fall back to alphabetical
+          expect(ascNonDirNames).toEqual(descNonDirNames);
+        }
+      });
+
+      it('should produce stable sort order when sorted multiple times', async () => {
+        // This test verifies that sorting is stable and doesn't produce NaN
+        // comparisons which would cause inconsistent ordering
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const firstSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        // Sort again with the same parameters
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const secondSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        // The order should be identical - if NaN comparisons occurred,
+        // the sort would be unstable and produce different results
+        expect(firstSort).toEqual(secondSort);
+      });
+
+      it('should produce stable sort order for last_modified when sorted multiple times', async () => {
+        // Verify last_modified sorting is also stable (no NaN issues)
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'last_modified'
+        });
+        await signalToPromise(dirListing.updated);
+        const firstSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'last_modified'
+        });
+        await signalToPromise(dirListing.updated);
+        const secondSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        expect(firstSort).toEqual(secondSort);
+      });
+    });
+
     describe('should sort correctly', () => {
       beforeEach(async () => {
         const options = createOptionsForConstructor();
