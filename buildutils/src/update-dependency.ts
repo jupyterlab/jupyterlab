@@ -232,6 +232,7 @@ commander
   .option('--dry-run', 'Do not perform actions, just print output')
   .option('--regex', 'Package is a regular expression')
   .option('--lerna', 'Update dependencies in all lerna packages')
+  .option('--yarn', 'Update dependencies in all yarn workspace packages')
   .option('--path <path>', 'Path to package or monorepo to update')
   .option('--minimal', 'only update if the change is substantial')
   .arguments('<package> [versionspec]')
@@ -239,16 +240,23 @@ commander
     async (name: string | RegExp, version: string = '^latest', args: any) => {
       const basePath = path.resolve(args.path || '.');
       const pkg = args.regex ? new RegExp(name) : name;
+      const paths = [];
 
       if (args.lerna) {
-        const paths = utils.getLernaPaths(basePath).sort();
+        paths.push(...utils.getLernaPaths(basePath).sort());
+      } else if (args.yarn) {
+        paths.push(...utils.getYarnPaths(basePath).sort());
+      }
 
+      if (paths.length) {
+        paths.sort();
         // We use a loop instead of Promise.all so that the output is in
         // alphabetical order.
         for (const pkgPath of paths) {
           await handlePackage(pkg, version, pkgPath, args.dryRun, args.minimal);
         }
       }
+
       await handlePackage(pkg, version, basePath, args.dryRun, args.minimal);
     }
   );
@@ -282,12 +290,12 @@ Examples
 
       update-dependency --regex '^@jupyterlab/' ^latest
 
-  Update all packages starting with '@jupyterlab/' in all lerna
+  Update all packages starting with '@jupyterlab/' in all yarn
   workspaces and the root package.json to whatever version the 'next'
   tag for each package currently points to (with a caret tag).
   Update the version range only if the change is substantial.
 
-      update-dependency --lerna --regex --minimal '^@jupyterlab/' ^next
+      update-dependency --yarn --regex --minimal '^@jupyterlab/' ^next
 `);
 });
 
