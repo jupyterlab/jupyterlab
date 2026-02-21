@@ -70,7 +70,6 @@ if (outputDir !== buildDir) {
 // Set up variables for the watch mode ignore plugins
 const watched = {};
 const ignoreCache = Object.create(null);
-let watchNodeModules = false; // eslint-disable-line no-unused-vars
 Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
@@ -82,9 +81,6 @@ Object.keys(jlab.linkedPackages).forEach(function (name) {
     return;
   }
   watched[name] = path.dirname(localPkgPath);
-  if (localPkgPath.indexOf('node_modules') !== -1) {
-    watchNodeModules = true;
-  }
 });
 
 // Set up source-map-loader to look in watched lib dirs

@@ -6,7 +6,7 @@ export default [
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
-      parser: tseslint.parser,
+      parser: tseslint.parser
     },
     plugins: {
       '@typescript-eslint': tseslint.plugin

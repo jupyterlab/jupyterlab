@@ -3,9 +3,8 @@ import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
-import prettierPlugin from 'eslint-plugin-prettier';
+import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
-import prettierConfig from 'eslint-config-prettier';
 
 // Filter globals to remove any with leading/trailing whitespace
 const cleanGlobals = globalsObj => {
@@ -192,7 +191,6 @@ export default defineConfig([
 
     plugins: {
       '@typescript-eslint': tseslint.plugin,
-      prettier: prettierPlugin,
       jest: jestPlugin,
       react: reactPlugin
     },
@@ -262,6 +260,13 @@ export default defineConfig([
       '@typescript-eslint/triple-slash-reference': 'warn',
       '@typescript-eslint/no-inferrable-types': 'off',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports'
+        }
+      ],
       '@typescript-eslint/no-unsafe-function-type': 'warn',
       '@typescript-eslint/no-unused-expressions': 'warn',
       '@typescript-eslint/no-require-imports': 'warn',
@@ -436,7 +441,7 @@ export default defineConfig([
       'no-restricted-syntax': 'off'
     }
   },
-  prettierConfig,
+  prettierPluginRecommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
