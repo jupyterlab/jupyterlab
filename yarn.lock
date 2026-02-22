@@ -3718,6 +3718,7 @@ __metadata:
     "@jupyterlab/nbformat": ^4.6.0-alpha.2
     "@jupyterlab/notebook": ^4.6.0-alpha.2
     "@jupyterlab/settingregistry": ^4.6.0-alpha.2
+    "@jupyterlab/terminal": ^4.6.0-alpha.2
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
