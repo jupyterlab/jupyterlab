@@ -188,6 +188,3 @@ export class ActiveCellTool extends NotebookTools.Tool {
   private _editorEl: HTMLPreElement;
   private _inputPrompt: InputPrompt;
 }
-
-
-
