@@ -81,6 +81,17 @@ export async function ensurePackage(
       // Skip processing packages that can have different versions
       return;
     }
+    // Skip processing Node.js-native dependencies
+    if (name.startsWith('node:')) {
+      if (options.allowNodeDependencies) {
+        return;
+      } else {
+        messages.push(
+          `Node.js dependencies are not allowed in ${data.name} package (seen ${name})`
+        );
+        return;
+      }
+    }
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
     }
@@ -137,6 +148,17 @@ export async function ensurePackage(
     if (differentVersions.indexOf(name) !== -1) {
       // Skip processing packages that can have different versions
       return;
+    }
+    // Skip processing Node.js-native dependencies
+    if (name.startsWith('node:')) {
+      if (options.allowNodeDependencies) {
+        return;
+      } else {
+        messages.push(
+          `Node.js dependencies are not allowed in ${data.name} package (seen ${name})`
+        );
+        return;
+      }
     }
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
@@ -231,6 +253,17 @@ export async function ensurePackage(
     }
     if (name === '.' || name === '..') {
       return;
+    }
+    // Skip processing Node.js-native dependencies
+    if (name.startsWith('node:')) {
+      if (options.allowNodeDependencies) {
+        return;
+      } else {
+        messages.push(
+          `Node.js dependencies are not allowed in ${data.name} package (seen ${name})`
+        );
+        return;
+      }
     }
     if (!deps[name]) {
       if (!(name in seenDeps)) {
@@ -864,6 +897,11 @@ export interface IEnsurePackageOptions {
    * Older versions supported by core packages in addition to the latest.
    */
   backwardVersions?: Record<string, Record<string, string>>;
+
+  /**
+   * Whether Node.js imports are allowed.
+   */
+  allowNodeDependencies?: boolean;
 }
 
 /**

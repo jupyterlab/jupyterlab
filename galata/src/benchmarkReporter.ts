@@ -16,11 +16,11 @@ import type {
 import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import fs from 'fs';
 import path from 'path';
+import os from 'node:os';
 import * as vega from 'vega';
 import * as vl from 'vega-lite';
 import * as vs from 'vega-statistics';
 import generateVegaLiteSpec from './benchmarkVLTpl';
-const os = require('node:os');
 
 /**
  * Benchmark namespace
