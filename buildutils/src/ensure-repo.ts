@@ -176,7 +176,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/apputils',
     '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    '@jupyterlab/terminal'
   ],
   '@jupyterlab/galata-extension': [
     '@jupyterlab/application',
@@ -184,7 +185,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/cells',
     '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    '@jupyterlab/terminal'
   ],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/lsp': ['codemirror'],

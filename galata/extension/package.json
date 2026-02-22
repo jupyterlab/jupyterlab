@@ -20,11 +20,8 @@
   "author": "Project Jupyter",
   "main": "../lib/extension/index.js",
   "types": "../lib/extension/index.d.ts",
-  "style": "style/index.css",
   "files": [
-    "../lib/extension/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/index.css",
-    "style/index.js"
+    "../lib/extension/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
   ],
   "scripts": {
     "build": "npm run build:lib && npm run build:labextension",
@@ -59,6 +56,5 @@
   "jupyterlab": {
     "extension": true,
     "outputDir": "../../jupyterlab/galata/@jupyterlab/galata-extension"
-  },
-  "styleModule": "style/index.js"
+  }
 }
