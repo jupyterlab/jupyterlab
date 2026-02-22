@@ -5,6 +5,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ITerminalTracker } from '@jupyterlab/terminal';
 import '@fontsource/dejavu-sans';
 import '@fontsource/ubuntu';
 import '@fontsource/dejavu-mono';
@@ -27,14 +28,71 @@ export const fontsPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   description:
     'Adds version-pinned fonts for consistent playwright screenshots',
-  activate: (app: JupyterFrontEnd): void => {
+  optional: [ITerminalTracker],
+  activate: (
+    app: JupyterFrontEnd,
+    terminalTracker: ITerminalTracker | null
+  ): void => {
     void app.restored.then(() => {
       const style = document.createElement('style');
       style.textContent = STYLE;
       app.shell.node.appendChild(style);
-      // Components created with jupyter-ui-toolkit do not respect variable overwrites
-      // as the toke system runs independently; we need to set --body-font manually
-      document.body.style.setProperty('--body-font', 'Ubuntu');
     });
+
+    // Components created with jupyter-ui-toolkit do not respect variable overwrites
+    // as the toke system runs independently; we need to set --body-font manually
+    const ensureBodyFont = (): void => {
+      if (document.body.style.getPropertyValue('--body-font') !== 'Ubuntu') {
+        document.body.style.setProperty('--body-font', 'Ubuntu');
+      }
+    };
+
+    ensureBodyFont();
+
+    const bodyObserver = new MutationObserver(() => {
+      ensureBodyFont();
+    });
+
+    bodyObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['style']
+    });
+
+    // There is no public API to set kerning, rendering, nor antialiasing
+    // see https://github.com/xtermjs/xterm.js/issues/2464
+    if (terminalTracker) {
+      terminalTracker.widgetAdded.connect((_, widget) => {
+        const applyCanvasSettings = (canvas: HTMLCanvasElement): void => {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            return;
+          }
+          ctx.fontKerning = 'normal';
+          ctx.textRendering = 'geometricPrecision';
+        };
+
+        const applyToExistingCanvases = (): void => {
+          // There may be multiple canvas layers when links extension is enabled
+          const canvases = widget.content.node.querySelectorAll('canvas');
+          for (const canvas of canvases) {
+            applyCanvasSettings(canvas);
+          }
+        };
+
+        const observer = new MutationObserver(() => {
+          applyToExistingCanvases();
+        });
+
+        observer.observe(widget.content.node, {
+          childList: true,
+          subtree: true
+        });
+        applyToExistingCanvases();
+
+        widget.disposed.connect(() => {
+          observer.disconnect();
+        });
+      });
+    }
   }
 };
