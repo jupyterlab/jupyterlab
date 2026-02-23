@@ -437,6 +437,9 @@ export class CodeConsole extends Widget {
     for (const key of Object.keys(metadata)) {
       cell.model.setMetadata(key, metadata[key]);
     }
+    if (this._config.hideCodeInput) {
+      cell.inputArea?.setHidden(true);
+    }
     this.addCell(cell);
     return this._execute(cell);
   }
