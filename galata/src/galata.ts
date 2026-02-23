@@ -47,9 +47,11 @@ export namespace galata {
     },
     '@jupyterlab/apputils-extension:themes': {
       overrides: {
-        'code-font-family': 'DejaVu Mono',
-        'content-font-family': 'DejaVu Sans',
-        'ui-font-family': 'DejaVu Sans'
+        'code-font-family': '"DejaVu Mono"',
+        // DejaVu Sans does not support Chineese,
+        // so we fallback to Noto Simplified Chineese
+        'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
+        'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
       }
     }
   };

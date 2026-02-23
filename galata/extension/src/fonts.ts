@@ -7,8 +7,8 @@ import type {
 } from '@jupyterlab/application';
 import { ITerminalTracker } from '@jupyterlab/terminal';
 import '@fontsource/dejavu-sans';
-import '@fontsource/ubuntu';
 import '@fontsource/dejavu-mono';
+import '@fontsource-variable/noto-sans-sc';
 
 const STYLE = `
 :root {
@@ -42,8 +42,10 @@ export const fontsPlugin: JupyterFrontEndPlugin<void> = {
     // Components created with jupyter-ui-toolkit do not respect variable overwrites
     // as the toke system runs independently; we need to set --body-font manually
     const ensureBodyFont = (): void => {
-      if (document.body.style.getPropertyValue('--body-font') !== 'Ubuntu') {
-        document.body.style.setProperty('--body-font', 'Ubuntu');
+      if (
+        document.body.style.getPropertyValue('--body-font') !== '"DejaVu Sans"'
+      ) {
+        document.body.style.setProperty('--body-font', '"DejaVu Sans"');
       }
     };
 

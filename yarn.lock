@@ -1781,6 +1781,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/noto-sans-sc@npm:^5.2.10":
+  version: 5.2.10
+  resolution: "@fontsource-variable/noto-sans-sc@npm:5.2.10"
+  checksum: 48a2bbdbf1b416fa191d6a52df90d3fd25883abf92237dd28f3fce3a055de93ea4ea8a4c24d5779b705ad3349284a042d1693ce234d1e12f62b1b297ea75be19
+  languageName: node
+  linkType: hard
+
 "@fontsource/dejavu-mono@npm:^5.2.5":
   version: 5.2.5
   resolution: "@fontsource/dejavu-mono@npm:5.2.5"
@@ -1792,13 +1799,6 @@ __metadata:
   version: 5.2.5
   resolution: "@fontsource/dejavu-sans@npm:5.2.5"
   checksum: dc2c18df70a30dec9e4ef4338bdc31d31f478e47f1515837129e7a758da29b6600177244b94ab8b75ebc232ba7f74775531cc1a993534e1a309a3c0239dffc0b
-  languageName: node
-  linkType: hard
-
-"@fontsource/ubuntu@npm:^5.2.8":
-  version: 5.2.8
-  resolution: "@fontsource/ubuntu@npm:5.2.8"
-  checksum: b657bfc9cdd8895d26f8bca33644fb6444b7c0b06cfca61f916af742ba148b8091007ae77b84d51ffa3476615caf242c1a70066df9474a7fd87b92cad947611e
   languageName: node
   linkType: hard
 
@@ -3706,9 +3706,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata-extension@workspace:galata/extension"
   dependencies:
+    "@fontsource-variable/noto-sans-sc": ^5.2.10
     "@fontsource/dejavu-mono": ^5.2.5
     "@fontsource/dejavu-sans": ^5.2.5
-    "@fontsource/ubuntu": ^5.2.8
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/builder": ^4.6.0-alpha.2
