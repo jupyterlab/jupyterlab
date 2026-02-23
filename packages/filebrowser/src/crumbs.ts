@@ -165,6 +165,18 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._resizeObserver.disconnect();
+    this._resizeThrottler.dispose();
+    super.dispose();
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -190,8 +202,7 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
-    this._resizeObserver.disconnect();
-    this._resizeThrottler.dispose();
+    this._resizeObserver.unobserve(node);
   }
 
   /**

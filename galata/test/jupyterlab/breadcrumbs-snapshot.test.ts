@@ -56,7 +56,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await page.sidebar.setWidth(800);
 
     // Wait for breadcrumb recalculation after resize
-    await page.locator(`${BREADCRUMB_SELECTOR} >> text=Longer_dir4`).waitFor();
+    await page.locator(`${BREADCRUMB_SELECTOR} >> text=dir2`).waitFor();
 
     // Take snapshot of breadcrumbs container
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
