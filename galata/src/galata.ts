@@ -43,7 +43,7 @@ export namespace galata {
     },
     '@jupyterlab/terminal-extension:plugin': {
       cursorBlink: false,
-      fontFamily: 'DejaVu Mono'
+      fontFamily: '"DejaVu Mono"'
     },
     '@jupyterlab/apputils-extension:themes': {
       overrides: {
