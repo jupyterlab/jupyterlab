@@ -603,6 +603,97 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.6.0a3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0a2...fcfab45e4bcf32eab257ce52a82b0e45cc8eee66))
+
+### Enhancements made
+
+- Expand the file browser breadcrumbs when there is space available adaptively [#18430](https://github.com/jupyterlab/jupyterlab/pull/18430) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Add setting to paste code cells without their outputs [#18390](https://github.com/jupyterlab/jupyterlab/pull/18390) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@aaron-seq](https://github.com/aaron-seq), [@krassowski](https://github.com/krassowski), [@superlevure](https://github.com/superlevure))
+- Add setting to choose file name sort order in the file browser [#18388](https://github.com/jupyterlab/jupyterlab/pull/18388) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Allow preventing console title to update [#18331](https://github.com/jupyterlab/jupyterlab/pull/18331) ([@brichet](https://github.com/brichet), [@krassowski](https://github.com/krassowski))
+- Add 'Open in Terminal' from file browser context menu [#18274](https://github.com/jupyterlab/jupyterlab/pull/18274) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Add confirmation step for cell toolbar "delete" button [#18182](https://github.com/jupyterlab/jupyterlab/pull/18182) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+
+### Bugs fixed
+
+- Fix comms subshell resource management on disposal and when changing settings [#18531](https://github.com/jupyterlab/jupyterlab/pull/18531) ([@krassowski](https://github.com/krassowski), [@Carreau](https://github.com/Carreau), [@Copilot](https://github.com/Copilot), [@ianthomas23](https://github.com/ianthomas23))
+- Fix theme settings broken in non-English locales [#18530](https://github.com/jupyterlab/jupyterlab/pull/18530) ([@apoorvdarshan](https://github.com/apoorvdarshan), [@krassowski](https://github.com/krassowski))
+- Only turn off overflow anchor when windowing is active [#18503](https://github.com/jupyterlab/jupyterlab/pull/18503) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Upgrade `@codemirror/view`, fixing slow selection when line wrapping is enabled [#18479](https://github.com/jupyterlab/jupyterlab/pull/18479) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Prevent file browser from stealing focus on refresh [#18478](https://github.com/jupyterlab/jupyterlab/pull/18478) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Avoid using system clipboard in Notebook widget [#18474](https://github.com/jupyterlab/jupyterlab/pull/18474) ([@brichet](https://github.com/brichet), [@krassowski](https://github.com/krassowski))
+- Update CodeMirror versions, fixing a few selection issues [#18466](https://github.com/jupyterlab/jupyterlab/pull/18466) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix debugger variable panel to render value 0 properly [#18464](https://github.com/jupyterlab/jupyterlab/pull/18464) ([@itsmevichu](https://github.com/itsmevichu), [@krassowski](https://github.com/krassowski))
+- Bump Lumino packages to the 2026.2.5 release, fixing iframe resizing [#18440](https://github.com/jupyterlab/jupyterlab/pull/18440) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Fix persistent text highlight in inactive cells [#18438](https://github.com/jupyterlab/jupyterlab/pull/18438) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Fix table of contents navigation for Markdown files [#18411](https://github.com/jupyterlab/jupyterlab/pull/18411) ([@itsmevichu](https://github.com/itsmevichu), [@krassowski](https://github.com/krassowski))
+- Consider both the content type and pattern match in `DocumentRegistry.getFileTypeForModel()` [#18409](https://github.com/jupyterlab/jupyterlab/pull/18409) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout), [@martinRenou](https://github.com/martinRenou))
+- Fix CVE-2025-13465 in `lodash` and `lodash-es` [#18400](https://github.com/jupyterlab/jupyterlab/pull/18400) ([@ktaletsk](https://github.com/ktaletsk), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Check Python version compatibility in Extension Manager [#18393](https://github.com/jupyterlab/jupyterlab/pull/18393) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- false in saveAs to avoid fetching file body [#18379](https://github.com/jupyterlab/jupyterlab/pull/18379) ([@DeborahOlaboye](https://github.com/DeborahOlaboye), [@jasongrout](https://github.com/jasongrout))
+
+### Maintenance and upkeep improvements
+
+- Make documentation snapshot update job use `update-snapshots-checkout` [#18550](https://github.com/jupyterlab/jupyterlab/pull/18550) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Upgrade verdaccio from `v5.33.0` to `v6.2.5` [#18545](https://github.com/jupyterlab/jupyterlab/pull/18545) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Add language packs for French and Chinese to binder env [#18534](https://github.com/jupyterlab/jupyterlab/pull/18534) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Update to marked 17.0.2 and mermaid 11.12.3 [#18526](https://github.com/jupyterlab/jupyterlab/pull/18526) ([@bollwyvl](https://github.com/bollwyvl), [@krassowski](https://github.com/krassowski))
+- Debugger: delete the thread from the stopped before sending the 'continue' request [#18509](https://github.com/jupyterlab/jupyterlab/pull/18509) ([@brichet](https://github.com/brichet), [@HaudinFlorence](https://github.com/HaudinFlorence), [@krassowski](https://github.com/krassowski))
+- Fix flaky completer tokens test [#18506](https://github.com/jupyterlab/jupyterlab/pull/18506) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fixe a few issues in config tests [#18496](https://github.com/jupyterlab/jupyterlab/pull/18496) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix more flaky tests [#18495](https://github.com/jupyterlab/jupyterlab/pull/18495) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix CodeQL `self` warnings [#18494](https://github.com/jupyterlab/jupyterlab/pull/18494) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix continued flakiness in 'Search in multiple selected cells' test [#18493](https://github.com/jupyterlab/jupyterlab/pull/18493) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Fix flaky subshell test [#18492](https://github.com/jupyterlab/jupyterlab/pull/18492) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix flaky search test by working around bug [#18488](https://github.com/jupyterlab/jupyterlab/pull/18488) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Fix useless conditionals noted by GitHub CodeQL [#18486](https://github.com/jupyterlab/jupyterlab/pull/18486) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Fix useless assignments to local variables noted by GitHub CodeQL [#18485](https://github.com/jupyterlab/jupyterlab/pull/18485) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Update locking workflow [#18477](https://github.com/jupyterlab/jupyterlab/pull/18477) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Bump webpack from 5.99.6 to 5.105.0 in /jupyterlab/tests/mock_packages/test_no_hyphens [#18472](https://github.com/jupyterlab/jupyterlab/pull/18472) ([@krassowski](https://github.com/krassowski))
+- Make Python tests run faster on CI [#18454](https://github.com/jupyterlab/jupyterlab/pull/18454) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix flaky UI tests [#18453](https://github.com/jupyterlab/jupyterlab/pull/18453) ([@krassowski](https://github.com/krassowski), [@Copilot](https://github.com/Copilot), [@jasongrout](https://github.com/jasongrout))
+- Fix `pre-commit` `prettier` entry after upgrade to a new version [#18452](https://github.com/jupyterlab/jupyterlab/pull/18452) ([@krassowski](https://github.com/krassowski), [@brichet](https://github.com/brichet))
+- Bump webpack from 5.99.6 to 5.105.0 in /jupyterlab/tests/mock_packages/test-hyphens-underscore [#18449](https://github.com/jupyterlab/jupyterlab/pull/18449) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Use past tense in README when referencing JupyterLab 3 security fixes [#18435](https://github.com/jupyterlab/jupyterlab/pull/18435) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Update to Rspack 1.7.5 [#18432](https://github.com/jupyterlab/jupyterlab/pull/18432) ([@jtpio](https://github.com/jtpio), [@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Use sharding for faster visual regression/integration tests [#18427](https://github.com/jupyterlab/jupyterlab/pull/18427) ([@krassowski](https://github.com/krassowski), [@bollwyvl](https://github.com/bollwyvl), [@jasongrout](https://github.com/jasongrout))
+- Bump the actions group with 8 updates [#18424](https://github.com/jupyterlab/jupyterlab/pull/18424) ([@krassowski](https://github.com/krassowski))
+- Turn on Typescript `noImplicitThis` option and fix errors [#18423](https://github.com/jupyterlab/jupyterlab/pull/18423) ([@jasongrout](https://github.com/jasongrout), [@aaron-seq](https://github.com/aaron-seq), [@krassowski](https://github.com/krassowski))
+- Turn on Typescript `strictBuiltinIteratorReturn` and fix errors [#18421](https://github.com/jupyterlab/jupyterlab/pull/18421) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Update prettier, use cache and parallel CLI options [#18420](https://github.com/jupyterlab/jupyterlab/pull/18420) ([@bollwyvl](https://github.com/bollwyvl), [@jasongrout](https://github.com/jasongrout))
+- Turn on the Typescript alwaysStrict option [#18414](https://github.com/jupyterlab/jupyterlab/pull/18414) ([@jasongrout](https://github.com/jasongrout), [@jtpio](https://github.com/jtpio))
+- Bump lodash-es from 4.17.21 to 4.17.23 in /jupyterlab/tests/mock_packages/test-hyphens-underscore [#18408](https://github.com/jupyterlab/jupyterlab/pull/18408) ([@jtpio](https://github.com/jtpio))
+- Upgrade to Typescript 5.9 [#18402](https://github.com/jupyterlab/jupyterlab/pull/18402) ([@jasongrout](https://github.com/jasongrout), [@jtpio](https://github.com/jtpio))
+- Update to Playwright 1.58.0 [#18391](https://github.com/jupyterlab/jupyterlab/pull/18391) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Update release instructions [#18375](https://github.com/jupyterlab/jupyterlab/pull/18375) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Bump lodash-es from 4.17.21 to 4.17.23 in /jupyterlab/tests/mock_packages/test_no_hyphens [#18371](https://github.com/jupyterlab/jupyterlab/pull/18371) ([@krassowski](https://github.com/krassowski))
+- Linter: enforce "import type" when applicable [#18129](https://github.com/jupyterlab/jupyterlab/pull/18129) ([@martinRenou](https://github.com/martinRenou), [@jasongrout](https://github.com/jasongrout), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Add tests for browser window's selection [#17718](https://github.com/jupyterlab/jupyterlab/pull/17718) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Revise team section in README with governance updates [#18483](https://github.com/jupyterlab/jupyterlab/pull/18483) ([@krassowski](https://github.com/krassowski), [@andrii-i](https://github.com/andrii-i), [@jasongrout](https://github.com/jasongrout))
+- Fix inconsistent JupyterLab capitalization [#18450](https://github.com/jupyterlab/jupyterlab/pull/18450) ([@RamiNoodle733](https://github.com/RamiNoodle733), [@krassowski](https://github.com/krassowski))
+- Disclose AI usage in PR template [#18413](https://github.com/jupyterlab/jupyterlab/pull/18413) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski), [@ktaletsk](https://github.com/ktaletsk))
+- Fix Contents API fetch documentation of the `content` default [#18383](https://github.com/jupyterlab/jupyterlab/pull/18383) ([@ceasermikes002](https://github.com/ceasermikes002), [@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Add AI rules [#18322](https://github.com/jupyterlab/jupyterlab/pull/18322) ([@jtpio](https://github.com/jtpio), [@andrii-i](https://github.com/andrii-i), [@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Clarify notebook and cell metadata API changes in JupyterLab 4 [#18304](https://github.com/jupyterlab/jupyterlab/pull/18304) ([@Krish-876](https://github.com/Krish-876), [@krassowski](https://github.com/krassowski))
+- Add documentation of autosave option [#18283](https://github.com/jupyterlab/jupyterlab/pull/18283) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@Darshan808](https://github.com/Darshan808), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Document a change in the Code Editor source updates via `sharedModel` in JupyterLab 4 [#18260](https://github.com/jupyterlab/jupyterlab/pull/18260) ([@Krish-876](https://github.com/Krish-876), [@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-01-22&to=2026-02-23&type=c))
+
+@aaron-seq ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aaaron-seq+updated%3A2026-01-22..2026-02-23&type=Issues)) | @andrii-i ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2026-01-22..2026-02-23&type=Issues)) | @apoorvdarshan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aapoorvdarshan+updated%3A2026-01-22..2026-02-23&type=Issues)) | @aviu16 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aaviu16+updated%3A2026-01-22..2026-02-23&type=Issues)) | @bollwyvl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2026-01-22..2026-02-23&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-01-22..2026-02-23&type=Issues)) | @Carreau ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACarreau+updated%3A2026-01-22..2026-02-23&type=Issues)) | @ceasermikes002 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aceasermikes002+updated%3A2026-01-22..2026-02-23&type=Issues)) | @Copilot ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACopilot+updated%3A2026-01-22..2026-02-23&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-01-22..2026-02-23&type=Issues)) | @DeborahOlaboye ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADeborahOlaboye+updated%3A2026-01-22..2026-02-23&type=Issues)) | @doshi-kevin ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adoshi-kevin+updated%3A2026-01-22..2026-02-23&type=Issues)) | @github29tani ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub29tani+updated%3A2026-01-22..2026-02-23&type=Issues)) | @HaudinFlorence ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2026-01-22..2026-02-23&type=Issues)) | @ianthomas23 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aianthomas23+updated%3A2026-01-22..2026-02-23&type=Issues)) | @itsmevichu ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2026-01-22..2026-02-23&type=Issues)) | @jasongrout ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2026-01-22..2026-02-23&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-01-22..2026-02-23&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-01-22..2026-02-23&type=Issues)) | @Krish-876 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKrish-876+updated%3A2026-01-22..2026-02-23&type=Issues)) | @ktaletsk ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aktaletsk+updated%3A2026-01-22..2026-02-23&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2026-01-22..2026-02-23&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-01-22..2026-02-23&type=Issues)) | @RamiNoodle733 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARamiNoodle733+updated%3A2026-01-22..2026-02-23&type=Issues)) | @superlevure ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asuperlevure+updated%3A2026-01-22..2026-02-23&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.6.0a2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0a1...7d2dba2a79d7b5a979fa08828d4761f708482d79))
@@ -644,8 +735,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-01-12&to=2026-01-22&type=c))
 
 @aaron-seq ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aaaron-seq+updated%3A2026-01-12..2026-01-22&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-01-12..2026-01-22&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-01-12..2026-01-22&type=Issues)) | @IsabelParedes ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AIsabelParedes+updated%3A2026-01-12..2026-01-22&type=Issues)) | @jasongrout ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2026-01-12..2026-01-22&type=Issues)) | @jimangel ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajimangel+updated%3A2026-01-12..2026-01-22&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-01-12..2026-01-22&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-01-12..2026-01-22&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2026-01-12..2026-01-22&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-01-12..2026-01-22&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.6.0a1
 
