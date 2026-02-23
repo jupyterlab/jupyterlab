@@ -97,11 +97,14 @@ jobs:
         run: |
           cd galata
           jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
+          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+            mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           fi
+
       - name: Upload test assets
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
