@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata",
-  "version": "5.5.4",
+  "version": "5.5.5",
   "description": "JupyterLab UI Testing Framework",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,15 +44,15 @@
     "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.4",
-    "@jupyterlab/apputils": "^4.6.4",
-    "@jupyterlab/coreutils": "^6.5.4",
-    "@jupyterlab/debugger": "^4.5.4",
-    "@jupyterlab/docmanager": "^4.5.4",
-    "@jupyterlab/nbformat": "^4.5.4",
-    "@jupyterlab/notebook": "^4.5.4",
-    "@jupyterlab/services": "^7.5.4",
-    "@jupyterlab/settingregistry": "^4.5.4",
+    "@jupyterlab/application": "^4.5.5",
+    "@jupyterlab/apputils": "^4.6.5",
+    "@jupyterlab/coreutils": "^6.5.5",
+    "@jupyterlab/debugger": "^4.5.5",
+    "@jupyterlab/docmanager": "^4.5.5",
+    "@jupyterlab/nbformat": "^4.5.5",
+    "@jupyterlab/notebook": "^4.5.5",
+    "@jupyterlab/services": "^7.5.5",
+    "@jupyterlab/settingregistry": "^4.5.5",
     "@lumino/coreutils": "^2.2.2",
     "@playwright/test": "^1.57.0",
     "@stdlib/stats": "~0.0.13",
