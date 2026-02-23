@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { TransactionSpec } from '@codemirror/state';
+import { EditorSelection, type TransactionSpec } from '@codemirror/state';
 import type { SourceChange } from '@jupyter/ydoc';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -138,13 +138,33 @@ export class InlineCompleter extends Widget {
     const requestPosition = editor.getOffsetAt(position);
     const start = requestPosition;
     const end = cursorBeforeChange;
-    const transactions: TransactionSpec = {
-      changes: { from: start, to: end, insert: value }
-    };
-    if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
-      transactions.selection = { anchor: start + value.length };
+    const cmEditor = (editor as CodeMirrorEditor).editor;
+    const selections = editor.getSelections();
+    if (selections.length <= 1) {
+      const transactions: TransactionSpec = {
+        changes: { from: start, to: end, insert: value }
+      };
+      if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
+        transactions.selection = { anchor: start + value.length };
+      }
+      cmEditor.dispatch(transactions);
+      model.reset();
+      this.update();
+      return;
     }
-    (editor as CodeMirrorEditor).editor.dispatch(transactions);
+
+    const replacedLength = end - start;
+
+    const transaction = cmEditor.state.changeByRange(range => {
+      const from = Math.max(0, range.head - replacedLength);
+      const to = range.head;
+
+      return {
+        changes: { from, to, insert: value },
+        range: EditorSelection.cursor(from + value.length)
+      };
+    });
+    cmEditor.dispatch(transaction);
     model.reset();
     this.update();
   }
@@ -449,8 +469,7 @@ export class InlineCompleter extends Widget {
       minLines = this._minLines;
     }
 
-    this._ghostManager.placeGhost(view, {
-      from: editor.getOffsetAt(model.cursor),
+    const ghostBase = {
       content: text,
       providerId: item.provider.identifier,
       addedPart: item.lastStreamed,
@@ -460,7 +479,26 @@ export class InlineCompleter extends Widget {
       onPointerOver: this._onPointerOverGhost.bind(this),
       onPointerLeave: this._onPointerLeaveGhost.bind(this),
       error: item.error
-    });
+    };
+    const cursorOffsets = editor
+      .getSelections()
+      .filter(
+        selection =>
+          selection.start.line === selection.end.line &&
+          selection.start.column === selection.end.column
+      )
+      .map(selection => editor.getOffsetAt(selection.end));
+    const uniqueOffsets =
+      cursorOffsets.length > 0
+        ? Array.from(new Set(cursorOffsets))
+        : [editor.getOffsetAt(model.cursor)];
+    this._ghostManager.placeGhost(
+      view,
+      uniqueOffsets.map(from => ({
+        ...ghostBase,
+        from
+      }))
+    );
     editor.host.classList.add(INLINE_COMPLETER_ACTIVE_CLASS);
   }
 

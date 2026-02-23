@@ -105,8 +105,11 @@ export class GhostTextManager {
   /**
    * Place ghost text in an editor.
    */
-  placeGhost(view: EditorView, text: IGhostText): void {
-    const effects: StateEffect<unknown>[] = [Private.addMark.of(text)];
+  placeGhost(view: EditorView, text: IGhostText | IGhostText[]): void {
+    const specs = Array.isArray(text) ? text : [text];
+    const effects: StateEffect<unknown>[] = specs.map(spec =>
+      Private.addMark.of(spec)
+    );
 
     if (!view.state.field(Private.markField, false)) {
       effects.push(StateEffect.appendConfig.of([Private.markField]));
@@ -398,6 +401,8 @@ namespace Private {
     action: GhostAction;
     /* Spec of the ghost text to set on transaction */
     spec?: IGhostText;
+    /* Specs of ghost texts to set on transaction */
+    specs?: IGhostText[];
   }
 
   export const addMark = StateEffect.define<IGhostText>({
@@ -414,18 +419,27 @@ namespace Private {
    * Decide what should be done for transaction effects.
    */
   function chooseAction(tr: Transaction): IGhostActionData | null {
-    // This function can short-circuit because at any time there is no more than one ghost text.
+    const specs: IGhostText[] = [];
     for (let e of tr.effects) {
       if (e.is(addMark)) {
-        return {
-          action: GhostAction.Set,
-          spec: e.value
-        };
+        specs.push(e.value);
       } else if (e.is(removeMark)) {
         return {
           action: GhostAction.Remove
         };
       }
+    }
+    if (specs.length === 1) {
+      return {
+        action: GhostAction.Set,
+        spec: specs[0]
+      };
+    }
+    if (specs.length > 1) {
+      return {
+        action: GhostAction.Set,
+        specs
+      };
     }
     if (tr.docChanged || tr.selection) {
       return {
@@ -510,11 +524,19 @@ namespace Private {
       }
       switch (data.action) {
         case GhostAction.Set: {
-          const spec = data.spec!;
-          const newWidget = createWidget(spec, tr);
+          if (data.spec) {
+            const newWidget = createWidget(data.spec, tr);
+            return marks.update({
+              add: [newWidget],
+              filter: (_from, _to, value) => value === newWidget.value
+            });
+          }
+          const specs = data.specs ?? [];
+          const newWidgets = specs.map(spec => createWidget(spec, tr));
+          const newValues = newWidgets.map(widget => widget.value);
           return marks.update({
-            add: [newWidget],
-            filter: (_from, _to, value) => value === newWidget.value
+            add: newWidgets,
+            filter: (_from, _to, value) => newValues.includes(value)
           });
         }
         case GhostAction.Remove:
@@ -522,72 +544,85 @@ namespace Private {
             filter: () => false
           });
         case GhostAction.FilterAndUpdate: {
+          const originalSpecs: IGhostText[] = [];
           let cursor = marks.iter();
-          // skip over spacer if any
-          while (
-            cursor.value &&
-            cursor.value.spec.widget instanceof TransientSpacerWidget
-          ) {
+          while (cursor.value) {
+            if (!(cursor.value.spec.widget instanceof TransientSpacerWidget)) {
+              originalSpecs.push(cursor.value.spec.ghostSpec as IGhostText);
+            }
             cursor.next();
           }
-          if (!cursor.value) {
-            // short-circuit if no widgets are present, or if only spacer was present
+          if (originalSpecs.length === 0) {
+            // short-circuit if no widgets are present, or if only spacers are present
             return marks.map(tr.changes);
           }
-          const originalSpec = cursor.value!.spec.ghostSpec as IGhostText;
-          const spec = { ...originalSpec };
-          let shouldRemoveGhost = false;
-          tr.changes.iterChanges(
-            (
-              fromA: number,
-              toA: number,
-              fromB: number,
-              toB: number,
-              inserted: Text
-            ) => {
-              if (shouldRemoveGhost) {
-                return;
-              }
-              if (fromA === toA && fromB !== toB) {
-                // text was inserted without modifying old text
-                for (
-                  let lineNumber = 0;
-                  lineNumber < inserted.lines;
-                  lineNumber++
-                ) {
-                  const lineContent = inserted.lineAt(lineNumber).text;
-                  const line =
-                    lineNumber > 0 ? '\n' + lineContent : lineContent;
-                  if (spec.content.startsWith(line)) {
-                    spec.content = spec.content.slice(line.length);
-                    spec.from += line.length;
-                  } else {
-                    shouldRemoveGhost = true;
-                    break;
-                  }
+
+          const newWidgets = [];
+          let shouldMapMarks = false;
+          for (const originalSpec of originalSpecs) {
+            const spec = {
+              ...originalSpec,
+              from: tr.changes.mapPos(originalSpec.from, 1)
+            };
+            let shouldRemoveGhost = false;
+            tr.changes.iterChanges(
+              (
+                fromA: number,
+                toA: number,
+                fromB: number,
+                toB: number,
+                inserted: Text
+              ) => {
+                if (shouldRemoveGhost) {
+                  return;
                 }
-              } else if (fromB === toB && fromA !== toA) {
-                // text was removed
-                shouldRemoveGhost = true;
-              } else {
-                // text was replaced
-                shouldRemoveGhost = true;
-                // TODO: could check if the previous spec matches
+                if (fromA === toA && fromB !== toB) {
+                  // text was inserted without modifying old text
+                  if (fromA !== originalSpec.from) {
+                    return;
+                  }
+                  for (
+                    let lineNumber = 0;
+                    lineNumber < inserted.lines;
+                    lineNumber++
+                  ) {
+                    const lineContent = inserted.lineAt(lineNumber).text;
+                    const line =
+                      lineNumber > 0 ? '\n' + lineContent : lineContent;
+                    if (spec.content.startsWith(line)) {
+                      spec.content = spec.content.slice(line.length);
+                    } else {
+                      shouldRemoveGhost = true;
+                      break;
+                    }
+                  }
+                } else if (fromB === toB && fromA !== toA) {
+                  // text was removed
+                  shouldRemoveGhost = true;
+                } else {
+                  // text was replaced
+                  shouldRemoveGhost = true;
+                  // TODO: could check if the previous spec matches
+                }
               }
+            );
+            // removing multi-line widget would cause the code cell to jump; instead
+            // we add a temporary spacer widget(s) which will be removed in a future update
+            // allowing a slight delay between getting a new suggestion and reducing cell height
+            if (shouldRemoveGhost) {
+              shouldMapMarks = true;
+              newWidgets.push(...createSpacer(originalSpec, tr));
+            } else {
+              newWidgets.push(createWidget(spec, tr));
             }
-          );
-          // removing multi-line widget would cause the code cell to jump; instead
-          // we add a temporary spacer widget(s) which will be removed in a future update
-          // allowing a slight delay between getting a new suggestion and reducing cell height
-          const newWidgets = shouldRemoveGhost
-            ? createSpacer(originalSpec, tr)
-            : [createWidget(spec, tr)];
+          }
+
           const newValues = newWidgets.map(widget => widget.value);
           marks = marks.update({
             add: newWidgets,
             filter: (_from, _to, value) => newValues.includes(value)
           });
-          if (shouldRemoveGhost) {
+          if (shouldMapMarks) {
             // TODO this can error out when deleting text, ideally a clean solution would be used.
             try {
               marks = marks.map(tr.changes);
