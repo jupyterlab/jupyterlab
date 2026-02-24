@@ -317,6 +317,13 @@ export class DirListing extends Widget {
   }
 
   /**
+   * A signal fired when the sort state changes.
+   */
+  get sortChanged(): ISignal<DirListing, DirListing.ISortState> {
+    return this._sortChanged;
+  }
+
+  /**
    * A signal fired when the selection changes.
    */
   get selectionChanged(): ISignal<DirListing, void> {
@@ -354,7 +361,10 @@ export class DirListing extends Widget {
       this.translator
     );
     this._sortState = state;
+    this._renderer.updateSortIndicator?.(this.headerNode, state);
     this.update();
+    this._sortChanged.emit(state);
+    this._saveSortState();
   }
 
   /**
@@ -575,18 +585,37 @@ export class DirListing extends Widget {
         | Record<DirListing.IColumn['id'], number | null>
         | undefined;
 
-      if (!sizes) {
-        return;
+      if (sizes) {
+        for (const [key, size] of Object.entries(sizes)) {
+          this._columnSizes[key as DirListing.IColumn['id']] = size;
+        }
+        this._updateColumnSizes();
       }
-      for (const [key, size] of Object.entries(sizes)) {
-        this._columnSizes[key as DirListing.IColumn['id']] = size;
+
+      const sortState = (columns as ReadonlyJSONObject)[
+        'sortState'
+      ] as unknown as DirListing.ISortState | undefined;
+
+      if (sortState) {
+        this.sort(sortState);
       }
-      this._updateColumnSizes();
     } catch (error) {
       await state.remove(key);
     }
   }
   private _stateColumnsKey: string;
+
+  /**
+   * Save the current sort state to the state database.
+   */
+  private _saveSortState(): void {
+    if (this._state && this._stateColumnsKey) {
+      void this._state.save(this._stateColumnsKey, {
+        sizes: this._columnSizes,
+        sortState: { ...this._sortState }
+      });
+    }
+  }
 
   /**
    * Shut down kernels on the applicable currently selected items.
@@ -1197,6 +1226,7 @@ export class DirListing extends Widget {
       this._hiddenColumns,
       this._columnSizes
     );
+    this._renderer.updateSortIndicator?.(this.headerNode, this._sortState);
 
     this._updateColumnSizes();
   }
@@ -1297,7 +1327,8 @@ export class DirListing extends Widget {
 
     if (this._state && this._stateColumnsKey) {
       void this._state.save(this._stateColumnsKey, {
-        sizes: this._columnSizes
+        sizes: this._columnSizes,
+        sortState: { ...this._sortState }
       });
     }
   }
@@ -2620,6 +2651,7 @@ export class DirListing extends Widget {
   };
   private _handleOpenFile: (path: string) => void;
   private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
+  private _sortChanged = new Signal<DirListing, DirListing.ISortState>(this);
   private _selectionChanged = new Signal<DirListing, void>(this);
   private _drag: Drag | null = null;
   private _dragData: {
@@ -2798,6 +2830,15 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       columnsSizes?: Record<IColumn['id'], number | null>
     ): void;
+
+    /**
+     * Update the header sort indicator to reflect the given sort state.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param sortState - The sort state to reflect in the header.
+     */
+    updateSortIndicator?(node: HTMLElement, sortState: ISortState): void;
 
     /**
      * Handle a header click.
@@ -3095,6 +3136,45 @@ export namespace DirListing {
         'right',
         'up'
       );
+    }
+
+    /**
+     * Update the header sort indicator to reflect the given sort state.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param sortState - The sort state to reflect in the header.
+     */
+    updateSortIndicator(
+      node: HTMLElement,
+      sortState: DirListing.ISortState
+    ): void {
+      const sortableColumns = DirListing.columns.filter(Private.isSortable);
+
+      for (const column of sortableColumns) {
+        const header = node.querySelector(`.${column.className}`);
+        if (!header) {
+          continue;
+        }
+        const headerIcon = DOMUtils.findElement(
+          header as HTMLElement,
+          HEADER_ITEM_ICON_CLASS
+        );
+        if (column.id === sortState.key) {
+          header.classList.add(SELECTED_CLASS);
+          if (sortState.direction === 'descending') {
+            header.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(headerIcon, column.caretSide, 'down');
+          } else {
+            header.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(headerIcon, column.caretSide, 'up');
+          }
+        } else {
+          header.classList.remove(SELECTED_CLASS);
+          header.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(headerIcon, column.caretSide);
+        }
+      }
     }
 
     /**

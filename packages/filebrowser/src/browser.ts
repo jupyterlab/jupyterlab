@@ -291,6 +291,24 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * The current sort state of the file browser.
+   */
+  get sortState(): DirListing.ISortState {
+    return this.listing.sortState;
+  }
+
+  set sortState(state: DirListing.ISortState) {
+    this.listing.sort(state);
+  }
+
+  /**
+   * A signal fired when the sort state changes.
+   */
+  get sortChanged(): ISignal<DirListing, DirListing.ISortState> {
+    return this.listing.sortChanged;
+  }
+
+  /**
    * Whether to sort notebooks above other files
    */
   get sortNotebooksFirst(): boolean {
