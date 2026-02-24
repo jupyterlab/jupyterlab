@@ -825,6 +825,12 @@ export async function ensureIntegrity(): Promise<boolean> {
       options.noUnused = false;
     }
 
+    if (name === '@jupyterlab/galata') {
+      // Most of the galata codebase runs on the Node.js runtime,
+      // with the exception being the `extension` subpackage.
+      options.allowNodeDependencies = true;
+    }
+
     const pkgMessages = await ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
