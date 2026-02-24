@@ -327,9 +327,9 @@ jobs:
           elif [ "${{ needs.open-pr.result }}" != "success" ]; then
             BODY="I prepared snapshot changes, but opening the snapshot update PR failed. [Workflow run](${RUN_URL})"
           elif [ "${{ needs.open-pr.outputs.pr-action }}" = "updated" ]; then
-            BODY="I updated the PR ${{ needs.open-pr.outputs.pr-url }} with the latest snapshots from [run \`${ASSETS_RUN_ID}\`](${ASSETS_RUN_URL})."
+            BODY="I updated the PR ${{ needs.open-pr.outputs.pr-url }} with the latest snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
           else
-            BODY="I created the PR ${{ needs.open-pr.outputs.pr-url }} with snapshots from [run \`${ASSETS_RUN_ID}\`](${ASSETS_RUN_URL})."
+            BODY="I created the PR ${{ needs.open-pr.outputs.pr-url }} with snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
           fi
 
           echo "body=$BODY" >> $GITHUB_OUTPUT
