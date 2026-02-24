@@ -45,6 +45,13 @@ export interface IUploadModel {
   progress: number;
 }
 
+export class UploadCancelledError extends Error {
+  constructor(path: string) {
+    super(`Upload cancelled: ${path}`);
+    this.name = 'UploadCancelledError';
+  }
+}
+
 /**
  * An implementation of a file browser model.
  *
@@ -564,6 +571,7 @@ export class FileBrowserModel implements IDisposable {
             newValue: null,
             oldValue: upload
           });
+          throw new UploadCancelledError(path);
         } else {
           this._uploadChanged.emit({
             name: 'failure',
@@ -624,6 +632,7 @@ export class FileBrowserModel implements IDisposable {
             newValue: upload,
             oldValue: null
           });
+          throw new UploadCancelledError(path);
         } else {
           this._uploadChanged.emit({
             name: 'failure',
