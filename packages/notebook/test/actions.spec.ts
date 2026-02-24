@@ -2178,6 +2178,18 @@ describe('@jupyterlab/notebook', () => {
         expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
       });
 
+      it('should prefer scrolling to the start of the selected cell when hiding output', () => {
+        widget.activeCellIndex = 1;
+        const scrollSpy = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue(undefined);
+
+        NotebookActions.hideOutput(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        scrollSpy.mockRestore();
+      });
+
       it('should hide and show the outputs on the selected cell', () => {
         const next = widget.widgets[1];
         widget.select(next);
