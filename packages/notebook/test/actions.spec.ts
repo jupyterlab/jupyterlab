@@ -622,6 +622,18 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
+      it('should prefer scrolling to the start of the next active cell', () => {
+        widget.activeCellIndex = 1;
+        const scrollSpy = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue(undefined);
+
+        NotebookActions.deleteCells(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        scrollSpy.mockRestore();
+      });
+
       it('should activate the cell after the last selected cell', () => {
         widget.activeCellIndex = 4;
         const prev = widget.widgets[2];
@@ -1417,6 +1429,18 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(0);
       });
 
+      it('should prefer scrolling to the start of the selected cell', () => {
+        widget.activeCellIndex = 2;
+        const scrollSpy = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue(undefined);
+
+        NotebookActions.selectAbove(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        scrollSpy.mockRestore();
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.selectAbove(widget);
@@ -1452,6 +1476,17 @@ describe('@jupyterlab/notebook', () => {
       it('should select the cell below the active cell', () => {
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should prefer scrolling to the start of the selected cell', () => {
+        const scrollSpy = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue(undefined);
+
+        NotebookActions.selectBelow(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        scrollSpy.mockRestore();
       });
 
       it('should be a no-op if there is no model', () => {
