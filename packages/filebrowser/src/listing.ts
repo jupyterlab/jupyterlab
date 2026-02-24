@@ -317,13 +317,6 @@ export class DirListing extends Widget {
   }
 
   /**
-   * A signal fired when the sort state changes.
-   */
-  get sortChanged(): ISignal<DirListing, DirListing.ISortState> {
-    return this._sortChanged;
-  }
-
-  /**
    * A signal fired when the selection changes.
    */
   get selectionChanged(): ISignal<DirListing, void> {
@@ -363,7 +356,6 @@ export class DirListing extends Widget {
     this._sortState = state;
     this._renderer.updateSortIndicator?.(this.headerNode, state);
     this.update();
-    this._sortChanged.emit(state);
     this._saveSortState();
   }
 
@@ -2651,7 +2643,6 @@ export class DirListing extends Widget {
   };
   private _handleOpenFile: (path: string) => void;
   private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
-  private _sortChanged = new Signal<DirListing, DirListing.ISortState>(this);
   private _selectionChanged = new Signal<DirListing, void>(this);
   private _drag: Drag | null = null;
   private _dragData: {

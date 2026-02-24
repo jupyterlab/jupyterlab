@@ -150,14 +150,6 @@ namespace CommandIDs {
   export const toggleSortNotebooksFirst =
     'filebrowser:toggle-sort-notebooks-first';
 
-  export const sortByName = 'filebrowser:sort-by-name';
-
-  export const sortByLastModified = 'filebrowser:sort-by-last-modified';
-
-  export const sortByFileSize = 'filebrowser:sort-by-file-size';
-
-  export const toggleSortDirection = 'filebrowser:toggle-sort-direction';
-
   export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
@@ -1443,22 +1435,6 @@ function addCommands(
       command: CommandIDs.openPath,
       category: trans.__('File Operations')
     });
-    commandPalette.addItem({
-      command: CommandIDs.sortByName,
-      category: trans.__('File Operations')
-    });
-    commandPalette.addItem({
-      command: CommandIDs.sortByLastModified,
-      category: trans.__('File Operations')
-    });
-    commandPalette.addItem({
-      command: CommandIDs.sortByFileSize,
-      category: trans.__('File Operations')
-    });
-    commandPalette.addItem({
-      command: CommandIDs.toggleSortDirection,
-      category: trans.__('File Operations')
-    });
   }
 
   commands.addCommand(CommandIDs.open, {
@@ -1877,87 +1853,6 @@ function addCommands(
           .catch((reason: Error) => {
             console.error(`Failed to set showFileCheckboxes setting`);
           });
-      }
-    },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.sortByName, {
-    label: trans.__('Sort by Name'),
-    isToggled: () => {
-      const widget = tracker.currentWidget;
-      return widget?.sortState.key === 'name';
-    },
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (widget) {
-        widget.sortState = { key: 'name', direction: 'ascending' };
-      }
-    },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.sortByLastModified, {
-    label: trans.__('Sort by Last Modified'),
-    isToggled: () => {
-      const widget = tracker.currentWidget;
-      return widget?.sortState.key === 'last_modified';
-    },
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (widget) {
-        widget.sortState = { key: 'last_modified', direction: 'ascending' };
-      }
-    },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.sortByFileSize, {
-    label: trans.__('Sort by File Size'),
-    isToggled: () => {
-      const widget = tracker.currentWidget;
-      return widget?.sortState.key === 'file_size';
-    },
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (widget) {
-        widget.sortState = { key: 'file_size', direction: 'ascending' };
-      }
-    },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.toggleSortDirection, {
-    label: trans.__('Toggle Sort Direction'),
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (widget) {
-        const current = widget.sortState;
-        widget.sortState = {
-          key: current.key,
-          direction:
-            current.direction === 'ascending' ? 'descending' : 'ascending'
-        };
       }
     },
     describedBy: {
