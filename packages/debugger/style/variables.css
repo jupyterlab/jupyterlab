@@ -87,6 +87,8 @@
 
 .jp-DebuggerVariables-colorPalette .jp-mod-text {
   color: var(--jp-content-font-color0);
+  font-family: var(--jp-datagrid-font-family, var(--jp-content-font-family));
+  font-size: var(--jp-datagrid-font-size, 12px);
 }
 
 .jp-VariableRendererPanel {
