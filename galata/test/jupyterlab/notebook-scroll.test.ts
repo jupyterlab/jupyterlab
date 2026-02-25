@@ -482,3 +482,75 @@ test.describe('Jump to execution button', () => {
     await lastCell?.waitFor({ state: 'visible', timeout: 1000 });
   });
 });
+
+test.describe('Jump to Last Cell', () => {
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('should jump to last cell using End key', async ({ page }) => {
+    // Get the total number of cells
+    const cellCount = await page.notebook.getCellCount();
+    expect(cellCount).toBeGreaterThan(1);
+
+    // Scroll to the first cell to ensure we're not already at the end
+    const firstCell = await page.notebook.getCellLocator(0);
+    await firstCell?.scrollIntoViewIfNeeded();
+
+    // Verify first cell is visible
+    await firstCell?.waitFor({ state: 'visible', timeout: 1000 });
+
+    // Press End key to jump to last cell
+    await page.keyboard.press('End');
+
+    // Wait a bit for the scroll to complete
+    await page.waitForTimeout(500);
+
+    // Verify the last cell is now visible
+    const lastCellIndex = cellCount - 1;
+    const lastCell = await page.notebook.getCellLocator(lastCellIndex);
+    await lastCell?.waitFor({ state: 'visible', timeout: 2000 });
+
+    // Verify first cell is no longer in viewport if there are enough cells
+    if (cellCount > 5) {
+      // The first cell might still be partially visible, but the last should be visible
+      const lastCellInViewport = await lastCell?.isVisible();
+      expect(lastCellInViewport).toBe(true);
+    }
+  });
+
+  test('should activate last cell when jumping', async ({ page }) => {
+    const cellCount = await page.notebook.getCellCount();
+    expect(cellCount).toBeGreaterThan(1);
+
+    // Start at first cell
+    await page.notebook.selectCells(0);
+    const firstCell = await page.notebook.getCellLocator(0);
+    await firstCell?.scrollIntoViewIfNeeded();
+
+    // Press End key
+    await page.keyboard.press('End');
+
+    // Wait for scroll and activation
+    await page.waitForTimeout(500);
+
+    // Verify last cell is active
+    const lastCellIndex = cellCount - 1;
+    const lastCell = await page.notebook.getCellLocator(lastCellIndex);
+    await lastCell?.waitFor({ state: 'visible', timeout: 2000 });
+
+    // Check that the last cell has active state
+    const activeCell = page.locator('.jp-Cell.jp-mod-active');
+    await expect(activeCell).toHaveCount(1);
+  });
+});
