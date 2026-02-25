@@ -96,8 +96,8 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: var(--md-grey-400, #bdbdbd);
-  --jp-border-color1: var(--md-grey-400, #bdbdbd);
+  --jp-border-color0: purple;
+  --jp-border-color1: purple;
   --jp-border-color2: var(--md-grey-300, #e0e0e0);
   --jp-border-color3: var(--md-grey-200, #eee);
   --jp-inverse-border-color: var(--md-grey-600, #757575);
