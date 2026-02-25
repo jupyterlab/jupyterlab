@@ -98,8 +98,8 @@ jobs:
           cd galata
           set +e  # we want to move the reports even if we fail
           jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
-          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           TEST_EXIT_CODE=$?
+          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
           BENCHMARK_EXIT_CODE=0
           if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then

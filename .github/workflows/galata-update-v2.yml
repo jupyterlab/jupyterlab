@@ -323,7 +323,7 @@ jobs:
           if [ "${{ needs.create-branch.result }}" != "success" ]; then
             BODY="I failed to update snapshots while preparing/pushing the update branch. [Workflow run](${RUN_URL})"
           elif [ "${{ needs.create-branch.outputs.has-changes }}" = "false" ]; then
-            BODY="I did not detect and snapshot changes. [Workflow run](${RUN_URL})"
+            BODY="I did not detect any snapshot changes. [Workflow run](${RUN_URL})"
           elif [ "${{ needs.open-pr.result }}" != "success" ]; then
             BODY="I prepared snapshot changes, but opening the snapshot update PR failed. [Workflow run](${RUN_URL})"
           elif [ "${{ needs.open-pr.outputs.pr-action }}" = "updated" ]; then
