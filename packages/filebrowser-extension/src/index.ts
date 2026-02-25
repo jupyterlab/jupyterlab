@@ -1621,7 +1621,9 @@ function addCommands(
     icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     label: () => {
       const n = Array.from(tracker.currentWidget?.selectedItems() ?? []).length;
-      return n > 1 ? trans.__('Rename %1 Items', n) : trans.__('Rename');
+      return n > 1
+        ? trans._n('Rename %1 Item', 'Rename %1 Items', n, n)
+        : trans.__('Rename');
     },
     mnemonic: 0,
     describedBy: {
