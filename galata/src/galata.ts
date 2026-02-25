@@ -33,6 +33,13 @@ export namespace galata {
       checkForUpdates: false,
       fetchNews: 'false'
     },
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
+    },
     '@jupyterlab/fileeditor-extension:plugin': {},
     '@jupyterlab/notebook-extension:tracker': {},
     '@jupyterlab/codemirror-extension:plugin': {
