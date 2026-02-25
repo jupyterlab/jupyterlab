@@ -20,6 +20,7 @@ import {
   unfoldEffect
 } from '@codemirror/language';
 import { EditorSelection } from '@codemirror/state';
+import type { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
 import type {
@@ -46,6 +47,24 @@ namespace CommandIDs {
   export const unfoldSubregions = 'codemirror:unfold-subregions';
   export const foldAll = 'codemirror:fold-all';
   export const unfoldAll = 'codemirror:unfold-all';
+}
+
+interface CommentTokens {
+  block?: { open: string; close: string };
+  line?: string;
+}
+
+function hasBlockCommentTokens(state: EditorState): boolean {
+  const pos = state.selection.main.head;
+  const data = state.languageDataAt<CommentTokens>('commentTokens', pos);
+  return data.length > 0 && data[0].block !== undefined;
+}
+
+function toggleBlockCommentWithFallback(view: EditorView): boolean {
+  if (hasBlockCommentTokens(view.state)) {
+    return toggleBlockComment(view);
+  }
+  return toggleComment(view);
 }
 
 /**
@@ -219,7 +238,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.toggleBlockComment, {
       label: trans.__('Toggle Block Comment'),
       caption: trans.__(
-        'Toggles block comments in languages which support it (e.g. C, JavaScript)'
+        'Toggles block comments; falls back to line comments for languages without block comment syntax'
       ),
       describedBy: {
         args: {
@@ -232,7 +251,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         if (!view) {
           return;
         }
-        toggleBlockComment(view);
+        toggleBlockCommentWithFallback(view);
       },
       isEnabled
     });
