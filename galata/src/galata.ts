@@ -26,12 +26,20 @@ import { JupyterLabPage } from './jupyterlabpage';
 export namespace galata {
   /**
    * Default user settings:
-   * - Deactivate codemirror cursor blinking to avoid noise in screenshots
+   * - Deactivate cursor blinking to avoid noise in screenshots
+   * - Fix fonts to ensure consitent screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
       checkForUpdates: false,
       fetchNews: 'false'
+    },
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
     },
     '@jupyterlab/fileeditor-extension:plugin': {},
     '@jupyterlab/notebook-extension:tracker': {},
@@ -41,7 +49,17 @@ export namespace galata {
       }
     },
     '@jupyterlab/terminal-extension:plugin': {
-      cursorBlink: false
+      cursorBlink: false,
+      fontFamily: '"DejaVu Mono"'
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        'code-font-family': '"DejaVu Mono"',
+        // DejaVu Sans does not support Chineese,
+        // so we fallback to Noto Simplified Chineese
+        'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
+        'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
+      }
     }
   };
 

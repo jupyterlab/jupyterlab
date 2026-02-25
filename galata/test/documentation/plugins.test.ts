@@ -9,7 +9,7 @@ import * as fs from 'fs-extra';
 // As the test is run in the documentation environment, some plugins and tokens are not from core.
 const IGNORED_PLUGINS = [
   /^@jupyterlab\/geojson-extension:factory$/,
-  /^@jupyterlab\/galata-extension:helpers$/,
+  /^@jupyterlab\/galata-extension/,
   /^@jupyter-widgets\//,
   /^jupyterlab_pygments/,
   // Deprecated plugins

@@ -32,6 +32,9 @@
     "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans-sc": "^5.2.10",
+    "@fontsource/dejavu-mono": "^5.2.5",
+    "@fontsource/dejavu-sans": "^5.2.5",
     "@jupyterlab/application": "^4.6.0-alpha.3",
     "@jupyterlab/apputils": "^4.7.0-alpha.3",
     "@jupyterlab/cells": "^4.6.0-alpha.3",
@@ -40,6 +43,7 @@
     "@jupyterlab/nbformat": "^4.6.0-alpha.3",
     "@jupyterlab/notebook": "^4.6.0-alpha.3",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.3",
+    "@jupyterlab/terminal": "^4.6.0-alpha.3",
     "@lumino/algorithm": "^2.0.4",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/signaling": "^2.1.5"

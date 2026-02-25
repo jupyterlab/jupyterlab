@@ -17,7 +17,7 @@ jobs:
   test:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -185,7 +185,7 @@ jobs:
     # Python dependencies are frozen in the installation step
     # Note: IPython is among the frozen package
     timeout-minutes: 30
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
@@ -231,13 +231,8 @@ jobs:
           OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Install fonts for consistent documentation snapshots
-          sudo apt-get install fonts-dejavu fonts-noto
-
-          # Freeze the packages to ensure consistent look and feel
-          # IPython is frozen because its version is displayed in
-          # the console header
-          pip install 'ipykernel<7.0'
+          # Note: any changes to dependency pins need should
+          # be done by updating the [docs-screenshots] group.
           bash ./scripts/ci_install.sh
         working-directory: core
 
