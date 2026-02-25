@@ -260,11 +260,11 @@ describe('filebrowser/model', () => {
         expect(restrictedModel.path).toBe(subDir);
 
         // Navigate to subdirectory within root - should work
-        await restrictedModel.cd(subSubDir);
+        await restrictedModel.cd('/' + subSubDir);
         expect(restrictedModel.path).toBe(subSubDir);
 
         // Navigate back to root - should work
-        await restrictedModel.cd(subDir);
+        await restrictedModel.cd('/' + subDir);
         expect(restrictedModel.path).toBe(subDir);
 
         restrictedModel.dispose();
