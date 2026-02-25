@@ -20,7 +20,6 @@ import {
   unfoldEffect
 } from '@codemirror/language';
 import { EditorSelection } from '@codemirror/state';
-import type { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
 import type {
@@ -49,22 +48,8 @@ namespace CommandIDs {
   export const unfoldAll = 'codemirror:unfold-all';
 }
 
-interface CommentTokens {
-  block?: { open: string; close: string };
-  line?: string;
-}
-
-function hasBlockCommentTokens(state: EditorState): boolean {
-  const pos = state.selection.main.head;
-  const data = state.languageDataAt<CommentTokens>('commentTokens', pos);
-  return data.length > 0 && data[0].block !== undefined;
-}
-
 function toggleBlockCommentWithFallback(view: EditorView): boolean {
-  if (hasBlockCommentTokens(view.state)) {
-    return toggleBlockComment(view);
-  }
-  return toggleComment(view);
+  return toggleBlockComment(view) || toggleComment(view);
 }
 
 /**
@@ -238,7 +223,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.toggleBlockComment, {
       label: trans.__('Toggle Block Comment'),
       caption: trans.__(
-        'Toggles block comments; falls back to line comments for languages without block comment syntax'
+        'Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable'
       ),
       describedBy: {
         args: {
