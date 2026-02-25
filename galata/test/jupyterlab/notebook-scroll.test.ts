@@ -145,7 +145,7 @@ test.describe('Notebook scroll on dragging cells (with windowing)', () => {
     const scroller = page.locator(NOTEBOOK_SCROLLER);
     await firstCellLocator.scrollIntoViewIfNeeded();
 
-    const scrollerBBox = await scroller.boundingBox();
+    const scrollerBBox = (await scroller.boundingBox())!;
     const notebookContentHeight = (
       await page.locator(NOTEBOOK_CONTENT).boundingBox()
     ).height;
@@ -184,7 +184,7 @@ test.describe('Notebook scroll on dragging cells (with windowing)', () => {
     );
 
     const scroller = page.locator(NOTEBOOK_SCROLLER);
-    const scrollerBBox = await scroller.boundingBox();
+    const scrollerBBox = (await scroller.boundingBox())!;
     const notebookContentHeight = (
       await page.locator(NOTEBOOK_CONTENT).boundingBox()
     ).height;
@@ -344,13 +344,13 @@ test.describe('Notebook scroll over long outputs (with windowing)', () => {
       '.jp-Cell .jp-RenderedMarkdown:has-text("Before")'
     );
     // Wait until Markdown cells are rendered
-    await renderedMarkdownLocator.waitFor({ timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ timeout: 500 });
     // Un-render the "before" markdown cell
     await renderedMarkdownLocator.dblclick();
     // Make the first cell active
     await page.notebook.selectCells(0);
     // Check that that the markdown cell is un-rendered
-    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 500 });
 
     // Scroll to the last cell
     const lastCell = await page.notebook.getCellLocator(10);
@@ -361,6 +361,15 @@ test.describe('Notebook scroll over long outputs (with windowing)', () => {
 
     let previousOffset = await outer.evaluate(node => node.scrollTop);
     expect(previousOffset).toBeGreaterThan(1000);
+
+    const nbPanel = (await page.notebook.getNotebookInPanelLocator())!;
+    const bbox = (await nbPanel.boundingBox())!;
+
+    // Position mouse for scrolling
+    await page.mouse.move(
+      bbox.x + 0.5 * bbox.width,
+      bbox.y + 0.5 * bbox.height
+    );
 
     // Scroll piece by piece checking that there is no jump
     while (previousOffset > 75) {
@@ -453,11 +462,19 @@ test.describe('Jump to execution button', () => {
       page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
     ).toHaveCount(0);
 
-    // Run first cell
-    void page.notebook.runCell(0, false);
+    // Start executing the first cell (with 2 second sleep)
+    await page.notebook.runCell(0, { inplace: false });
 
+    // Add a cell at the end, it will have index 3 (fourth cell)
     await page.notebook.addCell('code', '1');
-    const runPromise = page.notebook.runCell(3, false);
+
+    // Schedule run of the last (fourth) cell we just added.
+    // Because runCell relies on selection and jump action
+    // does change selection in the meantime (which was causing
+    // this test to randomly fail) we await for run but create
+    // a promise to await for result manually.
+    await page.notebook.runCell(3, { wait: false });
+    const runPromise = page.notebook.waitForRun(3);
 
     // Hover and verify button exists
     await indicator.hover();
@@ -467,7 +484,6 @@ test.describe('Jump to execution button', () => {
     await expect(jumpButton).toBeVisible();
 
     // Click and scroll to the first cell (currently executing)
-    // TODO: this jumpButton.click fails with a timeout
     await jumpButton.click();
     const firstCell = await page.notebook.getCellLocator(0);
     await firstCell?.waitFor({ state: 'visible', timeout: 1000 });

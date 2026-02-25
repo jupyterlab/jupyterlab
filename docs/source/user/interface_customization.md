@@ -89,6 +89,10 @@ The above example will result in the following changes:
 
 ## Toolbars
 
+In addition to the toolbars attached to individual widgets, JupyterLab provides
+a TopBar extension point that allows extensions to add items to the application
+top bar area.
+
 Lots of toolbars are customizable. Here is a mapping of the customizable toolbars
 and the associated setting.
 
@@ -215,13 +219,11 @@ Customized menu bar
 The menu are identified by the following ids:
 
 - File menu: `jp-mainmenu-file`
-
   - New file submenu: `jp-mainmenu-file-new`
 
 - Edit menu: `jp-mainmenu-edit`
 
 - View menu: `jp-mainmenu-view`
-
   - Appearance submenu: `jp-mainmenu-view-appearance`
 
 - Run menu: `jp-mainmenu-run`

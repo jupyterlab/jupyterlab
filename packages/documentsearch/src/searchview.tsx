@@ -1,11 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   caretDownEmptyThinIcon,
   caretDownIcon,
@@ -20,14 +17,15 @@ import {
   VDomRenderer,
   wordIcon
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { CommandRegistry } from '@lumino/commands';
 import { UseSignal } from '@jupyterlab/apputils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { SearchDocumentModel } from './searchmodel';
-import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
+import type { SearchDocumentModel } from './searchmodel';
+import type { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -248,7 +246,6 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
           <button
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => props.onPreserveCaseToggled()}
-            tabIndex={0}
             title={trans.__('Preserve Case')}
           >
             <caseSensitiveIcon.react
@@ -261,24 +258,16 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
-        tabIndex={0}
       >
-        <span
-          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={0}
-        >
+        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
         </span>
       </button>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
-        tabIndex={0}
         onClick={() => props.onReplaceAll()}
       >
-        <span
-          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
-        >
+        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
         </span>
       </button>
@@ -669,7 +658,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
           // Show an alternate description, if one exists, when a filter is disabled in replace mode.
           const description = isEnabled
             ? filter.description
-            : filter.disabledDescription ?? filter.description;
+            : (filter.disabledDescription ?? filter.description);
           return (
             <FilterSelection
               key={name}

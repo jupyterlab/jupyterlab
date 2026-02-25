@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type * as DataGridModule from '@lumino/datagrid';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import type * as DSVModelModule from './model';
 import { CSVDelimiter } from './toolbar';
@@ -478,8 +478,7 @@ export namespace CSVDocumentWidget {
   // using something like https://stackoverflow.com/a/46941824, instead of
   // inheriting from this IOptionsOptionalContent.
 
-  export interface IOptions
-    extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
+  export interface IOptions extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
     /**
      * Data delimiter character
      */

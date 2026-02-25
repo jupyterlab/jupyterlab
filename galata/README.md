@@ -581,6 +581,8 @@ test.describe.serial('Table of Contents', () => {
 });
 ```
 
+You generally should not delete the `tmpPath` directory in your own `afterAll()` callback.
+
 ## Benchmark
 
 Benchmark of JupyterLab is done using Playwright. The actions measured are:

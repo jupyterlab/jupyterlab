@@ -1,16 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Token } from '@lumino/coreutils';
-import { FileEditor, FileEditorFactory } from './widget';
+import type { FileEditor, FileEditorFactory } from './widget';
 
 /**
  * A class that tracks editor widgets.
  */
-export interface IEditorTracker
-  extends IWidgetTracker<IDocumentWidget<FileEditor>> {}
+export interface IEditorTracker extends IWidgetTracker<
+  IDocumentWidget<FileEditor>
+> {}
 
 /**
  * The editor tracker token.
