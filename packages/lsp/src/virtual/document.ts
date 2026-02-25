@@ -660,16 +660,24 @@ export class VirtualDocument implements IDisposable {
 
     this.lineBlocks.push(lines.join('\n') + '\n');
 
-    // adding the virtual lines for the blank lines
-    for (let i = 0; i < this.blankLinesBetweenCells; i++) {
-      this.virtualLines.set(this.lastVirtualLine + i, {
-        skipInspect: [this.idPath],
-        editor: ceEditor,
-        sourceLine: null
-      });
+    // when an entire cell is extracted do not add new separator lines after it
+    const skipSeparatorLines =
+      lines.length === 1 &&
+      lines[0].trim() === '' &&
+      foreignDocumentsMap.size > 0;
+
+    if (!skipSeparatorLines) {
+      // adding the virtual lines for the blank lines
+      for (let i = 0; i < this.blankLinesBetweenCells; i++) {
+        this.virtualLines.set(this.lastVirtualLine + i, {
+          skipInspect: [this.idPath],
+          editor: ceEditor,
+          sourceLine: null
+        });
+      }
+      this.lastVirtualLine += this.blankLinesBetweenCells;
     }
 
-    this.lastVirtualLine += this.blankLinesBetweenCells;
     this.lastSourceLine += sourceCellLines.length;
   }
 
