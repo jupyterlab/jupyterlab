@@ -15,8 +15,8 @@ env:
 
 jobs:
   test:
-    name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
-    timeout-minutes: 30
+    name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }}${{ matrix.production && ' - production' || '' }})
+    timeout-minutes: 60
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -41,6 +41,24 @@ jobs:
             suite: galata
             shard: 2
             shards: 2
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+            production: true
+            shard: 1
+            shards: 3
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+            production: true
+            shard: 2
+            shards: 3
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+            production: true
+            shard: 3
+            shards: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -72,6 +90,12 @@ jobs:
         run: |
           pip install --upgrade --pre "ipykernel<=7.0.0a1"
 
+      - name: Build JupyterLab in production mode
+        if: matrix.production
+        run: |
+          cd dev_mode
+          npm run build:prod
+
       - name: Launch JupyterLab
         run: |
           cd galata
@@ -98,7 +122,7 @@ jobs:
           cd galata
           jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
 
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]] && [[ "${{ matrix.production }}" != "true" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
           fi
@@ -106,7 +130,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
-          name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
+          name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}${{ matrix.production && '-prod' || '' }}-${{ matrix.shard }}
           path: galata/test-results
           if-no-files-found: ignore  # expected when no tests fail
 
@@ -114,7 +138,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
-          name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
+          name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}${{ matrix.production && '-prod' || '' }}-${{ matrix.shard }}
           path: galata/blob-report
           retention-days: 1
           compression-level: 1
@@ -127,7 +151,7 @@ jobs:
   merge-reports:
     name: Merge Test Reports and Results
     if: ${{ !cancelled() }}
-    needs: test
+    needs: [test]
     runs-on: ubuntu-22.04
     steps:
       - name: Download artifacts
