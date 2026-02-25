@@ -15,8 +15,8 @@ env:
 
 jobs:
   test:
-    name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
-    timeout-minutes: 30
+    name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }}${{ matrix.production && ' - production' || '' }})
+    timeout-minutes: 60
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -41,6 +41,24 @@ jobs:
             suite: galata
             shard: 2
             shards: 2
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+            production: true
+            shard: 1
+            shards: 3
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+            production: true
+            shard: 2
+            shards: 3
+          - browser: chromium
+            project: jupyterlab
+            suite: jupyterlab
+            production: true
+            shard: 3
+            shards: 3
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -72,6 +90,12 @@ jobs:
         run: |
           pip install --upgrade --pre "ipykernel<=7.0.0a1"
 
+      - name: Build JupyterLab in production mode
+        if: matrix.production
+        run: |
+          cd dev_mode
+          npm run build:prod
+
       - name: Launch JupyterLab
         run: |
           cd galata
@@ -98,7 +122,7 @@ jobs:
           cd galata
           jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
 
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]] && [[ "${{ matrix.production }}" != "true" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
           fi
@@ -106,7 +130,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
-          name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
+          name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}${{ matrix.production && '-prod' || '' }}-${{ matrix.shard }}
           path: galata/test-results
           if-no-files-found: ignore  # expected when no tests fail
 
@@ -114,99 +138,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
-          name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
-          path: galata/blob-report
-          retention-days: 1
-          compression-level: 1
-
-      - name: Print JupyterLab logs
-        if: always()
-        run: |
-          cat /tmp/jupyterlab_server.log
-
-  test-production:
-    name: Integration Tests (chromium - production build ${{ matrix.shard }}/${{ matrix.shards }})
-    timeout-minutes: 60
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-        shards: [3]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-
-      - name: Find out Playwright version
-        id: pw-version
-        run: |
-          set -e
-          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
-          echo "Playwright version: $PW_VERSION"
-          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Set up browser cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/pw-browsers
-          key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
-
-      - name: Install dependencies
-        env:
-          OPTIONAL_DEPENDENCIES: ""
-        run: |
-          bash ./scripts/ci_install.sh
-
-      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        run: |
-          pip install --upgrade --pre "ipykernel<=7.0.0a1"
-
-      - name: Build JupyterLab in production mode
-        run: |
-          cd dev_mode
-          npm run build:prod
-
-      - name: Install browser
-        run: |
-          set -ex
-          cd galata
-          jlpm playwright install --with-deps chromium
-
-      - name: Build galata
-        run: |
-          set -ex
-          cd galata
-          jlpm run build
-
-      - name: Launch JupyterLab
-        run: |
-          cd galata
-          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
-
-      - name: Wait for JupyterLab
-        run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
-
-      - name: Test
-        run: |
-          cd galata
-          jlpm run test --project jupyterlab --shard ${{ matrix.shard }}/${{ matrix.shards }}
-
-      - name: Upload test assets
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: galata-test-assets-chromium-jupyterlab-prod-${{ matrix.shard }}
-          path: galata/test-results
-          if-no-files-found: ignore  # expected when no tests fail
-
-      - name: Upload test report blob
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: galata-blobs-chromium-jupyterlab-prod-${{ matrix.shard }}
+          name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}${{ matrix.production && '-prod' || '' }}-${{ matrix.shard }}
           path: galata/blob-report
           retention-days: 1
           compression-level: 1
@@ -219,7 +151,7 @@ jobs:
   merge-reports:
     name: Merge Test Reports and Results
     if: ${{ !cancelled() }}
-    needs: [test, test-production]
+    needs: [test]
     runs-on: ubuntu-22.04
     steps:
       - name: Download artifacts
