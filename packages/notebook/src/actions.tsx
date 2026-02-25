@@ -979,7 +979,7 @@ export namespace NotebookActions {
     // find first non hidden cell above current cell
     while (possibleNextCellIndex >= 0) {
       const possibleNextCell = notebook.widgets[possibleNextCellIndex];
-      if (!possibleNextCell.inputHidden && !possibleNextCell.isHidden) {
+      if (!possibleNextCell.isHidden) {
         break;
       }
       possibleNextCellIndex -= 1;
@@ -1027,7 +1027,7 @@ export namespace NotebookActions {
     // find first non hidden cell below current cell
     while (possibleNextCellIndex < maxCellIndex) {
       let possibleNextCell = notebook.widgets[possibleNextCellIndex];
-      if (!possibleNextCell.inputHidden && !possibleNextCell.isHidden) {
+      if (!possibleNextCell.isHidden) {
         break;
       }
       possibleNextCellIndex += 1;
