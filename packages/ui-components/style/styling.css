@@ -20,6 +20,7 @@ button.jp-mod-styled {
 }
 
 input.jp-mod-styled {
+  font-family: var(--jp-ui-font-family);
   background: var(--jp-input-background);
   height: 28px;
   box-sizing: border-box;
