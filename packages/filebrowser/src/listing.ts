@@ -2524,7 +2524,7 @@ export class DirListing extends Widget {
       text: defaultName
     });
 
-    if (!result.button.accept || !result.value) {
+    if (!result.button.accept) {
       this._inRename = false;
       return '';
     }
