@@ -363,7 +363,7 @@ test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
   await expect(addShortcutRow).toBeAttached();
 
   // Hide the add shortcut row
-  await addShortcutRow.getByTitle('Hide row').click();
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
   await expect(addShortcutRow).not.toBeAttached();
 });
 

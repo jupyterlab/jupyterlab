@@ -83,8 +83,7 @@ export class NewShortcutItem implements IShortcutItemProps {
     //Remove empty keys and delete keybindings if there is no new key.
     keys = keys.filter(key => key !== '');
     if (!keys.length) {
-      this.deleteKeybinding(target, keybinding);
-      return;
+      return this.deleteKeybinding(target, keybinding);
     }
     const index = this._shortcut.keybindings.findIndex(
       binding => binding.keys === keybinding.keys
