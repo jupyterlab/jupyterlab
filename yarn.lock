@@ -1781,6 +1781,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/noto-sans-sc@npm:^5.2.10":
+  version: 5.2.10
+  resolution: "@fontsource-variable/noto-sans-sc@npm:5.2.10"
+  checksum: 48a2bbdbf1b416fa191d6a52df90d3fd25883abf92237dd28f3fce3a055de93ea4ea8a4c24d5779b705ad3349284a042d1693ce234d1e12f62b1b297ea75be19
+  languageName: node
+  linkType: hard
+
 "@fortawesome/fontawesome-free@npm:^5.12.0":
   version: 5.15.4
   resolution: "@fortawesome/fontawesome-free@npm:5.15.4"
@@ -3685,6 +3692,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata-extension@workspace:galata/extension"
   dependencies:
+    "@fontsource-variable/noto-sans-sc": ^5.2.10
     "@jupyterlab/application": ^4.6.0-alpha.3
     "@jupyterlab/apputils": ^4.7.0-alpha.3
     "@jupyterlab/builder": ^4.6.0-alpha.3

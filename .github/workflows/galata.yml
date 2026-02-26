@@ -82,7 +82,7 @@ jobs:
           set -ex
           cd galata
           # Install only the relevant browser for this matrix job
-          jlpm playwright install ${{ matrix.browser }}
+          jlpm playwright install ${{ matrix.browser }} --only-shell
 
       - name: Build galata
         run: |
@@ -243,13 +243,8 @@ jobs:
           OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Install fonts for consistent documentation snapshots
-          sudo apt-get install fonts-dejavu fonts-noto
-
-          # Freeze the packages to ensure consistent look and feel
-          # IPython is frozen because its version is displayed in
-          # the console header
-          pip install 'ipykernel<7.0'
+          # Note: any changes to dependency pins need should
+          # be done by updating the [docs-screenshots] group.
           bash ./scripts/ci_install.sh
         working-directory: core
 
@@ -268,8 +263,8 @@ jobs:
         run: |
           set -ex
           cd galata
-          # Install only Chromium browser
-          jlpm playwright install chromium
+          # Install only headless Chromium browser (no system dependencies)
+          jlpm playwright install chromium --only-shell
         working-directory: core
 
       - name: Build galata

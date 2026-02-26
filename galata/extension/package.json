@@ -32,6 +32,7 @@
     "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans-sc": "^5.2.10",
     "@jupyterlab/application": "^4.6.0-alpha.3",
     "@jupyterlab/apputils": "^4.7.0-alpha.3",
     "@jupyterlab/cells": "^4.6.0-alpha.3",

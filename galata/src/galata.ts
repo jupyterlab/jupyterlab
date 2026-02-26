@@ -42,6 +42,14 @@ export namespace galata {
     },
     '@jupyterlab/terminal-extension:plugin': {
       cursorBlink: false
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        // DejaVu Sans does not support Chineese,
+        // so we fallback to Noto Simplified Chineese
+        'content-font-family': 'system-ui, "Noto Sans SC Variable"',
+        'ui-font-family': 'system-ui, "Noto Sans SC Variable"'
+      }
     }
   };
 

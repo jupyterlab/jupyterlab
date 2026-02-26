@@ -85,16 +85,12 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Install dependencies
+        env:
+          OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Install chinese font
-          sudo apt-get update
-          sudo apt-get install fonts-dejavu fonts-noto
-
-          # Freeze the packages to ensure consistent look and feel
-          # IPython is frozen because its version is displayed in
-          # the console header
-          pip install .[docs-screenshots] 'ipykernel<7.0'
+          # Note: any changes to dependency pins need should
+          # be done by updating the [docs-screenshots] group.
           bash ./scripts/ci_install.sh
 
           # Build dev-mode

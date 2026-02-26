@@ -85,7 +85,11 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
+    # Freeze the packages to ensure consistent look and feel
+    # IPython is frozen because its version is displayed in
+    # the console header
     "altair==6.0.0",
+    "ipykernel<7.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
