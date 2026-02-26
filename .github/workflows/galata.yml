@@ -82,7 +82,7 @@ jobs:
           set -ex
           cd galata
           # Install only the relevant browser for this matrix job
-          jlpm playwright install --with-deps ${{ matrix.browser }}
+          jlpm playwright install ${{ matrix.browser }}
 
       - name: Build galata
         run: |
@@ -269,7 +269,7 @@ jobs:
           set -ex
           cd galata
           # Install only Chromium browser
-          jlpm playwright install --with-deps chromium
+          jlpm playwright install chromium
         working-directory: core
 
       - name: Build galata
