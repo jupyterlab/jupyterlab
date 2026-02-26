@@ -172,9 +172,15 @@
 .jp-Shortcuts-Row-newShortcut
   .jp-Shortcuts-SaveNew:not(:disabled)
   .jp-icon3[fill] {
-  fill: green;
-  stroke: green;
-  stroke-width: 2px;
+  fill: var(--jp-ui-inverse-font-color0);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled) {
+  background: var(--jp-shortcuts-button-hover-background);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled):hover {
+  background: var(--jp-accept-color-normal);
 }
 
 .jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutKeys {
@@ -391,11 +397,11 @@
 }
 
 .jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept {
-  background: var(--jp-accept-color-normal);
+  background: var(--jp-shortcuts-button-hover-background);
 }
 
 .jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept:hover {
-  background: var(--jp-accept-color-hover);
+  background: var(--jp-accept-color-normal);
 }
 
 .jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled:disabled {
