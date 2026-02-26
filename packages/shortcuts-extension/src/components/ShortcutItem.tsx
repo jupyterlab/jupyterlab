@@ -40,7 +40,6 @@ export interface IShortcutItemProps {
     searchQuery: string;
     updateCommand: (command: string, category: string) => void;
     saveShortcut: () => Promise<void>;
-    hideAddCommandRow: () => void;
   };
 }
 
