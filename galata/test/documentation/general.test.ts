@@ -15,7 +15,17 @@ import {
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  viewport: { height: 720, width: 1280 },
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
+    }
+  }
 });
 
 test.describe('General', () => {
