@@ -17,7 +17,6 @@ export interface IAdvancedOptionsProps {
   resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
-  showAddCommandRow: boolean;
 }
 
 export interface ISymbolsProps {}
@@ -76,7 +75,6 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
         onClick={props.toggleAddCommandRow}
         title={trans.__('Tool for adding shortcuts')}
         aria-label={trans.__('Tool for adding shortcuts')}
-        disabled={props.showAddCommandRow}
       >
         <addIcon.react
           tag="span"
@@ -97,7 +95,6 @@ export interface ITopNavProps {
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
-  showAddCommandRow: boolean;
   width: number;
   translator: ITranslator;
 }
@@ -140,7 +137,6 @@ export class TopNav extends React.Component<ITopNavProps> {
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
             toggleAddCommandRow={this.props.toggleAddCommandRow}
-            showAddCommandRow={this.props.showAddCommandRow}
             translator={this.props.translator}
           />
         </div>

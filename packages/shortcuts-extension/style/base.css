@@ -169,6 +169,14 @@
   width: 40%;
 }
 
+.jp-Shortcuts-Row-newShortcut
+  .jp-Shortcuts-SaveNew:not(:disabled)
+  .jp-icon3[fill] {
+  fill: green;
+  stroke: green;
+  stroke-width: 2px;
+}
+
 .jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutKeys {
   border-color: var(--jp-border-color1);
   background: var(--jp-layout-color2);

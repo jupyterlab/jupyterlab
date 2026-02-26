@@ -7,7 +7,6 @@ import { Button } from '@jupyter/react-components';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import {
   checkIcon,
-  closeIcon,
   editIcon,
   HTMLSelect,
   infoIcon
@@ -199,9 +198,11 @@ export class ShortcutItem extends React.Component<
 
     return (
       <div className="jp-Shortcuts-Cell">
-        <div className="jp-Shortcuts-SourceCell">
-          {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
-        </div>
+        {!this.props.newShortcutUtils && (
+          <div className="jp-Shortcuts-SourceCell">
+            {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
+          </div>
+        )}
         {!allDefault ? this.getResetShortCutLink() : ''}
         {this.props.external.editorFactory && (
           <Button
@@ -254,15 +255,6 @@ export class ShortcutItem extends React.Component<
               }
             >
               <checkIcon.react tag={null} />
-            </Button>
-            <Button
-              className="jp-mod-styled jp-mod-accept jp-Shortcuts-HideNew"
-              onClick={this.props.newShortcutUtils?.hideAddCommandRow}
-              title={this._trans.__('Hide row')}
-              aria-label={this._trans.__('Hide row')}
-              appearance="neutral"
-            >
-              <closeIcon.react tag={null} />
             </Button>
           </>
         )}

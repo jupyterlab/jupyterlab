@@ -74,7 +74,7 @@ export class ShortcutUI
       newShortcut: this._newShortcutItem.shortcut
     };
 
-    this._newShortcutItem.changed.connect((_: any, newShortcutItem) => {
+    this._newShortcutItem.changed.connect(() => {
       this.setState({ newShortcut: { ...this._newShortcutItem.shortcut } });
     });
   }
@@ -404,7 +404,6 @@ export class ShortcutUI
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           toggleAddCommandRow={this.toggleAddCommandRow}
-          showAddCommandRow={this.state.showAddCommand}
           width={this.props.width}
           translator={this.props.external.translator}
         />
