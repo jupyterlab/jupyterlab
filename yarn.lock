@@ -5673,7 +5673,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/widgets@npm:^1.37.2 || ^2.7.5, @lumino/widgets@npm:^2.7.3, @lumino/widgets@npm:^2.7.5":
+"@lumino/widgets@npm:^1.37.2 || ^2.7.5, @lumino/widgets@npm:^2.7.5":
   version: 2.7.5
   resolution: "@lumino/widgets@npm:2.7.5"
   dependencies:
