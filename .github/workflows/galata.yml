@@ -96,12 +96,24 @@ jobs:
       - name: Test
         run: |
           cd galata
+          set +e  # we want to move the reports even if we fail
           jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
+          TEST_EXIT_CODE=$?
+          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          BENCHMARK_EXIT_CODE=0
+          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+            BENCHMARK_EXIT_CODE=$?
+            mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           fi
+
+          # mark as failing
+          if [[ $TEST_EXIT_CODE -ne 0 ]] || [[ $BENCHMARK_EXIT_CODE -ne 0 ]]; then
+            exit 1
+          fi
+
       - name: Upload test assets
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
