@@ -25,6 +25,9 @@ test.describe('Internationalization', () => {
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
 
+    // Wait for fonts to be loaded
+    await page.evaluate(() => document.fonts.ready);
+
     expect
       .soft(
         await page.screenshot({
