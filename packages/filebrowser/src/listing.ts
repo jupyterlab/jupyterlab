@@ -355,6 +355,7 @@ export class DirListing extends Widget {
     );
     this._sortState = state;
     this.update();
+    this._saveSortState();
   }
 
   /**
@@ -575,18 +576,37 @@ export class DirListing extends Widget {
         | Record<DirListing.IColumn['id'], number | null>
         | undefined;
 
-      if (!sizes) {
-        return;
+      if (sizes) {
+        for (const [key, size] of Object.entries(sizes)) {
+          this._columnSizes[key as DirListing.IColumn['id']] = size;
+        }
+        this._updateColumnSizes();
       }
-      for (const [key, size] of Object.entries(sizes)) {
-        this._columnSizes[key as DirListing.IColumn['id']] = size;
+
+      const sortState = (columns as ReadonlyJSONObject)[
+        'sortState'
+      ] as unknown as DirListing.ISortState | undefined;
+
+      if (sortState) {
+        this.sort(sortState);
       }
-      this._updateColumnSizes();
     } catch (error) {
       await state.remove(key);
     }
   }
   private _stateColumnsKey: string;
+
+  /**
+   * Save the current sort state to the state database.
+   */
+  private _saveSortState(): void {
+    if (this._state && this._stateColumnsKey) {
+      void this._state.save(this._stateColumnsKey, {
+        sizes: this._columnSizes,
+        sortState: { ...this._sortState }
+      });
+    }
+  }
 
   /**
    * Shut down kernels on the applicable currently selected items.
@@ -1195,7 +1215,8 @@ export class DirListing extends Widget {
       this.headerNode,
       this.translator,
       this._hiddenColumns,
-      this._columnSizes
+      this._columnSizes,
+      this._sortState
     );
 
     this._updateColumnSizes();
@@ -1297,7 +1318,8 @@ export class DirListing extends Widget {
 
     if (this._state && this._stateColumnsKey) {
       void this._state.save(this._stateColumnsKey, {
-        sizes: this._columnSizes
+        sizes: this._columnSizes,
+        sortState: { ...this._sortState }
       });
     }
   }
@@ -2796,7 +2818,8 @@ export namespace DirListing {
       node: HTMLElement,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      sortState?: ISortState
     ): void;
 
     /**
@@ -3035,7 +3058,8 @@ export namespace DirListing {
       node: HTMLElement,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      sortState?: DirListing.ISortState
     ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
@@ -3086,14 +3110,9 @@ export namespace DirListing {
         }
       }
 
-      const name = DOMUtils.findElement(node, NAME_ID_CLASS);
-      name.classList.add(SELECTED_CLASS);
-
-      // set the initial caret icon
-      Private.updateCaret(
-        DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS),
-        'right',
-        'up'
+      this._updateSortIndicator(
+        node,
+        sortState ?? { direction: 'ascending', key: 'name' }
       );
     }
 
@@ -3107,58 +3126,66 @@ export namespace DirListing {
      * @returns The sort state of the header after the click event.
      */
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
-      const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-
       const sortableColumns = DirListing.columns.filter(Private.isSortable);
 
       for (const column of sortableColumns) {
         const header = node.querySelector(`.${column.className}`);
         if (!header) {
-          // skip if the column is hidden
           continue;
         }
         if (header.contains(target)) {
-          state.key = column.id;
-          const headerIcon = DOMUtils.findElement(
-            header as HTMLElement,
-            HEADER_ITEM_ICON_CLASS
-          );
-          if (header.classList.contains(SELECTED_CLASS)) {
-            if (!header.classList.contains(DESCENDING_CLASS)) {
-              state.direction = 'descending';
-              header.classList.add(DESCENDING_CLASS);
-              Private.updateCaret(headerIcon, column.caretSide, 'down');
-            } else {
-              header.classList.remove(DESCENDING_CLASS);
-              Private.updateCaret(headerIcon, column.caretSide, 'up');
-            }
+          const isSelected = header.classList.contains(SELECTED_CLASS);
+          const isDescending = header.classList.contains(DESCENDING_CLASS);
+          let direction: 'ascending' | 'descending' = 'ascending';
+          if (isSelected && !isDescending) {
+            direction = 'descending';
+          }
+          const state: ISortState = { direction, key: column.id };
+          this._updateSortIndicator(node, state);
+          return state;
+        }
+      }
+      return { direction: 'ascending', key: 'name' };
+    }
+
+    /**
+     * Update the header sort indicator to reflect the given sort state.
+     *
+     * @param node - A node populated by [[populateHeaderNode]].
+     *
+     * @param sortState - The sort state to reflect in the header.
+     */
+    private _updateSortIndicator(
+      node: HTMLElement,
+      sortState: DirListing.ISortState
+    ): void {
+      const sortableColumns = DirListing.columns.filter(Private.isSortable);
+
+      for (const column of sortableColumns) {
+        const header = node.querySelector(`.${column.className}`);
+        if (!header) {
+          continue;
+        }
+        const headerIcon = DOMUtils.findElement(
+          header as HTMLElement,
+          HEADER_ITEM_ICON_CLASS
+        );
+        if (column.id === sortState.key) {
+          header.classList.add(SELECTED_CLASS);
+          if (sortState.direction === 'descending') {
+            header.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(headerIcon, column.caretSide, 'down');
           } else {
             header.classList.remove(DESCENDING_CLASS);
             Private.updateCaret(headerIcon, column.caretSide, 'up');
           }
-          header.classList.add(SELECTED_CLASS);
-          for (const otherColumn of sortableColumns) {
-            if (otherColumn.id === column.id) {
-              continue;
-            }
-            const otherHeader = node.querySelector(`.${otherColumn.className}`);
-            if (!otherHeader) {
-              // skip if hidden
-              continue;
-            }
-            otherHeader.classList.remove(SELECTED_CLASS);
-            otherHeader.classList.remove(DESCENDING_CLASS);
-            const otherHeaderIcon = DOMUtils.findElement(
-              otherHeader as HTMLElement,
-              HEADER_ITEM_ICON_CLASS
-            );
-            Private.updateCaret(otherHeaderIcon, otherColumn.caretSide);
-          }
-          return state;
+        } else {
+          header.classList.remove(SELECTED_CLASS);
+          header.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(headerIcon, column.caretSide);
         }
       }
-      return state;
     }
 
     /**
