@@ -123,8 +123,6 @@ namespace CommandIDs {
 
   export const rename = 'filebrowser:rename';
 
-  export const bulkRename = 'filebrowser:bulk-rename';
-
   // For main browser only.
   export const copyShareableLink = 'filebrowser:share-main';
 
