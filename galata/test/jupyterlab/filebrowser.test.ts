@@ -64,16 +64,19 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   await page.contents.uploadContent('test2', 'text', `${tmpPath}/${file2}`);
   await page.contents.uploadContent('test3', 'text', `${tmpPath}/${file3}`);
 
-  // Wait for items to be visible
-  const items = page.locator('.jp-DirListing-item');
-  await items.nth(0).waitFor();
-  await items.nth(1).waitFor();
-  await items.nth(2).waitFor();
+  // Wait for specific files to appear
+  const file1Item = page.locator(`.jp-DirListing-item:has-text("${file1}")`);
+  const file2Item = page.locator(`.jp-DirListing-item:has-text("${file2}")`);
+  const file3Item = page.locator(`.jp-DirListing-item:has-text("${file3}")`);
 
-  // Force multi-selection using Shift-selection (most stable across OS)
-  await items.nth(0).click();
+  await file1Item.waitFor();
+  await file2Item.waitFor();
+  await file3Item.waitFor();
+
+  // Multi-select using Shift (deterministic selection)
+  await file1Item.click();
   await page.keyboard.down('Shift');
-  await items.nth(2).click();
+  await file3Item.click();
   await page.keyboard.up('Shift');
 
   // Wait for selection state to update - verify items are selected
@@ -86,7 +89,7 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   });
 
   // Open context menu
-  await items.nth(0).click({ button: 'right' });
+  await file1Item.click({ button: 'right' });
 
   // Wait for context menu to appear
   await page.waitForFunction(
@@ -140,7 +143,7 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   expect(
     await page.filebrowser.isFileListedInBrowser(`${newBaseName}.md`)
   ).toBeTruthy();
-  await page.unrouteAll();
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
 });
 
 test('File rename input respects UI font size', async ({ page }) => {
