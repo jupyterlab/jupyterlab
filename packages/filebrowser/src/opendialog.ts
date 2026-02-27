@@ -338,13 +338,10 @@ namespace Private {
       handleOpenFile
     });
 
+    widget.clearFilterOnNavigation = false;
+
     if (defaultPath) {
       await widget.model.cd(defaultPath);
-
-      // Re-apply filter that was cleared when changing directories
-      if (filter) {
-        widget.model.setFilter(filter);
-      }
     }
 
     return widget;

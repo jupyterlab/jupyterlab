@@ -291,6 +291,14 @@ export class FileBrowser extends SidePanel {
     }
   }
 
+  get clearFilterOnNavigation(): boolean {
+    return this._clearFilterOnNavigation;
+  }
+
+  set clearFilterOnNavigation(value: boolean) {
+    this._clearFilterOnNavigation = value;
+  }
+
   /**
    * Whether to sort notebooks above other files
    */
@@ -423,12 +431,14 @@ export class FileBrowser extends SidePanel {
    */
   private _onPathChanged(): void {
     // Clear filter when user navigates to a new directory
-    this.model.setFilter(value => {
-      return {};
-    });
+    if (this._clearFilterOnNavigation) {
+      this.model.setFilter(value => {
+        return {};
+      });
 
-    if (this._fileFilterRef.current) {
-      this._fileFilterRef.current.value = '';
+      if (this._fileFilterRef.current) {
+        this._fileFilterRef.current.value = '';
+      }
     }
   }
 
@@ -625,6 +635,7 @@ export class FileBrowser extends SidePanel {
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
+  private _clearFilterOnNavigation: boolean = true;
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
