@@ -515,9 +515,10 @@ export class ShortcutItem extends React.Component<
     const filteredShortcuts = ShortcutRegistry.matchItems(
       registry,
       this.props.newShortcutUtils?.searchQuery ?? ''
-    ).map((item: ISearchResult) => {
-      return item.item;
-    });
+    )
+      .map((item: ISearchResult) => item.item)
+      .filter(target => !target.command.startsWith('__internal:'));
+
     filteredShortcuts.sort((a: IShortcutTarget, b: IShortcutTarget) => {
       const compareA: string = a.category;
       const compareB: string = b.category;
