@@ -1,0 +1,84 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-PathNavigator {
+  position: relative;
+  display: inline-block;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator {
+  display: block;
+  width: 100%;
+}
+
+.jp-PathNavigator > :first-child {
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0 2px;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+}
+
+.jp-PathNavigator > :first-child:hover {
+  opacity: 1;
+}
+
+.jp-PathNavigator > input {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+  border-radius: var(--jp-border-radius);
+  padding: 2px 6px;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-PathNavigator > input:focus {
+  outline: none;
+}
+
+.jp-PathNavigator-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: var(--jp-elevation-z4);
+}
+
+.jp-PathNavigator-suggestions > li {
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-PathNavigator-suggestions > li:hover,
+.jp-PathNavigator-suggestions > li.jp-mod-active {
+  background: var(--jp-layout-color2);
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode {
+  position: relative;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode > *:not(.jp-PathNavigator),
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > :first-child {
+  display: none;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > input {
+  display: block;
+}
