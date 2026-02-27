@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/core-meta",
-  "version": "4.6.0-alpha.2",
+  "version": "4.6.0-alpha.3",
   "description": "JupyterLab core metadata snapshot",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
