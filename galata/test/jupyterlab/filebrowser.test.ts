@@ -82,3 +82,33 @@ test('File rename input respects UI font size', async ({ page }) => {
 
   expect(inputFontSize).toEqual(normalFontSize);
 });
+
+test('Filter input is cleared after navigating into a subdirectory', async ({
+  page,
+  tmpPath
+}) => {
+  await page.contents.createDirectory(`${tmpPath}/mydir`);
+  await page.contents.uploadContent(
+    'data',
+    'text',
+    `${tmpPath}/mydir/file.txt`
+  );
+  await page.contents.uploadContent('data', 'text', `${tmpPath}/other.txt`);
+  await page.filebrowser.openDirectory(tmpPath);
+
+  const filterInput = page.locator('input[placeholder="Filter files by name"]');
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('filebrowser:toggle-file-filter')
+  );
+  await filterInput.fill('mydir');
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
+
+  await page.locator('.jp-DirListing-item:has-text("mydir")').dblclick();
+
+  await expect(
+    page.locator('.jp-DirListing-item:has-text("file.txt")')
+  ).toBeVisible();
+
+  await expect(filterInput).toHaveValue('');
+});

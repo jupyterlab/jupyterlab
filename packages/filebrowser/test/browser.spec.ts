@@ -70,6 +70,10 @@ describe('filebrowser/browser', () => {
       Widget.attach(fileBrowser, document.body);
     });
 
+    afterEach(() => {
+      fileBrowser.dispose();
+    });
+
     describe('#constructor', () => {
       it('should return new FileBrowser instance', () => {
         expect(fileBrowser).toBeInstanceOf(FileBrowser);
@@ -229,6 +233,40 @@ describe('filebrowser/browser', () => {
         });
         await created;
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#clearFilterOnNavigation', () => {
+      let dirName: string;
+
+      beforeEach(async () => {
+        const items = Array.from(model.items());
+        const dir = items.find(item => item.type === 'directory');
+        dirName = dir!.name;
+      });
+
+      afterEach(async () => {
+        model.setFilter(() => ({}));
+        await model.cd('/');
+      });
+
+      it('should clear the filter when navigating to a new directory', async () => {
+        model.setFilter(value => (value.type === 'notebook' ? {} : null));
+        await model.cd(dirName);
+        await model.cd('/');
+
+        const items = Array.from(model.items());
+        expect(items.some(item => item.type !== 'notebook')).toBe(true);
+      });
+
+      it('should not clear the filter when clearFilterOnNavigation is false', async () => {
+        fileBrowser.clearFilterOnNavigation = false;
+        model.setFilter(value => (value.type === 'notebook' ? {} : null));
+        await model.cd(dirName);
+        await model.cd('/');
+
+        const items = Array.from(model.items());
+        expect(items.every(item => item.type === 'notebook')).toBe(true);
       });
     });
   });
