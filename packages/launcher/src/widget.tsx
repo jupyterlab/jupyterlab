@@ -273,9 +273,14 @@ function Card(
   };
 
   // With tabindex working, you can now pick a kernel by tabbing around and
-  // pressing Enter.
+  // pressing Enter or Space.
   const onkeypress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
+    if (
+      event.key === 'Enter' ||
+      event.key === ' ' ||
+      event.key === 'Spacebar'
+    ) {
+      event.preventDefault();
       onclick();
     }
   };
