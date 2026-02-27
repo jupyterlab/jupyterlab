@@ -21,7 +21,9 @@ describe('@jupyterlab/mermaid', () => {
       const caption = figure.querySelector('figcaption');
 
       expect(caption).not.toBeNull();
-      expect(caption?.textContent).toBe('This diagram has one edge from A to B.');
+      expect(caption?.textContent).toBe(
+        'This diagram has one edge from A to B.'
+      );
       expect(caption?.className).toBe('jp-sr-only');
     });
 
