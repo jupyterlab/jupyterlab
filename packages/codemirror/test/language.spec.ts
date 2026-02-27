@@ -63,6 +63,21 @@ describe('@jupyterlab/codemirror', () => {
         <span class="ͼ1d">#t</span><span class="ͼ19">)</span><span class="ͼ19">)</span>`
         );
       });
+
+      it('should render single-character code blocks', async () => {
+        const container = document.createElement('pre');
+
+        const singleChar = 'x';
+        await languages.highlight(
+          singleChar,
+          languages.findBest('text/foo'),
+          container
+        );
+
+        // Before the fix: container was empty, textContent === ''
+        // After the fix: textContent should equal the original code
+        expect(container.textContent).toBe(singleChar);
+      });
     });
   });
 });
