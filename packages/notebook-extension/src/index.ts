@@ -4925,12 +4925,15 @@ namespace Private {
     // If the container is not available, append the newly created container
     // to the current notebook panel and set related properties
     if (hiddenAlertContainer.getAttribute('id') !== hiddenAlertContainerId) {
-      hiddenAlertContainer.classList.add('sr-only');
       hiddenAlertContainer.setAttribute('id', hiddenAlertContainerId);
-      hiddenAlertContainer.setAttribute('role', 'alert');
-      hiddenAlertContainer.hidden = true;
       notebookNode.appendChild(hiddenAlertContainer);
     }
+
+    hiddenAlertContainer.classList.add('jp-sr-only');
+    hiddenAlertContainer.setAttribute('role', 'alert');
+    hiddenAlertContainer.setAttribute('aria-live', 'assertive');
+    hiddenAlertContainer.setAttribute('aria-atomic', 'true');
+    hiddenAlertContainer.hidden = false;
 
     // Insert/Update alert container with the notification message
     hiddenAlertContainer.innerText = message;
