@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';
@@ -116,7 +116,5 @@ export async function changeCodeFontSize(
   page: IJupyterLabPageFixture,
   menuOption: string
 ): Promise<void> {
-  await page.click('text=Settings');
-  await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-  await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
+  await page.menu.clickMenuItem(`Settings>Theme>${menuOption}`);
 }

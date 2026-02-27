@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import {
   getTreeItemElement,
@@ -13,9 +14,9 @@ import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 
 import { ArrayExt } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -23,9 +24,9 @@ import { convertType } from '.';
 
 import { Debugger } from '../../debugger';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
-import { VariablesModel } from './model';
+import type { VariablesModel } from './model';
 
 /**
  * The body for tree of variables.
@@ -367,7 +368,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       }}
     >
       <span className="jp-DebuggerVariables-name">{variable.name}</span>
-      {details && (
+      {details != null && (
         <span className="jp-DebuggerVariables-detail">{details}</span>
       )}
       {hasMimeRenderer && showDetailsButton && (

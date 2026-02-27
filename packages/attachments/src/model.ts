@@ -1,20 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IObservableMap,
-  IObservableValue,
-  ObservableMap
-} from '@jupyterlab/observables';
-import {
-  AttachmentModel,
-  IAttachmentModel,
-  imageRendererFactory
-} from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableMap, IObservableValue } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
+import type { IAttachmentModel } from '@jupyterlab/rendermime';
+import { AttachmentModel, imageRendererFactory } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The model for attachments.

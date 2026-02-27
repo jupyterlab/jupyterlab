@@ -442,7 +442,7 @@ When an extension (the "consumer") is optionally using a service identified by a
 %
 % Prebuilt extensions need to deduplicate many of their dependencies with other prebuilt extensions and with source extensions. This deduplication happens in two phases:
 %
-% 1. When JupyterLab is initialized in the browser, the core Jupyterlab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
+% 1. When JupyterLab is initialized in the browser, the core JupyterLab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
 % 2. A source or prebuilt extension can import a dependency from the cache while JupyterLab is running.
 %
 % The main options controlling how things work in this deduplication are as follows. If a package is listed in this sharing config, it will be requested from the package cache.

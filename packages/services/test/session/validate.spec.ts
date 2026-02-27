@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Session } from '../../src';
+import type { Session } from '../../src';
 import {
   updateLegacySessionModel,
   validateModel

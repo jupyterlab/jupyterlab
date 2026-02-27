@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import type { IPluginNameToInterfaceMap } from '../extension';
-import { galata } from '../galata';
+import type { galata } from '../galata';
 import * as Utils from '../utils';
-import { MenuHelper } from './menu';
+import type { MenuHelper } from './menu';
 
 /**
  * Sidebar helpers

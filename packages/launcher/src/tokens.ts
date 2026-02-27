@@ -3,12 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ITranslator } from '@jupyterlab/translation';
-import { VDomRenderer } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Widget } from '@lumino/widgets';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { VDomRenderer } from '@jupyterlab/ui-components';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The launcher token.

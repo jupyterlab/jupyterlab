@@ -1,39 +1,40 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
   DockPanelSvg,
   LabIcon,
-  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IMessageHandler, Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { DockLayout, DockPanel, TabPanel, Title } from '@lumino/widgets';
 import {
   AccordionPanel,
   BoxLayout,
   BoxPanel,
-  DockLayout,
-  DockPanel,
   FocusTracker,
   Panel,
   SplitPanel,
   StackedPanel,
   TabBar,
-  TabPanel,
-  Title,
   Widget
 } from '@lumino/widgets';
-import { JupyterFrontEnd } from './frontend';
-import { LayoutRestorer } from './layoutrestorer';
+import type { JupyterFrontEnd } from './frontend';
+import type { LayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -1635,8 +1636,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
 
-    options = options || {};
-
     const { title } = widget;
     // Add widget ID to tab so that we can get a handle on the tab's widget
     // (for context menu support)
@@ -1681,8 +1680,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-      ? bars[0]
-      : null;
+        ? bars[0]
+        : null;
   }
 
   /*
@@ -1776,6 +1775,38 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     return true;
   };
+  /**
+   * Move a widget to the main dock panel.
+   */
+  moveTab(widget: Widget, direction: 'left' | 'right' | 'top' | 'bottom') {
+    const ref = widget;
+
+    const modeMap: Record<string, DockLayout.InsertMode> = {
+      left: 'split-left',
+      right: 'split-right',
+      top: 'split-top',
+      bottom: 'split-bottom'
+    };
+
+    const mode = modeMap[direction];
+
+    this._dockPanel.addWidget(widget, {
+      mode,
+      ref
+    });
+  }
+
+  /**
+   *  Find the tab bar containing a given widget.
+   */
+  getMainAreaTabBar(widget: Widget): TabBar<Widget> | null {
+    for (const tabBar of this._dockPanel.tabBars()) {
+      if (tabBar.titles.includes(widget.title)) {
+        return tabBar;
+      }
+    }
+    return null;
+  }
 
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;

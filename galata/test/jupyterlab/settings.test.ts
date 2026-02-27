@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect, Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 import { changeCodeFontSize, getFileListFontSize } from './utils';
@@ -50,6 +52,11 @@ test('Open the settings editor with a specific search query', async ({
 });
 
 test.describe('change font-size', () => {
+  // We wrap the font size comparisons in `expect().toPass()`
+  // because clicking on the menu only triggers the asynchronous
+  // update which might take a fraction on second to propagate
+  // due to the settings API network latency. This in past led
+  // to flaky tests.
   const ipynbFileName = 'create_test.ipynb';
 
   const createNewCodeCell = async (page: IJupyterLabPageFixture) => {
@@ -100,10 +107,13 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const newFontSize = await cellElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await cellElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease Code Font Size', async ({ page }) => {
@@ -117,10 +127,13 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const newFontSize = await cellElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await cellElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 
   test('should Increase Content Font Size', async ({ page }) => {
@@ -135,10 +148,13 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease Content Font Size', async ({ page }) => {
@@ -153,10 +169,13 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 
   test('should Increase UI Font Size', async ({ page }) => {
@@ -170,10 +189,13 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease UI Font Size', async ({ page }) => {
@@ -187,10 +209,13 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 });
 
@@ -215,6 +240,8 @@ test('Check codemirror settings can all be set at the same time.', async ({
   for (const selectText of textList) {
     let locator = page.getByLabel(selectText);
     await locator.click();
+    // Workaround for bug https://github.com/jupyterlab/jupyterlab/issues/18458
+    await page.waitForTimeout(50);
     locators.push(locator);
   }
   for (const locator of locators) {
@@ -488,13 +515,13 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
     })
   );
 
-  const settingContainer = page.locator(
-    '.form-group:has-text("Show Filter Bar by Default")'
+  const settingsForm = page.locator('.jp-SettingsForm');
+  const settingCheckbox = settingsForm.getByLabel(
+    'Show Filter Bar by Default',
+    { exact: true }
   );
-
-  const settingLabel = settingContainer.locator('label');
-  const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
-  await settingLabel.click();
+  const modifiedIndicator = settingsForm.locator('.jp-modifiedIndicator');
+  await settingCheckbox.click();
   await page.locator('button.jp-RestoreButton').waitFor();
   await expect(modifiedIndicator).toBeVisible();
 
@@ -507,7 +534,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   );
 
   // turn the setting OFF
-  await settingLabel.click();
+  await settingCheckbox.click();
   await page.locator('button.jp-RestoreButton').waitFor({ state: 'hidden' });
   await expect(modifiedIndicator).toBeHidden();
   await page.reload({ waitForIsReady: false });
