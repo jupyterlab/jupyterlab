@@ -4,26 +4,23 @@
  */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ArrayExt, StringExt } from '@lumino/algorithm';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
+import * as React from 'react';
+import { NewShortcutItem } from './NewShortcutItem';
+import { ShortcutItem } from './ShortcutItem';
 import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
 import type {
+  ICustomOptions,
   IKeybinding,
+  ISearchResult,
   IShortcutRegistry,
   IShortcutsSettingsLayout,
   IShortcutTarget,
   IShortcutUI
 } from '../types';
-import * as React from 'react';
-
-const enum MatchType {
-  Label,
-  Category,
-  Split,
-  Default
-}
 
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
@@ -40,153 +37,8 @@ export interface IShortcutUIState {
   searchQuery: string;
   showSelectors: boolean;
   currentSort: IShortcutUI.ColumnId;
-}
-
-/** Search result data **/
-interface ISearchResult {
-  matchType: MatchType;
-  categoryIndices: number[] | null;
-  labelIndices: number[] | null;
-  score: number;
-  item: IShortcutTarget;
-}
-
-/** Normalize the query text for a fuzzy search. */
-function normalizeQuery(text: string): string {
-  return text.replace(/\s+/g, '').toLowerCase();
-}
-
-/** Perform a fuzzy search on a single command item. */
-function fuzzySearch(
-  item: IShortcutTarget,
-  query: string
-): ISearchResult | null {
-  // Create the source text to be searched.
-  const category = item.category.toLowerCase();
-  const label = (item['label'] ?? '').toLowerCase();
-  const source = `${category} ${label}`;
-
-  // Set up the match score and indices array.
-  let score = Infinity;
-  let indices: number[] | null = null;
-
-  // The regex for search word boundaries
-  const rgx = /\b\w/g;
-
-  // Search the source by word boundary.
-  // eslint-disable-next-line
-  while (true) {
-    // Find the next word boundary in the source.
-    const rgxMatch = rgx.exec(source);
-
-    // Break if there is no more source context.
-    if (!rgxMatch) {
-      break;
-    }
-
-    // Run the string match on the relevant substring.
-    const match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
-
-    // Break if there is no match.
-    if (!match) {
-      break;
-    }
-
-    // Update the match if the score is better.
-    if (match && match.score <= score) {
-      score = match.score;
-      indices = match.indices;
-    }
-  }
-
-  // Bail if there was no match.
-  if (!indices || score === Infinity) {
-    return null;
-  }
-
-  // Compute the pivot index between category and label text.
-  const pivot = category.length + 1;
-
-  // Find the slice index to separate matched indices.
-  const j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b);
-
-  // Extract the matched category and label indices.
-  const categoryIndices = indices.slice(0, j);
-  const labelIndices = indices.slice(j);
-
-  // Adjust the label indices for the pivot offset.
-  for (let i = 0, n = labelIndices.length; i < n; ++i) {
-    labelIndices[i] -= pivot;
-  }
-
-  // Handle a pure label match.
-  if (categoryIndices.length === 0) {
-    return {
-      matchType: MatchType.Label,
-      categoryIndices: null,
-      labelIndices,
-      score,
-      item
-    };
-  }
-
-  // Handle a pure category match.
-  if (labelIndices.length === 0) {
-    return {
-      matchType: MatchType.Category,
-      categoryIndices,
-      labelIndices: null,
-      score,
-      item
-    };
-  }
-
-  // Handle a split match.
-  return {
-    matchType: MatchType.Split,
-    categoryIndices,
-    labelIndices,
-    score,
-    item
-  };
-}
-
-/** Perform a fuzzy match on an array of command items. */
-function matchItems(items: IShortcutRegistry, query: string): ISearchResult[] {
-  // Normalize the query text to lower case with no whitespace.
-  query = normalizeQuery(query);
-
-  // Create the array to hold the scores.
-  let scores: ISearchResult[] = [];
-
-  // Iterate over the items and match against the query.
-  for (const item of items.values()) {
-    // If the query is empty, all items are matched by default.
-    if (!query) {
-      scores.push({
-        matchType: MatchType.Default,
-        categoryIndices: null,
-        labelIndices: null,
-        score: 0,
-        item
-      });
-      continue;
-    }
-
-    // Run the fuzzy search for the item and query.
-    let score = fuzzySearch(item, query);
-
-    // Ignore the item if it is not a match.
-    if (!score) {
-      continue;
-    }
-
-    // Add the score to the results.
-    scores.push(score);
-  }
-
-  // Return the final array of scores.
-  return scores;
+  showAddCommand: boolean;
+  newShortcut: IShortcutTarget;
 }
 
 /** Top level React component for widget */
@@ -196,14 +48,35 @@ export class ShortcutUI
 {
   constructor(props: IShortcutUIProps) {
     super(props);
+    this._newShortcutItem = new NewShortcutItem({
+      showSelectors: false,
+      findConflictsFor: (keys: string[], selector: string) => {
+        if (this.state.shortcutRegistry) {
+          return this.state.shortcutRegistry.findConflictsFor(keys, selector);
+        } else {
+          console.error(
+            'Cannot search for keybinding conflicts at this time: registry is not ready'
+          );
+          return [];
+        }
+      },
+      external: this.props.external
+    });
+
     this.state = {
       shortcutRegistry: null,
       filteredShortcutList: new Array<IShortcutTarget>(),
       shortcutsFetched: false,
       searchQuery: '',
       showSelectors: false,
-      currentSort: 'category'
+      currentSort: 'category',
+      showAddCommand: false,
+      newShortcut: this._newShortcutItem.shortcut
     };
+
+    this._newShortcutItem.changed.connect(() => {
+      this.setState({ newShortcut: { ...this._newShortcutItem.shortcut } });
+    });
   }
 
   /** Fetch shortcut list on mount */
@@ -278,11 +151,12 @@ export class ShortcutUI
     if (!registry) {
       return [];
     }
-    const filteredShortcuts = matchItems(registry, this.state.searchQuery).map(
-      (item: ISearchResult) => {
-        return item.item;
-      }
-    );
+    const filteredShortcuts = ShortcutRegistry.matchItems(
+      registry,
+      this.state.searchQuery
+    ).map((item: ISearchResult) => {
+      return item.item;
+    });
     return filteredShortcuts;
   }
 
@@ -414,9 +288,45 @@ export class ShortcutUI
     await this._refreshShortcutList();
   }
 
+  /**
+   * Update the selector and args for a user defined shortcut.
+   */
+  setCustomOptions = async (
+    target: IShortcutTarget,
+    options: ICustomOptions
+  ): Promise<boolean> => {
+    const settings = await this.props.external.getSettings();
+    const userShortcuts = settings.user.shortcuts ?? [];
+    const shortcuts = userShortcuts.filter(
+      shortcut =>
+        shortcut.command === target.command &&
+        shortcut.selector === target.selector &&
+        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
+    );
+    if (!shortcuts.length) {
+      console.error('Error writing the custom options: target not found');
+      return false;
+    }
+    shortcuts.forEach(shortcut => {
+      shortcut.selector = options.selector;
+      shortcut.args = options.args;
+    });
+
+    await settings.set('shortcuts', userShortcuts as any);
+    await this._refreshShortcutList();
+    return true;
+  };
+
   /** Toggles showing command selectors */
   toggleSelectors = (): void => {
     this.setState({ showSelectors: !this.state.showSelectors });
+  };
+
+  /**
+   * Toggle showing add command row.
+   */
+  toggleAddCommandRow = async (): Promise<void> => {
+    this.setState({ showAddCommand: !this.state.showAddCommand });
   };
 
   /**
@@ -458,6 +368,28 @@ export class ShortcutUI
     this.setState({ filteredShortcutList: shortcuts });
   }
 
+  /**
+   * Save a new shortcut:
+   * - creates keybindings for the command
+   * - adds the args to the shortcut commands
+   */
+  saveNewShortcut = async (): Promise<void> => {
+    const shortcut = { ...this.state.newShortcut, args: undefined };
+    for (let keybinding of shortcut.keybindings) {
+      await this.addKeybinding(shortcut, keybinding.keys);
+    }
+
+    const created = await this.setCustomOptions(shortcut, {
+      selector: shortcut.selector,
+      args: this.state.newShortcut.args as ReadonlyJSONObject
+    });
+
+    if (created) {
+      this._newShortcutItem.reset();
+      void this.toggleAddCommandRow();
+    }
+  };
+
   render(): JSX.Element | null {
     if (!this.state.shortcutsFetched) {
       return null;
@@ -471,15 +403,28 @@ export class ShortcutUI
           showSelectors={this.state.showSelectors}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
+          toggleAddCommandRow={this.toggleAddCommandRow}
           width={this.props.width}
           translator={this.props.external.translator}
         />
+        {this.state.showAddCommand && (
+          <ShortcutItem
+            {...this._newShortcutItem}
+            shortcut={this.state.newShortcut}
+            newShortcutUtils={{
+              searchQuery: this.state.searchQuery,
+              updateCommand: this._newShortcutItem.updateCommand,
+              saveShortcut: this.saveNewShortcut
+            }}
+          />
+        )}
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
           resetKeybindings={this.resetKeybindings}
           addKeybinding={this.addKeybinding}
           replaceKeybinding={this.replaceKeybinding}
           deleteKeybinding={this.deleteKeybinding}
+          setCustomOptions={this.setCustomOptions}
           showSelectors={this.state.showSelectors}
           findConflictsFor={(keys: string[], selector: string) => {
             if (this.state.shortcutRegistry) {
@@ -500,4 +445,6 @@ export class ShortcutUI
       </div>
     );
   }
+
+  private _newShortcutItem: NewShortcutItem;
 }
