@@ -3045,7 +3045,7 @@ export namespace DirListing {
       resizable: true,
       sortable: true,
       caretSide: 'left',
-      grow: 0.5
+      grow: 1
     },
     {
       id: 'file_size' as const,
