@@ -79,7 +79,7 @@
       {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 11
+        "rank": 10.5
       },
       {
         "command": "filebrowser:shutdown",
