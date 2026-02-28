@@ -48,8 +48,8 @@ rules:
   csstree/validator: true
   # Enforce CSS variables for certain properties (issue #18540)
   declaration-property-value-allowed-list:
-    - ["^font-family$", ["var\\(--.+\\)"]]
-    - ["^font-size$", ["var\\(--.+\\)"]]
-    - ["^color$", ["var\\(--.+\\)", "^[a-zA-Z]+$"]]
-    - ["^background-color$", ["var\\(--.+\\)", "^[a-zA-Z]+$"]]
-    - ["^border.*$", ["var\\(--.+\\)", "^[0-9]+", "^#[a-fA-F0-9"]]
+    font-family: [/^var\\(/]
+    font-size: [/^var\\(/]
+    color: [/^var\\(/, /^[a-zA-Z]+$/]
+    background-color: [/^var\\(/, /^[a-zA-Z]+$/]
+    border: [/^var\\(/]
