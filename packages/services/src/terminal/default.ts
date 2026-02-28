@@ -314,11 +314,18 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     });
   };
 
-  private _onWSClose = (event: CloseEvent) => {
-    console.warn(`Terminal websocket closed: ${event.code}`);
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent) => {
+    console.warn(`Terminal websocket closed: ${evt.code}`);
+
+    if (this.isDisposed) {
+      return;
     }
+
+    if (evt.code === 1000 || evt.code === 1001) {
+      return;
+    }
+
+    this._reconnect();
   };
 
   /**
