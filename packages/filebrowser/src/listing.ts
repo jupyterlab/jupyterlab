@@ -2679,7 +2679,6 @@ export class DirListing extends Widget {
     file_size: null,
     is_selected: null,
     last_modified: null,
-    // eslint-disable-next-line camelcase
     date_created: null
   };
   private _sortNotebooksFirst = false;
@@ -3107,7 +3106,6 @@ export namespace DirListing {
             small: trans.__('Size'),
             large: trans.__('File Size')
           }),
-        // eslint-disable-next-line camelcase
         date_created: () =>
           this._createHeaderItemNodeWithSizes({
             small: trans.__('Created'),
@@ -3708,7 +3706,6 @@ export namespace DirListing {
         fileSize.className = ITEM_FILE_SIZE_CLASS;
         return fileSize;
       },
-      // eslint-disable-next-line camelcase
       date_created: () => {
         const created = document.createElement('span');
         created.className = ITEM_CREATED_CLASS;
