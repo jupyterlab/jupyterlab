@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import { EditorState } from '@codemirror/state';
 import type { IInlineCompletionProvider } from '@jupyterlab/completer';
 import { CompletionHandler, InlineCompleter } from '@jupyterlab/completer';
 import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { nullTranslator } from '@jupyterlab/translation';
 import { framePromise, signalToPromise, simulate } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
@@ -46,6 +48,8 @@ describe('completer/inline', () => {
     let suggestionsAbc: CompletionHandler.IInlineItem[];
     const findInHost = (selector: string) =>
       editorWidget.editor.host.querySelector(selector);
+    const findAllInHost = (selector: string) =>
+      editorWidget.editor.host.querySelectorAll(selector);
 
     beforeEach(() => {
       editorWidget = createEditorWidget();
@@ -136,9 +140,60 @@ describe('completer/inline', () => {
         await waitForChange;
         expect(editorWidget.editor.model.sharedModel.source).toBe('');
       });
+
+      it('should update all cursors if multiple cursors are active', () => {
+        const value = 'suggestion_1 = 1';
+        editorWidget.editor.model.sharedModel.setSource('sug\nsug\nsug');
+        (editorWidget.editor as CodeMirrorEditor).injectExtension(
+          EditorState.allowMultipleSelections.of(true)
+        );
+        editorWidget.editor.setSelections(
+          [0, 1, 2].map(line => ({
+            start: { line, column: 3 },
+            end: { line, column: 3 }
+          }))
+        );
+        model.cursor = { line: 0, column: 0 };
+        model.setCompletions({
+          items: [{ ...itemDefaults, insertText: value }]
+        });
+
+        completer.accept();
+
+        expect(editorWidget.editor.model.sharedModel.source).toBe(
+          `${value}\n${value}\n${value}`
+        );
+        expect(
+          editorWidget.editor
+            .getSelections()
+            .map(selection => selection.start.column)
+        ).toEqual([value.length, value.length, value.length]);
+      });
     });
 
     describe('#_setText()', () => {
+      it('should render ghost text for all active cursors', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        editorWidget.editor.model.sharedModel.setSource('sug\nsug\nsug');
+        (editorWidget.editor as CodeMirrorEditor).injectExtension(
+          EditorState.allowMultipleSelections.of(true)
+        );
+        editorWidget.editor.setSelections(
+          [0, 1, 2].map(line => ({
+            start: { line, column: 3 },
+            end: { line, column: 3 }
+          }))
+        );
+        model.cursor = { line: 0, column: 3 };
+        model.setCompletions({
+          items: [{ ...itemDefaults, insertText: 'gestion_1 = 1' }]
+        });
+        await framePromise();
+
+        expect(findAllInHost(`.${GHOST_TEXT_CLASS}`)).toHaveLength(3);
+      });
+
       it('should render the completion as it is streamed', async () => {
         Widget.attach(editorWidget, document.body);
         Widget.attach(completer, document.body);
