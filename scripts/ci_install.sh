@@ -29,17 +29,28 @@ git config --global user.email foo@bar.com
 # Install and enable the server extension
 pip install -q --upgrade pip --user
 pip --version
+
+if [[ -z "${OPTIONAL_DEPENDENCIES+x}" ]]; then
+    # undefined - use default dev,test
+    SPEC=".[dev,test]"
+elif [[ -z "${OPTIONAL_DEPENDENCIES}" ]]; then
+    # defined but empty
+    SPEC="."
+else
+    # defined and non-empty
+    SPEC=".[${OPTIONAL_DEPENDENCIES}]"
+fi
+
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
+pip install -e "${SPEC}" || pip install -v -e "${SPEC}"
+
 node -p process.versions
 jlpm config
 
-if [[ $GROUP == js-services ]]; then
-    # Install ipykernel pre-release that supports subshells for ikernel.spec.ts
-    # Remove when ipykernel 7 is released
-    pip install --upgrade --pre "ipykernel<=7.0.0a1"
-else
-    # For other groups, install ipykernel <7
+if [[ $GROUP != js-services ]]; then
+    # Tests run much faster in ipykernel 6, so use that except for
+    # ikernel.spec.ts in js-services, which tests subshell compatibility in
+    # ipykernel 7.
     pip install "ipykernel<7"
 fi
 

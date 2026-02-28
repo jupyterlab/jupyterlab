@@ -3,8 +3,9 @@
 
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DataModel } from '@lumino/datagrid';
-import { IDisposable } from '@lumino/disposable';
-import { IParser, parseDSV, parseDSVNoQuotes } from './parse';
+import type { IDisposable } from '@lumino/disposable';
+import type { IParser } from './parse';
+import { parseDSV, parseDSVNoQuotes } from './parse';
 
 /*
 Possible ideas for further implementation:

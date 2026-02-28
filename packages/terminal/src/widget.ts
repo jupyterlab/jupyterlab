@@ -1,16 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Terminal as TerminalNS } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Terminal as TerminalNS } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Platform } from '@lumino/domutils';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import type {
   ITerminalInitOnlyOptions,

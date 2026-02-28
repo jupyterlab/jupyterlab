@@ -2,24 +2,29 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Palette } from '../src/palette';
-import { CommandPalette } from '@lumino/widgets';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import { Application } from '@lumino/application';
+import { Widget } from '@lumino/widgets';
 
-describe('palette', () => {
-  let palette: Palette;
-  let commandPalette: CommandPalette;
+class DummyShell extends Widget {
+  add(widget: Widget): void {
+    document.body.appendChild(widget.node);
+  }
+}
 
-  beforeEach(() => {
-    palette = new Palette(commandPalette);
-  });
+describe('Palette', () => {
+  describe('#activate()', () => {
+    it('command palette should have aria-label and role for accessibility', async () => {
+      const app = new Application({ shell: new DummyShell() });
+      const settingRegistry = null;
+      Palette.activate(app as JupyterFrontEnd, nullTranslator, settingRegistry);
 
-  describe('#ariaLabelsAndRoles', () => {
-    it('command palette should have aria-label and role for accessibility', () => {
-      palette.activate();
-      const node = document.getElementById('command-palette');
-      expect(node?.getAttribute('aria-label')).toEqual(
+      const node = document.getElementById('command-palette')!;
+      expect(node.getAttribute('aria-label')).toEqual(
         'Command Palette Section'
       );
-      expect(node?.getAttribute('role')).toEqual('region');
+      expect(node.getAttribute('role')).toEqual('region');
     });
   });
 });

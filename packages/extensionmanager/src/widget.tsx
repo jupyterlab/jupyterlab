@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   Button,
   FilterBox,
@@ -14,11 +14,12 @@ import {
   ToolbarButton,
   ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
-import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-import { Action, IActionOptions, IEntry, ListModel } from './model';
+import type { Action, IActionOptions, IEntry } from './model';
+import { ListModel } from './model';
 
 const BADGE_SIZE = 32;
 const BADGE_QUERY_SIZE = Math.floor(devicePixelRatio * BADGE_SIZE);

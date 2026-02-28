@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISpecModel, ISpecModels } from './restapi';
+import type { ISpecModel, ISpecModels } from './restapi';
 import { validateProperty } from '../validate';
 
 /**
@@ -28,6 +28,10 @@ export function validateSpecModel(data: any): ISpecModel {
   let env: any = null;
   if (spec.hasOwnProperty('env')) {
     validateProperty(spec, 'env', 'object');
+    env = spec.env;
+  }
+  if (spec.hasOwnProperty('interrupt_mode')) {
+    validateProperty(spec, 'interrupt_mode', 'string');
     env = spec.env;
   }
   return {

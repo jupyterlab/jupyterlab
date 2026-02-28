@@ -5,29 +5,30 @@
  * @module terminal-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Terminal, TerminalAPI } from '@jupyterlab/services';
+import type { IRunningSessions } from '@jupyterlab/running';
+import { IRunningSessionManagers } from '@jupyterlab/running';
+import type { Terminal } from '@jupyterlab/services';
+import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITerminal,
-  ITerminalTracker,
-  Terminal as XTerm
-} from '@jupyterlab/terminal';
+import type { ITerminal } from '@jupyterlab/terminal';
+import { ITerminalTracker, Terminal as XTerm } from '@jupyterlab/terminal';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
@@ -35,7 +36,8 @@ import {
   refreshIcon,
   terminalIcon
 } from '@jupyterlab/ui-components';
-import { Menu, Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
 
 /**
@@ -59,6 +61,8 @@ namespace CommandIDs {
   export const setTheme = 'terminal:set-theme';
 
   export const shutdown = 'terminal:shut-down';
+
+  export const openFolderInTerminal = 'terminal:open-folder-in-terminal';
 }
 
 /**
@@ -83,9 +87,72 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
 };
 
 /**
- * Export the plugin as default.
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
  */
-export default plugin;
+const openFolderInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/terminal-extension:open-folder-in-terminal',
+  description: 'Adds an "Open in Terminal" command for the file browser.',
+  requires: [IFileBrowserFactory, ITranslator, ITerminalTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    fileBrowserFactory: IFileBrowserFactory,
+    translator: ITranslator,
+    tracker: ITerminalTracker
+  ): void => {
+    if (!app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openFolderInTerminal, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const { tracker } = fileBrowserFactory;
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const items = Array.from(widget.selectedItems());
+        if (items.length === 0) {
+          return;
+        }
+
+        for (const item of items) {
+          // Only open a terminal for directories.
+          if (item.type !== 'directory') {
+            continue;
+          }
+          try {
+            // Open one terminal for each selected directory.
+            await commands.execute(CommandIDs.createNew, {
+              cwd: item.path
+            });
+          } catch (error) {
+            void showErrorMessage(
+              trans.__('Failed to open new terminal'),
+              error as Error
+            );
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+export default [plugin, openFolderInTerminalPlugin];
 
 /**
  * Activate the terminal plugin.

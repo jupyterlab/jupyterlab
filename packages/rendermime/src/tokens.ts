@@ -3,10 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
-import { MimeModel } from './mimemodel';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
+import type { MimeModel } from './mimemodel';
 import type { RenderMimeRegistry } from './registry';
 
 /**
@@ -204,7 +205,30 @@ export const IMarkdownParser = new Token<IRenderMime.IMarkdownParser>(
   'A service for rendering markdown syntax as HTML content.'
 );
 
-export interface IMarkdownParser extends IRenderMime.IMarkdownParser {}
+export interface IMarkdownParser extends IRenderMime.IMarkdownParser {
+  /**
+   * Parse markdown and extract heading metadata.
+   *
+   * @param source - The markdown string to parse.
+   * @returns - A promise of heading metadata.
+   */
+  getHeadingTokens?: (source: string) => Promise<IMarkdownHeadingToken[]>;
+}
+
+/**
+ * Markdown heading metadata.
+ */
+export interface IMarkdownHeadingToken {
+  /**
+   * Line number in source markdown (0-based)
+   */
+  line: number;
+
+  /**
+   * Raw markdown text of the heading
+   */
+  raw: string;
+}
 
 /**
  * The URL resolver factory.

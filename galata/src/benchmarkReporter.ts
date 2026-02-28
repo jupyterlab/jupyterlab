@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { chromium, firefox, webkit } from '@playwright/test';
-import {
+import type {
   FullConfig,
   FullResult,
   Reporter,
@@ -16,7 +16,7 @@ import {
 import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import fs from 'fs';
 import path from 'path';
-import si from 'systeminformation';
+import os from 'node:os';
 import * as vega from 'vega';
 import * as vl from 'vega-lite';
 import * as vs from 'vega-statistics';
@@ -574,13 +574,11 @@ class BenchmarkReporter implements Reporter {
 
     let header = '| Test file |';
     let nFiles = 0;
-    for (const [file] of groups
-      .values()
-      .next()
-      .value.values()
-      .next()
-      .value.values()
-      .next().value) {
+    // groups is non-empty (checked above), so all nested maps have at least one entry
+    const firstTestGroup = groups.values().next().value!;
+    const firstBrowserGroup = firstTestGroup.values().next().value!;
+    const firstFileGroup = firstBrowserGroup.values().next().value!;
+    for (const [file] of firstFileGroup) {
       header += ` ${file} |`;
       nFiles++;
     }
@@ -688,12 +686,23 @@ class BenchmarkReporter implements Reporter {
   }
 
   protected async getMetadata(browser?: string): Promise<any> {
-    const cpu = await si.cpu();
-    // Keep only non-variable value
-    const totalMemory = (await si.mem()).total;
-    // Remove some os information
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { hostname, fqdn, ...osInfo } = await si.osInfo();
+    const cpus = os.cpus();
+    // Collect information in a format compatible with
+    // the `systeminformation` package output but only
+    // using built-in Node.js functionality.
+    const first = cpus[0];
+    const cpu = {
+      speed: first.speed,
+      model: first.model,
+      processors: cpus.length,
+      cores: os.availableParallelism()
+    };
+    const totalMemory = os.totalmem();
+    const osInfo = {
+      platform: os.platform(),
+      release: os.release(),
+      arch: os.arch()
+    };
 
     const browsers = ['chromium', 'firefox', 'webkit'];
     const browserVersions: { [name: string]: string } = {};

@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
 import { simulate } from 'simulate-event';
@@ -366,6 +368,74 @@ describe('filebrowser/model', () => {
 
         Widget.detach(customCrumbs);
         customCrumbs.dispose();
+      });
+
+      it('should show more items when container width increases', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 0,
+          minimumRightItems: 1
+        });
+
+        // Create a container with controlled width
+        const container = document.createElement('div');
+        container.style.width = '200px';
+        document.body.appendChild(container);
+
+        Widget.attach(customCrumbs, container);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        // Stub clientWidth to return controlled values
+        const originalClientWidth = Object.getOwnPropertyDescriptor(
+          HTMLElement.prototype,
+          'clientWidth'
+        );
+
+        // First, test with narrow width
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 150
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const narrowItemCount = items.length;
+
+        // Force truncation in narrow mode by ensuring it's very small if needed
+        // But with 150px and the setup, it should be small.
+
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 1000
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const wideItemCount = items.length;
+
+        // With sufficient width (1000px), it should show MORE items than the constricted 150px case
+        expect(wideItemCount).toBeGreaterThan(narrowItemCount);
+
+        // Restore original clientWidth descriptor if it existed
+        if (originalClientWidth) {
+          delete (customCrumbs.node as any).clientWidth;
+        }
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+        document.body.removeChild(container);
       });
     });
   });

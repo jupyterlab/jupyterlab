@@ -8,13 +8,16 @@ import {
   jpToolbar,
   provideJupyterDesignSystem
 } from '@jupyter/web-components';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Layout, PanelLayout, Widget } from '@lumino/widgets';
+import type { Layout } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
 import { ellipsesIcon, LabIcon } from '../icon';
@@ -821,7 +824,7 @@ export function ToolbarButtonComponent(
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
   const handleClick =
-    props.noFocusOnClick ?? false
+    (props.noFocusOnClick ?? false)
       ? undefined
       : (event: React.MouseEvent) => {
           if (event.button === 0) {
@@ -837,7 +840,7 @@ export function ToolbarButtonComponent(
   // Currently this is mostly useful for the notebook panel, to retrieve the focused
   // cell before the click event.
   const handleMouseDown =
-    props.noFocusOnClick ?? false
+    (props.noFocusOnClick ?? false)
       ? (event: React.MouseEvent) => {
           // Fire action only when left button is pressed.
           if (event.button === 0) {
@@ -890,7 +893,7 @@ export function ToolbarButtonComponent(
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.pressed ? props.pressedIcon ?? props.icon : props.icon}
+          icon={props.pressed ? (props.pressedIcon ?? props.icon) : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
@@ -983,8 +986,14 @@ export class ToolbarButton extends ReactWidget {
   /**
    * Returns the click handler for the button
    */
-  get onClick(): () => void {
-    return this._onClick!;
+  get onClick(): (event?: React.SyntheticEvent) => void {
+    return (event?: React.SyntheticEvent) => {
+      // Toggle the `pressed` state of the button when clicked
+      this.pressed = !this.pressed;
+
+      // Call the original click handler, if defined
+      this._onClick(event);
+    };
   }
 
   render(): JSX.Element {
@@ -1001,7 +1010,7 @@ export class ToolbarButton extends ReactWidget {
 
   private _pressed: boolean;
   private _enabled: boolean;
-  private _onClick: () => void;
+  private _onClick: (event?: React.SyntheticEvent) => void;
 }
 
 /**

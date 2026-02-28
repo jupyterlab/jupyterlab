@@ -5,6 +5,7 @@
  * @module application-extension
  */
 
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,
@@ -15,7 +16,6 @@ import {
   ITreePathUpdater,
   JupyterFrontEnd,
   JupyterFrontEndContextMenu,
-  JupyterFrontEndPlugin,
   JupyterLab,
   LabShell,
   LayoutRestorer,
@@ -37,27 +37,22 @@ import {
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ContextMenuSvg } from '@jupyterlab/ui-components';
 import {
   buildIcon,
-  ContextMenuSvg,
   jupyterIcon,
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
-import {
-  JSONExt,
-  PromiseDelegate,
-  ReadonlyPartialJSONValue
-} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
+import type { DockLayout, DockPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
 
@@ -118,6 +113,8 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const splitTab = 'application:split-tab';
 }
 
 /**
@@ -454,14 +451,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.index === undefined
             ? trans.__('Toggle Sidebar Element')
             : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+              ? trans.__(
+                  'Toggle Element %1 in Right Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                )
+              : trans.__(
+                  'Toggle Element %1 in Left Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                ),
         describedBy: {
           args: {
             type: 'object',
@@ -687,6 +684,92 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
           // Some actions are also trigger indirectly
           // - by listening to this command execution.
+        }
+      });
+
+      const contextMenuTabWidget = (): Widget | null => {
+        const test = (node: HTMLElement) =>
+          node.classList.contains('lm-TabBar-tab') && !!node.dataset.id;
+
+        const node = app.contextMenuHitTest(test);
+        if (!node) {
+          return null;
+        }
+
+        const id = node.dataset.id;
+        if (!id) {
+          return null;
+        }
+
+        return find(labShell.widgets('main'), w => w.id === id) ?? null;
+      };
+
+      commands.addCommand('application:split-tab', {
+        label: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+            | undefined;
+
+          if (!direction) {
+            return trans.__('Split Tab');
+          }
+
+          const directionLabels: Record<string, string> = {
+            left: trans.__('Left'),
+            right: trans.__('Right'),
+            top: trans.__('Up'),
+            bottom: trans.__('Down')
+          };
+
+          return directionLabels[direction];
+        },
+        caption: trans.__('Split the current tab'),
+
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              direction: {
+                type: 'string',
+                enum: ['left', 'right', 'top', 'bottom'],
+                description: trans.__('The direction to split the tab')
+              }
+            },
+            required: ['direction']
+          }
+        },
+        isEnabled: () => {
+          const widget = contextMenuTabWidget();
+          if (!widget) {
+            return false;
+          }
+
+          if (!(labShell instanceof LabShell)) {
+            return false;
+          }
+
+          const tabBar = labShell.getMainAreaTabBar(widget);
+          if (!tabBar) {
+            return false;
+          }
+
+          // Disable if only one tab in this area
+          return tabBar.titles.length > 1;
+        },
+        execute: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom';
+
+          const widget = contextMenuTabWidget();
+          if (widget && direction) {
+            labShell.moveTab(widget, direction);
+          }
         }
       });
     }
