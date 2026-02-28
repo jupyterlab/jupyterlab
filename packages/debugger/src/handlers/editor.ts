@@ -223,7 +223,14 @@ export class EditorHandler implements IDisposable {
       return;
     }
 
+    const view = (editor as CodeMirrorEditor).editor;
+    this._editorView = view;
     editor.setOption('lineNumbers', true);
+
+    // Check if gutter already exists in DOM to prevent duplicates
+    if (view.dom.querySelector('.cm-breakpoint-gutter')) {
+      return;
+    }
     const breakpointGutter = [
       this._breakpointState,
       this._highlightState,
@@ -252,16 +259,27 @@ export class EditorHandler implements IDisposable {
    */
   private _clearEditor(): void {
     const editor = this.editor as CodeMirrorEditor | null;
-    if (!editor || editor.isDisposed) {
-      return;
+    const view = this._editorView;
+
+    if (view) {
+      try {
+        view.dispatch({
+          effects: this._breakpointEffect.of([])
+        });
+        view.dispatch({
+          effects: this._gutter.reconfigure([])
+        });
+      } catch {
+        // View may be destroyed
+      }
     }
 
-    EditorHandler.clearHighlight(editor);
-    this._clearGutter(editor);
-    editor.setOption('lineNumbers', false);
-    editor.editor.dispatch({
-      effects: this._gutter.reconfigure([])
-    });
+    if (editor && !editor.isDisposed) {
+      EditorHandler.clearHighlight(editor);
+      editor.setOption('lineNumbers', false);
+    }
+
+    this._editorView = null;
   }
 
   /**
@@ -471,6 +489,7 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
+  private _editorView: EditorView | null = null;
 }
 
 /**
