@@ -492,6 +492,9 @@ async function activateConsole(
       void tracker.save(panel);
     });
 
+    // Track kernels for which a subshell has already been requested.
+    const allocatedKernelIds = new Set<string>();
+
     if (options.subshell) {
       panel.sessionContext.kernelChanged.connect(async () => {
         if (!panel.sessionContext.isDisposed) {
@@ -503,6 +506,12 @@ async function activateConsole(
                 console.error('Cannot create subshell without kernel');
               } else {
                 const { kernel } = panel.sessionContext.session;
+
+                if (allocatedKernelIds.has(kernel.id)) {
+                  return;
+                }
+                allocatedKernelIds.add(kernel.id);
+
                 // Ensure kernel has received kernel_info.
                 await kernel.info;
                 const replyMsg = await kernel.requestCreateSubshell({}).done;
