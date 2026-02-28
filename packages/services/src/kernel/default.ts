@@ -1504,7 +1504,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       return;
     };
 
-    const earlyClose = async (evt: Event) => {
+    const earlyClose = async (evt: CloseEvent | ErrorEvent) => {
       // If the websocket was closed early, that could mean
       // that the kernel is actually dead. Try getting
       // information about the kernel from the API call,
