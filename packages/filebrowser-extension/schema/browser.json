@@ -102,9 +102,14 @@
         "rank": 14
       },
       {
-        "command": "filebrowser:toggle-file-size",
+        "command": "filebrowser:toggle-date-created",
         "selector": ".jp-DirListing-header",
         "rank": 15
+      },
+      {
+        "command": "filebrowser:toggle-file-size",
+        "selector": ".jp-DirListing-header",
+        "rank": 16
       },
       {
         "command": "filebrowser:toggle-file-checkboxes",
@@ -211,6 +216,12 @@
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
       "default": true
+    },
+    "showDateCreatedColumn": {
+      "type": "boolean",
+      "title": "Show date created column",
+      "description": "Whether to show the date created column",
+      "default": false
     },
     "showFileSizeColumn": {
       "type": "boolean",
