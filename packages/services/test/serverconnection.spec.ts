@@ -91,6 +91,49 @@ describe('ServerConnection', () => {
     });
   });
 
+  describe('XSRF cookie handling', () => {
+    const originalToken = PageConfig.getOption('token');
+    let cookieDescriptor: PropertyDescriptor | undefined;
+
+    beforeEach(() => {
+      // Clear token so XSRF cookie is used for authentication
+      PageConfig.setOption('token', '');
+      // Save the original cookie property descriptor for restoration
+      cookieDescriptor = Object.getOwnPropertyDescriptor(
+        Document.prototype,
+        'cookie'
+      );
+    });
+
+    afterEach(() => {
+      PageConfig.setOption('token', originalToken);
+      // Restore the original cookie property descriptor
+      if (cookieDescriptor) {
+        Object.defineProperty(Document.prototype, 'cookie', cookieDescriptor);
+      }
+    });
+
+    it('should use the last matching cookie when duplicates exist', async () => {
+      // Simulate multiple _xsrf cookies with different paths.
+      // Per RFC 6265, document.cookie lists more-specific paths first.
+      // The server-side parser (SimpleCookie) keeps the last value,
+      // so the client should also return the last one.
+      Object.defineProperty(document, 'cookie', {
+        get: () => '_xsrf=specific_path_token; _xsrf=root_path_token',
+        configurable: true
+      });
+      let capturedHeaders: Headers | undefined;
+      const settings = ServerConnection.makeSettings({
+        fetch: (input: RequestInfo) => {
+          capturedHeaders = (input as Request).headers;
+          return Promise.resolve(new Response('{}', { status: 200 }));
+        }
+      });
+      await ServerConnection.makeRequest(settings.baseUrl, {}, settings);
+      expect(capturedHeaders?.get('X-XSRFToken')).toBe('root_path_token');
+    });
+  });
+
   describe('ResponseError', () => {
     describe('#create', () => {
       it.each([
