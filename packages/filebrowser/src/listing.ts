@@ -3826,9 +3826,6 @@ namespace Private {
     translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
-    // NOTE: The direction semantics are inverted from typical conventions:
-    // 'ascending' displays larger/newer values first, 'descending' displays smaller/older first.
-    // This is existing JupyterLab behavior (see https://github.com/jupyterlab/jupyterlab/issues/16779).
     const reverse = state.direction === 'descending' ? 1 : -1;
 
     /**
