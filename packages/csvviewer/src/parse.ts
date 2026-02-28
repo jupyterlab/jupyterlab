@@ -397,6 +397,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     i++;
 
     // Update return values based on state.
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (state) {
       case NEW_ROW:
         nrows++;

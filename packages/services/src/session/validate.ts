@@ -10,7 +10,6 @@ import { validateProperty } from '../validate';
 /**
  * Validate an `Session.IModel` object.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function validateModel(data: any): asserts data is Session.IModel {
   validateProperty(data, 'id', 'string');
   validateProperty(data, 'type', 'string');
@@ -23,7 +22,6 @@ export function validateModel(data: any): asserts data is Session.IModel {
 /**
  * Update model from legacy session data.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function updateLegacySessionModel(data: any): void {
   if (data.path === undefined && data.notebook !== undefined) {
     data.path = data.notebook.path;

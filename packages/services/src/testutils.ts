@@ -674,6 +674,7 @@ namespace Private {
   ): Contents.IModel {
     options = options || {};
     let name = UUID.uuid4();
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (options.type) {
       case 'directory':
         name = `Untitled Folder_${name}`;

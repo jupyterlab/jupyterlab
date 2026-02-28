@@ -64,7 +64,6 @@ export namespace PageConfig {
         }
         if (fullPath) {
           // Force Rspack to ignore this require and not treat it as requiring a package.
-          // eslint-disable-next-line
           configData = eval('require')(fullPath) as { [key: string]: string };
         }
       } catch (e) {

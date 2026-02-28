@@ -667,7 +667,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
       for (let i = this._measuredAllUntilIndex + 1; i <= index; i++) {
         let size: number;
-        let measured = false;
+        let measured: boolean;
 
         if (this._widgetSizers[i]?.measured) {
           size = this._widgetSizers[i].size;

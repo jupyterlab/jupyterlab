@@ -580,7 +580,7 @@ export class ListModel extends VDomModel {
     // Ensure action is removed when resolved
     const remove = () => {
       const i = this._pendingActions.indexOf(pending);
-      this._pendingActions.splice(i, 1);
+      void this._pendingActions.splice(i, 1);
       this.stateChanged.emit(undefined);
     };
     pending.then(remove, remove);
