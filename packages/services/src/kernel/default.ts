@@ -1470,7 +1470,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     let alreadyCalledOnclose = false;
 
-    const getKernelModel = async (evt: Event) => {
+    const getKernelModel = async (evt: CloseEvent | ErrorEvent) => {
       if (this._isDisposed) {
         return;
       }
