@@ -1810,7 +1810,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle a websocket close event.
    */
-  private _onWSClose = (evt: CloseEvent) => {
+  private _onWSClose = (evt: CloseEvent | ErrorEvent) => {
     if (this.isDisposed) {
       return;
     }
