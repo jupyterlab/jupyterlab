@@ -116,6 +116,28 @@
   vertical-align: middle;
 }
 
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect {
+  position: relative;
+  max-width: 300px;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select {
+  max-width: 300px;
+  white-space: pre-wrap;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
+  top: 4px;
+}
+
+.jp-Shortcuts-Cell jp-button {
+  vertical-align: inherit;
+}
+
+.jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
+  margin-left: 10px;
+}
+
 .jp-Shortcuts-ShortcutCell {
   display: flex;
   min-width: max-content;
@@ -127,12 +149,38 @@
 }
 
 .jp-Shortcuts-Row {
-  padding: 10px;
   width: 100%;
   display: table-row;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   vertical-align: middle;
   background-color: var(--jp-layout-color0);
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut
+  .jp-Shortcuts-Cell:first-of-type {
+  display: none;
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
+  width: 40%;
+}
+
+.jp-Shortcuts-Row-newShortcut
+  .jp-Shortcuts-SaveNew:not(:disabled)
+  .jp-icon3[fill] {
+  fill: var(--jp-ui-inverse-font-color0);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled) {
+  background: var(--jp-shortcuts-button-hover-background);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled):hover {
+  background: var(--jp-accept-color-normal);
 }
 
 .jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutKeys {
@@ -327,6 +375,8 @@
 
 .jp-Shortcuts-AdvancedOptions {
   padding-left: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink {
@@ -344,6 +394,23 @@
 .jp-Shortcuts-AdvancedOptionsLink:active {
   color: var(--jp-brand-color0);
   text-decoration: underline;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept {
+  background: var(--jp-shortcuts-button-hover-background);
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept:hover {
+  background: var(--jp-accept-color-normal);
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled .jp-icon3[fill] {
+  fill: var(--jp-ui-inverse-font-color0);
 }
 
 .jp-Shortcuts-HeaderRowContainer {
@@ -371,4 +438,35 @@
 .jp-Shortcuts-controlIcon {
   margin-left: 8px;
   margin-right: 16px;
+}
+
+.jp-Shortcuts-CustomOptionsDialogBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 500px;
+  height: 400px;
+  padding: 12px;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container label {
+  margin: 0;
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Shortcuts-CustomOptionDialog-container input {
+  padding: 8px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 2px;
+}
+
+.jp-JSONEditor {
+  flex: 1;
 }
