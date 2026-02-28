@@ -2925,6 +2925,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@jupyterlab/core-meta@^4.6.0-alpha.3, @jupyterlab/core-meta@workspace:packages/core-meta":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/core-meta@workspace:packages/core-meta"
+  languageName: unknown
+  linkType: soft
+
 "@jupyterlab/coreutils@^6.6.0-alpha.3, @jupyterlab/coreutils@workspace:packages/coreutils, @jupyterlab/coreutils@~6.6.0-alpha.3":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/coreutils@workspace:packages/coreutils"
@@ -4254,6 +4260,7 @@ __metadata:
     "@jupyterlab/completer-extension": ^4.6.0-alpha.3
     "@jupyterlab/console": ^4.6.0-alpha.3
     "@jupyterlab/console-extension": ^4.6.0-alpha.3
+    "@jupyterlab/core-meta": ^4.6.0-alpha.3
     "@jupyterlab/coreutils": ^6.6.0-alpha.3
     "@jupyterlab/csvviewer": ^4.6.0-alpha.3
     "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.3
