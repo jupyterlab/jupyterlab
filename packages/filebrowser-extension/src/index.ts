@@ -38,7 +38,8 @@ import {
   IDefaultFileBrowser,
   IFileBrowserCommands,
   IFileBrowserFactory,
-  Uploader
+  Uploader,
+  UploadNotifications
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -954,6 +955,43 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const uploadNotifications: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:upload-notifications',
+  description: 'Provides toast notifications for file upload progress',
+  autoStart: true,
+  requires: [IFileBrowserFactory],
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator | null
+  ): void => {
+    const { tracker } = factory;
+
+    const instances = new WeakMap<FileBrowser, UploadNotifications>();
+
+    const attachNotifications = (browser: FileBrowser) => {
+      const notificationHandler = new UploadNotifications({
+        model: browser.model,
+        translator: translator || nullTranslator
+      });
+
+      instances.set(browser, notificationHandler);
+
+      browser.disposed.connect(() => {
+        const handler = instances.get(browser);
+        if (handler) {
+          handler.dispose();
+          instances.delete(browser);
+        }
+      });
+    };
+
+    tracker.forEach(browser => {
+      attachNotifications(browser);
+    });
+  }
+};
 /**
  * A plugin to open files from remote URLs
  */
@@ -1891,6 +1929,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   openBrowserTabPlugin,
   openUrlPlugin,
   notifyUploadPlugin,
+  uploadNotifications,
   createNewLanguageFilePlugin
 ];
 export default plugins;

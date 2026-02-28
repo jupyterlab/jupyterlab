@@ -103,6 +103,7 @@
   "@jupyterlab/filebrowser-extension:open-with": "Adds the open-with feature allowing an user to pick the non-preferred document viewer.",
   "@jupyterlab/filebrowser-extension:settings": "Set up the default file browser settings",
   "@jupyterlab/filebrowser-extension:share-file": "Adds the \"Copy Shareable Link\" command; useful for JupyterHub deployment for example.",
+  "@jupyterlab/filebrowser-extension:upload-notifications": "Provides toast notifications for file upload progress",
   "@jupyterlab/filebrowser-extension:widget": "Adds the file browser to the application shell.",
   "@jupyterlab/fileeditor-extension:completer": "Adds the completer capability to the file editor.",
   "@jupyterlab/fileeditor-extension:cursor-position": "Adds a file editor cursor position status widget.",

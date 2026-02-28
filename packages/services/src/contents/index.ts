@@ -132,6 +132,11 @@ export namespace Contents {
      * The algorithm used to compute hash value. It cannot be null if hash is defined.
      */
     readonly hash_algorithm?: string;
+
+    /**
+     * The abort signal for the save operation.
+     */
+    readonly signal?: AbortSignal;
   }
 
   /**
@@ -1818,16 +1823,18 @@ export class RestContentProvider implements IContentProvider {
    */
   async save(
     localPath: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> & { signal?: AbortSignal } = {}
   ): Promise<Contents.IModel> {
     const settings = this._options.serverSettings;
     const url = this._getUrl(localPath);
-    const file = new File([JSON.stringify(options)], 'data.json', {
+    const { signal, ...newOptions } = options;
+    const file = new File([JSON.stringify(newOptions)], 'data.json', {
       type: 'application/json'
     });
     const init = {
       method: 'PUT',
-      body: file
+      body: file,
+      signal: signal
     };
     const response = await ServerConnection.makeRequest(url, init, settings);
     // will return 200 for an existing file and 201 for a new file
