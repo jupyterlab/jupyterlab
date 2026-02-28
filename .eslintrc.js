@@ -120,6 +120,7 @@ module.exports = {
           'cursor_end',
           'cursor_pos',
           'cursor_start',
+          'date_created',
           'detail_level',
           'display_data',
           'display_id',
