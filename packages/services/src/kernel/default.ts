@@ -1482,7 +1482,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         if (model?.execution_state === 'dead') {
           this._updateStatus('dead');
         } else {
-          this._onWSClose(evt as CloseEvent);
+          this._onWSClose(evt);
         }
       } catch (err) {
         // Try again, if there is a network failure
