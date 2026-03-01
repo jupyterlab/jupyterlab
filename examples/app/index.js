@@ -4,7 +4,8 @@
 import { JupyterLab } from '@jupyterlab/application';
 
 // The webpack public path needs to be set before loading the CSS assets.
-import { PageConfig } from '@jupyterlab/coreutils';
+import { JupyterPluginRegistry, PageConfig } from '@jupyterlab/coreutils';
+import { IConnectionStatus, IServiceManager } from '@jupyterlab/services';
 // eslint-disable-next-line
 __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
@@ -43,6 +44,7 @@ const extensions = [
   ),
   import('@jupyterlab/rendermime-extension'),
   import('@jupyterlab/running-extension'),
+  import('@jupyterlab/services-extension'),
   import('@jupyterlab/settingeditor-extension'),
   import('@jupyterlab/shortcuts-extension'),
   import('@jupyterlab/statusbar-extension'),
@@ -59,15 +61,46 @@ const mimeExtensions = [
   import('@jupyterlab/pdf-extension')
 ];
 
+/**
+ * Get the plugins from an extension.
+ */
+function getPlugins(extension) {
+  // Handle commonjs or es2015 modules
+  let exports;
+  if (extension.hasOwnProperty('__esModule')) {
+    exports = extension.default;
+  } else {
+    // CommonJS exports.
+    exports = extension;
+  }
+
+  return Array.isArray(exports) ? exports : [exports];
+}
+
 window.addEventListener('load', async function () {
   // Make sure the styles have loaded
   await styles;
 
   // Initialize JupyterLab with the mime extensions and application extensions.
+  var pluginRegistry = new JupyterPluginRegistry();
+  const resolvedExtensions = await Promise.all(extensions);
+  const plugins = [];
+  for (const ext of resolvedExtensions) {
+    plugins.push(...getPlugins(ext));
+  }
+  pluginRegistry.registerPlugins(plugins);
+
+  const connectionStatus =
+    await pluginRegistry.resolveOptionalService(IConnectionStatus);
+  const serviceManager =
+    await pluginRegistry.resolveRequiredService(IServiceManager);
+
   const lab = new JupyterLab({
+    pluginRegistry,
+    serviceManager,
+    connectionStatus,
     mimeExtensions: await Promise.all(mimeExtensions)
   });
-  lab.registerPluginModules(await Promise.all(extensions));
 
   /* eslint-disable no-console */
   console.log('Starting app');
