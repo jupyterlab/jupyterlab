@@ -394,6 +394,18 @@ export namespace NotebookActions {
           : undefined
     };
 
+    // Keep this logic outside of transact to avoid them on undo
+    toDelete.forEach(index => {
+      const cellToDelete = cells.get(index);
+      if (cellToDelete.type === 'code') {
+        (cellToDelete as ICodeCellModel).sharedModel.executionState = 'idle';
+      }
+    });
+    const activeCell = cells.get(active);
+    if (activeCell.type === 'code') {
+      (activeCell as ICodeCellModel).sharedModel.executionState = 'idle';
+    }
+
     // Make the changes while preserving history.
     model.sharedModel.transact(() => {
       model.sharedModel.deleteCell(active);

@@ -1977,6 +1977,46 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 1);
       });
+
+      it('should reset execution state to idle after undoing a merge', () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const initialSource = 'line1\nline2';
+        cell.model.sharedModel.setSource(initialSource);
+        // Simulate running cell
+        cell.model.sharedModel.executionState = 'running';
+        // Split the first cell
+        const editor = cell.editor as CodeEditor.IEditor;
+        widget.activeCellIndex = 0;
+        editor.setCursorPosition(editor.getPositionAt(6)!); // Split after 'line1'
+        NotebookActions.splitCell(widget);
+        const firstSplitCell = widget.widgets[0] as CodeCell;
+        const secondSplitCell = widget.widgets[1] as CodeCell;
+        expect(firstSplitCell.model.sharedModel.getSource()).toBe('line1');
+        expect(secondSplitCell.model.sharedModel.getSource()).toBe('line2');
+        expect(firstSplitCell.model.sharedModel.executionState).toBe('idle');
+        expect(secondSplitCell.model.sharedModel.executionState).toBe(
+          'running'
+        );
+        // Merge cells
+        widget.activeCellIndex = 0;
+        NotebookActions.mergeCells(widget, false, false);
+        const mergedCell = widget.widgets[0] as CodeCell;
+        expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
+        expect(mergedCell.model.sharedModel.executionState).toBe('idle');
+        // Undo the merge (which splits the cells again)
+        NotebookActions.undo(widget);
+        const firstCellAfterUndo = widget.widgets[0] as CodeCell;
+        const secondCellAfterUndo = widget.widgets[1] as CodeCell;
+        expect(firstCellAfterUndo.model.sharedModel.getSource()).toBe('line1');
+        expect(secondCellAfterUndo.model.sharedModel.getSource()).toBe('line2');
+        expect(firstCellAfterUndo.model.sharedModel.executionState).toBe(
+          'idle'
+        );
+        expect(secondCellAfterUndo.model.sharedModel.executionState).toBe(
+          'idle'
+        );
+      });
     });
 
     describe('#redo()', () => {
