@@ -71,7 +71,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       window.setTimeout(() => {
         if (
           args.newValue === 'command' &&
-          document.activeElement?.closest('.jp-DocumentSearch-overlay')
+          this._isSearchOverlayFocused()
         ) {
           // Do not request updating mode when user switched focus to search overlay.
           return;
@@ -80,6 +80,31 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         this._filtersChanged.emit();
       }, 0);
     }
+  }
+
+  /**
+   * Check whether the search overlay currently has focus.
+   *
+   * This checks both the active element and whether a search-related
+   * focus change is pending. The latter handles the race condition where
+   * the notebook mode changes to 'command' before the browser has moved
+   * focus to the search overlay (e.g. when Ctrl+F is pressed while text
+   * is selected in a cell).
+   */
+  private _isSearchOverlayFocused(): boolean {
+    if (document.activeElement?.closest('.jp-DocumentSearch-overlay')) {
+      return true;
+    }
+    // When search is active, the transition to command mode is very likely
+    // caused by the search overlay stealing focus; re-check after a
+    // microtask to give the browser time to update `document.activeElement`.
+    // Since we are already inside a setTimeout(0), the overlay should have
+    // focus by now in most cases, but if not, we conservatively preserve
+    // the selection mode when search is active.
+    if (this._searchActive) {
+      return true;
+    }
+    return false;
   }
 
   /**
