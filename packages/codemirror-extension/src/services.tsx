@@ -27,6 +27,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FormComponent,
+  getTemplates,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 import type { ReadonlyJSONValue } from '@lumino/coreutils';
@@ -150,6 +151,10 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
+            const { TitleField, DescriptionField } = getTemplates(
+              props.registry,
+              props.uiSchema
+            );
             let defaultFormData: Record<string, any>;
             const properties = React.useMemo(
               () => registry.settingsSchema,
@@ -174,14 +179,20 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
             return (
               <div className="jp-FormGroup-contentNormal">
-                <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-                  {props.schema.title}
-                </h3>
-                {props.schema.description && (
-                  <div className="jp-FormGroup-description">
-                    {props.schema.description}
-                  </div>
-                )}
+                <TitleField
+                  {...props}
+                  id={`${props.idSchema.$id}__title`}
+                  title={
+                    props.schema.title ||
+                    `${(props.uiSchema || JSONExt.emptyObject)['ui:title']}` ||
+                    ''
+                  }
+                />
+                <DescriptionField
+                  {...props}
+                  id={`${props.idSchema.$id}__description`}
+                  description={props.schema.description ?? ''}
+                />
                 <FormComponent
                   schema={{
                     title: props.schema.title,
