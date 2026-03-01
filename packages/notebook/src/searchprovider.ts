@@ -164,6 +164,39 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     };
   }
 
+  /**
+   * Whether the current match cannot be replaced (either in output or read-only cell).
+   */
+  get isCurrentMatchInOutput(): boolean {
+    // Check if output filter is enabled and we have a current match
+    if (!this._filters?.output || this._currentProviderIndex === null) {
+      return false;
+    }
+
+    const currentProvider = this._searchProviders[this._currentProviderIndex];
+    if (!currentProvider) {
+      return false;
+    }
+
+    // For CodeCellSearchProvider, check if the current match is in an output
+    // The CodeCellSearchProvider has a currentProviderIndex property that indicates
+    // whether the match is in the code editor (-1) or in an output provider (>= 0)
+    if ('currentProviderIndex' in currentProvider) {
+      const codeCellProvider = currentProvider as any;
+      return codeCellProvider.currentProviderIndex >= 0;
+    }
+
+    return false;
+  }
+
+  /**
+   * Whether the current match cannot be replaced.
+   * Returns true if match is in output OR if the notebook is read-only.
+   */
+  get isCurrentMatchNonReplaceable(): boolean {
+    return this.isCurrentMatchInOutput || this.isReadOnly;
+  }
+
   getSelectionState(): SelectionState {
     const cellMode = this._selectionSearchMode === 'cells';
     const selectedCount = cellMode ? this._selectedCells : this._selectedLines;
@@ -234,10 +267,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
         disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
+          'Search in the cell outputs (replace will be disabled for output matches).'
         ),
         default: false,
-        supportReplace: false
+        supportReplace: true // Allow search in outputs when replace is shown
       },
       selection: {
         title:

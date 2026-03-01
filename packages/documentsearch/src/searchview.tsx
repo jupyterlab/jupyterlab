@@ -220,6 +220,8 @@ interface IReplaceEntryProps {
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
+  isCurrentMatchInOutput?: boolean;
+  isCurrentMatchNonReplaceable?: boolean;
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -258,6 +260,14 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
+        disabled={props.isCurrentMatchNonReplaceable}
+        title={
+          props.isCurrentMatchNonReplaceable
+            ? props.isCurrentMatchInOutput
+              ? trans.__('Cannot replace matches in cell outputs')
+              : trans.__('Cannot replace matches in read-only document')
+            : trans.__('Replace')
+        }
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
@@ -266,6 +276,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceAll()}
+        title={trans.__('Replace All')}
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
@@ -545,6 +556,14 @@ interface ISearchOverlayProps {
    */
   onSearchChanged: (q: string) => void;
   /**
+   * Whether the current match is in a cell output.
+   */
+  isCurrentMatchInOutput?: boolean;
+  /**
+   * Whether the current match cannot be replaced (either in output or read-only cell).
+   */
+  isCurrentMatchNonReplaceable?: boolean;
+  /**
    * Provides information about keybindings for display.
    */
   keyBindings?: ISearchKeyBindings;
@@ -776,6 +795,10 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 replaceText={this.props.replaceText}
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
+                isCurrentMatchInOutput={this.props.isCurrentMatchInOutput}
+                isCurrentMatchNonReplaceable={
+                  this.props.isCurrentMatchNonReplaceable
+                }
               />
               <div className={SPACER_CLASS}></div>
             </>
@@ -919,6 +942,8 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         translator={this.translator}
         useRegex={this.model.useRegex}
         wholeWords={this.model.wholeWords}
+        isCurrentMatchInOutput={this.model.isCurrentMatchInOutput}
+        isCurrentMatchNonReplaceable={this.model.isCurrentMatchNonReplaceable}
         onCaseSensitiveToggled={() => {
           this.model.caseSensitive = !this.model.caseSensitive;
         }}
