@@ -5,7 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+
+const CSV_VIEWER_PLUGIN_ID = '@jupyterlab/csvviewer-extension:csv';
 
 // Generated using https://www.mockaroo.com/
 const testData = `id,name,ip_address,userid
@@ -50,6 +52,67 @@ test.describe('CSV Viewer', () => {
     await page.theme.setDarkTheme();
 
     expect(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
+  });
+
+  test.describe('with default delimiter setting', () => {
+    const semicolonCsvFileName = 'test-semicolon.csv';
+    const semicolonTestData = `id;name;value
+1;Alpha;100
+2;Beta;200
+3;Gamma;300
+`;
+
+    let semicolonTempFilePath: string;
+
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [CSV_VIEWER_PLUGIN_ID]: {
+          delimiter: ';'
+        }
+      }
+    });
+
+    test.beforeEach(async ({ page, tmpPath }) => {
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'csv-semicolon-'));
+      semicolonTempFilePath = path.join(tempDir, semicolonCsvFileName);
+      fs.writeFileSync(semicolonTempFilePath, semicolonTestData);
+      await page.contents.uploadFile(
+        semicolonTempFilePath,
+        `${tmpPath}/${semicolonCsvFileName}`
+      );
+    });
+
+    test('should use default delimiter from settings for semicolon-separated CSV', async ({
+      page
+    }) => {
+      await page.filebrowser.open(semicolonCsvFileName);
+
+      const csvLocator = page.locator('.jp-CSVViewer');
+      await expect(csvLocator).toBeVisible();
+
+      // With semicolon delimiter, "name" should be its own column and we should see "Alpha", "Beta", "Gamma"
+      await expect(csvLocator.locator('text=Alpha')).toBeVisible();
+      await expect(csvLocator.locator('text=Beta')).toBeVisible();
+      await expect(csvLocator.locator('text=Gamma')).toBeVisible();
+      // Value column (200, 300) should be in separate cells
+      await expect(csvLocator.locator('text=200')).toBeVisible();
+      await expect(csvLocator.locator('text=300')).toBeVisible();
+    });
+
+    test.afterEach(async ({ page }) => {
+      try {
+        await page.contents.deleteFile(semicolonCsvFileName);
+      } catch (e) {
+        console.error(`Error deleting file ${semicolonCsvFileName}: ${e}`);
+      }
+      try {
+        fs.unlinkSync(semicolonTempFilePath);
+        fs.rmdirSync(path.dirname(semicolonTempFilePath));
+      } catch (e) {
+        console.error(`Error cleaning up temp file: ${e}`);
+      }
+    });
   });
 
   test.afterEach(async ({ page }) => {
