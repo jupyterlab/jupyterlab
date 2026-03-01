@@ -2489,9 +2489,13 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
-        // no-op
-      });
+      // Cell-to-cell navigation should keep the start of the target cell in view,
+      // especially for cells with long outputs.
+      await notebook
+        .scrollToItem(activeCellIndex, 'auto', 0, 'start')
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
