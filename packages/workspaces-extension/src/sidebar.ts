@@ -67,12 +67,25 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         return this._workspace.metadata.id;
       }
       labelTitle() {
+        const layout =
+          this._workspace.data['layout-restorer:data'] as
+            | { main?: { dock?: { widgets?: unknown[] } } }
+            | undefined;
+
+        const widgetCount = layout?.main?.dock?.widgets?.length ?? 0;
+
+        const workspaceId = String(this._workspace.metadata.id ?? '');
+        const lastModified =
+          this._workspace.metadata['last_modified'] &&
+          String(this._workspace.metadata['last_modified']).trim() !== ''
+            ? String(this._workspace.metadata['last_modified'])
+            : trans.__('unknown');
+
         return trans.__(
-          '%1 workspace with %2 tabs, last modified on %3',
-          this._workspace.metadata.id,
-          (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
-            ?.widgets?.length,
-          this._workspace.metadata['last_modified']
+          '%1 workspace with %2 tab(s), last modified on %3',
+          workspaceId,
+          String(widgetCount),
+          lastModified
         );
       }
 
