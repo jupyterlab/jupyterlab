@@ -2530,6 +2530,10 @@ export class DirListing extends Widget {
     }
 
     const newBaseName = result.value;
+    if (!newBaseName) {
+      this._inRename = false;
+      return '';
+    }
     if (!isValidFileName(newBaseName)) {
       void showErrorMessage(
         trans.__('Rename Error'),
