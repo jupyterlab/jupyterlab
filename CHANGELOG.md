@@ -102,7 +102,7 @@ set in the settings editor.
 
 The “Show Workspace Indicator” command has been added to the command palette
 and the “Send Code to Console” shortcut has been restored. The previous issue
-involving editing shortcuts on Safari loosing focus, has been resolved.
+involving editing shortcuts on Safari losing focus, has been resolved.
 
 ### Settings
 
@@ -2330,7 +2330,7 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 - Fix typos [#16832](https://github.com/jupyterlab/jupyterlab/pull/16832) ([@algonell](https://github.com/algonell))
 - Update to the latest Lumino [#16804](https://github.com/jupyterlab/jupyterlab/pull/16804) ([@jtpio](https://github.com/jtpio))
 - Fix typo in the `IPropertyInspectorProvider` plugin description [#16797](https://github.com/jupyterlab/jupyterlab/pull/16797) ([@jtpio](https://github.com/jtpio))
-- Replace link to accessiblity project with a link to accessiblity issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
+- Replace link to accessibility project with a link to accessibility issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
 - Remove Python 2 from documentation [#16771](https://github.com/jupyterlab/jupyterlab/pull/16771) ([@JasonWeill](https://github.com/JasonWeill))
 - Fix compatibility with server-side execution extensions [#16764](https://github.com/jupyterlab/jupyterlab/pull/16764) ([@krassowski](https://github.com/krassowski))
 - Document mandatory steps before running JupyterLab in dev mode [#16761](https://github.com/jupyterlab/jupyterlab/pull/16761) ([@cmarmo](https://github.com/cmarmo))
@@ -6068,7 +6068,7 @@ No merged PRs
 
 - Fix `release_test` [#11390](https://github.com/jupyterlab/jupyterlab/pull/11390) ([@fcollonval](https://github.com/fcollonval))
 - Removed `cat package.json` [#11372](https://github.com/jupyterlab/jupyterlab/pull/11372) ([@ceesu](https://github.com/ceesu))
-- Relax `@playright/test` dependency in Galata [#11371](https://github.com/jupyterlab/jupyterlab/pull/11371) ([@jtpio](https://github.com/jtpio))
+- Relax `@playwright/test` dependency in Galata [#11371](https://github.com/jupyterlab/jupyterlab/pull/11371) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
 
@@ -6565,7 +6565,7 @@ No merged PRs
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
   with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
-- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
+- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future versions will enable restoring the previous behaviour of per-cell undo/redo.
 - Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/toc.html).
 - The debugger received many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
@@ -8486,7 +8486,7 @@ migrating extensions to JupyterLab 2.0.
 - Add storybook to `ui-components`
   ([#7588](https://github.com/jupyterlab/jupyterlab/pull/7588),
   [#6799](https://github.com/jupyterlab/jupyterlab/issues/6799))
-- Add explicit documentation encouraging people to re-use lab
+- Add explicit documentation encouraging people to reuse lab
   components
   ([#7543](https://github.com/jupyterlab/jupyterlab/pull/7543))
 - Enable TypeScript sourcemaps for debugging locally installed
