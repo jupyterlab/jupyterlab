@@ -1617,13 +1617,13 @@ function addCommands(
         return widget.rename();
       }
     },
-    isVisible: () =>
-      // So long as this command only handles one file at time, don't show it
-      // if multiple files are selected.
-      !!tracker.currentWidget &&
-      Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Rename'),
+    label: () => {
+      const n = Array.from(tracker.currentWidget?.selectedItems() ?? []).length;
+      return n > 1
+        ? trans._n('Rename %1 Item', 'Rename %1 Items', n, n)
+        : trans.__('Rename');
+    },
     mnemonic: 0,
     describedBy: {
       args: {
