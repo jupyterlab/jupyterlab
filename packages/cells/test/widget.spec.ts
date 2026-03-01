@@ -511,6 +511,24 @@ describe('cells/widget', () => {
           const factory = new Cell.ContentFactory({ editorFactory });
           expect(factory.createCellFooter()).toBeInstanceOf(CellFooter);
         });
+
+        it('should default to output position', () => {
+          const factory = new Cell.ContentFactory({ editorFactory });
+          const footer = factory.createCellFooter();
+          expect(footer.position).toBe('output');
+        });
+
+        it('should create an input footer', () => {
+          const factory = new Cell.ContentFactory({ editorFactory });
+          const footer = factory.createCellFooter('input');
+          expect(footer.position).toBe('input');
+        });
+
+        it('should create an output footer', () => {
+          const factory = new Cell.ContentFactory({ editorFactory });
+          const footer = factory.createCellFooter('output');
+          expect(footer.position).toBe('output');
+        });
       });
 
       describe('#createOutputPrompt()', () => {
@@ -1184,6 +1202,24 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
       it('should create a new cell footer', () => {
         expect(new CellFooter()).toBeInstanceOf(CellFooter);
+      });
+
+      it('should default to output position', () => {
+        const footer = new CellFooter();
+        expect(footer.position).toBe('output');
+        expect(footer.hasClass('jp-mod-output')).toBe(true);
+      });
+
+      it('should accept input position', () => {
+        const footer = new CellFooter('input');
+        expect(footer.position).toBe('input');
+        expect(footer.hasClass('jp-mod-input')).toBe(true);
+      });
+
+      it('should accept output position', () => {
+        const footer = new CellFooter('output');
+        expect(footer.position).toBe('output');
+        expect(footer.hasClass('jp-mod-output')).toBe(true);
       });
     });
   });
