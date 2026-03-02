@@ -256,6 +256,15 @@ describe('@jupyterlab/notebook', () => {
         expect(prev.model.sharedModel.getSource()).toBe('');
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        widget.activeCell!.model.setMetadata('editable', false);
+        NotebookActions.splitCell(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
@@ -380,6 +389,15 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        widget.activeCell!.model.setMetadata('editable', false);
+        NotebookActions.mergeCells(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
         widget.activeCellIndex = 1;
         let source = widget.activeCell!.model.sharedModel.getSource();
@@ -393,6 +411,15 @@ describe('@jupyterlab/notebook', () => {
         let source = widget.activeCell!.model.sharedModel.getSource();
         const cellNumber = widget.widgets.length;
         NotebookActions.mergeCells(widget, true);
+        expect(widget.widgets.length).toBe(cellNumber);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should be a no-op if any merged cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        widget.widgets[1].model.setMetadata('editable', false);
+        NotebookActions.mergeCells(widget);
         expect(widget.widgets.length).toBe(cellNumber);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
