@@ -816,7 +816,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 self.log.error(
                     "Simultaneous LabServerApp.blocked_extensions_uris and LabServerApp.allowed_extensions_uris is not supported. Please define only one of those."
                 )
-                import sys
+                import sys  # noqa: PLC0415
 
                 sys.exit(-1)
 

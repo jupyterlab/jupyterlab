@@ -7,7 +7,6 @@ import re
 import shutil
 import subprocess
 import sys
-from typing import Optional
 
 try:
     import tomllib
@@ -57,7 +56,7 @@ JUPYTER_SERVER_REQUIREMENT = re.compile("^jupyter_server([^\\w]|$)")
 
 
 def update_extension(  # noqa
-    target: str, vcs_ref: Optional[str] = None, interactive: bool = True
+    target: str, vcs_ref: str | None = None, interactive: bool = True
 ) -> None:
     """Update an extension to the current JupyterLab
 
@@ -266,7 +265,7 @@ def update_extension(  # noqa
     if override_pyproject:
         if (target / "setup.cfg").exists():
             try:
-                import tomli_w
+                import tomli_w  # noqa: PLC0415
             except ImportError:
                 msg = "To update pyproject.toml, you need to install tomli-w"
                 print(msg)

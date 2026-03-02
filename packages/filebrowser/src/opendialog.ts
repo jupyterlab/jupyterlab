@@ -3,14 +3,16 @@
 
 import { Dialog, setToolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Contents } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore } from '@jupyterlab/ui-components';
+import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
 import { FilterFileBrowserModel } from './model';
-import { IFileBrowserFactory } from './tokens';
+import type { IFileBrowserFactory } from './tokens';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 /**
@@ -30,16 +32,15 @@ export namespace FileDialog {
   /**
    * Options for the open directory dialog
    */
-  export interface IDirectoryOptions
-    extends Partial<
-      Pick<
-        Dialog.IOptions<Promise<Contents.IModel[]>>,
-        Exclude<
-          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-          'body' | 'buttons' | 'defaultButton'
-        >
+  export interface IDirectoryOptions extends Partial<
+    Pick<
+      Dialog.IOptions<Promise<Contents.IModel[]>>,
+      Exclude<
+        keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+        'body' | 'buttons' | 'defaultButton'
       >
-    > {
+    >
+  > {
     /**
      * Document manager
      */

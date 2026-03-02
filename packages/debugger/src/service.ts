@@ -1,26 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelSpec, Session } from '@jupyterlab/services';
+import type { KernelSpec, Session } from '@jupyterlab/services';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
-import { VariablesModel } from './panels/variables/model';
+import type { VariablesModel } from './panels/variables/model';
 
-import { IDebugger } from './tokens';
-import { IDebuggerDisplayRegistry } from './tokens';
+import type { IDebugger } from './tokens';
+import type { IDebuggerDisplayRegistry } from './tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -41,7 +40,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._session = null;
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model({
-      displayRegistry: options.displayRegistry
+      displayRegistry: options.displayRegistry,
+      getSource: this.getSource.bind(this),
+      mimeTypeService: options.mimeTypeService || null
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -164,7 +165,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Whether there exists a thread in stopped state.
    */
   hasStoppedThreads(): boolean {
-    return this._model?.stoppedThreads.size > 0 ?? false;
+    return this._model.stoppedThreads.size > 0;
   }
 
   /**
@@ -215,12 +216,12 @@ export class DebuggerService implements IDebugger, IDisposable {
       if (!this.session) {
         throw new Error('No active debugger session');
       }
-      await this.session.sendRequest('continue', {
-        threadId: this._currentThread()
-      });
       this._model.stoppedThreads.delete(this._currentThread());
       this._clearModel();
       this._clearSignals();
+      await this.session.sendRequest('continue', {
+        threadId: this._currentThread()
+      });
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -1085,5 +1086,10 @@ export namespace DebuggerService {
      * The display registry.
      */
     displayRegistry?: IDebuggerDisplayRegistry | null;
+
+    /**
+     * The mimetype service.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

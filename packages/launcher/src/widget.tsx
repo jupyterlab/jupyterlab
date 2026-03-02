@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
   LabIcon,
@@ -14,12 +11,13 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { ArrayExt, map } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ILauncher } from './tokens';
+import type { ILauncher } from './tokens';
 
 /**
  * The class name added to Launcher instances.

@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
-import { MenuHelper } from './menu';
+import type { Page } from '@playwright/test';
+import type { MenuHelper } from './menu';
 
 /**
  * Status Bar helpers

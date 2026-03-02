@@ -5,12 +5,11 @@
  * @module debugger-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   Dialog,
@@ -44,19 +43,16 @@ import {
   NotebookActions,
   NotebookPanel
 } from '@jupyterlab/notebook';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
   standardRendererFactories as initialFactories,
-  IRenderMime,
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { Session } from '@jupyterlab/services';
+import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  NullTranslator,
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { NullTranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
@@ -454,20 +450,27 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [IDebuggerDisplayRegistry, IDebuggerSources, ITranslator],
+  optional: [
+    IDebuggerDisplayRegistry,
+    IDebuggerSources,
+    ITranslator,
+    IEditorServices
+  ],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
     displayRegistry: IDebuggerDisplayRegistry | null,
     debuggerSources: IDebugger.ISources | null,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    editorServices: IEditorServices | null
   ) =>
     new Debugger.Service({
       config,
       displayRegistry,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
-      translator
+      translator,
+      mimeTypeService: editorServices?.mimeTypeService ?? null
     })
 };
 

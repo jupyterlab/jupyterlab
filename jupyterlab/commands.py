@@ -23,7 +23,6 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
@@ -921,7 +920,7 @@ class _AppHandler:
             if pkg in local or pkg in linked:
                 continue
             if old_deps[pkg] != dep:
-                msg = f"{pkg} changed from {old_deps[pkg]} to {new_deps[pkg]}"
+                msg = f"{pkg} changed from {old_deps[pkg]} to {dep}"
                 messages.append(msg)
 
         # Look for updated local extensions.
@@ -2427,7 +2426,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[frozenset[str]] = None
+    locked_plugins: frozenset[str] | None = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:

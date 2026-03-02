@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,

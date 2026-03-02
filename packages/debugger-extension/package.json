@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger-extension",
-  "version": "4.6.0-alpha.0",
+  "version": "4.6.0-alpha.3",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -43,30 +43,30 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/cells": "^4.6.0-alpha.0",
-    "@jupyterlab/codeeditor": "^4.6.0-alpha.0",
-    "@jupyterlab/completer": "^4.6.0-alpha.0",
-    "@jupyterlab/console": "^4.6.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.6.0-alpha.0",
-    "@jupyterlab/debugger": "^4.6.0-alpha.0",
-    "@jupyterlab/docregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/fileeditor": "^4.6.0-alpha.0",
-    "@jupyterlab/nbformat": "^4.6.0-alpha.0",
-    "@jupyterlab/notebook": "^4.6.0-alpha.0",
-    "@jupyterlab/rendermime": "^4.6.0-alpha.0",
-    "@jupyterlab/services": "^7.6.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0",
+    "@jupyterlab/application": "^4.6.0-alpha.3",
+    "@jupyterlab/apputils": "^4.7.0-alpha.3",
+    "@jupyterlab/cells": "^4.6.0-alpha.3",
+    "@jupyterlab/codeeditor": "^4.6.0-alpha.3",
+    "@jupyterlab/completer": "^4.6.0-alpha.3",
+    "@jupyterlab/console": "^4.6.0-alpha.3",
+    "@jupyterlab/coreutils": "^6.6.0-alpha.3",
+    "@jupyterlab/debugger": "^4.6.0-alpha.3",
+    "@jupyterlab/docregistry": "^4.6.0-alpha.3",
+    "@jupyterlab/fileeditor": "^4.6.0-alpha.3",
+    "@jupyterlab/nbformat": "^4.6.0-alpha.3",
+    "@jupyterlab/notebook": "^4.6.0-alpha.3",
+    "@jupyterlab/rendermime": "^4.6.0-alpha.3",
+    "@jupyterlab/services": "^7.6.0-alpha.3",
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.3",
+    "@jupyterlab/translation": "^4.6.0-alpha.3",
     "@lumino/commands": "^2.3.3"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.6.0-alpha.0",
+    "@jupyterlab/testing": "^4.6.0-alpha.3",
     "@types/jest": "^29.2.0",
     "@types/react-dom": "^18.0.9",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "publishConfig": {
     "access": "public"

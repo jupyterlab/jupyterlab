@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyPartialJSONValue, Token } from '@lumino/coreutils';
-import { IDataConnector } from './interfaces';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
+import type { IDataConnector } from './interfaces';
 
 /**
  * The default state database token.

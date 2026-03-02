@@ -3,10 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CommandRegistry } from '@lumino/commands';
-import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ElementDataset } from '@lumino/virtualdom';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ElementDataset } from '@lumino/virtualdom';
 
 /**
  * The command data attribute added to nodes that are connected.
