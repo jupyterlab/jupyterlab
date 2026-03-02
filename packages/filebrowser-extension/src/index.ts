@@ -273,7 +273,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           sortNotebooksFirst: false,
           sortFileNamesNaturally: true,
           showFullPath: false,
-          allowFileUploads: true
+          allowFileUploads: true,
+          timestampFormat: 'absolute' as const
         };
 
         browser.showFileFilter = settings.get('showFileFilter')
@@ -282,8 +283,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
-            const value = settings.get(key).composite as boolean;
-            browser[key] = value;
+            const value = settings.get(key).composite as boolean | string;
+            (browser as any)[key] = value;
           }
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;

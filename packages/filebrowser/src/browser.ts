@@ -3,7 +3,7 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import type { IMovableSectionDestination } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';
@@ -777,6 +777,19 @@ export class FileBrowser
   private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
+  private _timestampFormat: Time.TimestampFormat = 'absolute';
+
+  get timestampFormat(): Time.TimestampFormat {
+    return this._timestampFormat;
+  }
+
+  set timestampFormat(value: Time.TimestampFormat) {
+    if (this._timestampFormat === value) {
+      return;
+    }
+    this._timestampFormat = value;
+    this.listing?.setTimestampFormat(value);
+  }
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
   private _sortFileNamesNaturally: boolean = true;

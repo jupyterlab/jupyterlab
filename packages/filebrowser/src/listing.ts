@@ -1098,7 +1098,12 @@ export class DirListing extends Widget {
   /**
    * Update only the modified dates.
    */
-  protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
+  protected updateModified(
+    items: Contents.IModel[],
+    nodes: HTMLElement[],
+    timestampFormat?: Time.TimestampFormat
+  ) {
+    const format = timestampFormat ?? this._timestampFormat;
     items.forEach((item, i) => {
       const node = nodes[i];
       if (node && item.last_modified) {
@@ -1110,13 +1115,15 @@ export class DirListing extends Widget {
           this.renderer.updateItemModified(
             modified,
             item.last_modified,
-            this._modifiedStyle
+            this._modifiedStyle,
+            format
           );
         } else {
           DirListing.defaultRenderer.updateItemModified(
             modified,
             item.last_modified,
-            this._modifiedStyle
+            this._modifiedStyle,
+            format
           );
         }
       }
@@ -1182,7 +1189,8 @@ export class DirListing extends Widget {
         this.selection[item.path],
         this._modifiedStyle,
         this._columnSizes,
-        this._createdStyle
+        this._createdStyle,
+        this._timestampFormat
       );
       if (
         this.selection[item.path] &&
@@ -1528,6 +1536,15 @@ export class DirListing extends Widget {
    */
   setAllowSingleClickNavigation(isEnabled: boolean) {
     this._allowSingleClick = isEnabled;
+  }
+
+  /**
+   * Update the setting for timestamp format.
+   * This refreshes the modified dates with the new format.
+   */
+  setTimestampFormat(format: Time.TimestampFormat) {
+    this._timestampFormat = format;
+    this.updateModified(this._sortedItems, this._items);
   }
 
   /**
@@ -2831,6 +2848,7 @@ export class DirListing extends Widget {
   private _focusPath = '';
   private _modifiedStyle: Time.HumanStyle = 'short';
   private _createdStyle: Time.HumanStyle = 'short';
+  private _timestampFormat: Time.TimestampFormat = 'absolute';
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
@@ -2999,11 +3017,14 @@ export namespace DirListing {
      * @param modifiedDate - String representation of the last modified date.
      *
      * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     *
+     * @param timestampFormat - The timestamp format: 'relative' or 'absolute'
      */
     updateItemModified?(
       modified: HTMLElement,
       modifiedDate: string,
-      modifiedStyle: Time.HumanStyle
+      modifiedStyle: Time.HumanStyle,
+      timestampFormat?: Time.TimestampFormat
     ): void;
 
     /**
@@ -3041,7 +3062,8 @@ export namespace DirListing {
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<IColumn['id'], number | null>,
-      createdStyle?: Time.HumanStyle
+      createdStyle?: Time.HumanStyle,
+      timestampFormat?: Time.TimestampFormat
     ): void;
 
     /**
@@ -3447,13 +3469,15 @@ export namespace DirListing {
     updateItemModified(
       modified: HTMLElement,
       modifiedDate: string,
-      modifiedStyle: Time.HumanStyle
+      modifiedStyle: Time.HumanStyle,
+      timestampFormat: Time.TimestampFormat = 'absolute'
     ): void {
       this._updateItemDate(
         modified,
         modifiedDate,
         modifiedStyle,
-        this._modifiedColumnLastUpdate
+        this._modifiedColumnLastUpdate,
+        timestampFormat
       );
     }
 
@@ -3487,33 +3511,35 @@ export namespace DirListing {
      * of comparing if an update is needed using a last update cache.
      *
      * @param element - The date column element to update.
-     *
      * @param dateString - String representation of the date.
-     *
      * @param style - The date style: narrow, short, or long.
-     *
-     * @param cache - The WeakMap cache tracking the last rendered state for
-     *   this column.
+     * @param cache - The WeakMap cache tracking the last rendered state.
+     * @param timestampFormat - The timestamp format: 'relative' or 'absolute'.
      */
     private _updateItemDate(
       element: HTMLElement,
       dateString: string,
       style: Time.HumanStyle,
-      cache: WeakMap<HTMLElement, { date: string; style: Time.HumanStyle }>
+      cache: WeakMap<
+        HTMLElement,
+        { date: string; style: Time.HumanStyle; timestampFormat?: Time.TimestampFormat }
+      >,
+      timestampFormat: Time.TimestampFormat = 'absolute'
     ): void {
       const previousUpdate = cache.get(element);
       if (
         previousUpdate?.date === dateString &&
-        previousUpdate?.style === style
+        previousUpdate?.style === style &&
+        previousUpdate?.timestampFormat === timestampFormat
       ) {
         return;
       }
 
       const parsedDate = new Date(dateString);
-      // Render the date in one of multiple formats, depending on the container's size
-      element.textContent = Time.formatHuman(parsedDate, style);
+      // Render the date using the configured format (absolute or relative)
+      element.textContent = Time.formatTimestamp(parsedDate, timestampFormat, style);
       element.title = Time.format(parsedDate);
-      cache.set(element, { date: dateString, style });
+      cache.set(element, { date: dateString, style, timestampFormat });
     }
 
     /**
@@ -3535,7 +3561,8 @@ export namespace DirListing {
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
-      createdStyle?: Time.HumanStyle
+      createdStyle?: Time.HumanStyle,
+      timestampFormat: Time.TimestampFormat = 'absolute'
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3660,13 +3687,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.format(new Date(model.created))
+          Time.formatTimestamp(new Date(model.created), timestampFormat)
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.format(new Date(model.last_modified))
+          Time.formatTimestamp(new Date(model.last_modified), timestampFormat)
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -3909,7 +3936,11 @@ export namespace DirListing {
      */
     private _modifiedColumnLastUpdate = new WeakMap<
       HTMLElement,
-      { date: string; style: Time.HumanStyle }
+      {
+        date: string;
+        style: Time.HumanStyle;
+        timestampFormat: Time.TimestampFormat;
+      }
     >();
 
     /**
@@ -3917,7 +3948,7 @@ export namespace DirListing {
      */
     private _createdColumnLastUpdate = new WeakMap<
       HTMLElement,
-      { date: string; style: Time.HumanStyle }
+      { date: string; style: Time.HumanStyle; timestampFormat?: Time.TimestampFormat }
     >();
 
     private _lastRenderedState = new WeakMap<HTMLElement, string>();
