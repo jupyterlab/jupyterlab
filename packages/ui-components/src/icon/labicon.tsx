@@ -925,7 +925,6 @@ namespace Private {
       protected _rendererOptions?: LabIcon.IRendererOptions
     ) {}
 
-    // eslint-disable-next-line
     render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {}
     unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
   }
