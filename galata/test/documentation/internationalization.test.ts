@@ -57,6 +57,7 @@ test.describe('Internationalization', () => {
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
 
     // Wait for fonts to be loaded (again, we are reloading)
+    await page.waitForLoadState('networkidle');
     await page.evaluate(() => document.fonts.ready);
 
     await page.addStyleTag({
