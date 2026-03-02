@@ -329,24 +329,13 @@ export class Dialog<T> extends Widget {
     }
     super.onCloseRequest(msg);
   }
-
   /**
    * Handle the `'input'` event for dialog's children.
    *
    * @param event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
-    this._checkValidation();
-  }
-
-  /**
-   * Check that every input in the dialog is valid.
-   * It looks for :invalid pseudo class of inputs, or .jp-mod-error class.
-   */
-  protected _checkValidation(): void {
-    this._hasValidationErrors =
-      !!this.node.querySelector(':invalid') ||
-      !!this.node.querySelector('.jp-mod-error');
+    this._hasValidationErrors = !!this.node.querySelector(':invalid');
     for (let i = 0; i < this._buttons.length; i++) {
       if (this._buttons[i].accept) {
         this._buttonNodes[i].disabled = this._hasValidationErrors;

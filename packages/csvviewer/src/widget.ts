@@ -51,14 +51,6 @@ export class TextRenderConfig {
    * horizontalAlignment of the text
    */
   horizontalAlignment: DataGridModule.TextRenderer.HorizontalAlignment;
-  /**
-   * font size
-   */
-  fontSize?: string;
-  /**
-   * font family
-   */
-  fontFamily?: string;
 }
 
 /**
@@ -400,7 +392,6 @@ export class CSVViewer extends Widget {
     const { TextRenderer } = await Private.ensureDataGrid();
     const rendererConfig = this._baseRenderer;
     const renderer = new TextRenderer({
-      font: `${rendererConfig.fontSize ?? '12px'} ${rendererConfig.fontFamily ?? 'sans-serif'}`,
       textColor: rendererConfig.textColor,
       horizontalAlignment: rendererConfig.horizontalAlignment,
       backgroundColor:

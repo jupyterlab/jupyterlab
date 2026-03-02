@@ -342,10 +342,7 @@ namespace Private {
     node = palette.querySelector('.jp-mod-selection');
     const selectionFillColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-text');
-    const textStyle = getComputedStyle(node!);
-    const textColor = textStyle.color;
-    const fontFamily = textStyle.fontFamily;
-    const fontSize = textStyle.fontSize;
+    const textColor = getComputedStyle(node!).color;
     document.body.removeChild(palette);
     return {
       style: {
@@ -359,7 +356,7 @@ namespace Private {
         selectionFillColor
       },
       textRenderer: new TextRenderer({
-        font: `${fontSize} ${fontFamily}`,
+        font: '12px sans-serif',
         textColor,
         backgroundColor: '',
         verticalAlignment: 'center',
