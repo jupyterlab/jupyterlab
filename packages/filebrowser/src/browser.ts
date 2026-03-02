@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -595,6 +595,19 @@ export class FileBrowser extends SidePanel {
   private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
+  private _timestampFormat: Time.TimestampFormat = 'absolute';
+
+  get timestampFormat(): Time.TimestampFormat {
+    return this._timestampFormat;
+  }
+
+  set timestampFormat(value: Time.TimestampFormat) {
+    if (this._timestampFormat === value) {
+      return;
+    }
+    this._timestampFormat = value;
+    this.listing?.setTimestampFormat(value);
+  }
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
   private _allowFileUploads: boolean = true;
