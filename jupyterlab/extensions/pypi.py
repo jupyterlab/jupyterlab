@@ -405,6 +405,26 @@ class PyPIExtensionManager(ExtensionManager):
                 self._rpc_client.browse,
                 ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
             )
+
+            # Language packs are not tagged as prebuilt extensions but can be
+            # installed via pip.  Fetch them using the broader classifier and
+            # filter by name prefix.
+            try:
+                self.log.debug("Requesting PyPI.org RPC API for JupyterLab language packs.")
+                jlab_packages = await self.__throttleRequest(
+                    True,
+                    self._rpc_client.browse,
+                    ["Framework :: Jupyter :: JupyterLab"],
+                )
+                extension_names = {p[0] for p in self.__all_packages_cache}
+                self.__all_packages_cache.extend(
+                    p
+                    for p in jlab_packages
+                    if p[0].startswith("jupyterlab-language-pack-") and p[0] not in extension_names
+                )
+            except Exception:
+                self.log.warning("Failed to fetch language packs from PyPI.", exc_info=True)
+
             self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
 
         return self.__all_packages_cache
