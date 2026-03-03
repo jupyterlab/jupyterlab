@@ -22,7 +22,7 @@
 }
 
 .jp-ThemedContainer button:focus-visible {
-  outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
   outline-offset: -1px;
 }
 
