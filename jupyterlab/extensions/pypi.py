@@ -147,6 +147,42 @@ async def _fetch_package_metadata(
         return {}
 
 
+# Known language packs from https://github.com/jupyterlab/language-packs
+# These are not tagged with the prebuilt extension classifier on PyPI,
+# so they are listed explicitly.
+LANGUAGE_PACKS = (
+    "jupyterlab-language-pack-ar-SA",
+    "jupyterlab-language-pack-ca-ES",
+    "jupyterlab-language-pack-cs-CZ",
+    "jupyterlab-language-pack-da-DK",
+    "jupyterlab-language-pack-de-DE",
+    "jupyterlab-language-pack-el-GR",
+    "jupyterlab-language-pack-es-ES",
+    "jupyterlab-language-pack-et-EE",
+    "jupyterlab-language-pack-fi-FI",
+    "jupyterlab-language-pack-fr-FR",
+    "jupyterlab-language-pack-he-IL",
+    "jupyterlab-language-pack-hu-HU",
+    "jupyterlab-language-pack-hy-AM",
+    "jupyterlab-language-pack-id-ID",
+    "jupyterlab-language-pack-it-IT",
+    "jupyterlab-language-pack-ja-JP",
+    "jupyterlab-language-pack-ko-KR",
+    "jupyterlab-language-pack-lt-LT",
+    "jupyterlab-language-pack-nl-NL",
+    "jupyterlab-language-pack-no-NO",
+    "jupyterlab-language-pack-pl-PL",
+    "jupyterlab-language-pack-pt-BR",
+    "jupyterlab-language-pack-ro-RO",
+    "jupyterlab-language-pack-ru-RU",
+    "jupyterlab-language-pack-tr-TR",
+    "jupyterlab-language-pack-uk-UA",
+    "jupyterlab-language-pack-vi-VN",
+    "jupyterlab-language-pack-zh-CN",
+    "jupyterlab-language-pack-zh-TW",
+)
+
+
 class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
 
@@ -395,6 +431,29 @@ class PyPIExtensionManager(ExtensionManager):
 
         return extensions, total_pages
 
+    async def __fetch_latest_version(self, name: str) -> tuple[str, str]:
+        """Fetch the latest version of a package from the PyPI JSON API.
+
+        Args:
+            name: The package name
+        Returns:
+            A (name, version) tuple
+        Raises:
+            Exception: If the version cannot be determined
+        """
+        response = await self._httpx_client.get(
+            self.base_url + f"/{name}/json",
+            headers={"Content-Type": "application/json"},
+        )
+        if response.status_code >= 400:  # noqa PLR2004
+            msg = f"Failed to fetch {name} from PyPI: HTTP {response.status_code}"
+            raise RuntimeError(msg)
+        version = json.loads(response.text).get("info", {}).get("version", "")
+        if not version:
+            msg = f"No version found for {name}"
+            raise RuntimeError(msg)
+        return (name, version)
+
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
             tz=timezone.utc
@@ -406,20 +465,21 @@ class PyPIExtensionManager(ExtensionManager):
                 ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
             )
 
-            # Also include language packs, which use a dedicated classifier.
-            try:
-                self.log.debug("Requesting PyPI.org RPC API for JupyterLab language packs.")
-                language_packs = await self.__throttleRequest(
-                    True,
-                    self._rpc_client.browse,
-                    ["Framework :: Jupyter :: JupyterLab :: Language Pack"],
-                )
-                extension_names = {p[0] for p in self.__all_packages_cache}
-                self.__all_packages_cache.extend(
-                    p for p in language_packs if p[0] not in extension_names
-                )
-            except Exception:
-                self.log.warning("Failed to fetch language packs from PyPI.", exc_info=True)
+            # Also include known language packs.  They are not tagged with the
+            # prebuilt extension classifier so we fetch their latest versions
+            # from the JSON API instead.
+            extension_names = {p[0] for p in self.__all_packages_cache}
+            language_pack_results = await asyncio.gather(
+                *(
+                    self.__fetch_latest_version(name)
+                    for name in LANGUAGE_PACKS
+                    if name not in extension_names
+                ),
+                return_exceptions=True,
+            )
+            for result in language_pack_results:
+                if isinstance(result, tuple):
+                    self.__all_packages_cache.append(result)
 
             self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
 
