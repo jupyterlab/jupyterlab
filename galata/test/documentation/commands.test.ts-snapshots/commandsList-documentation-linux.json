@@ -943,7 +943,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable",
     "shortcuts": [
       "Alt A"
     ],
