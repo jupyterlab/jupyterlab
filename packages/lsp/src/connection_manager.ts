@@ -31,9 +31,7 @@ import type * as protocol from 'vscode-languageserver-protocol';
  * (see JupyterLabWidgetAdapter). Using id_path instead of uri led to documents being overwritten
  * as two identical id_paths could be created for two different notebooks.
  */
-export class DocumentConnectionManager
-  implements ILSPDocumentConnectionManager
-{
+export class DocumentConnectionManager implements ILSPDocumentConnectionManager {
   constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
     this.documents = new Map();

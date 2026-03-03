@@ -33,6 +33,7 @@ jobs:
             suite: jupyterlab
           - browser: chromium
             project: galata
+            suite: galata
             shard: 1
             shards: 2
           - browser: chromium
@@ -42,7 +43,7 @@ jobs:
             shards: 2
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -56,7 +57,7 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Set up browser cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
@@ -95,12 +96,24 @@ jobs:
       - name: Test
         run: |
           cd galata
+          set +e  # we want to move the reports even if we fail
           jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
+          TEST_EXIT_CODE=$?
+          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          BENCHMARK_EXIT_CODE=0
+          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+            BENCHMARK_EXIT_CODE=$?
+            mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           fi
+
+          # mark as failing
+          if [[ $TEST_EXIT_CODE -ne 0 ]] || [[ $BENCHMARK_EXIT_CODE -ne 0 ]]; then
+            exit 1
+          fi
+
       - name: Upload test assets
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
@@ -130,7 +143,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
           pattern: galata-blobs-*
@@ -160,7 +173,7 @@ jobs:
 
       - name: Merge and upload test results
         if: ${{ !cancelled() && steps.check-assets.outputs.count > 0 }}
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
           name: galata-test-assets-merged
@@ -169,7 +182,7 @@ jobs:
 
       - name: Merge blobs and delete individual shards
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
           name: galata-blobs-merged
@@ -191,12 +204,12 @@ jobs:
         python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -220,7 +233,7 @@ jobs:
         working-directory: core
 
       - name: Set up browser cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ steps.pw-version.outputs.version }}
@@ -272,7 +285,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test:doc
+          jlpm run test:doc --reporter github,list,html
         working-directory: core
 
       - name: Upload Galata Test assets
@@ -289,7 +302,7 @@ jobs:
         with:
           name: documentation-report
           path: core/galata/playwright-report
-          if-no-files-found: ignore  # expected when no tests fail (after retries)
+          if-no-files-found: error
 
       - name: Stop JupyterLab
         if: always()

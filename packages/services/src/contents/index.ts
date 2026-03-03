@@ -1917,8 +1917,10 @@ export interface IContentProviderRegistry {
  *
  * @experimental
  */
-export interface IContentProvider
-  extends Pick<Contents.IDrive, 'get' | 'save' | 'sharedModelFactory'> {
+export interface IContentProvider extends Pick<
+  Contents.IDrive,
+  'get' | 'save' | 'sharedModelFactory'
+> {
   /**
    * A signal emitted when a file operation takes place.
    *

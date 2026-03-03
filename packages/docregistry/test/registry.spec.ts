@@ -737,6 +737,30 @@ describe('docregistry/registry', () => {
         expect(customNotebookType.name).toBe('test_ipynb');
       });
 
+      it('should consider both pattern and content type', () => {
+        registry.addFileType({
+          name: 'node_modules_directory',
+          contentType: 'directory',
+          pattern: '^node_modules'
+        });
+
+        registry.addFileType({
+          name: 'node_modules_notebook',
+          contentType: 'notebook',
+          pattern: '^node_modules'
+        });
+        const nodeModuleDirFt = registry.getFileTypeForModel({
+          path: '/foo/node_modules',
+          type: 'directory'
+        });
+        expect(nodeModuleDirFt.name).toBe('node_modules_directory');
+        const nodeModuleNbFt = registry.getFileTypeForModel({
+          path: '/foo/node_modules.ipynb',
+          type: 'notebook'
+        });
+        expect(nodeModuleNbFt.name).toBe('node_modules_notebook');
+      });
+
       it('should handle a python file', () => {
         const ft = registry.getFileTypeForModel({
           name: 'foo.py'

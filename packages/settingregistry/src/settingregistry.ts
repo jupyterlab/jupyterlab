@@ -414,7 +414,7 @@ export class SettingRegistry implements ISettingRegistry {
     await this._ready;
 
     const fetched = await this.connector.fetch(plugin);
-    const plugins = this.plugins; // eslint-disable-line
+    const plugins = this.plugins;
     const registry = this; // eslint-disable-line
 
     if (fetched === undefined) {

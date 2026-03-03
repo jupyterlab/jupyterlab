@@ -191,8 +191,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     rowDelimiter === '\r\n'
       ? [CRLF, 2]
       : rowDelimiter === '\r'
-      ? [CR, 1]
-      : [LF, 1];
+        ? [CR, 1]
+        : [LF, 1];
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;
@@ -397,6 +397,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     i++;
 
     // Update return values based on state.
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (state) {
       case NEW_ROW:
         nrows++;
@@ -470,7 +471,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     }
   }
 
-  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
+  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
 }
 
 /**
@@ -573,5 +574,5 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     currRow = rowEnd + rowDelimiterLength;
   }
 
-  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
+  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
 }

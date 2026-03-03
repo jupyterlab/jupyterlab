@@ -220,8 +220,10 @@ export namespace JupyterFrontEnd {
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
-  export interface IOptions<T extends IShell = IShell, U = any>
-    extends Application.IOptions<T> {
+  export interface IOptions<
+    T extends IShell = IShell,
+    U = any
+  > extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.
      */

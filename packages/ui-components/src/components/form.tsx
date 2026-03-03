@@ -561,10 +561,10 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                 isRoot
                   ? 'jp-root'
                   : schema.type === 'object'
-                  ? 'jp-objectFieldWrapper'
-                  : schema.type === 'array'
-                  ? 'jp-arrayFieldWrapper'
-                  : 'jp-inputFieldWrapper jp-FormGroup-contentItem'
+                    ? 'jp-objectFieldWrapper'
+                    : schema.type === 'array'
+                      ? 'jp-arrayFieldWrapper'
+                      : 'jp-inputFieldWrapper jp-FormGroup-contentItem'
               }`}
             >
               {children}
@@ -605,8 +605,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
  * FormComponent properties
  */
 export interface IFormComponentProps<T = ReadonlyJSONObject>
-  extends FormProps<T>,
-    FormComponent.ILabCustomizerProps {
+  extends FormProps<T>, FormComponent.ILabCustomizerProps {
   /**
    *
    */

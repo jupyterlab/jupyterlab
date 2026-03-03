@@ -200,7 +200,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   ): IEditorLanguage | null {
     const modename = typeof language === 'string' ? language : language.name;
     const mimetype = typeof language !== 'string' ? language.mime : modename;
-    const ext = typeof language !== 'string' ? language.extensions ?? [] : [];
+    const ext = typeof language !== 'string' ? (language.extensions ?? []) : [];
 
     return (
       (modename ? this.findByName(modename) : null) ??
@@ -249,9 +249,13 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
       pos = to;
     });
 
-    if (pos < tree.length - 1) {
-      // No style applied on the trailing text
-      el.appendChild(document.createTextNode(code.slice(pos, tree.length)));
+    if (pos === 0 && code.length > 0) {
+      // No tokens were emitted (e.g., single unrecognized character like 'x')
+      // Render the entire code as plain text fallback
+      el.appendChild(document.createTextNode(code));
+    } else if (pos < code.length) {
+      // Handle any remaining unstyled content
+      el.appendChild(document.createTextNode(code.slice(pos, code.length)));
     }
   }
 

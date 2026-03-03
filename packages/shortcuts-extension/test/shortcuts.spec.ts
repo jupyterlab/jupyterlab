@@ -80,9 +80,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       await settingRegistry.load(bar.id);
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
@@ -193,9 +191,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       });
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
@@ -312,9 +308,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       });
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
@@ -393,9 +387,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       await settingRegistry.load(bar.id);
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
