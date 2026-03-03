@@ -18,6 +18,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-ThemedContainer button {
+  font-family: var(--jp-ui-font-family);
   border-radius: var(--jp-border-radius);
 }
 
