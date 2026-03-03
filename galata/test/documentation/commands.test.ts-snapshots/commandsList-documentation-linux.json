@@ -2579,16 +2579,6 @@
     }
   },
   {
-    "id": "filebrowser:search",
-    "label": "Search on File Names",
-    "caption": "",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
     "id": "filebrowser:select-all",
     "label": "Select All",
     "caption": "",
