@@ -150,8 +150,6 @@ namespace CommandIDs {
   export const toggleSortNotebooksFirst =
     'filebrowser:toggle-sort-notebooks-first';
 
-  export const search = 'filebrowser:search';
-
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
   export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
@@ -1855,17 +1853,6 @@ function addCommands(
           });
       }
     },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.search, {
-    label: trans.__('Search on File Names'),
-    execute: () => alert('search'),
     describedBy: {
       args: {
         type: 'object',
