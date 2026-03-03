@@ -192,6 +192,14 @@ all of MD as it is not optimized for dense, information rich UIs.
     sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 
   /*
+   * DataGrid Fonts
+   *
+   * Data grid needs higher density than other user content to accommodate large data sets.
+   */
+  --jp-datagrid-font-size: 12px;
+  --jp-datagrid-font-family: var(--jp-content-font-family);
+
+  /*
    * Code Fonts
    *
    * Code font variables are used for typography of code and other monospaces content.

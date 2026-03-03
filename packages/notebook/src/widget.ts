@@ -175,7 +175,6 @@ export type NotebookMode = 'command' | 'edit';
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
-  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
@@ -628,6 +627,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     args: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this.removeHeader();
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add': {
         let index = 0;
@@ -2034,7 +2034,8 @@ export class Notebook extends StaticNotebook {
       this._selectionChanged.emit(void 0);
     }
     // Make sure we have a valid active cell.
-    this.activeCellIndex = this.activeCellIndex; // eslint-disable-line
+    // eslint-disable-next-line no-self-assign
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
@@ -3011,6 +3012,7 @@ export class Notebook extends StaticNotebook {
     event.stopPropagation();
 
     // If in select mode, update the selection
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (this._mouseMode) {
       case 'select': {
         const target = event.target as HTMLElement;

@@ -77,6 +77,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       sender: TerminalNS.ITerminalConnection,
       msg: TerminalNS.IMessage
     ): void => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.type) {
         case 'stdout':
           if (msg.content) {
@@ -165,7 +166,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
 
     this._options[option] = value;
-
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (option) {
       case 'fontFamily':
         this._term.options.fontFamily = value as string | undefined;
@@ -436,6 +437,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     sender: TerminalNS.ITerminalConnection,
     msg: TerminalNS.IMessage
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msg.type) {
       case 'stdout':
         if (msg.content) {

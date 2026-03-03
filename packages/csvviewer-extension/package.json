@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer-extension",
-  "version": "4.6.0-alpha.2",
+  "version": "4.6.0-alpha.3",
   "description": "JupyterLab - CSV Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,15 +37,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0-alpha.2",
-    "@jupyterlab/apputils": "^4.7.0-alpha.2",
-    "@jupyterlab/csvviewer": "^4.6.0-alpha.2",
-    "@jupyterlab/docregistry": "^4.6.0-alpha.2",
-    "@jupyterlab/documentsearch": "^4.6.0-alpha.2",
-    "@jupyterlab/mainmenu": "^4.6.0-alpha.2",
-    "@jupyterlab/observables": "^5.6.0-alpha.2",
-    "@jupyterlab/settingregistry": "^4.6.0-alpha.2",
-    "@jupyterlab/translation": "^4.6.0-alpha.2",
+    "@jupyterlab/application": "^4.6.0-alpha.3",
+    "@jupyterlab/apputils": "^4.7.0-alpha.3",
+    "@jupyterlab/csvviewer": "^4.6.0-alpha.3",
+    "@jupyterlab/docregistry": "^4.6.0-alpha.3",
+    "@jupyterlab/documentsearch": "^4.6.0-alpha.3",
+    "@jupyterlab/mainmenu": "^4.6.0-alpha.3",
+    "@jupyterlab/observables": "^5.6.0-alpha.3",
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.3",
+    "@jupyterlab/translation": "^4.6.0-alpha.3",
     "@lumino/datagrid": "^2.5.6",
     "@lumino/widgets": "^2.7.5"
   },
