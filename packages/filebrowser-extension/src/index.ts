@@ -509,7 +509,7 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
         filebrowsermenuDisposables.add(
           app.contextMenu.addItem({
             command: CommandIDs.createNewFile,
-            selector: '.jp-DirListing',
+            selector: '.jp-DirListing-content',
             args: {
               ext: filetype.extensions[0],
               label: trans.__('New %1 File', filetype.displayName),
