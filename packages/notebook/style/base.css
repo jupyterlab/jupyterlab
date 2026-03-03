@@ -517,7 +517,7 @@ div.jp-Cell-Placeholder-content-3 {
 
 .jp-Notebook .jp-scrollbarItem-executionIndicator {
   display: inline-block;
-  font-family: monospace;
+  font-family: var(--jp-cell-prompt-font-family);
   font-size: 80%;
   line-height: 100%;
   margin-left: -1px;
