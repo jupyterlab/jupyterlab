@@ -38,6 +38,7 @@ import {
   IDefaultFileBrowser,
   IFileBrowserCommands,
   IFileBrowserFactory,
+  IFileBrowserRenderer,
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
@@ -304,13 +305,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   description: 'Provides the file browser factory.',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
-  optional: [IStateDB, JupyterLab.IInfo],
+  optional: [IStateDB, JupyterLab.IInfo, IFileBrowserRenderer],
   activate: async (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
     stateDB: IStateDB | null,
-    info: JupyterLab.IInfo | null
+    info: JupyterLab.IInfo | null,
+    renderer: IFileBrowserRenderer | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
     const createFileBrowser = (
@@ -337,7 +339,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
         allowFileUploads: options.allowFileUploads ?? true
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator, state });
+      const widget = new FileBrowser({
+        id,
+        model,
+        restore,
+        translator,
+        state,
+        renderer: options.renderer ?? renderer ?? undefined
+      });
 
       // Track the newly created file browser.
       void tracker.add(widget);

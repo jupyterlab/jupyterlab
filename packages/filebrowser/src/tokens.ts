@@ -5,6 +5,7 @@ import type { WidgetTracker } from '@jupyterlab/apputils';
 import type { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import type { FileBrowser } from './browser';
+import type { DirListing } from './listing';
 
 /**
  * The file browser factory token.
@@ -22,6 +23,16 @@ export const IFileBrowserFactory = new Token<IFileBrowserFactory>(
 export const IDefaultFileBrowser = new Token<IDefaultFileBrowser>(
   '@jupyterlab/filebrowser:IDefaultFileBrowser',
   'A service for the default file browser.'
+);
+
+/**
+ * The file browser renderer token.
+ */
+export interface IFileBrowserRenderer extends DirListing.IRenderer {}
+
+export const IFileBrowserRenderer = new Token<IFileBrowserRenderer>(
+  '@jupyterlab/filebrowser:IFileBrowserRenderer',
+  'A service for overriding the default file browser directory listing renderer.'
 );
 
 /**
@@ -120,6 +131,15 @@ export namespace IFileBrowserFactory {
      * Whether to allow file uploads. Defaults to `true`.
      */
     allowFileUploads?: boolean;
+
+    /**
+     * An optional renderer for the directory listing area.
+     *
+     * #### Notes
+     * If not provided, the app-level file browser renderer service
+     * (if available) will be used.
+     */
+    renderer?: DirListing.IRenderer;
   }
 }
 
