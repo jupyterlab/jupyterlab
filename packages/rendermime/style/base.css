@@ -228,10 +228,8 @@
   line-height: var(--jp-content-line-height);
 }
 
-/* Left-justify outputs.*/
 .jp-OutputArea-output.jp-RenderedLatex {
   padding: var(--jp-code-padding);
-  text-align: left;
 }
 
 /*-----------------------------------------------------------------------------
