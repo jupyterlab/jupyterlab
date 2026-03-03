@@ -2611,8 +2611,8 @@
     }
   },
   {
-    "id": "filebrowser:toggle-file-checkboxes",
-    "label": "Show File Checkboxes",
+    "id": "filebrowser:toggle-date-created",
+    "label": "Show Date Created Column",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -2621,8 +2621,8 @@
     }
   },
   {
-    "id": "filebrowser:toggle-date-created",
-    "label": "Show Date Created Column",
+    "id": "filebrowser:toggle-file-checkboxes",
+    "label": "Show File Checkboxes",
     "caption": "",
     "shortcuts": [],
     "args": {
