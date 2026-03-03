@@ -196,7 +196,7 @@
 
 .jp-DirListing-headerItem.jp-id-created:not([style*='width']) {
   /* default width before user resizes this column */
-  flex: 0.5 0 70px;
+  flex: 1 0 70px;
 }
 
 /**
