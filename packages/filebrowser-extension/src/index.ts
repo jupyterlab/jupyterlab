@@ -36,9 +36,9 @@ import {
   FilterFileBrowserModel,
   formatFileSize,
   IDefaultFileBrowser,
+  IDefaultFileBrowserRenderer,
   IFileBrowserCommands,
   IFileBrowserFactory,
-  IFileBrowserRenderer,
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
@@ -305,14 +305,13 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   description: 'Provides the file browser factory.',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
-  optional: [IStateDB, JupyterLab.IInfo, IFileBrowserRenderer],
+  optional: [IStateDB, JupyterLab.IInfo],
   activate: async (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
     stateDB: IStateDB | null,
-    info: JupyterLab.IInfo | null,
-    renderer: IFileBrowserRenderer | null
+    info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
     const createFileBrowser = (
@@ -345,7 +344,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
         restore,
         translator,
         state,
-        renderer: options.renderer ?? renderer ?? undefined
+        renderer: options.renderer
       });
 
       // Track the newly created file browser.
@@ -366,14 +365,21 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
-  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell, ITranslator],
+  optional: [
+    IRouter,
+    JupyterFrontEnd.ITreeResolver,
+    ILabShell,
+    ITranslator,
+    IDefaultFileBrowserRenderer
+  ],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    renderer: IDefaultFileBrowserRenderer | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -381,7 +387,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
-      restore: false
+      restore: false,
+      renderer: renderer ?? undefined
     });
 
     // Set attributes when adding the browser to the UI

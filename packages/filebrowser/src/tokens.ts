@@ -26,14 +26,15 @@ export const IDefaultFileBrowser = new Token<IDefaultFileBrowser>(
 );
 
 /**
- * The file browser renderer token.
+ * The default file browser renderer token.
  */
-export interface IFileBrowserRenderer extends DirListing.IRenderer {}
+export interface IDefaultFileBrowserRenderer extends DirListing.IRenderer {}
 
-export const IFileBrowserRenderer = new Token<IFileBrowserRenderer>(
-  '@jupyterlab/filebrowser:IFileBrowserRenderer',
-  'A service for overriding the default file browser directory listing renderer.'
-);
+export const IDefaultFileBrowserRenderer =
+  new Token<IDefaultFileBrowserRenderer>(
+    '@jupyterlab/filebrowser:IDefaultFileBrowserRenderer',
+    'A service for overriding the default file browser directory listing renderer.'
+  );
 
 /**
  * Default file browser type.
@@ -136,8 +137,7 @@ export namespace IFileBrowserFactory {
      * An optional renderer for the directory listing area.
      *
      * #### Notes
-     * If not provided, the app-level file browser renderer service
-     * (if available) will be used.
+     * If not provided, the default renderer will be used.
      */
     renderer?: DirListing.IRenderer;
   }
