@@ -848,6 +848,20 @@ describe('filebrowser/listing', () => {
       const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
       const CREATED_ID_CLASS = 'jp-id-created';
 
+      beforeEach(async () => {
+        // Assign each file a distinct `created` timestamp so sort tests have
+        // deterministic, unambiguous data to work with.
+        const items = [...dirListing.sortedItems()].filter(
+          i => i.type !== 'directory'
+        );
+        const contents = dirListing.model.manager.services.contents;
+        for (let i = 0; i < items.length; i++) {
+          const created = new Date(2020 + i, 0, 1).toISOString();
+          await contents.save(items[i].path, { created } as any);
+        }
+        await signalToPromise(dirListing.updated);
+      });
+
       it('should be hidden by default', () => {
         const headerNode = dirListing.headerNode;
         const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
@@ -923,10 +937,7 @@ describe('filebrowser/listing', () => {
         for (let i = 1; i < itemsAsc.length; i++) {
           const prevCreated = Date.parse(itemsAsc[i - 1].created ?? '');
           const currCreated = Date.parse(itemsAsc[i].created ?? '');
-          // Skip comparison if either date is invalid
-          if (Number.isFinite(prevCreated) && Number.isFinite(currCreated)) {
-            expect(prevCreated).toBeGreaterThanOrEqual(currCreated);
-          }
+          expect(prevCreated).toBeGreaterThanOrEqual(currCreated);
         }
       });
 
@@ -946,10 +957,7 @@ describe('filebrowser/listing', () => {
         for (let i = 1; i < itemsDesc.length; i++) {
           const prevCreated = Date.parse(itemsDesc[i - 1].created ?? '');
           const currCreated = Date.parse(itemsDesc[i].created ?? '');
-          // Skip comparison if either date is invalid
-          if (Number.isFinite(prevCreated) && Number.isFinite(currCreated)) {
-            expect(prevCreated).toBeLessThanOrEqual(currCreated);
-          }
+          expect(prevCreated).toBeLessThanOrEqual(currCreated);
         }
       });
 
@@ -960,7 +968,6 @@ describe('filebrowser/listing', () => {
         });
         await signalToPromise(dirListing.updated);
         const itemsAsc = [...dirListing.sortedItems()];
-        const itemsAscNames = itemsAsc.map(i => i.name);
 
         dirListing.sort({
           direction: 'descending',
@@ -968,40 +975,16 @@ describe('filebrowser/listing', () => {
         });
         await signalToPromise(dirListing.updated);
         const itemsDesc = [...dirListing.sortedItems()];
-        const itemsDescNames = itemsDesc.map(i => i.name);
 
-        // Ascending and descending should produce reverse orders
-        // (excluding directories which are always sorted first)
-        expect(itemsAscNames.length).toBe(itemsDescNames.length);
-        expect(itemsAscNames.length).toBeGreaterThan(0);
-
-        // Count actual directories from the model data
+        // Directories are always pinned first; compare only non-directory items.
         const dirCount = itemsAsc.filter(i => i.type === 'directory').length;
+        const ascNonDirNames = itemsAsc.slice(dirCount).map(i => i.name);
+        const descNonDirNames = itemsDesc.slice(dirCount).map(i => i.name);
 
-        // Verify the non-directory items are actually reversed
-        // Directories are always first, so compare items after directories
-        const ascNonDirs = itemsAsc.slice(dirCount);
-        const descNonDirs = itemsDesc.slice(dirCount);
-        const ascNonDirNames = ascNonDirs.map(i => i.name);
-        const descNonDirNames = descNonDirs.map(i => i.name);
-
-        // Check if items have different created dates
-        // If all dates are the same/invalid, items fall back to alphabetical sort
-        const ascDates = ascNonDirs.map(i => Date.parse(i.created ?? ''));
-        const hasDistinctDates =
-          ascDates.length > 1 &&
-          ascDates.some(
-            (d, i) => i > 0 && Number.isFinite(d) && d !== ascDates[i - 1]
-          );
-
-        if (ascNonDirNames.length > 1 && hasDistinctDates) {
-          // Only expect reversal when items have different valid dates
-          // Use spread to avoid mutating descNonDirNames
-          expect(ascNonDirNames).toEqual([...descNonDirNames].reverse());
-        } else {
-          // When dates are identical, both directions fall back to alphabetical
-          expect(ascNonDirNames).toEqual(descNonDirNames);
-        }
+        // The beforeEach guarantees distinct created dates, so ascending and
+        // descending must produce strictly reversed orderings.
+        expect(ascNonDirNames.length).toBeGreaterThan(1);
+        expect(ascNonDirNames).toEqual([...descNonDirNames].reverse());
       });
 
       it('should produce stable sort order when sorted multiple times', async () => {
