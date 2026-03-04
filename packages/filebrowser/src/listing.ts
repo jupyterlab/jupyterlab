@@ -3451,22 +3451,22 @@ export namespace DirListing {
         nameColumn.insertAdjacentElement('afterend', modified);
       }
 
-      const showFileSize = !hiddenColumns?.has('file_size');
-      if (fileSize && !showFileSize) {
-        node.removeChild(fileSize);
-      } else if (showFileSize && !fileSize) {
-        fileSize = this.itemFactories.file_size();
-        (modified ?? nameColumn).insertAdjacentElement('afterend', fileSize);
-      }
-
       const showCreated = !hiddenColumns?.has('date_created');
       if (created && !showCreated) {
         node.removeChild(created);
       } else if (showCreated && !created) {
         created = this.itemFactories.date_created();
-        const insertAfter = fileSize ?? modified ?? nameColumn;
+        (modified ?? nameColumn).insertAdjacentElement('afterend', created);
+      }
+
+      const showFileSize = !hiddenColumns?.has('file_size');
+      if (fileSize && !showFileSize) {
+        node.removeChild(fileSize);
+      } else if (showFileSize && !fileSize) {
+        fileSize = this.itemFactories.file_size();
+        const insertAfter = created ?? modified ?? nameColumn;
         if (insertAfter) {
-          insertAfter.insertAdjacentElement('afterend', created);
+          insertAfter.insertAdjacentElement('afterend', fileSize);
         }
       }
 
