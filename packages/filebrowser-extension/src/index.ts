@@ -275,7 +275,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean | string;
-            (browser as any)[key] = value;
+            browser[key] = value;
           }
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
