@@ -8,8 +8,14 @@
       {
         "id": "jp-mainmenu-kernel",
         "items": [
-          { "type": "separator", "rank": 1.2 },
-          { "command": "debugger:restart-debug", "rank": 1.2 }
+          {
+            "type": "separator",
+            "rank": 1.2
+          },
+          {
+            "command": "debugger:restart-debug",
+            "rank": 1.2
+          }
         ]
       },
       {
@@ -114,6 +120,12 @@
       "description": "A regular expression filter to apply by default when showing the kernel sources",
       "type": "string",
       "default": ""
+    },
+    "hideNativeFilteredKernelSources": {
+      "title": "Hide native filtered kernel sources",
+      "description": "If true, apply the filter automatically.",
+      "type": "boolean",
+      "default": false
     },
     "autoCollapseDebuggerSidebar": {
       "title": "Auto Collapse Debugger Sidebar",

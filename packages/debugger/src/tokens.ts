@@ -1068,6 +1068,11 @@ export namespace IDebugger {
       filter: string;
 
       /**
+       * Whether to hide native sources.
+       */
+      hideNativeSources: boolean;
+
+      /**
        * Signal emitted when the kernel sources have changed.
        */
       readonly changed: ISignal<
