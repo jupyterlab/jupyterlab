@@ -202,7 +202,7 @@ ensured-targets = [
     "jupyterlab/schemas/@jupyterlab/shortcuts-extension/shortcuts.json",
     "jupyterlab/themes/@jupyterlab/theme-light-extension/index.css"
 ]
-install-pre-commit-hook = false
+install-pre-commit-hook = true
 
 [tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
 build_cmd = "build"
