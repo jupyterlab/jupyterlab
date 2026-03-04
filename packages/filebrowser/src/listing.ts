@@ -3271,7 +3271,12 @@ export namespace DirListing {
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle,
       timestampFormat: Time.TimestampFormat = 'absolute'
+      
     ): void {
+      // Formatting dates is expensive (0.1-0.2ms per call,
+      // so over 150 files can easily already choke the renderer),
+      // let's do the bare minimum check of comparing if an update
+      // is needed using a last update cache:
       const previousUpdate = this._modifiedColumnLastUpdate.get(modified);
       if (
         previousUpdate?.date === modifiedDate &&
@@ -3282,6 +3287,7 @@ export namespace DirListing {
       }
 
       const parsedDate = new Date(modifiedDate);
+      // Render the date in one of multiple formats, depending on the container's size
       const modText = Time.formatTimestamp(
         parsedDate,
         timestampFormat,
