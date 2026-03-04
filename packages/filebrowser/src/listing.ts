@@ -3271,7 +3271,7 @@ export namespace DirListing {
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle,
       timestampFormat: Time.TimestampFormat = 'absolute'
-      
+
     ): void {
       // Formatting dates is expensive (0.1-0.2ms per call,
       // so over 150 files can easily already choke the renderer),
