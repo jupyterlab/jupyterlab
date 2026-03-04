@@ -243,7 +243,7 @@ jobs:
           OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Note: any changes to dependency pins need should
+          # Note: any changes to dependency pins need to
           # be done by updating the [docs-screenshots] group.
           bash ./scripts/ci_install.sh
         working-directory: core
