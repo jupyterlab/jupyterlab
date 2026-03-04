@@ -180,23 +180,23 @@
   flex: 1 0 70px;
 }
 
+.jp-DirListing-headerItem.jp-id-created:not([style*='width']) {
+  /* default width before user resizes this column */
+  flex: 1 0 70px;
+}
+
 .jp-DirListing-headerItem.jp-id-filesize:not([style*='width']) {
   /* default width before user resizes this column */
   flex: 0 0 75px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified,
-.jp-DirListing-headerItem.jp-id-filesize,
-.jp-DirListing-headerItem.jp-id-created {
+.jp-DirListing-headerItem.jp-id-created,
+.jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
   /* stylelint-disable */
   container-type: inline-size;
   /* stylelint-enable */
-}
-
-.jp-DirListing-headerItem.jp-id-created:not([style*='width']) {
-  /* default width before user resizes this column */
-  flex: 1 0 70px;
 }
 
 /**
