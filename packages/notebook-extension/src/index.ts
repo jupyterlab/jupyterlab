@@ -14,6 +14,7 @@ import type {
 import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
+  CommandToolbarButton,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -108,6 +109,7 @@ import {
   copyIcon,
   cutIcon,
   duplicateIcon,
+  editIcon,
   fastForwardIcon,
   IFormRendererRegistry,
   moveDownIcon,
@@ -313,6 +315,8 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
+
+  export const jumpToLastFocused = 'notebook:jump-to-last-focused';
 
   export const replaceSelection = 'notebook:replace-selection';
 
@@ -924,7 +928,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
   description: 'Adds table of content capability to the notebooks',
-  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
+  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer, ILabShell],
   optional: [IMarkdownParser, ISettingRegistry],
   autoStart: true,
   activate: (
@@ -932,11 +936,31 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
     sanitizer: IRenderMime.ISanitizer,
+    labShell: ILabShell,
     mdParser: IMarkdownParser | null,
     settingRegistry: ISettingRegistry | null
   ): void => {
     const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
     tocRegistry.add(nbTocFactory);
+    app.restored.then(() => {
+      const tocWidget = Array.from(labShell.widgets('left')).find(
+        w => w.id === 'table-of-contents'
+      );
+
+      if (tocWidget && (tocWidget as any).toolbar) {
+        (tocWidget as any).toolbar.addItem(
+          'jump-to-last-focused',
+          new CommandToolbarButton({
+            commands: app.commands,
+            id: CommandIDs.jumpToLastFocused,
+            icon: editIcon,
+            label: '',
+            caption: 'Jump to Last Focused Cell'
+          })
+        );
+      }
+    });
+
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
         .then(([_, setting]) => {
@@ -1263,7 +1287,7 @@ function activateNotebookTools(
   if (inspectorProvider) {
     tracker.widgetAdded.connect((sender, panel) => {
       const inspector = inspectorProvider.register(panel);
-      inspector.render(notebookTools);
+      void inspector.render(notebookTools);
     });
   }
 
@@ -1801,6 +1825,47 @@ function activateNotebookHandler(
 
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  // Jump to Last Focused
+  const jumpHistory = new WeakMap<Notebook, number>();
+
+  tracker.widgetAdded.connect((sender, panel) => {
+    const notebook = panel.content;
+    let currentIndex = notebook.activeCellIndex;
+
+    notebook.activeCellChanged.connect(() => {
+      const newIndex = notebook.activeCellIndex;
+      if (newIndex !== currentIndex) {
+        jumpHistory.set(notebook, currentIndex);
+        currentIndex = newIndex;
+      }
+    });
+  });
+
+  commands.addCommand(CommandIDs.jumpToLastFocused, {
+    label: trans.__('Jump to Last Focused Cell'),
+    icon: editIcon,
+    execute: () => {
+      const currentWidget = tracker.currentWidget;
+      if (!currentWidget) {
+        return;
+      }
+
+      const notebook = currentWidget.content;
+      const previousIndex = jumpHistory.get(notebook);
+
+      if (
+        previousIndex !== undefined &&
+        previousIndex >= 0 &&
+        notebook.model &&
+        previousIndex < notebook.model.cells.length
+      ) {
+        notebook.activeCellIndex = previousIndex;
+        const cell = notebook.widgets[previousIndex];
+        void notebook.scrollToCell(cell);
+      }
+    }
+  });
 
   // Use the router to deal with hash navigation
   function onRouted(router: IRouter, location: IRouter.ILocation): void {
@@ -4628,7 +4693,8 @@ function populatePalette(
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
-    CommandIDs.virtualScrollbar
+    CommandIDs.virtualScrollbar,
+    CommandIDs.jumpToLastFocused
   ].forEach(command => {
     palette.addItem({ command, category });
   });
