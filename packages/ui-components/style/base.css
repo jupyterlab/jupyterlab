@@ -50,8 +50,7 @@
 }
 
 /* Utility class for content that should only be available to screen readers. */
-.jp-sr-only,
-.sr-only {
+.jp-sr-only {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
