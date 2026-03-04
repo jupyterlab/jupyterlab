@@ -1780,12 +1780,11 @@ function addCommands(
     execute: () => {
       const value = !browser.showDateCreatedColumn;
       const key = 'showDateCreatedColumn';
-      // Silent no-op when settingRegistry unavailable, consistent with other toggle commands
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
-          .catch((reason: unknown) => {
-            console.error(`Failed to set ${key} setting:`, reason);
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
           });
       }
     },
