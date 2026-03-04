@@ -354,8 +354,9 @@ export class DirListing extends Widget {
       this.translator
     );
     this._sortState = state;
+    this._renderer.updateSortIndicator(this.headerNode, state);
     this.update();
-    this._saveSortState();
+    this._saveState();
   }
 
   /**
@@ -576,6 +577,17 @@ export class DirListing extends Widget {
         | Record<DirListing.IColumn['id'], number | null>
         | undefined;
 
+      const sortState = (columns as ReadonlyJSONObject)[
+        'sortState'
+      ] as unknown as DirListing.ISortState | undefined;
+
+      // Set sort state before updating column sizes so that any
+      // state save triggered by _updateColumnSizes includes the
+      // correct sort state rather than the default.
+      if (sortState) {
+        this._sortState = sortState;
+      }
+
       if (sizes) {
         for (const [key, size] of Object.entries(sizes)) {
           this._columnSizes[key as DirListing.IColumn['id']] = size;
@@ -583,12 +595,18 @@ export class DirListing extends Widget {
         this._updateColumnSizes();
       }
 
-      const sortState = (columns as ReadonlyJSONObject)[
-        'sortState'
-      ] as unknown as DirListing.ISortState | undefined;
-
+      // Sort items and update header indicator without calling
+      // sort() to avoid a redundant state save.
       if (sortState) {
-        this.sort(sortState);
+        this._sortedItems = Private.sort(
+          this.model.items(),
+          sortState,
+          this._sortNotebooksFirst,
+          this._sortFileNamesNaturally,
+          this.translator
+        );
+        this._renderer.updateSortIndicator(this.headerNode, sortState);
+        this.update();
       }
     } catch (error) {
       await state.remove(key);
@@ -597,9 +615,9 @@ export class DirListing extends Widget {
   private _stateColumnsKey: string;
 
   /**
-   * Save the current sort state to the state database.
+   * Save the current column sizes and sort state to the state database.
    */
-  private _saveSortState(): void {
+  private _saveState(): void {
     if (this._state && this._stateColumnsKey) {
       void this._state.save(this._stateColumnsKey, {
         sizes: this._columnSizes,
@@ -1316,12 +1334,7 @@ export class DirListing extends Widget {
       }
     }
 
-    if (this._state && this._stateColumnsKey) {
-      void this._state.save(this._stateColumnsKey, {
-        sizes: this._columnSizes,
-        sortState: { ...this._sortState }
-      });
-    }
+    this._saveState();
   }
 
   private get _visibleColumns() {
@@ -2834,6 +2847,18 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null;
 
     /**
+     * Update the header sort indicator to reflect the given sort state.
+     *
+     * @param node - The header node to update.
+     *
+     * @param sortState - The sort state to reflect in the header.
+     */
+    updateSortIndicator(
+      node: HTMLElement,
+      sortState: ISortState
+    ): void;
+
+    /**
      * Create a new item node for a dir listing.
      *
      * @returns A new DOM node to use as a content item.
@@ -3156,6 +3181,13 @@ export namespace DirListing {
      *
      * @param sortState - The sort state to reflect in the header.
      */
+    updateSortIndicator(
+      node: HTMLElement,
+      sortState: DirListing.ISortState
+    ): void {
+      this._updateSortIndicator(node, sortState);
+    }
+
     private _updateSortIndicator(
       node: HTMLElement,
       sortState: DirListing.ISortState
