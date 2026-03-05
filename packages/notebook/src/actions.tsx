@@ -45,6 +45,8 @@ import type { INotebookCellExecutor } from './tokens';
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
+const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
 
 export class KernelError extends Error {
   /**
@@ -146,10 +148,20 @@ export class NotebookActions {
  * A namespace for `NotebookActions` static methods.
  */
 export namespace NotebookActions {
+  function notifyReadOnlyAction(
+    message: string,
+    translator?: ITranslator
+  ): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(trans.__(message));
+  }
+
   /**
    * Split the active cell into two or more cells.
    *
    * @param notebook The target notebook widget.
+   *
+   * @param translator - Application translator.
    *
    * #### Notes
    * It will preserve the existing mode.
@@ -165,11 +177,15 @@ export namespace NotebookActions {
    * This action can be undone.
    * The original cell is preserved to maintain kernel connections.
    */
-  export function splitCell(notebook: Notebook): void {
+  export function splitCell(
+    notebook: Notebook,
+    translator?: ITranslator
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
     if (notebook.activeCell.model.getMetadata('editable') === false) {
+      notifyReadOnlyAction(READ_ONLY_SPLIT_ERROR, translator);
       return;
     }
 
@@ -308,6 +324,8 @@ export namespace NotebookActions {
    * @param addExtraLine - Whether to add an extra newline between merged cell contents
    *    (true, default) or use only a single newline (false).
    *
+   * @param translator - Application translator.
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -320,7 +338,8 @@ export namespace NotebookActions {
   export function mergeCells(
     notebook: Notebook,
     mergeAbove: boolean = false,
-    addExtraLine: boolean = true
+    addExtraLine: boolean = true,
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -358,6 +377,7 @@ export namespace NotebookActions {
     });
 
     if (hasReadOnlyCell) {
+      notifyReadOnlyAction(READ_ONLY_MERGE_ERROR, translator);
       return;
     }
 
@@ -372,6 +392,7 @@ export namespace NotebookActions {
         if (
           notebook.widgets[active - 1].model.getMetadata('editable') === false
         ) {
+          notifyReadOnlyAction(READ_ONLY_MERGE_ERROR, translator);
           return;
         }
         // Otherwise merge with the previous cell.
@@ -387,6 +408,7 @@ export namespace NotebookActions {
         if (
           notebook.widgets[active + 1].model.getMetadata('editable') === false
         ) {
+          notifyReadOnlyAction(READ_ONLY_MERGE_ERROR, translator);
           return;
         }
         // Otherwise merge with the next cell.

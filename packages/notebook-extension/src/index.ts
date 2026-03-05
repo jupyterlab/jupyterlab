@@ -3384,7 +3384,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.splitCell(current.content);
+        return NotebookActions.splitCell(current.content, translator);
       }
     },
     isEnabled,
@@ -3404,7 +3404,12 @@ function addCommands(
         const addExtraLine =
           (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
-        return NotebookActions.mergeCells(current.content, false, addExtraLine);
+        return NotebookActions.mergeCells(
+          current.content,
+          false,
+          addExtraLine,
+          translator
+        );
       }
     },
     isEnabled,
@@ -3424,7 +3429,12 @@ function addCommands(
         const addExtraLine =
           (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
-        return NotebookActions.mergeCells(current.content, true, addExtraLine);
+        return NotebookActions.mergeCells(
+          current.content,
+          true,
+          addExtraLine,
+          translator
+        );
       }
     },
     isEnabled,
@@ -3444,7 +3454,12 @@ function addCommands(
         const addExtraLine =
           (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
-        return NotebookActions.mergeCells(current.content, false, addExtraLine);
+        return NotebookActions.mergeCells(
+          current.content,
+          false,
+          addExtraLine,
+          translator
+        );
       }
     },
     isEnabled,
