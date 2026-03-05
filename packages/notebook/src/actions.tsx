@@ -146,14 +146,23 @@ export class NotebookActions {
  * A namespace for `NotebookActions` static methods.
  */
 export namespace NotebookActions {
+  const READ_ONLY_ACTION_AUTO_CLOSE = 5000;
+
   function notifySplitReadOnlyAction(translator?: ITranslator): void {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
-    Notification.error(trans.__('The cell is read-only and cannot be split.'));
+    Notification.error(trans.__('The cell is read-only and cannot be split.'), {
+      autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+    });
   }
 
   function notifyMergeReadOnlyAction(translator?: ITranslator): void {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
-    Notification.error(trans.__('The cell is read-only and cannot be merged.'));
+    Notification.error(
+      trans.__('The cell is read-only and cannot be merged.'),
+      {
+        autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+      }
+    );
   }
 
   /**

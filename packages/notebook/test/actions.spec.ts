@@ -37,6 +37,7 @@ import uncoalescedOp from './uncoalesced_op.json';
 const ERROR_INPUT = 'a = foo';
 const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
 const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
+const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
@@ -49,7 +50,9 @@ function withNotificationError(action: () => void, message: string): void {
   try {
     action();
     expect(notificationError).toHaveBeenCalledTimes(1);
-    expect(notificationError).toHaveBeenCalledWith(message);
+    expect(notificationError).toHaveBeenCalledWith(message, {
+      autoClose: READ_ONLY_NOTIFICATION_AUTO_CLOSE
+    });
   } finally {
     notificationError.mockRestore();
   }
