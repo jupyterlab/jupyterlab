@@ -46,6 +46,7 @@ showDialog({
 
 :::{note}
 If no options are specified, the dialog will only contain _OK_ and _Cancel_ buttons.
+:::
 
 ### Dialog Button Helpers and Defaults
 
