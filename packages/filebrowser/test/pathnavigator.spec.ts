@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { simulate } from 'simulate-event';
+import { Widget } from '@lumino/widgets';
 import { PathNavigator } from '../src/pathnavigator';
 
 const flushPromises = (): Promise<void> =>
@@ -30,8 +31,7 @@ function makeNavigator(overrides: Partial<PathNavigator.IOptions> = {}): {
     ...overrides
   });
 
-  document.body.appendChild(navigator.node);
-  navigator.attach();
+  Widget.attach(navigator, document.body);
 
   return { navigator, navigated, counts };
 }
@@ -71,7 +71,7 @@ describe('PathNavigator', () => {
     });
   });
 
-  describe('#attach() / #detach()', () => {
+  describe('#onAfterAttach() / #onBeforeDetach()', () => {
     it('should respond to trigger click after attach', () => {
       const { navigator, counts } = makeNavigator();
       simulate(triggerEl(navigator), 'click');
@@ -80,7 +80,7 @@ describe('PathNavigator', () => {
 
     it('should not respond to trigger click after detach', () => {
       const { navigator, counts } = makeNavigator();
-      navigator.detach();
+      Widget.detach(navigator);
       simulate(triggerEl(navigator), 'click');
       expect(counts.activated).toBe(0);
     });

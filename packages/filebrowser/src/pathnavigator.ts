@@ -4,6 +4,8 @@
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { editIcon } from '@jupyterlab/ui-components';
+import type { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 
 /**
  * we cache per directory; in case the filesystem change below us, we refresh
@@ -15,13 +17,16 @@ const PATHNAVIGATOR_CLASS = 'jp-PathNavigator';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 
 /**
- * A component that renders a path input with directory autocomplete for quick
+ * A widget that renders a path input with directory autocomplete for quick
  * navigation. It owns a trigger button, a text input, and a suggestions
  * dropdown.
  *
  */
-export class PathNavigator {
+export class PathNavigator extends Widget {
   constructor(options: PathNavigator.IOptions) {
+    super({ node: document.createElement('span') });
+    this.addClass(PATHNAVIGATOR_CLASS);
+
     this._options = options;
     this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
 
@@ -39,19 +44,9 @@ export class PathNavigator {
     this._suggestionsNode.className = PATHNAVIGATOR_SUGGESTIONS_CLASS;
     this._suggestionsNode.style.display = 'none';
 
-    this._node = document.createElement('span');
-    this._node.className = PATHNAVIGATOR_CLASS;
-    this._node.appendChild(this._triggerNode);
-    this._node.appendChild(this._inputNode);
-    this._node.appendChild(this._suggestionsNode);
-  }
-
-  /**
-   * The root node containing the adder button, input, and suggestions dropdown.
-   * Append this single node to the DOM.
-   */
-  get node(): HTMLElement {
-    return this._node;
+    this.node.appendChild(this._triggerNode);
+    this.node.appendChild(this._inputNode);
+    this.node.appendChild(this._suggestionsNode);
   }
 
   /**
@@ -62,9 +57,10 @@ export class PathNavigator {
   }
 
   /**
-   * Attach DOM event listeners.
+   * A message handler invoked on an `'after-attach'` message.
    */
-  attach(): void {
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
     this._triggerNode.addEventListener('click', this._enterInputMode);
     this._inputNode.addEventListener('input', this);
     this._inputNode.addEventListener('keydown', this);
@@ -74,14 +70,15 @@ export class PathNavigator {
   }
 
   /**
-   * Remove DOM event listeners.
+   * A message handler invoked on a `'before-detach'` message.
    */
-  detach(): void {
+  protected onBeforeDetach(msg: Message): void {
     this._triggerNode.removeEventListener('click', this._enterInputMode);
     this._inputNode.removeEventListener('input', this);
     this._inputNode.removeEventListener('keydown', this);
     this._inputNode.removeEventListener('blur', this);
     this._suggestionsNode.removeEventListener('mousedown', this);
+    super.onBeforeDetach(msg);
   }
 
   handleEvent(event: Event): void {
@@ -335,7 +332,6 @@ export class PathNavigator {
 
   private _options: PathNavigator.IOptions;
   private _trans: TranslationBundle;
-  private _node: HTMLElement;
   private _triggerNode: HTMLElement;
   private _inputNode: HTMLInputElement;
   private _suggestionsNode: HTMLElement;

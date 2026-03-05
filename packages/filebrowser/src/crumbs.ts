@@ -16,6 +16,7 @@ import { JSONExt } from '@lumino/coreutils';
 import { Throttler } from '@lumino/polling';
 import type { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import type { FileBrowserModel } from './model';
 
@@ -216,13 +217,14 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragover', this);
     this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
-    this._pathNavigator.attach();
+    MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.AfterAttach);
   }
 
   /**
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
+    MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.BeforeDetach);
     super.onBeforeDetach(msg);
     const node = this.node;
     node.removeEventListener('click', this);
@@ -231,7 +233,6 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
     this._resizeObserver.unobserve(node);
-    this._pathNavigator.detach();
   }
 
   /**
