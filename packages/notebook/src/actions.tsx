@@ -45,8 +45,6 @@ import type { INotebookCellExecutor } from './tokens';
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
-const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
-const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
 
 export class KernelError extends Error {
   /**
@@ -148,12 +146,14 @@ export class NotebookActions {
  * A namespace for `NotebookActions` static methods.
  */
 export namespace NotebookActions {
-  function notifyReadOnlyAction(
-    message: string,
-    translator?: ITranslator
-  ): void {
+  function notifySplitReadOnlyAction(translator?: ITranslator): void {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
-    Notification.error(trans.__(message));
+    Notification.error(trans.__('The cell is read-only and cannot be split.'));
+  }
+
+  function notifyMergeReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(trans.__('The cell is read-only and cannot be merged.'));
   }
 
   /**
@@ -185,7 +185,7 @@ export namespace NotebookActions {
       return;
     }
     if (notebook.activeCell.model.getMetadata('editable') === false) {
-      notifyReadOnlyAction(READ_ONLY_SPLIT_ERROR, translator);
+      notifySplitReadOnlyAction(translator);
       return;
     }
 
@@ -377,7 +377,7 @@ export namespace NotebookActions {
     });
 
     if (hasReadOnlyCell) {
-      notifyReadOnlyAction(READ_ONLY_MERGE_ERROR, translator);
+      notifyMergeReadOnlyAction(translator);
       return;
     }
 
@@ -392,7 +392,7 @@ export namespace NotebookActions {
         if (
           notebook.widgets[active - 1].model.getMetadata('editable') === false
         ) {
-          notifyReadOnlyAction(READ_ONLY_MERGE_ERROR, translator);
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the previous cell.
@@ -408,7 +408,7 @@ export namespace NotebookActions {
         if (
           notebook.widgets[active + 1].model.getMetadata('editable') === false
         ) {
-          notifyReadOnlyAction(READ_ONLY_MERGE_ERROR, translator);
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the next cell.

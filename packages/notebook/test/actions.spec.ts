@@ -413,10 +413,12 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if the active cell is not editable', () => {
         const source = widget.activeCell!.model.sharedModel.getSource();
         const count = widget.widgets.length;
-        widget.activeCell!.model.setMetadata('editable', false);
-        NotebookActions.mergeCells(widget);
-        expect(widget.widgets.length).toBe(count);
-        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
       });
 
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
