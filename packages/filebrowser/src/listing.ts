@@ -2853,10 +2853,7 @@ export namespace DirListing {
      *
      * @param sortState - The sort state to reflect in the header.
      */
-    updateSortIndicator?(
-      node: HTMLElement,
-      sortState: ISortState
-    ): void;
+    updateSortIndicator?(node: HTMLElement, sortState: ISortState): void;
 
     /**
      * Create a new item node for a dir listing.
