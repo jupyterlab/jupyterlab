@@ -169,6 +169,34 @@ describe('completer/inline', () => {
             .map(selection => selection.start.column)
         ).toEqual([value.length, value.length, value.length]);
       });
+
+      it('should ignore non-empty secondary selections', () => {
+        const value = 'suggestion_1 = 1';
+        editorWidget.editor.model.sharedModel.setSource('sug\nxyzz');
+        (editorWidget.editor as CodeMirrorEditor).injectExtension(
+          EditorState.allowMultipleSelections.of(true)
+        );
+        editorWidget.editor.setSelections([
+          {
+            start: { line: 0, column: 3 },
+            end: { line: 0, column: 3 }
+          },
+          {
+            start: { line: 1, column: 0 },
+            end: { line: 1, column: 2 }
+          }
+        ]);
+        model.cursor = { line: 0, column: 0 };
+        model.setCompletions({
+          items: [{ ...itemDefaults, insertText: value }]
+        });
+
+        completer.accept();
+
+        expect(editorWidget.editor.model.sharedModel.source).toBe(
+          `${value}\nxyzz`
+        );
+      });
     });
 
     describe('#_setText()', () => {

@@ -140,7 +140,12 @@ export class InlineCompleter extends Widget {
     const end = cursorBeforeChange;
     const cmEditor = (editor as CodeMirrorEditor).editor;
     const selections = editor.getSelections();
-    if (selections.length <= 1) {
+    const hasNonEmptySelections = selections.some(
+      selection =>
+        selection.start.line !== selection.end.line ||
+        selection.start.column !== selection.end.column
+    );
+    if (selections.length <= 1 || hasNonEmptySelections) {
       const transactions: TransactionSpec = {
         changes: { from: start, to: end, insert: value }
       };

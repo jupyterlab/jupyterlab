@@ -558,7 +558,6 @@ namespace Private {
           }
 
           const newWidgets = [];
-          let shouldMapMarks = false;
           for (const originalSpec of originalSpecs) {
             const spec = {
               ...originalSpec,
@@ -610,8 +609,15 @@ namespace Private {
             // we add a temporary spacer widget(s) which will be removed in a future update
             // allowing a slight delay between getting a new suggestion and reducing cell height
             if (shouldRemoveGhost) {
-              shouldMapMarks = true;
-              newWidgets.push(...createSpacer(originalSpec, tr));
+              newWidgets.push(
+                ...createSpacer(
+                  {
+                    ...originalSpec,
+                    from: spec.from
+                  },
+                  tr
+                )
+              );
             } else {
               newWidgets.push(createWidget(spec, tr));
             }
@@ -622,15 +628,6 @@ namespace Private {
             add: newWidgets,
             filter: (_from, _to, value) => newValues.includes(value)
           });
-          if (shouldMapMarks) {
-            // TODO this can error out when deleting text, ideally a clean solution would be used.
-            try {
-              marks = marks.map(tr.changes);
-            } catch (e) {
-              console.warn(e);
-              return Decoration.none;
-            }
-          }
           return marks;
         }
       }
