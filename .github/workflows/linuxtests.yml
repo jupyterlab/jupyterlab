@@ -11,6 +11,8 @@ on:
 jobs:
   linuxtests:
     name: Linux
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
     strategy:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
@@ -59,14 +61,20 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+
       - name: Restore Playwright browsers cache
         uses: actions/cache@v5
         id: playwright-cache
         with:
-          path: /home/runner/.cache/ms-playwright
-          key: playwright-browsers-${{ runner.os }}-v1
-          restore-keys: |
-            playwright-browsers-${{ runner.os }}-
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-playwright-firefox-${{ steps.pw-version.outputs.version }}
 
       - name: Restore ${{ matrix.group }} cache
         if: ${{ matrix.cache-path }}
