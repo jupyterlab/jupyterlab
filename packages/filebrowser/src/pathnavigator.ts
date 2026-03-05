@@ -3,7 +3,6 @@
 
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import { editIcon } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
@@ -17,10 +16,9 @@ const PATHNAVIGATOR_CLASS = 'jp-PathNavigator';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 
 /**
- * A widget that renders a path input with directory autocomplete for quick
- * navigation. It owns a trigger button, a text input, and a suggestions
- * dropdown.
- *
+ * A widget that renders a path text input with directory autocomplete.
+ * It owns only the input field and the suggestions dropdown.
+ * The trigger button and edit-mode state are managed by the parent widget.
  */
 export class PathNavigator extends Widget {
   constructor(options: PathNavigator.IOptions) {
@@ -30,12 +28,6 @@ export class PathNavigator extends Widget {
     this._options = options;
     this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
 
-    this._triggerNode = editIcon.element({
-      tag: 'span',
-      title: this._trans.__('Go to path…'),
-      stylesheet: 'breadCrumb'
-    });
-
     this._inputNode = document.createElement('input');
     this._inputNode.type = 'text';
     this._inputNode.placeholder = this._trans.__('Type a path…');
@@ -44,16 +36,21 @@ export class PathNavigator extends Widget {
     this._suggestionsNode.className = PATHNAVIGATOR_SUGGESTIONS_CLASS;
     this._suggestionsNode.style.display = 'none';
 
-    this.node.appendChild(this._triggerNode);
     this.node.appendChild(this._inputNode);
     this.node.appendChild(this._suggestionsNode);
   }
 
   /**
-   * Whether path input mode is currently active.
+   * Open the path input: prefill with `currentPath`, focus, and load suggestions.
+   * Called by the parent widget when the user activates edit mode.
    */
-  get isActive(): boolean {
-    return this._isActive;
+  open(currentPath: string): void {
+    this._isOpen = true;
+    const prefill = currentPath ? currentPath + '/' : '';
+    this._inputNode.value = prefill;
+    this._inputNode.focus();
+    this._inputNode.setSelectionRange(prefill.length, prefill.length);
+    void this._updateSuggestions(prefill);
   }
 
   /**
@@ -61,7 +58,6 @@ export class PathNavigator extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this._triggerNode.addEventListener('click', this._enterInputMode);
     this._inputNode.addEventListener('input', this);
     this._inputNode.addEventListener('keydown', this);
     this._inputNode.addEventListener('blur', this);
@@ -73,7 +69,6 @@ export class PathNavigator extends Widget {
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
-    this._triggerNode.removeEventListener('click', this._enterInputMode);
     this._inputNode.removeEventListener('input', this);
     this._inputNode.removeEventListener('keydown', this);
     this._inputNode.removeEventListener('blur', this);
@@ -90,7 +85,7 @@ export class PathNavigator extends Widget {
         this._evtKeydown(event as KeyboardEvent);
         break;
       case 'blur':
-        this._exitInputMode();
+        this._close();
         break;
       case 'mousedown':
         this._evtSuggestionMousedown(event as MouseEvent);
@@ -101,32 +96,15 @@ export class PathNavigator extends Widget {
   }
 
   /**
-   * Enter path input mode: show the input, prefill with the current path, and
-   * immediately load suggestions.
+   * Close the input and notify the parent via onClose.
    */
-  private _enterInputMode = (): void => {
-    this._isActive = true;
-    this._options.onActivate();
-
-    const currentPath = this._options.getCurrentPath();
-    const prefill = currentPath ? currentPath + '/' : '';
-    this._inputNode.value = prefill;
-    this._inputNode.focus();
-    this._inputNode.setSelectionRange(prefill.length, prefill.length);
-
-    void this._updateSuggestions(prefill);
-  };
-
-  /**
-   * Exit path input mode and hide the suggestions dropdown.
-   */
-  private _exitInputMode(): void {
-    if (!this._isActive) {
+  private _close(): void {
+    if (!this._isOpen) {
       return;
     }
-    this._isActive = false;
+    this._isOpen = false;
     this._suggestionsNode.style.display = 'none';
-    this._options.onDeactivate();
+    this._options.onClose();
   }
 
   /**
@@ -207,10 +185,10 @@ export class PathNavigator extends Widget {
     switch (event.key) {
       case 'Enter':
         this._options.onNavigate(this._inputNode.value);
-        this._exitInputMode();
+        this._close();
         break;
       case 'Escape':
-        this._exitInputMode();
+        this._close();
         break;
       case 'Tab':
         event.preventDefault();
@@ -250,7 +228,7 @@ export class PathNavigator extends Widget {
         const path = target.dataset.path;
         if (path) {
           this._options.onNavigate(path);
-          this._exitInputMode();
+          this._close();
         }
         return;
       }
@@ -332,10 +310,9 @@ export class PathNavigator extends Widget {
 
   private _options: PathNavigator.IOptions;
   private _trans: TranslationBundle;
-  private _triggerNode: HTMLElement;
   private _inputNode: HTMLInputElement;
   private _suggestionsNode: HTMLElement;
-  private _isActive = false;
+  private _isOpen = false;
   private _suggestions: string[] = [];
   private _currentFilteredSuggestions: string[] = [];
   private _activeSuggestionIndex = -1;
@@ -346,11 +323,6 @@ export class PathNavigator extends Widget {
 
 export namespace PathNavigator {
   export interface IOptions {
-    /**
-     * Returns the current local path, used to pre-fill the input on open.
-     */
-    getCurrentPath: () => string;
-
     /**
      * Fetch the list of items inside the given directory path.
      */
@@ -366,14 +338,9 @@ export namespace PathNavigator {
     onNavigate: (path: string) => void;
 
     /**
-     * Called when path input mode becomes active.
+     * Called when the input closes (Escape, blur, or after navigation).
      */
-    onActivate: () => void;
-
-    /**
-     * Called when path input mode becomes inactive.
-     */
-    onDeactivate: () => void;
+    onClose: () => void;
 
     /**
      * The application language translator.

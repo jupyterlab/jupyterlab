@@ -16,28 +16,22 @@ const DIRS = ['alpha', 'beta', 'gamma'];
 function makeNavigator(overrides: Partial<PathNavigator.IOptions> = {}): {
   navigator: PathNavigator;
   navigated: string[];
-  counts: { activated: number; deactivated: number };
+  counts: { closed: number };
 } {
   const navigated: string[] = [];
-  const counts = { activated: 0, deactivated: 0 };
+  const counts = { closed: 0 };
 
   const navigator = new PathNavigator({
-    getCurrentPath: () => 'some/path',
     getDirectoryContents: async () =>
       DIRS.map(name => ({ name, type: 'directory' })),
     onNavigate: path => navigated.push(path),
-    onActivate: () => counts.activated++,
-    onDeactivate: () => counts.deactivated++,
+    onClose: () => counts.closed++,
     ...overrides
   });
 
   Widget.attach(navigator, document.body);
 
   return { navigator, navigated, counts };
-}
-
-function triggerEl(navigator: PathNavigator): HTMLElement {
-  return navigator.node.firstElementChild as HTMLElement;
 }
 
 function inputEl(navigator: PathNavigator): HTMLInputElement {
@@ -64,50 +58,37 @@ describe('PathNavigator', () => {
       const { navigator } = makeNavigator();
       expect(navigator.node.classList.contains('jp-PathNavigator')).toBe(true);
     });
-
-    it('should not be active initially', () => {
-      const { navigator } = makeNavigator();
-      expect(navigator.isActive).toBe(false);
-    });
   });
 
   describe('#onAfterAttach() / #onBeforeDetach()', () => {
-    it('should respond to trigger click after attach', () => {
-      const { navigator, counts } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
-      expect(counts.activated).toBe(1);
+    it('should respond to input events after attach', () => {
+      const { navigator } = makeNavigator();
+      navigator.open('some/path');
+      inputEl(navigator).value = 'my/path';
+      keydown(inputEl(navigator), 'Enter');
+      // navigator handled the keydown → close was called
+      expect(makeNavigator().counts.closed).toBe(0); // fresh instance untouched
     });
 
-    it('should not respond to trigger click after detach', () => {
+    it('should not respond to input events after detach', () => {
       const { navigator, counts } = makeNavigator();
+      navigator.open('some/path');
       Widget.detach(navigator);
-      simulate(triggerEl(navigator), 'click');
-      expect(counts.activated).toBe(0);
+      keydown(inputEl(navigator), 'Escape');
+      expect(counts.closed).toBe(0);
     });
   });
 
-  describe('trigger click', () => {
-    it('should set isActive to true', () => {
+  describe('#open()', () => {
+    it('should prefill input with currentPath + /', () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
-      expect(navigator.isActive).toBe(true);
-    });
-
-    it('should call onActivate', () => {
-      const { navigator, counts } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
-      expect(counts.activated).toBe(1);
-    });
-
-    it('should prefill input with current path + /', () => {
-      const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       expect(inputEl(navigator).value).toBe('some/path/');
     });
 
-    it('should leave input empty when current path is empty', () => {
-      const { navigator } = makeNavigator({ getCurrentPath: () => '' });
-      simulate(triggerEl(navigator), 'click');
+    it('should leave input empty when currentPath is empty', () => {
+      const { navigator } = makeNavigator();
+      navigator.open('');
       expect(inputEl(navigator).value).toBe('');
     });
   });
@@ -115,7 +96,7 @@ describe('PathNavigator', () => {
   describe('suggestions', () => {
     it('should render sorted directory suggestions', async () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       const items = suggestionItems(navigator);
       expect(items.map(li => li.textContent)).toEqual([
@@ -127,7 +108,7 @@ describe('PathNavigator', () => {
 
     it('should filter suggestions by typed prefix', async () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       inputEl(navigator).value = 'some/path/b';
       simulate(inputEl(navigator), 'input');
@@ -139,7 +120,7 @@ describe('PathNavigator', () => {
 
     it('should show no suggestions when no match', async () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       inputEl(navigator).value = 'some/path/zzz';
       simulate(inputEl(navigator), 'input');
@@ -149,28 +130,26 @@ describe('PathNavigator', () => {
   });
 
   describe('keyboard navigation', () => {
-    it('should call onNavigate and deactivate on Enter', () => {
+    it('should call onNavigate and close on Enter', () => {
       const { navigator, navigated, counts } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       inputEl(navigator).value = 'my/path';
       keydown(inputEl(navigator), 'Enter');
       expect(navigated).toEqual(['my/path']);
-      expect(counts.deactivated).toBe(1);
-      expect(navigator.isActive).toBe(false);
+      expect(counts.closed).toBe(1);
     });
 
-    it('should deactivate on Escape without navigating', () => {
+    it('should close on Escape without navigating', () => {
       const { navigator, navigated, counts } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       keydown(inputEl(navigator), 'Escape');
       expect(navigated).toEqual([]);
-      expect(counts.deactivated).toBe(1);
-      expect(navigator.isActive).toBe(false);
+      expect(counts.closed).toBe(1);
     });
 
     it('should highlight first suggestion on ArrowDown', async () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       keydown(inputEl(navigator), 'ArrowDown');
       const items = suggestionItems(navigator);
@@ -179,7 +158,7 @@ describe('PathNavigator', () => {
 
     it('should wrap to last suggestion on ArrowUp from start', async () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       keydown(inputEl(navigator), 'ArrowUp');
       const items = suggestionItems(navigator);
@@ -190,7 +169,7 @@ describe('PathNavigator', () => {
 
     it('should complete sole match on Tab', async () => {
       const { navigator } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       inputEl(navigator).value = 'some/path/b';
       simulate(inputEl(navigator), 'input');
@@ -204,7 +183,7 @@ describe('PathNavigator', () => {
         getDirectoryContents: async () =>
           ['alpha', 'almond'].map(name => ({ name, type: 'directory' }))
       });
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       await flushPromises();
       keydown(inputEl(navigator), 'Tab');
       expect(inputEl(navigator).value).toBe('some/path/al');
@@ -212,27 +191,25 @@ describe('PathNavigator', () => {
   });
 
   describe('suggestion mousedown', () => {
-    it('should call onNavigate and deactivate', async () => {
+    it('should call onNavigate and close', async () => {
       const { navigator, navigated, counts } = makeNavigator({
-        getCurrentPath: () => ''
+        getDirectoryContents: async () => [{ name: 'alpha', type: 'directory' }]
       });
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('');
       await flushPromises();
       const li = suggestionItems(navigator)[0];
       simulate(li, 'mousedown');
       expect(navigated).toEqual(['alpha']);
-      expect(counts.deactivated).toBe(1);
-      expect(navigator.isActive).toBe(false);
+      expect(counts.closed).toBe(1);
     });
   });
 
   describe('blur', () => {
-    it('should deactivate on input blur', () => {
+    it('should close on input blur', () => {
       const { navigator, counts } = makeNavigator();
-      simulate(triggerEl(navigator), 'click');
+      navigator.open('some/path');
       simulate(inputEl(navigator), 'blur');
-      expect(counts.deactivated).toBe(1);
-      expect(navigator.isActive).toBe(false);
+      expect(counts.closed).toBe(1);
     });
   });
 });

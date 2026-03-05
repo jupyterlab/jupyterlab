@@ -7,6 +7,7 @@ import { renameFile } from '@jupyterlab/docmanager';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
+  editIcon,
   ellipsesIcon,
   homeIcon as preferredIcon,
   folderIcon as rootIcon
@@ -103,8 +104,13 @@ export class BreadCrumbs extends Widget {
     });
 
     const contents = this._model.manager.services.contents;
+    this._triggerNode = editIcon.element({
+      tag: 'span',
+      title: this._trans.__('Go to path…'),
+      stylesheet: 'breadCrumb'
+    });
+
     this._pathNavigator = new PathNavigator({
-      getCurrentPath: () => contents.localPath(this._model.path),
       getDirectoryContents: async path => {
         const result = await contents.get(path, { content: true });
         if (result.type === 'directory') {
@@ -113,10 +119,8 @@ export class BreadCrumbs extends Widget {
         return [];
       },
       onNavigate: path => this._commitNavigation(path),
-      onActivate: () => {
-        this.node.classList.add(BREADCRUMB_INPUT_MODE_CLASS);
-      },
-      onDeactivate: () => {
+      onClose: () => {
+        this._isEditMode = false;
         this.node.classList.remove(BREADCRUMB_INPUT_MODE_CLASS);
         this._previousState = null;
         this.update();
@@ -124,6 +128,7 @@ export class BreadCrumbs extends Widget {
       translator: options.translator
     });
 
+    this.node.appendChild(this._triggerNode);
     this.node.appendChild(this._pathNavigator.node);
   }
 
@@ -217,6 +222,7 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragover', this);
     this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
+    this._triggerNode.addEventListener('click', this._enterEditMode);
     MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.AfterAttach);
   }
 
@@ -224,6 +230,7 @@ export class BreadCrumbs extends Widget {
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
+    this._triggerNode.removeEventListener('click', this._enterEditMode);
     MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.BeforeDetach);
     super.onBeforeDetach(msg);
     const node = this.node;
@@ -239,7 +246,7 @@ export class BreadCrumbs extends Widget {
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this._pathNavigator.isActive) {
+    if (this._isEditMode) {
       return;
     }
 
@@ -268,8 +275,9 @@ export class BreadCrumbs extends Widget {
     this._previousState = state;
     Private.updateCrumbs(this._crumbs, state);
 
-    // Re-append the navigator node: Private.updateCrumbs() removes all children
-    // after the first one on every render, so it gets detached from the DOM.
+    // Re-append trigger and navigator nodes: Private.updateCrumbs() removes all
+    // children after the first one on every render, so they get detached.
+    this.node.appendChild(this._triggerNode);
     this.node.appendChild(this._pathNavigator.node);
   }
 
@@ -299,8 +307,12 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      if (this._pathNavigator.node.contains(node)) {
-        // Inside PathNavigator — handled by PathNavigator; skip navigation.
+      if (
+        node === this._triggerNode ||
+        this._triggerNode.contains(node) ||
+        this._pathNavigator.node.contains(node)
+      ) {
+        // Inside trigger or PathNavigator — not a breadcrumb navigation click.
         return;
       }
       if (
@@ -643,6 +655,16 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Enter edit mode: show the path input and hide the breadcrumb content.
+   */
+  private _enterEditMode = (): void => {
+    this._isEditMode = true;
+    this.node.classList.add(BREADCRUMB_INPUT_MODE_CLASS);
+    const contents = this._model.manager.services.contents;
+    this._pathNavigator.open(contents.localPath(this._model.path));
+  };
+
+  /**
    * Navigate to the given path.
    */
   private _commitNavigation(path: string): void {
@@ -678,6 +700,8 @@ export class BreadCrumbs extends Widget {
     itemWidths: number[];
   } | null = null;
   private _lastRenderedWidth = 0;
+  private _isEditMode = false;
+  private _triggerNode: HTMLElement;
   private _pathNavigator: PathNavigator;
 }
 
