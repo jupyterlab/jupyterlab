@@ -69,7 +69,6 @@ window.addEventListener('load', async function () {
   });
   lab.registerPluginModules(await Promise.all(extensions));
 
-  /* eslint-disable no-console */
   console.log('Starting app');
   await lab.start();
   console.log('App started, waiting for restore');
