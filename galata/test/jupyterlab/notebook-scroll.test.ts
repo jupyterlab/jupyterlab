@@ -293,6 +293,9 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.notebook.setCell(
       1,
       'code',
+      // In the `full` windowing mode the anchoring will be in effect for 3 seconds
+      // after the most recent scroll event. In other windowing modes the browser
+      // will anchor the active cell at all times, without time limits.
       'from time import sleep\nsleep(2)\nfor i in range(100):\nprint(i)\nsleep(0.05)'
     );
 

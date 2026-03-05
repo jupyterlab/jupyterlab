@@ -28,7 +28,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
  *
  * The time is given in milliseconds.
  */
-const MAXIMUM_TIME_REMAINING = 100;
+const MAXIMUM_TIME_REMAINING = 3000;
 
 /*
  * Feature detection
@@ -667,7 +667,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
       for (let i = this._measuredAllUntilIndex + 1; i <= index; i++) {
         let size: number;
-        let measured = false;
+        let measured: boolean;
 
         if (this._widgetSizers[i]?.measured) {
           size = this._widgetSizers[i].size;
@@ -1358,6 +1358,13 @@ export class WindowedList<
         this._itemsResizeObserver?.unobserve(widget.node)
       );
     }
+    if (!this._areaResizeObserver && this.viewModel.windowingActive) {
+      // This is taken care by browser scroll anchoring outside of full windowing mode.
+      this._areaResizeObserver = new ResizeObserver(
+        this._onAreaResize.bind(this)
+      );
+      this._areaResizeObserver.observe(this._innerElement);
+    }
     this._outerElement.addEventListener('scroll', this, passiveIfSupported);
   }
 
@@ -1386,6 +1393,8 @@ export class WindowedList<
    */
   private _removeListeners() {
     this._outerElement.removeEventListener('scroll', this);
+    this._areaResizeObserver?.disconnect();
+    this._areaResizeObserver = null;
     this._itemsResizeObserver?.disconnect();
     this._itemsResizeObserver = null;
     this._scrollbarResizeObserver?.disconnect();
@@ -1481,6 +1490,13 @@ export class WindowedList<
   }
 
   /**
+   * Handle viewport area resize.
+   */
+  private _onAreaResize(_entries: ResizeObserverEntry[]): void {
+    this._scrollBackToItemOnResize();
+  }
+
+  /**
    * Handle viewport content (i.e. items) resize.
    */
   private _onItemResize(entries: ResizeObserverEntry[]): void {
@@ -1508,9 +1524,42 @@ export class WindowedList<
 
     // If some sizes changed
     if (this.viewModel.setWidgetSize(newSizes)) {
+      this._scrollBackToItemOnResize();
       // Update the list
       this.update();
     }
+  }
+
+  /**
+   * Scroll to the item which was most recently requested.
+   *
+   * This method ensures that the app scrolls to the item even if a resize event
+   * occurs shortly after the scroll. Consider the following sequence of events:
+   *
+   * 1. User is at the nth cell, presses Shift+Enter (run current cell and
+   *    advance to next)
+   * 2. App scrolls to the next (n+1) cell
+   * 3. The nth cell finishes running and renders the output, pushing the
+   *    (n+1) cell down out of view
+   * 4. This triggers the resize observer, which calls this method and scrolls
+   *    the (n+1) cell back into view
+   *
+   * On implementation level, this is ensured by scrolling to `this._scrollToItem`
+   * which is cleared after a short timeout once the scrolling settles
+   * (see `this._resetScrollToItem()`).
+   *
+   * This is taken care by browser scroll anchoring outside of full windowing mode.
+   */
+  private _scrollBackToItemOnResize() {
+    if (!this.viewModel.windowingActive) {
+      return;
+    }
+    if (!this._scrollToItem) {
+      return;
+    }
+    this.scrollToItem(...this._scrollToItem).catch(reason => {
+      console.log(reason);
+    });
   }
 
   /**
@@ -1682,6 +1731,7 @@ export class WindowedList<
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
   private _requiresTotalSizeUpdate: boolean = false;
+  private _areaResizeObserver: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
   private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
