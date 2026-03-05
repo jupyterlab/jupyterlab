@@ -354,7 +354,7 @@ export class DirListing extends Widget {
       this.translator
     );
     this._sortState = state;
-    this._renderer.updateSortIndicator(this.headerNode, state);
+    this._renderer.updateSortIndicator?.(this.headerNode, state);
     this.update();
     this._saveState();
   }
@@ -605,7 +605,7 @@ export class DirListing extends Widget {
           this._sortFileNamesNaturally,
           this.translator
         );
-        this._renderer.updateSortIndicator(this.headerNode, sortState);
+        this._renderer.updateSortIndicator?.(this.headerNode, sortState);
         this.update();
       }
     } catch (error) {
@@ -2853,7 +2853,7 @@ export namespace DirListing {
      *
      * @param sortState - The sort state to reflect in the header.
      */
-    updateSortIndicator(
+    updateSortIndicator?(
       node: HTMLElement,
       sortState: ISortState
     ): void;
