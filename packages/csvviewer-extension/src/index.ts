@@ -147,7 +147,7 @@ function activateCsv(
 
   // The current styles for the data grids.
   let style: DataGrid.Style = Private.LIGHT_STYLE;
-  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
+  let rendererConfig: TextRenderConfig = Private.getTextRendererConfig();
 
   if (restorer) {
     // Handle state restoration.
@@ -200,9 +200,7 @@ function activateCsv(
         ? themeManager.isLight(themeManager.theme)
         : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    rendererConfig = isLight
-      ? Private.LIGHT_TEXT_CONFIG
-      : Private.DARK_TEXT_CONFIG;
+    rendererConfig = Private.getTextRendererConfig(isLight);
     tracker.forEach(async grid => {
       await grid.content.ready;
       grid.content.style = style;
@@ -316,7 +314,7 @@ function activateTsv(
 
   // The current styles for the data grids.
   let style: DataGrid.Style = Private.LIGHT_STYLE;
-  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
+  let rendererConfig: TextRenderConfig = Private.getTextRendererConfig();
 
   if (restorer) {
     // Handle state restoration.
@@ -366,9 +364,7 @@ function activateTsv(
         ? themeManager.isLight(themeManager.theme)
         : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    rendererConfig = isLight
-      ? Private.LIGHT_TEXT_CONFIG
-      : Private.DARK_TEXT_CONFIG;
+    rendererConfig = Private.getTextRendererConfig(isLight);
     tracker.forEach(async grid => {
       await grid.content.ready;
       grid.content.style = style;
@@ -456,9 +452,28 @@ namespace Private {
   };
 
   /**
+   * Utility to get the text renderer config for light/dark theme.
+   */
+  export const getTextRendererConfig = (
+    isLight: boolean = true
+  ): TextRenderConfig => {
+    const style = window.getComputedStyle(document.body);
+    const fontFamily = style.getPropertyValue('--jp-datagrid-font-family');
+    const fallbackFontFamily = style.getPropertyValue(
+      '--jp-content-font-family'
+    );
+    const fontSize = style.getPropertyValue('--jp-datagrid-font-size');
+    return {
+      ...(isLight ? LIGHT_TEXT_CONFIG : DARK_TEXT_CONFIG),
+      fontSize: fontSize || undefined,
+      fontFamily: fontFamily || fallbackFontFamily || undefined
+    };
+  };
+
+  /**
    * The light config for the data grid renderer.
    */
-  export const LIGHT_TEXT_CONFIG: TextRenderConfig = {
+  const LIGHT_TEXT_CONFIG: Omit<TextRenderConfig, 'fontSize' | 'fontFamily'> = {
     textColor: '#111111',
     matchBackgroundColor: '#FFFFE0',
     currentMatchBackgroundColor: '#FFFF00',
@@ -468,7 +483,7 @@ namespace Private {
   /**
    * The dark config for the data grid renderer.
    */
-  export const DARK_TEXT_CONFIG: TextRenderConfig = {
+  const DARK_TEXT_CONFIG: Omit<TextRenderConfig, 'fontSize' | 'fontFamily'> = {
     textColor: '#F5F5F5',
     matchBackgroundColor: '#838423',
     currentMatchBackgroundColor: '#A3807A',

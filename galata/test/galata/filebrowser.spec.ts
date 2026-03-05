@@ -16,6 +16,12 @@ test.describe('filebrowser helper', () => {
       .getByRole('button', { name: 'Select Kernel', exact: true })
       .click();
 
+    // Wait for the kernel to start
+    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+
+    // Save, so that the kernel gets remembered.
+    await page.notebook.save();
+
     await page.activity.closeAll();
   });
 

@@ -56,6 +56,7 @@
   outline: none;
   background: transparent;
   color: var(--jp-ui-font-color1);
+  font-family: var(--jp-ui-font-family);
 }
 
 .jp-WorkspaceSelector-list {
