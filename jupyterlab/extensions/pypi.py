@@ -431,29 +431,6 @@ class PyPIExtensionManager(ExtensionManager):
 
         return extensions, total_pages
 
-    async def __fetch_latest_version(self, name: str) -> tuple[str, str]:
-        """Fetch the latest version of a package from the PyPI JSON API.
-
-        Args:
-            name: The package name
-        Returns:
-            A (name, version) tuple
-        Raises:
-            Exception: If the version cannot be determined
-        """
-        response = await self._httpx_client.get(
-            self.base_url + f"/{name}/json",
-            headers={"Content-Type": "application/json"},
-        )
-        if response.status_code >= 400:  # noqa PLR2004
-            msg = f"Failed to fetch {name} from PyPI: HTTP {response.status_code}"
-            raise RuntimeError(msg)
-        version = json.loads(response.text).get("info", {}).get("version", "")
-        if not version:
-            msg = f"No version found for {name}"
-            raise RuntimeError(msg)
-        return (name, version)
-
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
             tz=timezone.utc
@@ -469,17 +446,20 @@ class PyPIExtensionManager(ExtensionManager):
             # prebuilt extension classifier so we fetch their latest versions
             # from the JSON API instead.
             extension_names = {p[0] for p in self.__all_packages_cache}
+            packs_to_fetch = [name for name in LANGUAGE_PACKS if name not in extension_names]
             language_pack_results = await asyncio.gather(
-                *(
-                    self.__fetch_latest_version(name)
-                    for name in LANGUAGE_PACKS
-                    if name not in extension_names
-                ),
+                *(self.get_latest_version(name) for name in packs_to_fetch),
                 return_exceptions=True,
             )
-            for result in language_pack_results:
-                if isinstance(result, tuple):
-                    self.__all_packages_cache.append(result)
+            for name, result in zip(packs_to_fetch, language_pack_results, strict=True):
+                if isinstance(result, Exception):
+                    self.log.info(
+                        "Failed to fetch latest version for language pack %s: %s",
+                        name,
+                        result,
+                    )
+                elif result is not None:
+                    self.__all_packages_cache.append((name, result))
 
             self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
 
