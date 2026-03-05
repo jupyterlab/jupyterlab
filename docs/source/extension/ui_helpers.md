@@ -46,7 +46,18 @@ showDialog({
 
 :::{note}
 If no options are specified, the dialog will only contain _OK_ and _Cancel_ buttons.
-:::
+
+### Dialog Button Helpers and Defaults
+
+Use the `Dialog` helpers from `@jupyterlab/apputils` to get consistent labels,
+styling and behavior:
+
+- `Dialog.okButton(options?)`: creates an accept button (`accept: true`) with a default localized `Ok` label.
+- `Dialog.cancelButton(options?)`: creates a reject button (`accept: false`) with a default localized `Cancel` label.
+- `Dialog.warnButton(options?)`: creates a warning-styled button (`displayType: 'warn'`); acceptance and label still follow `Dialog.createButton`.
+- `Dialog.createButton(options)`: generic helper; if `accept` is omitted it defaults to `true`, and the default label is `Ok` for accept buttons and `Cancel` otherwise.
+
+You only need to provide `label` when you want custom text.
 
 ### Message Dialogs
 
