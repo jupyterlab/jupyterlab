@@ -28,7 +28,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
  *
  * The time is given in milliseconds.
  */
-const MAXIMUM_TIME_REMAINING = 100;
+const MAXIMUM_TIME_REMAINING = 3000;
 
 /*
  * Feature detection
@@ -667,7 +667,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
       for (let i = this._measuredAllUntilIndex + 1; i <= index; i++) {
         let size: number;
-        let measured = false;
+        let measured: boolean;
 
         if (this._widgetSizers[i]?.measured) {
           size = this._widgetSizers[i].size;
@@ -1042,6 +1042,8 @@ export class WindowedList<
 
     if (!this.viewModel.windowingActive) {
       this._outerElement.scrollTo({ top: scrollOffset });
+      // Scrolling done with browser-native code above
+      this._markProgrammaticScrollingDone();
       return;
     }
 
@@ -1051,7 +1053,11 @@ export class WindowedList<
       this.viewModel.scrollOffset = scrollOffset;
       this._scrollUpdateWasRequested = true;
 
+      // Scroll will happen in udpate() routine
       this.update();
+    } else {
+      // No further scrolling will happen
+      this._markProgrammaticScrollingDone();
     }
   }
 
@@ -1084,6 +1090,7 @@ export class WindowedList<
     margin: number = 0.25,
     alignPreference?: WindowedList.BaseScrollToAlignment
   ): Promise<void> {
+    let deletage: PromiseDelegate<void>;
     if (
       !this._isScrolling ||
       this._scrollToItem === null ||
@@ -1094,10 +1101,13 @@ export class WindowedList<
         this._isScrolling.reject('Scrolling to a new item is requested.');
       }
 
-      this._isScrolling = new PromiseDelegate<void>();
+      deletage = new PromiseDelegate<void>();
+      this._isScrolling = deletage;
       // Catch the internal reject, as otherwise this will
       // result in an unhandled promise rejection in test.
-      this._isScrolling.promise.catch(console.debug);
+      deletage.promise.catch(console.debug);
+    } else {
+      deletage = this._isScrolling;
     }
 
     this._scrollToItem = [index, align, margin, alignPreference];
@@ -1133,7 +1143,7 @@ export class WindowedList<
       )
     );
 
-    return this._isScrolling.promise;
+    return deletage.promise;
   }
 
   /**
@@ -1358,7 +1368,8 @@ export class WindowedList<
         this._itemsResizeObserver?.unobserve(widget.node)
       );
     }
-    if (!this._areaResizeObserver) {
+    if (!this._areaResizeObserver && this.viewModel.windowingActive) {
+      // This is taken care by browser scroll anchoring outside of full windowing mode.
       this._areaResizeObserver = new ResizeObserver(
         this._onAreaResize.bind(this)
       );
@@ -1470,6 +1481,7 @@ export class WindowedList<
         if (this._scrollUpdateWasRequested) {
           this._outerElement.scrollTop = this.viewModel.scrollOffset;
           this._scrollUpdateWasRequested = false;
+          this._markProgrammaticScrollingDone();
         }
       }
     }
@@ -1546,8 +1558,13 @@ export class WindowedList<
    * On implementation level, this is ensured by scrolling to `this._scrollToItem`
    * which is cleared after a short timeout once the scrolling settles
    * (see `this._resetScrollToItem()`).
+   *
+   * This is taken care by browser scroll anchoring outside of full windowing mode.
    */
   private _scrollBackToItemOnResize() {
+    if (!this.viewModel.windowingActive) {
+      return;
+    }
     if (!this._scrollToItem) {
       return;
     }
@@ -1567,11 +1584,18 @@ export class WindowedList<
     if (this._scrollToItem) {
       this._resetScrollToItemTimeout = window.setTimeout(() => {
         this._scrollToItem = null;
-        if (this._isScrolling) {
-          this._isScrolling.resolve();
-          this._isScrolling = null;
-        }
+        this._markProgrammaticScrollingDone();
       }, MAXIMUM_TIME_REMAINING);
+    }
+  }
+
+  /**
+   * Mark the current promise for programmatic scrolling as compelted.
+   */
+  private _markProgrammaticScrollingDone() {
+    if (this._isScrolling) {
+      this._isScrolling.resolve();
+      this._isScrolling = null;
     }
   }
 

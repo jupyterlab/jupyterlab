@@ -9,6 +9,7 @@ const { JSX } = require('typedoc');
  */
 exports.load = function (app) {
   // Inject JupyterLab favicon
+  // eslint-disable-next-line no-unused-vars
   app.renderer.hooks.on('head.begin', context => {
     return JSX.createElement(
       JSX.Fragment,
@@ -22,6 +23,7 @@ exports.load = function (app) {
     );
   });
   // Inject Plausible.io analytics in the footer of the head section
+  // eslint-disable-next-line no-unused-vars
   app.renderer.hooks.on('head.end', context => {
     return JSX.createElement(
       JSX.Fragment,

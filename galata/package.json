@@ -41,7 +41,7 @@
     "test:doc": "jlpm run test --project documentation",
     "test:doc:update": "jlpm run test --project documentation --update-snapshots",
     "test:report": "playwright show-report",
-    "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
+    "test:update": "jlpm test:base:update ; jlpm test:benchmark:update"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.6.0-alpha.3",
@@ -59,7 +59,6 @@
     "fs-extra": "^10.1.0",
     "json5": "^2.2.3",
     "path": "~0.12.7",
-    "systeminformation": "^5.8.6",
     "vega": "^5.20.0",
     "vega-lite": "^5.6.1",
     "vega-statistics": "^1.7.9"
