@@ -432,12 +432,16 @@ export class FileBrowser extends SidePanel {
   private _onPathChanged(): void {
     // Clear filter when user navigates to a new directory
     if (this._clearFilterOnNavigation) {
-      this.model.setFilter(value => {
-        return {};
-      });
+      const input = this._fileFilterRef.current;
+      const query = input ? input.value : '';
 
-      if (this._fileFilterRef.current) {
-        this._fileFilterRef.current.value = '';
+      // Only clear the filter (and trigger a refresh) if a non-empty query is active
+      if (query && query.trim() !== '') {
+        this.model.setFilter(value => {
+          return {};
+        });
+
+        input.value = '';
       }
     }
   }
