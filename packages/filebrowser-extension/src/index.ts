@@ -1427,7 +1427,7 @@ function addCommands(
     }
   });
 
-  // Add the openPath command to the command palette
+  // Add commands to the command palette
   if (commandPalette) {
     commandPalette.addItem({
       command: CommandIDs.openPath,
