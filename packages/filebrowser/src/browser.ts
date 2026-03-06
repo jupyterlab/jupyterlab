@@ -291,6 +291,9 @@ export class FileBrowser extends SidePanel {
     }
   }
 
+  /**
+   * Whether to clear the filter value when navigating to a new directory.
+   */
   get clearFilterOnNavigation(): boolean {
     return this._clearFilterOnNavigation;
   }
