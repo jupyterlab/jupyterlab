@@ -1,0 +1,25 @@
+{
+  "name": "@jupyterlab/core-meta",
+  "version": "4.6.0-alpha.3",
+  "description": "JupyterLab core metadata snapshot",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "core.package.json"
+  ],
+  "scripts": {
+    "build": "echo 'core-meta has no build step'",
+    "build:all": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
