@@ -1,0 +1,108 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic [ref=e1]:
+    - link "Skip to main panel" [ref=e3] [cursor=pointer]:
+      - /url: "#"
+    - banner "Top Bar" [ref=e4]:
+      - img [ref=e6]
+      - navigation "main menu" [ref=e9]:
+        - menubar [ref=e11]:
+          - menuitem "File" [ref=e12]:
+            - generic [ref=e13]: File
+          - menuitem "Edit" [ref=e14]:
+            - generic [ref=e15]: Edit
+          - menuitem "View" [ref=e16]:
+            - generic [ref=e17]: View
+          - menuitem "Run" [ref=e18]:
+            - generic [ref=e19]: Run
+          - menuitem "Kernel" [ref=e20]:
+            - generic [ref=e21]: Kernel
+          - menuitem "Tabs" [ref=e22]:
+            - generic [ref=e23]: Tabs
+          - menuitem "Settings" [ref=e24]:
+            - generic [ref=e25]: Settings
+          - menuitem "Help" [ref=e26]:
+            - generic [ref=e27]: Help
+      - toolbar "Topbar toolbar" [ref=e28]
+    - generic [ref=e31]:
+      - complementary "main sidebar" [ref=e32]:
+        - tablist "main sidebar" [ref=e33]:
+          - tab "File Browser (Ctrl+Shift+F)" [selected] [ref=e34]:
+            - img [ref=e36]
+          - tab "Running Terminals and Kernels" [ref=e38]:
+            - img [ref=e40]
+          - tab "Table of Contents" [ref=e42]:
+            - img [ref=e44]
+          - tab "Extension Manager" [ref=e46]:
+            - img [ref=e48]
+      - generic [ref=e51]:
+        - region "File Browser Section" [ref=e53]:
+          - toolbar "file browser" [ref=e54]:
+            - generic [ref=e55]:
+              - generic:
+                - generic "New Launcher (Ctrl+Shift+L)" [ref=e57] [cursor=pointer]:
+                  - button "New Launcher (Ctrl+Shift+L)" [ref=e58]:
+                    - generic [ref=e59]:
+                      - generic:
+                        - img
+                - generic "New Folder" [ref=e61] [cursor=pointer]:
+                  - button "New Folder" [ref=e62]:
+                    - generic [ref=e63]:
+                      - generic:
+                        - img
+                - generic "Upload Files" [ref=e65] [cursor=pointer]:
+                  - button "Upload Files" [ref=e66]:
+                    - generic [ref=e67]:
+                      - generic:
+                        - img
+                - generic "Refresh the file browser." [ref=e69] [cursor=pointer]:
+                  - button "Refresh the file browser." [ref=e70]:
+                    - generic [ref=e71]:
+                      - generic:
+                        - img
+                - generic "Toggle File Filter" [ref=e73] [cursor=pointer]:
+                  - button "Toggle File Filter" [ref=e74]:
+                    - generic [ref=e75]:
+                      - generic:
+                        - img
+          - region "side panel content" [ref=e76]:
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - generic "C:/openSource/jupyterlab" [ref=e79]:
+                  - img [ref=e80] [cursor=pointer]
+                - text: /
+              - generic [ref=e83]:
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Name
+                  - img [ref=e87]
+                - generic [ref=e91]: Modified
+        - main "Main Content" [ref=e93]
+      - complementary "alternate sidebar" [ref=e94]:
+        - tablist "alternate sidebar" [ref=e95]:
+          - tab "Property Inspector" [ref=e96]:
+            - img [ref=e98]
+          - tab "Debugger" [ref=e100]:
+            - img [ref=e102]
+    - contentinfo "Bottom Panel" [ref=e104]:
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - switch "Simple" [ref=e108]:
+            - generic "Simple Interface (Ctrl+Shift+D)" [ref=e109]: Simple
+          - generic "0 Terminals, 0 Kernel sessions" [ref=e111]:
+            - button "0" [ref=e112] [cursor=pointer]:
+              - generic [ref=e114]:
+                - generic [ref=e115]: "0"
+                - img [ref=e118]
+        - button "0" [ref=e123]:
+          - generic [ref=e124]: "0"
+          - img [ref=e127]
+  - text: No results
+  - 'dialog "Cannot open Could not find path: galata-test-jupyterlab-ter-b839a-me-Dark-theme-terminal-dark" [ref=e129]':
+    - generic [ref=e130]:
+      - generic [ref=e131]: Cannot open
+      - generic [ref=e132]: "Could not find path: galata-test-jupyterlab-ter-b839a-me-Dark-theme-terminal-dark"
+      - button "Close" [active] [ref=e135]:
+        - generic "Close" [ref=e136]
+```

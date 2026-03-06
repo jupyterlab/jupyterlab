@@ -18,6 +18,7 @@ import {
   SidebarHelper,
   StatusBarHelper,
   StyleHelper,
+  TerminalHelper,
   ThemeHelper
 } from './helpers';
 import * as Utils from './utils';
@@ -69,6 +70,11 @@ export interface IJupyterLabPage {
    * JupyterLab notifications
    */
   readonly notifications: Promise<Notification.INotification[]>;
+
+  /**
+   * JupyterLab terminal helpers
+   */
+  readonly terminal: TerminalHelper;
 
   /**
    * Webbrowser performance helpers
@@ -306,6 +312,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
     this.style = new StyleHelper(page);
+    this.terminal = new TerminalHelper(page);
     this.theme = new ThemeHelper(page);
     this.debugger = new DebuggerHelper(page, this.sidebar, this.notebook);
   }
@@ -351,6 +358,11 @@ export class JupyterLabPage implements IJupyterLabPage {
   get notifications(): Promise<Notification.INotification[]> {
     return this.page.evaluate(async () => window.galata.getNotifications());
   }
+
+  /**
+   * JupyterLab terminal helpers
+   */
+  readonly terminal: TerminalHelper;
 
   /**
    * Webbrowser performance helpers

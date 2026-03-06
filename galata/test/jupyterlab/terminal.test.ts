@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import path from 'path';
 import { expect, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
@@ -123,45 +124,64 @@ test.describe('Terminal', () => {
   });
 });
 
-test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
-  await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
+test.describe('Terminal with screenReaderMode', () => {
+  test.use({
+    mockSettings: {
+      '@jupyterlab/terminal-extension:plugin': {
+        screenReaderMode: true
+      }
+    }
+  });
 
-  await page.locator('[role="main"] >> p:has-text("Terminal")').click();
+  test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
+    await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
 
-  const terminal = page.locator(TERMINAL_SELECTOR);
-  await terminal.waitFor();
+    await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
-  await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-  await page.keyboard.type('basename $PWD');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(1000);
-  expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
-});
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await terminal.waitFor();
 
-test('Terminal web link', async ({ page, tmpPath, browserName }) => {
-  test.skip(browserName === 'firefox', 'Flaky on Firefox');
+    await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
+    await page.keyboard.type('basename $PWD');
+    await page.keyboard.press('Enter');
 
-  await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
+    // Wait for the basename to appear in the terminal output
+    const basename = path.basename(tmpPath);
+    const terminalBody = terminal.locator('.jp-Terminal-body:visible');
+    await expect(terminalBody).toContainText(basename, { timeout: 5000 });
 
-  await page.locator('[role="main"] >> p:has-text("Terminal")').click();
+    expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
+  });
 
-  const terminal = page.locator(TERMINAL_SELECTOR);
-  await terminal.waitFor();
+  test('Terminal web link', async ({ page, tmpPath, browserName }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
 
-  await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-  await page.keyboard.type('echo https://jupyter.org/');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(1000);
-  await Promise.all([
-    terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-    terminal.locator('canvas.xterm-link-layer').hover({
+    await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
+
+    await page.locator('[role="main"] >> p:has-text("Terminal")').click();
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await terminal.waitFor();
+
+    await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
+    await page.keyboard.type('echo https://jupyter.org/');
+    await page.keyboard.press('Enter');
+
+    // Wait for the URL to appear in the terminal output
+    const terminalBody = terminal.locator('.jp-Terminal-body:visible');
+    await expect(terminalBody).toContainText('https://jupyter.org/', { timeout: 5000 });
+
+    // Wait for the link to become interactive, then hover
+    await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
+    await terminal.locator('canvas.xterm-link-layer').hover({
       position: {
         x: 60,
         y: 23
       }
-    })
-  ]);
-  expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
+    });
+
+    expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
+  });
 });
 
 test.describe('Open in Terminal from File Browser', () => {

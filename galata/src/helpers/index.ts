@@ -13,3 +13,4 @@ export * from './statusbar';
 export * from './style';
 export * from './theme';
 export * from './debuggerpanel';
+export * from './terminal';
