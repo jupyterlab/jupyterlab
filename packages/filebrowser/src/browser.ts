@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';
@@ -10,6 +10,7 @@ import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { IScore } from '@jupyterlab/ui-components';
+
 import {
   FilenameSearcher,
   SidePanel,
@@ -615,6 +616,19 @@ export class FileBrowser extends SidePanel {
   private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
+  private _timestampFormat: Time.TimestampFormat = 'absolute';
+
+  get timestampFormat(): Time.TimestampFormat {
+    return this._timestampFormat;
+  }
+
+  set timestampFormat(value: Time.TimestampFormat) {
+    if (this._timestampFormat === value) {
+      return;
+    }
+    this._timestampFormat = value;
+    this.listing?.setTimestampFormat(value);
+  }
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
   private _sortFileNamesNaturally: boolean = true;
