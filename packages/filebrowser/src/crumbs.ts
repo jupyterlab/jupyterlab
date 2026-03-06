@@ -11,6 +11,7 @@ import {
   homeIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
+import { PathNavigator } from './pathnavigator';
 import { JSONExt } from '@lumino/coreutils';
 import { Throttler } from '@lumino/polling';
 import type { Drag } from '@lumino/dragdrop';
@@ -58,6 +59,8 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
  */
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
+const BREADCRUMB_INPUT_MODE_CLASS = 'jp-mod-inputMode';
+
 /**
  * A class which hosts folder breadcrumbs.
  */
@@ -97,6 +100,30 @@ export class BreadCrumbs extends Widget {
         void this._resizeThrottler.invoke();
       }
     });
+
+    const contents = this._model.manager.services.contents;
+    this._pathNavigator = new PathNavigator({
+      getCurrentPath: () => contents.localPath(this._model.path),
+      getDirectoryContents: async path => {
+        const result = await contents.get(path, { content: true });
+        if (result.type === 'directory') {
+          return result.content as Array<{ name: string; type: string }>;
+        }
+        return [];
+      },
+      onNavigate: path => this._commitNavigation(path),
+      onActivate: () => {
+        this.node.classList.add(BREADCRUMB_INPUT_MODE_CLASS);
+      },
+      onDeactivate: () => {
+        this.node.classList.remove(BREADCRUMB_INPUT_MODE_CLASS);
+        this._previousState = null;
+        this.update();
+      },
+      translator: options.translator
+    });
+
+    this.node.appendChild(this._pathNavigator.node);
   }
 
   /**
@@ -189,6 +216,7 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragover', this);
     this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
+    this._pathNavigator.attach();
   }
 
   /**
@@ -203,12 +231,17 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
     this._resizeObserver.unobserve(node);
+    this._pathNavigator.detach();
   }
 
   /**
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
+    if (this._pathNavigator.isActive) {
+      return;
+    }
+
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
@@ -233,6 +266,10 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
     Private.updateCrumbs(this._crumbs, state);
+
+    // Re-append the navigator node: Private.updateCrumbs() removes all children
+    // after the first one on every render, so it gets detached from the DOM.
+    this.node.appendChild(this._pathNavigator.node);
   }
 
   /**
@@ -259,6 +296,10 @@ export class BreadCrumbs extends Widget {
         // Stop the event propagation.
         event.preventDefault();
         event.stopPropagation();
+        return;
+      }
+      if (this._pathNavigator.node.contains(node)) {
+        // Inside PathNavigator — handled by PathNavigator; skip navigation.
         return;
       }
       if (
@@ -600,6 +641,23 @@ export class BreadCrumbs extends Widget {
     };
   }
 
+  /**
+   * Navigate to the given path.
+   */
+  private _commitNavigation(path: string): void {
+    // Strip trailing slash (except bare root), then ensure a leading slash so
+    // model.cd() → resolvePath() treats this as absolute rather than relative
+    // to the current directory.
+    let normalized =
+      path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+    if (!normalized.startsWith('/')) {
+      normalized = '/' + normalized;
+    }
+    this._model
+      .cd(normalized || '/')
+      .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
+  }
+
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: FileBrowserModel;
@@ -619,6 +677,7 @@ export class BreadCrumbs extends Widget {
     itemWidths: number[];
   } | null = null;
   private _lastRenderedWidth = 0;
+  private _pathNavigator: PathNavigator;
 }
 
 /**
