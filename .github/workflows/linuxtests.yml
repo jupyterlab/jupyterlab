@@ -12,7 +12,7 @@ jobs:
   linuxtests:
     name: Linux
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+      PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
     strategy:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
@@ -73,7 +73,7 @@ jobs:
         uses: actions/cache@v5
         id: playwright-cache
         with:
-          path: ${{ github.workspace }}/pw-browsers
+          path: /home/runner/pw-browsers
           key: ${{ runner.os }}-playwright-firefox-${{ steps.pw-version.outputs.version }}
 
       - name: Restore ${{ matrix.group }} cache

@@ -61,6 +61,3 @@ stats.json
 
 # pixi environments
 .pixi
-
-# playwright browsers cache
-pw-browsers

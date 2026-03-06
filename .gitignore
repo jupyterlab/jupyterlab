@@ -160,8 +160,5 @@ untitled*.txt
 # pixi environments
 .pixi
 
-# playwright browsers cache
-pw-browsers
-
 # temporary files, useful for testing
 tmp
