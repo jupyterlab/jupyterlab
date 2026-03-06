@@ -137,6 +137,7 @@ The team of maintainers includes:
 
 - decision-making contributors listed on the [council team members](https://jupyterlab-team-compass.readthedocs.io/en/latest/team.html) page
 - code contributors listed on the [contributors graph](https://github.com/jupyterlab/jupyterlab/graphs/contributors) page
+- code owners listed in the [`CODEOWNERS`](.github/CODEOWNERS) file
 
 <details>
 
