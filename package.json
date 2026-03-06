@@ -106,6 +106,7 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
+    "@lezer/python": "^1.1.18",
     "@types/react": "^18.0.26",
     "lodash": "^4.17.23",
     "lodash-es": "^4.17.23",
