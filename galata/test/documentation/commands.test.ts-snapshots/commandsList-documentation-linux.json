@@ -3459,6 +3459,16 @@
     }
   },
   {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "jupyterlab-translation:zh_CN",
     "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
     "caption": "Change interface language to Chinese (Simplified, China) - 中文 (简体, 中国)",
