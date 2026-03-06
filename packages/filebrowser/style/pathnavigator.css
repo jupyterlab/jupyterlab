@@ -3,17 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-PathNavigator {
-  position: relative;
-  display: inline-block;
-}
-
-.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator {
-  display: block;
-  width: 100%;
-}
-
-.jp-PathNavigator > :first-child {
+/* Edit trigger button lives in BreadCrumbs, not in PathNavigator */
+.jp-BreadCrumbs-editTrigger {
   cursor: pointer;
   opacity: 0.6;
   padding: 0 2px;
@@ -22,8 +13,14 @@
   top: -2px;
 }
 
-.jp-PathNavigator > :first-child:hover {
+.jp-BreadCrumbs-editTrigger:hover {
   opacity: 1;
+}
+
+/* PathNavigator contains only the input and the suggestions dropdown */
+.jp-PathNavigator {
+  position: relative;
+  display: inline-block;
 }
 
 .jp-PathNavigator > input {
@@ -70,13 +67,18 @@
   background: var(--jp-layout-color2);
 }
 
+/* Edit mode: BreadCrumbs shows only PathNavigator, full-width */
 .jp-BreadCrumbs.jp-mod-inputMode {
   position: relative;
 }
 
-.jp-BreadCrumbs.jp-mod-inputMode > *:not(.jp-PathNavigator),
-.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > :first-child {
+.jp-BreadCrumbs.jp-mod-inputMode > *:not(.jp-PathNavigator) {
   display: none;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator {
+  display: block;
+  width: 100%;
 }
 
 .jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > input {

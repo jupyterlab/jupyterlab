@@ -64,6 +64,11 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 const BREADCRUMB_INPUT_MODE_CLASS = 'jp-mod-inputMode';
 
 /**
+ * The class name for the breadcrumbs edit trigger button.
+ */
+const BREADCRUMB_EDIT_TRIGGER_CLASS = 'jp-BreadCrumbs-editTrigger';
+
+/**
  * A class which hosts folder breadcrumbs.
  */
 export class BreadCrumbs extends Widget {
@@ -109,6 +114,7 @@ export class BreadCrumbs extends Widget {
       title: this._trans.__('Go to path…'),
       stylesheet: 'breadCrumb'
     });
+    this._triggerNode.classList.add(BREADCRUMB_EDIT_TRIGGER_CLASS);
 
     this._pathNavigator = new PathNavigator({
       getDirectoryContents: async path => {
