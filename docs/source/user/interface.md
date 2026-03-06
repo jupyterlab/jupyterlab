@@ -134,6 +134,18 @@ marked with a colored top border (blue by default).
 
 (tabs)=
 
+### Switching Tabs by Index
+
+You can switch to a specific tab in the main area using the keyboard shortcuts with a modifier key and a number from `1` to `8` (where `1` is the first tab and `8` is the eighth tab, if it exists). To jump directly to the last tab, regardless of how many tabs are open or its position, use `9`.
+
+The default modifier is `Accel Alt` (i.e., {kbd}`Cmd+Alt` on macOS or {kbd}`Ctrl+Alt` on Windows/Linux). You can change this modifier in Settings by going to **Settings > Settings Editor** and searching for "Tab Switch Modifier". The available options are:
+
+- **Accel Alt** (default): {kbd}`Cmd+Alt` / {kbd}`Ctrl+Alt` + number
+- **Ctrl Alt**: {kbd}`Ctrl+Alt` + number
+- **Alt**: {kbd}`Alt` + number
+- **Ctrl**: {kbd}`Ctrl` + number
+- **disabled**: No tab switching shortcuts
+
 ## Tabs and Simple Interface Mode
 
 The Tabs panel in the left sidebar lists the open documents or
