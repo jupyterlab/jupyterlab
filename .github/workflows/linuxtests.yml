@@ -74,7 +74,7 @@ jobs:
         id: playwright-cache
         with:
           path: /home/runner/pw-browsers
-          key: ${{ runner.os }}-playwright-firefox-${{ steps.pw-version.outputs.version }}
+          key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}
 
       - name: Restore ${{ matrix.group }} cache
         if: ${{ matrix.cache-path }}
