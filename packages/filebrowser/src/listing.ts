@@ -354,7 +354,6 @@ export class DirListing extends Widget {
       this.translator
     );
     this._sortState = state;
-    this._renderer.updateSortIndicator?.(this.headerNode, state);
     this.update();
     this._saveState();
   }
@@ -595,8 +594,8 @@ export class DirListing extends Widget {
         this._updateColumnSizes();
       }
 
-      // Sort items and update header indicator without calling
-      // sort() to avoid a redundant state save.
+      // Sort items and rebuild the header to reflect the restored
+      // sort state without calling sort() to avoid a redundant save.
       if (sortState) {
         this._sortedItems = Private.sort(
           this.model.items(),
@@ -605,7 +604,14 @@ export class DirListing extends Widget {
           this._sortFileNamesNaturally,
           this.translator
         );
-        this._renderer.updateSortIndicator?.(this.headerNode, sortState);
+        this.headerNode.innerHTML = '';
+        this._renderer.populateHeaderNode(
+          this.headerNode,
+          this.translator,
+          this._hiddenColumns,
+          this._columnSizes,
+          sortState
+        );
         this.update();
       }
     } catch (error) {
@@ -2847,15 +2853,6 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null;
 
     /**
-     * Update the header sort indicator to reflect the given sort state.
-     *
-     * @param node - The header node to update.
-     *
-     * @param sortState - The sort state to reflect in the header.
-     */
-    updateSortIndicator?(node: HTMLElement, sortState: ISortState): void;
-
-    /**
      * Create a new item node for a dir listing.
      *
      * @returns A new DOM node to use as a content item.
@@ -3169,20 +3166,6 @@ export namespace DirListing {
         }
       }
       return { direction: 'ascending', key: 'name' };
-    }
-
-    /**
-     * Update the header sort indicator to reflect the given sort state.
-     *
-     * @param node - A node populated by [[populateHeaderNode]].
-     *
-     * @param sortState - The sort state to reflect in the header.
-     */
-    updateSortIndicator(
-      node: HTMLElement,
-      sortState: DirListing.ISortState
-    ): void {
-      this._updateSortIndicator(node, sortState);
     }
 
     private _updateSortIndicator(
