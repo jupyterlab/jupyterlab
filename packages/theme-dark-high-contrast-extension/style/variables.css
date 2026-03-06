@@ -480,7 +480,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Outline styles for focus-visible states needed for keyboard navigation */
   /* 2px is the minimum size required for accessibility */
   --jp-focus-outline-color: #ffa500;
-  --jp-focus-outline: 4px solid var(--jp-focus-outline-color);
+  --jp-focus-outline-width: 4px;
+  --jp-focus-outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
 /* Completer specific styles */
