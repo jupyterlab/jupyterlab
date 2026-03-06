@@ -305,8 +305,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         this._iconButtons[widget.id] = updateIconButton(
           widget,
           toggleDebugging,
-          this._service.isStarted,
-          enabled
+          enabled,
+          this._service.isStarted
         );
       } else {
         updateIconButtonState(
@@ -357,9 +357,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
-    const debuggingEnabled = await this._service.isAvailable(connection);
-    addToolbarButton(debuggingEnabled);
-
     // listen to the disposed signals
     widget.disposed.connect(async () => {
       if (isDebuggerOn()) {
@@ -370,13 +367,23 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       delete this._contextKernelChangedHandlers[widget.id];
     });
 
+    const hasKernel = !!connection.kernel;
+    // Delay adding the button until a kernel exists to avoid showing
+    // a transient disabled state during kernel startup.
+    if (!hasKernel && !this._iconButtons[widget.id]) {
+      return;
+    }
+
+    const debuggingEnabled = hasKernel
+      ? await this._service.isAvailable(connection)
+      : false;
+    addToolbarButton(debuggingEnabled);
+
     if (!debuggingEnabled) {
       removeHandlers();
       const debugButton = this._iconButtons[widget.id];
       if (debugButton) {
         updateIconButtonState(debugButton, false, false);
-      } else {
-        console.warn('Debugger button not found');
       }
       return;
     }

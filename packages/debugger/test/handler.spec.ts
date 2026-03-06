@@ -17,13 +17,15 @@ import type { ILabShell } from '@jupyterlab/application';
 import type { Session } from '@jupyterlab/services';
 
 const DEBUGGER_ITEM_NAME = 'debugger-icon';
+type ButtonCapture = {
+  current: ToolbarButton | null;
+  insertedEnabledStates: boolean[];
+};
 
 /**
  * Mock a session widget, capturing the debugger button instance once set.
  */
-function mockSessionWidget(buttonCapture: {
-  current: ToolbarButton | null;
-}): DocumentWidget {
+function mockSessionWidget(buttonCapture: ButtonCapture): DocumentWidget {
   const toolbar = new Toolbar<ToolbarButton>();
   jest
     .spyOn(toolbar, 'insertBefore')
@@ -38,6 +40,7 @@ function mockSessionWidget(buttonCapture: {
     .mockImplementation((name: string, widget: ToolbarButton) => {
       if (name === DEBUGGER_ITEM_NAME) {
         buttonCapture.current = widget;
+        buttonCapture.insertedEnabledStates.push(widget.enabled);
       }
       return true;
     });
@@ -66,13 +69,13 @@ describe('DebuggerHandler', () => {
   describe('#updateWidget', () => {
     // Tests for DebuggerHandler toolbar button state, see #18514 - icon flicker
 
-    let buttonCapture: { current: ToolbarButton | null };
+    let buttonCapture: ButtonCapture;
     let widget: DocumentWidget;
     let connection: Session.ISessionConnection;
     let service: IDebugger;
 
     beforeEach(() => {
-      buttonCapture = { current: null };
+      buttonCapture = { current: null, insertedEnabledStates: [] };
       widget = mockSessionWidget(buttonCapture);
       const kernel = new KernelMock({});
       kernel.requestDebug = jest.fn().mockResolvedValue({});
@@ -92,26 +95,11 @@ describe('DebuggerHandler', () => {
 
       expect(buttonCapture.current).not.toBeNull();
       expect(buttonCapture.current!.enabled).toBe(true);
+      expect(buttonCapture.insertedEnabledStates).toEqual([true]);
     });
 
     it('should add debugger button as disabled when kernel does not support debugging', async () => {
       service = createMockDebugger(false);
-      const noKernelConnection = new SessionConnectionMock({}, null);
-
-      const handler = new Debugger.Handler({
-        type: 'notebook',
-        shell: { currentWidget: widget } as unknown as ILabShell,
-        service
-      });
-
-      await handler.updateWidget(widget, noKernelConnection);
-
-      expect(buttonCapture.current).not.toBeNull();
-      expect(buttonCapture.current!.enabled).toBe(false);
-    });
-
-    it('should resolve isAvailable before showing button (no disabled-then-enabled flicker)', async () => {
-      service = createMockDebugger(true);
 
       const handler = new Debugger.Handler({
         type: 'notebook',
@@ -121,8 +109,36 @@ describe('DebuggerHandler', () => {
 
       await handler.updateWidget(widget, connection);
 
+      expect(buttonCapture.current).not.toBeNull();
+      expect(buttonCapture.current!.enabled).toBe(false);
+      expect(buttonCapture.insertedEnabledStates).toEqual([false]);
+    });
+
+    it('should not add debugger button before a kernel exists', async () => {
+      service = createMockDebugger(true);
+      const noKernelConnection = {
+        ...connection,
+        kernel: null
+      } as Session.ISessionConnection;
+
+      const handler = new Debugger.Handler({
+        type: 'notebook',
+        shell: { currentWidget: widget } as unknown as ILabShell,
+        service
+      });
+
+      await handler.updateWidget(widget, noKernelConnection);
+
+      expect(service.isAvailable).not.toHaveBeenCalled();
+      expect(buttonCapture.current).toBeNull();
+      expect(buttonCapture.insertedEnabledStates).toHaveLength(0);
+
+      await handler.updateWidget(widget, connection);
+
       expect(service.isAvailable).toHaveBeenCalledWith(connection);
+      expect(buttonCapture.current).not.toBeNull();
       expect(buttonCapture.current!.enabled).toBe(true);
+      expect(buttonCapture.insertedEnabledStates).toEqual([true]);
     });
   });
 });
