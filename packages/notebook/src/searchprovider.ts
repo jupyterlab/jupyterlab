@@ -777,6 +777,21 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         // provider when switching active cell to preserve current match;
         // if we are searching within selected cells we should update
         this._currentProviderIndex = this.widget.content.activeCellIndex;
+      } else {
+        // Even when the previous provider cell is still in the selection,
+        // we need to check if the active cell has changed and if the current
+        // provider has no active match. In that case we should update to the
+        // active cell so _ensureCurrentMatch can find a match there.
+        const activeCellIndex = this.widget.content.activeCellIndex;
+        if (this._currentProviderIndex !== activeCellIndex) {
+          const currentEngine =
+            this._searchProviders[this._currentProviderIndex!];
+          const currentMatch = currentEngine?.getCurrentMatch();
+          if (!currentMatch) {
+            await this.clearHighlight();
+            this._currentProviderIndex = activeCellIndex;
+          }
+        }
       }
     }
 
@@ -803,6 +818,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           scroll: false,
           select: false
         });
+        // Emit state change so the UI counter updates immediately; without
+        // this the counter can remain stale (showing "-/N") until the next
+        // unrelated state change triggers a repaint.
+        this._stateChanged.emit();
       }
     }
   }
@@ -885,7 +904,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private async _onCellSelectionChanged() {
-    if (this._delayedActiveCellChangeHandler !== null) {
+    const hadPendingActiveCellChange =
+      this._delayedActiveCellChangeHandler !== null;
+    if (hadPendingActiveCellChange) {
       // Avoid race condition due to `activeCellChanged` and `selectionChanged`
       // signals firing in short sequence when selection gets extended, with
       // handling of the former having potential to undo selection set by the latter.
@@ -893,6 +914,48 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._delayedActiveCellChangeHandler = null;
     }
     await this._updateCellSelection();
+
+    // When there was a pending active cell change handler that we cancelled,
+    // we need to perform the essential parts of that handler here: updating
+    // `_currentProviderIndex` and clearing stale highlights. Without this,
+    // the current provider index may point at a cell that no longer has a
+    // current match, causing the match counter to show "-/N" instead of "1/N".
+    if (hadPendingActiveCellChange && this._onSelection) {
+      const activeCellIndex = this.widget.content.activeCellIndex;
+      const previousProviderCell =
+        this._currentProviderIndex !== null &&
+        this._currentProviderIndex < this.widget.content.widgets.length
+          ? this.widget.content.widgets[this._currentProviderIndex]
+          : null;
+
+      const previousProviderInCurrentSelection =
+        previousProviderCell &&
+        this.widget.content.isSelectedOrActive(previousProviderCell);
+
+      if (!previousProviderInCurrentSelection) {
+        // Clear highlight from previous provider since its cell
+        // is no longer in the current selection.
+        await this.clearHighlight();
+        this._currentProviderIndex = activeCellIndex;
+      } else if (this._currentProviderIndex !== activeCellIndex) {
+        // Even when the previous provider is still in the selection,
+        // if the active cell changed we should update the current provider
+        // to the newly active cell and clear any stale highlight so that
+        // `_ensureCurrentMatch` can properly establish a new current match.
+        const currentEngine =
+          this._currentProviderIndex !== null
+            ? this._searchProviders[this._currentProviderIndex]
+            : null;
+        if (currentEngine) {
+          const currentMatch = currentEngine.getCurrentMatch();
+          if (!currentMatch) {
+            await this.clearHighlight();
+            this._currentProviderIndex = activeCellIndex;
+          }
+        }
+      }
+    }
+
     if (this._currentProviderIndex === null) {
       // For consistency we set the first cell in selection as current provider.
       const firstSelectedCellIndex = this.widget.content.widgets.findIndex(
