@@ -28,6 +28,7 @@
     "strictNullChecks": true,
     "noImplicitThis": true,
     "target": "ES2018",
-    "types": []
+    "types": [],
+    "verbatimModuleSyntax": true
   }
 }
