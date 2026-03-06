@@ -444,7 +444,9 @@ export class FileBrowser extends SidePanel {
           return {};
         });
 
-        input.value = '';
+        if (input) {
+          input.value = '';
+        }
       }
     }
   }
