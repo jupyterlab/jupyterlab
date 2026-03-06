@@ -3,18 +3,22 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Edit trigger button lives in BreadCrumbs, not in PathNavigator */
-.jp-BreadCrumbs-editTrigger {
-  cursor: pointer;
-  opacity: 0.6;
-  padding: 0 2px;
-  vertical-align: middle;
-  position: relative;
-  top: -2px;
+/* Make the breadcrumb bar a flex container so the fill stretches to the end */
+.jp-BreadCrumbs {
+  display: flex;
+  align-items: center;
 }
 
-.jp-BreadCrumbs-editTrigger:hover {
-  opacity: 1;
+/* Invisible fill — stretches to fill remaining width and carries the hover cue */
+.jp-BreadCrumbs-fill {
+  flex: 1;
+  min-width: 8px;
+  align-self: stretch;
+  cursor: text;
+}
+
+.jp-BreadCrumbs:not(.jp-mod-inputMode) .jp-BreadCrumbs-fill:hover {
+  background: var(--jp-layout-color2);
 }
 
 /* PathNavigator contains only the input and the suggestions dropdown */
@@ -29,10 +33,11 @@
   box-sizing: border-box;
   background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color0);
-  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
   border-radius: var(--jp-border-radius);
   padding: 2px 6px;
   font-size: var(--jp-ui-font-size1);
+  height: 17px;
+  border: thin solid blue;
 }
 
 .jp-PathNavigator > input:focus {

@@ -7,7 +7,6 @@ import { renameFile } from '@jupyterlab/docmanager';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
-  editIcon,
   ellipsesIcon,
   homeIcon as preferredIcon,
   folderIcon as rootIcon
@@ -64,9 +63,10 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 const BREADCRUMB_INPUT_MODE_CLASS = 'jp-mod-inputMode';
 
 /**
- * The class name for the breadcrumbs edit trigger button.
+ * The class name for the invisible fill element that makes the trailing
+ * empty space of the breadcrumb bar clickable and hoverable.
  */
-const BREADCRUMB_EDIT_TRIGGER_CLASS = 'jp-BreadCrumbs-editTrigger';
+const BREADCRUMB_FILL_CLASS = 'jp-BreadCrumbs-fill';
 
 /**
  * A class which hosts folder breadcrumbs.
@@ -109,13 +109,6 @@ export class BreadCrumbs extends Widget {
     });
 
     const contents = this._model.manager.services.contents;
-    this._triggerNode = editIcon.element({
-      tag: 'span',
-      title: this._trans.__('Go to path…'),
-      stylesheet: 'breadCrumb'
-    });
-    this._triggerNode.classList.add(BREADCRUMB_EDIT_TRIGGER_CLASS);
-
     this._pathNavigator = new PathNavigator({
       getDirectoryContents: async path => {
         const result = await contents.get(path, { content: true });
@@ -134,7 +127,9 @@ export class BreadCrumbs extends Widget {
       translator: options.translator
     });
 
-    this.node.appendChild(this._triggerNode);
+    this._fillNode = document.createElement('span');
+    this._fillNode.className = BREADCRUMB_FILL_CLASS;
+    this.node.appendChild(this._fillNode);
     this.node.appendChild(this._pathNavigator.node);
   }
 
@@ -228,7 +223,6 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragover', this);
     this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
-    this._triggerNode.addEventListener('click', this._enterEditMode);
     MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.AfterAttach);
   }
 
@@ -236,7 +230,6 @@ export class BreadCrumbs extends Widget {
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
-    this._triggerNode.removeEventListener('click', this._enterEditMode);
     MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.BeforeDetach);
     super.onBeforeDetach(msg);
     const node = this.node;
@@ -281,9 +274,9 @@ export class BreadCrumbs extends Widget {
     this._previousState = state;
     Private.updateCrumbs(this._crumbs, state);
 
-    // Re-append trigger and navigator nodes: Private.updateCrumbs() removes all
+    // Re-append fill and navigator nodes: Private.updateCrumbs() removes all
     // children after the first one on every render, so they get detached.
-    this.node.appendChild(this._triggerNode);
+    this.node.appendChild(this._fillNode);
     this.node.appendChild(this._pathNavigator.node);
   }
 
@@ -313,12 +306,8 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      if (
-        node === this._triggerNode ||
-        this._triggerNode.contains(node) ||
-        this._pathNavigator.node.contains(node)
-      ) {
-        // Inside trigger or PathNavigator — not a breadcrumb navigation click.
+      if (this._pathNavigator.node.contains(node)) {
+        // Inside PathNavigator — not a breadcrumb navigation click.
         return;
       }
       if (
@@ -346,6 +335,9 @@ export class BreadCrumbs extends Widget {
       }
       node = node.parentElement as HTMLElement;
     }
+
+    // Click landed on the breadcrumb background — enter edit mode.
+    this._enterEditMode();
   }
 
   /**
@@ -663,12 +655,12 @@ export class BreadCrumbs extends Widget {
   /**
    * Enter edit mode: show the path input and hide the breadcrumb content.
    */
-  private _enterEditMode = (): void => {
+  private _enterEditMode(): void {
     this._isEditMode = true;
     this.node.classList.add(BREADCRUMB_INPUT_MODE_CLASS);
     const contents = this._model.manager.services.contents;
     this._pathNavigator.open(contents.localPath(this._model.path));
-  };
+  }
 
   /**
    * Navigate to the given path.
@@ -707,7 +699,7 @@ export class BreadCrumbs extends Widget {
   } | null = null;
   private _lastRenderedWidth = 0;
   private _isEditMode = false;
-  private _triggerNode: HTMLElement;
+  private _fillNode: HTMLElement;
   private _pathNavigator: PathNavigator;
 }
 
