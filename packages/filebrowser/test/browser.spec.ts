@@ -10,7 +10,7 @@ import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import type { ServiceManager } from '@jupyterlab/services';
-import { signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
@@ -27,6 +27,10 @@ class TestFileBrowser extends FileBrowser {
     // Allows us to spy on onUpdateRequest.
     this.renameCalled.emit();
     return result;
+  }
+
+  get fileFilterInput(): HTMLInputElement | null {
+    return (this as any)._fileFilterRef.current;
   }
 }
 
@@ -251,6 +255,12 @@ describe('filebrowser/browser', () => {
       });
 
       it('should clear the filter when navigating to a new directory', async () => {
+        fileBrowser.showFileFilter = true;
+        await framePromise();
+
+        const input = fileBrowser.fileFilterInput!;
+        input.value = 'notebook';
+
         model.setFilter(value => (value.type === 'notebook' ? {} : null));
         await model.cd(dirName);
         await model.cd('/');
@@ -261,6 +271,12 @@ describe('filebrowser/browser', () => {
 
       it('should not clear the filter when clearFilterOnNavigation is false', async () => {
         fileBrowser.clearFilterOnNavigation = false;
+        fileBrowser.showFileFilter = true;
+        await framePromise();
+
+        const input = fileBrowser.fileFilterInput!;
+        input.value = 'notebook';
+
         model.setFilter(value => (value.type === 'notebook' ? {} : null));
         await model.cd(dirName);
         await model.cd('/');
