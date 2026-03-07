@@ -81,6 +81,71 @@ the Jupyter Notebook (for example, LaTeX equations work). As seen in the
 animation, edits to the Markdown source are immediately reflected in the
 rendered version.
 
+(mermaid)=
+
+## Mermaid Diagrams
+
+JupyterLab includes built-in support for rendering
+[Mermaid](https://mermaid.js.org/) diagrams in Markdown cells and `.md`
+files — no additional installation or extensions required.
+
+### Using Mermaid in Notebook Markdown Cells
+
+To insert a Mermaid diagram in a notebook, create a Markdown cell and
+wrap your diagram definition in a fenced code block with the `mermaid`
+language tag:
+
+````markdown
+```mermaid
+graph TD
+    A[Start] --> B{Is it working?}
+    B -- Yes --> C[Great!]
+    B -- No --> D[Debug]
+    D --> B
+```
+````
+
+When you run the cell, JupyterLab will render the diagram inline.
+
+### Using Mermaid in Markdown Files
+
+Mermaid diagrams are also rendered in standalone `.md` files opened in
+the Markdown viewer. Use the same fenced code block syntax:
+
+````markdown
+```mermaid
+sequenceDiagram
+    Alice->>Bob: Hello Bob!
+    Bob-->>Alice: Hi Alice!
+```
+````
+
+To switch between the rendered view and the raw Markdown source, use the
+**Open With** context menu in the file browser and select **Editor** to
+edit the source, or **Markdown Preview** to see the rendered output.
+
+### Supported Diagram Types
+
+Mermaid supports many diagram types, including:
+
+- **Flowcharts** (`graph` / `flowchart`)
+- **Sequence diagrams** (`sequenceDiagram`)
+- **Class diagrams** (`classDiagram`)
+- **State diagrams** (`stateDiagram-v2`)
+- **Entity-relationship diagrams** (`erDiagram`)
+- **Gantt charts** (`gantt`)
+- **Pie charts** (`pie`)
+
+For the full list of supported diagram types and syntax, refer to the
+[Mermaid documentation](https://mermaid.js.org/intro/).
+
+### Availability
+
+Mermaid rendering is available in JupyterLab but is **not** available in
+the classic Jupyter Notebook interface. If you need Mermaid support in
+Jupyter Notebook, you can install a third-party extension such as
+[jupyter-contrib-nbextensions](https://github.com/ipython-contrib/jupyter_contrib_nbextensions).
+
 ## Images
 
 - File extensions: `.bmp`, `.gif`, `.jpeg`, `.jpg`, `.png`,
