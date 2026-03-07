@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import path from 'path';
+import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
@@ -18,14 +18,18 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
  * @param terminalLocator Locator that matches the terminal container ('.jp-Terminal' or a visible terminal container)
  * @param command Shell command to run
  */
-async function runCommand(page: any, terminalLocator: any, command: string): Promise<void> {
-  // wait for terminal input to be present (screenReaderMode or normal)
+async function runCommand(
+  page: Page,
+  terminalLocator: Locator,
+  command: string
+): Promise<void> {
   await terminalLocator.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-
-  // focus the terminal and type the command
   await terminalLocator.click();
   await page.keyboard.type(command);
-  // ensure the command is submitted
+  // Verify the command was fully typed before pressing Enter
+  await expect(terminalLocator.locator(TERMINAL_INPUT_SELECTOR)).toHaveValue(
+    command
+  );
   await page.keyboard.press('Enter');
 }
 
