@@ -10,6 +10,25 @@ const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
 const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
+/**
+ * Run a shell command in the visible terminal panel.
+ * Keep this helper local to the test file (not in src/helpers).
+ *
+ * @param page Playwright page (provided by galata fixture)
+ * @param terminalLocator Locator that matches the terminal container ('.jp-Terminal' or a visible terminal container)
+ * @param command Shell command to run
+ */
+async function runCommand(page: any, terminalLocator: any, command: string): Promise<void> {
+  // wait for terminal input to be present (screenReaderMode or normal)
+  await terminalLocator.locator(TERMINAL_INPUT_SELECTOR).waitFor();
+
+  // focus the terminal and type the command
+  await terminalLocator.click();
+  await page.keyboard.type(command);
+  // ensure the command is submitted
+  await page.keyboard.press('Enter');
+}
+
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
     await page.menu.clickMenuItem('File>New>Terminal');
@@ -104,9 +123,7 @@ test.describe('Terminal', () => {
       await terminal.waitFor();
 
       // Display some content in terminal.
-      await page.locator('div.xterm-screen').click();
-      await page.keyboard.type('seq 1006 2 1024');
-      await page.keyboard.press('Enter');
+      await runCommand(page, terminal, 'seq 1006 2 1024');
 
       // Perform search.
       const searchText = '101';
@@ -141,9 +158,8 @@ test.describe('Terminal with screenReaderMode', () => {
     const terminal = page.locator(TERMINAL_SELECTOR);
     await terminal.waitFor();
 
-    await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-    await page.keyboard.type('basename $PWD');
-    await page.keyboard.press('Enter');
+    // use the local helper to run basename
+    await runCommand(page, terminal, 'basename $PWD');
 
     // Wait for the basename to appear in the terminal output
     const basename = path.basename(tmpPath);
@@ -164,8 +180,7 @@ test.describe('Terminal with screenReaderMode', () => {
     await terminal.waitFor();
 
     await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-    await page.keyboard.type('echo https://jupyter.org/');
-    await page.keyboard.press('Enter');
+    await runCommand(page, terminal, 'echo https://jupyter.org/');
 
     // Wait for the URL to appear in the terminal output
     const terminalBody = terminal.locator('.jp-Terminal-body:visible');
@@ -226,7 +241,7 @@ test.describe('Open in Terminal from File Browser', () => {
     );
     await expect(terminalTabLocator).toHaveCount(1);
 
-    // Get visible terminal panel
+    // Get visible terminal panel (container)
     const terminalPanelLocator = page.locator(
       '.lm-DockPanel .jp-Terminal:visible'
     );
@@ -236,8 +251,8 @@ test.describe('Open in Terminal from File Browser', () => {
     await terminalPanelLocator.locator('.jp-Terminal-body').waitFor();
     await terminalPanelLocator.click();
 
-    await page.keyboard.type('pwd');
-    await page.keyboard.press('Enter');
+    // Use helper to execute pwd in the visible terminal container
+    await runCommand(page, terminalPanelLocator, 'pwd');
 
     await expect(terminalPanelLocator).toContainText(folderName, {
       timeout: 5000
@@ -285,25 +300,24 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
     const foundFolders = new Set<string>();
     for (let i = 0; i < 2; i++) {
       await tabs.nth(i).click();
-      await activeTerminal.waitFor({ state: 'visible' });
 
-      // Find the currently visible terminal body
-      await expect(activeTerminal).toHaveCount(1);
+      // Find the currently visible terminal container
+      const activeTerminalContainer = page.locator('.lm-DockPanel .jp-Terminal:visible');
+      await activeTerminalContainer.waitFor({ state: 'visible' });
 
-      await activeTerminal.click();
-      await page.keyboard.type('pwd');
-      await page.keyboard.press('Enter');
+      // Ensure the body is visible then run pwd via helper
+      await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
+      await runCommand(page, activeTerminalContainer, 'pwd');
 
-      await expect(activeTerminal).toContainText(
-        new RegExp(`${folderA}|${folderB}`),
-        { timeout: 10000 }
-      );
+      const activeBody = activeTerminalContainer.locator('.jp-Terminal-body:visible');
+      await expect(activeBody).toContainText(new RegExp(`${folderA}|${folderB}`), {
+        timeout: 10000
+      });
 
-      const text = await activeTerminal.textContent();
+      const text = await activeBody.textContent();
       if (text?.includes(folderA)) {
         foundFolders.add(folderA);
       }
@@ -360,18 +374,13 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(1, { timeout: 10000 });
 
     // Verify content is the directory
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
-
-    if ((await tabs.count()) > 0) {
-      await tabs.first().click();
-    }
+    const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
     await activeTerminal.waitFor({ state: 'visible' });
 
-    await activeTerminal.click();
-    await page.keyboard.type('pwd');
-    await page.keyboard.press('Enter');
+    await runCommand(page, activeTerminal, 'pwd');
 
-    await expect(activeTerminal).toContainText(folderName, { timeout: 5000 });
+    const activeBody = activeTerminal.locator('.jp-Terminal-body:visible');
+    await expect(activeBody).toContainText(folderName, { timeout: 5000 });
   });
 
   test('should not show the context menu item for files', async ({
