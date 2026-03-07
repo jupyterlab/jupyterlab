@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import path from 'path';
 import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from '@jupyterlab/galata';
 
@@ -12,10 +13,9 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
 /**
  * Run a shell command in the visible terminal panel.
- * Keep this helper local to the test file (not in src/helpers).
  *
  * @param page Playwright page (provided by galata fixture)
- * @param terminalLocator Locator that matches the terminal container ('.jp-Terminal' or a visible terminal container)
+ * @param terminalLocator Locator that matches the terminal container
  * @param command Shell command to run
  */
 async function runCommand(
