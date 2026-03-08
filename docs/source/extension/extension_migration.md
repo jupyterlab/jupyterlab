@@ -436,7 +436,6 @@ package configuration.
 - Create a file `.yarnrc.yml` containing:
 
 ```yaml
-enableImmutableInstalls: false
 nodeLinker: node-modules
 ```
 
