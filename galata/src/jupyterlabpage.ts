@@ -71,10 +71,6 @@ export interface IJupyterLabPage {
   readonly notifications: Promise<Notification.INotification[]>;
 
   /**
-   * JupyterLab terminal helpers
-   */
-
-  /**
    * Webbrowser performance helpers
    */
   readonly performance: PerformanceHelper;
@@ -355,11 +351,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   get notifications(): Promise<Notification.INotification[]> {
     return this.page.evaluate(async () => window.galata.getNotifications());
   }
-
-  /**
-   * JupyterLab terminal helpers
-   */
-
+  
   /**
    * Webbrowser performance helpers
    */

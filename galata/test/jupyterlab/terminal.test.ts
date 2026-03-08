@@ -27,7 +27,7 @@ async function runCommand(
   await terminalLocator.click();
   await page.keyboard.type(command);
   // Verify the command was fully typed before pressing Enter
-  await expect(terminalLocator.locator(TERMINAL_INPUT_SELECTOR)).toHaveValue(
+  await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
     command
   );
   await page.keyboard.press('Enter');
