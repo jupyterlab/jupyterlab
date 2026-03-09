@@ -73,7 +73,9 @@
 }
 
 .jp-StatusBar-TextItem:focus-visible {
-  outline: 2px solid var(--jp-focus-outline-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
 }
 
 .jp-StatusBar-GroupItem {
@@ -83,7 +85,9 @@
 }
 
 .jp-StatusBar-GroupItem:focus-visible {
-  outline: 2px solid var(--jp-focus-outline-color, var(--jp-brand-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -1px;
 }
 
