@@ -57,7 +57,7 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Set up browser cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
@@ -233,7 +233,7 @@ jobs:
         working-directory: core
 
       - name: Set up browser cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ steps.pw-version.outputs.version }}

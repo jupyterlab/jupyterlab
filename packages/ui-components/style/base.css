@@ -60,6 +60,7 @@
   border-radius: var(--jp-border-radius);
   padding: 0 12px;
   font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
 
   /* Copy from blueprint 3 */
   display: inline-flex;
