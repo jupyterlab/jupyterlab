@@ -60,15 +60,9 @@ test.describe('Internationalization', () => {
     });
 
     await page.evaluate(() => {
-      // Invalidate text shaping cache which causes some CJK characters
-      // render as "tofu" blank rectangles on Chromium.
+      // Workaround a Chromium issue with CJK characters
+      // rendering as "tofu" blank rectangles.
       document.body.style.fontKerning = 'none';
-      return new Promise<void>(resolve => {
-        requestAnimationFrame(() => {
-          document.body.style.fontKerning = '';
-          resolve();
-        });
-      });
     });
 
     // Wait for the launcher to be loaded
