@@ -55,6 +55,7 @@
     "@jupyterlab/completer-extension": "^4.6.0-alpha.3",
     "@jupyterlab/console": "^4.6.0-alpha.3",
     "@jupyterlab/console-extension": "^4.6.0-alpha.3",
+    "@jupyterlab/core-meta": "^4.6.0-alpha.3",
     "@jupyterlab/coreutils": "^6.6.0-alpha.3",
     "@jupyterlab/csvviewer": "^4.6.0-alpha.3",
     "@jupyterlab/csvviewer-extension": "^4.6.0-alpha.3",
