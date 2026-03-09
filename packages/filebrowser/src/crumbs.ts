@@ -97,12 +97,6 @@ export class BreadCrumbs extends Widget {
     this._crumbs = Private.createCrumbs();
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
-
-    // The widget has two direct children:
-    //   1. _crumbContainer — holds breadcrumb icons, separators, items, and fill
-    //   2. PathNavigator   — the path input + suggestions dropdown
-    // updateCrumbs only touches the container, so the PathNavigator is never
-    // accidentally removed or reordered.
     this._crumbContainer = document.createElement('span');
     this._crumbContainer.className = BREADCRUMB_CONTAINER_CLASS;
     if (this._hasPreferred) {
