@@ -25,9 +25,6 @@ test.describe('Internationalization', () => {
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
 
-    // Wait for fonts to be loaded
-    await page.evaluate(() => document.fonts.ready);
-
     expect
       .soft(
         await page.screenshot({
@@ -56,10 +53,6 @@ test.describe('Internationalization', () => {
 
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
 
-    // Wait for fonts to be loaded (again, we are reloading)
-    await page.waitForLoadState('networkidle');
-    await page.evaluate(() => document.fonts.ready);
-
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
         border-top: none;
@@ -67,16 +60,19 @@ test.describe('Internationalization', () => {
     });
 
     await page.evaluate(() => {
+      // Invalidate text shaping cache which causes some CJK characters
+      // render as "tofu" blank rectangles on Chromium.
       document.body.style.fontKerning = 'none';
+      return new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+          document.body.style.fontKerning = '';
+          resolve();
+        });
+      });
     });
 
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
-
-    await page.evaluate(() => {
-      const x = document.body.innerHTML;
-      document.body.innerHTML = x;
-    });
 
     expect.soft(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
 
