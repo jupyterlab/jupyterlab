@@ -184,13 +184,22 @@ export class NotebookViewModel extends WindowedListModel {
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
     if (model instanceof CodeCellModel && !model.isDisposed) {
+      const textOutputTypes = [
+        'application/vnd.jupyter.stderr',
+        'application/vnd.jupyter.stdout',
+        'text/plain'
+      ];
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
-        const data = output.data['text/plain'];
-        if (typeof data === 'string') {
-          outputsLines += data.split('\n').length;
-        } else if (Array.isArray(data)) {
-          outputsLines += data.join('').split('\n').length;
+        for (const mimeType of textOutputTypes) {
+          const data = output.data[mimeType];
+          if (typeof data === 'string') {
+            outputsLines += data.split('\n').length;
+            break;
+          } else if (Array.isArray(data)) {
+            outputsLines += data.join('').split('\n').length;
+            break;
+          }
         }
       }
     }
