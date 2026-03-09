@@ -366,6 +366,11 @@ test.describe('Reactive toolbar', () => {
       'cellType'
     );
 
+    // Wait for the reactive toolbar resizer to move the new item to the popup
+    await expect(
+      toolbar.locator('.jp-Toolbar-item:visible', { hasText: 'new item 1' })
+    ).toHaveCount(0);
+
     await toolbar.locator('.jp-Toolbar-responsive-opener').click();
 
     // A 'visible' selector is added because there is another response popup element
