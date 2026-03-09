@@ -16,7 +16,6 @@ import { JSONExt } from '@lumino/coreutils';
 import { Throttler } from '@lumino/polling';
 import type { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
-import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import type { FileBrowserModel } from './model';
 
@@ -124,7 +123,6 @@ export class BreadCrumbs extends Widget {
       translator: options.translator
     });
     this._pathNavigator.closed.connect(this._exitEditMode, this);
-    this.node.appendChild(this._pathNavigator.node);
   }
 
   /**
@@ -220,14 +218,14 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragover', this);
     this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
-    MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.AfterAttach);
+    Widget.attach(this._pathNavigator, this.node);
   }
 
   /**
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
-    MessageLoop.sendMessage(this._pathNavigator, Widget.Msg.BeforeDetach);
+    Widget.detach(this._pathNavigator);
     super.onBeforeDetach(msg);
     const node = this.node;
     node.removeEventListener('click', this);
@@ -797,12 +795,7 @@ namespace Private {
     state: ICrumbsState,
     fillNode: HTMLElement
   ): void {
-    // Remove all but the first child (Preferred when hasPreferred, else Home).
-    const firstChild = container.firstChild as HTMLElement;
-    console.warn('FC:', firstChild);
-    while (firstChild && firstChild.nextSibling) {
-      container.removeChild(firstChild.nextSibling);
-    }
+    container.replaceChildren();
 
     if (state.hasPreferred) {
       container.appendChild(breadcrumbs[Private.Crumb.Preferred]);
