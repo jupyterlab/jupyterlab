@@ -1,10 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { showErrorMessage } from '@jupyterlab/apputils';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import type { FileBrowserModel } from './model';
 
 /**
  * we cache per directory; in case the filesystem change below us, we refresh
@@ -25,7 +29,7 @@ export class PathNavigator extends Widget {
     super({ node: document.createElement('span') });
     this.addClass(PATHNAVIGATOR_CLASS);
 
-    this._options = options;
+    this._model = options.model;
     this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
 
     this._inputNode = document.createElement('input');
@@ -41,11 +45,22 @@ export class PathNavigator extends Widget {
   }
 
   /**
-   * Open the path input: prefill with `currentPath`, focus, and load suggestions.
-   * Called by the parent widget when the user activates edit mode.
+   * A signal emitted when the navigator closes (Escape, blur, or after
+   * navigation is committed).  The parent widget should use this to exit
+   * edit mode.
    */
-  open(currentPath: string): void {
+  get closed(): ISignal<this, void> {
+    return this._closed;
+  }
+
+  /**
+   * Open the path input: prefill with the model's current path, focus,
+   * and load suggestions.
+   */
+  open(): void {
     this._isOpen = true;
+    const contents = this._model.manager.services.contents;
+    const currentPath = contents.localPath(this._model.path);
     const prefill = currentPath ? currentPath + '/' : '';
     this._inputNode.value = prefill;
     this._inputNode.focus();
@@ -96,7 +111,7 @@ export class PathNavigator extends Widget {
   }
 
   /**
-   * Close the input and notify the parent via onClose.
+   * Close the input and notify the parent via the `closed` signal.
    */
   private _close(): void {
     if (!this._isOpen) {
@@ -104,7 +119,25 @@ export class PathNavigator extends Widget {
     }
     this._isOpen = false;
     this._suggestionsNode.style.display = 'none';
-    this._options.onClose();
+    this._closed.emit();
+  }
+
+  /**
+   * Navigate to the given path, then close the input.
+   */
+  private _commitNavigation(path: string): void {
+    // Strip trailing slash (except bare root), then ensure a leading slash so
+    // model.cd() → resolvePath() treats this as absolute rather than relative
+    // to the current directory.
+    let normalized =
+      path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+    if (!normalized.startsWith('/')) {
+      normalized = '/' + normalized;
+    }
+    this._model
+      .cd(normalized || '/')
+      .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
+    this._close();
   }
 
   /**
@@ -129,12 +162,17 @@ export class PathNavigator extends Widget {
       this._suggestions = [];
       const fetchId = ++this._fetchId;
       try {
-        const items = await this._options.getDirectoryContents(dirPart || '/');
+        const contents = this._model.manager.services.contents;
+        const result = await contents.get(dirPart || '/', { content: true });
         // Discard result if a newer fetch has started since this one was issued.
         if (fetchId !== this._fetchId) {
           return;
         }
         this._suggestionFetchTime = Date.now();
+        const items =
+          result.type === 'directory'
+            ? (result.content as Array<{ name: string; type: string }>)
+            : [];
         this._suggestions = items
           .filter(item => item.type === 'directory')
           .map(item => (dirPart ? `${dirPart}/${item.name}` : item.name));
@@ -184,8 +222,7 @@ export class PathNavigator extends Widget {
   private _evtKeydown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'Enter':
-        this._options.onNavigate(this._inputNode.value);
-        this._close();
+        this._commitNavigation(this._inputNode.value);
         break;
       case 'Escape':
         this._close();
@@ -227,8 +264,7 @@ export class PathNavigator extends Widget {
       if (target.tagName === 'LI') {
         const path = target.dataset.path;
         if (path) {
-          this._options.onNavigate(path);
-          this._close();
+          this._commitNavigation(path);
         }
         return;
       }
@@ -308,10 +344,11 @@ export class PathNavigator extends Widget {
     }
   }
 
-  private _options: PathNavigator.IOptions;
+  private _model: FileBrowserModel;
   private _trans: TranslationBundle;
   private _inputNode: HTMLInputElement;
   private _suggestionsNode: HTMLElement;
+  private _closed = new Signal<this, void>(this);
   private _isOpen = false;
   private _suggestions: string[] = [];
   private _currentFilteredSuggestions: string[] = [];
@@ -324,23 +361,9 @@ export class PathNavigator extends Widget {
 export namespace PathNavigator {
   export interface IOptions {
     /**
-     * Fetch the list of items inside the given directory path.
+     * The file browser model.
      */
-    getDirectoryContents: (
-      path: string
-    ) => Promise<Array<{ name: string; type: string }>>;
-
-    /**
-     * Called when the user confirms a path (Enter or suggestion click).
-     * The path value is the raw string from the input; normalization is the
-     * caller's responsibility.
-     */
-    onNavigate: (path: string) => void;
-
-    /**
-     * Called when the input closes (Escape, blur, or after navigation).
-     */
-    onClose: () => void;
+    model: FileBrowserModel;
 
     /**
      * The application language translator.

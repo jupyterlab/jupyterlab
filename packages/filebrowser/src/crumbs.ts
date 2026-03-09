@@ -60,8 +60,6 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
  */
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
-const BREADCRUMB_INPUT_MODE_CLASS = 'jp-mod-inputMode';
-
 /**
  * The class name for the invisible fill element that makes the trailing
  * empty space of the breadcrumb bar clickable and hoverable.
@@ -93,7 +91,7 @@ export class BreadCrumbs extends Widget {
       this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
     }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    this._model.refreshed.connect(this.update, this);
+    this._model.refreshed.connect(this._onModelRefreshed, this);
     this._resizeThrottler = new Throttler(() => this._onResize(), 50);
     this._resizeObserver = new ResizeObserver(entries => {
       const entry = entries[0];
@@ -108,24 +106,11 @@ export class BreadCrumbs extends Widget {
       }
     });
 
-    const contents = this._model.manager.services.contents;
     this._pathNavigator = new PathNavigator({
-      getDirectoryContents: async path => {
-        const result = await contents.get(path, { content: true });
-        if (result.type === 'directory') {
-          return result.content as Array<{ name: string; type: string }>;
-        }
-        return [];
-      },
-      onNavigate: path => this._commitNavigation(path),
-      onClose: () => {
-        this._isEditMode = false;
-        this.node.classList.remove(BREADCRUMB_INPUT_MODE_CLASS);
-        this._previousState = null;
-        this.update();
-      },
+      model: this._model,
       translator: options.translator
     });
+    this._pathNavigator.closed.connect(this._exitEditMode, this);
 
     this._fillNode = document.createElement('span');
     this._fillNode.className = BREADCRUMB_FILL_CLASS;
@@ -246,6 +231,10 @@ export class BreadCrumbs extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._isEditMode) {
+      // In edit mode the breadcrumb bar contains only the PathNavigator,
+      // stretched to fill the full width.
+      Private.clearChildren(this.node);
+      this.node.appendChild(this._pathNavigator.node);
       return;
     }
 
@@ -272,6 +261,16 @@ export class BreadCrumbs extends Widget {
       return;
     }
     this._previousState = state;
+
+    // Ensure the anchor crumb node is in the DOM before updateCrumbs runs —
+    // it derives the parent node from breadcrumbs[0].parentNode, and the node
+    // may have been detached by a previous edit-mode clearChildren call.
+    if (!this._crumbs[0].parentNode) {
+      if (this._hasPreferred) {
+        this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
+      }
+      this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+    }
     Private.updateCrumbs(this._crumbs, state);
 
     // Re-append fill and navigator nodes: Private.updateCrumbs() removes all
@@ -657,26 +656,33 @@ export class BreadCrumbs extends Widget {
    */
   private _enterEditMode(): void {
     this._isEditMode = true;
-    this.node.classList.add(BREADCRUMB_INPUT_MODE_CLASS);
-    const contents = this._model.manager.services.contents;
-    this._pathNavigator.open(contents.localPath(this._model.path));
+    this._previousState = null;
+    this.update();
+    this._pathNavigator.open();
   }
 
   /**
-   * Navigate to the given path.
+   * Exit edit mode and restore the breadcrumb display.
    */
-  private _commitNavigation(path: string): void {
-    // Strip trailing slash (except bare root), then ensure a leading slash so
-    // model.cd() → resolvePath() treats this as absolute rather than relative
-    // to the current directory.
-    let normalized =
-      path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
-    if (!normalized.startsWith('/')) {
-      normalized = '/' + normalized;
+  private _exitEditMode(): void {
+    if (!this._isEditMode) {
+      return;
     }
-    this._model
-      .cd(normalized || '/')
-      .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
+    this._isEditMode = false;
+    this._previousState = null;
+    this.update();
+  }
+
+  /**
+   * Handle the model's `refreshed` signal.
+   * If we are in edit mode, dismiss it (the model path may have changed).
+   */
+  private _onModelRefreshed(): void {
+    if (this._isEditMode) {
+      this._exitEditMode();
+      return;
+    }
+    this.update();
   }
 
   protected translator: ITranslator;
@@ -761,6 +767,15 @@ namespace Private {
     fullPath: boolean;
     minimumLeftItems: number;
     minimumRightItems: number;
+  }
+
+  /**
+   * Remove all children from a node.
+   */
+  export function clearChildren(node: HTMLElement): void {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
   }
 
   /**

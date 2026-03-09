@@ -4,6 +4,7 @@
 import { simulate } from 'simulate-event';
 import { Widget } from '@lumino/widgets';
 import { PathNavigator } from '../src/pathnavigator';
+import type { FileBrowserModel } from '../src/model';
 
 const flushPromises = (): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, 0));
@@ -13,25 +14,59 @@ Element.prototype.scrollIntoView = jest.fn();
 
 const DIRS = ['alpha', 'beta', 'gamma'];
 
-function makeNavigator(overrides: Partial<PathNavigator.IOptions> = {}): {
-  navigator: PathNavigator;
-  navigated: string[];
-  counts: { closed: number };
-} {
-  const navigated: string[] = [];
-  const counts = { closed: 0 };
+/**
+ * Create a minimal mock of FileBrowserModel that satisfies PathNavigator.
+ */
+function mockModel(
+  overrides: {
+    path?: string;
+    getResult?: Array<{ name: string; type: string }>;
+  } = {}
+): { model: FileBrowserModel; cdCalls: string[] } {
+  const cdCalls: string[] = [];
+  const getResult =
+    overrides.getResult ?? DIRS.map(n => ({ name: n, type: 'directory' }));
+  const model = {
+    path: overrides.path ?? '',
+    manager: {
+      services: {
+        contents: {
+          localPath: (p: string) => p,
+          get: async (_path: string, _opts: unknown) => ({
+            type: 'directory',
+            content: getResult
+          })
+        }
+      }
+    },
+    cd: jest.fn(async (path: string) => {
+      cdCalls.push(path);
+    })
+  } as unknown as FileBrowserModel;
+  return { model, cdCalls };
+}
 
-  const navigator = new PathNavigator({
-    getDirectoryContents: async () =>
-      DIRS.map(name => ({ name, type: 'directory' })),
-    onNavigate: path => navigated.push(path),
-    onClose: () => counts.closed++,
-    ...overrides
+function makeNavigator(
+  overrides: {
+    path?: string;
+    getResult?: Array<{ name: string; type: string }>;
+  } = {}
+): {
+  navigator: PathNavigator;
+  cdCalls: string[];
+  closedCount: { value: number };
+} {
+  const { model, cdCalls } = mockModel(overrides);
+  const closedCount = { value: 0 };
+
+  const navigator = new PathNavigator({ model });
+  navigator.closed.connect(() => {
+    closedCount.value++;
   });
 
   Widget.attach(navigator, document.body);
 
-  return { navigator, navigated, counts };
+  return { navigator, cdCalls, closedCount };
 }
 
 function inputEl(navigator: PathNavigator): HTMLInputElement {
@@ -63,32 +98,32 @@ describe('PathNavigator', () => {
   describe('#onAfterAttach() / #onBeforeDetach()', () => {
     it('should respond to input events after attach', () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       inputEl(navigator).value = 'my/path';
       keydown(inputEl(navigator), 'Enter');
       // navigator handled the keydown → close was called
-      expect(makeNavigator().counts.closed).toBe(0); // fresh instance untouched
+      expect(makeNavigator().closedCount.value).toBe(0); // fresh instance untouched
     });
 
     it('should not respond to input events after detach', () => {
-      const { navigator, counts } = makeNavigator();
-      navigator.open('some/path');
+      const { navigator, closedCount } = makeNavigator();
+      navigator.open();
       Widget.detach(navigator);
       keydown(inputEl(navigator), 'Escape');
-      expect(counts.closed).toBe(0);
+      expect(closedCount.value).toBe(0);
     });
   });
 
   describe('#open()', () => {
-    it('should prefill input with currentPath + /', () => {
-      const { navigator } = makeNavigator();
-      navigator.open('some/path');
+    it('should prefill input with model path + /', () => {
+      const { navigator } = makeNavigator({ path: 'some/path' });
+      navigator.open();
       expect(inputEl(navigator).value).toBe('some/path/');
     });
 
-    it('should leave input empty when currentPath is empty', () => {
-      const { navigator } = makeNavigator();
-      navigator.open('');
+    it('should leave input empty when model path is empty', () => {
+      const { navigator } = makeNavigator({ path: '' });
+      navigator.open();
       expect(inputEl(navigator).value).toBe('');
     });
   });
@@ -96,7 +131,7 @@ describe('PathNavigator', () => {
   describe('suggestions', () => {
     it('should render sorted directory suggestions', async () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
       const items = suggestionItems(navigator);
       expect(items.map(li => li.textContent)).toEqual([
@@ -108,9 +143,9 @@ describe('PathNavigator', () => {
 
     it('should filter suggestions by typed prefix', async () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
-      inputEl(navigator).value = 'some/path/b';
+      inputEl(navigator).value = 'b';
       simulate(inputEl(navigator), 'input');
       await flushPromises();
       expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
@@ -120,9 +155,9 @@ describe('PathNavigator', () => {
 
     it('should show no suggestions when no match', async () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
-      inputEl(navigator).value = 'some/path/zzz';
+      inputEl(navigator).value = 'zzz';
       simulate(inputEl(navigator), 'input');
       await flushPromises();
       expect(suggestionItems(navigator).length).toBe(0);
@@ -130,26 +165,26 @@ describe('PathNavigator', () => {
   });
 
   describe('keyboard navigation', () => {
-    it('should call onNavigate and close on Enter', () => {
-      const { navigator, navigated, counts } = makeNavigator();
-      navigator.open('some/path');
+    it('should call model.cd and close on Enter', () => {
+      const { navigator, cdCalls, closedCount } = makeNavigator();
+      navigator.open();
       inputEl(navigator).value = 'my/path';
       keydown(inputEl(navigator), 'Enter');
-      expect(navigated).toEqual(['my/path']);
-      expect(counts.closed).toBe(1);
+      expect(cdCalls).toEqual(['/my/path']);
+      expect(closedCount.value).toBe(1);
     });
 
     it('should close on Escape without navigating', () => {
-      const { navigator, navigated, counts } = makeNavigator();
-      navigator.open('some/path');
+      const { navigator, cdCalls, closedCount } = makeNavigator();
+      navigator.open();
       keydown(inputEl(navigator), 'Escape');
-      expect(navigated).toEqual([]);
-      expect(counts.closed).toBe(1);
+      expect(cdCalls).toEqual([]);
+      expect(closedCount.value).toBe(1);
     });
 
     it('should highlight first suggestion on ArrowDown', async () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
       keydown(inputEl(navigator), 'ArrowDown');
       const items = suggestionItems(navigator);
@@ -158,7 +193,7 @@ describe('PathNavigator', () => {
 
     it('should wrap to last suggestion on ArrowUp from start', async () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
       keydown(inputEl(navigator), 'ArrowUp');
       const items = suggestionItems(navigator);
@@ -169,47 +204,49 @@ describe('PathNavigator', () => {
 
     it('should complete sole match on Tab', async () => {
       const { navigator } = makeNavigator();
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
-      inputEl(navigator).value = 'some/path/b';
+      inputEl(navigator).value = 'b';
       simulate(inputEl(navigator), 'input');
       await flushPromises();
       keydown(inputEl(navigator), 'Tab');
-      expect(inputEl(navigator).value).toBe('some/path/beta/');
+      expect(inputEl(navigator).value).toBe('beta/');
     });
 
     it('should complete longest common prefix on Tab with multiple matches', async () => {
       const { navigator } = makeNavigator({
-        getDirectoryContents: async () =>
-          ['alpha', 'almond'].map(name => ({ name, type: 'directory' }))
+        getResult: ['alpha', 'almond'].map(name => ({
+          name,
+          type: 'directory'
+        }))
       });
-      navigator.open('some/path');
+      navigator.open();
       await flushPromises();
       keydown(inputEl(navigator), 'Tab');
-      expect(inputEl(navigator).value).toBe('some/path/al');
+      expect(inputEl(navigator).value).toBe('al');
     });
   });
 
   describe('suggestion mousedown', () => {
-    it('should call onNavigate and close', async () => {
-      const { navigator, navigated, counts } = makeNavigator({
-        getDirectoryContents: async () => [{ name: 'alpha', type: 'directory' }]
+    it('should call model.cd and close', async () => {
+      const { navigator, cdCalls, closedCount } = makeNavigator({
+        getResult: [{ name: 'alpha', type: 'directory' }]
       });
-      navigator.open('');
+      navigator.open();
       await flushPromises();
       const li = suggestionItems(navigator)[0];
       simulate(li, 'mousedown');
-      expect(navigated).toEqual(['alpha']);
-      expect(counts.closed).toBe(1);
+      expect(cdCalls).toEqual(['/alpha']);
+      expect(closedCount.value).toBe(1);
     });
   });
 
   describe('blur', () => {
     it('should close on input blur', () => {
-      const { navigator, counts } = makeNavigator();
-      navigator.open('some/path');
+      const { navigator, closedCount } = makeNavigator();
+      navigator.open();
       simulate(inputEl(navigator), 'blur');
-      expect(counts.closed).toBe(1);
+      expect(closedCount.value).toBe(1);
     });
   });
 });

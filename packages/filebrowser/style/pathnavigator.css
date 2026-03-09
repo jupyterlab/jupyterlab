@@ -17,7 +17,7 @@
   cursor: text;
 }
 
-.jp-BreadCrumbs:not(.jp-mod-inputMode) .jp-BreadCrumbs-fill:hover {
+.jp-BreadCrumbs-fill:hover {
   background: var(--jp-layout-color2);
 }
 
@@ -72,20 +72,17 @@
   background: var(--jp-layout-color2);
 }
 
-/* Edit mode: BreadCrumbs shows only PathNavigator, full-width */
-.jp-BreadCrumbs.jp-mod-inputMode {
+/*
+ * Edit mode: the DOM only contains PathNavigator as a direct child.
+ * When PathNavigator is the sole child it stretches to fill the bar.
+ * The :only-child selector matches this state without needing a CSS class.
+ */
+.jp-BreadCrumbs > .jp-PathNavigator:only-child {
+  display: block;
+  width: 100%;
   position: relative;
 }
 
-.jp-BreadCrumbs.jp-mod-inputMode > *:not(.jp-PathNavigator) {
-  display: none;
-}
-
-.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator {
-  display: block;
-  width: 100%;
-}
-
-.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > input {
+.jp-BreadCrumbs > .jp-PathNavigator:only-child > input {
   display: block;
 }
