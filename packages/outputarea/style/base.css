@@ -196,7 +196,9 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 }
 
 .jp-TrimmedOutputs-button:focus-visible {
-  outline: 2px solid var(--jp-focus-outline-color, var(--jp-brand-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -1px;
 }
 
@@ -270,7 +272,9 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 }
 
 .jp-Stdin-input:focus-visible {
-  outline: 2px solid var(--jp-focus-outline-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -2px;
 }
 

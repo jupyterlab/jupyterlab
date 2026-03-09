@@ -49,7 +49,9 @@ input.jp-mod-styled:focus {
 }
 
 input[type='checkbox'].jp-mod-styled:focus-visible {
-  outline: 2px solid var(--jp-input-active-border-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: 1px;
 }
 

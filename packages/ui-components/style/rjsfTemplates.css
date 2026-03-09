@@ -58,13 +58,17 @@
 .jp-FormGroup-content fieldset input:focus,
 .jp-FormGroup-content fieldset select:focus {
   -moz-outline-radius: unset;
-  outline: 2px solid var(--jp-input-active-border-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-input-active-border-color);
+  outline-style: solid;
   outline-offset: -1px;
   box-shadow: var(--jp-input-box-shadow);
 }
 
 .jp-FormGroup-content fieldset input[type="checkbox"]:focus-visible {
-  outline: 2px solid var(--jp-focus-outline-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: 1px;
 }
 

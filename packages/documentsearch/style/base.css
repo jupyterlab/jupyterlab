@@ -100,13 +100,17 @@
 
 .jp-DocumentSearch-toggle-wrapper:focus,
 .jp-DocumentSearch-button-wrapper:focus {
-  outline: 2px solid var(--jp-focus-outline-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -2px;
 }
 
 /* Higher specificity is needed to override .jp-ThemedContainer button:focus-visible */
 .jp-DocumentSearch-overlay .jp-DocumentSearch-button-wrapper:focus-visible {
-  outline: var(--jp-focus-outline);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -2px;
 }
 
@@ -226,7 +230,9 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
 }
 
 .jp-DocumentSearch-replace-button-wrapper:focus {
-  outline: 2px solid var(--jp-focus-outline-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
 }
 
 .jp-DocumentSearch-replace-button {
