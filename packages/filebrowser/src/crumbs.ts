@@ -500,15 +500,13 @@ export class BreadCrumbs extends Widget {
    * including those currently hidden behind the ellipsis.
    */
   private _measureAllItemWidths(parts: string[]): void {
-    const container = this._crumbContainer;
+    const node = this._crumbContainer;
 
     // Measure fixed elements that are already in the DOM
     const home = this._crumbs[Private.Crumb.Home];
     const ellipsis = this._crumbs[Private.Crumb.Ellipsis];
     const preferred = this._crumbs[Private.Crumb.Preferred];
-    const separators = container.getElementsByClassName(
-      BREADCRUMB_SEPARATOR_CLASS
-    );
+    const separators = node.getElementsByClassName(BREADCRUMB_SEPARATOR_CLASS);
     const separator = separators.length > 0 ? separators[0] : null;
 
     // Create an off-screen container to measure all items
@@ -520,7 +518,7 @@ export class BreadCrumbs extends Widget {
     measurer.style.whiteSpace = 'nowrap';
     // Inherit font styles from the breadcrumb node
     measurer.className = BREADCRUMB_CLASS;
-    container.appendChild(measurer);
+    node.appendChild(measurer);
 
     // Create and measure each breadcrumb item for every path segment
     const itemWidths: number[] = [];
@@ -537,7 +535,7 @@ export class BreadCrumbs extends Widget {
     }
 
     // Clean up
-    container.removeChild(measurer);
+    node.removeChild(measurer);
 
     this._cachedWidths = {
       home: (home.getBoundingClientRect().width || 22) + 4,
