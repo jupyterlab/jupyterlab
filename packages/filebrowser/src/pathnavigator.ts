@@ -140,7 +140,7 @@ export class PathNavigator extends Widget {
       .cd(normalized || '/')
       .then(() => this._close())
       .catch(error => {
-        showErrorMessage(this._trans.__('Open Error'), error);
+        void showErrorMessage(this._trans.__('Open Error'), error);
         this._close();
       });
   }
