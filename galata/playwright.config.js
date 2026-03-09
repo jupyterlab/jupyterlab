@@ -5,7 +5,9 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
 var chromiumArgs = [
   // Ensures that subpixel font rendering in Chrome is the same on CI as locally
-  '--disable-lcd-text'
+  '--disable-lcd-text',
+  // Use a consistent web font rendering code path
+  '--disable-skia-runtime-opts'
 ];
 
 module.exports = {
