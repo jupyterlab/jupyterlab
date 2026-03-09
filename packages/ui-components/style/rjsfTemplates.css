@@ -65,7 +65,7 @@
   box-shadow: var(--jp-input-box-shadow);
 }
 
-.jp-FormGroup-content fieldset input[type="checkbox"]:focus-visible {
+.jp-FormGroup-content fieldset input[type='checkbox']:focus-visible {
   outline-width: var(--jp-focus-outline-width);
   outline-color: var(--jp-focus-outline-color);
   outline-style: solid;

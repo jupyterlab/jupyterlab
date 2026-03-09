@@ -482,7 +482,7 @@ all of MD as it is not optimized for dense, information rich UIs.
       This color is slightly darker than --jp-brand-color1 to ensure there is
       enough contrast with the white borders.
   */
-  --jp-focus-outline-color: #0E80DD;
+  --jp-focus-outline-color: #0e80dd;
   --jp-focus-outline-width: 2px;
 }
 
