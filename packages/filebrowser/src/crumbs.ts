@@ -67,6 +67,11 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 const BREADCRUMB_FILL_CLASS = 'jp-BreadCrumbs-fill';
 
 /**
+ * The class name for the container span that holds all breadcrumb items.
+ */
+const BREADCRUMB_CONTAINER_CLASS = 'jp-BreadCrumbs-container';
+
+/**
  * The class name added to the breadcrumb node when in edit mode.
  */
 const BREADCRUMB_EDIT_MODE_CLASS = 'jp-mod-editMode';
@@ -92,10 +97,25 @@ export class BreadCrumbs extends Widget {
     this._crumbs = Private.createCrumbs();
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
+
+    // The widget has two direct children:
+    //   1. _crumbContainer — holds breadcrumb icons, separators, items, and fill
+    //   2. PathNavigator   — the path input + suggestions dropdown
+    // updateCrumbs only touches the container, so the PathNavigator is never
+    // accidentally removed or reordered.
+    this._crumbContainer = document.createElement('span');
+    this._crumbContainer.className = BREADCRUMB_CONTAINER_CLASS;
     if (this._hasPreferred) {
-      this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
+      this._crumbContainer.appendChild(this._crumbs[Private.Crumb.Preferred]);
     }
-    this.node.appendChild(this._crumbs[Private.Crumb.Home]);
+    this._crumbContainer.appendChild(this._crumbs[Private.Crumb.Home]);
+
+    this._fillNode = document.createElement('span');
+    this._fillNode.className = BREADCRUMB_FILL_CLASS;
+    this._crumbContainer.appendChild(this._fillNode);
+
+    this.node.appendChild(this._crumbContainer);
+
     this._model.refreshed.connect(this._onModelRefreshed, this);
     this._resizeThrottler = new Throttler(() => this._onResize(), 50);
     this._resizeObserver = new ResizeObserver(entries => {
@@ -116,10 +136,6 @@ export class BreadCrumbs extends Widget {
       translator: options.translator
     });
     this._pathNavigator.closed.connect(this._exitEditMode, this);
-
-    this._fillNode = document.createElement('span');
-    this._fillNode.className = BREADCRUMB_FILL_CLASS;
-    this.node.appendChild(this._fillNode);
     this.node.appendChild(this._pathNavigator.node);
   }
 
@@ -269,12 +285,11 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
 
-    Private.updateCrumbs(this._crumbs, state);
+    Private.updateCrumbs(this._crumbContainer, this._crumbs, state);
 
-    // Re-append fill and navigator nodes: Private.updateCrumbs() removes all
-    // children after the first one on every render, so they get detached.
-    this.node.appendChild(this._fillNode);
-    this.node.appendChild(this._pathNavigator.node);
+    // Re-append the fill node — updateCrumbs clears everything after the
+    // first child (Preferred or Home) and rebuilds, so fill gets detached.
+    this._crumbContainer.appendChild(this._fillNode);
   }
 
   /**
@@ -464,7 +479,7 @@ export class BreadCrumbs extends Widget {
    */
   private _getBreadcrumbElements(): HTMLElement[] {
     const elements: HTMLElement[] = [];
-    const children = this.node.children;
+    const children = this._crumbContainer.children;
     for (let i = 0; i < children.length; i++) {
       const child = children[i] as HTMLElement;
       if (
@@ -497,13 +512,15 @@ export class BreadCrumbs extends Widget {
    * including those currently hidden behind the ellipsis.
    */
   private _measureAllItemWidths(parts: string[]): void {
-    const node = this.node;
+    const container = this._crumbContainer;
 
     // Measure fixed elements that are already in the DOM
     const home = this._crumbs[Private.Crumb.Home];
     const ellipsis = this._crumbs[Private.Crumb.Ellipsis];
     const preferred = this._crumbs[Private.Crumb.Preferred];
-    const separators = node.getElementsByClassName(BREADCRUMB_SEPARATOR_CLASS);
+    const separators = container.getElementsByClassName(
+      BREADCRUMB_SEPARATOR_CLASS
+    );
     const separator = separators.length > 0 ? separators[0] : null;
 
     // Create an off-screen container to measure all items
@@ -515,7 +532,7 @@ export class BreadCrumbs extends Widget {
     measurer.style.whiteSpace = 'nowrap';
     // Inherit font styles from the breadcrumb node
     measurer.className = BREADCRUMB_CLASS;
-    node.appendChild(measurer);
+    container.appendChild(measurer);
 
     // Create and measure each breadcrumb item for every path segment
     const itemWidths: number[] = [];
@@ -532,7 +549,7 @@ export class BreadCrumbs extends Widget {
     }
 
     // Clean up
-    node.removeChild(measurer);
+    container.removeChild(measurer);
 
     this._cachedWidths = {
       home: (home.getBoundingClientRect().width || 22) + 4,
@@ -717,6 +734,7 @@ export class BreadCrumbs extends Widget {
   private _lastRenderedWidth = 0;
   private _isEditMode = false;
   private _lastPath = '';
+  private _crumbContainer: HTMLElement;
   private _fillNode: HTMLElement;
   private _pathNavigator: PathNavigator;
 }
@@ -782,25 +800,28 @@ namespace Private {
   }
 
   /**
-   * Populate the breadcrumb node.
+   * Populate the breadcrumb container node.
+   *
+   * @param container - The container element that holds breadcrumb items.
+   * @param breadcrumbs - The reusable breadcrumb elements (Home, Ellipsis, Preferred).
+   * @param state - The current breadcrumb state.
    */
   export function updateCrumbs(
+    container: HTMLElement,
     breadcrumbs: ReadonlyArray<HTMLElement>,
     state: ICrumbsState
   ): void {
-    const node = breadcrumbs[0].parentNode as HTMLElement;
-
-    // Remove all but the home or preferred node.
-    const firstChild = node.firstChild as HTMLElement;
+    // Remove all but the first child (Preferred when hasPreferred, else Home).
+    const firstChild = container.firstChild as HTMLElement;
     while (firstChild && firstChild.nextSibling) {
-      node.removeChild(firstChild.nextSibling);
+      container.removeChild(firstChild.nextSibling);
     }
 
     if (state.hasPreferred) {
-      node.appendChild(breadcrumbs[Crumb.Home]);
-      node.appendChild(createCrumbSeparator());
+      container.appendChild(breadcrumbs[Crumb.Home]);
+      container.appendChild(createCrumbSeparator());
     } else {
-      node.appendChild(createCrumbSeparator());
+      container.appendChild(createCrumbSeparator());
     }
 
     const parts = state.path.split('/').filter(part => part !== '');
@@ -814,12 +835,12 @@ namespace Private {
         for (let i = 0; i < minimumLeftItems; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
-          node.appendChild(elem);
-          node.appendChild(createCrumbSeparator());
+          container.appendChild(elem);
+          container.appendChild(createCrumbSeparator());
         }
 
         // Add ellipsis
-        node.appendChild(breadcrumbs[Crumb.Ellipsis]);
+        container.appendChild(breadcrumbs[Crumb.Ellipsis]);
         const hiddenStartIndex = minimumLeftItems;
         const hiddenEndIndex = parts.length - minimumRightItems;
         const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
@@ -830,30 +851,30 @@ namespace Private {
             : parts.slice(0, minimumLeftItems).join('/');
         breadcrumbs[Crumb.Ellipsis].title = hiddenFolders;
         breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
-        node.appendChild(createCrumbSeparator());
+        container.appendChild(createCrumbSeparator());
 
         // Add right items
         const rightStartIndex = parts.length - minimumRightItems;
         for (let i = rightStartIndex; i < parts.length; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
-          node.appendChild(elem);
-          node.appendChild(createCrumbSeparator());
+          container.appendChild(elem);
+          container.appendChild(createCrumbSeparator());
         }
       } else {
         for (let i = 0; i < parts.length; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
-          node.appendChild(elem);
-          node.appendChild(createCrumbSeparator());
+          container.appendChild(elem);
+          container.appendChild(createCrumbSeparator());
         }
       }
     } else if (state.fullPath && parts.length > 0) {
       for (let i = 0; i < parts.length; i++) {
         const elemPath = parts.slice(0, i + 1).join('/');
         const elem = createBreadcrumbElement(parts[i], elemPath);
-        node.appendChild(elem);
-        node.appendChild(createCrumbSeparator());
+        container.appendChild(elem);
+        container.appendChild(createCrumbSeparator());
       }
     }
   }
