@@ -200,7 +200,7 @@
 }
 
 .jp-toast-button:focus {
-  outline: 1px solid var(--jp-reject-color-normal, var(--jp-layout-color2));
+  outline: 2px solid var(--jp-reject-color-normal, var(--jp-layout-color2));
   outline-offset: 1px;
   -moz-outline-radius: 0;
 }
