@@ -53,8 +53,9 @@
 }
 
 .jp-SideBar .lm-TabBar-tab:focus-visible {
-  /* --accent-fill-focus is computed by the jp toolkit to ensure accessibility */
-  outline: 2px solid var(--accent-fill-focus, var(--jp-focus-outline-color));
+  outline-color: var(--jp-focus-outline-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-style: solid;
   outline-offset: -3px;
 }
 

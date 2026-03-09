@@ -59,7 +59,9 @@ button.jp-Dialog-button:disabled {
 }
 
 button.jp-Dialog-button:focus {
-  outline: var(--jp-focus-outline);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: 4px;
   -moz-outline-radius: 0;
 }
@@ -76,15 +78,21 @@ button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus {
-  outline: 2px solid var(--jp-accept-color-normal, var(--jp-focus-outline-color));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-accept-color-normal, var(--jp-focus-outline-color));
+  outline-style: solid;
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus {
-  outline: 2px solid var(--jp-warn-color-normal, var(--jp-error-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-warn-color-normal, var(--jp-error-color1));
+  outline-style: solid;
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
-  outline: 2px solid var(--jp-reject-color-normal, var(--md-grey-600, #757575));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-reject-color-normal, var(--md-grey-600, #757575));
+  outline-style: solid;
 }
 
 button.jp-Dialog-close-button {

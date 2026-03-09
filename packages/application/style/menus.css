@@ -85,7 +85,9 @@
 }
 
 .lm-MenuBar:focus-visible {
-  outline: 2px solid var(--jp-accept-color-active, var(--jp-focus-outline-color));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-accept-color-active, var(--jp-focus-outline-color));
+  outline-style: solid;
   outline-offset: -1px;
 }
 

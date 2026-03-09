@@ -386,8 +386,8 @@
 .jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
   /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
   when it gets replaced with `jp-DirListing-editor` when editing the file name */
-  outline-width: 2px;
-  outline-color: var(--jp-inverse-layout-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
   outline-offset: -4px;
 }
