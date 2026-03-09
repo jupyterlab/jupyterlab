@@ -66,8 +66,17 @@ test.describe('Internationalization', () => {
       }`
     });
 
+    await page.evaluate(() => {
+      document.body.style.fontKerning = 'none';
+    });
+
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
+
+    await page.evaluate(() => {
+      const x = document.body.innerHTML;
+      document.body.innerHTML = x;
+    });
 
     expect.soft(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
 
