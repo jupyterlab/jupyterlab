@@ -477,9 +477,12 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-switch-color: var(--md-grey-400, #bdbdbd);
   --jp-switch-true-position-color: var(--md-orange-700, #f57c00);
 
-  /* Outline styles for focus-visible states needed for keyboard navigation */
-  /* 2px is the minimum size required for accessibility */
-  --jp-focus-outline-color: var(--jp-brand-color1);
+  /* Outline styles for focus-visible states needed for keyboard navigation.
+      2px is the minimum size required for accessibility.
+      This color is slightly lighter than --jp-brand-color1 to ensure there is
+      enough contrast on the lighter backgrounds (--jp-layout-color2).
+  */
+  --jp-focus-outline-color: #38A0F5;
   --jp-focus-outline-width: 2px;
 }
 
