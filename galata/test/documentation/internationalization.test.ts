@@ -64,11 +64,12 @@ test.describe('Internationalization', () => {
     });
 
     await page.evaluate(async () => {
+      document.body.style.fontKerning = 'normal';
       // Workaround a Chromium issue with CJK characters
       // rendering as "tofu" blank rectangles.
       await document.fonts.load('12px "Noto Sans SC Variable"');
-      // This just triggers reflow
-      document.body.offsetHeight;
+      // Force-refresh all text
+      document.body.style.fontKerning = 'none';
     });
 
     // Wait for the launcher to be loaded
