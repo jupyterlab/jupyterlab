@@ -247,6 +247,7 @@ export class BreadCrumbs extends Widget {
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
+    this._lastPath = localPath;
 
     // Invalidate cached widths if the path changed
     if (this._previousState && this._previousState.path !== localPath) {
@@ -676,8 +677,20 @@ export class BreadCrumbs extends Widget {
    * If we are in edit mode, dismiss it (the model path may have changed).
    */
   private _onModelRefreshed(): void {
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
+    console.warn(
+      '[BreadCrumbs] model refreshed — path: %s, isEditMode: %s',
+      localPath || '/',
+      this._isEditMode
+    );
     if (this._isEditMode) {
-      this._exitEditMode();
+      // Only exit edit mode if the path actually changed (e.g. the user
+      // navigated via the PathNavigator).  Background refreshes of the
+      // same directory should not dismiss the input.
+      if (localPath !== this._lastPath) {
+        this._exitEditMode();
+      }
       return;
     }
     this.update();
@@ -703,6 +716,7 @@ export class BreadCrumbs extends Widget {
   } | null = null;
   private _lastRenderedWidth = 0;
   private _isEditMode = false;
+  private _lastPath = '';
   private _fillNode: HTMLElement;
   private _pathNavigator: PathNavigator;
 }

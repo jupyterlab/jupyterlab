@@ -303,7 +303,7 @@ export class PathNavigator extends Widget {
 
     const path = activeItem.dataset.path;
     if (path) {
-      this._inputNode.value = path + '/';
+      this._inputNode.value = path;
     }
   }
 
