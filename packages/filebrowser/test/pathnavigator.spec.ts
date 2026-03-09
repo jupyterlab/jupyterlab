@@ -165,11 +165,12 @@ describe('PathNavigator', () => {
   });
 
   describe('keyboard navigation', () => {
-    it('should call model.cd and close on Enter', () => {
+    it('should call model.cd and close on Enter', async () => {
       const { navigator, cdCalls, closedCount } = makeNavigator();
       navigator.open();
       inputEl(navigator).value = 'my/path';
       keydown(inputEl(navigator), 'Enter');
+      await flushPromises();
       expect(cdCalls).toEqual(['/my/path']);
       expect(closedCount.value).toBe(1);
     });
@@ -236,6 +237,7 @@ describe('PathNavigator', () => {
       await flushPromises();
       const li = suggestionItems(navigator)[0];
       simulate(li, 'mousedown');
+      await flushPromises();
       expect(cdCalls).toEqual(['/alpha']);
       expect(closedCount.value).toBe(1);
     });

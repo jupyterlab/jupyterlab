@@ -37,7 +37,7 @@
   padding: 2px 6px;
   font-size: var(--jp-ui-font-size1);
   height: 17px;
-  border: thin solid blue;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
 }
 
 .jp-PathNavigator > input:focus {
@@ -73,16 +73,19 @@
 }
 
 /*
- * Edit mode: the DOM only contains PathNavigator as a direct child.
- * When PathNavigator is the sole child it stretches to fill the bar.
- * The :only-child selector matches this state without needing a CSS class.
+ * Edit mode: the breadcrumb bar gets the jp-mod-editMode class so the
+ * PathNavigator stretches to fill the full width.
  */
-.jp-BreadCrumbs > .jp-PathNavigator:only-child {
+.jp-BreadCrumbs.jp-mod-editMode > .jp-PathNavigator {
   display: block;
   width: 100%;
   position: relative;
 }
 
-.jp-BreadCrumbs > .jp-PathNavigator:only-child > input {
+.jp-BreadCrumbs.jp-mod-editMode > *:not(.jp-PathNavigator) {
+  display: none;
+}
+
+.jp-BreadCrumbs.jp-mod-editMode > .jp-PathNavigator > input {
   display: block;
 }

@@ -134,10 +134,15 @@ export class PathNavigator extends Widget {
     if (!normalized.startsWith('/')) {
       normalized = '/' + normalized;
     }
+    // Hide suggestions immediately so the input looks committed.
+    this._suggestionsNode.style.display = 'none';
     this._model
       .cd(normalized || '/')
-      .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
-    this._close();
+      .then(() => this._close())
+      .catch(error => {
+        showErrorMessage(this._trans.__('Open Error'), error);
+        this._close();
+      });
   }
 
   /**

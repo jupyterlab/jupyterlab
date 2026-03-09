@@ -67,6 +67,11 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 const BREADCRUMB_FILL_CLASS = 'jp-BreadCrumbs-fill';
 
 /**
+ * The class name added to the breadcrumb node when in edit mode.
+ */
+const BREADCRUMB_EDIT_MODE_CLASS = 'jp-mod-editMode';
+
+/**
  * A class which hosts folder breadcrumbs.
  */
 export class BreadCrumbs extends Widget {
@@ -190,6 +195,9 @@ export class BreadCrumbs extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._model.refreshed.disconnect(this._onModelRefreshed, this);
+    this._pathNavigator.closed.disconnect(this._exitEditMode, this);
+    this._pathNavigator.dispose();
     this._resizeObserver.disconnect();
     this._resizeThrottler.dispose();
     super.dispose();
@@ -231,10 +239,8 @@ export class BreadCrumbs extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._isEditMode) {
-      // In edit mode the breadcrumb bar contains only the PathNavigator,
-      // stretched to fill the full width.
-      Private.clearChildren(this.node);
-      this.node.appendChild(this._pathNavigator.node);
+      // In edit mode the CSS class hides breadcrumb content and stretches
+      // the PathNavigator to fill the full width.
       return;
     }
 
@@ -262,15 +268,6 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
 
-    // Ensure the anchor crumb node is in the DOM before updateCrumbs runs —
-    // it derives the parent node from breadcrumbs[0].parentNode, and the node
-    // may have been detached by a previous edit-mode clearChildren call.
-    if (!this._crumbs[0].parentNode) {
-      if (this._hasPreferred) {
-        this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
-      }
-      this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    }
     Private.updateCrumbs(this._crumbs, state);
 
     // Re-append fill and navigator nodes: Private.updateCrumbs() removes all
@@ -656,8 +653,8 @@ export class BreadCrumbs extends Widget {
    */
   private _enterEditMode(): void {
     this._isEditMode = true;
+    this.node.classList.add(BREADCRUMB_EDIT_MODE_CLASS);
     this._previousState = null;
-    this.update();
     this._pathNavigator.open();
   }
 
@@ -669,6 +666,7 @@ export class BreadCrumbs extends Widget {
       return;
     }
     this._isEditMode = false;
+    this.node.classList.remove(BREADCRUMB_EDIT_MODE_CLASS);
     this._previousState = null;
     this.update();
   }
@@ -767,15 +765,6 @@ namespace Private {
     fullPath: boolean;
     minimumLeftItems: number;
     minimumRightItems: number;
-  }
-
-  /**
-   * Remove all children from a node.
-   */
-  export function clearChildren(node: HTMLElement): void {
-    while (node.firstChild) {
-      node.removeChild(node.firstChild);
-    }
   }
 
   /**
