@@ -288,6 +288,11 @@ export class BreadCrumbs extends Widget {
       return;
     }
 
+    // In edit mode the PathNavigator owns all interaction.
+    if (this._isEditMode) {
+      return;
+    }
+
     // Find a valid click target.
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
@@ -303,10 +308,6 @@ export class BreadCrumbs extends Widget {
         // Stop the event propagation.
         event.preventDefault();
         event.stopPropagation();
-        return;
-      }
-      if (this._pathNavigator.node.contains(node)) {
-        // Inside PathNavigator — not a breadcrumb navigation click.
         return;
       }
       if (
