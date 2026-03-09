@@ -683,9 +683,6 @@ export class BreadCrumbs extends Widget {
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
     if (this._isEditMode) {
-      // Only exit edit mode if the path actually changed (e.g. the user
-      // navigated via the PathNavigator).  Background refreshes of the
-      // same directory should not dismiss the input.
       if (localPath !== this._lastPath) {
         this._exitEditMode();
       }
@@ -786,7 +783,7 @@ namespace Private {
    * @param container - The container element that holds breadcrumb items.
    * @param breadcrumbs - The reusable breadcrumb elements (Home, Ellipsis, Preferred).
    * @param state - The current breadcrumb state.
-   * @param fillNode - The trailing fill element, re-appended at the end.
+   * @param fillNode - The trailing fill element.
    */
   export function updateCrumbs(
     container: HTMLElement,
