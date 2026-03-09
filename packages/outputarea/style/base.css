@@ -269,6 +269,11 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   box-shadow: none;
 }
 
+.jp-Stdin-input:focus-visible {
+  outline: 2px solid var(--jp-focus-outline-color);
+  outline-offset: -2px;
+}
+
 .jp-Stdin-input:focus::placeholder {
   opacity: 1;
 }
