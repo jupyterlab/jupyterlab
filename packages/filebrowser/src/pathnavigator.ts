@@ -303,6 +303,10 @@ export class PathNavigator extends Widget {
 
     const path = activeItem.dataset.path;
     if (path) {
+      // it is tempting to append / here, though not appending it allows us to us
+      // this key (`/`) as comiting navigation in the pathnavigator and keep typing, or
+      // and showing completion whiel Enter/Return validate the breadcrumb level.
+      // appending / here feels awkward when to use inpractice
       this._inputNode.value = path;
     }
   }
