@@ -2320,6 +2320,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jupyter/eslint-plugin@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@jupyter/eslint-plugin@npm:0.0.2"
+  peerDependencies:
+    eslint: ">=9.0.0"
+  checksum: 63efec5ed97dfa3187852389d96c5b41d221f7069a41ec1766244dbe4ac68e3c16c65a127801ece5900f92f872c9efa4ef9bc7d1f8b1e1b71f30b1a2afef6bd9
+  languageName: node
+  linkType: hard
+
 "@jupyter/react-components@npm:^0.16.6":
   version: 0.16.6
   resolution: "@jupyter/react-components@npm:0.16.6"
@@ -4755,6 +4764,7 @@ __metadata:
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
     "@eslint/js": ^10.0.1
+    "@jupyter/eslint-plugin": 0.0.2
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
