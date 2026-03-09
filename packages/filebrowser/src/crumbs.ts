@@ -99,14 +99,8 @@ export class BreadCrumbs extends Widget {
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     this._crumbContainer = document.createElement('span');
     this._crumbContainer.className = BREADCRUMB_CONTAINER_CLASS;
-    if (this._hasPreferred) {
-      this._crumbContainer.appendChild(this._crumbs[Private.Crumb.Preferred]);
-    }
-    this._crumbContainer.appendChild(this._crumbs[Private.Crumb.Home]);
-
     this._fillNode = document.createElement('span');
     this._fillNode.className = BREADCRUMB_FILL_CLASS;
-    this._crumbContainer.appendChild(this._fillNode);
 
     this.node.appendChild(this._crumbContainer);
 
@@ -279,11 +273,12 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
 
-    Private.updateCrumbs(this._crumbContainer, this._crumbs, state);
-
-    // Re-append the fill node — updateCrumbs clears everything after the
-    // first child (Preferred or Home) and rebuilds, so fill gets detached.
-    this._crumbContainer.appendChild(this._fillNode);
+    Private.updateCrumbs(
+      this._crumbContainer,
+      this._crumbs,
+      state,
+      this._fillNode
+    );
   }
 
   /**
@@ -690,11 +685,6 @@ export class BreadCrumbs extends Widget {
   private _onModelRefreshed(): void {
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
-    console.warn(
-      '[BreadCrumbs] model refreshed — path: %s, isEditMode: %s',
-      localPath || '/',
-      this._isEditMode
-    );
     if (this._isEditMode) {
       // Only exit edit mode if the path actually changed (e.g. the user
       // navigated via the PathNavigator).  Background refreshes of the
@@ -799,24 +789,26 @@ namespace Private {
    * @param container - The container element that holds breadcrumb items.
    * @param breadcrumbs - The reusable breadcrumb elements (Home, Ellipsis, Preferred).
    * @param state - The current breadcrumb state.
+   * @param fillNode - The trailing fill element, re-appended at the end.
    */
   export function updateCrumbs(
     container: HTMLElement,
     breadcrumbs: ReadonlyArray<HTMLElement>,
-    state: ICrumbsState
+    state: ICrumbsState,
+    fillNode: HTMLElement
   ): void {
     // Remove all but the first child (Preferred when hasPreferred, else Home).
     const firstChild = container.firstChild as HTMLElement;
+    console.warn('FC:', firstChild);
     while (firstChild && firstChild.nextSibling) {
       container.removeChild(firstChild.nextSibling);
     }
 
     if (state.hasPreferred) {
-      container.appendChild(breadcrumbs[Crumb.Home]);
-      container.appendChild(createCrumbSeparator());
-    } else {
-      container.appendChild(createCrumbSeparator());
+      container.appendChild(breadcrumbs[Private.Crumb.Preferred]);
     }
+    container.appendChild(breadcrumbs[Crumb.Home]);
+    container.appendChild(createCrumbSeparator());
 
     const parts = state.path.split('/').filter(part => part !== '');
     if (!state.fullPath && parts.length > 0) {
@@ -871,6 +863,8 @@ namespace Private {
         container.appendChild(createCrumbSeparator());
       }
     }
+
+    container.appendChild(fillNode);
   }
 
   /**
