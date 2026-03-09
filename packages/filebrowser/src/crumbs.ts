@@ -791,69 +791,62 @@ namespace Private {
     state: ICrumbsState,
     fillNode: HTMLElement
   ): void {
-    container.replaceChildren();
+    const nodes: Node[] = [];
 
     if (state.hasPreferred) {
-      container.appendChild(breadcrumbs[Private.Crumb.Preferred]);
+      nodes.push(breadcrumbs[Private.Crumb.Preferred]);
     }
-    container.appendChild(breadcrumbs[Crumb.Home]);
-    container.appendChild(createCrumbSeparator());
+    nodes.push(breadcrumbs[Crumb.Home], createCrumbSeparator());
 
     const parts = state.path.split('/').filter(part => part !== '');
     if (!state.fullPath && parts.length > 0) {
       const minimumLeftItems = state.minimumLeftItems;
       const minimumRightItems = state.minimumRightItems;
 
-      // Check if we need ellipsis
       if (parts.length > minimumLeftItems + minimumRightItems) {
-        // Add left items
+        // Left items
         for (let i = 0; i < minimumLeftItems; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
-          container.appendChild(elem);
-          container.appendChild(createCrumbSeparator());
+          nodes.push(createBreadcrumbElement(parts[i], elemPath));
+          nodes.push(createCrumbSeparator());
         }
 
-        // Add ellipsis
-        container.appendChild(breadcrumbs[Crumb.Ellipsis]);
+        // Ellipsis
         const hiddenStartIndex = minimumLeftItems;
         const hiddenEndIndex = parts.length - minimumRightItems;
         const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
-        const hiddenFolders = hiddenParts.join('/');
-        const hiddenPath =
+        const ellipsis = breadcrumbs[Crumb.Ellipsis];
+        ellipsis.title = hiddenParts.join('/');
+        ellipsis.dataset.path =
           hiddenParts.length > 0
             ? parts.slice(0, hiddenEndIndex).join('/')
             : parts.slice(0, minimumLeftItems).join('/');
-        breadcrumbs[Crumb.Ellipsis].title = hiddenFolders;
-        breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
-        container.appendChild(createCrumbSeparator());
+        nodes.push(ellipsis, createCrumbSeparator());
 
-        // Add right items
+        // Right items
         const rightStartIndex = parts.length - minimumRightItems;
         for (let i = rightStartIndex; i < parts.length; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
-          container.appendChild(elem);
-          container.appendChild(createCrumbSeparator());
+          nodes.push(createBreadcrumbElement(parts[i], elemPath));
+          nodes.push(createCrumbSeparator());
         }
       } else {
         for (let i = 0; i < parts.length; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
-          container.appendChild(elem);
-          container.appendChild(createCrumbSeparator());
+          nodes.push(createBreadcrumbElement(parts[i], elemPath));
+          nodes.push(createCrumbSeparator());
         }
       }
     } else if (state.fullPath && parts.length > 0) {
       for (let i = 0; i < parts.length; i++) {
         const elemPath = parts.slice(0, i + 1).join('/');
-        const elem = createBreadcrumbElement(parts[i], elemPath);
-        container.appendChild(elem);
-        container.appendChild(createCrumbSeparator());
+        nodes.push(createBreadcrumbElement(parts[i], elemPath));
+        nodes.push(createCrumbSeparator());
       }
     }
 
-    container.appendChild(fillNode);
+    nodes.push(fillNode);
+    container.replaceChildren(...nodes);
   }
 
   /**
