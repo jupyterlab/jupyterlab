@@ -12,7 +12,8 @@ test.use({
     ...galata.DEFAULT_SETTINGS,
     '@jupyterlab/apputils-extension:themes': {
       overrides: {
-        // Use a font with full Simplified Chineese support for this test
+        // Use a font with full Simplified Chineese support for this test;
+        // Note, it also includes the `latin` subset so no fallback needed.
         'content-font-family': '"Noto Sans SC Variable"',
         'ui-font-family': '"Noto Sans SC Variable"'
       }
