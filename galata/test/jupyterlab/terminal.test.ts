@@ -155,7 +155,9 @@ test.describe('Terminal with screenReaderMode', () => {
   });
 
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
-    await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
+    await page
+      .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
+      .waitFor();
 
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
@@ -176,7 +178,9 @@ test.describe('Terminal with screenReaderMode', () => {
   test('Terminal web link', async ({ page, tmpPath, browserName }) => {
     test.skip(browserName === 'firefox', 'Flaky on Firefox');
 
-    await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
+    await page
+      .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
+      .waitFor();
 
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
@@ -188,7 +192,9 @@ test.describe('Terminal with screenReaderMode', () => {
 
     // Wait for the URL to appear in the terminal output
     const terminalBody = terminal.locator('.jp-Terminal-body:visible');
-    await expect(terminalBody).toContainText('https://jupyter.org/', { timeout: 5000 });
+    await expect(terminalBody).toContainText('https://jupyter.org/', {
+      timeout: 5000
+    });
 
     // Wait for the link to become interactive, then hover
     await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
@@ -309,17 +315,24 @@ test.describe('Open in Terminal from File Browser', () => {
       await tabs.nth(i).click();
 
       // Find the currently visible terminal container
-      const activeTerminalContainer = page.locator('.lm-DockPanel .jp-Terminal:visible');
+      const activeTerminalContainer = page.locator(
+        '.lm-DockPanel .jp-Terminal:visible'
+      );
       await activeTerminalContainer.waitFor({ state: 'visible' });
 
       // Ensure the body is visible then run pwd via helper
       await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
       await runCommand(page, activeTerminalContainer, 'pwd');
 
-      const activeBody = activeTerminalContainer.locator('.jp-Terminal-body:visible');
-      await expect(activeBody).toContainText(new RegExp(`${folderA}|${folderB}`), {
-        timeout: 10000
-      });
+      const activeBody = activeTerminalContainer.locator(
+        '.jp-Terminal-body:visible'
+      );
+      await expect(activeBody).toContainText(
+        new RegExp(`${folderA}|${folderB}`),
+        {
+          timeout: 10000
+        }
+      );
 
       const text = await activeBody.textContent();
       if (text?.includes(folderA)) {
