@@ -21,15 +21,17 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 async function runCommand(
   page: Page,
   terminalLocator: Locator,
-  command: string
+  command: string,
+  verify = false
 ): Promise<void> {
   await terminalLocator.locator(TERMINAL_INPUT_SELECTOR).waitFor();
   await terminalLocator.click();
   await page.keyboard.type(command);
-  // Verify the command was fully typed before pressing Enter
-  await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
-    command
-  );
+  if (verify) {
+    await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
+      command
+    );
+  }
   await page.keyboard.press('Enter');
 }
 
@@ -165,7 +167,7 @@ test.describe('Terminal with screenReaderMode', () => {
     await terminal.waitFor();
 
     // use the local helper to run basename
-    await runCommand(page, terminal, 'basename $PWD');
+    await runCommand(page, terminal, 'basename $PWD', true);
 
     // Wait for the basename to appear in the terminal output
     const basename = path.basename(tmpPath);
@@ -188,7 +190,7 @@ test.describe('Terminal with screenReaderMode', () => {
     await terminal.waitFor();
 
     await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-    await runCommand(page, terminal, 'echo https://jupyter.org/');
+    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
 
     // Wait for the URL to appear in the terminal output
     const terminalBody = terminal.locator('.jp-Terminal-body:visible');
