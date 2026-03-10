@@ -84,11 +84,13 @@ test.describe('Internationalization', () => {
 
     // Re-render items which are high in DOM and Chromium sometimes
     // does not manage to the fonts
-    await page.evaluate(async () => {
+    await page.evaluate(() => {
       for (const id of ['jp-menu-panel', 'jp-single-document-mode']) {
         const element = document.getElementById(id) as HTMLElement;
         const source = element.innerHTML;
+        element.innerHTML = '';
         element.innerHTML = source;
+        element.style.fontKerning = '';
       }
     });
 
