@@ -7,7 +7,17 @@ import { filterContent } from './utils';
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  viewport: { height: 720, width: 1280 },
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        // Use a font with full Simplified Chineese support for this test
+        'content-font-family': '"Noto Sans SC Variable"',
+        'ui-font-family': '"Noto Sans SC Variable"'
+      }
+    }
+  }
 });
 
 test.describe('Internationalization', () => {
@@ -63,35 +73,10 @@ test.describe('Internationalization', () => {
       }`
     });
 
-    await page.evaluate(async () => {
-      document.body.style.fontKerning = 'normal';
-      // Workaround a Chromium issue with CJK characters
-      // rendering as "tofu" blank rectangles.
-      await document.fonts.load('12px "Noto Sans SC Variable"');
-      // Force-refresh all text
-      document.body.style.fontKerning = 'none';
-    });
-
-    const simpleModeToggle = await page.evaluate(() =>
-      document.fonts.check('16px "Noto Sans SC Variable"', '简易界面')
-    );
-    expect.soft(simpleModeToggle).toBe(true);
-
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
 
     expect.soft(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
-
-    // Re-render items which are high in DOM and Chromium sometimes
-    // does not manage to the fonts
-    await page.evaluate(() => {
-      for (const id of ['jp-menu-panel', 'jp-single-document-mode']) {
-        const element = document.getElementById(id) as HTMLElement;
-        element.style.color = 'red';
-        element.style.fontFamily = '"Noto Sans SC Variable"';
-        element.style.fontKerning = '';
-      }
-    });
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
