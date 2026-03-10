@@ -87,9 +87,8 @@ test.describe('Internationalization', () => {
     await page.evaluate(() => {
       for (const id of ['jp-menu-panel', 'jp-single-document-mode']) {
         const element = document.getElementById(id) as HTMLElement;
-        const source = element.innerHTML;
-        element.innerHTML = '';
-        element.innerHTML = source;
+        element.style.color = 'red';
+        element.style.fontFamily = '"Noto Sans SC Variable"';
         element.style.fontKerning = '';
       }
     });
