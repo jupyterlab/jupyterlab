@@ -320,6 +320,7 @@ test.describe('Open in Terminal from File Browser', () => {
       const activeTerminalContainer = page.locator(
         '.lm-DockPanel .jp-Terminal:visible'
       );
+      await expect(activeTerminalContainer).toHaveCount(1);
       await activeTerminalContainer.waitFor({ state: 'visible' });
 
       // Ensure the body is visible then run pwd via helper
