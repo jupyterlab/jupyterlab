@@ -31,6 +31,14 @@ export interface ITableOfContentsRegistry {
   ): TableOfContents.Model | undefined;
 
   /**
+   * Get the toolbar items for a widget.
+   *
+   * @param widget - widget
+   * @returns List of toolbar items
+   */
+  getToolbarItems(widget: Widget): ToolbarRegistry.IToolbarItem[] | undefined;
+
+  /**
    * Adds a table of contents factory to the registry.
    *
    * @param factory - table of contents factory
@@ -96,6 +104,14 @@ export namespace TableOfContents {
       widget: W,
       configuration?: TableOfContents.IConfig
     ) => IModel<H>;
+
+    /**
+     * Get the toolbar items for the widget
+     *
+     * @param widget - widget
+     * @returns List of toolbar items
+     */
+    getToolbarItems?: (widget: W) => ToolbarRegistry.IToolbarItem[];
   }
 
   /**

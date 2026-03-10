@@ -4575,6 +4575,7 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.3
     "@jupyterlab/ui-components": ^4.6.0-alpha.3
     "@lumino/algorithm": ^2.0.4
+    "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/domutils": ^2.0.4
@@ -5177,6 +5178,7 @@ __metadata:
     "@jupyterlab/toc": ^6.6.0-alpha.3
     "@jupyterlab/translation": ^4.6.0-alpha.3
     "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@lumino/disposable": ^2.1.5
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
