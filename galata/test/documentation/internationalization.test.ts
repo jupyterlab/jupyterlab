@@ -72,15 +72,25 @@ test.describe('Internationalization', () => {
       document.body.style.fontKerning = 'none';
     });
 
-    const simpleModeToglle = await page.evaluate(() =>
+    const simpleModeToggle = await page.evaluate(() =>
       document.fonts.check('16px "Noto Sans SC Variable"', '简易界面')
     );
-    expect.soft(simpleModeToglle).toBe(true);
+    expect.soft(simpleModeToggle).toBe(true);
 
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
 
     expect.soft(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
+
+    // Re-render items which are high in DOM and Chromium sometimes
+    // does not manage to the fonts
+    await page.evaluate(async () => {
+      for (const id of ['jp-menu-panel', 'jp-single-document-mode']) {
+        const element = document.getElementById(id) as HTMLElement;
+        const source = element.innerHTML;
+        element.innerHTML = source;
+      }
+    });
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
