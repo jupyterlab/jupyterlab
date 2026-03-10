@@ -7,12 +7,11 @@
  * @module settingeditor-extension
  */
 
-import {
-  ILabStatus,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
   ICommandPalette,
@@ -34,7 +33,10 @@ import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
 } from '@jupyterlab/settingeditor/lib/tokens';
-import { JsonSettingEditor, SettingsEditor } from '@jupyterlab/settingeditor';
+import type {
+  JsonSettingEditor,
+  SettingsEditor
+} from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -46,11 +48,13 @@ import {
   settingsIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 import {
   ImportSettingsDialogBodyWidget,
   ImportSettingsWidget
 } from './importSettingsWidget';
+import { history, historyKeymap } from '@codemirror/commands';
+import { keymap } from '@codemirror/view';
 
 const HARDCODED_TO_SKIP = [
   '@jupyterlab/application-extension:context-menu',
@@ -359,7 +363,17 @@ function activateJSON(
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
-        editorFactory,
+        editorFactory: options => {
+          const cmEditor = editorFactory({
+            ...options,
+            extensions: [
+              ...(options.extensions ?? []),
+              history(), // Adds the CM6 undo/redo history extension
+              keymap.of(historyKeymap) // bind Ctrl+Z / Ctrl+Shift+Z
+            ]
+          });
+          return cmEditor;
+        },
         key,
         registry,
         rendermime,

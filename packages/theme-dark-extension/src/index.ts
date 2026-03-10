@@ -5,7 +5,7 @@
  * @module theme-dark-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';

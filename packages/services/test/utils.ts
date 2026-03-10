@@ -1,22 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject,
-  JSONPrimitive,
-  PromiseDelegate,
-  UUID
-} from '@lumino/coreutils';
+import type { JSONObject, JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import WebSocket from 'ws';
+import type { Contents, Kernel, Session, Terminal } from '../src';
 import {
-  Contents,
-  Kernel,
   KernelManager,
   KernelMessage,
   ServerConnection,
-  Session,
-  SessionManager,
-  Terminal
+  SessionManager
 } from '../src';
 import { deserialize, serialize } from '../src/kernel/serialize';
 
@@ -97,7 +90,6 @@ export const KERNELSPECS: JSONObject = {
  */
 export function getRequestHandler(
   status: number,
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any
 ): ServerConnection.ISettings {
   const customFetch = (info: RequestInfo, init?: RequestInit) => {
@@ -121,7 +113,6 @@ export interface IService {
 /**
  * Handle a single request with a mock response.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;

@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { Cell } from '@jupyterlab/cells';
 import {
-  Cell,
   CodeCell,
   CodeCellModel,
   MarkdownCell,
@@ -10,23 +10,20 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import {
-  INotebookModel,
-  Notebook,
-  NotebookModel,
-  StaticNotebook
-} from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { Notebook, NotebookModel, StaticNotebook } from '@jupyterlab/notebook';
 import {
   framePromise,
   JupyterServer,
   signalToPromise,
   sleep
 } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();
@@ -496,7 +493,8 @@ describe('@jupyter/notebook', () => {
       it('should not be called if the model does not change', () => {
         const widget = createWidget();
         widget.methods = [];
-        widget.model = widget.model; // eslint-disable-line
+        // eslint-disable-next-line no-self-assign
+        widget.model = widget.model;
         expect(widget.methods).toEqual(
           expect.not.arrayContaining(['onModelChanged'])
         );
@@ -639,7 +637,8 @@ describe('@jupyter/notebook', () => {
         widget.activeCellChanged.connect(() => {
           called = true;
         });
-        widget.activeCellIndex = widget.activeCellIndex; // eslint-disable-line
+        // eslint-disable-next-line no-self-assign
+        widget.activeCellIndex = widget.activeCellIndex;
         expect(called).toBe(false);
       });
     });

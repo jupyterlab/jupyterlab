@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToolbarRegistry } from '@jupyterlab/apputils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { Widget } from '@lumino/widgets';
-import { ITableOfContentsRegistry, TableOfContents } from './tokens';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { Widget } from '@lumino/widgets';
+import type { ITableOfContentsRegistry, TableOfContents } from './tokens';
 
 /**
  * Class for registering table of contents generators.

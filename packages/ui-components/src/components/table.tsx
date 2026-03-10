@@ -3,7 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import React, { ReactElement, ReactNode, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React, { useState } from 'react';
 import { caretDownIcon, caretUpIcon } from '../icon';
 
 export const TABLE_CLASS = 'jp-sortable-table';

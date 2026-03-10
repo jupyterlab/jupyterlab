@@ -3,22 +3,25 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Contents, ServerConnection } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore } from '@jupyterlab/ui-components';
 import {
   FilenameSearcher,
-  IScore,
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
-import { FilterFileBrowserModel } from './model';
+import type { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to file browsers.
@@ -300,6 +303,23 @@ export class FileBrowser extends SidePanel {
       this._sortNotebooksFirst = value;
     } else {
       console.warn('Listing does not support sorting notebooks first');
+    }
+  }
+
+  /**
+   * Whether to sort file names naturally.
+   * Default is true; set to false for lexicographic order.
+   */
+  get sortFileNamesNaturally(): boolean {
+    return this._sortFileNamesNaturally;
+  }
+
+  set sortFileNamesNaturally(value: boolean) {
+    if (this.listing.setSortFileNamesNaturally) {
+      this.listing.setSortFileNamesNaturally(value);
+      this._sortFileNamesNaturally = value;
+    } else {
+      console.warn('Listing does not support natural file name sorting');
     }
   }
 
@@ -597,6 +617,7 @@ export class FileBrowser extends SidePanel {
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
 }

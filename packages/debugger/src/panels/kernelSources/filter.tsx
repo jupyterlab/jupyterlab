@@ -5,10 +5,10 @@ import { UseSignal } from '@jupyterlab/ui-components';
 
 import React from 'react';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 import { Search } from '@jupyter/react-components';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -29,9 +29,10 @@ const FilterBox = (props: IFilterBoxProps) => {
   };
   return (
     <Search
-      onChange={onFilterChange}
-      placeholder={props.trans.__('Filter the kernel sources')}
+      onInput={onFilterChange}
+      placeholder={props.trans.__('Filter sources')}
       value={props.model.filter}
+      className="jp-Debugger-KernelSources-Filter"
     />
   );
 };

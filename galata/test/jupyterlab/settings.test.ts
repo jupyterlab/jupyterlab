@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect, Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { changeCodeFontSize, getFileListFontSize } from './utils';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -49,6 +52,11 @@ test('Open the settings editor with a specific search query', async ({
 });
 
 test.describe('change font-size', () => {
+  // We wrap the font size comparisons in `expect().toPass()`
+  // because clicking on the menu only triggers the asynchronous
+  // update which might take a fraction on second to propagate
+  // due to the settings API network latency. This in past led
+  // to flaky tests.
   const ipynbFileName = 'create_test.ipynb';
 
   const createNewCodeCell = async (page: IJupyterLabPageFixture) => {
@@ -87,24 +95,6 @@ test.describe('change font-size', () => {
     );
     return parseInt(newFontSize);
   };
-  const getFileListFontSize = async (page: IJupyterLabPageFixture) => {
-    const itemElement = page.locator(
-      '.jp-DirListing-content .jp-DirListing-itemText'
-    );
-    await itemElement.waitFor();
-    const newFontSize = await itemElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    return parseInt(newFontSize);
-  };
-  const changeCodeFontSize = async (
-    page: IJupyterLabPageFixture,
-    menuOption
-  ) => {
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-    await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
-  };
 
   test('should Increase Code Font Size', async ({ page }) => {
     await createNewCodeCell(page);
@@ -117,10 +107,13 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const newFontSize = await cellElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await cellElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease Code Font Size', async ({ page }) => {
@@ -134,10 +127,13 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const newFontSize = await cellElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await cellElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 
   test('should Increase Content Font Size', async ({ page }) => {
@@ -152,10 +148,13 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease Content Font Size', async ({ page }) => {
@@ -170,10 +169,13 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 
   test('should Increase UI Font Size', async ({ page }) => {
@@ -187,10 +189,13 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease UI Font Size', async ({ page }) => {
@@ -204,10 +209,13 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 });
 
@@ -232,6 +240,8 @@ test('Check codemirror settings can all be set at the same time.', async ({
   for (const selectText of textList) {
     let locator = page.getByLabel(selectText);
     await locator.click();
+    // Workaround for bug https://github.com/jupyterlab/jupyterlab/issues/18458
+    await page.waitForTimeout(50);
     locators.push(locator);
   }
   for (const locator of locators) {
@@ -328,6 +338,133 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
   expect(await firstRow.screenshot()).toMatchSnapshot(
     'settings-shortcuts-edit.png'
   );
+});
+
+test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
+  const rows = shortcutsForm.locator('.jp-Shortcuts-Row');
+  // Wait for the shortcuts to be displayed.
+  await rows.first().waitFor();
+
+  // Expect the add shortcut row to not be attached by default.
+  await expect(addShortcutRow).not.toBeAttached();
+
+  // Show the add shortcut row.
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await expect(addShortcutRow).toBeAttached();
+
+  // Hide the add shortcut row
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await expect(addShortcutRow).not.toBeAttached();
+});
+
+test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
+
+  // Locator to all options except the empty one.
+  const commandOptions = addShortcutRow.locator(
+    'select option:not([value=""])'
+  );
+
+  // Show the add shortcut row and count initial commands.
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  const initialCount = await commandOptions.count();
+
+  // Filtering on notebook should reduce the count.
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('notebook');
+  expect(await commandOptions.count()).toBeLessThan(initialCount);
+
+  // Filtering on a specific command should keep only one command.
+  await filterInput.locator('input').fill('restart kernel and run all cells');
+  expect(await commandOptions.count()).toBe(1);
+});
+
+test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
+  // Function that get the shortcuts related to a command.
+  const getShortcut = async (command: string) => {
+    return await page.evaluate(async command => {
+      const settingsRegistry = window.jupyterapp.pluginRegistry._plugins.get(
+        '@jupyterlab/apputils-extension:settings'
+      ).service;
+      const shortcuts = (
+        await settingsRegistry.load('@jupyterlab/shortcuts-extension:shortcuts')
+      ).composite.shortcuts as any[];
+      return shortcuts.filter(shortcut => shortcut.command === command);
+    }, command);
+  };
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const selector = '.jp-Notebook';
+  const args = { a: 'b' };
+
+  // Ensure there is no shortcut defined yet for 'notebook:restart-run-all'.
+  expect(await getShortcut('notebook:restart-run-all')).toHaveLength(0);
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
+
+  // Show the add shortcut row.
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+
+  // Select the command.
+  await addShortcutRow
+    .locator('select')
+    .selectOption('notebook: Restart Kernel and Run All Cells…');
+  // Display the shortcut input and add a shortcut.
+  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell').first().hover();
+  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell a').click();
+  const shortcutKey = addShortcutRow.locator('.jp-Shortcuts-Input').first();
+  await shortcutKey.press('Control+r');
+  await addShortcutRow.locator('.jp-Shortcuts-Submit').click();
+
+  // Open the custom command dialog.
+  await addShortcutRow.getByTitle('Custom options').waitFor();
+  await addShortcutRow.getByTitle('Custom options').click();
+
+  // Fill some custom value for the selector and the args.
+  const dialog = page.locator('.jp-Dialog-content');
+  await dialog.waitFor();
+  await dialog.getByRole('textbox').first().fill(selector);
+  const jsonEditorLine = dialog.locator('.jp-JSONEditor-host .cm-line').first();
+  await jsonEditorLine.click();
+  await jsonEditorLine.selectText();
+  await jsonEditorLine.fill(JSON.stringify(args));
+  await dialog.locator('button.jp-mod-accept').click();
+  await dialog.waitFor({ state: 'detached' });
+
+  // Save the new shortcut.
+  await addShortcutRow.getByTitle('Save shortcut').click();
+  await addShortcutRow.waitFor({ state: 'detached' });
+
+  // The shortcut should now be listed with the correct selector and args.
+  const shortcut = await getShortcut('notebook:restart-run-all');
+  expect(shortcut).toHaveLength(1);
+  expect(shortcut[0].selector).toBe(selector);
+  expect(JSON.stringify(shortcut[0].args)).toBe(JSON.stringify(args));
 });
 
 test('Settings Export: Clicking the export button triggers a download and matches content', async ({
@@ -505,13 +642,13 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
     })
   );
 
-  const settingContainer = page.locator(
-    '.form-group:has-text("Show Filter Bar by Default")'
+  const settingsForm = page.locator('.jp-SettingsForm');
+  const settingCheckbox = settingsForm.getByLabel(
+    'Show Filter Bar by Default',
+    { exact: true }
   );
-
-  const settingLabel = settingContainer.locator('label');
-  const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
-  await settingLabel.click();
+  const modifiedIndicator = settingsForm.locator('.jp-modifiedIndicator');
+  await settingCheckbox.click();
   await page.locator('button.jp-RestoreButton').waitFor();
   await expect(modifiedIndicator).toBeVisible();
 
@@ -524,7 +661,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   );
 
   // turn the setting OFF
-  await settingLabel.click();
+  await settingCheckbox.click();
   await page.locator('button.jp-RestoreButton').waitFor({ state: 'hidden' });
   await expect(modifiedIndicator).toBeHidden();
   await page.reload({ waitForIsReady: false });

@@ -14,16 +14,13 @@ jobs:
     strategy:
       matrix:
         group: [integrity, python, usage, usage2]
-        python-version: [3.12]
-        include:
-          - group: python
-            python-version: 3.13
+        python-version: ["3.14"]
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1

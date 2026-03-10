@@ -13,14 +13,14 @@ jobs:
         github.event.issue.author_association == 'COLLABORATOR' ||
         github.event.issue.author_association == 'MEMBER'
       ) && github.event.issue.pull_request && contains(github.event.comment.body, 'please run benchmarks')
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     env:
       BENCHMARK_NUMBER_SAMPLES: 100
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
@@ -177,7 +177,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: benchmark-assets
           path: |
@@ -199,12 +199,12 @@ jobs:
         github.event.issue.author_association == 'MEMBER'
       ) && github.event.issue.pull_request && contains(github.event.comment.body, 'please run benchmarks')
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1

@@ -2,40 +2,35 @@
 // Distributed under the terms of the Modified BSD License.
 import { selectAll } from '@codemirror/commands';
 import { findNext, gotoLine } from '@codemirror/search';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  Clipboard,
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import type {
   ICommandPalette,
   ISessionContextDialogs,
-  MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
+import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
-  CodeEditor,
   CodeViewerWidget,
-  IEditorMimeTypeService,
-  IEditorServices
+  IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
-import {
+import type {
   CodeMirrorEditor,
   IEditorExtensionRegistry,
   IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { IConsoleTracker } from '@jupyterlab/console';
+import type { ICompletionProviderManager } from '@jupyterlab/completer';
+import type { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { ILauncher } from '@jupyterlab/launcher';
-import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import type { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import type { ILauncher } from '@jupyterlab/launcher';
+import type { IMainMenu } from '@jupyterlab/mainmenu';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,
@@ -48,9 +43,10 @@ import {
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -180,7 +176,7 @@ export namespace Commands {
   ): void {
     config =
       (settings.get('editorConfig').composite as Record<string, any>) ?? {};
-    scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
     commands.notifyCommandChanged(CommandIDs.lineNumbers);
@@ -212,6 +208,7 @@ export namespace Commands {
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
     editor.setOptions({ ...config, scrollPastEnd });
+    widget.toggleClass('jp-mod-scrollPastEnd', scrollPastEnd);
   }
 
   /**

@@ -1,14 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterFrontEndPlugin,
-  JupyterLab,
-  LayoutRestorer
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { JupyterLab, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
-import { DockPanel } from '@lumino/widgets';
+import type { DockPanel } from '@lumino/widgets';
 
 describe('plugins', () => {
   let lab: JupyterLab;

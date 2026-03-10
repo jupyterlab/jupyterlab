@@ -37,3 +37,20 @@
     opacity: 1;
   }
 }
+
+/* For all the screens smaller than 760px */
+@media (width <= 760px) {
+  .jp-Notebook-footer {
+    margin-left: calc(
+      var(--jp-cell-collapser-width) + var(--jp-code-padding) +
+        var(--jp-cell-padding) + var(--jp-notebook-padding)
+    );
+    width: calc(
+      100% -
+        (
+          var(--jp-cell-collapser-width) + 2 * var(--jp-cell-padding) + 2 *
+            var(--jp-notebook-padding) + var(--jp-code-padding)
+        )
+    );
+  }
+}

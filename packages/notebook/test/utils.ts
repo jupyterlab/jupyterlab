@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
-import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-import { INotebookContent } from '@jupyterlab/nbformat';
-import {
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { Context, DocumentRegistry } from '@jupyterlab/docregistry';
+import type { INotebookContent } from '@jupyterlab/nbformat';
+import type {
   INotebookModel,
   Notebook,
   NotebookPanel,

@@ -18,3 +18,8 @@
 .jp-FileEditorCodeWrapper .cm-editor {
   height: 100%;
 }
+
+/* Add extra space at the bottom when scrollPastEnd is enabled */
+.jp-FileEditor.jp-mod-scrollPastEnd .cm-content {
+  padding-bottom: var(--jp-editor-scroll-padding);
+}

@@ -1,35 +1,47 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
-import { Poll } from '@lumino/polling';
+import type { Poll } from '@lumino/polling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Builder, BuildManager } from './builder';
+import type { Builder } from './builder';
+import { BuildManager } from './builder';
 
-import { Contents, ContentsManager } from './contents';
+import type { Contents } from './contents';
+import { ContentsManager } from './contents';
 
-import { Event, EventManager } from './event';
+import type { Event } from './event';
+import { EventManager } from './event';
 
-import { Kernel, KernelManager } from './kernel';
+import type { Kernel } from './kernel';
+import { KernelManager } from './kernel';
 
-import { KernelSpec, KernelSpecManager } from './kernelspec';
+import type { KernelSpec } from './kernelspec';
+import { KernelSpecManager } from './kernelspec';
 
-import { NbConvert, NbConvertManager } from './nbconvert';
+import type { NbConvert } from './nbconvert';
+import { NbConvertManager } from './nbconvert';
 
 import { ServerConnection } from './serverconnection';
 
-import { Session, SessionManager } from './session';
+import type { Session } from './session';
+import { SessionManager } from './session';
 
-import { Setting, SettingManager } from './setting';
+import type { Setting } from './setting';
+import { SettingManager } from './setting';
 
-import { Terminal, TerminalManager } from './terminal';
+import type { Terminal } from './terminal';
+import { TerminalManager } from './terminal';
 
-import { User, UserManager } from './user';
+import type { User } from './user';
+import { UserManager } from './user';
 
-import { Workspace, WorkspaceManager } from './workspace';
+import type { Workspace } from './workspace';
+import { WorkspaceManager } from './workspace';
 
 /**
  * A Jupyter services manager.

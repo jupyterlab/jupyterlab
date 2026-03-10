@@ -6,9 +6,10 @@
 import expect from 'expect';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { signalToPromise } from '@jupyterlab/testing';
 import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
@@ -120,9 +121,7 @@ describe('filebrowser/browser', () => {
         simulate(
           fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
           'mousedown',
-          {
-            shiftKey: true
-          }
+          { shiftKey: true }
         );
         await selectionChanged;
 

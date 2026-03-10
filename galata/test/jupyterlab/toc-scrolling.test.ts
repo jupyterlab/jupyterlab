@@ -28,11 +28,6 @@ test.describe('Table of Contents scrolling to heading', () => {
     await page.notebook.close(true);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Notebook scrolls to heading', async ({ page }) => {
     await page.notebook.selectCells(0);
 

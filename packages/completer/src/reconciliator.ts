@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SourceChange } from '@jupyter/ydoc';
+import type { SourceChange } from '@jupyter/ydoc';
 import { CompletionHandler } from './handler';
-import {
+import type {
   CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
   IInlineCompleterSettings,
   IInlineCompletionList,
   IInlineCompletionProvider,
-  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
-import { Completer } from './widget';
+import { InlineCompletionTriggerKind } from './tokens';
+import type { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
 import { isHintableMimeType } from './utils';
 

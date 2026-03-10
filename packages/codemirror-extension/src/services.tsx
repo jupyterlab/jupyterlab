@@ -4,8 +4,8 @@
  */
 
 import { LanguageSupport, StreamLanguage } from '@codemirror/language';
-import { IYText } from '@jupyter/ydoc';
-import {
+import type { IYText } from '@jupyter/ydoc';
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -29,7 +29,8 @@ import {
   FormComponent,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
-import { JSONExt, ReadonlyJSONValue } from '@lumino/coreutils';
+import type { ReadonlyJSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import type { FieldProps } from '@rjsf/utils';
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import React from 'react';
@@ -52,7 +53,8 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
 
     // Register default languages
     for (const language of EditorLanguageRegistry.getDefaultLanguages(
-      translator
+      translator,
+      (info: string) => languages.findBest(info)
     )) {
       languages.addLanguage(language);
     }
@@ -210,6 +212,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
                   }}
                   tagName="div"
                   translator={translator ?? nullTranslator}
+                  buttonStyle="icons"
                 />
               </div>
             );

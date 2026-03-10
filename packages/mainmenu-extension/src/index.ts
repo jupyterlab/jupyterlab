@@ -5,12 +5,14 @@
  * @module mainmenu-extension
  */
 
+import type {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import {
   addSemanticCommand,
   ILabShell,
-  IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  IRouter
 } from '@jupyterlab/application';
 import {
   Dialog,
@@ -19,31 +21,32 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import {
+import type {
   IEditMenu,
   IFileMenu,
   IHelpMenu,
   IKernelMenu,
-  IMainMenu,
   IRunMenu,
   ITabsMenu,
-  IViewMenu,
-  MainMenu
+  IViewMenu
 } from '@jupyterlab/mainmenu';
+import { IMainMenu, MainMenu } from '@jupyterlab/mainmenu';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
+import type { RankedMenu } from '@jupyterlab/ui-components';
 import {
   fastForwardIcon,
-  RankedMenu,
   refreshIcon,
   runIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Menu, Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { Menu } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import { recentsMenuPlugin } from './recents';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';

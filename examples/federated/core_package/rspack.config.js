@@ -5,10 +5,10 @@ const path = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
 const Build = require('@jupyterlab/builder').Build;
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
 const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
-const { ModuleFederationPlugin } = webpack.container;
+const { ModuleFederationPlugin } = rspack.container;
 
 const packageData = require('./package.json');
 const jlab = packageData.jupyterlab;
@@ -70,7 +70,7 @@ const entryPoint = path.join(buildDir, 'bootstrap.js');
 fs.copySync('./bootstrap.js', entryPoint);
 
 /**
- * Create the webpack ``shared`` configuration
+ * Create the module federation ``shared`` configuration
  */
 function createShared(packageData) {
   // Set up module federation sharing config
@@ -208,6 +208,6 @@ module.exports = [
 
 // For debugging, write the config out
 fs.writeFileSync(
-  path.join(buildDir, 'webpack.config-log.json'),
+  path.join(buildDir, 'rspack.config-log.json'),
   JSON.stringify(module.exports, null, '  ')
 );

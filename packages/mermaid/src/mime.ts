@@ -7,13 +7,9 @@
  * @module mermaid-extension
  */
 
-import {
-  IMermaidManager,
-  MERMAID_CLASS,
-  MERMAID_MIME_TYPE,
-  WARNING_CLASS
-} from './tokens';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IMermaidManager } from './tokens';
+import { MERMAID_CLASS, MERMAID_MIME_TYPE, WARNING_CLASS } from './tokens';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 

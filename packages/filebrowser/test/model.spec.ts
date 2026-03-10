@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
 import { StateDB } from '@jupyterlab/statedb';
 import {
   acceptDialog,

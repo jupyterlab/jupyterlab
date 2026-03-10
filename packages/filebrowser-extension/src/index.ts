@@ -6,13 +6,13 @@
  */
 
 import { DisposableSet } from '@lumino/disposable';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ILabShell,
   ILayoutRestorer,
   IRouter,
   ITreePathUpdater,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
   JupyterLab
 } from '@jupyterlab/application';
 import {
@@ -28,10 +28,8 @@ import {
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import {
-  DocumentRegistry,
-  getAvailableKernelFileTypes
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
@@ -42,11 +40,15 @@ import {
   IFileBrowserFactory,
   Uploader
 } from '@jupyterlab/filebrowser';
-import { Contents } from '@jupyterlab/services';
+import type { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type {
+  IDisposableMenuItem,
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   addIcon,
   closeIcon,
@@ -57,20 +59,18 @@ import {
   fileIcon,
   filterIcon,
   folderIcon,
-  IDisposableMenuItem,
   LabIcon,
   linkIcon,
   markdownIcon,
   newFolderIcon,
   pasteIcon,
-  RankedMenu,
   refreshIcon,
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ContextMenu } from '@lumino/widgets';
+import type { ContextMenu } from '@lumino/widgets';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -149,8 +149,6 @@ namespace CommandIDs {
 
   export const toggleSortNotebooksFirst =
     'filebrowser:toggle-sort-notebooks-first';
-
-  export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
@@ -264,6 +262,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
+          sortFileNamesNaturally: true,
           showFullPath: false,
           allowFileUploads: true
         };
@@ -512,7 +511,7 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
         filebrowsermenuDisposables.add(
           app.contextMenu.addItem({
             command: CommandIDs.createNewFile,
-            selector: '.jp-DirListing',
+            selector: '.jp-DirListing-content',
             args: {
               ext: filetype.extensions[0],
               label: trans.__('New %1 File', filetype.displayName),
@@ -1854,17 +1853,6 @@ function addCommands(
           });
       }
     },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.search, {
-    label: trans.__('Search on File Names'),
-    execute: () => alert('search'),
     describedBy: {
       args: {
         type: 'object',

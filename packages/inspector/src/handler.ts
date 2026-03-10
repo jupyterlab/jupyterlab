@@ -1,15 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
-import { IDataConnector } from '@jupyterlab/statedb';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { MimeModel } from '@jupyterlab/rendermime';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
-import { IInspector } from './tokens';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { IInspector } from './tokens';
 
 /**
  * An object that handles code inspection.

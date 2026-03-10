@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   Button,
   closeIcon,
@@ -11,7 +12,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { WidgetTracker } from './widgettracker';
@@ -327,13 +329,24 @@ export class Dialog<T> extends Widget {
     }
     super.onCloseRequest(msg);
   }
+
   /**
    * Handle the `'input'` event for dialog's children.
    *
    * @param event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
-    this._hasValidationErrors = !!this.node.querySelector(':invalid');
+    this._checkValidation();
+  }
+
+  /**
+   * Check that every input in the dialog is valid.
+   * It looks for :invalid pseudo class of inputs, or .jp-mod-error class.
+   */
+  protected _checkValidation(): void {
+    this._hasValidationErrors =
+      !!this.node.querySelector(':invalid') ||
+      !!this.node.querySelector('.jp-mod-error');
     for (let i = 0; i < this._buttons.length; i++) {
       if (this._buttons[i].accept) {
         this._buttonNodes[i].disabled = this._hasValidationErrors;
