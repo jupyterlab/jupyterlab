@@ -8,7 +8,7 @@ $ErrorActionPreference = "stop"
 New-Item -Path $Env:USERPROFILE\.jupyter -ItemType "directory" -Force
 
 # Install and enable the server extension
-pip install -q --upgrade pip uv --user
+pip install -q --upgrade pip uv
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 pip --version
