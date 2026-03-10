@@ -72,6 +72,11 @@ test.describe('Internationalization', () => {
       document.body.style.fontKerning = 'none';
     });
 
+    const simpleModeToglle = await page.evaluate(() =>
+      document.fonts.check('16px "Noto Sans SC Variable"', '简易界面')
+    );
+    expect.soft(simpleModeToglle).toBe(true);
+
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
 
