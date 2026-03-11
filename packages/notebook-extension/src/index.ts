@@ -3384,7 +3384,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.splitCell(current.content);
+        return NotebookActions.splitCell(current.content, translator);
       }
     },
     isEnabled,
@@ -3404,7 +3404,12 @@ function addCommands(
         const addExtraLine =
           (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
-        return NotebookActions.mergeCells(current.content, false, addExtraLine);
+        return NotebookActions.mergeCells(
+          current.content,
+          false,
+          addExtraLine,
+          translator
+        );
       }
     },
     isEnabled,
@@ -3424,7 +3429,12 @@ function addCommands(
         const addExtraLine =
           (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
-        return NotebookActions.mergeCells(current.content, true, addExtraLine);
+        return NotebookActions.mergeCells(
+          current.content,
+          true,
+          addExtraLine,
+          translator
+        );
       }
     },
     isEnabled,
@@ -3444,7 +3454,12 @@ function addCommands(
         const addExtraLine =
           (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
-        return NotebookActions.mergeCells(current.content, false, addExtraLine);
+        return NotebookActions.mergeCells(
+          current.content,
+          false,
+          addExtraLine,
+          translator
+        );
       }
     },
     isEnabled,
@@ -4925,12 +4940,15 @@ namespace Private {
     // If the container is not available, append the newly created container
     // to the current notebook panel and set related properties
     if (hiddenAlertContainer.getAttribute('id') !== hiddenAlertContainerId) {
-      hiddenAlertContainer.classList.add('sr-only');
       hiddenAlertContainer.setAttribute('id', hiddenAlertContainerId);
-      hiddenAlertContainer.setAttribute('role', 'alert');
-      hiddenAlertContainer.hidden = true;
       notebookNode.appendChild(hiddenAlertContainer);
     }
+
+    hiddenAlertContainer.classList.add('jp-sr-only');
+    hiddenAlertContainer.setAttribute('role', 'alert');
+    hiddenAlertContainer.setAttribute('aria-live', 'assertive');
+    hiddenAlertContainer.setAttribute('aria-atomic', 'true');
+    hiddenAlertContainer.hidden = false;
 
     // Insert/Update alert container with the notification message
     hiddenAlertContainer.innerText = message;
