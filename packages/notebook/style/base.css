@@ -151,7 +151,7 @@
   outline: none;
   border: none;
   border-radius: 2px;
-  box-shadow: 0 0 0 var(--jp-focus-outline-width) var(--jp-focus-outline-color);
+  box-shadow: 0 0 0 1px var(--jp-focus-outline-color);
   z-index: 1;
 }
 
