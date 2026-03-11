@@ -603,6 +603,35 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.5...a6dda8829b2d6b670de634081d26c1a39be145c4))
+
+### Bugs fixed
+
+- Replace scrollback implementation with scroll anchoring outside of `full` windowing mode [#18522](https://github.com/jupyterlab/jupyterlab/pull/18522) ([@krassowski](https://github.com/krassowski))
+- Harmonize translation wrappers in Python files to use `gettext` methods [#18597](https://github.com/jupyterlab/jupyterlab/pull/18597) ([@tmetzl](https://github.com/tmetzl))
+- Remove unimplemented `filebrowser:search` command [#18593](https://github.com/jupyterlab/jupyterlab/pull/18593) ([@krassowski](https://github.com/krassowski))
+- Fix status bar focus outlines [#18585](https://github.com/jupyterlab/jupyterlab/pull/18585) ([@IsabelParedes](https://github.com/IsabelParedes))
+- Fix `filebrowser:create-new-file` context menu selector [#18588](https://github.com/jupyterlab/jupyterlab/pull/18588) ([@jtpio](https://github.com/jtpio))
+- Fix single-character code blocks rendering as empty [#18572](https://github.com/jupyterlab/jupyterlab/pull/18572) ([@soniya-malviy](https://github.com/soniya-malviy))
+- Hide `code` input in `CodeConsole` when configured [#18554](https://github.com/jupyterlab/jupyterlab/pull/18554) ([@agriyakhetarpal](https://github.com/agriyakhetarpal))
+
+### Maintenance and upkeep improvements
+
+- Update benchmark snapshots even if base snapshots require changes [#18549](https://github.com/jupyterlab/jupyterlab/pull/18549) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-02-23&to=2026-03-11&type=c))
+
+@agriyakhetarpal ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aagriyakhetarpal+updated%3A2026-02-23..2026-03-11&type=Issues)) | @IsabelParedes ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AIsabelParedes+updated%3A2026-02-23..2026-03-11&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-02-23..2026-03-11&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-02-23..2026-03-11&type=Issues)) | @soniya-malviy ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asoniya-malviy+updated%3A2026-02-23..2026-03-11&type=Issues)) | @tmetzl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atmetzl+updated%3A2026-02-23..2026-03-11&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.4...4a223c0dbe53f47f03cdff3573fd7e9ccbb2605b))
@@ -627,8 +656,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-02-11&to=2026-02-23&type=c))
 
 @apoorvdarshan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aapoorvdarshan+updated%3A2026-02-11..2026-02-23&type=Issues)) | @bollwyvl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2026-02-11..2026-02-23&type=Issues)) | @itsmevichu ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2026-02-11..2026-02-23&type=Issues)) | @jasongrout ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2026-02-11..2026-02-23&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-02-11..2026-02-23&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.4
 
