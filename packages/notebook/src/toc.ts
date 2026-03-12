@@ -593,7 +593,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
   protected _createNew(
     widget: NotebookPanel,
     configuration?: TableOfContents.IConfig
-  ): TableOfContentsModel<TableOfContents.IHeading, NotebookPanel> {
+  ): NotebookToCModel {
     const model = new NotebookToCModel(
       widget,
       this.parser,

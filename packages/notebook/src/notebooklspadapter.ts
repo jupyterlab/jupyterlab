@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import type { Cell, ICellModel } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type {
