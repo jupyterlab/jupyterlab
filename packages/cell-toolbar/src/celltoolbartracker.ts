@@ -130,7 +130,7 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * @deprecated Will become protected in JupyterLab 5
    */
-  _onActiveCellChanged(notebook: Notebook): void {
+  _onActiveCellChanged(notebook: Notebook, cell: Cell | null): void {
     if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
       // Disposed cells do not have a model anymore.
       this._removeToolbar(this._previousActiveCell.model);
@@ -262,7 +262,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _getCell(model: ICellModel): Cell | undefined {
-    return this._panel?.content.widgets.find(widget => widget.model === model);
+    return this._panel?.content.widgets.find((widget: Cell) => widget.model === model);
   }
 
   private _removeToolbar(model: ICellModel): void {
@@ -604,5 +604,5 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     widget: Widget,
     commandArgs?: Record<string, any>
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
-  private _tracker: CellToolbarTracker;
+  private _tracker!: CellToolbarTracker;
 }

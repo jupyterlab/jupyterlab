@@ -60,12 +60,13 @@ export async function runCell({
     return false;
   };
 
-  const onFailure = (reason: any) => {
+  const onFailure = (reason: unknown) => {
+    const message = reason instanceof Error ? reason.message : String(reason);
     onCellExecuted({
       cell,
       executionDate: new Date(),
       success: false,
-      error: new Error(reason)
+      error: new Error(message)
     });
     return false;
   };

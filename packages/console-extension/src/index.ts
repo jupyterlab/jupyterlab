@@ -670,7 +670,7 @@ async function activateConsole(
       }
     },
     execute: (args: IOpenOptions) => {
-      const path = args['path'];
+      const path = args.path;
       const widget = tracker.find(value => {
         return value.console.sessionContext.session?.path === path;
       });
@@ -807,7 +807,7 @@ async function activateConsole(
           (args['cwd'] as string) ||
           filebrowser?.model.path) ??
         '';
-      return createConsole({ basePath, ...args });
+      return createConsole({ basePath, ...args } as ICreateOptions);
     }
   });
 
@@ -827,7 +827,7 @@ async function activateConsole(
   /**
    * Create commands to change the position of the prompt cell.
    */
-  const iconMap = {
+  const iconMap: Record<CodeConsole.PromptCellPosition, any> = {
     top: dockTopIcon,
     bottom: dockBottomIcon,
     right: dockRightIcon,
