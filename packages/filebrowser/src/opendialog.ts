@@ -188,7 +188,7 @@ class OpenDialogBody
         this._browser = browser;
 
         // Add toolbar items
-        setToolbar(this._browser, (browser: FileBrowser) => [
+        setToolbar(this._browser, (browser) => [
           {
             name: 'new-folder',
             widget: new ToolbarButton({

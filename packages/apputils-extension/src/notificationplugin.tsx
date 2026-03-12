@@ -837,7 +837,7 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     return (
       <CloseButton
-        close={props.closeToast}
+        close={(e) => props.closeToast(e)}
         closeIcon={closeIcon.react}
         title={trans.__('Hide notification')}
       />

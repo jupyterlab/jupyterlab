@@ -477,7 +477,7 @@ export abstract class EditorSearchProvider<
         const start = editor.getOffsetAt(this._inSelection.start);
         const end = editor.getOffsetAt(this._inSelection.end);
         this.cmHandler.matches = allMatches.filter(
-          match => match.position >= start && match.position <= end
+          (match: ISearchMatch) => match.position >= start && match.position <= end
         );
         // A special case to always have a current match when in line selection mode.
         if (

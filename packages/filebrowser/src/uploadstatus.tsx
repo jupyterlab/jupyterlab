@@ -175,7 +175,7 @@ export namespace FileUploadStatus {
      */
     private _uploadChanged = (
       browse: FileBrowserModel,
-      uploads: IChangedArgs<IUploadModel>
+      uploads: IChangedArgs<IUploadModel | null>
     ) => {
       if (uploads.name === 'start') {
         this._items.push({
