@@ -1060,5 +1060,94 @@ describe('filebrowser/listing', () => {
         });
       });
     });
+
+    describe('singleClickNavigation', () => {
+      beforeEach(async () => {
+        await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd('.');
+        await signalToPromise(dirListing.updated);
+      });
+
+      it('should open a file on single click', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(dirListing.contentNode.children[1]!, 'click');
+
+        expect(fileOpened).toHaveBeenCalledTimes(1);
+        const openedFile = fileOpened.mock.calls[0][1];
+        expect(openedFile.type).toBe('file');
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should navigate to directory on single click', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const firstNode = dirListing.contentNode.children[0] as HTMLElement;
+        simulate(firstNode, 'click');
+        await signalToPromise(dirListing.updated);
+        expect(getItemTitles(dirListing)).toHaveLength(0);
+      });
+
+      it('should not open file or navigate to directory when single click navigation is disabled', async () => {
+        dirListing.setAllowSingleClickNavigation(false);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(dirListing.contentNode.children[1]!, 'click');
+        expect(fileOpened).not.toHaveBeenCalled();
+
+        simulate(dirListing.contentNode.children[0]!, 'click');
+        await Promise.race([
+          signalToPromise(dirListing.updated),
+          new Promise(r => setTimeout(r, 100))
+        ]);
+        expect(getItemTitles(dirListing)).toHaveLength(5);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should still open directory on double click when single click navigation is disabled', async () => {
+        dirListing.setAllowSingleClickNavigation(false);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(dirListing.contentNode.children[1]!, 'dblclick');
+        expect(fileOpened).toHaveBeenCalledTimes(1);
+        const openedFile = fileOpened.mock.calls[0][1];
+        expect(openedFile.type).toBe('file');
+
+        simulate(dirListing.contentNode.children[0]!, 'dblclick');
+        await signalToPromise(dirListing.updated);
+        expect(getItemTitles(dirListing)).toHaveLength(0);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should check boxes when clicking with single click navigation enabled', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          itemNode
+        ) as HTMLInputElement;
+        simulate(checkbox, 'click');
+
+        expect(fileOpened).not.toHaveBeenCalled();
+        expect(checkbox.checked).toBe(true);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+    });
   });
 });
