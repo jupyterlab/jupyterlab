@@ -153,8 +153,14 @@ jobs:
         run: |
           npx playwright merge-reports --reporter html,github ./artifacts/
 
+      - name: Upload merged reports
+        uses: actions/upload-artifact@v6
+        with:
+          name: visual-regression-report
+          path: playwright-report
+
       - name: Inline the report
-        uses: krassowski/maintainer-tools/.github/actions/inline-playwright-report@2c7237e8251543baf60ddf9667719b5f7230c717
+        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@v1
         with:
           path: playwright-report
 
@@ -169,12 +175,6 @@ jobs:
       - name: Add report link to job summary
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload merged reports
-        uses: actions/upload-artifact@v6
-        with:
-          name: visual-regression-report
-          path: playwright-report
 
       - name: Check for test assets
         id: check-assets
