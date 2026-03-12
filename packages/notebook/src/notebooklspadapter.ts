@@ -486,7 +486,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Metadata of the notebook
    */
-  private _languageInfo: ILanguageInfoMetadata;
+  private _languageInfo!: ILanguageInfoMetadata;
 
   private _type: nbformat.CellType = 'code';
 

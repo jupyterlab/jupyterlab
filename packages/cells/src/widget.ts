@@ -71,7 +71,6 @@ import type { IInputPrompt } from './inputarea';
 import { InputArea, InputPrompt } from './inputarea';
 
 import type {
-  CellModel,
   IAttachmentsCellModel,
   ICellModel,
   ICodeCellModel,

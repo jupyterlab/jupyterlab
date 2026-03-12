@@ -285,9 +285,9 @@ export class NotebookTools extends Widget implements INotebookTools {
 
   translator: ITranslator;
   private _tools: Array<NotebookTools.IToolPanel>;
-  private _tracker: INotebookTracker;
+  private _tracker!: INotebookTracker;
   private _prevActiveCell: ICellModel | null;
-  private _prevActiveNotebookModel: INotebookModel | null;
+  private _prevActiveNotebookModel!: INotebookModel | null;
 }
 
 /**
@@ -409,7 +409,7 @@ export namespace NotebookTools {
     /**
      * The notebook tools object.
      */
-    notebookTools: INotebookTools;
+    notebookTools!: INotebookTools;
 
     dispose(): void {
       super.dispose();
@@ -551,9 +551,9 @@ export namespace NotebookTools {
       (this.layout as PanelLayout).addWidget(this.editor);
     }
 
-    private _editor: JSONEditor;
-    private _editorLabel: string;
-    private _editorFactory: CodeEditor.Factory;
+    private _editor!: JSONEditor;
+    private _editorLabel!: string;
+    private _editorFactory!: CodeEditor.Factory;
   }
 
   /**

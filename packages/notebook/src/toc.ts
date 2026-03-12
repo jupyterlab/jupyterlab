@@ -254,7 +254,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                   cellRef: cell,
                   collapsed: false,
                   isRunning: RunningStatus.Idle
-                };
+                } as INotebookHeading;
               })
             );
           }
@@ -272,7 +272,7 @@ export class NotebookToCModel extends TableOfContentsModel<
               cellRef: cell,
               collapsed: false,
               isRunning: RunningStatus.Idle
-            };
+            } as INotebookHeading;
           });
           // If there are multiple headings, only collapse the highest heading (i.e. minimal level)
           // consistent with the cell.headingInfo
@@ -378,7 +378,7 @@ export class NotebookToCModel extends TableOfContentsModel<
       notebook: Notebook;
       cell: Cell;
       success: boolean;
-      error: KernelError | null;
+      error?: KernelError | null;
     }
   ): void {
     this._runningCells.forEach((cell, index) => {
@@ -602,7 +602,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     let headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
     const onActiveHeadingChanged = (
-      model: NotebookToCModel,
+      model: TableOfContentsModel.IModel<INotebookHeading>,
       heading: INotebookHeading | null
     ) => {
       if (heading) {
@@ -710,7 +710,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     };
 
-    const onHeadingsChanged = (model: NotebookToCModel) => {
+    const onHeadingsChanged = (model: TableOfContentsModel.IModel<INotebookHeading>) => {
       if (!this.parser) {
         return;
       }
@@ -726,7 +726,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     const onHeadingCollapsed = (
-      _: NotebookToCModel,
+      _: TableOfContentsModel.IModel<INotebookHeading>,
       heading: INotebookHeading | null
     ) => {
       if (model.configuration.syncCollapseState) {
@@ -787,7 +787,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     });
 
-    return model;
+    return model as TableOfContentsModel<TableOfContents.IHeading, NotebookPanel>;
   }
 
   private _scrollToTop: boolean = true;
