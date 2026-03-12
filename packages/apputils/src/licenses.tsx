@@ -141,27 +141,27 @@ export class Licenses extends SplitPanel {
   /**
    * An area for selecting licenses by bundle and filters
    */
-  protected _leftPanel: Panel;
+  protected _leftPanel!: Panel;
 
   /**
    * Filters on visible licenses
    */
-  protected _filters: Licenses.Filters;
+  protected _filters!: Licenses.Filters;
 
   /**
    * Tabs reflecting available bundles
    */
-  protected _bundles: TabBar<Widget>;
+  protected _bundles!: TabBar<Widget>;
 
   /**
    * A grid of the current bundle's packages' license metadata
    */
-  protected _grid: Licenses.Grid;
+  protected _grid!: Licenses.Grid;
 
   /**
    * The currently-selected package's full license text
    */
-  protected _licenseText: Licenses.FullText;
+  protected _licenseText!: Licenses.FullText;
 }
 
 /** A namespace for license components */
@@ -549,9 +549,9 @@ export namespace Licenses {
 
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
     private _trackerDataChanged: Signal<Model, void> = new Signal(this);
-    private _serverResponse: ILicenseResponse | null;
+    private _serverResponse!: ILicenseResponse | null;
     private _client: ILicensesClient;
-    private _currentBundleName: string | null;
+    private _currentBundleName!: string | null;
     private _trans: TranslationBundle;
     private _currentPackageIndex: number | null = 0;
     private _licensesReady = new PromiseDelegate<void>();

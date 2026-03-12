@@ -337,14 +337,14 @@ export class MainMenu extends MenuBar implements IMainMenu {
 
   private _commands: CommandRegistry;
   private _items: Private.IRankItem[] = [];
-  private _editMenu: EditMenu;
-  private _fileMenu: FileMenu;
-  private _helpMenu: HelpMenu;
-  private _kernelMenu: KernelMenu;
-  private _runMenu: RunMenu;
-  private _settingsMenu: SettingsMenu;
-  private _viewMenu: ViewMenu;
-  private _tabsMenu: TabsMenu;
+  private _editMenu!: EditMenu;
+  private _fileMenu!: FileMenu;
+  private _helpMenu!: HelpMenu;
+  private _kernelMenu!: KernelMenu;
+  private _runMenu!: RunMenu;
+  private _settingsMenu!: SettingsMenu;
+  private _viewMenu!: ViewMenu;
+  private _tabsMenu!: TabsMenu;
 }
 
 /**

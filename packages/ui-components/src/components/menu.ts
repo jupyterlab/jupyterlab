@@ -428,7 +428,7 @@ class DisposableMenuItem implements IDisposableMenuItem {
     Signal.clearData(this);
   }
 
-  private _isDisposed: boolean;
+  private _isDisposed!: boolean;
   private _item: WeakRef<Menu.IItem>;
   private _menu: Menu;
 }

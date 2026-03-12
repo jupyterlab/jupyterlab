@@ -595,7 +595,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return svgElement;
   }
 
-  readonly name: string;
+  readonly name!: string;
 
   /**
    * A React component that will create the icon.
@@ -632,14 +632,14 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @param ref - forwarded to the ref prop of the icon's svg element
    */
-  readonly react: LabIcon.IReact;
+  readonly react!: LabIcon.IReact;
 
-  protected _className: string;
-  protected _loading: boolean;
+  protected _className!: string;
+  protected _loading!: boolean;
   protected _props: LabIcon.IProps = {};
   protected _svgReplaced = new Signal<this, void>(this);
-  protected _svgstr: string;
-  protected _uuid: string;
+  protected _svgstr!: string;
+  protected _uuid!: string;
 
   /**
    * Cache for svg parsing intermediates
@@ -751,7 +751,7 @@ export namespace LabIcon {
   /**
    * The type of the svg node ref that can be passed into icon React components
    */
-  export type IReactRef = React.RefObject<SVGElement>;
+  export type IReactRef = React.ForwardedRef<SVGElement>;
 
   /**
    * The properties that can be passed into the React component stored in

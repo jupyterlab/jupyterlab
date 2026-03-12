@@ -63,7 +63,7 @@ export const VEGALITE5_MIME_TYPE = 'application/vnd.vegalite.v5+json';
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export class RenderedVega extends Widget implements IRenderMime.IRenderer {
-  private _result: VegaModuleType.Result;
+  private _result!: VegaModuleType.Result;
 
   /**
    * Create a new widget for rendering Vega/Vega-Lite.

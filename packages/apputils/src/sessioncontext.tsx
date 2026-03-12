@@ -3,11 +3,11 @@
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
 import type {
   Kernel,
   KernelMessage,
   KernelSpec,
-  ServerConnection,
   Session
 } from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';

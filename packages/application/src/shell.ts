@@ -1842,13 +1842,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _idTypeMap = new Map<string, string>();
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
-  private _userLayout: {
+  private _userLayout!: {
     'single-document': ILabShell.IUserLayout;
     'multiple-document': ILabShell.IUserLayout;
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
   private _translator: ITranslator;
-  private _layoutRestorer: LayoutRestorer;
+  private _layoutRestorer!: LayoutRestorer;
 }
 
 namespace Private {

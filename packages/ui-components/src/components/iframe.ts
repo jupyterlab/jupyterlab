@@ -93,8 +93,8 @@ export class IFrame extends Widget {
   }
 
   private _sandbox: IFrame.SandboxExceptions[] = [];
-  private _referrerPolicy: IFrame.ReferrerPolicy;
-  private _loading: IFrame.Loading;
+  private _referrerPolicy!: IFrame.ReferrerPolicy;
+  private _loading!: IFrame.Loading;
 }
 
 /**

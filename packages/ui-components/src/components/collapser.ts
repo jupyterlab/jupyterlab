@@ -189,10 +189,10 @@ export class Collapser<T extends Widget = Widget> extends Widget {
   }
 
   private _collapseChanged = new Signal<this, void>(this);
-  private _collapsed: boolean;
+  private _collapsed!: boolean;
   private _content: Panel;
   private _header: Widget;
-  private _widget: T;
+  private _widget!: T;
 }
 
 export namespace Collapser {

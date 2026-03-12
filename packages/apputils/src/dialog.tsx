@@ -532,10 +532,10 @@ export class Dialog<T> extends Widget {
   private _buttonNodes: ReadonlyArray<HTMLButtonElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
-  private _original: HTMLElement;
-  private _first: HTMLElement;
+  private _original!: HTMLElement;
+  private _first!: HTMLElement;
   private _primary: HTMLElement;
-  private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
+  private _promise!: PromiseDelegate<Dialog.IResult<T>> | null;
   private _defaultButton: number;
   private _host: HTMLElement;
   private _hasClose: boolean;

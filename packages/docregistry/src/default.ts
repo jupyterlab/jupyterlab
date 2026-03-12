@@ -191,7 +191,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: ISharedFile;
+  readonly sharedModel!: ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
