@@ -1488,11 +1488,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
         // Handle network errors, as well as cases where we are on a
         // JupyterHub and the server is not running. JupyterHub returns a
         // 503 (<2.0) or 424 (>2.0) in that case.
-        if (
-          err instanceof ServerConnection.NetworkError ||
-          err.response?.status === 503 ||
-          err.response?.status === 424
-        ) {
+        const isNetworkError = err instanceof ServerConnection.NetworkError;
+        const hasResponse = typeof err === 'object' && err !== null && 'response' in err;
+        const status = hasResponse ? (err as any).response?.status : undefined;
+
+        if (isNetworkError || status === 503 || status === 424) {
           const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
           setTimeout(getKernelModel, timeout, evt);
         } else {
@@ -1777,7 +1777,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       );
       validate.validateMessage(msg);
     } catch (error) {
-      error.message = `Kernel message validation error: ${error.message}`;
+      if (error instanceof Error) {
+        error.message = `Kernel message validation error: ${error.message}`;
+      }
       // We throw the error so that it bubbles up to the top, and displays the right stack.
       throw error;
     }
