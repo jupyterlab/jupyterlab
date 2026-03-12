@@ -410,7 +410,7 @@ class FilterWidget extends ReactWidget implements IFilterProvider {
 }
 
 class ListWidget extends ReactWidget {
-  private _mode: 'tree' | 'list';
+  private _mode: 'tree' | 'list' = 'list';
 
   constructor(
     private _options: {

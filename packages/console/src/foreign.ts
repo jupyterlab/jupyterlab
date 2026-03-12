@@ -72,7 +72,7 @@ export class ForeignHandler implements IDisposable {
    */
   protected onIOPubMessage(
     sender: ISessionContext,
-    msg: KernelMessage.IIOPubMessage
+    msg: KernelMessage.IMessage
   ): boolean {
     // Only process messages if foreign cell injection is enabled.
     if (!this._enabled) {

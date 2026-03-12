@@ -18,7 +18,7 @@ export async function runCell({
   onCellExecuted,
   sessionContext
 }: IConsoleCellExecutor.IRunCellOptions): Promise<boolean> {
-  const onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
+  const onSuccess = (value: KernelMessage.IExecuteReplyMsg | void) => {
     if (value && value.content.status === 'ok') {
       const content = value.content;
       // Use deprecated payloads for backwards compatibility.

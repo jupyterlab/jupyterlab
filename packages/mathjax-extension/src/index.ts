@@ -72,7 +72,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
   }
 
   protected _initialized: boolean = false;
-  protected _mathDocument: MathDocument<any, any, any>;
+  protected _mathDocument!: MathDocument<any, any, any>;
 }
 
 /**

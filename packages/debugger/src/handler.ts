@@ -424,7 +424,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
-  private _previousConnection: Session.ISessionConnection | null;
+  private _previousConnection: Session.ISessionConnection | null = null;
   private _activeWidget:
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null;

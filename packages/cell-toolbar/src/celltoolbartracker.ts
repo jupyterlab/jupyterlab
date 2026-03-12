@@ -86,7 +86,7 @@ export class CellToolbarTracker implements IDisposable {
     void panel.revealed.then(() => {
       requestAnimationFrame(() => {
         const notebook = panel.content;
-        this._onActiveCellChanged(notebook);
+        this._onActiveCellChanged(notebook, notebook.activeCell);
         // Handle subsequent changes of active cell.
         notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
 
@@ -106,7 +106,7 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * @deprecated Will become protected in JupyterLab 5
    */
-  _onMetadataChanged(model: CellModel, args: IMapChange) {
+  _onMetadataChanged(model: ICellModel, args: IMapChange) {
     if (args.key === 'jupyter') {
       if (
         typeof args.newValue === 'object' &&

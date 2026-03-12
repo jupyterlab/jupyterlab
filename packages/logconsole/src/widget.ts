@@ -72,7 +72,7 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   /**
    * The execution count for the prompt.
    */
-  executionCount: nbformat.ExecutionCount;
+  executionCount: nbformat.ExecutionCount = null;
 
   private _timestamp: Date;
   private _level: FullLogLevel;

@@ -556,7 +556,7 @@ export class NotebookToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Notebook files.
  */
-export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
+export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel, INotebookHeading> {
   /**
    * Constructor
    *

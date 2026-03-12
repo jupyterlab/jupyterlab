@@ -95,7 +95,7 @@ export class NotebookHandler implements IDisposable {
     cells?: IObservableList<ICellModel>,
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    this._notebookPanel.content.widgets.forEach(cell =>
+    this._notebookPanel.content.widgets.forEach((cell: Cell) =>
       this._addEditorHandler(cell)
     );
 

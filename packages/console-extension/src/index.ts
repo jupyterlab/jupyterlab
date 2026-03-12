@@ -646,6 +646,10 @@ async function activateConsole(
    */
   interface IOpenOptions extends Partial<ConsolePanel.IOptions> {
     /**
+     * The path of the session to open.
+     */
+    path?: string;
+    /**
      * Whether to activate the console.  Defaults to `true`.
      */
     activate?: boolean;

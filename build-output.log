@@ -1,0 +1,145 @@
+
+> @jupyterlab/metapackage@4.6.0-alpha.4 build
+> tsc -b
+
+../ui-components/src/components/iframe.ts(96,11): error TS2564: Property '_referrerPolicy' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/iframe.ts(97,11): error TS2564: Property '_loading' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/menu.ts(431,11): error TS2564: Property '_isDisposed' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/sidepanel.ts(119,13): error TS2564: Property '_header' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/sidepanel.ts(120,13): error TS2564: Property '_toolbar' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/switch.ts(24,12): error TS2565: Property '_value' is used before being assigned.
+../ui-components/src/components/switch.ts(103,11): error TS2564: Property '_value' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/table.tsx(82,17): error TS2532: Object is possibly 'undefined'.
+../ui-components/src/components/toolbar.tsx(734,11): error TS2564: Property '_zoom' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/vdom.ts(170,11): error TS2564: Property '_model' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/windowedlist.ts(1746,11): error TS2564: Property '_isParentHidden' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/windowedlist.ts(1750,11): error TS2564: Property '_resetScrollToItemTimeout' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/windowedlist.ts(1752,11): error TS2564: Property '_areaResizeObserver' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/components/windowedlist.ts(1756,11): error TS2564: Property '_scrollbarResizeObserver' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(459,7): error TS2345: Argument of type '(props: LabIcon.IProps | undefined, ref: LabIcon.IReactRef) => JSX.Element' is not assignable to parameter of type 'ForwardRefRenderFunction<SVGElement, IProps | undefined>'.
+  Types of parameters 'ref' and 'ref' are incompatible.
+    Type 'ForwardedRef<SVGElement>' is not assignable to type 'IReactRef'.
+      Type 'null' is not assignable to type 'RefObject<SVGElement>'.
+../ui-components/src/icon/labicon.tsx(598,12): error TS2564: Property 'name' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(635,12): error TS2564: Property 'react' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(637,13): error TS2564: Property '_className' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(638,13): error TS2564: Property '_loading' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(641,13): error TS2564: Property '_svgstr' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(642,13): error TS2564: Property '_uuid' has no initializer and is not definitely assigned in the constructor.
+../ui-components/src/icon/labicon.tsx(802,5): error TS2345: Argument of type '({ className, container, label, title, tag, ...styleProps }: LabIcon.IProps, ref: LabIcon.IReactRef) => JSX.Element' is not assignable to parameter of type 'ForwardRefRenderFunction<SVGElement, IProps>'.
+  Types of parameters 'ref' and 'ref' are incompatible.
+    Type 'ForwardedRef<SVGElement>' is not assignable to type 'IReactRef'.
+      Type 'null' is not assignable to type 'RefObject<SVGElement>'.
+../statusbar/src/components/hover.tsx(4,26): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../statusbar/src/components/hover.tsx(174,11): error TS2564: Property '_observer' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/clipboard.ts(204,13): error TS18046: 'reason' is of type 'unknown'.
+../apputils/src/clipboard.ts(235,13): error TS18046: 'reason' is of type 'unknown'.
+../apputils/src/commandpalette.ts(6,28): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/commandpalette.ts(28,10): error TS2565: Property '_commandPalette' is used before being assigned.
+../apputils/src/commandpalette.ts(173,11): error TS2564: Property '_commandPalette' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/dialog.tsx(12,8): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/dialog.tsx(535,11): error TS2564: Property '_original' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/dialog.tsx(536,11): error TS2564: Property '_first' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/dialog.tsx(538,11): error TS2564: Property '_promise' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/index.ts(7,38): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/index.ts(33,8): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/kernelstatuses.tsx(5,26): error TS2307: Cannot find module '@jupyterlab/statusbar' or its corresponding type declarations.
+../apputils/src/kernelstatuses.tsx(8,41): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/kernelstatuses.tsx(124,10): error TS2339: Property 'addClass' does not exist on type 'KernelStatus'.
+../apputils/src/kernelstatuses.tsx(131,14): error TS2339: Property 'model' does not exist on type 'KernelStatus'.
+../apputils/src/kernelstatuses.tsx(136,24): error TS2339: Property 'model' does not exist on type 'KernelStatus'.
+../apputils/src/kernelstatuses.tsx(137,28): error TS2339: Property 'model' does not exist on type 'KernelStatus'.
+../apputils/src/kernelstatuses.tsx(138,30): error TS2339: Property 'model' does not exist on type 'KernelStatus'.
+../apputils/src/kernelstatuses.tsx(195,12): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/kernelstatuses.tsx(237,12): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/kernelstatuses.tsx(261,14): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/kernelstatuses.tsx(265,15): error TS2564: Property 'translation' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(6,30): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/licenses.tsx(13,8): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/licenses.tsx(57,16): error TS2339: Property 'dispose' does not exist on type 'Model'.
+../apputils/src/licenses.tsx(76,27): error TS2345: Argument of type 'Filters' is not assignable to parameter of type 'Widget'.
+  Type 'Filters' is missing the following properties from type 'Widget': dispose, disposed, node, isDisposed, and 48 more.
+../apputils/src/licenses.tsx(77,31): error TS2345: Argument of type 'Filters' is not assignable to parameter of type 'Widget'.
+  Type 'Filters' is missing the following properties from type 'Widget': dispose, disposed, node, isDisposed, and 48 more.
+../apputils/src/licenses.tsx(92,16): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/licenses.tsx(100,27): error TS2345: Argument of type 'Grid' is not assignable to parameter of type 'Widget'.
+  Type 'Grid' is missing the following properties from type 'Widget': dispose, disposed, node, isDisposed, and 48 more.
+../apputils/src/licenses.tsx(101,20): error TS2345: Argument of type 'Grid' is not assignable to parameter of type 'Widget'.
+  Type 'Grid' is missing the following properties from type 'Widget': dispose, disposed, node, isDisposed, and 48 more.
+../apputils/src/licenses.tsx(109,27): error TS2345: Argument of type 'Grid' is not assignable to parameter of type 'Widget'.
+  Type 'Grid' is missing the following properties from type 'Widget': dispose, disposed, node, isDisposed, and 48 more.
+../apputils/src/licenses.tsx(110,20): error TS2345: Argument of type 'FullText' is not assignable to parameter of type 'Widget'.
+  Type 'FullText' is missing the following properties from type 'Widget': dispose, disposed, node, isDisposed, and 48 more.
+../apputils/src/licenses.tsx(144,13): error TS2564: Property '_leftPanel' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(149,13): error TS2564: Property '_filters' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(154,13): error TS2564: Property '_bundles' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(159,13): error TS2564: Property '_grid' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(164,13): error TS2564: Property '_licenseText' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(387,14): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/licenses.tsx(440,14): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/licenses.tsx(475,12): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/licenses.tsx(516,12): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/licenses.tsx(552,13): error TS2564: Property '_serverResponse' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(554,13): error TS2564: Property '_currentBundleName' has no initializer and is not definitely assigned in the constructor.
+../apputils/src/licenses.tsx(567,12): error TS2339: Property 'addClass' does not exist on type 'Filters'.
+../apputils/src/licenses.tsx(568,12): error TS2339: Property 'addClass' does not exist on type 'Filters'.
+../apputils/src/licenses.tsx(572,30): error TS2339: Property 'model' does not exist on type 'Filters'.
+../apputils/src/licenses.tsx(607,26): error TS2339: Property 'model' does not exist on type 'Filters'.
+../apputils/src/licenses.tsx(627,12): error TS2339: Property 'model' does not exist on type 'Filters'.
+../apputils/src/licenses.tsx(627,44): error TS2339: Property 'model' does not exist on type 'Filters'.
+../apputils/src/licenses.tsx(683,12): error TS2339: Property 'addClass' does not exist on type 'Grid'.
+../apputils/src/licenses.tsx(684,12): error TS2339: Property 'addClass' does not exist on type 'Grid'.
+../apputils/src/licenses.tsx(691,58): error TS2339: Property 'model' does not exist on type 'Grid'.
+../apputils/src/licenses.tsx(692,37): error TS2339: Property 'model' does not exist on type 'Grid'.
+../apputils/src/licenses.tsx(728,39): error TS2339: Property 'model' does not exist on type 'Grid'.
+../apputils/src/licenses.tsx(729,35): error TS2339: Property 'model' does not exist on type 'Grid'.
+../apputils/src/licenses.tsx(763,12): error TS2339: Property 'addClass' does not exist on type 'FullText'.
+../apputils/src/licenses.tsx(764,12): error TS2339: Property 'addClass' does not exist on type 'FullText'.
+../apputils/src/licenses.tsx(765,12): error TS2339: Property 'addClass' does not exist on type 'FullText'.
+../apputils/src/licenses.tsx(772,46): error TS2339: Property 'model' does not exist on type 'FullText'.
+../apputils/src/mainareawidget.ts(6,30): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/mainareawidget.ts(7,42): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/menufactory.ts(8,25): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/runningSessions.tsx(18,8): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/runningSessions.tsx(21,37): error TS2307: Cannot find module '@jupyterlab/statusbar' or its corresponding type declarations.
+../apputils/src/runningSessions.tsx(126,7): error TS2345: Argument of type '(manager: SessionManager, sessions: IModel[]) => void' is not assignable to parameter of type 'Slot<IManager, IModel[]>'.
+  Types of parameters 'manager' and 'sender' are incompatible.
+    Type 'IManager' is missing the following properties from type 'SessionManager': requestRunning, _onStarted, _onDisposed, _onChanged, and 14 more.
+../apputils/src/runningSessions.tsx(130,7): error TS2345: Argument of type '(manager: TerminalManager, terminals: IModel[]) => void' is not assignable to parameter of type 'Slot<IManager, IModel[]>'.
+  Types of parameters 'manager' and 'sender' are incompatible.
+    Type 'IManager' is missing the following properties from type 'TerminalManager': requestRunning, _onStarted, _onDisposed, _isReady, and 10 more.
+../apputils/src/runningSessions.tsx(134,10): error TS2339: Property 'addClass' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(141,15): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(150,12): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(151,12): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(156,10): error TS2339: Property 'node' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(160,24): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(161,25): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(177,7): error TS2345: Argument of type '(manager: SessionManager, sessions: IModel[]) => void' is not assignable to parameter of type 'Slot<IManager, IModel[]>'.
+  Types of parameters 'manager' and 'sender' are incompatible.
+    Type 'IManager' is missing the following properties from type 'SessionManager': requestRunning, _onStarted, _onDisposed, _onChanged, and 14 more.
+../apputils/src/runningSessions.tsx(181,7): error TS2345: Argument of type '(manager: TerminalManager, terminals: IModel[]) => void' is not assignable to parameter of type 'Slot<IManager, IModel[]>'.
+  Types of parameters 'manager' and 'sender' are incompatible.
+    Type 'IManager' is missing the following properties from type 'TerminalManager': requestRunning, _onStarted, _onDisposed, _isReady, and 10 more.
+../apputils/src/runningSessions.tsx(193,10): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(203,10): error TS2339: Property 'model' does not exist on type 'RunningSessions'.
+../apputils/src/runningSessions.tsx(234,14): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/runningSessions.tsx(249,14): error TS2339: Property 'stateChanged' does not exist on type 'Model'.
+../apputils/src/toolbar/factory.ts(11,30): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/toolbar/factory.ts(102,25): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(callbackfn: (previousValue: IToolbarItem[], currentValue: IToolbarItem[], currentIndex: number, array: IToolbarItem[][]) => IToolbarItem[], initialValue: IToolbarItem[]): IToolbarItem[]', gave the following error.
+    Type 'IToolbarItem[] | undefined' is not assignable to type 'IToolbarItem[]'.
+      Type 'undefined' is not assignable to type 'IToolbarItem[]'.
+  Overload 2 of 3, '(callbackfn: (previousValue: IToolbarItem[], currentValue: IToolbarItem[], currentIndex: number, array: IToolbarItem[][]) => IToolbarItem[], initialValue: IToolbarItem[]): IToolbarItem[]', gave the following error.
+    Type 'IToolbarItem[] | undefined' is not assignable to type 'IToolbarItem[]'.
+      Type 'undefined' is not assignable to type 'IToolbarItem[]'.
+../apputils/src/toolbar/factory.ts(370,3): error TS2578: Unused '@ts-expect-error' directive.
+../apputils/src/toolbar/factory.ts(378,3): error TS2578: Unused '@ts-expect-error' directive.
+../apputils/src/toolbar/registry.ts(10,8): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/toolbar/registry.ts(90,36): error TS2345: Argument of type '(main: T) => Widget' is not assignable to parameter of type '(main: Widget) => Widget'.
+  Types of parameters 'main' and 'main' are incompatible.
+    Type 'Widget' is not assignable to type 'T'.
+      'Widget' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint 'Widget'.
+../apputils/src/toolbar/widget.tsx(17,8): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
+../apputils/src/toolbar/widget.tsx(162,10): error TS7006: Parameter 'sessionContext' implicitly has an 'any' type.
+../codeeditor/src/jsoneditor.ts(8,37): error TS2307: Cannot find module '@jupyterlab/ui-components' or its corresponding type declarations.
