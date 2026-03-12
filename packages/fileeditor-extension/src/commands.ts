@@ -601,8 +601,9 @@ export namespace Commands {
 
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set theme - ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set theme - ${message}`);
         }
       },
       isToggled: args =>

@@ -26,8 +26,6 @@ import { Debugger } from '../../debugger';
 
 import type { IDebugger } from '../../tokens';
 
-import type { VariablesModel } from './model';
-
 /**
  * The body for tree of variables.
  */

@@ -1024,7 +1024,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
               err.message = trans.__('Could not open URL: %1', url);
             }
           }
-          return showErrorMessage(trans.__('Cannot fetch'), reason);
+          return showErrorMessage(trans.__('Cannot fetch'), reason as string);
         }
 
         // upload the content of the file to the server
@@ -1035,10 +1035,10 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
           return commands.execute('docmanager:open', {
             path: model.path
           });
-        } catch (error) {
+        } catch (error: unknown) {
           return showErrorMessage(
             trans._p('showErrorMessage', 'Upload Error'),
-            error
+            error as string
           );
         }
       },
@@ -1422,11 +1422,14 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
-      } catch (reason) {
-        if (reason.response && reason.response.status === 404) {
-          reason.message = trans.__('Could not find path: %1', path);
+      } catch (reason: unknown) {
+        if (reason && typeof reason === 'object' && 'response' in reason) {
+          const err = reason as any;
+          if (err.response && err.response.status === 404) {
+            err.message = trans.__('Could not find path: %1', path);
+          }
         }
-        return showErrorMessage(trans.__('Cannot open'), reason);
+        return showErrorMessage(trans.__('Cannot open'), reason as string);
       }
     },
     describedBy: {

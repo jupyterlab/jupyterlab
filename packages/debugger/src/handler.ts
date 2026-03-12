@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
-import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import type { ConsolePanel } from '@jupyterlab/console';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type { DocumentWidget } from '@jupyterlab/docregistry';
