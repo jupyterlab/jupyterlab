@@ -961,7 +961,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private async _onCurrentFrameChanged(
     _: IDebugger.Model.ICallstack,
-    frame: IDebugger.IStackFrame
+    frame: IDebugger.IStackFrame | null
   ): Promise<void> {
     if (!frame) {
       return;
@@ -981,7 +981,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param variable The expanded variable.
    */
   private async _onVariableExpanded(
-    _: VariablesModel,
+    _: IDebugger.Model.IVariables,
     variable: DebugProtocol.Variable
   ): Promise<DebugProtocol.Variable[]> {
     if (!this.session) {

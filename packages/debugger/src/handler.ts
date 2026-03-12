@@ -122,7 +122,14 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       return this.updateWidget(widget, connection);
     }
 
-    const kernelChanged = (): void => {
+    const kernelChanged = (
+      _: Session.ISessionConnection,
+      args: IChangedArgs<
+        Kernel.IKernelConnection,
+        Kernel.IKernelConnection,
+        'kernel'
+      >
+    ): void => {
       void this.updateWidget(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
@@ -183,7 +190,14 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     sessionContext: ISessionContext
   ): Promise<void> {
-    const connectionChanged = (): void => {
+    const connectionChanged = (
+      _: SessionContext,
+      args: IChangedArgs<
+        Kernel.IKernelConnection,
+        Kernel.IKernelConnection,
+        'kernel'
+      >
+    ): void => {
       const { session: connection } = sessionContext;
       void this.update(widget, connection);
     };
