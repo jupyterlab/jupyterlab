@@ -153,6 +153,18 @@ jobs:
         run: |
           npx playwright merge-reports --reporter html,github ./artifacts/
 
+      - name: Inline the report
+        uses: krassowski/maintainer-tools/.github/actions/inline-playwright-report@6f0982155899522605372f80540cc726a7c786e8
+        with:
+          path: playwright-report
+
+      - name: Upload inlined report
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          name: visual-regression-report-standalone
+          path: playwright-report/output.html
+
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
         with:
