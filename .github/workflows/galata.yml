@@ -159,11 +159,16 @@ jobs:
           path: playwright-report
 
       - name: Upload inlined report
+        id: upload-report
         uses: actions/upload-artifact@v7
         with:
           archive: false
           name: visual-regression-report-standalone
           path: playwright-report/output.html
+
+      - name: Add report link to job summary
+        run: |
+          echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
