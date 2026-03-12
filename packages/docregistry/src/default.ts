@@ -481,7 +481,7 @@ export abstract class ABCWidgetFactory<
     // Add toolbar
     setToolbar(
       widget,
-      this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)
+      (this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)) as (widget: Widget) => IObservableList<IToolbarItem> | IToolbarItem[]
     );
 
     // Emit widget created signal
@@ -597,7 +597,7 @@ export class DocumentWidget<
   /**
    * Handle a title change.
    */
-  private async _onTitleChanged(_sender: Title<this>) {
+  private async _onTitleChanged(_sender: Title<Widget>) {
     const validNameExp = /[\/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name

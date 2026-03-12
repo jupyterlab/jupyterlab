@@ -169,7 +169,7 @@ export class MimeContent extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason as string | Dialog.IError
       );
     }
   }

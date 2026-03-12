@@ -81,5 +81,5 @@ export class FileMenu extends RankedMenu implements IFileMenu {
    */
   public quitEntry: boolean;
 
-  private _newMenu: RankedMenu;
+  private _newMenu!: RankedMenu;
 }

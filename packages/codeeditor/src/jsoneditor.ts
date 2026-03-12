@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IObservableJSON } from '@jupyterlab/observables';
+import type { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
 import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -204,7 +204,7 @@ export class JSONEditor extends Widget {
    */
   private _onSourceChanged(
     sender: IObservableJSON,
-    args: IObservableJSON.IChangedArgs
+    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
   ) {
     if (this._changeGuard) {
       return;
