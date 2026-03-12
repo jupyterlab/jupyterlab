@@ -23,6 +23,7 @@ import {
   KernelConnector
 } from '@jupyterlab/inspector';
 import { ILauncher } from '@jupyterlab/launcher';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
@@ -296,7 +297,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     const handlers: { [id: string]: InspectionHandler } = {};
 
     // Create a handler for each notebook that is created.
-    notebooks.widgetAdded.connect((sender, parent) => {
+    notebooks.widgetAdded.connect((sender: INotebookTracker, parent: NotebookPanel) => {
       const sessionContext = parent.sessionContext;
       const rendermime = parent.content.rendermime;
       const connector = new KernelConnector({ sessionContext });

@@ -188,7 +188,7 @@ function activateLogConsole(
       notifyCommands();
     });
 
-    logConsolePanel.sourceDisplayed.connect((panel, { source, version }) => {
+    logConsolePanel.sourceDisplayed.connect((panel: LogConsolePanel, { source, version }: { source: string, version: number }) => {
       status.model.sourceDisplayed(source, version);
     });
 
