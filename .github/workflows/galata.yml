@@ -159,6 +159,23 @@ jobs:
           name: visual-regression-report
           path: playwright-report
 
+      - name: Inline the report
+        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@v1
+        with:
+          path: playwright-report
+
+      - name: Upload inlined report
+        id: upload-report
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          name: visual-regression-report-standalone
+          path: playwright-report/output.html
+
+      - name: Add report link to job summary
+        run: |
+          echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
+
       - name: Check for test assets
         id: check-assets
         run: |
