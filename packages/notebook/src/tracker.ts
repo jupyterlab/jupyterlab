@@ -84,7 +84,7 @@ export class NotebookTracker
     this._activeCellChanged.emit(widget.content.activeCell || null);
   }
 
-  private _onActiveCellChanged(sender: Notebook, cell: Cell): void {
+  private _onActiveCellChanged(sender: Notebook, cell: Cell | null): void {
     // Check if the active cell change happened for the current notebook.
     if (this.currentWidget && this.currentWidget.content === sender) {
       this._activeCell = cell || null;

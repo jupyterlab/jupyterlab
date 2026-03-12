@@ -176,7 +176,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param change - Changed data
    */
   async onKernelChanged(
-    _session: SessionContext,
+    _session: ISessionContext,
     change: Session.ISessionConnection.IKernelChangedArgs
   ): Promise<void> {
     if (!change.newValue) {

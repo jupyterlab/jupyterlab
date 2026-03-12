@@ -48,7 +48,7 @@ function isCodeMirrorElement(element: Element | null): boolean {
 /**
  * Subclass IntersectionObserver to allow suspending callbacks when notebook is scrolling.
  */
-window.IntersectionObserver = class extends window.IntersectionObserver {
+(window.IntersectionObserver as any) = class extends window.IntersectionObserver {
   constructor(
     protected callback: IntersectionObserverCallback,
     options: IntersectionObserverInit
@@ -312,7 +312,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
   set activeCell(widget: Widget | null) {
     this._activeCell = widget;
   }
-  private _activeCell: Widget | null;
+  private _activeCell!: Widget | null;
 
   /**
    * Dispose the layout

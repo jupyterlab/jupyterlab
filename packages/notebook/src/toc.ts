@@ -356,8 +356,12 @@ export class NotebookToCModel extends TableOfContentsModel<
 
   protected onActiveCellChanged(
     notebook: Notebook,
-    cell: Cell<ICellModel>
+    cell: Cell<ICellModel> | null
   ): void {
+    if (!cell) {
+      this.setActiveHeading(null, false);
+      return;
+    }
     // Highlight the first title as active (if multiple titles are in the same cell)
     const activeHeading = this.getCellHeadings(cell)[0];
     this.setActiveHeading(activeHeading ?? null, false);
@@ -602,7 +606,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     let headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
     const onActiveHeadingChanged = (
-      model: TableOfContentsModel.IModel<INotebookHeading>,
+      model: TableOfContents.IModel<INotebookHeading>,
       heading: INotebookHeading | null
     ) => {
       if (heading) {
@@ -710,7 +714,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     };
 
-    const onHeadingsChanged = (model: TableOfContentsModel.IModel<INotebookHeading>) => {
+    const onHeadingsChanged = (model: TableOfContents.IModel<INotebookHeading>) => {
       if (!this.parser) {
         return;
       }
@@ -726,7 +730,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     const onHeadingCollapsed = (
-      _: TableOfContentsModel.IModel<INotebookHeading>,
+      _: TableOfContents.IModel<INotebookHeading>,
       heading: INotebookHeading | null
     ) => {
       if (model.configuration.syncCollapseState) {
@@ -747,8 +751,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         }
       }
     };
-    const onCellCollapsed = (_: unknown, cell: MarkdownCell) => {
-      if (model.configuration.syncCollapseState) {
+    const onCellCollapsed = (_: unknown, cell: Cell<ICellModel>) => {
+      if (model.configuration.syncCollapseState && cell instanceof MarkdownCell) {
         const h = model.getCellHeadings(cell)[0];
         if (h) {
           model.toggleCollapse({
@@ -759,7 +763,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    const onCellInViewportChanged = (_: unknown, cell: Cell) => {
+    const onCellInViewportChanged = (_: unknown, cell: Cell<ICellModel>) => {
       if (cell.inViewport) {
         findHeadingElement(cell);
       } else {
@@ -787,7 +791,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     });
 
-    return model as TableOfContentsModel<TableOfContents.IHeading, NotebookPanel>;
+    return model;
   }
 
   private _scrollToTop: boolean = true;

@@ -286,7 +286,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   translator: ITranslator;
   private _tools: Array<NotebookTools.IToolPanel>;
   private _tracker!: INotebookTracker;
-  private _prevActiveCell: ICellModel | null;
+  private _prevActiveCell!: ICellModel | null;
   private _prevActiveNotebookModel!: INotebookModel | null;
 }
 
