@@ -75,8 +75,8 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
 
   private _timer: any = -1;
   private _timeout = -1;
-  private _sender: Sender;
-  private _args: Args;
+  private _sender!: Sender;
+  private _args!: Args;
   private _isDisposed = false;
   private _activityStopped = new Signal<
     this,

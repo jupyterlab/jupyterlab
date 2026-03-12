@@ -32,7 +32,7 @@ export class NbConvertManager implements NbConvert.IManager {
   /**
    * The server settings used to make API requests.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Fetch and cache the export formats from the expensive nbconvert handler.

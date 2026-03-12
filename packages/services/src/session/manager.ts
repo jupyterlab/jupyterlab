@@ -55,7 +55,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * The server settings for the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.
@@ -333,7 +333,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   private _isReady = false;
   private _sessionConnections = new Set<SessionConnection>();
   private _models = new Map<string, Session.IModel>();
-  private _pollModels: Poll;
+  private _pollModels!: Poll;
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
@@ -345,7 +345,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
     return this._kernelManager.connectTo(options);
   };
 
-  private _kernelManager: Kernel.IManager;
+  private _kernelManager!: Kernel.IManager;
   private _sessionAPIClient: Session.ISessionAPIClient;
 }
 

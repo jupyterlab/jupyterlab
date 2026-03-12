@@ -307,7 +307,7 @@ export abstract class KernelFutureHandler<
   ) => void | PromiseLike<void> = Private.noOp;
   private _reply: (msg: REPLY) => void | PromiseLike<void> = Private.noOp;
   private _done = new PromiseDelegate<REPLY>();
-  private _replyMsg: REPLY;
+  private _replyMsg!: REPLY;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
   private _kernel: Kernel.IKernelConnection;
@@ -468,8 +468,8 @@ namespace Private {
 
     private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] =
       [];
-    private _compactScheduled: boolean;
-    private _processing: Promise<void>;
+    private _compactScheduled!: boolean;
+    private _processing!: Promise<void>;
   }
 
   /**

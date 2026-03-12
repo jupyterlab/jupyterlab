@@ -176,7 +176,7 @@ export namespace WPPlugin {
       );
     }
 
-    options: DuplicatePackageCheckerPlugin.Options;
+    declare options: DuplicatePackageCheckerPlugin.Options;
   }
 
   /**

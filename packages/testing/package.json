@@ -49,9 +49,9 @@
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
-    "@types/node": "^20.14.8",
+    "@types/node": "^20.19.37",
     "rimraf": "~5.0.5",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.1-rc"
   },
   "peerDependencies": {
     "typescript": ">=4.3"

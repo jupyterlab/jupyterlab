@@ -47,7 +47,7 @@ export function getLernaPaths(basePath = '.'): string[] {
       packages = baseConfig.packages;
     }
   } catch (e) {
-    if (e.code === 'MODULE_NOT_FOUND') {
+    if (typeof e === 'object' && e !== null && 'code' in e && (e as any).code === 'MODULE_NOT_FOUND') {
       throw new Error(
         `No yarn workspace / lerna package list found in ${basePath}`
       );

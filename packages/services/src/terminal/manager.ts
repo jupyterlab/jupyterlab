@@ -58,7 +58,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   /**
    * The server settings of the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.

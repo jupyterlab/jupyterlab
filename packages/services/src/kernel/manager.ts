@@ -59,7 +59,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   /**
    * The server settings for the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.
@@ -364,7 +364,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _ready: Promise<void>;
   private _kernelConnections = new Set<KernelConnection>();
   private _models = new Map<string, Kernel.IModel>();
-  private _pollModels: Poll;
+  private _pollModels!: Poll;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
   private _kernelAPIClient: Kernel.IKernelAPIClient;

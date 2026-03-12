@@ -126,7 +126,7 @@ class DataTransferItemMock implements DataTransferItem {
 export class DataTransferMock implements DataTransfer {
   dropEffect: DataTransfer['dropEffect'] = 'none';
   effectAllowed: DataTransfer['dropEffect'] = 'none';
-  files: DataTransfer['files'];
+  files: DataTransfer['files'] = [] as any;
   get items(): DataTransfer['items'] {
     return [
       ...Object.entries(this._data).map(

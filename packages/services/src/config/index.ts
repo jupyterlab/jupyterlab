@@ -66,7 +66,7 @@ export class ConfigSectionManager implements ConfigSection.IManager {
   /**
    * The server settings used to make API requests.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -142,7 +142,7 @@ class DefaultConfigSection implements IConfigSection {
   /**
    * The server settings for the section.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Get the data for this section.
@@ -215,7 +215,7 @@ class DefaultConfigSection implements IConfigSection {
   }
 
   private _name: string;
-  private _data: JSONObject;
+  private _data!: JSONObject;
 }
 
 /**

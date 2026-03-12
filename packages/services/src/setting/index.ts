@@ -33,7 +33,7 @@ export class SettingManager extends DataConnector<
   /**
    * The server settings used to make API requests.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Fetch a plugin's settings.

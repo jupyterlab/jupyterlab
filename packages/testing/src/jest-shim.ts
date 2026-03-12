@@ -114,6 +114,7 @@ class IntersectionObserverMock {
   root = document;
   rootMargin = '0px 0px 0px 0px';
   thresholds = [0];
+  scrollMargin = '0px 0px 0px 0px';
 }
 
 window.IntersectionObserver = IntersectionObserverMock;
@@ -125,16 +126,16 @@ window.DataTransfer = DataTransferMock;
 // https://github.com/jsdom/jsdom/issues/1568
 class ClipboardEventMock extends Event implements ClipboardEvent {
   constructor(
-    type: 'copy' | 'cut' | 'paste',
-    options: { clipboardData: DataTransfer }
+    type: string,
+    eventInitDict?: ClipboardEventInit
   ) {
     super(type);
-    this.clipboardData = options.clipboardData;
+    this.clipboardData = (eventInitDict as any)?.clipboardData || null;
   }
-  clipboardData: DataTransfer;
+  clipboardData: DataTransfer | null;
 }
 
-window.ClipboardEvent = ClipboardEventMock;
+window.ClipboardEvent = ClipboardEventMock as any;
 
 (window as any).document.elementFromPoint = (left: number, top: number) =>
   document.body;

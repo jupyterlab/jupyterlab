@@ -62,7 +62,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   /**
    * The server settings for the session.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the session is disposed.

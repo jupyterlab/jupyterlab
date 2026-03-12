@@ -95,7 +95,7 @@ export abstract class BaseManager implements IManager {
   /**
    * The server settings of the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);

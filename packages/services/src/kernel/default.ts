@@ -74,7 +74,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * The server settings for the kernel.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Handle comm messages
@@ -1864,7 +1864,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   } = Object.create(null);
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
   private _pendingMessages: KernelMessage.IMessage[] = [];
-  private _specPromise: Promise<KernelSpec.ISpecModel | undefined>;
+  private _specPromise!: Promise<KernelSpec.ISpecModel | undefined>;
   private _statusChanged = new Signal<this, KernelMessage.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this

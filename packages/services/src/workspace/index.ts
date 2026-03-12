@@ -30,7 +30,7 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
   /**
    * The server settings used to make API requests.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Fetch a workspace.
