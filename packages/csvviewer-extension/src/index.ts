@@ -180,7 +180,7 @@ function activateCsv(
     // Delay await to execute `widget.title` setters (above) synchronously
     if (searchRegistry && !searchProviderInitialized) {
       const { CSVSearchProvider } = await import('./searchprovider');
-      searchRegistry.add('csv', CSVSearchProvider);
+      searchRegistry.add('csv', CSVSearchProvider as any);
       searchProviderInitialized = true;
     }
 
@@ -347,7 +347,7 @@ function activateTsv(
     // Delay await to execute `widget.title` setters (above) synchronously
     if (searchRegistry && !searchProviderInitialized) {
       const { CSVSearchProvider } = await import('./searchprovider');
-      searchRegistry.add('tsv', CSVSearchProvider);
+      searchRegistry.add('tsv', CSVSearchProvider as any);
       searchProviderInitialized = true;
     }
 
