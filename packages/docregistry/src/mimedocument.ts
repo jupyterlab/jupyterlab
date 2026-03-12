@@ -203,7 +203,7 @@ export class MimeContent extends Widget {
   private _trans: TranslationBundle;
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _fragment = '';
-  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
+  private _monitor!: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
   private _isRendering = false;

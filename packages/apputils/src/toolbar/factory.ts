@@ -99,9 +99,9 @@ async function setToolbarItems(
         })
         .concat([(schema[TOOLBAR_KEY] ?? {})[factoryName] ?? []])
         .reduceRight(
-          (acc, val) => SettingRegistry.reconcileToolbarItems(acc, val, true),
-          []
-        )!;
+          (acc, val) => SettingRegistry.reconcileToolbarItems(acc, val, true) ?? [],
+          [] as ISettingRegistry.IToolbarItem[]
+        );
 
       // Apply default value as last step to take into account overrides.json
       // The standard toolbars default is [] as the plugin must use

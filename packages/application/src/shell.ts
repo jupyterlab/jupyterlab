@@ -1847,7 +1847,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'multiple-document': ILabShell.IUserLayout;
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
-  private _translator: ITranslator;
+  private _translator!: ITranslator;
   private _layoutRestorer!: LayoutRestorer;
 }
 

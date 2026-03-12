@@ -182,7 +182,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       try {
         this.registerPlugin(item);
       } catch (error) {
-        this.registerPluginErrors.push(error);
+        this.registerPluginErrors.push(error as Error);
       }
     });
   }
@@ -231,10 +231,10 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 
     const disconnectListeners = () => {
       if (onBeforeInput) {
-        target.removeEventListener('beforeinput', onBeforeInput);
+        target.removeEventListener('beforeinput', onBeforeInput as EventListener);
       }
       if (onBeforeKeyUp) {
-        target.removeEventListener('keyup', onBeforeKeyUp);
+        target.removeEventListener('keyup', onBeforeKeyUp as EventListener);
       }
     };
 
@@ -272,7 +272,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
           disconnectListeners();
           return resolve(true);
         };
-        target.addEventListener('beforeinput', onBeforeInput, { once: true });
+        target.addEventListener('beforeinput', onBeforeInput as EventListener, { once: true });
       }),
       new Promise(resolve => {
         onBeforeKeyUp = (keyUpEvent: KeyboardEvent) => {
@@ -281,7 +281,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
             return resolve(false);
           }
         };
-        target.addEventListener('keyup', onBeforeKeyUp, { once: true });
+        target.addEventListener('keyup', onBeforeKeyUp as EventListener, { once: true });
       }),
       new Promise(resolve => {
         setTimeout(() => {
