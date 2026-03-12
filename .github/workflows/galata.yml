@@ -44,12 +44,14 @@ jobs:
           - browser: chromium
             project: documentation
             suite: documentation
+            python-version: ['3.10.6']
             shard: 1
             shards: 2
             optional_dependencies: "docs-screenshots"
           - browser: chromium
             project: documentation
             suite: documentation
+            python-version: ['3.10.6']
             shard: 2
             shards: 2
             optional_dependencies: "docs-screenshots"
