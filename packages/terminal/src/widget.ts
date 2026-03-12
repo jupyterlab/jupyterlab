@@ -495,15 +495,15 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     );
   }
 
-  private _fitAddon: FitAddon;
-  private _searchAddon: SearchAddon;
+  private _fitAddon!: FitAddon;
+  private _searchAddon!: SearchAddon;
   private _needsResize = true;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
   private _options: ITerminal.IOptions;
   private _isReady = false;
   private _ready = new PromiseDelegate<void>();
-  private _term: Xterm;
+  private _term!: Xterm;
   private _termOpened = false;
   private _trans: TranslationBundle;
   private _themeChanged = new Signal<this, void>(this);

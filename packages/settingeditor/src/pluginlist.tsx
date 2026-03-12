@@ -463,8 +463,8 @@ export class PluginList extends ReactWidget {
 
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
-  private _errors: { [id: string]: boolean };
-  private _filter: SettingsEditor.PluginSearchFilter;
+  private _errors!: { [id: string]: boolean };
+  private _filter!: SettingsEditor.PluginSearchFilter;
   private _model: PluginList.Model;
   private _query: string | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);

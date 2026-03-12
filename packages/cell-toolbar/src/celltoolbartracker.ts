@@ -90,13 +90,14 @@ export class CellToolbarTracker implements IDisposable {
         notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
 
         // Check whether the toolbar should be rendered upon a layout change
-        notebook.renderingLayoutChanged.connect(
-          this._onActiveCellChanged,
-          this
-        );
+        const onRenderingLayoutChanged = () => {
+          this._onActiveCellChanged(notebook, notebook.activeCell);
+        };
+        notebook.renderingLayoutChanged.connect(onRenderingLayoutChanged, this);
 
         notebook.disposed.connect(() => {
           notebook.activeCellChanged.disconnect(this._onActiveCellChanged);
+          notebook.renderingLayoutChanged.disconnect(onRenderingLayoutChanged);
         });
       });
     });

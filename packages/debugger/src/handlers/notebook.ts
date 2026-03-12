@@ -92,7 +92,7 @@ export class NotebookHandler implements IDisposable {
    * Handle a notebook cells changed event.
    */
   private _onCellsChanged(
-    cells?: IObservableList<ICellModel>,
+    cells?: CellList,
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this._notebookPanel.content.widgets.forEach((cell: Cell) =>

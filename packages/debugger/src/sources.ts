@@ -3,13 +3,14 @@
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import type { Cell } from '@jupyterlab/cells';
 import type {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
 import type { IConsoleTracker } from '@jupyterlab/console';
 import type { IEditorTracker } from '@jupyterlab/fileeditor';
-import type { Cell, INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import type { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import type { IDebugger } from './tokens';
 

@@ -23,7 +23,8 @@ import {
   KernelConnector
 } from '@jupyterlab/inspector';
 import { ILauncher } from '@jupyterlab/launcher';
-import type { Cell, Notebook, NotebookPanel } from '@jupyterlab/notebook';
+import type { Cell } from '@jupyterlab/cells';
+import type { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
