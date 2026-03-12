@@ -44,14 +44,12 @@ jobs:
           - browser: chromium
             project: documentation
             suite: documentation
-            python-version: '3.10.6'
             shard: 1
             shards: 2
             optional_dependencies: "docs-screenshots"
           - browser: chromium
             project: documentation
             suite: documentation
-            python-version: '3.10.6'
             shard: 2
             shards: 2
             optional_dependencies: "docs-screenshots"
@@ -104,6 +102,7 @@ jobs:
         working-directory: core
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
+        if: ${{ matrix.project != 'documentation' }}
         run: |
           pip install --upgrade --pre "ipykernel<=7.0.0a1"
         working-directory: core
