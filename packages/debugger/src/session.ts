@@ -301,7 +301,7 @@ export class DebuggerSession implements IDebugger.ISession {
   protected translator: ITranslator;
   private _seq = 0;
   private _ready = new PromiseDelegate<void>();
-  private _connection: Session.ISessionConnection | null;
+  private _connection: Session.ISessionConnection | null = null;
   private _config: IDebugger.IConfig;
   private _capabilities: DebugProtocol.Capabilities | undefined;
   private _isDisposed = false;

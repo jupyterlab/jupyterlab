@@ -20,6 +20,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
   constructor(options: SourcesModel.IOptions) {
     this._currentSource = null;
     this._currentFrame = null;
+    this.currentFrameChanged = options.currentFrameChanged;
 
     this._displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();

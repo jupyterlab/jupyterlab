@@ -1537,7 +1537,7 @@ function activateConsoleCompleterService(
   consoles.widgetAdded.connect(updateCompleter);
   manager.activeProvidersChanged.connect(() => {
     consoles.forEach((consoleWidget: ConsolePanel) => {
-      updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
+      updateCompleter(consoles, consoleWidget).catch(e => console.error(e));
     });
   });
 }

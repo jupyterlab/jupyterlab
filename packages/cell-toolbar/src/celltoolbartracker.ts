@@ -6,7 +6,6 @@ import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import { createDefaultFactory } from '@jupyterlab/apputils';
 import type {
   Cell,
-  CellModel,
   CodeCell,
   ICellModel,
   MarkdownCell

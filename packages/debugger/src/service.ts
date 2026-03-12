@@ -41,7 +41,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model({
       displayRegistry: options.displayRegistry,
-      getSource: this.getSource.bind(this),
+      getSource: async () => {
+        return { content: '', mimeType: '', path: '' };
+      },
       mimeTypeService: options.mimeTypeService || null
     });
     this._debuggerSources = options.debuggerSources ?? null;
@@ -222,8 +224,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('continue', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -285,8 +288,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('next', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -516,8 +520,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('pause', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -532,8 +537,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('stepIn', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -548,8 +554,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('stepOut', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
