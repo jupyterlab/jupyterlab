@@ -169,7 +169,7 @@ async function setToolbarItems(
       }
     });
   } catch (error) {
-    if (error.name === 'TransformError') {
+    if (error instanceof Error && error.name === 'TransformError') {
       // Assume the existing transformer is the toolbar builder transformer
       // from another factory set up.
       listenPlugin = false;
@@ -427,7 +427,7 @@ export function setToolbar(
               name => item.name === name
             );
             if (existingIndex >= 0) {
-              Array.from(toolbar_.children())[existingIndex].parent = null;
+              (Array.from(toolbar_.children())[existingIndex] as any).parent = null;
             }
 
             toolbar_.insertItem(
@@ -438,7 +438,7 @@ export function setToolbar(
           });
           break;
         case 'clear':
-          Array.from(toolbar_.children()).forEach(child => {
+          Array.from(toolbar_.children()).forEach((child: any) => {
             child.parent = null;
           });
           break;

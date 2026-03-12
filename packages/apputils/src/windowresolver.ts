@@ -36,7 +36,7 @@ export class WindowResolver implements IWindowResolver {
     });
   }
 
-  private _name: string;
+  private _name!: string;
 }
 
 /*
