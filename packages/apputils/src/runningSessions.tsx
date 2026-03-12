@@ -4,9 +4,7 @@
 import type {
   ServiceManager,
   Session,
-  SessionManager,
-  Terminal,
-  TerminalManager
+  Terminal
 } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';

@@ -567,9 +567,10 @@ export class DocumentWidget<
 {
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
-    options.reveal = Promise.all([options.reveal, options.context.ready]);
-    super(options);
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    const opts = options as MainAreaWidget.IOptions<T> & DocumentWidget.IOptions<T, U>;
+    opts.reveal = Promise.all([opts.reveal, options.context.ready]);
+    super(opts);
+    this._trans = (opts.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes

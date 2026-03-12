@@ -8,7 +8,6 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
 import type { JSONObject, ReadonlyPartialJSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
-import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
@@ -205,7 +204,7 @@ export class JSONEditor extends Widget {
    */
   private _onSourceChanged(
     sender: IObservableJSON,
-    args: IChangedArgs<ReadonlyPartialJSONValue | undefined>
+    args: IObservableJSON.IChangedArgs
   ) {
     if (this._changeGuard) {
       return;
