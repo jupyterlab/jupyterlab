@@ -250,12 +250,12 @@ export class LspWsConnection implements ILspConnection {
   /**
    * The internal websocket connection to the LSP handler
    */
-  protected socket: WebSocket;
+  protected socket!: WebSocket;
 
   /**
    * The json-rpc wrapper over the internal websocket connection.
    */
-  protected connection: MessageConnection;
+  protected connection!: MessageConnection;
 
   /**
    * Map to track opened virtual documents..
@@ -265,7 +265,7 @@ export class LspWsConnection implements ILspConnection {
   /**
    * Lists server capabilities.
    */
-  serverCapabilities: protocol.ServerCapabilities;
+  serverCapabilities!: protocol.ServerCapabilities;
 
   /**
    * The connection is connected?

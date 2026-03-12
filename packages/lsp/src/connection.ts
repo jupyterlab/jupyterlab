@@ -223,12 +223,12 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   /**
    * Requests comes from the client.
    */
-  clientRequests: ClientRequests;
+  clientRequests!: ClientRequests;
 
   /**
    * Responses comes from the server.
    */
-  serverRequests: ServerRequests;
+  serverRequests!: ServerRequests;
 
   /**
    * Should log all communication?

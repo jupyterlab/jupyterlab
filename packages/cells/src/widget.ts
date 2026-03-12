@@ -703,7 +703,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: CellModel, args: IMapChange): void {
+  protected onMetadataChanged(model: ICellModel, args: IMapChange): void {
     switch (args.key) {
       case 'jupyter':
         if (this.syncCollapse) {
@@ -756,10 +756,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   private _editorConfig: Record<string, any> = {};
   private _editorExtensions: Extension[] = [];
-  private _input: InputArea | null;
+  private _input!: InputArea | null;
   private _inputHidden = false;
-  private _inputWrapper: Widget | null;
-  private _inputPlaceholder: InputPlaceholder | null;
+  private _inputWrapper!: Widget | null;
+  private _inputPlaceholder!: InputPlaceholder | null;
   private _inViewportChanged: Signal<Cell, boolean> = new Signal<Cell, boolean>(
     this
   );
@@ -1658,7 +1658,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: CellModel, args: IMapChange): void {
+  protected onMetadataChanged(model: ICellModel, args: IMapChange): void {
     switch (args.key) {
       case 'scrolled':
         if (this.syncScrolled) {
@@ -1707,14 +1707,14 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   private _headingsCache: Cell.IHeading[] | null = null;
-  private _rendermime: IRenderMimeRegistry;
+  private _rendermime!: IRenderMimeRegistry;
   private _outputHidden = false;
-  private _outputsScrolled: boolean;
+  private _outputsScrolled!: boolean;
   private _outputWrapper: Widget | null = null;
   private _outputPlaceholder: OutputPlaceholder | null = null;
-  private _output: OutputArea;
+  private _output!: OutputArea;
   private _syncScrolled = false;
-  private _lastOnCaretMovedHandler: () => void;
+  private _lastOnCaretMovedHandler!: () => void;
   private _lastTarget: HTMLElement | null = null;
   private _lastOutputHeight = '';
 }
@@ -2032,7 +2032,7 @@ export abstract class AttachmentsCell<
         if (model.type === 'file') {
           const URI = this._generateURI(model.name);
           this.updateCellSourceWithAttachment(model.name, URI);
-          void withContent().then(fullModel => {
+          void withContent().then((fullModel: any) => {
             this.model.attachments.set(URI, {
               [fullModel.mimetype]: fullModel.content
             });
@@ -2574,13 +2574,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   private _headingsCache: Cell.IHeading[] | null = null;
-  private _headingCollapsed: boolean;
+  private _headingCollapsed!: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
-  private _monitor: ActivityMonitor<ICellModel, void>;
-  private _numberChildNodes: number;
+  private _monitor!: ActivityMonitor<ICellModel, void>;
+  private _numberChildNodes!: number;
   private _prevText = '';
-  private _renderer: IRenderMime.IRenderer;
-  private _rendermime: IRenderMimeRegistry;
+  private _renderer!: IRenderMime.IRenderer;
+  private _rendermime!: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
   private _showEditorForReadOnlyMarkdown = true;

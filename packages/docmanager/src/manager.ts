@@ -588,7 +588,7 @@ export class DocumentManager implements IDocumentManager {
     ) => {
       this._widgetManager.adoptWidget(context, widget as IDocumentWidget);
       // TODO should we pass the type for layout customization
-      this._opener.open(widget, options);
+      this._opener.open(widget as IDocumentWidget, options);
     };
     const context = new Context({
       opener: adopter,

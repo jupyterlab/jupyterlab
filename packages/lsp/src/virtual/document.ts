@@ -266,12 +266,12 @@ export class VirtualDocument implements IDisposable {
   /**
    * Line number of the last line in the real document.
    */
-  lastSourceLine: number;
+  lastSourceLine!: number;
 
   /**
    * Line number of the last line in the virtual document.
    */
-  lastVirtualLine: number;
+  lastVirtualLine!: number;
 
   /**
    * the remote document uri, version and other server-related info
@@ -961,21 +961,21 @@ export class VirtualDocument implements IDisposable {
   /**
    * Virtual lines keep all the lines present in the document AND extracted to the foreign document.
    */
-  protected virtualLines: Map<number, IVirtualLine>;
-  protected sourceLines: Map<number, ISourceLine>;
-  protected lineBlocks: Array<string>;
+  protected virtualLines!: Map<number, IVirtualLine>;
+  protected sourceLines!: Map<number, ISourceLine>;
+  protected lineBlocks!: Array<string>;
 
-  protected unusedStandaloneDocuments: DefaultMap<
+  protected unusedStandaloneDocuments!: DefaultMap<
     language,
     Array<VirtualDocument>
   >;
 
   private _isDisposed = false;
-  private _remainingLifetime: number;
-  private _editorToSourceLine: Map<Document.IEditor, number>;
-  private _editorToSourceLineNew: Map<Document.IEditor, number>;
-  private _foreignCodeExtractors: ILSPCodeExtractorsManager;
-  private previousValue: string;
+  private _remainingLifetime!: number;
+  private _editorToSourceLine!: Map<Document.IEditor, number>;
+  private _editorToSourceLineNew!: Map<Document.IEditor, number>;
+  private _foreignCodeExtractors!: ILSPCodeExtractorsManager;
+  private previousValue!: string;
   private static instancesCount = 0;
   private readonly options: VirtualDocument.IOptions;
 

@@ -26,7 +26,7 @@ import {
  * A mermaid diagram manager with cache.
  */
 export class MermaidManager implements IMermaidManager {
-  protected _diagrams: LruCache<string, HTMLElement>;
+  protected _diagrams!: LruCache<string, HTMLElement>;
   protected _themes: IThemeManager | null;
 
   constructor(options: MermaidManager.IOptions = {}) {

@@ -106,7 +106,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       return [];
     }
 
-    return notebook.widgets.map(cell => {
+    return notebook.widgets.map((cell: any) => {
       return {
         ceEditor: this._getCellEditor(cell),
         type: cell.model.type,
@@ -141,7 +141,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   getEditorIndexAt(position: IVirtualPosition): number {
     let cell = this._getCellAt(position);
     let notebook = this.widget.content;
-    return notebook.widgets.findIndex(otherCell => {
+    return notebook.widgets.findIndex((otherCell: any) => {
       return cell === otherCell;
     });
   }

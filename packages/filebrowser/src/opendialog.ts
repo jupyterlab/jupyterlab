@@ -204,7 +204,7 @@ class OpenDialogBody
             widget: new ToolbarButton({
               icon: refreshIcon,
               onClick: () => {
-                browser.model.refresh().catch(reason => {
+                browser.model.refresh().catch((reason: any) => {
                   console.error(
                     'Failed to refresh file browser in open dialog.',
                     reason
