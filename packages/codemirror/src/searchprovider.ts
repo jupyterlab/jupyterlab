@@ -654,7 +654,7 @@ export class CodeMirrorSearchHighlighter {
   set protectSelection(v: boolean) {
     this._protectSelection = v;
   }
-  private _protectSelection: boolean;
+  private _protectSelection!: boolean;
 
   /**
    * Clear all highlighted matches

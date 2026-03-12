@@ -586,7 +586,7 @@ export class DirListing extends Widget {
       await state.remove(key);
     }
   }
-  private _stateColumnsKey: string;
+  private _stateColumnsKey!: string;
 
   /**
    * Shut down kernels on the applicable currently selected items.
@@ -2671,7 +2671,7 @@ export class DirListing extends Widget {
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
-  private _modifiedWidth: number;
+  private _modifiedWidth!: number;
   private _modifiedStyle: Time.HumanStyle;
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;

@@ -285,7 +285,7 @@ class OpenDialogBody
   }
 
   private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
-  private _browser: FileBrowser;
+  private _browser!: FileBrowser;
 }
 
 namespace Private {
