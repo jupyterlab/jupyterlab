@@ -1502,7 +1502,7 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+  const updateCompleter = async (_: IConsoleTracker, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,

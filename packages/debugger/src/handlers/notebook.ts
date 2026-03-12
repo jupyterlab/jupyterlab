@@ -64,7 +64,7 @@ export class NotebookHandler implements IDisposable {
   /**
    * Whether the handler is disposed.
    */
-  isDisposed: boolean;
+  isDisposed = false;
 
   /**
    * Dispose the handler.
@@ -92,7 +92,7 @@ export class NotebookHandler implements IDisposable {
    * Handle a notebook cells changed event.
    */
   private _onCellsChanged(
-    cells?: any,
+    cells?: IObservableList<ICellModel>,
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this._notebookPanel.content.widgets.forEach(cell =>
