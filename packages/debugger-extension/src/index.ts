@@ -61,7 +61,7 @@ import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
 
 function notifyCommands(commands: CommandRegistry): void {
-  Object.values(Debugger.CommandIDs).forEach(command => {
+  Object.values(Debugger.CommandIDs).forEach((command: string) => {
     if (commands.hasCommand(command)) {
       commands.notifyCommandChanged(command);
     }
@@ -388,7 +388,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
       });
     } else {
-      notebookTracker.currentChanged.connect((_, notebookPanel) => {
+      notebookTracker.currentChanged.connect((_: any, notebookPanel: NotebookPanel | null) => {
         if (notebookPanel) {
           void updateHandlerAndCommands(notebookPanel);
         }
@@ -410,7 +410,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         getDisplayName(source: IDebugger.Source): string {
           let displayName = source.path ?? '';
 
-          notebookTracker.forEach(panel => {
+          notebookTracker.forEach((panel: NotebookPanel) => {
             for (const cell of panel.content.widgets) {
               const model = cell.model;
               if (!isCodeCellModel(model)) {

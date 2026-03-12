@@ -9,7 +9,7 @@ import type {
 } from '@jupyterlab/codeeditor';
 import type { IConsoleTracker } from '@jupyterlab/console';
 import type { IEditorTracker } from '@jupyterlab/fileeditor';
-import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { Cell, INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import type { IDebugger } from './tokens';
 
@@ -82,7 +82,7 @@ export class DebuggerSources implements IDebugger.ISources {
     const { focus, kernel, path, source } = params;
 
     const editors: IDebugger.ISources.IEditor[] = [];
-    this._notebookTracker.forEach(notebookPanel => {
+    this._notebookTracker.forEach((notebookPanel: NotebookPanel) => {
       const sessionContext = notebookPanel.sessionContext;
 
       if (path !== sessionContext.path) {
@@ -95,7 +95,7 @@ export class DebuggerSources implements IDebugger.ISources {
       }
 
       const cells = notebookPanel.content.widgets;
-      cells.forEach((cell, i) => {
+      cells.forEach((cell: Cell, i: number) => {
         // check the event is for the correct cell
         const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
