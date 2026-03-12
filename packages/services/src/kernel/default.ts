@@ -400,10 +400,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _sendKernelShellControl<
     REQUEST extends KernelMessage.IShellControlMessage,
     REPLY extends KernelMessage.IShellControlMessage,
-    KFH extends new (...params: any[]) => KernelFutureHandler<REQUEST, REPLY>,
     T extends KernelMessage.IMessage
   >(
-    ctor: KFH,
+    ctor: new (...params: any[]) => any,
     msg: T,
     expectReply = false,
     disposeOnDone = true
@@ -445,8 +444,18 @@ export class KernelConnection implements Kernel.IKernelConnection {
       disposeOnDone,
       this
     );
-    this._futures.set(msg.header.msg_id, future);
-    return future;
+    const typedFuture = future as unknown as Kernel.IFuture<
+      KernelMessage.IShellControlMessage,
+      KernelMessage.IShellControlMessage
+    >;
+    this._futures.set(
+      msg.header.msg_id,
+      future as unknown as KernelFutureHandler<
+        KernelMessage.IShellControlMessage,
+        KernelMessage.IShellControlMessage
+      >
+    );
+    return typedFuture;
   }
 
   /**
