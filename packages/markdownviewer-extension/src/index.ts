@@ -12,7 +12,7 @@ import type {
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
+import type { MarkdownDocument, MarkdownViewerFactory } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
   MarkdownViewer,
@@ -126,7 +126,7 @@ function activate(
     fileTypes: ['markdown'],
     defaultRendered: ['markdown']
   });
-  factory.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect((sender: MarkdownViewerFactory, widget: MarkdownDocument) => {
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);

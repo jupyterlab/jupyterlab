@@ -210,9 +210,9 @@ export class ScrollingWidget<T extends Widget> extends Widget {
 
   private _content: T;
   private _observer: IntersectionObserver | null = null;
-  private _scrollHeight: number;
+  private _scrollHeight!: number;
   private _sentinel: HTMLDivElement;
-  private _tracking: boolean;
+  private _tracking!: boolean;
 }
 
 export namespace ScrollingWidget {

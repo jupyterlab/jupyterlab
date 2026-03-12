@@ -23,7 +23,7 @@ import {
   KernelConnector
 } from '@jupyterlab/inspector';
 import { ILauncher } from '@jupyterlab/launcher';
-import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { Cell, Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
@@ -311,7 +311,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       handler.editor = cell && cell.editor;
 
       // Listen for active cell changes.
-      parent.content.activeCellChanged.connect((sender, cell) => {
+      parent.content.activeCellChanged.connect((sender: Notebook, cell: Cell | null) => {
         void cell?.ready.then(() => {
           if (cell === parent.content.activeCell) {
             handler.editor = cell!.editor;
