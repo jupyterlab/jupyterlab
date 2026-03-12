@@ -104,7 +104,7 @@ export class NbConvertManager implements NbConvert.IManager {
     window?.open(url, '_blank', 'noopener');
   }
 
-  protected _requestingFormats: PromiseDelegate<NbConvert.IExportFormats> | null;
+  protected _requestingFormats: PromiseDelegate<NbConvert.IExportFormats> | null = null;
   protected _exportFormats: NbConvert.IExportFormats | null = null;
 }
 
