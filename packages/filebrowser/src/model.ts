@@ -301,7 +301,7 @@ export class FileBrowserModel implements IDisposable {
           this._connectionFailure.emit(error);
         }
       });
-    return this._pending;
+    return this._pending!;
   }
 
   /**

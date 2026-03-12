@@ -583,10 +583,10 @@ export class DocumentManager implements IDocumentManager {
 
     // Allow options to be passed when adding a sibling.
     const adopter = (
-      widget: IDocumentWidget,
+      widget: Widget,
       options?: DocumentRegistry.IOpenOptions
     ) => {
-      this._widgetManager.adoptWidget(context, widget);
+      this._widgetManager.adoptWidget(context, widget as IDocumentWidget);
       // TODO should we pass the type for layout customization
       this._opener.open(widget, options);
     };
