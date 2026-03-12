@@ -154,7 +154,7 @@ jobs:
           npx playwright merge-reports --reporter html,github ./artifacts/
 
       - name: Inline the report
-        uses: krassowski/maintainer-tools/.github/actions/inline-playwright-report@772ecd7e77f100e1bba093911a09b41fc8af94cc
+        uses: krassowski/maintainer-tools/.github/actions/inline-playwright-report@2c7237e8251543baf60ddf9667719b5f7230c717
         with:
           path: playwright-report
 
