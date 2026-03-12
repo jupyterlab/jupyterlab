@@ -187,7 +187,7 @@ export class Completer extends Widget {
   /**
    * Whether to suppress the tab completer when inline completions are presented.
    */
-  suppressIfInlineCompleterActive: boolean;
+  suppressIfInlineCompleterActive = false;
 
   /**
    * Dispose of the resources held by the completer widget.
@@ -910,21 +910,21 @@ export class Completer extends Widget {
   private _visibilityChanged = new Signal<this, void>(this);
   private _indexChanged = new Signal<this, number>(this);
   private _lastSubsetMatch: string = '';
-  private _showDoc: boolean;
+  private _showDoc!: boolean;
   private _sizeCache: Private.IDimensionsCache | undefined;
 
   /**
    * The maximum height of a completer widget.
    */
-  private _maxHeight: number;
+  private _maxHeight!: number;
 
   /**
    * The minimum height of a completer widget.
    */
-  private _minHeight: number;
+  private _minHeight!: number;
 
-  private _scrollbarWidth: number;
-  private _docPanelWidth: number;
+  private _scrollbarWidth!: number;
+  private _docPanelWidth!: number;
   private _docPanel: HTMLElement;
   private _geometryLock = false;
 

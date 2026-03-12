@@ -36,7 +36,7 @@ function activateForeign(
 ): void {
   const trans = translator.load('jupyterlab');
   const { shell } = app;
-  tracker.widgetAdded.connect((sender, widget) => {
+  tracker.widgetAdded.connect((sender: IConsoleTracker, widget: ConsolePanel) => {
     const console = widget.console;
 
     const handler = new ForeignHandler({

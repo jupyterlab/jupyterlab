@@ -155,7 +155,7 @@ export namespace TabSpaceStatus {
       }
     }
 
-    private _indentUnit: string | null;
+    private _indentUnit: string | null = null;
   }
 
   /**

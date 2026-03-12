@@ -27,6 +27,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { CodeCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
@@ -509,7 +510,7 @@ async function activateConsole(
                 kernel.subshellId = replyMsg.content.subshell_id;
               }
             })
-            .catch(reason => {
+            .catch((reason: unknown) => {
               console.error(
                 'Failed to initialize SessionContext or create new subshell.',
                 reason
@@ -1424,8 +1425,9 @@ async function activateConsole(
           'interactionMode',
           args['interactionMode'] as string
         );
-      } catch (reason) {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+      } catch (reason: unknown) {
+        const message = reason instanceof Error ? reason.message : String(reason);
+        console.error(`Failed to set ${pluginId}:${key} - ${message}`);
       }
     },
     isToggled: args => args['interactionMode'] === interactionMode,
@@ -1509,7 +1511,7 @@ function activateConsoleCompleterService(
       widget: consolePanel
     };
     await manager.updateCompleter(completerContext);
-    consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
+    consolePanel.console.promptCellCreated.connect((codeConsole: CodeConsole, cell: CodeCell) => {
       const newContext = {
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
@@ -1530,7 +1532,7 @@ function activateConsoleCompleterService(
   };
   consoles.widgetAdded.connect(updateCompleter);
   manager.activeProvidersChanged.connect(() => {
-    consoles.forEach(consoleWidget => {
+    consoles.forEach((consoleWidget: ConsolePanel) => {
       updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
     });
   });
