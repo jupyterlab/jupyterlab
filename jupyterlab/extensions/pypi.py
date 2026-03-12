@@ -27,7 +27,8 @@ from zipfile import ZipFile
 import httpx
 import tornado
 from async_lru import alru_cache
-from packaging.version import Version
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import InvalidVersion, Version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab._version import __version__
@@ -88,6 +89,31 @@ if http_proxy_url:
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
+def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
+    """Check if the current Python version satisfies the requires_python specifier.
+
+    Args:
+        requires_python: The requires_python specifier string from PyPI (e.g., ">=3.10")
+
+    Returns:
+        (compatible, explanation)
+        compatible: True if compatible or if requires_python is None/empty, False otherwise.
+        explanation: A string explaining the mismatch if incompatible, otherwise None.
+    """
+    if not requires_python:
+        return True, None
+    try:
+        current_version_str = sys.version.split()[0]
+        current_version = Version(current_version_str)
+        specifier = SpecifierSet(requires_python)
+        if current_version in specifier:
+            return True, None
+        return False, f"Requires Python {requires_python} but detected Python {current_version}"
+    except (InvalidSpecifier, InvalidVersion):
+        # If parsing fails, assume compatible to avoid false negatives
+        return True, None
+
+
 async def _fetch_package_metadata(
     client: httpx.AsyncClient,
     name: str,
@@ -113,6 +139,7 @@ async def _fetch_package_metadata(
                 "package_url",
                 "project_url",
                 "project_urls",
+                "requires_python",
                 "summary",
             ]
         }
@@ -300,14 +327,28 @@ class PyPIExtensionManager(ExtensionManager):
                 or bug_tracker_url
             )
 
+            # Check Python version compatibility
+            requires_python = data.get("requires_python")
+            python_compatible, version_explanation = _check_python_version_compatible(
+                requires_python
+            )
+
+            description = data.get("summary")
+            if version_explanation:
+                if description:
+                    description += f" ({version_explanation})"
+                else:
+                    description = version_explanation
+
             extension = ExtensionPackage(
                 name=normalized_name,
-                description=data.get("summary"),
+                description=description,
                 homepage_url=best_guess_home_url,
                 author=data.get("author"),
                 license=data.get("license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
+                allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
                 package_manager_url=data.get("package_url"),

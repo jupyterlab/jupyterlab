@@ -3,11 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { CommsOverSubshells } from '@jupyterlab/services';
+import type { CommsOverSubshells } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /*

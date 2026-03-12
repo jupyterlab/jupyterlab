@@ -5,6 +5,7 @@
  * @module application-extension
  */
 
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,
@@ -15,7 +16,6 @@ import {
   ITreePathUpdater,
   JupyterFrontEnd,
   JupyterFrontEndContextMenu,
-  JupyterFrontEndPlugin,
   JupyterLab,
   LabShell,
   LayoutRestorer,
@@ -37,27 +37,22 @@ import {
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ContextMenuSvg } from '@jupyterlab/ui-components';
 import {
   buildIcon,
-  ContextMenuSvg,
   jupyterIcon,
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
-import {
-  JSONExt,
-  PromiseDelegate,
-  ReadonlyPartialJSONValue
-} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
+import type { DockLayout, DockPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
 
@@ -456,14 +451,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.index === undefined
             ? trans.__('Toggle Sidebar Element')
             : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+              ? trans.__(
+                  'Toggle Element %1 in Right Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                )
+              : trans.__(
+                  'Toggle Element %1 in Left Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                ),
         describedBy: {
           args: {
             type: 'object',

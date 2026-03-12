@@ -3,15 +3,18 @@
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { Contents } from '@jupyterlab/services';
-import { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PartialJSONValue } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Title, Widget } from '@lumino/widgets';
-import { DocumentRegistry, IDocumentWidget } from './index';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Contents } from '@jupyterlab/services';
+import type { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title, Widget } from '@lumino/widgets';
+import type { DocumentRegistry, IDocumentWidget } from './index';
 import { createReadonlyLabel } from './components';
 
 /**
@@ -326,8 +329,7 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U>
-{
+> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -557,9 +559,9 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * A document widget implementation.
  */
 export class DocumentWidget<
-    T extends Widget = Widget,
-    U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-  >
+  T extends Widget = Widget,
+  U extends DocumentRegistry.IModel = DocumentRegistry.IModel
+>
   extends MainAreaWidget<T>
   implements IDocumentWidget<T, U>
 {

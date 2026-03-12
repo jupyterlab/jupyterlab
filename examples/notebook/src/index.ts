@@ -10,7 +10,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 // Import style through JS file to deduplicate them.
 import './style';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 import {
   Toolbar as AppToolbar,
   CommandToolbarButton,

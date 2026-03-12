@@ -1,21 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  ISessionContext,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Toolbar as AppToolbar,
   Dialog,
-  ISessionContext,
-  ISessionContextDialogs,
   SessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import * as nbformat from '@jupyterlab/nbformat';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
   addToolbarButtonClass,
@@ -34,9 +33,9 @@ import {
 } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { NotebookPanel } from './panel';
+import type { Notebook } from './widget';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.

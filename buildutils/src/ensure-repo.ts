@@ -16,11 +16,8 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
-import {
-  ensurePackage,
-  ensureUiComponents,
-  IEnsurePackageOptions
-} from './ensure-package';
+import type { IEnsurePackageOptions } from './ensure-package';
+import { ensurePackage, ensureUiComponents } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
 
@@ -826,6 +823,12 @@ export async function ensureIntegrity(): Promise<boolean> {
 
     if (name === '@jupyterlab/metapackage') {
       options.noUnused = false;
+    }
+
+    if (name === '@jupyterlab/galata') {
+      // Most of the galata codebase runs on the Node.js runtime,
+      // with the exception being the `extension` subpackage.
+      options.allowNodeDependencies = true;
     }
 
     const pkgMessages = await ensurePackage(options);

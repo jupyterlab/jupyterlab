@@ -7,11 +7,11 @@
  * @module apputils-extension
  */
 
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ILayoutRestorer,
   IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEnd
 } from '@jupyterlab/application';
 import {
   Dialog,
@@ -35,7 +35,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
@@ -46,7 +46,7 @@ import { subshellsSettings } from './subshell-settings';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
 
 /**

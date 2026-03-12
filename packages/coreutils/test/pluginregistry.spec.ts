@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { JupyterPluginRegistry } from '@jupyterlab/coreutils';
-import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
+import type { IPlugin } from '@lumino/coreutils';
+import { PluginRegistry, Token } from '@lumino/coreutils';
 
 describe('JupyterPluginRegistry', () => {
   let registry: JupyterPluginRegistry;

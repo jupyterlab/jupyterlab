@@ -3,17 +3,14 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import {
-  ConfigSection,
-  IConfigSectionManager,
-  ServerConnection
-} from '@jupyterlab/services';
+import type { ConfigSection } from '@jupyterlab/services';
+import { IConfigSectionManager, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 

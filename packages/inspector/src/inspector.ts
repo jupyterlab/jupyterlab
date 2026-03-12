@@ -2,13 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Printing } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IInspector } from './tokens';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PanelLayout } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
+import type { IInspector } from './tokens';
 
 /**
  * The class name added to inspector panels.
@@ -47,9 +45,7 @@ export class InspectorPanel
         `<p>${options.initialContent}</p>`
       );
     } else {
-      const placeholderHeadline = `<h3>${this._trans.__(
-        'No Documentation'
-      )}</h3>`;
+      const placeholderHeadline = `<h3>${this._trans.__('No Documentation')}</h3>`;
       const placeholderText = `<p>${this._trans.__(
         'Move the cursor to a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
       )}</p>`;

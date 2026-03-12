@@ -2,13 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Extension } from '@codemirror/state';
-import { ISharedText, YFile } from '@jupyter/ydoc';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
-import { ITranslator } from '@jupyterlab/translation';
-import { JSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISharedText } from '@jupyter/ydoc';
+import { YFile } from '@jupyter/ydoc';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IObservableMap } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { IEditorMimeTypeService } from './mimetype';
 
 /**
@@ -53,8 +56,10 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate
-    extends Pick<DOMRectReadOnly, 'left' | 'right' | 'top' | 'bottom'> {}
+  export interface ICoordinate extends Pick<
+    DOMRectReadOnly,
+    'left' | 'right' | 'top' | 'bottom'
+  > {}
 
   /**
    * A range.

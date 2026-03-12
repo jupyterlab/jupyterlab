@@ -3,12 +3,14 @@
 
 import { YFile } from '@jupyter/ydoc';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import {
   CodeMirrorEditor,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
-  IEditorExtensionRegistry,
-  IEditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 import { sleep } from '@jupyterlab/testutils';

@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { DebuggerDisplayRegistry } from './displayregistry';
 
@@ -17,7 +18,7 @@ import { SourcesModel } from './panels/sources/model';
 
 import { VariablesModel } from './panels/variables/model';
 
-import { IDebugger, IDebuggerDisplayRegistry } from './tokens';
+import type { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A model for a debugger.

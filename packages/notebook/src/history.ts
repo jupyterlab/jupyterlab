@@ -1,18 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell } from '@jupyterlab/cells';
-import { ISessionContext } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { KernelMessage } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { IDisposable } from '@lumino/disposable';
+import type { Cell } from '@jupyterlab/cells';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
+import type { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 /**
  * The definition of a console history manager object.
