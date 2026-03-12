@@ -62,7 +62,7 @@ import { isCodeCellModel } from '@jupyterlab/cells';
 import type { DebugProtocol } from '@vscode/debugprotocol';
 
 function notifyCommands(commands: CommandRegistry): void {
-  Object.values(Debugger.CommandIDs).forEach((command: string) => {
+  Object.values(Debugger.CommandIDs).forEach((command) => {
     if (commands.hasCommand(command)) {
       commands.notifyCommandChanged(command);
     }

@@ -12,7 +12,7 @@ import type {
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import type { MarkdownDocument, MarkdownViewerFactory } from '@jupyterlab/markdownviewer';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
   MarkdownViewer,

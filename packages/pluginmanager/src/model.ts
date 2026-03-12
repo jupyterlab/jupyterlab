@@ -390,8 +390,8 @@ export class PluginListModel extends VDomModel {
           ];
         })
       );
-    } catch (reason) {
-      this.statusError = reason.toString();
+    } catch (reason: unknown) {
+      this.statusError = String(reason);
     } finally {
       this._isLoading = false;
       this.stateChanged.emit();

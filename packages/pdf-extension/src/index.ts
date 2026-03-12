@@ -120,7 +120,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
 
   private _base64 = '';
   private _disposable: DisposableDelegate | null = null;
-  private _object: HTMLObjectElement;
+  private _object!: HTMLObjectElement;
   private _ready = new PromiseDelegate<void>();
 }
 
