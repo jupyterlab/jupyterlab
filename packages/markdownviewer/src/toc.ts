@@ -113,7 +113,7 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
   protected _createNew(
     widget: MarkdownDocument,
     configuration?: TableOfContents.IConfig
-  ): TableOfContentsModel<TableOfContents.IHeading, MarkdownDocument> {
+  ): TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument> {
     const model = new MarkdownViewerTableOfContentsModel(
       widget,
       this.parser,

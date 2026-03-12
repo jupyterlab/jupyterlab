@@ -27,6 +27,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
@@ -1554,20 +1555,22 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.createNewFile, {
-    execute: (args: { ext: string; label: string }) => {
+    execute: (args: ReadonlyPartialJSONObject) => {
       const widget = tracker.currentWidget;
 
       if (widget) {
-        return widget.createNewFile({ ext: args.ext ?? 'txt' });
+        const ext = typeof args.ext === 'string' ? args.ext : 'txt';
+        return widget.createNewFile({ ext });
       }
     },
-    icon: (args: { iconName: string }) => {
-      return args.iconName
+    icon: (args: ReadonlyPartialJSONObject) => {
+      return args.iconName && typeof args.iconName === 'string'
         ? LabIcon.resolve({ icon: args.iconName })
         : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
     },
-    label: (args: { ext: string; label: string }) => {
-      return trans.__(args.label ?? 'New File');
+    label: (args: ReadonlyPartialJSONObject) => {
+      const label = typeof args.label === 'string' ? args.label : 'New File';
+      return trans.__(label);
     },
     describedBy: {
       args: {

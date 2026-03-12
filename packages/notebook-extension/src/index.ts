@@ -1427,6 +1427,9 @@ function activateClonedOutputs(
         }
         cell = current.content.activeCell as CodeCell;
         index = current.content.activeCellIndex;
+        if (index < 0) {
+          return;
+        }
       }
       // Create a MainAreaWidget
       const content = new Private.ClonedOutputArea({

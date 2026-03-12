@@ -161,8 +161,8 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     if (registry) {
       await Private.loadSettingsMenu(
         registry,
-        (aMenu: RankedMenu) => {
-          menu.addMenu(aMenu, false, { rank: aMenu.rank });
+        (aMenu: Menu) => {
+          menu.addMenu(aMenu, false, { rank: (aMenu as RankedMenu).rank });
         },
         options => MainMenu.generateMenu(commands, options, trans),
         translator

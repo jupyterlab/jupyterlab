@@ -313,7 +313,7 @@ const adapterTrackerPlugin: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
   description: 'Provides the tracker of `WidgetLSPAdapter`.',
   autoStart: true,
   provides: IWidgetLSPAdapterTracker,
-  activate: (app: JupyterFrontEnd<LabShell>): IWidgetLSPAdapterTracker => {
+  activate: (app: JupyterFrontEnd): IWidgetLSPAdapterTracker => {
     return new WidgetLSPAdapterTracker({ shell: app.shell });
   }
 };
