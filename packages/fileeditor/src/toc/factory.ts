@@ -43,7 +43,7 @@ export abstract class EditorTableOfContentsFactory extends TableOfContentsFactor
     const model = super.createNew(widget, configuration);
 
     const onActiveHeadingChanged = (
-      model: TableOfContentsModel<
+      model: TableOfContents.IModel<
         IEditorHeading,
         IDocumentWidget<FileEditor, DocumentRegistry.IModel>
       >,

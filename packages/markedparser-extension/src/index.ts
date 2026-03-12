@@ -211,7 +211,7 @@ namespace Private {
       }
 
       // fall back to calling with the renderer as `this`
-      return originalCode.call(renderer, { text, lang, escaped });
+      return originalCode.call(renderer, { text, lang, escaped, type: 'code', raw: text });
     };
 
     return renderer;
