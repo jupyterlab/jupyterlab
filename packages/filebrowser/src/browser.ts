@@ -431,7 +431,7 @@ export class FileBrowser extends SidePanel {
       await this.rename();
       return model;
     } catch (err) {
-      void showErrorMessage(this._trans.__('Error'), err);
+      void showErrorMessage(this._trans.__('Error'), err as string | Dialog.IError);
       throw err;
     }
   }

@@ -1222,12 +1222,13 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
             }
           }
         },
-        execute: async (args: IRouter.ILocation) => {
+        execute: async (args: any) => {
           if (set.isDisposed) {
             return;
           }
 
-          const query = URLExt.queryStringToObject(args.search ?? '');
+          const location = args as IRouter.ILocation;
+          const query = URLExt.queryStringToObject(location.search ?? '');
           const browser = query['file-browser-path'] || '';
 
           // Remove the file browser path from the query string.

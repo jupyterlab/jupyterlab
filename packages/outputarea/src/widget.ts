@@ -231,7 +231,7 @@ export class OutputArea extends Widget {
     // Handle stdin.
     value.onStdin = msg => {
       if (KernelMessage.isInputRequestMsg(msg)) {
-        this.onInputRequest(msg, value);
+        this.onInputRequest(msg, value as Kernel.IShellFuture);
       }
     };
   }

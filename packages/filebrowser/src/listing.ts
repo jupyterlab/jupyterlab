@@ -2379,10 +2379,10 @@ export class DirListing extends Widget {
   private async _delete(paths: string[]): Promise<void> {
     await Promise.all(
       paths.map(path =>
-        this._model.manager.deleteFile(path).catch(err => {
+        this._model.manager.deleteFile(path).catch((err: unknown) => {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Delete Failed'),
-            err
+            err as string | Dialog.IError
           );
         })
       )
@@ -2464,7 +2464,7 @@ export class DirListing extends Widget {
         if (error !== 'File not renamed') {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Rename Error'),
-            error
+            error as string | Dialog.IError
           );
         }
         finalFilename = original;
@@ -2672,7 +2672,7 @@ export class DirListing extends Widget {
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
   private _modifiedWidth!: number;
-  private _modifiedStyle: Time.HumanStyle;
+  private _modifiedStyle!: Time.HumanStyle;
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
