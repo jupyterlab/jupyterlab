@@ -246,7 +246,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
 
-  readonly sharedModel: ISharedCell;
+  readonly sharedModel!: ISharedCell;
 
   /**
    * The type of cell.
@@ -689,7 +689,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return this._outputs;
   }
 
-  readonly sharedModel: ISharedCodeCell;
+  readonly sharedModel!: ISharedCodeCell;
 
   clearExecution(): void {
     this.outputs.clear();

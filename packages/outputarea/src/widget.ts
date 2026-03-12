@@ -832,7 +832,7 @@ export class OutputArea extends Widget {
   }
 
   private _displayIdMap = new Map<string, number[]>();
-  private _future: Kernel.IShellFuture<
+  private _future!: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   >;
@@ -1357,8 +1357,8 @@ export class Stdin extends Widget implements IStdin {
   private _password: boolean;
   private _promise = new PromiseDelegate<void>();
   private _trans: TranslationBundle;
-  private _value: string;
-  private _valueCache: string;
+  private _value!: string;
+  private _valueCache!: string;
   private _resolved: boolean = false;
 }
 
