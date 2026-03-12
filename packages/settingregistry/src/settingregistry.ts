@@ -186,8 +186,10 @@ export class DefaultSchemaValidator implements ISchemaValidator {
         ];
       }
 
-      const { column, description } = error;
-      const line = error.lineNumber;
+      // Handle JSON5 parse errors
+      const parseError = error as any;
+      const { column, description } = parseError;
+      const line = parseError.lineNumber;
 
       return [
         {
@@ -608,7 +610,7 @@ export class SettingRegistry implements ISettingRegistry {
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
           /* Ignore silently if no transformers. */
-          if (errors[0]?.keyword !== 'unset') {
+          if (Array.isArray(errors) && errors[0]?.keyword !== 'unset') {
             console.warn('Ignored setting registry preload errors.', errors);
           }
         }
