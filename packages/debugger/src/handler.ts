@@ -125,8 +125,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     const kernelChanged = (
       _: Session.ISessionConnection,
       args: IChangedArgs<
-        Kernel.IKernelConnection,
-        Kernel.IKernelConnection,
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
         'kernel'
       >
     ): void => {
@@ -191,10 +191,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     sessionContext: ISessionContext
   ): Promise<void> {
     const connectionChanged = (
-      _: SessionContext,
+      _: ISessionContext,
       args: IChangedArgs<
-        Kernel.IKernelConnection,
-        Kernel.IKernelConnection,
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
         'kernel'
       >
     ): void => {
@@ -449,10 +449,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
   private _contextKernelChangedHandlers: {
     [id: string]: (
-      sender: SessionContext,
+      sender: ISessionContext,
       args: IChangedArgs<
-        Kernel.IKernelConnection,
-        Kernel.IKernelConnection,
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
         'kernel'
       >
     ) => void;
@@ -461,8 +461,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     [id: string]: (
       sender: Session.ISessionConnection,
       args: IChangedArgs<
-        Kernel.IKernelConnection,
-        Kernel.IKernelConnection,
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
         'kernel'
       >
     ) => void;

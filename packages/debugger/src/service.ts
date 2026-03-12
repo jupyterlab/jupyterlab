@@ -15,8 +15,6 @@ import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
-import type { VariablesModel } from './panels/variables/model';
-
 import type { IDebugger } from './tokens';
 import type { IDebuggerDisplayRegistry } from './tokens';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';

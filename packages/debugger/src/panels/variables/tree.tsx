@@ -106,7 +106,7 @@ export class VariablesBodyTree extends ReactWidget {
    *
    * @param model The variables model.
    */
-  private _updateScopes(model: VariablesModel): void {
+  private _updateScopes(model: IDebugger.Model.IVariables): void {
     if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
       return;
     }

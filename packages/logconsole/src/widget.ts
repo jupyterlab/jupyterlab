@@ -74,8 +74,8 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    */
   executionCount: nbformat.ExecutionCount = null;
 
-  private _timestamp: Date;
-  private _level: FullLogLevel;
+  private _timestamp!: Date;
+  private _level!: FullLogLevel;
   private _timestampNode: HTMLDivElement;
 }
 
@@ -87,7 +87,7 @@ class LogConsoleOutputArea extends OutputArea {
   /**
    * Output area model used by the widget.
    */
-  readonly model: LoggerOutputAreaModel;
+  readonly model!: LoggerOutputAreaModel;
 
   /**
    * Create an output item with a prompt and actual output

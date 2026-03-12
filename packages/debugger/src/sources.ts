@@ -110,7 +110,7 @@ export class DebuggerSources implements IDebugger.ISources {
           if (notebook.activeCell) {
             notebook
               .scrollToItem(notebook.activeCellIndex, 'smart')
-              .catch(reason => {
+              .catch((reason: unknown) => {
                 // no-op
               });
           }
