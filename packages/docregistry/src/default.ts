@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
+import { MainAreaWidget, setToolbar, ToolbarRegistry } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -481,7 +481,7 @@ export abstract class ABCWidgetFactory<
     // Add toolbar
     setToolbar(
       widget,
-      (this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)) as (widget: Widget) => IObservableList<IToolbarItem> | IToolbarItem[]
+      (this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)) as (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> | ToolbarRegistry.IToolbarItem[]
     );
 
     // Emit widget created signal

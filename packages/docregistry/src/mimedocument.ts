@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Printing, showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, Printing, showErrorMessage } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
