@@ -1017,9 +1017,12 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
           const req = await fetch(url);
           blob = await req.blob();
           type = req.headers.get('Content-Type') ?? '';
-        } catch (reason) {
-          if (reason.response && reason.response.status !== 200) {
-            reason.message = trans.__('Could not open URL: %1', url);
+        } catch (reason: unknown) {
+          if (reason && typeof reason === 'object' && 'response' in reason) {
+            const err = reason as any;
+            if (err.response && err.response.status !== 200) {
+              err.message = trans.__('Could not open URL: %1', url);
+            }
           }
           return showErrorMessage(trans.__('Cannot fetch'), reason);
         }

@@ -126,7 +126,7 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
     >();
 
     const onActiveHeadingChanged = (
-      model: TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument>,
+      model: TableOfContents.IModel<IMarkdownViewerHeading>,
       heading: IMarkdownViewerHeading | null
     ) => {
       if (heading) {

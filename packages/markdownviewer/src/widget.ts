@@ -195,14 +195,14 @@ export class MarkdownViewer extends Widget {
       } else {
         this._rendered.emit();
       }
-    } catch (reason) {
+    } catch (reason: unknown) {
       // Dispose the document if rendering fails.
       requestAnimationFrame(() => {
         this.dispose();
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason as string
       );
     }
   }
@@ -213,7 +213,7 @@ export class MarkdownViewer extends Widget {
   private _trans: TranslationBundle;
   private _config = { ...MarkdownViewer.defaultConfig };
   private _fragment = '';
-  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
+  private _monitor!: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _isRendering = false;
   private _renderRequested = false;
