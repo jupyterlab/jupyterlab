@@ -93,6 +93,7 @@ export class ForeignHandler implements IDisposable {
     const parentHeader = msg.parent_header as KernelMessage.IHeader;
     const parentMsgId = parentHeader.msg_id as string;
     let cell: CodeCell | undefined;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
       case 'execute_input': {
         const inputMsg = msg as KernelMessage.IExecuteInputMsg;
