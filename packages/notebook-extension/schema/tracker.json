@@ -697,9 +697,15 @@
         "lineWrap": false
       }
     },
+    "allowEmptyNotebook": {
+      "title": "Allow Empty Notebook",
+      "description": "Whether not to show a cell when the notebook is empty.",
+      "type": "boolean",
+      "default": false
+    },
     "defaultCell": {
       "title": "Default cell type",
-      "description": "The default type (markdown, code, or raw) for new cells",
+      "description": "The default type (markdown, code, or raw) for new cells.",
       "type": "string",
       "enum": ["code", "markdown", "raw"],
       "default": "code"
