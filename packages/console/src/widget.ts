@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import type { ISharedRawCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import type { ISessionContext } from '@jupyterlab/apputils';
@@ -37,20 +40,80 @@ import type { IConsoleHistory } from './history';
 import { ConsoleHistory } from './history';
 import type { IConsoleCellExecutor } from './tokens';
 
+/**
+ * The data attribute added to a widget that has an active kernel.
+ */
 const KERNEL_USER = 'jpKernelUser';
+
+/**
+ * The data attribute added to a widget can run code.
+ */
 const CODE_RUNNER = 'jpCodeRunner';
+
+/**
+ * The class name added to console widgets.
+ */
 const CONSOLE_CLASS = 'jp-CodeConsole';
+
+/**
+ * The class added to console cells
+ */
 const CONSOLE_CELL_CLASS = 'jp-Console-cell';
+
+/**
+ * The class name added to the console banner.
+ */
 const BANNER_CLASS = 'jp-CodeConsole-banner';
+
+/**
+ * The class name of the active prompt cell.
+ */
 const PROMPT_CLASS = 'jp-CodeConsole-promptCell';
+
+/**
+ * The class name of the panel that holds cell content.
+ */
 const CONTENT_CLASS = 'jp-CodeConsole-content';
+
+/**
+ * The class name of the panel that holds prompts.
+ */
 const INPUT_CLASS = 'jp-CodeConsole-input';
+
+/**
+ * The class name added to the console when an element within it is focused
+ * and takes keyboard input, such as <input> and <div contenteditable>
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
 const READ_WRITE_CLASS = 'jp-mod-readWrite';
+
+/**
+ * The timeout in ms for execution requests to the kernel.
+ */
 const EXECUTION_TIMEOUT = 250;
+
+/**
+ * The mimetype used for Jupyter cell data.
+ */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+/**
+ * The data attribute added to a widget that can undo.
+ */
 const UNDOER = 'jpUndoer';
 
+/**
+ * A widget containing a Jupyter console.
+ *
+ * #### Notes
+ * The CodeConsole class is intended to be used within a ConsolePanel
+ * instance. Under most circumstances, it is not instantiated by user code.
+ */
 export class CodeConsole extends Widget {
+  /**
+   * Construct a console widget.
+   */
   constructor(options: CodeConsole.IOptions) {
     super();
     this._translator = options.translator ?? nullTranslator;
@@ -59,8 +122,9 @@ export class CodeConsole extends Widget {
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
-    this.node.tabIndex = -1;
+    this.node.tabIndex = -1; // Allow the widget to take focus.
 
+    // Create the panels that hold the content and input.
     const layout = (this.layout = new PanelLayout());
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
@@ -74,15 +138,20 @@ export class CodeConsole extends Widget {
     this.sessionContext = options.sessionContext;
     this._mimeTypeService = options.mimeTypeService;
 
+    // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
     layout.addWidget(this._splitPanel);
 
+    // Listen for manual split panel resizing.
     this._splitPanel.handleMoved.connect(() => {
       this._setManualResize();
     }, this);
 
+    // Listen for pointerdown to detect when user starts dragging the split
+    // handle. We need to catch this early to prevent the ResizeObserver from
+    // fighting with the user during the first drag.
     this._splitPanel.node.addEventListener(
       'pointerdown',
       event => {
@@ -94,6 +163,7 @@ export class CodeConsole extends Widget {
       true
     );
 
+    // initialize the console with defaults
     this.setConfig({
       clearCellsOnExecute: false,
       clearCodeContentOnExecute: true,
@@ -115,25 +185,59 @@ export class CodeConsole extends Widget {
     );
   }
 
+  /**
+   * A signal emitted when the console finished executing its prompt cell.
+   */
   get executed(): ISignal<this, Date> {
     return this._executed;
   }
 
+  /**
+   * A signal emitted when a new prompt cell is created.
+   */
   get promptCellCreated(): ISignal<this, CodeCell> {
     return this._promptCellCreated;
   }
 
+  /**
+   * The content factory used by the console.
+   */
   readonly contentFactory: CodeConsole.IContentFactory;
+
+  /**
+   * The model factory for the console widget.
+   */
   readonly modelFactory: CodeConsole.IModelFactory;
+
+  /**
+   * The rendermime instance used by the console.
+   */
   readonly rendermime: IRenderMimeRegistry;
+
+  /**
+   * The client session used by the console.
+   */
   readonly sessionContext: ISessionContext;
 
+  /**
+   * The configuration options for the text editor widget.
+   */
   editorConfig: Record<string, any> = CodeConsole.defaultEditorConfig;
 
+  /**
+   * The list of content cells in the console.
+   *
+   * #### Notes
+   * This list does not include the current banner or the prompt for a console.
+   * It may include previous banners as raw cells.
+   */
   get cells(): IObservableList<Cell> {
     return this._cells;
   }
 
+  /*
+   * The console input prompt cell.
+   */
   get promptCell(): CodeCell | null {
     const inputLayout = this._input.layout as PanelLayout | null;
     if (!inputLayout) {
@@ -142,6 +246,19 @@ export class CodeConsole extends Widget {
     return (inputLayout.widgets[0] as CodeCell) || null;
   }
 
+  /**
+   * Add a new cell to the content panel.
+   *
+   * @param cell - The code cell widget being added to the content panel.
+   *
+   * @param msgId - The optional execution message id for the cell.
+   *
+   * #### Notes
+   * This method is meant for use by outside classes that want to add cells to a
+   * console. It is distinct from the `inject` method in that it requires
+   * rendered code cell widgets and does not execute them (though it can store
+   * the execution message id).
+   */
   addCell(cell: CodeCell, msgId?: string): void {
     if (this._config.clearCellsOnExecute) {
       this.clear();
@@ -170,12 +287,17 @@ export class CodeConsole extends Widget {
     ).forEach(el => el.setAttribute('tabindex', '-1'));
   }
 
+  /**
+   * Add a banner cell.
+   */
   addBanner(): void {
     if (this._banner) {
+      // An old banner just becomes a normal cell now.
       const cell = this._banner;
       this._cells.push(this._banner);
       cell.disposed.connect(this._onCellDisposed, this);
     }
+    // Create the banner.
     const model = this.modelFactory.createRawCell({
       sharedModel: createStandaloneCell({
         cell_type: 'raw',
@@ -210,13 +332,20 @@ export class CodeConsole extends Widget {
     this._applyBannerAccessibility(banner);
   }
 
+  /**
+   * Clear the code cells.
+   */
   clear(): void {
+    // Dispose all the content cells
     const cells = this._cells;
     while (cells.length > 0) {
       cells.get(0).dispose();
     }
   }
 
+  /**
+   * Create a new cell with the built-in factory.
+   */
   createCodeCell(): CodeCell {
     const factory = this.contentFactory;
     const options = this._createCodeCellOptions();
@@ -226,11 +355,16 @@ export class CodeConsole extends Widget {
     return cell;
   }
 
+  /**
+   * Dispose of the resources held by the widget.
+   */
   dispose(): void {
+    // Do nothing if already disposed.
     if (this.isDisposed) {
       return;
     }
 
+    // Clean up ResizeObserver and content listener from the current prompt cell
     const promptCell = this.promptCell;
     if (promptCell) {
       if (this._promptResizeObserver) {
@@ -251,6 +385,16 @@ export class CodeConsole extends Widget {
     super.dispose();
   }
 
+  /**
+   * Execute the current prompt.
+   *
+   * @param force - Whether to force execution without checking code
+   * completeness.
+   *
+   * @param timeout - The length of time, in milliseconds, that the execution
+   * should wait for the API to determine whether code being submitted is
+   * incomplete before attempting submission anyway. The default value is `250`.
+   */
   async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
     if (this.sessionContext.session?.kernel?.status === 'dead') {
       return;
@@ -263,28 +407,44 @@ export class CodeConsole extends Widget {
     promptCell.model.trusted = true;
 
     if (force) {
+      // Create a new prompt cell before kernel execution to allow typeahead.
       this.newPromptCell();
       await this._execute(promptCell);
       return;
     }
 
+    // Check whether we should execute.
     const shouldExecute = await this._shouldExecute(timeout);
     if (this.isDisposed) {
       return;
     }
     if (shouldExecute) {
+      // Create a new prompt cell before kernel execution to allow typeahead.
       this.newPromptCell();
       this.promptCell!.editor!.focus();
       await this._execute(promptCell);
     } else {
+      // add a newline if we shouldn't execute
       promptCell.editor!.newIndentedLine();
     }
   }
 
+  /**
+   * Get a cell given a message id.
+   *
+   * @param msgId - The message id.
+   */
   getCell(msgId: string): CodeCell | undefined {
     return this._msgIds.get(msgId);
   }
 
+  /**
+   * Inject arbitrary code for the console to execute immediately.
+   *
+   * @param code - The code contents of the cell being injected.
+   *
+   * @returns A promise that indicates when the injected cell's execution ends.
+   */
   inject(code: string, metadata: JSONObject = {}): Promise<void> {
     const cell = this.createCodeCell();
     cell.model.sharedModel.setSource(code);
@@ -298,6 +458,9 @@ export class CodeConsole extends Widget {
     return this._execute(cell);
   }
 
+  /**
+   * Insert a line break in the prompt cell.
+   */
   insertLinebreak(): void {
     const promptCell = this.promptCell;
     if (!promptCell) {
@@ -306,6 +469,11 @@ export class CodeConsole extends Widget {
     promptCell.editor!.newIndentedLine();
   }
 
+  /**
+   * Replaces the selected text in the prompt cell.
+   *
+   * @param text - The text to replace the selection.
+   */
   replaceSelection(text: string): void {
     const promptCell = this.promptCell;
     if (!promptCell) {
@@ -314,6 +482,9 @@ export class CodeConsole extends Widget {
     promptCell.editor!.replaceSelection?.(text);
   }
 
+  /**
+   * Set configuration options for the console.
+   */
   setConfig(config: CodeConsole.IConfig): void {
     const {
       clearCellsOnExecute,
@@ -334,6 +505,13 @@ export class CodeConsole extends Widget {
     this._updateLayout();
   }
 
+  /**
+   * Serialize the output.
+   *
+   * #### Notes
+   * This only serializes the code cells and the prompt cell if it exists, and
+   * skips any old banner cells.
+   */
   serialize(): nbformat.ICodeCell[] {
     const cells: nbformat.ICodeCell[] = [];
     for (const cell of this._cells) {
@@ -349,11 +527,16 @@ export class CodeConsole extends Widget {
     return cells;
   }
 
+  /**
+   * Handle `mousedown` events for the widget.
+   */
   private _evtMouseDown(event: MouseEvent): void {
     const { button, shiftKey } = event;
 
+    // We only handle main or secondary button actions.
     if (
       !(button === 0 || button === 2) ||
+      // Shift right-click gives the browser default behavior.
       (shiftKey && button === 2)
     ) {
       return;
@@ -365,6 +548,10 @@ export class CodeConsole extends Widget {
     let cellIndex = CellDragUtils.findCell(target, this._cells, cellFilter);
 
     if (cellIndex === -1) {
+      // `event.target` sometimes gives an orphaned node in
+      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+      // to find a cell using `event.target`, try again using a target
+      // reconstructed from the position of the click event.
       target = document.elementFromPoint(
         event.clientX,
         event.clientY
@@ -396,6 +583,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Handle `mousemove` event of widget
+   */
   private _evtMouseMove(event: MouseEvent) {
     const data = this._dragData;
     if (
@@ -411,6 +601,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Start a drag event
+   */
   private _startDrag(
     index: number,
     clientX: number,
@@ -449,6 +642,16 @@ export class CodeConsole extends Widget {
     });
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event -The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'keydown':
@@ -477,7 +680,10 @@ export class CodeConsole extends Widget {
     }
   }
 
-    protected onAfterAttach(msg: Message): void {
+  /**
+   * Handle `after_attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
     const node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
@@ -521,6 +727,7 @@ export class CodeConsole extends Widget {
       }
     });
 
+    // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
     } else {
@@ -529,6 +736,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
   protected onBeforeDetach(msg: Message): void {
     const node = this.node;
     node.removeEventListener('keydown', this, true);
@@ -537,6 +747,9 @@ export class CodeConsole extends Widget {
     node.removeEventListener('focusout', this);
   }
 
+  /**
+   * Handle `'activate-request'` messages.
+   */
   protected onActivateRequest(msg: Message): void {
     const editor = this.promptCell && this.promptCell.editor;
     if (editor) {
@@ -545,6 +758,9 @@ export class CodeConsole extends Widget {
     this.update();
   }
 
+  /**
+   * Make a new prompt cell.
+   */
   protected newPromptCell(): void {
     let promptCell = this.promptCell;
     const input = this._input;
@@ -552,24 +768,31 @@ export class CodeConsole extends Widget {
     const previousContent = promptCell?.model.sharedModel.getSource() ?? '';
     const previousCursorPosition = promptCell?.editor?.getCursorPosition();
 
+    // Make the last prompt read-only, clear its signals, and move to content.
     if (promptCell) {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
 
+      // Disconnect the content change listener
       promptCell.model.sharedModel.changed.disconnect(
         this._onPromptContentChanged,
         this
       );
 
+      // Schedule execution of signal clearance to happen later so that
+      // the `readOnly` configuration gets updated before editor signals
+      // get disconnected (see `Cell.onUpdateRequest`).
       const oldCell = promptCell;
       const promptResizeObserver = this._promptResizeObserver;
       requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
         Signal.clearData(oldCell.editor);
         if (promptResizeObserver) {
           promptResizeObserver.disconnect();
         }
       });
 
+      // Ensure to clear the cursor
       promptCell.editor?.blur();
       const child = input.widgets[0];
       child.parent = null;
@@ -579,16 +802,19 @@ export class CodeConsole extends Widget {
       this.addCell(promptCell);
     }
 
+    // Create the new prompt cell.
     const factory = this.contentFactory;
     const options = this._createCodeCellOptions();
     promptCell = factory.createCodeCell(options);
     promptCell.model.mimeType = this._mimetype;
     promptCell.addClass(PROMPT_CLASS);
 
+    // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
 
     this._history.editor = promptCell.editor;
 
+    // Detect height changes via ResizeObserver for when the cell grows
     if (promptCell.node) {
       this._promptResizeObserver = new ResizeObserver(() => {
         this._scheduleInputSizeAdjustment();
@@ -596,6 +822,7 @@ export class CodeConsole extends Widget {
       this._promptResizeObserver.observe(promptCell.node);
     }
 
+    // Also listen for content changes to handle shrinking when content is removed (e.g. line deletes)
     promptCell.model.sharedModel.changed.connect(
       this._onPromptContentChanged,
       this
@@ -613,6 +840,28 @@ export class CodeConsole extends Widget {
       if (editorNode) {
         editorNode.tabIndex = 0;
         editorNode.setAttribute('aria-label', 'Console Input');
+
+        // Dismiss any stale autocomplete/tooltip menu when focus returns to the
+        // editor from an external element (e.g. after Tab-navigation).
+        // We dispatch a real Escape keydown event so CodeMirror closes its
+        // internal completion state cleanly, rather than just removing the DOM
+        // node (which CodeMirror would immediately re-render).
+        editorNode.addEventListener('focusin', () => {
+          const tooltip = promptCell.node.querySelector(
+            '.cm-tooltip-autocomplete, .cm-tooltip, .jp-Completer'
+          );
+          if (tooltip) {
+            const escapeEvent = new KeyboardEvent('keydown', {
+              key: 'Escape',
+              code: 'Escape',
+              keyCode: 27,
+              which: 27,
+              bubbles: true,
+              cancelable: true
+            });
+            editorNode.dispatchEvent(escapeEvent);
+          }
+        });
       }
 
       const cmContent = promptCell.node.querySelector<HTMLElement>(
@@ -637,12 +886,45 @@ export class CodeConsole extends Widget {
             );
 
             if (autocompleteOpen) {
+              // Dispatch Escape to let CodeMirror close its completion state
+              // cleanly (just removing the DOM node is not enough; CM re-renders it).
+              evt.preventDefault();
+              evt.stopImmediatePropagation();
+              const escapeEvent = new KeyboardEvent('keydown', {
+                key: 'Escape',
+                code: 'Escape',
+                keyCode: 27,
+                which: 27,
+                bubbles: true,
+                cancelable: true
+              });
+              cmContent.dispatchEvent(escapeEvent);
               return;
             }
+
+            // Dismiss any remaining tooltips before moving focus by dispatching
+            // Escape so CodeMirror tears down its completion state properly.
+            const dismissTooltips = () => {
+              const tip = promptCell.node.querySelector(
+                '.cm-tooltip-autocomplete, .cm-tooltip, .jp-Completer'
+              );
+              if (tip) {
+                const esc = new KeyboardEvent('keydown', {
+                  key: 'Escape',
+                  code: 'Escape',
+                  keyCode: 27,
+                  which: 27,
+                  bubbles: true,
+                  cancelable: true
+                });
+                cmContent.dispatchEvent(esc);
+              }
+            };
 
             if (!evt.shiftKey) {
               evt.stopImmediatePropagation();
               evt.preventDefault();
+              dismissTooltips();
               const focusable = Array.from(
                 document.querySelectorAll<HTMLElement>(
                   '[tabindex="0"], button:not([disabled]), a[href], input:not([disabled])'
@@ -656,6 +938,7 @@ export class CodeConsole extends Widget {
             } else {
               evt.stopImmediatePropagation();
               evt.preventDefault();
+              dismissTooltips();
               this._content.node.focus();
             }
           }
@@ -666,10 +949,16 @@ export class CodeConsole extends Widget {
     this._promptCellCreated.emit(promptCell);
   }
 
+  /**
+   * Handle `update-request` messages.
+   */
   protected onUpdateRequest(msg: Message): void {
     Private.scrollToBottom(this._content.node);
   }
 
+  /**
+   * Handle the `'keydown'` event for the widget.
+   */
   private _evtKeyDown(event: KeyboardEvent): void {
     const editor = this.promptCell && this.promptCell.editor;
     if (!editor) {
@@ -679,6 +968,7 @@ export class CodeConsole extends Widget {
       event.preventDefault();
       editor.focus();
     } else if (event.keyCode === 27 && editor.hasFocus()) {
+      // Set to command mode
       event.preventDefault();
       event.stopImmediatePropagation();
       setTimeout(() => {
@@ -689,6 +979,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Handle the `'mouseup'` event for the widget.
+   */
   private _evtMouseUp(event: MouseEvent): void {
     if (
       this.promptCell &&
@@ -698,17 +991,30 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Handle `focus` events for the widget.
+   */
   private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
     this._updateReadWrite();
   }
 
+  /**
+   * Handle `focusout` events for the widget.
+   */
   private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
     this._updateReadWrite();
   }
 
+  /**
+   * Execute the code in the current prompt cell.
+   */
   private async _execute(cell: CodeCell): Promise<void> {
     const source = cell.model.sharedModel.getSource();
     this._history.push(source);
+    // If the source of the console is just "clear", clear the console as we
+    // do in IPython or QtConsole.
     if (source === 'clear' || source === '%clear') {
       this.clear();
       return Promise.resolve(void 0);
@@ -746,6 +1052,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Update the console based on the kernel info.
+   */
   private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     if (info.status !== 'ok') {
       if (this._banner) {
@@ -765,6 +1074,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Create the options used to initialize a code cell widget.
+   */
   private _createCodeCellOptions(): CodeCell.IOptions {
     const contentFactory = this.contentFactory;
     const modelFactory = this.modelFactory;
@@ -782,6 +1094,9 @@ export class CodeConsole extends Widget {
     };
   }
 
+  /**
+   * Handle cell disposed signals.
+   */
   private _onCellDisposed(sender: Cell, args: void): void {
     if (!this.isDisposed) {
       this._cells.removeValue(sender);
@@ -793,6 +1108,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Test whether we should execute the prompt cell.
+   */
   private _shouldExecute(timeout: number): Promise<boolean> {
     const promptCell = this.promptCell;
     if (!promptCell) {
@@ -828,6 +1146,9 @@ export class CodeConsole extends Widget {
     });
   }
 
+  /**
+   * Handle a change to the kernel.
+   */
   private async _onKernelChanged(): Promise<void> {
     this.clear();
     if (this._banner) {
@@ -842,6 +1163,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Handle a change to the kernel status.
+   */
   private async _onKernelStatusChanged(): Promise<void> {
     const kernel = this.sessionContext.session?.kernel;
     if (kernel?.status === 'restarting') {
@@ -852,11 +1176,18 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Update the console node with class indicating read-write state.
+   */
   private _updateReadWrite(): void {
+    // TODO: de-duplicate with code in notebook/src/widget.ts
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
+  /**
+   * Calculate relative sizes for split panel based on prompt cell position.
+   */
   private _calculateRelativeSizes(): number[] {
     const { promptCellPosition = 'bottom' } = this._config;
 
@@ -869,11 +1200,17 @@ export class CodeConsole extends Widget {
     return sizes;
   }
 
+  /**
+   * Set the manual resize flag and cancel any pending auto-resize.
+   */
   private _setManualResize(): void {
     this._hasManualResize = true;
     this._cancelPendingResizeAdjustment();
   }
 
+  /**
+   * Cancel any pending resize adjustment animation frame.
+   */
   private _cancelPendingResizeAdjustment(): void {
     if (this._resizeAnimationFrameId !== null) {
       cancelAnimationFrame(this._resizeAnimationFrameId);
@@ -881,7 +1218,12 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Schedule an input size adjustment using requestAnimationFrame to coalesce
+   * multiple rapid events into a single layout update.
+   */
   private _scheduleInputSizeAdjustment(): void {
+    // Don't schedule if manual resize is active
     if (this._hasManualResize) {
       return;
     }
@@ -893,10 +1235,16 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Handle changes to the prompt cell content.
+   */
   private _onPromptContentChanged(): void {
     this._scheduleInputSizeAdjustment();
   }
 
+  /**
+   * Adjust split panel sizes when the input cell grows or shrinks.
+   */
   private _adjustSplitPanelForInputGrowth(): void {
     if (
       this.isDisposed ||
@@ -909,6 +1257,7 @@ export class CodeConsole extends Widget {
 
     const { promptCellPosition = 'bottom' } = this._config;
 
+    // Only adjust for vertical layouts (top/bottom positions)
     if (promptCellPosition === 'left' || promptCellPosition === 'right') {
       return;
     }
@@ -918,9 +1267,12 @@ export class CodeConsole extends Widget {
       return;
     }
 
+    // Get the editor's content height directly from CodeMirror.
+    // This gives us the intrinsic height needed regardless of container size.
     const cmEditor = promptCell.editor as CodeMirrorEditor;
     const editorContentHeight = cmEditor.editor.contentHeight;
 
+    // Get additional padding from the input area and cell
     const cellPadding = this._getInputCellPadding();
     const inputHeight = editorContentHeight + cellPadding;
 
@@ -943,6 +1295,7 @@ export class CodeConsole extends Widget {
       contentRatio = remainingHeight / totalHeight;
     }
 
+    // Convert to the format expected by setRelativeSizes
     const totalRatio = contentRatio + inputRatio;
     if (totalRatio > 0) {
       const normalizedSizes =
@@ -954,6 +1307,9 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Get the total vertical padding for the input cell (excluding editor content).
+   */
   private _getInputCellPadding(): number {
     const inputPanelNode = this._input.node;
     const inputPanelStyle = window.getComputedStyle(inputPanelNode);
@@ -970,6 +1326,7 @@ export class CodeConsole extends Widget {
     const cellPadding =
       parseFloat(cellStyle.paddingTop) + parseFloat(cellStyle.paddingBottom);
 
+    // Account for editor wrapper border (CodeMirror's contentHeight includes its own padding)
     const editorWrapper = promptCell.editorWidget?.node;
     let editorBorder = 0;
     if (editorWrapper) {
@@ -982,9 +1339,13 @@ export class CodeConsole extends Widget {
     return inputPanelPadding + cellPadding + editorBorder;
   }
 
+  /**
+   * Update the layout of the code console.
+   */
   private _updateLayout(): void {
     const { promptCellPosition = 'bottom' } = this._config;
 
+    // Reset manual resize flag when layout changes
     this._hasManualResize = false;
 
     this._splitPanel.orientation = ['left', 'right'].includes(
@@ -993,6 +1354,7 @@ export class CodeConsole extends Widget {
       ? 'horizontal'
       : 'vertical';
 
+    // Insert the content and input panes into the widget.
     SplitPanel.setStretch(this._content, 1);
     SplitPanel.setStretch(this._input, 1);
 
@@ -1007,6 +1369,7 @@ export class CodeConsole extends Widget {
     this._splitPanel.setRelativeSizes(this._calculateRelativeSizes());
 
     requestAnimationFrame(() => {
+      // adjust the sizes if the prompt cell is moved with code in it
       this._adjustSplitPanelForInputGrowth();
     });
   }
@@ -1038,70 +1401,205 @@ export class CodeConsole extends Widget {
   private _resizeAnimationFrameId: number | null = null;
 }
 
+/**
+ * A namespace for CodeConsole statics.
+ */
 export namespace CodeConsole {
+  /**
+   * Where the prompt cell is located.
+   */
   export type PromptCellPosition = 'top' | 'bottom' | 'left' | 'right';
 
+  /**
+   * The configuration options for a console widget.
+   */
   export interface IConfig {
+    /**
+     * Whether to clear the previous cells on execute.
+     */
     clearCellsOnExecute?: boolean;
+
+    /**
+     * Whether to clear the code content of the prompt cell on execute.
+     */
     clearCodeContentOnExecute?: boolean;
+
+    /**
+     * Whether to hide the code input after a cell is executed.
+     */
     hideCodeInput?: boolean;
+
+    /**
+     * Where the prompt cell should be located.
+     */
     promptCellPosition?: PromptCellPosition;
+
+    /**
+     * Whether to show the kernel banner.
+     */
     showBanner?: boolean;
   }
 
+  /**
+   * The initialization options for a console widget.
+   */
   export interface IOptions {
+    /**
+     * The content factory for the console widget.
+     */
     contentFactory: IContentFactory;
+
+    /**
+     * Console cell executor
+     */
     executor?: IConsoleCellExecutor;
+
+    /**
+     * The model factory for the console widget.
+     */
     modelFactory?: IModelFactory;
+
+    /**
+     * The mime renderer for the console widget.
+     */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * The client session for the console widget.
+     */
     sessionContext: ISessionContext;
+
+    /**
+     * The service used to look up mime types.
+     */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 
+  /**
+   * Default console editor configuration
+   */
   export const defaultEditorConfig: Record<string, any> = {
     codeFolding: false,
     lineNumbers: false
   };
 
+  /**
+   * A content factory for console children.
+   */
   export interface IContentFactory extends Cell.IContentFactory {
+    /**
+     * Create a new code cell widget.
+     */
     createCodeCell(options: CodeCell.IOptions): CodeCell;
+
+    /**
+     * Create a new raw cell widget.
+     */
     createRawCell(options: RawCell.IOptions): RawCell;
   }
 
+  /**
+   * Default implementation of `IContentFactory`.
+   */
   export class ContentFactory
     extends Cell.ContentFactory
     implements IContentFactory
   {
+    /**
+     * Create a new code cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
+     */
     createCodeCell(options: CodeCell.IOptions): CodeCell {
       return new CodeCell(options).initializeState();
     }
 
+    /**
+     * Create a new raw cell widget.
+     *
+     * #### Notes
+     * If no cell content factory is passed in with the options, the one on the
+     * notebook content factory is used.
+     */
     createRawCell(options: RawCell.IOptions): RawCell {
       return new RawCell(options).initializeState();
     }
   }
 
+  /**
+   * A namespace for the code console content factory.
+   */
   export namespace ContentFactory {
+    /**
+     * An initialize options for `ContentFactory`.
+     */
     export interface IOptions extends Cell.IContentFactory {}
   }
 
+  /**
+   * A model factory for a console widget.
+   */
   export interface IModelFactory {
+    /**
+     * The factory for code cell content.
+     */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
+
+    /**
+     * Create a new code cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new code cell. If a source cell is provided, the
+     *   new cell will be initialized with the data from the source.
+     */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
+
+    /**
+     * Create a new raw cell.
+     *
+     * @param options - The options used to create the cell.
+     *
+     * @returns A new raw cell. If a source cell is provided, the
+     *   new cell will be initialized with the data from the source.
+     */
     createRawCell(
       options: AttachmentsCellModel.IOptions<ISharedRawCell>
     ): IRawCellModel;
   }
 
+  /**
+   * The default implementation of an `IModelFactory`.
+   */
   export class ModelFactory {
+    /**
+     * Create a new cell model factory.
+     */
     constructor(options: IModelFactoryOptions = {}) {
       this.codeCellContentFactory =
         options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
     }
 
+    /**
+     * The factory for output area models.
+     */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
+    /**
+     * Create a new code cell.
+     * @param options - The data to use for the original source data.
+     * @returns A new code cell. If a source cell is provided, the
+    new cell will be initialized with the data from the source.
+    If the contentFactory is not provided, the instance
+    `codeCellContentFactory` will be used.
+     */
     createCodeCell(options: CodeCellModel.IOptions = {}): ICodeCellModel {
       if (!options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
@@ -1109,6 +1607,12 @@ export namespace CodeConsole {
       return new CodeCellModel(options);
     }
 
+    /**
+     * Create a new raw cell.
+     * @param options - The data to use for the original source data.
+     * @returns A new raw cell. If a source cell is provided, the
+    new cell will be initialized with the data from the source.
+     */
     createRawCell(
       options: AttachmentsCellModel.IOptions<ISharedRawCell>
     ): IRawCellModel {
@@ -1116,14 +1620,31 @@ export namespace CodeConsole {
     }
   }
 
+  /**
+   * The options used to initialize a `ModelFactory`.
+   */
   export interface IModelFactoryOptions {
+    /**
+     * The factory for output area models.
+     */
     codeCellContentFactory?: CodeCellModel.IContentFactory;
   }
 
+  /**
+   * The default `ModelFactory` instance.
+   */
   export const defaultModelFactory = new ModelFactory({});
 }
 
+/**
+ * A namespace for console widget private data.
+ */
 namespace Private {
+  /**
+   * Jump to the bottom of a node.
+   *
+   * @param node - The scrollable element.
+   */
   export function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
   }
