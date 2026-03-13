@@ -5,7 +5,7 @@
 
 import path from 'path';
 import { type Locator, type Page } from '@playwright/test';
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
@@ -150,6 +150,7 @@ test.describe('Terminal', () => {
 test.describe('Terminal with screenReaderMode', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/terminal-extension:plugin': {
         screenReaderMode: true
       }
@@ -198,14 +199,16 @@ test.describe('Terminal with screenReaderMode', () => {
       timeout: 5000
     });
 
-    // Wait for the link to become interactive, then hover
-    await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
-    await terminal.locator('canvas.xterm-link-layer').hover({
-      position: {
-        x: 60,
-        y: 23
-      }
-    });
+    // Hover over the link layer to trigger link highlighting
+    await Promise.all([
+      terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
+      terminal.locator('canvas.xterm-link-layer').hover({
+        position: {
+          x: 60,
+          y: 23
+        }
+      })
+    ]);
 
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
   });
@@ -214,6 +217,7 @@ test.describe('Terminal with screenReaderMode', () => {
 test.describe('Open in Terminal from File Browser', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/terminal-extension:plugin': {
         screenReaderMode: true
       }
