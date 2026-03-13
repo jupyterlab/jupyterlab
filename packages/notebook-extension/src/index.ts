@@ -2518,6 +2518,7 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
   tracker.activeCellChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
   });
@@ -3358,7 +3359,21 @@ function addCommands(
         return NotebookActions.deleteCells(current.content);
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      const deletable =
+        current.content.activeCell?.model.getMetadata('deletable');
+      if (deletable === undefined) {
+        return true;
+      }
+      if (!deletable) {
+        return false;
+      }
+      return true;
+    },
     describedBy: {
       args: {
         type: 'object',
