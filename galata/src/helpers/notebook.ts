@@ -465,18 +465,28 @@ export class NotebookHelper {
    * Wait for notebook cells execution to finish
    *
    * @param cellIndex Cell index
+   * @param timeout Maximum time to wait in milliseconds (default: 60000)
    */
-  async waitForRun(cellIndex?: number): Promise<void> {
+  async waitForRun(cellIndex?: number, timeout = 60000): Promise<void> {
     const idleLocator = this.page.locator('#jp-main-statusbar >> text=Idle');
     await idleLocator.waitFor();
 
     // Wait for all cells to have an execution count
+    const startTime = Date.now();
     let done = false;
     do {
       await this.page.waitForTimeout(20);
       done = await this.page.evaluate(cellIdx => {
         return window.galata.haveBeenExecuted(cellIdx);
       }, cellIndex);
+
+      if (Date.now() - startTime > timeout) {
+        const cellDesc = cellIndex !== undefined ? `cell ${cellIndex}` : 'all cells';
+        throw new Error(
+          `Timeout waiting for ${cellDesc} to execute after ${timeout}ms. ` +
+          `The cell may not have started execution due to a timing issue.`
+        );
+      }
     } while (!done);
   }
 
