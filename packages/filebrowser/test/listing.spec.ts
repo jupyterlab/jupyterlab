@@ -13,7 +13,7 @@ import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
 import { simulate } from 'simulate-event';
-import { DirListing, FilterFileBrowserModel } from '../src';
+import { DirListing, FilterFileBrowserModel, formatFileSize } from '../src';
 
 const ITEM_TEXT_CLASS = 'jp-DirListing-itemText';
 
@@ -92,6 +92,37 @@ describe('filebrowser/listing', () => {
         const options = createOptionsForConstructor();
         const dirListing = new DirListing(options);
         expect(dirListing).toBeInstanceOf(DirListing);
+      });
+    });
+
+    describe('#fileSizeDisplayUnit', () => {
+      it('should default to decimal units', () => {
+        const options = createOptionsForConstructor();
+        const dirListing = new DirListing(options);
+        expect(dirListing.fileSizeDisplayUnit).toBe('decimal');
+      });
+
+      it('should allow setting to binary units', () => {
+        const options = createOptionsForConstructor();
+        const dirListing = new DirListing(options);
+        dirListing.fileSizeDisplayUnit = 'binary';
+        expect(dirListing.fileSizeDisplayUnit).toBe('binary');
+      });
+
+      it('should trigger a refresh when changed', async () => {
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+
+        const updateSpy = jest.fn();
+        dirListing.updated.connect(updateSpy);
+
+        dirListing.fileSizeDisplayUnit = 'binary';
+        await signalToPromise(dirListing.updated);
+
+        expect(updateSpy).toHaveBeenCalled();
+        dirListing.updated.disconnect(updateSpy);
+        Widget.detach(dirListing);
       });
     });
 
@@ -1058,6 +1089,49 @@ describe('filebrowser/listing', () => {
             'file10.txt'
           ]);
         });
+      });
+    });
+  });
+
+  describe('formatFileSize', () => {
+    describe('with decimal units (base 1000)', () => {
+      it('should format bytes correctly', () => {
+        expect(formatFileSize(0, 2, 'decimal')).toBe('0 B');
+        expect(formatFileSize(999, 0, 'decimal')).toBe('999 B');
+      });
+
+      it('should format kilobytes correctly', () => {
+        expect(formatFileSize(1000, 0, 'decimal')).toBe('1 KB');
+        expect(formatFileSize(1234, 2, 'decimal')).toBe('1.23 KB');
+      });
+
+      it('should format megabytes correctly', () => {
+        expect(formatFileSize(1500000, 1, 'decimal')).toBe('1.5 MB');
+        expect(formatFileSize(1234567, 3, 'decimal')).toBe('1.235 MB');
+      });
+    });
+
+    describe('with binary units (base 1024)', () => {
+      it('should format bytes correctly', () => {
+        expect(formatFileSize(0, 0, 'binary')).toBe('0 B');
+        expect(formatFileSize(1023, 1, 'binary')).toBe('1023 B');
+      });
+
+      it('should format kibibytes correctly', () => {
+        expect(formatFileSize(1024, 0, 'binary')).toBe('1 KiB');
+        expect(formatFileSize(1536, 1, 'binary')).toBe('1.5 KiB');
+      });
+
+      it('should format mebibytes correctly', () => {
+        expect(formatFileSize(1048576, 0, 'binary')).toBe('1 MiB');
+        expect(formatFileSize(1234567, 2, 'binary')).toBe('1.18 MiB');
+      });
+    });
+
+    describe('default behavior', () => {
+      it('should use decimal units by default', () => {
+        expect(formatFileSize(1000, 0)).toBe('1 KB');
+        expect(formatFileSize(1024, 2)).toBe('1.02 KB');
       });
     });
   });
