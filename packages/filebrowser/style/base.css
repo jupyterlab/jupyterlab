@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('./pathnavigator.css');
+
 /*-----------------------------------------------------------------------------
 | Variables
 |----------------------------------------------------------------------------*/
@@ -61,6 +63,7 @@
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .jp-BreadCrumbs-item:hover {

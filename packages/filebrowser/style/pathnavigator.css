@@ -1,0 +1,99 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Make the breadcrumb bar a flex container so the fill stretches to the end */
+.jp-BreadCrumbs {
+  display: flex;
+  align-items: center;
+}
+
+/* The container holds breadcrumb icons, separators, items, and the fill */
+.jp-BreadCrumbs-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Invisible fill — stretches to fill remaining width and carries the hover cue */
+.jp-BreadCrumbs-fill {
+  flex: 1;
+  min-width: 8px;
+  align-self: stretch;
+  cursor: text;
+}
+
+.jp-BreadCrumbs:has(.jp-BreadCrumbs-fill:hover) {
+  background: var(--jp-layout-color2);
+}
+
+/* PathNavigator contains only the input and the suggestions dropdown */
+.jp-PathNavigator {
+  position: relative;
+  display: inline-block;
+}
+
+.jp-PathNavigator > input {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
+  border-radius: var(--jp-border-radius);
+  padding: 2px 6px;
+  font-size: var(--jp-ui-font-size1);
+  height: 17px;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+}
+
+.jp-PathNavigator > input:focus {
+  outline: none;
+}
+
+.jp-PathNavigator-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: var(--jp-elevation-z4);
+}
+
+.jp-PathNavigator-suggestions > li {
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-PathNavigator-suggestions > li:hover,
+.jp-PathNavigator-suggestions > li.jp-mod-active {
+  background: var(--jp-layout-color2);
+}
+
+/*
+ * Edit mode: hide the breadcrumb container and stretch the PathNavigator
+ * to fill the full width.
+ */
+.jp-BreadCrumbs.jp-mod-editMode > .jp-BreadCrumbs-container {
+  display: none;
+}
+
+.jp-BreadCrumbs.jp-mod-editMode > .jp-PathNavigator {
+  display: block;
+  flex: 1;
+  position: relative;
+}
+
+.jp-BreadCrumbs.jp-mod-editMode > .jp-PathNavigator > input {
+  display: block;
+}
