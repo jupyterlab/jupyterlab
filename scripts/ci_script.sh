@@ -12,6 +12,20 @@ export YARN_ENABLE_GLOBAL_CACHE=1
 # display verbose output for pkg builds run during `jlpm install`
 export YARN_ENABLE_INLINE_BUILDS=1
 
+# Helper function to wait for a condition with timeout
+# Usage: wait_for_condition TIMEOUT_SECONDS COMMAND [ARGS...]
+wait_for_condition() {
+    local timeout=$1
+    shift
+    for i in $(seq 1 $timeout); do
+        if "$@"; then
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+
 
 if [[ $GROUP != nonode ]]; then
     python -c "from jupyterlab.commands import build_check; build_check()"
@@ -26,7 +40,7 @@ if [[ $GROUP == python ]]; then
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
 
     # Run the python tests
-    python -m pytest
+    python -m pytest -n 3
 fi
 
 
@@ -47,7 +61,7 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
-    pip install .[docs]
+    python -m pip install .[docs]
     pushd docs
     make html
     popd
@@ -59,8 +73,15 @@ if [[ $GROUP == integrity ]]; then
     jlpm run integrity --force
     # Validate the project
     jlpm install --immutable  --immutable-cache
-    # Use print to not update the yarn.lock only fail
-    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest --fail --print
+    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
+    # Here we should not be stringent as yarn may clean
+    # output of `yarn-berry-deduplicate`
+    jlpm install
+    if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
+        git status
+        git diff
+        exit 1
+    fi
     # Run a browser check in dev mode
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
@@ -75,8 +96,8 @@ if [[ $GROUP == lint ]]; then
     jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
 
     # Python checks
-    black --check --diff --color .
-    ruff .
+    ruff format .
+    ruff check .
     pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 
@@ -199,16 +220,36 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
     jupyter labextension enable @jupyterlab/notebook-extension --debug
 
+    # Test enable/disable on system level
+    JUPYTER_BIN=$(which jupyter)
+    sudo $JUPYTER_BIN labextension disable @jupyterlab/console-extension --level system --debug
+    sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1 --debug
+    cat labextensions | grep "@jupyterlab/console-extension (all plugins)"
+    sudo $JUPYTER_BIN labextension enable @jupyterlab/console-extension --level system --debug
+    sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1 --debug
+    ! cat labextensions | grep -L "@jupyterlab/console-extension (all plugins)"
+
+    # Test locking at higher level
+    jupyter labextension enable @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension lock @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension disable @jupyterlab/notebook-extension --level user 2>&1 | grep "Extension locked at a higher level, cannot toggle status"
+    jupyter labextension unlock @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension disable @jupyterlab/notebook-extension --level user
+    USER_PAGE_CONFIG=$(jupyter --config-dir)/labconfig/page_config.json
+    cat $USER_PAGE_CONFIG | grep "\"@jupyterlab/notebook-extension\": true"
+    jupyter labextension enable @jupyterlab/notebook-extension --level user
+    cat $USER_PAGE_CONFIG | grep "\"@jupyterlab/notebook-extension\": false"
+
     # Test with a prebuilt install
     jupyter labextension develop extension --debug
     jupyter labextension build extension
 
     # Test develop script with hyphens and underscores in the module name
-    pip install -e test-hyphens
+    python -m pip install -e test-hyphens
     jupyter labextension develop test-hyphens --overwrite --debug
-    pip install -e test_no_hyphens
+    python -m pip install -e test_no_hyphens
     jupyter labextension develop test_no_hyphens --overwrite --debug
-    pip install -e test-hyphens-underscore
+    python -m pip install -e test-hyphens-underscore
     jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
@@ -224,6 +265,14 @@ if [[ $GROUP == usage ]]; then
     cat labextensions | grep -q "mock-extension"
     # build it again without a static-url to avoid causing errors
     jupyter labextension build extension
+
+    # Test with a service manager extension
+    python -m pip install -e service-manager-extension
+    jupyter labextension develop service-manager-extension --overwrite --debug
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-service-manager-extension.*enabled.*OK"
+    python -m jupyterlab.browser_check
+
     popd
 
     jupyter lab workspaces export > workspace.json --debug
@@ -253,7 +302,7 @@ if [[ $GROUP == usage ]]; then
     jlpm run get:dependency react-native
 
     # Use the extension upgrade script
-    pip install copier jinja2-time
+    python -m pip install .[upgrade-extension]
     python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
 fi
 
@@ -301,15 +350,26 @@ if [[ $GROUP == usage2 ]]; then
     $TEST_INSTALL_PATH/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser &
+    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
+    if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
+        echo "Server started successfully"
+    else
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    fi
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Check the labhubapp
+    # Test that the labhubapp fails to start if jupyterhub is not installed
+    # and provides a helpful error message.
+    ($TEST_INSTALL_PATH/bin/jupyter-labhub 2>&1 || true) | tee labhub.log
+    grep -q "JupyterHub is not installed" labhub.log || exit 1
+    # Install jupyterhub and test that the labhubapp starts successfully.
     $TEST_INSTALL_PATH/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
     $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
@@ -368,7 +428,7 @@ if [[ $GROUP == interop ]]; then
     popd
     pushd provider
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     pushd consumer
     jupyter labextension install .
@@ -392,7 +452,7 @@ if [[ $GROUP == interop ]]; then
     popd
     pushd consumer
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
@@ -416,7 +476,7 @@ if [[ $GROUP == interop ]]; then
     # if installed after
     jupyter labextension install .
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
@@ -432,13 +492,19 @@ if [[ $GROUP == nonode ]]; then
     ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
 
     # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
+    ./test_install/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
+    if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
+        echo "Server started successfully"
+    else
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    fi
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Make sure we can install the tarball
     virtualenv -p $(which python3) test_sdist

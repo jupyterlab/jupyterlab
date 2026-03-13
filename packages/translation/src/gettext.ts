@@ -13,17 +13,18 @@
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
 
+import { DEFAULT_LANGUAGE_CODE } from './tokens';
 import { normalizeDomain } from './utils';
 
 /**
  * A plural form function.
  */
-type PluralForm = (n: number) => number;
+export type PluralForm = (n: number) => number;
 
 /**
  * Metadata for a language pack.
  */
-interface IJsonDataHeader {
+export interface IJsonDataHeader {
   /**
    * Language locale. Example: es_CO, es-CO.
    */
@@ -48,7 +49,7 @@ interface IJsonDataHeader {
 /**
  * Translatable string messages.
  */
-interface IJsonDataMessages {
+export interface IJsonDataMessages {
   /**
    * Translation strings for a given msg_id.
    */
@@ -56,9 +57,9 @@ interface IJsonDataMessages {
 }
 
 /**
- * Translatable string messages incluing metadata.
+ * Translatable string messages including metadata.
  */
-interface IJsonData extends IJsonDataMessages {
+export interface IJsonData extends IJsonDataMessages {
   /**
    * Metadata of the language bundle.
    */
@@ -68,7 +69,7 @@ interface IJsonData extends IJsonDataMessages {
 /**
  * Configurable options for the Gettext constructor.
  */
-interface IOptions {
+export interface IOptions {
   /**
    * Language locale. Example: es_CO, es-CO.
    */
@@ -141,7 +142,8 @@ class Gettext {
     // default values that could be overridden in Gettext() constructor
     this._defaults = {
       domain: 'messages',
-      locale: document.documentElement.getAttribute('lang') || 'en',
+      locale:
+        document.documentElement.getAttribute('lang') || DEFAULT_LANGUAGE_CODE,
       pluralFunc: function (n: number) {
         return { nplurals: 2, plural: n != 1 ? 1 : 0 };
       },
@@ -537,7 +539,6 @@ class Gettext {
    * @param pluralForm - Plural form string..
    * @returns An function to compute plural forms.
    */
-  // eslint-disable-next-line @typescript-eslint/ban-types
   private getPluralFunc(pluralForm: string): Function {
     // Plural form string regexp
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js

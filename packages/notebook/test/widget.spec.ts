@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { Cell } from '@jupyterlab/cells';
 import {
-  Cell,
   CodeCell,
   CodeCellModel,
   MarkdownCell,
@@ -10,22 +10,21 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import {
-  INotebookModel,
-  Notebook,
-  NotebookModel,
-  StaticNotebook
-} from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { Notebook, NotebookModel, StaticNotebook } from '@jupyterlab/notebook';
 import {
   framePromise,
   JupyterServer,
   signalToPromise,
   sleep
 } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();
 
@@ -452,6 +451,36 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#moveCell()', () => {
+      it('should preserve isDirty state after moving a code cell', () => {
+        const widget = createWidget();
+        widget.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code' },
+          { cell_type: 'code' }
+        ]);
+        (widget.widgets[0].model as CodeCellModel).isDirty = true;
+        widget.moveCell(0, 1);
+        expect((widget.widgets[1].model as CodeCellModel).isDirty).toBe(true);
+      });
+
+      it('should preserve isDirty state after moving multiple code cells', () => {
+        const widget = createWidget();
+        widget.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code' },
+          { cell_type: 'code' },
+          { cell_type: 'code' },
+          { cell_type: 'code' },
+          { cell_type: 'code' }
+        ]);
+        (widget.widgets[0].model as CodeCellModel).isDirty = true;
+        (widget.widgets[2].model as CodeCellModel).isDirty = true;
+        widget.moveCell(0, 4, 3);
+        expect((widget.widgets[2].model as CodeCellModel).isDirty).toBe(true);
+        expect((widget.widgets[3].model as CodeCellModel).isDirty).toBe(false);
+        expect((widget.widgets[4].model as CodeCellModel).isDirty).toBe(true);
+      });
+    });
+
     describe('#onModelChanged()', () => {
       it('should be called when the model changes', () => {
         const widget = new LogStaticNotebook(options);
@@ -464,7 +493,8 @@ describe('@jupyter/notebook', () => {
       it('should not be called if the model does not change', () => {
         const widget = createWidget();
         widget.methods = [];
-        widget.model = widget.model; // eslint-disable-line
+        // eslint-disable-next-line no-self-assign
+        widget.model = widget.model;
         expect(widget.methods).toEqual(
           expect.not.arrayContaining(['onModelChanged'])
         );
@@ -607,7 +637,8 @@ describe('@jupyter/notebook', () => {
         widget.activeCellChanged.connect(() => {
           called = true;
         });
-        widget.activeCellIndex = widget.activeCellIndex; // eslint-disable-line
+        // eslint-disable-next-line no-self-assign
+        widget.activeCellIndex = widget.activeCellIndex;
         expect(called).toBe(false);
       });
     });
@@ -776,6 +807,31 @@ describe('@jupyter/notebook', () => {
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         expect(widget.activeCell).toBe(widget.widgets[1]);
+      });
+
+      it('should render a markdown cell when moving active cells if autoRenderMarkdownCells is true', () => {
+        const widget = createActiveWidget();
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '# Hello'
+        }); // Should be rendered with content.
+        const child = widget.widgets[0] as MarkdownCell;
+        expect(child.rendered).toBe(true);
+        widget.activeCellIndex = 0;
+        widget.mode = 'edit';
+        expect(child.rendered).toBe(false);
+
+        // Turn on rendering of markdown cells when exiting
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          autoRenderMarkdownCells: true
+        };
+
+        // Exiting should trigger rendering of the old cell
+        widget.activeCellIndex = 1;
+        expect(child.rendered).toBe(true);
       });
     });
 
@@ -1203,6 +1259,21 @@ describe('@jupyter/notebook', () => {
         it('should extend selection if invoked with shift', () => {
           widget.activeCellIndex = 3;
 
+          // shift click no-op
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+          // test that selecting mode handler does not prevent default
+          // if no cells were selected; in the selecting mode we listen
+          // to the `mouseup` event to stop selecting when the mouse button gets
+          // released; this event gets default prevented as handled by the notebook.
+          const mouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true
+          });
+          widget.widgets[3].node.dispatchEvent(mouseUpEvent);
+          expect(mouseUpEvent.defaultPrevented).toBe(false);
+
           // shift click below
           simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(4);
@@ -1222,6 +1293,27 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[2].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(2);
           expect(selected(widget)).toEqual([2, 3]);
+
+          // shift click deselect
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+
+          // shift click select by dragging from active cell
+          expect(widget.activeCellIndex).toBe(3);
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          simulate(widget.widgets[4].node, 'mousemove', { shiftKey: true });
+          expect(selected(widget)).toEqual([3, 4]);
+          // test that selecting mode mouse up handler prevents default;
+          // in selecting mode we listen to the `mouseup` event to stop
+          // selecting when the mouse button gets released
+          const blockedMouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true
+          });
+          widget.widgets[4].node.dispatchEvent(blockedMouseUpEvent);
+          expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
         it('should not extend a selection if there is text selected in the output', () => {
@@ -1345,10 +1437,28 @@ describe('@jupyter/notebook', () => {
           expect(widget.events).toEqual(expect.arrayContaining(['focusin']));
           expect(widget.mode).toBe('command');
         });
+
+        it('should not unrender previously active markdown cell', async () => {
+          widget.model!.sharedModel.insertCell(0, {
+            cell_type: 'markdown',
+            source: '# Hello'
+          });
+          const mdCell = widget.widgets[0] as MarkdownCell;
+          if (!mdCell.inViewport) {
+            await signalToPromise(mdCell.inViewportChanged);
+          }
+          widget.activeCellIndex = 0;
+          expect(mdCell.rendered).toBe(true);
+          const cellToActivate = widget.widgets[1];
+          expect(widget.mode).toBe('command');
+          simulate(cellToActivate.editorWidget!.node, 'focusin');
+          expect(widget.mode).toBe('edit');
+          expect(mdCell.rendered).toBe(true);
+        });
       });
 
       describe('focusout', () => {
-        it('should switch to command mode', () => {
+        it('should switch to command mode', async () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const event = generate('focusout');
@@ -1356,6 +1466,8 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(event);
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          // Wait for the activeCell to be focused
+          await framePromise();
           expect(widget.mode).toBe('command');
           expect(widget.activeCell!.editor!.hasFocus()).toBe(false);
         });
@@ -1429,13 +1541,15 @@ describe('@jupyter/notebook', () => {
     describe('#onActivateRequest()', () => {
       it('should focus the node after an update', async () => {
         const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
+        await framePromise();
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onActivateRequest'])
         );
         await framePromise();
-        expect(document.activeElement).toBe(widget.node);
+        expect(document.activeElement).toBe(widget.activeCell!.node);
         widget.dispose();
       });
     });
@@ -1515,6 +1629,24 @@ describe('@jupyter/notebook', () => {
         widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.activeCell).toBe(widget.widgets[2]);
       });
+
+      it.each(['full', 'defer', 'none'])(
+        'should connect undoManager to the cell editor in %s windowing mode',
+        async mode => {
+          const widget = createActiveWidget();
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            windowingMode: mode as 'full' | 'defer' | 'none'
+          };
+          Widget.attach(widget, document.body);
+          widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
+          const child = widget.widgets[0];
+          await child.ready;
+          const editor = child.editorWidget!.editor as CodeMirrorEditor;
+          const conf = editor.editor.state.facet(yUndoManagerFacet);
+          expect(conf.undoManager).toBeTruthy();
+        }
+      );
 
       describe('`edgeRequested` signal', () => {
         it('should activate the previous cell if top is requested', async () => {

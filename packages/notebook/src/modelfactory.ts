@@ -2,16 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISharedNotebook } from '@jupyter/ydoc';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Contents } from '@jupyterlab/services';
-import { INotebookModel, NotebookModel } from './model';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { Contents } from '@jupyterlab/services';
+import type { INotebookModel } from './model';
+import { NotebookModel } from './model';
 
 /**
  * A model factory for notebooks.
  */
-export class NotebookModelFactory
-  implements DocumentRegistry.IModelFactory<INotebookModel>
-{
+export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookModel> {
   /**
    * Construct a new notebook model factory.
    */
@@ -79,7 +78,7 @@ export class NotebookModelFactory
   /**
    * Create a new model for a given path.
    *
-   * @param languagePreference - An optional kernel language preference.
+   * @param options Model options.
    *
    * @returns A new document model.
    */

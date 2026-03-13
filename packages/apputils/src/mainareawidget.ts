@@ -1,9 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ReactiveToolbar, Spinner, Toolbar } from '@jupyterlab/ui-components';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { Toolbar } from '@jupyterlab/ui-components';
+import { ReactiveToolbar, Spinner } from '@jupyterlab/ui-components';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';
 import { Printing } from './printing';
@@ -44,10 +47,11 @@ export class MainAreaWidget<T extends Widget = Widget>
     const trans = (options.translator || nullTranslator).load('jupyterlab');
     const content = (this._content = options.content);
     content.node.setAttribute('role', 'region');
-    content.node.setAttribute('aria-label', trans.__('notebook content'));
-    const toolbar = (this._toolbar = options.toolbar || new ReactiveToolbar());
-    toolbar.node.setAttribute('role', 'navigation');
-    toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
+    content.node.setAttribute('aria-label', trans.__('main area content'));
+    const toolbar = (this._toolbar =
+      options.toolbar || new ReactiveToolbar({ noFocusOnClick: true }));
+    toolbar.node.setAttribute('role', 'toolbar');
+    toolbar.node.setAttribute('aria-label', trans.__('main area toolbar'));
     const contentHeader = (this._contentHeader =
       options.contentHeader ||
       new BoxPanel({

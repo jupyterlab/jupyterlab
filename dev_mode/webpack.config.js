@@ -3,16 +3,19 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+const RsdoctorRspackPlugin = require('@rsdoctor/rspack-plugin');
+
 const path = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
+// TODO: investigate using https://rspack.rs/plugins/rspack/html-rspack-plugin instead of html-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin =
   require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
-const { ModuleFederationPlugin } = webpack.container;
+const { ModuleFederationPlugin } = rspack.container;
 
 const Build = require('@jupyterlab/builder').Build;
 const WPPlugin = require('@jupyterlab/builder').WPPlugin;
@@ -67,21 +70,17 @@ if (outputDir !== buildDir) {
 // Set up variables for the watch mode ignore plugins
 const watched = {};
 const ignoreCache = Object.create(null);
-let watchNodeModules = false;
 Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
-  let localPkgPath = '';
+  let localPkgPath = ''; // eslint-disable-line no-useless-assignment
   try {
     localPkgPath = require.resolve(path.join(name, 'package.json'));
-  } catch (e) {
+  } catch {
     return;
   }
   watched[name] = path.dirname(localPkgPath);
-  if (localPkgPath.indexOf('node_modules') !== -1) {
-    watchNodeModules = true;
-  }
 });
 
 // Set up source-map-loader to look in watched lib dirs
@@ -99,7 +98,7 @@ function maybeSync(localPath, name, rest) {
   let stats;
   try {
     stats = fs.statSync(localPath);
-  } catch (e) {
+  } catch {
     return;
   }
 
@@ -176,10 +175,9 @@ for (let pkg of extensionPackages) {
 const extraShared = [];
 for (let pkg of extensionPackages) {
   let pkgShared = {};
-  let {
-    dependencies = {},
-    jupyterlab: { sharedPackages = {} } = {}
-  } = require(`${pkg}/package.json`);
+  let { dependencies = {}, jupyterlab: { sharedPackages = {} } = {} } = require(
+    `${pkg}/package.json`
+  );
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
       pkgShared[dep] = { requiredVersion };
@@ -269,18 +267,26 @@ const plugins = [
     },
     name: 'CORE_FEDERATION',
     shared
-  })
+  }),
+  // Register the plugin only when RSDOCTOR is true, as the plugin increases build time
+  process.env.RSDOCTOR && new RsdoctorRspackPlugin.RsdoctorRspackPlugin({})
 ];
 
-if (process.argv.includes('--analyze')) {
-  plugins.push(new BundleAnalyzerPlugin());
+if (process.env.WEBPACK_BUNDLE_ANALYZER) {
+  plugins.push(
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      reportFilename: 'webpack-bundle-analyzer.html',
+      openAnalyzer: false
+    })
+  );
 }
 
 module.exports = [
   merge(baseConfig, {
     mode: 'development',
     entry: {
-      main: ['./publicpath', 'whatwg-fetch', entryPoint]
+      main: ['./publicpath', entryPoint]
     },
     output: {
       path: path.resolve(buildDir),
@@ -314,12 +320,9 @@ module.exports = [
   })
 ].concat(extensionAssetConfig);
 
-// Needed to watch changes in linked extensions in node_modules
-// (jupyter lab --watch)
-// See https://github.com/webpack/webpack/issues/11612
-if (watchNodeModules) {
-  module.exports[0].snapshot = { managedPaths: [] };
-}
-
 const logPath = path.join(buildDir, 'build_log.json');
-fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+if (!process.env.RSDOCTOR) {
+  // rsdoctor plugin has circular refs that prevent logging the full config
+  // so we only log if we are not running rsdoctor
+  fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+}

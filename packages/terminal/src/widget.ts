@@ -1,25 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Terminal as TerminalNS } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Terminal as TerminalNS } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Platform } from '@lumino/domutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import type {
   ITerminalInitOnlyOptions,
   ITerminalOptions,
   Terminal as Xterm
-} from 'xterm';
-import type { CanvasAddon } from 'xterm-addon-canvas';
-import type { FitAddon } from 'xterm-addon-fit';
-import type { WebLinksAddon } from 'xterm-addon-web-links';
-import type { WebglAddon } from 'xterm-addon-webgl';
+} from '@xterm/xterm';
+import type { CanvasAddon } from '@xterm/addon-canvas';
+import type { FitAddon } from '@xterm/addon-fit';
+import type { SearchAddon } from '@xterm/addon-search';
+import type { WebLinksAddon } from '@xterm/addon-web-links';
+import type { WebglAddon } from '@xterm/addon-webgl';
+import Color from 'color';
 import { ITerminal } from '.';
 
 /**
@@ -61,6 +63,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     const { theme, ...other } = this._options;
     const xtermOptions = {
       theme: Private.getXTermTheme(theme),
+      allowProposedApi: true, // To support xtermjs SearchAddon coloring.
       ...other
     };
 
@@ -74,6 +77,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       sender: TerminalNS.ITerminalConnection,
       msg: TerminalNS.IMessage
     ): void => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.type) {
         case 'stdout':
           if (msg.content) {
@@ -93,9 +97,10 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     // Create the xterm.
     Private.createTerminal(xtermOptions)
-      .then(([term, fitAddon]) => {
+      .then(([term, fitAddon, searchAddon]) => {
         this._term = term;
         this._fitAddon = fitAddon;
+        this._searchAddon = searchAddon;
         this._initializeTerm();
 
         this.id = `jp-Terminal-${Private.id++}`;
@@ -161,7 +166,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
 
     this._options[option] = value;
-
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (option) {
       case 'fontFamily':
         this._term.options.fontFamily = value as string | undefined;
@@ -183,6 +188,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
           ...Private.getXTermTheme(value as ITerminal.Theme)
         };
         this._setThemeAttribute(value as ITerminal.Theme);
+        this._themeChanged.emit();
         break;
       case 'macOptionIsMeta':
         this._term.options.macOptionIsMeta = value as boolean | undefined;
@@ -272,6 +278,31 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       default:
         break;
     }
+  }
+
+  /**
+   * Return xtermjs SearchAddon.
+   * Public as needed by TerminalSearchProvider
+   */
+  get searchAddon(): SearchAddon {
+    return this._searchAddon;
+  }
+
+  /**
+   * Return terminal theme.
+   * Public as needed by TerminalSearchProvider
+   */
+  getXTermTheme(): ITerminal.IThemeObject {
+    const { theme } = this._options;
+    return Private.getXTermTheme(theme);
+  }
+
+  /**
+   * A signal emitted when the terminal theme changes, this includes the when the lab theme
+   * changes if the terminal theme is 'inherit'.
+   */
+  get themeChanged(): ISignal<this, void> {
+    return this._themeChanged;
   }
 
   /**
@@ -406,6 +437,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     sender: TerminalNS.ITerminalConnection,
     msg: TerminalNS.IMessage
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msg.type) {
       case 'stdout':
         if (msg.content) {
@@ -464,6 +496,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   private _fitAddon: FitAddon;
+  private _searchAddon: SearchAddon;
   private _needsResize = true;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
@@ -473,6 +506,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _term: Xterm;
   private _termOpened = false;
   private _trans: TranslationBundle;
+  private _themeChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -493,7 +527,8 @@ namespace Private {
     cursor: '#616161', // md-grey-700
     cursorAccent: '#F5F5F5', // md-grey-100
     selectionBackground: 'rgba(97, 97, 97, 0.3)', // md-grey-700
-    selectionInactiveBackground: 'rgba(189, 189, 189, 0.3)' // md-grey-400
+    selectionInactiveBackground: 'rgba(189, 189, 189, 0.3)', // md-grey-400
+    activeMatchBackground: '#ffee58' // md-yellow-400
   };
 
   /**
@@ -505,32 +540,42 @@ namespace Private {
     cursor: '#fff',
     cursorAccent: '#000',
     selectionBackground: 'rgba(255, 255, 255, 0.3)',
-    selectionInactiveBackground: 'rgba(238, 238, 238, 0.3)' // md-grey-200
+    selectionInactiveBackground: 'rgba(238, 238, 238, 0.3)', // md-grey-200
+    activeMatchBackground: '#F57F17' // md-yellow-900
   };
 
   /**
    * The current theme.
    */
-  export const inheritTheme = (): ITerminal.IThemeObject => ({
-    foreground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-font-color0')
-      .trim(),
-    background: getComputedStyle(document.body)
-      .getPropertyValue('--jp-layout-color0')
-      .trim(),
-    cursor: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-font-color1')
-      .trim(),
-    cursorAccent: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-inverse-font-color0')
-      .trim(),
-    selectionBackground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-layout-color3')
-      .trim(),
-    selectionInactiveBackground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-layout-color2')
-      .trim()
-  });
+  export const inheritTheme = (): ITerminal.IThemeObject => {
+    const bodyStyle = getComputedStyle(document.body);
+    const background = bodyStyle.getPropertyValue('--jp-layout-color0').trim();
+
+    let activeMatchBackground = '#ffee58'; // md-yellow-400 for light mode background
+    try {
+      if (Color(background).isDark()) {
+        activeMatchBackground = '#F57F17'; // md-yellow-900 for dark mode background
+      }
+    } catch (e) {
+      // Use the light mode default.
+    }
+
+    return {
+      foreground: bodyStyle.getPropertyValue('--jp-ui-font-color0').trim(),
+      background,
+      cursor: bodyStyle.getPropertyValue('--jp-ui-font-color1').trim(),
+      cursorAccent: bodyStyle
+        .getPropertyValue('--jp-ui-inverse-font-color0')
+        .trim(),
+      selectionBackground: bodyStyle
+        .getPropertyValue('--jp-layout-color3')
+        .trim(),
+      selectionInactiveBackground: bodyStyle
+        .getPropertyValue('--jp-layout-color2')
+        .trim(),
+      activeMatchBackground
+    };
+  };
 
   export function getXTermTheme(
     theme: ITerminal.Theme
@@ -555,6 +600,7 @@ namespace Private {
   let Xterm_: typeof Xterm;
   let FitAddon_: typeof FitAddon;
   let WeblinksAddon_: typeof WebLinksAddon;
+  let SearchAddon_: typeof SearchAddon;
   let Renderer_: typeof CanvasAddon | typeof WebglAddon;
 
   /**
@@ -598,29 +644,34 @@ namespace Private {
    */
   export async function createTerminal(
     options: ITerminalOptions & ITerminalInitOnlyOptions
-  ): Promise<[Xterm, FitAddon]> {
+  ): Promise<[Xterm, FitAddon, SearchAddon]> {
     if (!Xterm_) {
       supportWebGL = hasWebGLContext();
-      const [xterm_, fitAddon_, renderer_, weblinksAddon_] = await Promise.all([
-        import('xterm'),
-        import('xterm-addon-fit'),
-        supportWebGL
-          ? import('xterm-addon-webgl')
-          : import('xterm-addon-canvas'),
-        import('xterm-addon-web-links')
-      ]);
+      const [xterm_, fitAddon_, renderer_, weblinksAddon_, searchAddon_] =
+        await Promise.all([
+          import('@xterm/xterm'),
+          import('@xterm/addon-fit'),
+          supportWebGL
+            ? import('@xterm/addon-webgl')
+            : import('@xterm/addon-canvas'),
+          import('@xterm/addon-web-links'),
+          import('@xterm/addon-search')
+        ]);
       Xterm_ = xterm_.Terminal;
       FitAddon_ = fitAddon_.FitAddon;
       Renderer_ =
         (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
       WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
+      SearchAddon_ = searchAddon_.SearchAddon;
     }
 
     const term = new Xterm_(options);
     addRenderer(term);
     const fitAddon = new FitAddon_();
     term.loadAddon(fitAddon);
+    const searchAddon = new SearchAddon_();
     term.loadAddon(new WeblinksAddon_());
-    return [term, fitAddon];
+    term.loadAddon(searchAddon);
+    return [term, fitAddon, searchAddon];
   }
 }

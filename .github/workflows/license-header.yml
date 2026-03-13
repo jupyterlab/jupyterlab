@@ -13,20 +13,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure git to use https
         run: git config --global hub.protocol https
 
+        #####
+        # This workflow is triggered by pull_request_target event.
+        # The following step will checkout the PR.
+        # DO NOT, UNDER ANY CIRCUMSTANCES, RUN ANY LOCAL CODE ON THE PR.
+        #####
       - name: Checkout the branch from the PR that triggered the job
-        run: hub pr checkout ${{ github.event.pull_request.number }}
+        run: gh pr checkout ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fix License Header
-        uses: apache/skywalking-eyes/header@v0.4.0
+        uses: apache/skywalking-eyes/header@61275cc80d0798a405cb070f7d3a8aaf7cf2c2c1 # v0.8.0
         with:
           mode: fix
 
@@ -35,10 +40,8 @@ jobs:
         shell: bash -l {0}
         run: |
           set -ex
-          export CHANGES=$(git status --porcelain | tee modified.log | wc -l)
-          cat modified.log
-          # Remove the log otherwise it will be committed
-          rm modified.log
+          export CHANGES=$(git status --porcelain | tee /tmp/modified.log | wc -l)
+          cat /tmp/modified.log
 
           echo "N_CHANGES=${CHANGES}" >> $GITHUB_OUTPUT
 

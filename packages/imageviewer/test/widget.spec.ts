@@ -1,18 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
   Base64ModelFactory,
   Context,
-  DocumentRegistry,
   DocumentWidget
 } from '@jupyterlab/docregistry';
 import { createFileContext } from '@jupyterlab/docregistry/lib/testutils';
 import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 class LogImage extends ImageViewer {
@@ -31,7 +32,6 @@ class LogImage extends ImageViewer {
 
 // jsdom does not have createObjectURL and revokeObjectURL, so we define them.
 if (typeof window.URL.createObjectURL === 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const noOp = () => {};
   Object.defineProperty(window.URL, 'createObjectURL', { value: noOp });
   Object.defineProperty(window.URL, 'revokeObjectURL', { value: noOp });

@@ -1,23 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import type { CommsOverSubshells, ServerConnection } from '..';
 
-import * as KernelMessage from './messages';
+import type * as KernelMessage from './messages';
 
-import { KernelSpec } from '../kernelspec';
-import { IManager as IBaseManager } from '../basemanager';
+import type { IManager as IBaseManager } from '../basemanager';
+
+import type { KernelSpec } from '../kernelspec';
+
+import type { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
 
 import { IKernelOptions, IModel } from './restapi';
 
 export { Status } from './messages';
-export { IModel, IKernelOptions };
+export { IKernelOptions, IModel };
 
 /**
  * Interface of a Kernel connection that is managed by a session.
@@ -109,6 +112,21 @@ export interface IKernelConnection extends IObservableDisposable {
   handleComms: boolean;
 
   /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * Options are:
+   * - disabled: not using subshells
+   * - one subshell per comm-target (default)
+   * - one subshell per comm (can lead to issues if creating many comms)
+   */
+  commsOverSubshells?: CommsOverSubshells;
+
+  /**
    * Whether the kernel connection has pending input.
    *
    * #### Notes
@@ -175,7 +193,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * @returns A promise that resolves when the kernel has interrupted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -192,7 +210,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * @returns A promise that resolves when the kernel has restarted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) and validates the response model.
    *
    * Any existing Future or Comm objects are cleared.
    *
@@ -205,8 +223,6 @@ export interface IKernelConnection extends IObservableDisposable {
 
   /**
    * Send a `kernel_info_request` message.
-   *
-   * @param content - The content of the request.
    *
    * @returns A promise that resolves with the response message.
    *
@@ -324,6 +340,63 @@ export interface IKernelConnection extends IObservableDisposable {
   >;
 
   /**
+   * Send a `create_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A promise that resolves with the response message.
+   */
+  requestCreateSubshell(
+    content: KernelMessage.ICreateSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.ICreateSubshellRequestMsg,
+    KernelMessage.ICreateSubshellReplyMsg
+  >;
+
+  /**
+   * Send a `delete_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A promise that resolves with the response message.
+   */
+  requestDeleteSubshell(
+    content: KernelMessage.IDeleteSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.IDeleteSubshellRequestMsg,
+    KernelMessage.IDeleteSubshellReplyMsg
+  >;
+
+  /**
+   * Send a `list_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A promise that resolves with the response message.
+   */
+  requestListSubshell(
+    content: KernelMessage.IListSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.IListSubshellRequestMsg,
+    KernelMessage.IListSubshellReplyMsg
+  >;
+
+  /**
    * Send an `is_complete_request` message.
    *
    * @param content - The content of the request.
@@ -375,7 +448,7 @@ export interface IKernelConnection extends IObservableDisposable {
    *
    * @param targetName - The name of the comm target.
    *
-   * @param id - The comm id.
+   * @param commId - The comm id.
    *
    * @returns A comm instance.
    */
@@ -431,7 +504,7 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Register an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id in messages the hook should
+   * @param msgId - The parent_header message id in messages the hook should
    * intercept.
    *
    * @param hook - The callback invoked for the message.
@@ -456,7 +529,7 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Remove an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook intercepted.
+   * @param msgId - The parent_header message id the hook intercepted.
    *
    * @param hook - The callback invoked for the message.
    *
@@ -537,6 +610,16 @@ export interface IKernelConnection extends IObservableDisposable {
       'clientId' | 'username' | 'handleComms'
     >
   ): IKernelConnection;
+
+  /**
+   * Check if this kernel supports JEP 91 kernel subshells.
+   */
+  get supportsSubshells(): boolean;
+
+  /**
+   * The subshell ID, main shell has null.
+   */
+  subshellId: string | null;
 }
 
 /**
@@ -558,6 +641,16 @@ export namespace IKernelConnection {
     serverSettings?: ServerConnection.ISettings;
 
     /**
+     * The kernel API client.
+     */
+    kernelAPIClient?: IKernelAPIClient;
+
+    /**
+     * The kernel spec API client.
+     */
+    kernelSpecAPIClient?: IKernelSpecAPIClient;
+
+    /**
      * The username of the kernel client.
      */
     username?: string;
@@ -575,9 +668,29 @@ export namespace IKernelConnection {
     handleComms?: boolean;
 
     /**
+     * Whether comm messages should be sent to kernel subshells, if the
+     * kernel supports it.
+     *
+     * #### Notes
+     * Sending comm messages over subshells allows processing comms whilst
+     * processing execute-request on the "main shell". This prevents blocking
+     * comm processing.
+     * Options are:
+     * - disabled: not using subshells
+     * - one subshell per comm-target (default)
+     * - one subshell per comm (can lead to issues if creating many comms)
+     */
+    commsOverSubshells?: CommsOverSubshells;
+
+    /**
      * The unique identifier for the kernel client.
      */
     clientId?: string;
+
+    /**
+     * The subshell ID.
+     */
+    subshellId?: string;
   }
 }
 
@@ -616,6 +729,26 @@ export interface IManager extends IBaseManager {
    * @returns A new iterator over the running kernels.
    */
   running(): IterableIterator<IModel>;
+
+  /**
+   * The number of running kernels.
+   */
+  readonly runningCount: number;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * Options are:
+   * - disabled: not using subshells
+   * - one subshell per comm-target (default)
+   * - one subshell per comm (can lead to issues if creating many comms)
+   */
+  commsOverSubshells?: CommsOverSubshells;
 
   /**
    * Force a refresh of the running kernels.
@@ -660,7 +793,8 @@ export interface IManager extends IBaseManager {
   /**
    * Connect to an existing kernel.
    *
-   * @param model - The model of the target kernel.
+   * @param options - The options for connecting to the kernel
+   * @param options.model - The model of the target kernel.
    *
    * @returns A promise that resolves with the new kernel instance.
    */
@@ -807,6 +941,11 @@ export interface IComm extends IDisposable {
   readonly targetName: string;
 
   /**
+   * Whether comms are running on subshell or not.
+   */
+  commsOverSubshells?: CommsOverSubshells;
+
+  /**
    * Callback for a comm close event.
    *
    * #### Notes
@@ -920,4 +1059,66 @@ export interface IAnyMessageArgs {
    * The direction of the message.
    */
   direction: 'send' | 'recv';
+}
+
+/**
+ * Interface for making requests to the Kernel API.
+ */
+export interface IKernelAPIClient {
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * List the running kernels.
+   *
+   * @returns A promise that resolves with the list of running kernel models.
+   */
+  listRunning(): Promise<IModel[]>;
+
+  /**
+   * Get a kernel model.
+   *
+   * @param id - The id of the kernel of interest.
+   *
+   * @returns A promise that resolves with the kernel model.
+   */
+  getModel(id: string): Promise<IModel | undefined>;
+
+  /**
+   * Start a new kernel.
+   *
+   * @param options - The options used to create the kernel.
+   *
+   * @returns A promise that resolves with the kernel model.
+   */
+  startNew(options?: IKernelOptions): Promise<IModel>;
+
+  /**
+   * Restart a kernel.
+   *
+   * @param id - The id of the kernel to restart.
+   *
+   * @returns A promise that resolves when the kernel is restarted.
+   */
+  restart(id: string): Promise<void>;
+
+  /**
+   * Interrupt a kernel.
+   *
+   * @param id - The id of the kernel to interrupt.
+   *
+   * @returns A promise that resolves when the kernel is interrupted.
+   */
+  interrupt(id: string): Promise<void>;
+
+  /**
+   * Shut down a kernel by id.
+   *
+   * @param id - The id of the kernel to shut down.
+   *
+   * @returns A promise that resolves when the kernel is shut down.
+   */
+  shutdown(id: string): Promise<void>;
 }

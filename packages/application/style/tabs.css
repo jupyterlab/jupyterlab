@@ -60,6 +60,22 @@
   position: relative;
 }
 
+.lm-DockPanel-tabBar .lm-TabBar-tab:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-addButton:focus-visible,
+.lm-TabPanel-tabBar .lm-TabBar-tab:focus-visible {
+  border: 1px solid var(--accent-fill-focus);
+  border-bottom: none;
+
+  /* Thicken the border by 1px within the element border */
+  box-shadow: 0 0 0 1px inset var(--accent-fill-focus);
+  outline: none;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after,
+.lm-TabPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after {
+  border-bottom-color: var(--accent-fill-focus);
+}
+
 .lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current),
 .lm-TabPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
   background: var(--jp-layout-color1);

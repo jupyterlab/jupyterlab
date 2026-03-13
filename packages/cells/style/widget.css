@@ -102,6 +102,11 @@
   width: calc(
     var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset)
   );
+  flex: 0 0
+    calc(
+      var(--jp-cell-prompt-width) -
+        var(--jp-private-cell-scrolling-output-offset)
+    );
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay {
@@ -117,7 +122,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-MarkdownOutput {
-  display: table-cell;
+  flex: 1 1 auto;
   width: 100%;
   margin-top: 0;
   margin-bottom: 0;
@@ -234,5 +239,9 @@ cell outputs.
   .jp-Cell-inputWrapper,
   .jp-Cell-outputWrapper {
     display: block;
+  }
+
+  .jp-MarkdownOutput {
+    display: table-cell;
   }
 }

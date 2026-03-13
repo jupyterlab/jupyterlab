@@ -1,28 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableString } from '@jupyterlab/observables';
+import type { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Kernel } from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type {
   JSONObject,
-  PromiseDelegate,
   ReadonlyJSONObject,
-  ReadonlyPartialJSONObject,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IOutputAreaModel } from './model';
+import type { IOutputAreaModel } from './model';
 
 /**
  * The class name added to an output area widget.
@@ -43,6 +43,8 @@ const OUTPUT_AREA_OUTPUT_CLASS = 'jp-OutputArea-output';
  * The class name added to prompt children of OutputArea.
  */
 const OUTPUT_AREA_PROMPT_CLASS = 'jp-OutputArea-prompt';
+
+const OUTPUT_AREA_STDIN_HIDING_CLASS = 'jp-OutputArea-stdin-hiding';
 
 /**
  * The class name added to OutputPrompt.
@@ -106,6 +108,7 @@ export class OutputArea extends Widget {
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
+    this._showInputPlaceholder = options.showInputPlaceholder ?? true;
 
     const model = (this.model = options.model);
     for (
@@ -115,6 +118,17 @@ export class OutputArea extends Widget {
     ) {
       const output = model.get(i);
       this._insertOutput(i, output);
+      if (output.type === 'stream') {
+        // This is a stream output, follow changes to the text.
+        output.streamText!.changed.connect(
+          (
+            sender: IObservableString,
+            event: IObservableString.IChangedArgs
+          ) => {
+            this._setOutput(i, output);
+          }
+        );
+      }
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
@@ -189,6 +203,15 @@ export class OutputArea extends Widget {
     }
     this._future = value;
 
+    value.done
+      .finally(() => {
+        this._pendingInput = false;
+      })
+      .catch(() => {
+        // No-op, required because `finally` re-raises any rejections,
+        // even if caught on the `done` promise level before.
+      });
+
     this.model.clear();
 
     // Make sure there were no input widgets.
@@ -214,10 +237,19 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Signal emitted when an output area is requesting an input.
+   * Signal emitted when an output area is requesting an input. The signal
+   * carries the input widget that this class creates in response to the input
+   * request.
    */
-  get inputRequested(): ISignal<OutputArea, void> {
+  get inputRequested(): ISignal<OutputArea, IStdin> {
     return this._inputRequested;
+  }
+
+  /**
+   * A flag indicating if the output area has pending input.
+   */
+  get pendingInput(): boolean {
+    return this._pendingInput;
   }
 
   /**
@@ -261,9 +293,22 @@ export class OutputArea extends Widget {
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
+        const output = args.newValues[0];
+        this._insertOutput(args.newIndex, output);
+        if (output.type === 'stream') {
+          // A stream output has been added, follow changes to the text.
+          output.streamText!.changed.connect(
+            (
+              sender: IObservableString,
+              event: IObservableString.IChangedArgs
+            ) => {
+              this._setOutput(args.newIndex, output);
+            }
+          );
+        }
         break;
       case 'remove':
         if (this.widgets.length) {
@@ -292,6 +337,9 @@ export class OutputArea extends Widget {
           }
         }
         break;
+      case 'clear':
+        this._clear();
+        break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
         break;
@@ -310,18 +358,44 @@ export class OutputArea extends Widget {
     return this._toggleScrolling;
   }
 
+  get initialize(): ISignal<OutputArea, void> {
+    return this._initialize;
+  }
+
   /**
    * Add overlay allowing to toggle scrolling.
    */
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    const trans = this._translator.load('jupyterlab');
-    overlay.title = trans.__('Toggle output scrolling');
     overlay.addEventListener('click', () => {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
+
+    // Update overlay height so it always matches the output panel.
+    // TODO: use CSS anchor positionning level once fully supported in all browsers
+    const resize = () => {
+      const panel = this.node.querySelector(
+        '.jp-OutputArea-child'
+      ) as HTMLElement;
+      if (panel) {
+        overlay.style.height = `${Math.max(
+          panel.getBoundingClientRect().height,
+          this.node.getBoundingClientRect().height
+        )}px`;
+      }
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(this.node);
+
+    this.disposed.connect(() => {
+      observer.disconnect();
+    });
+
+    requestAnimationFrame(() => {
+      this._initialize.emit();
+    });
   }
 
   /**
@@ -435,13 +509,17 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
+    // Indicate that input is pending
+    this._pendingInput = true;
+
     const input = factory.createStdin({
       parent_header: msg.header,
       prompt: stdinPrompt,
       password,
       future,
       translator: this._translator,
-      inputHistoryScope: this._inputHistoryScope
+      inputHistoryScope: this._inputHistoryScope,
+      showInputPlaceholder: this._showInputPlaceholder
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -450,9 +528,10 @@ export class OutputArea extends Widget {
     if (this.model.length >= this.maxNumberOutputs) {
       this.maxNumberOutputs = this.model.length;
     }
-    this.layout.addWidget(panel);
+    this._inputRequested.emit(input);
 
-    this._inputRequested.emit();
+    // Get the input node to ensure focus after updating the model upon user reply.
+    const inputNode = input.node.getElementsByTagName('input')[0];
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -463,14 +542,40 @@ export class OutputArea extends Widget {
       if (this.model.length >= this.maxNumberOutputs) {
         this.maxNumberOutputs = this.model.length + 1;
       }
+      panel.addClass(OUTPUT_AREA_STDIN_HIDING_CLASS);
       // Use stdin as the stream so it does not get combined with stdout.
+      // Note: because it modifies DOM it may (will) shift focus away from the input node.
       this.model.add({
         output_type: 'stream',
         name: 'stdin',
         text: value + '\n'
       });
-      panel.dispose();
+      // Refocus the input node after it lost focus due to update of the model.
+      inputNode.focus();
+
+      // Indicate that input is no longer pending
+      this._pendingInput = false;
+
+      // Keep the input in view for a little while; this (along refocusing)
+      // ensures that we can avoid the cell editor stealing the focus, and
+      // leading to user inadvertently modifying editor content when executing
+      // consecutive commands in short succession.
+      window.setTimeout(() => {
+        // Tack currently focused element to ensure that it remains on it
+        // after disposal of the panel with the old input
+        // (which modifies DOM and can lead to focus jump).
+        const focusedElement = document.activeElement;
+        // Dispose the old panel with no longer needed input box.
+        panel.dispose();
+        // Refocus the element that was focused before.
+        if (focusedElement && focusedElement instanceof HTMLElement) {
+          focusedElement.focus();
+        }
+      }, 500);
     });
+
+    // Note: the `input.value` promise must be listened to before we attach the panel
+    this.layout.addWidget(panel);
   }
 
   /**
@@ -482,7 +587,9 @@ export class OutputArea extends Widget {
     }
     const panel = this.layout.widgets[index] as Panel;
     const renderer = (
-      panel.widgets ? panel.widgets[1] : panel
+      panel.widgets
+        ? panel.widgets.filter(it => 'renderModel' in it).pop()
+        : panel
     ) as IRenderMime.IRenderer;
     // Check whether it is safe to reuse renderer:
     // - Preferred mime type has not changed
@@ -517,11 +624,15 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
 
     if (index === this._maxNumberOutputs) {
-      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
-        const lastShown = this._maxNumberOutputs;
-        this._maxNumberOutputs = Infinity;
-        this._showTrimmedOutputs(lastShown);
-      });
+      const warning = new Private.TrimmedOutputs(
+        this._maxNumberOutputs,
+        () => {
+          const lastShown = this._maxNumberOutputs;
+          this._maxNumberOutputs = Infinity;
+          this._showTrimmedOutputs(lastShown);
+        },
+        this._translator
+      );
       layout.insertWidget(index, this._wrappedOutput(warning));
     } else {
       let output = this.createOutputItem(model);
@@ -625,7 +736,7 @@ export class OutputArea extends Widget {
     const transient = ((msg.content as any).transient || {}) as JSONObject;
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
-
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
       case 'execute_result':
       case 'display_data':
@@ -648,6 +759,15 @@ export class OutputArea extends Widget {
           }
         }
         break;
+      case 'status': {
+        const executionState = (msg as KernelMessage.IStatusMsg).content
+          .execution_state;
+        if (executionState === 'idle') {
+          // If status is idle, the kernel is no longer blocked by the input
+          this._pendingInput = false;
+        }
+        break;
+      }
       default:
         break;
     }
@@ -699,7 +819,6 @@ export class OutputArea extends Widget {
     executionCount: number | null = null
   ): Panel {
     const panel = new Private.OutputPanel();
-
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     const prompt = this.contentFactory.createOutputPrompt();
@@ -723,13 +842,16 @@ export class OutputArea extends Widget {
    */
   private _maxNumberOutputs: number;
   private _minHeightTimeout: number | null = null;
-  private _inputRequested = new Signal<OutputArea, void>(this);
+  private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
+  private _initialize = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
   private _translator: ITranslator;
   private _inputHistoryScope: 'global' | 'session' = 'global';
+  private _pendingInput: boolean = false;
+  private _showInputPlaceholder: boolean = true;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -748,10 +870,17 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected createOutputItem(model: IOutputModel): Widget | null {
     const output = this.createRenderedMimetype(model);
-    if (output) {
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+
+    if (!output) {
+      return null;
     }
-    return output;
+
+    const panel = new Private.OutputPanel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
   }
 }
 
@@ -797,6 +926,11 @@ export namespace OutputArea {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Whether to show placeholder text in standard input
+     */
+    showInputPlaceholder?: boolean;
   }
 
   /**
@@ -1051,9 +1185,13 @@ export class Stdin extends Widget implements IStdin {
 
     this._input = this.node.getElementsByTagName('input')[0];
     // make users aware of the line history feature
-    this._input.placeholder = this._trans.__(
-      '↑↓ for history. Search history with c-↑/c-↓'
-    );
+    if (options.showInputPlaceholder && !this._password) {
+      this._input.placeholder = this._trans.__(
+        '↑↓ for history. Search history with c-↑/c-↓'
+      );
+    } else {
+      this._input.placeholder = '';
+    }
 
     // initialize line history
     if (!Stdin._history.has(this._historyKey)) {
@@ -1079,6 +1217,13 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: KeyboardEvent): void {
+    // Stop bubbling
+    event.stopPropagation();
+    if (this._resolved) {
+      // Do not handle any more key events if the promise was resolved.
+      event.preventDefault();
+      return;
+    }
     const input = this._input;
 
     if (event.type === 'keydown') {
@@ -1098,6 +1243,7 @@ export class Stdin extends Widget implements IStdin {
           this._value += input.value;
           Stdin._historyPush(this._historyKey, input.value);
         }
+        this._resolved = true;
         this._promise.resolve(void 0);
       } else if (event.key === 'Escape') {
         // currently this gets clobbered by the documentsearch:end command at the notebook level
@@ -1213,6 +1359,7 @@ export class Stdin extends Widget implements IStdin {
   private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
+  private _resolved: boolean = false;
 }
 
 export namespace Stdin {
@@ -1249,6 +1396,11 @@ export namespace Stdin {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Show placeholder text
+     */
+    showInputPlaceholder?: boolean;
   }
 }
 
@@ -1405,23 +1557,22 @@ namespace Private {
      */
     constructor(
       maxNumberOutputs: number,
-      onClick: (event: MouseEvent) => void
+      onClick: (event: MouseEvent) => void,
+      translator?: ITranslator
     ) {
       const node = document.createElement('div');
-      const title = `The first ${maxNumberOutputs} are displayed`;
-      const msg = 'Show more outputs';
-      node.insertAdjacentHTML(
-        'afterbegin',
-        `<a title=${title}>
-          <pre>${msg}</pre>
-        </a>`
-      );
+      const trans = (translator ?? nullTranslator).load('jupyterlab');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'jp-TrimmedOutputs-button';
+      button.title = trans.__('The first %1 are displayed', maxNumberOutputs);
+      button.textContent = trans.__('Show more outputs');
+      node.appendChild(button);
       super({
         node
       });
       this._onClick = onClick;
       this.addClass('jp-TrimmedOutputs');
-      this.addClass('jp-RenderedHTMLCommon');
     }
 
     /**

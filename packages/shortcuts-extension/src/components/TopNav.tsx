@@ -3,44 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
-import { InputGroup } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { IDisposable } from '@lumino/disposable';
-import { Menu } from '@lumino/widgets';
+import { Button } from '@jupyter/react-components';
+import type { ITranslator } from '@jupyterlab/translation';
+import { addIcon, FilterBox } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
+import type { IShortcutUI } from '../types';
 
 export interface IAdvancedOptionsProps {
-  toggleSelectors: Function;
+  toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
-  resetShortcuts: Function;
-  menu: Menu;
+  resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
+  toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
 }
 
 export interface ISymbolsProps {}
-
-/** All external actions, setting commands, getting command list ... */
-export interface IShortcutUIexternal {
-  translator: ITranslator;
-  getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
-  removeShortCut: (key: string) => Promise<void>;
-  createMenu: () => Menu;
-  hasCommand: (id: string) => boolean;
-  addCommand: (
-    id: string,
-    options: CommandRegistry.ICommandOptions
-  ) => IDisposable;
-  getLabel: (id: string) => string;
-}
-
-export namespace CommandIDs {
-  export const showSelectors = 'shortcutui:showSelectors';
-  export const resetAll = 'shortcutui:resetAll';
-}
 
 function Symbols(props: ISymbolsProps): JSX.Element {
   return (
@@ -91,100 +70,86 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
       >
         {trans.__('Reset All')}
       </a>
+      <Button
+        className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
+        onClick={props.toggleAddCommandRow}
+        title={trans.__('Tool for adding shortcuts')}
+        aria-label={trans.__('Tool for adding shortcuts')}
+      >
+        <addIcon.react
+          tag="span"
+          elementSize="xlarge"
+          elementPosition="center"
+        />
+      </Button>
     </div>
   );
 }
 
 /** State for TopNav component */
 export interface ITopNavProps {
-  resetShortcuts: Function;
-  updateSearchQuery: Function;
-  toggleSelectors: Function;
+  resetShortcuts: IShortcutUI['resetShortcuts'];
+  updateSearchQuery: IShortcutUI['updateSearchQuery'];
+  toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
-  updateSort: Function;
+  updateSort: IShortcutUI['updateSort'];
   currentSort: string;
+  toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
   width: number;
-  external: IShortcutUIexternal;
+  translator: ITranslator;
 }
 
 /** React component for top navigation */
 export class TopNav extends React.Component<ITopNavProps> {
-  menu: Menu;
   constructor(props: ITopNavProps) {
     super(props);
-
-    this.addMenuCommands();
-    this.menu = this.props.external.createMenu();
-    this.menu.addItem({ command: CommandIDs.showSelectors });
-    this.menu.addItem({ command: CommandIDs.resetAll });
   }
 
-  addMenuCommands() {
-    const trans = this.props.external.translator.load('jupyterlab');
-    if (!this.props.external.hasCommand(CommandIDs.showSelectors)) {
-      this.props.external.addCommand(CommandIDs.showSelectors, {
-        label: trans.__('Toggle Selectors'),
-        caption: trans.__('Toggle command selectors'),
-        execute: () => {
-          this.props.toggleSelectors();
-        }
-      });
-    }
-
-    if (!this.props.external.hasCommand(CommandIDs.resetAll)) {
-      this.props.external.addCommand(CommandIDs.resetAll, {
-        label: trans.__('Reset All'),
-        caption: trans.__('Reset all shortcuts'),
-        execute: () => {
-          this.props.resetShortcuts();
-        }
-      });
-    }
-  }
-
-  getShortCutTitleItem(title: string) {
+  getShortCutTitleItem(title: string, columnId: IShortcutUI.ColumnId) {
     return (
       <div className="jp-Shortcuts-Cell">
         <ShortcutTitleItem
           title={title}
           updateSort={this.props.updateSort}
           active={this.props.currentSort}
+          columnId={columnId}
         />
       </div>
     );
   }
 
   render() {
-    const trans = this.props.external.translator.load('jupyterlab');
+    const trans = this.props.translator.load('jupyterlab');
     return (
       <div className="jp-Shortcuts-Top">
         <div className="jp-Shortcuts-TopNav">
           <Symbols />
-          <InputGroup
-            className="jp-Shortcuts-Search"
-            type="text"
-            onChange={event => this.props.updateSearchQuery(event)}
+          <FilterBox
+            aria-label={trans.__('Search shortcuts')}
+            updateFilter={(_, query) =>
+              this.props.updateSearchQuery(query ?? '')
+            }
             placeholder={trans.__('Search…')}
-            rightIcon="ui-components:search"
+            useFuzzyFilter={false}
           />
           <AdvancedOptions
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
-            menu={this.menu}
-            translator={this.props.external.translator}
+            toggleAddCommandRow={this.props.toggleAddCommandRow}
+            translator={this.props.translator}
           />
         </div>
         <div className="jp-Shortcuts-HeaderRowContainer">
           <div className="jp-Shortcuts-HeaderRow">
-            {this.getShortCutTitleItem(trans.__('Category'))}
-            {this.getShortCutTitleItem(trans.__('Command'))}
+            {this.getShortCutTitleItem(trans.__('Category'), 'category')}
+            {this.getShortCutTitleItem(trans.__('Command'), 'command')}
             <div className="jp-Shortcuts-Cell">
               <div className="title-div">{trans.__('Shortcut')}</div>
             </div>
-            {this.getShortCutTitleItem(trans.__('Source'))}
+            {this.getShortCutTitleItem(trans.__('Source'), 'source')}
             {this.props.showSelectors &&
-              this.getShortCutTitleItem(trans.__('Selectors'))}
+              this.getShortCutTitleItem(trans.__('Selectors'), 'selector')}
           </div>
         </div>
       </div>

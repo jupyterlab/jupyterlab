@@ -12,31 +12,43 @@
   --jp-private-filebrowser-button-width: 48px;
 }
 
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-
 .jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  flex-wrap: wrap;
-  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
   box-shadow: none;
   padding: 0;
-  justify-content: flex-start;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar::part(positioning-region) {
+  row-gap: 12px;
+}
+
+.jp-FileBrowser-filterToolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
+.jp-FileBrowser-filterToolbar.jp-Toolbar {
+  border-bottom: none;
+  height: auto;
+  margin: 0 12px 6px;
+  box-shadow: none;
+  padding: 0;
 }
 
 .jp-FileBrowser-Panel {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .jp-BreadCrumbs {
@@ -68,16 +80,16 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar > .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item,
+.jp-FileBrowser-filterToolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
-  padding-right: 2px;
   align-items: center;
   height: unset;
 }
 
 .jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
-  width: 40px;
+  width: 28px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -92,16 +104,24 @@
   margin-top: 12px;
 }
 
-.jp-LastModified-hidden {
-  display: none;
-}
-
-.jp-FileSize-hidden {
-  display: none;
-}
-
 .jp-FileBrowser .lm-AccordionPanel > h3:first-child {
   display: none;
+}
+
+.jp-FileBrowser-filterToolbar > .jp-FileBrowser-filterBox {
+  width: 100%;
+}
+
+.jp-FileBrowser-filterBox > .jp-FilterBox {
+  width: 100%;
+}
+
+.jp-Open-Dialog > .jp-FileBrowser {
+  min-height: 200px;
+}
+
+.jp-Open-Dialog-label {
+  overflow: visible;
 }
 
 /*-----------------------------------------------------------------------------
@@ -113,6 +133,9 @@
   display: flex;
   flex-direction: column;
   outline: 0;
+  overflow: hidden;
+
+  --jp-dirlisting-padding-width: 12px;
 }
 
 .jp-DirListing-header {
@@ -125,49 +148,113 @@
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
+  user-select: none;
 }
 
 .jp-DirListing-headerItem {
   padding: 4px 12px 2px;
   font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.jp-DirListing-headerItemText {
+  flex-grow: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .jp-DirListing-headerItem:hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 84px;
+.jp-DirListing-headerItem.jp-id-name:not([style*='width']) {
+  /* default width before user resizes this column */
+  flex: 1 1 126px;
 }
 
-.jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 112px;
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
-  text-align: right;
+.jp-DirListing-headerItem.jp-id-modified:not([style*='width']) {
+  /* default width before user resizes this column */
+  flex: 1 0 70px;
 }
 
-.jp-DirListing-headerItem.jp-id-filesize {
+.jp-DirListing-headerItem.jp-id-filesize:not([style*='width']) {
+  /* default width before user resizes this column */
   flex: 0 0 75px;
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-DirListing-headerItem.jp-id-modified,
+.jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
+  /* stylelint-disable */
+  container-type: inline-size;
+  /* stylelint-enable */
 }
 
-.jp-id-narrow {
-  display: none;
-  flex: 0 0 5px;
-  padding: 4px;
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
-  text-align: right;
-  color: var(--jp-border-color2);
+/**
+ * Use container queries (not yet supported by our version of stylelint)
+ * to display either a small or large header for the last-modified column.
+ */
+/* stylelint-disable */
+@container (max-width: 300px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: none;
+  }
 }
 
-.jp-DirListing-narrow .jp-id-narrow {
-  display: block;
+/* stylelint-disable */
+@container (min-width: 300px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-large {
+    display: inline;
+  }
 }
 
-.jp-DirListing-narrow .jp-id-modified,
-.jp-DirListing-narrow .jp-DirListing-itemModified {
-  display: none;
+/* stylelint-disable */
+@container (max-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (min-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: inline;
+  }
 }
 
 .jp-DirListing-headerItem.jp-mod-selected {
@@ -182,6 +269,7 @@
   list-style-type: none;
   overflow: auto;
   background-color: var(--jp-layout-color1);
+  overflow-x: hidden;
 }
 
 .jp-DirListing-content mark {
@@ -202,25 +290,22 @@
 }
 
 .jp-DirListing-item {
-  display: flex;
-  flex-direction: row;
   align-items: center;
-  padding: 4px 12px;
+  padding: 4px var(--jp-dirlisting-padding-width);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  display: inline-grid;
+  grid-auto-columns: max-content;
+  width: 100%;
+  box-sizing: border-box;
+  grid-auto-flow: column;
 }
 
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
-}
-
-.jp-DirListing-header
-  .jp-DirListing-checkboxWrapper
-  + .jp-DirListing-headerItem {
-  padding-left: 4px;
 }
 
 .jp-DirListing-content .jp-DirListing-checkboxWrapper {
@@ -246,6 +331,33 @@
   }
 }
 
+.jp-DirListing-resizeHandle {
+  min-width: var(--jp-border-width);
+  background: var(--jp-border-color2);
+  height: calc(100% - 4px);
+
+  /* border increases the area where handle can be grabbed */
+  border: 2px solid var(--jp-layout-color1);
+}
+
+.jp-DirListing-resizeHandle.jp-mod-active {
+  background: var(--jp-brand-color1);
+  border-color: var(--jp-brand-color1);
+}
+
+.jp-DirListing-resizeHandle.jp-mod-active:hover {
+  border-color: var(--jp-brand-color1);
+}
+
+.jp-DirListing-resizeHandle:hover {
+  cursor: col-resize;
+  border-color: var(--jp-border-color2);
+}
+
+.jp-DirListing-itemName {
+  display: flex;
+}
+
 .jp-DirListing-item[data-is-dot] {
   opacity: 75%;
 }
@@ -268,32 +380,40 @@
   margin-right: 4px;
 }
 
-.jp-DirListing-itemText {
-  flex: 1 0 64px;
-  white-space: nowrap;
+.jp-DirListing-itemText,
+.jp-DirListing-itemModified,
+.jp-DirListing-itemFileSize {
   overflow: hidden;
   text-overflow: ellipsis;
-  user-select: none;
+  white-space: nowrap;
 }
 
-.jp-DirListing-itemText:focus {
+.jp-DirListing-itemName:not([style*='width']) > .jp-DirListing-itemText {
+  flex: 1 1 106px;
+}
+
+.jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
+  /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
+  when it gets replaced with `jp-DirListing-editor` when editing the file name */
   outline-width: 2px;
   outline-color: var(--jp-inverse-layout-color1);
   outline-style: solid;
-  outline-offset: 1px;
+  outline-offset: -4px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+.jp-DirListing-item.jp-mod-selected:focus-within {
   outline-color: var(--jp-layout-color1);
 }
 
+.jp-DirListing-item > .jp-DirListing-itemName > .jp-DirListing-itemText:focus {
+  outline: 0;
+}
+
 .jp-DirListing-itemModified {
-  flex: 0 0 125px;
   text-align: right;
 }
 
 .jp-DirListing-itemFileSize {
-  flex: 0 0 90px;
   text-align: right;
 }
 
@@ -301,8 +421,11 @@
   flex: 1 0 64px;
   outline: none;
   border: none;
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
   color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
+  z-index: 0;
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {

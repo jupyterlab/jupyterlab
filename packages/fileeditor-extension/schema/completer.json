@@ -5,7 +5,7 @@
     {
       "command": "completer:invoke-file",
       "keys": ["Tab"],
-      "selector": ".jp-FileEditor .jp-mod-completer-enabled"
+      "selector": ".jp-FileEditor .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)"
     }
   ],
   "properties": {},

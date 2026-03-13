@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Widget } from '@lumino/widgets';
-import * as React from 'react';
+import type { IDisposable } from '@lumino/disposable';
+import type { Widget } from '@lumino/widgets';
+import type * as React from 'react';
 
 /**
  * A property inspector interface provided when registering
@@ -56,5 +56,5 @@ export interface IPropertyInspectorProvider {
  */
 export const IPropertyInspectorProvider = new Token<IPropertyInspectorProvider>(
   '@jupyterlab/property-inspector:IPropertyInspectorProvider',
-  'A service to registry new widget in the property inspector side panel.'
+  'A service to register new widgets in the property inspector side panel.'
 );

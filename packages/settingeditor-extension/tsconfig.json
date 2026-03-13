@@ -16,6 +16,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../pluginmanager"
+    },
+    {
       "path": "../rendermime"
     },
     {

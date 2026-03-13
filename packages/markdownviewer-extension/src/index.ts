@@ -5,20 +5,21 @@
  * @module markdownviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { ILayoutRestorer } from '@jupyterlab/application';
+import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
-  MarkdownDocument,
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownViewerTableOfContentsFactory
 } from '@jupyterlab/markdownviewer';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
   IRenderMimeRegistry,
   markdownRendererFactory
@@ -49,7 +50,12 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   description: 'Adds markdown file viewer and provides its tracker.',
   provides: IMarkdownViewerTracker,
   requires: [IRenderMimeRegistry, ITranslator],
-  optional: [ILayoutRestorer, ISettingRegistry, ITableOfContentsRegistry],
+  optional: [
+    ILayoutRestorer,
+    ISettingRegistry,
+    ITableOfContentsRegistry,
+    ISanitizer
+  ],
   autoStart: true
 };
 
@@ -62,7 +68,8 @@ function activate(
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
-  tocRegistry: ITableOfContentsRegistry | null
+  tocRegistry: ITableOfContentsRegistry | null,
+  sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
   const { commands, docRegistry } = app;
@@ -151,6 +158,22 @@ function activate(
         factory: FACTORY,
         options: args['options']
       });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('The path to the markdown file to preview')
+          },
+          options: {
+            type: 'object',
+            description: trans.__('Options for opening the preview')
+          }
+        },
+        required: ['path']
+      }
     }
   });
 
@@ -175,14 +198,21 @@ function activate(
         (widget && PathExt.extname(widget.context.path) === '.md') || false
       );
     },
-    label: trans.__('Show Markdown Editor')
+    label: trans.__('Show Markdown Editor'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (tocRegistry) {
     tocRegistry.add(
       new MarkdownViewerTableOfContentsFactory(
         tracker,
-        rendermime.markdownParser
+        rendermime.markdownParser,
+        sanitizer ?? rendermime.sanitizer
       )
     );
   }

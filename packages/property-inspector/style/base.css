@@ -1,6 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2019, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
@@ -15,11 +14,14 @@
 }
 
 .jp-PropertyInspector-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
 }
 
 .jp-PropertyInspector-placeholderContent {
+  color: var(--jp-content-font-color2);
   padding: 8px;
+}
+
+.jp-PropertyInspector-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
 }

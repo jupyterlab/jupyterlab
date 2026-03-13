@@ -10,10 +10,16 @@
       "path": "../application"
     },
     {
+      "path": "../codeeditor"
+    },
+    {
       "path": "../completer"
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

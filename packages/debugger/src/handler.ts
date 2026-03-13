@@ -1,21 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { ConsolePanel } from '@jupyterlab/console';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentWidget } from '@jupyterlab/docregistry';
-import { FileEditor } from '@jupyterlab/fileeditor';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ConsolePanel } from '@jupyterlab/console';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { DocumentWidget } from '@jupyterlab/docregistry';
+import type { FileEditor } from '@jupyterlab/fileeditor';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';
 import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
@@ -90,6 +92,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
+    this._translator = options.translator || nullTranslator;
   }
 
   /**
@@ -150,10 +153,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       msg: KernelMessage.IIOPubMessage
     ): void => {
       if (
-        (msg.parent_header as KernelMessage.IHeader).msg_type ==
-          'execute_request' &&
         this._service.isStarted &&
-        !this._service.hasStoppedThreads()
+        !this._service.hasStoppedThreads() &&
+        (msg.parent_header as KernelMessage.IHeader).msg_type ===
+          'execute_request'
       ) {
         void this._service.displayDefinedVariables();
       }
@@ -232,19 +235,22 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         case 'notebook':
           this._handlers[widget.id] = new NotebookHandler({
             debuggerService: this._service,
-            widget: widget as NotebookPanel
+            widget: widget as NotebookPanel,
+            translator: this._translator || undefined
           });
           break;
         case 'console':
           this._handlers[widget.id] = new ConsoleHandler({
             debuggerService: this._service,
-            widget: widget as ConsolePanel
+            widget: widget as ConsolePanel,
+            translator: this._translator || undefined
           });
           break;
         case 'file':
           this._handlers[widget.id] = new FileHandler({
             debuggerService: this._service,
-            widget: widget as DocumentWidget<FileEditor>
+            widget: widget as DocumentWidget<FileEditor>,
+            translator: this._translator || undefined
           });
           break;
         default:
@@ -254,6 +260,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const removeHandlers = (): void => {
+      this._service.stopped.disconnect(onDebuggerStopped);
+
       const handler = this._handlers[widget.id];
       if (!handler) {
         return;
@@ -278,6 +286,18 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
       updateAttribute();
     };
+
+    const onDebuggerStopped = (): void => {
+      const debugButton = this._iconButtons[widget.id];
+
+      removeHandlers();
+
+      if (debugButton) {
+        updateIconButtonState(debugButton, false, true);
+      }
+    };
+
+    this._service.stopped.connect(onDebuggerStopped);
 
     const addToolbarButton = (enabled: boolean = true): void => {
       const debugButton = this._iconButtons[widget.id];
@@ -368,7 +388,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         : null;
       this._service.session.connection = connection;
     }
-    await this._service.restoreState(false);
+
+    if (isDebuggerOn()) {
+      await this._service.restoreState(true);
+    } else {
+      await this._service.restoreState(false);
+    }
+
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
       if (this._service.session?.capabilities?.supportsModulesRequest) {
@@ -405,6 +431,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
+  private _translator: ITranslator | null;
 
   private _contextKernelChangedHandlers: {
     [id: string]: (
@@ -465,6 +492,16 @@ export namespace DebuggerHandler {
      * The debugger service.
      */
     service: IDebugger;
+
+    /**
+     * The debugger settings.
+     */
+    settings?: ISettingRegistry.ISettings;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

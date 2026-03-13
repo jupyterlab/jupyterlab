@@ -1,8 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
   DockPanelSvg,
@@ -13,25 +16,25 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IMessageHandler, Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { DockLayout, DockPanel, TabPanel, Title } from '@lumino/widgets';
 import {
+  AccordionPanel,
   BoxLayout,
   BoxPanel,
-  DockLayout,
-  DockPanel,
   FocusTracker,
   Panel,
   SplitPanel,
   StackedPanel,
   TabBar,
-  TabPanel,
-  Title,
   Widget
 } from '@lumino/widgets';
-import { JupyterFrontEnd } from './frontend';
-import { LayoutRestorer } from './layoutrestorer';
+import type { JupyterFrontEnd } from './frontend';
+import type { LayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -65,7 +68,7 @@ const ACTIVITY_CLASS = 'jp-Activity';
  */
 export const ILabShell = new Token<ILabShell>(
   '@jupyterlab/application:ILabShell',
-  'A service for interacting with the JupyterLab shell. The top-level ``application`` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
+  'A service for interacting with the JupyterLab shell. The top-level `application` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
 );
 
 /**
@@ -276,18 +279,42 @@ export namespace ILabShell {
      * The collection of widgets held by the sidebar.
      */
     readonly widgets: Array<Widget> | null;
+
+    /**
+     * The collection of widgets states held by the sidebar.
+     */
+    readonly widgetStates: {
+      [id: string]: {
+        /**
+         * Vertical sizes of the widgets.
+         */
+        readonly sizes: Array<number> | null;
+
+        /**
+         * Expansion states of the widgets.
+         */
+        readonly expansionStates: Array<boolean> | null;
+      };
+    };
+  }
+
+  /**
+   * The restorable description of the top area in the user interface.
+   */
+  export interface ITopArea {
+    /**
+     * Top area visibility in simple mode.
+     */
+    readonly simpleVisibility: boolean;
   }
 }
 
 /**
  * The restorable description of the top area in the user interface.
+ *
+ * @deprecated It has been moved to {@link ILabShell.ITopArea} for consistency.
  */
-export interface ITopArea {
-  /**
-   * Top area visibility in simple mode.
-   */
-  readonly simpleVisibility: boolean;
-}
+export interface ITopArea extends ILabShell.ITopArea {}
 
 /**
  * The application shell for JupyterLab.
@@ -710,7 +737,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       TabBarSvg.translator = value;
 
       const trans = value.load('jupyterlab');
-      this._menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
+      this._menuHandler.panel.node.setAttribute(
+        'aria-label',
+        trans.__('main menu')
+      );
       this._leftHandler.sideBar.node.setAttribute(
         'aria-label',
         trans.__('main sidebar')
@@ -727,6 +757,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         'aria-label',
         trans.__('alternate sidebar')
       );
+      this._topHandler.panel.node.setAttribute(
+        'aria-label',
+        trans.__('Top Bar')
+      );
+      this._bottomPanel.node.setAttribute(
+        'aria-label',
+        trans.__('Bottom Panel')
+      );
+      this._dockPanel.node.setAttribute('aria-label', trans.__('Main Content'));
     }
   }
 
@@ -770,6 +809,41 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /**
+   * Activate widget in specified area.
+   *
+   * ### Notes
+   * The alpha version of this method only supports activating the "main" area.
+   *
+   * @alpha
+   * @param area Name of area to activate
+   */
+  activateArea(area: ILabShell.Area = 'main'): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (area) {
+      case 'main':
+        {
+          const current = this._currentTabBar();
+          if (!current) {
+            return;
+          }
+          if (current.currentTitle) {
+            current.currentTitle.owner.activate();
+          }
+        }
+        return;
+      case 'left':
+      case 'right':
+      case 'header':
+      case 'top':
+      case 'menu':
+      case 'bottom':
+        console.debug(`Area: ${area} activation not yet implemented`);
+        break;
+      default:
+        throw new Error(`Invalid area: ${area}`);
+    }
+  }
   /**
    * Activate the next Tab in the active TabBar.
    */
@@ -1306,6 +1380,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IterableIterator<Widget> {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
@@ -1563,8 +1638,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
 
-    options = options || {};
-
     const { title } = widget;
     // Add widget ID to tab so that we can get a handle on the tab's widget
     // (for context menu support)
@@ -1609,8 +1682,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-      ? bars[0]
-      : null;
+        ? bars[0]
+        : null;
   }
 
   /*
@@ -1704,6 +1777,38 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     return true;
   };
+  /**
+   * Move a widget to the main dock panel.
+   */
+  moveTab(widget: Widget, direction: 'left' | 'right' | 'top' | 'bottom') {
+    const ref = widget;
+
+    const modeMap: Record<string, DockLayout.InsertMode> = {
+      left: 'split-left',
+      right: 'split-right',
+      top: 'split-top',
+      bottom: 'split-bottom'
+    };
+
+    const mode = modeMap[direction];
+
+    this._dockPanel.addWidget(widget, {
+      mode,
+      ref
+    });
+  }
+
+  /**
+   *  Find the tab bar containing a given widget.
+   */
+  getMainAreaTabBar(widget: Widget): TabBar<Widget> | null {
+    for (const tabBar of this._dockPanel.tabBars()) {
+      if (tabBar.titles.includes(widget.title)) {
+        return tabBar;
+      }
+    }
+    return null;
+  }
 
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
@@ -1910,6 +2015,20 @@ namespace Private {
     }
 
     /**
+     * Handles a movement to the handles of a widget
+     */
+    private _onHandleMoved(): void {
+      return this._refreshVisibility();
+    }
+
+    /**
+     * Handles changes to the expansion status of a widget
+     */
+    private _onExpansionToggle(sender: AccordionPanel, index: number): void {
+      return this._refreshVisibility();
+    }
+
+    /**
      * Expand the sidebar.
      *
      * #### Notes
@@ -1967,7 +2086,6 @@ namespace Private {
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
-
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
@@ -1982,7 +2100,10 @@ namespace Private {
           stylesheet: 'sideBar'
         });
       }
-
+      // @ts-expect-error sometimes widget is an Accordion Panel
+      widget.content?.expansionToggled?.connect(this._onExpansionToggle, this);
+      // @ts-expect-error sometimes widget is a SidePanel
+      widget.content?.handleMoved?.connect(this._onHandleMoved, this);
       this._refreshVisibility();
     }
 
@@ -1993,11 +2114,26 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
+      const widgetStates: {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      } = {};
+      this._stackedPanel.widgets.forEach((w: SidePanel) => {
+        if (w.id && w.content instanceof SplitPanel) {
+          widgetStates[w.id] = {
+            sizes: w.content.relativeSizes() as number[],
+            expansionStates: w.content.widgets.map(wi => wi.isVisible)
+          };
+        }
+      });
       return {
         collapsed,
         currentWidget,
         visible: !this._isHiddenByUser,
-        widgets
+        widgets,
+        widgetStates
       };
     }
 
@@ -2013,6 +2149,25 @@ namespace Private {
       }
       if (!data.visible) {
         this.hide();
+      }
+      if (data.widgetStates) {
+        this._stackedPanel.widgets.forEach((w: SidePanel) => {
+          if (w.id && w.content instanceof SplitPanel) {
+            const state = data.widgetStates[w.id] ?? {};
+            w.content.widgets.forEach((wi, widx) => {
+              const expansion = (state.expansionStates ?? [])[widx];
+              if (
+                typeof expansion === 'boolean' &&
+                w.content instanceof AccordionPanel
+              ) {
+                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+              }
+            });
+            if (state.sizes) {
+              w.content.setRelativeSizes(state.sizes);
+            }
+          }
+        });
       }
     }
 
@@ -2135,13 +2290,17 @@ namespace Private {
       this.addClass('jp-skiplink');
       this.id = 'jp-skiplink';
       this._shell = shell;
-      this._createSkipLink('Skip to left side bar');
+      this._createSkipLink('Skip to main panel', 'main');
     }
 
     handleEvent(event: Event): void {
       switch (event.type) {
         case 'click':
-          this._focusLeftSideBar();
+          if (event.target instanceof HTMLElement) {
+            this._shell.activateArea(
+              event.target?.dataset?.targetarea as ILabShell.Area
+            );
+          }
           break;
       }
     }
@@ -2162,18 +2321,15 @@ namespace Private {
       this.node.removeEventListener('click', this);
       super.onBeforeDetach(msg);
     }
-
-    private _focusLeftSideBar() {
-      this._shell.expandLeft();
-    }
     private _shell: ILabShell;
 
-    private _createSkipLink(skipLinkText: string): void {
+    private _createSkipLink(skipLinkText: string, area: ILabShell.Area): void {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
-      skipLink.tabIndex = 1;
+      skipLink.tabIndex = 0;
       skipLink.text = skipLinkText;
       skipLink.className = 'skip-link';
+      skipLink.dataset['targetarea'] = area;
       this.node.appendChild(skipLink);
     }
   }
@@ -2283,11 +2439,19 @@ namespace Private {
   }
 
   export class RestorableSplitPanel extends SplitPanel {
-    updated: Signal<RestorableSplitPanel, void>;
-
+    /**
+     * Construct a new RestorableSplitPanel.
+     */
     constructor(options: SplitPanel.IOptions = {}) {
       super(options);
-      this.updated = new Signal(this);
+      this._updated = new Signal(this);
+    }
+
+    /**
+     * A signal emitted when the split panel is updated.
+     */
+    get updated(): ISignal<RestorableSplitPanel, void> {
+      return this._updated;
     }
 
     /**
@@ -2295,7 +2459,9 @@ namespace Private {
      */
     protected onUpdateRequest(msg: Message): void {
       super.onUpdateRequest(msg);
-      this.updated.emit();
+      this._updated.emit();
     }
+
+    private _updated: Signal<RestorableSplitPanel, void>;
   }
 }

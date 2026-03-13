@@ -7,10 +7,10 @@
  * @module vega5-extension
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { JSONObject } from '@lumino/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import * as VegaModuleType from 'vega-embed';
+import type * as VegaModuleType from 'vega-embed';
 
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.
@@ -147,8 +147,8 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       typeof embedOptions.scaleFactor === 'number'
         ? embedOptions.scaleFactor
         : embedOptions.scaleFactor
-        ? (embedOptions.scaleFactor as any).png
-        : embedOptions.scaleFactor
+          ? (embedOptions.scaleFactor as any).png
+          : embedOptions.scaleFactor
     );
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }

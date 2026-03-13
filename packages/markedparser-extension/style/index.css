@@ -7,3 +7,5 @@
 @import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/application/style/index.css');
 @import url('~@jupyterlab/codemirror/style/index.css');
+@import url('~@jupyterlab/mermaid/style/index.css');
+@import url('./base.css');

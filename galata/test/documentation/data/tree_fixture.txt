@@ -1,0 +1,37 @@
+$ tree . -L 2
+.
+├── LICENSE
+├── README.md
+├── data
+│   ├── 1024px-Hubble_Interacting_Galaxy_AM_0500-620_(2008-04-24).jpg
+│   ├── Dockerfile
+│   ├── Museums_in_DC.geojson
+│   ├── README.md
+│   ├── bar.vl.json
+│   ├── iris.csv
+│   ├── japan_meterological_agency_201707211555.json
+│   └── zika_assembled_genomes.fasta
+├── jupyter_notebook_config.py
+├── narrative
+│   ├── QConAI.md
+│   ├── jupyterlab.md
+│   ├── markdown_python.md
+│   └── scipy2017.md
+├── notebooks
+│   ├── Cpp.ipynb
+│   ├── Data.ipynb
+│   ├── Fasta.ipynb
+│   ├── Julia.ipynb
+│   ├── Lorenz.ipynb
+│   ├── R.ipynb
+│   ├── audio
+│   ├── images
+│   └── lorenz.py
+├── slides
+│   ├── jupyterlab-slides.key
+│   ├── jupyterlab-slides.pdf
+│   └── jupyterlab-slides_scipy19.pdf
+├── talks.yml
+└── tasks.py
+
+6 directories, 27 files

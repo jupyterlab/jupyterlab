@@ -16,9 +16,9 @@ for (const type of ['Text', 'Notebook', 'Markdown']) {
       type === 'Notebook' ? `File>New>${type}` : `File>New>${type} File`
     );
 
-    await page.waitForSelector(
-      `[role="main"] >> text=${DEFAULT_NAME}${EXTENSION[type]}`
-    );
+    await page
+      .locator(`[role="main"] >> text=${DEFAULT_NAME}${EXTENSION[type]}`)
+      .waitFor();
 
     if (type === 'Notebook') {
       // Select the kernel
@@ -29,7 +29,7 @@ for (const type of ['Text', 'Notebook', 'Markdown']) {
       type === 'Markdown' ? `File>Save ${type} File` : `File>Save ${type}`
     );
 
-    await page.waitForSelector('.jp-Dialog >> text=Rename file');
+    await page.locator('.jp-Dialog >> text=Rename file').waitFor();
 
     await expect(
       page.locator('.jp-Dialog >> input[placeholder="File name"]')
@@ -51,9 +51,9 @@ for (const type of ['Text', 'Notebook', 'Markdown']) {
       type === 'Notebook' ? `File>New>${type}` : `File>New>${type} File`
     );
 
-    await page.waitForSelector(
-      `[role="main"] >> text=${DEFAULT_NAME}${EXTENSION[type]}`
-    );
+    await page
+      .locator(`[role="main"] >> text=${DEFAULT_NAME}${EXTENSION[type]}`)
+      .waitFor();
 
     if (type === 'Notebook') {
       // Select the kernel

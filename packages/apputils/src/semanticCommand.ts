@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * Options when add a command to a semantic group.
@@ -36,6 +36,18 @@ export class SemanticCommand {
    * Default rank for semantic command
    */
   static readonly DEFAULT_RANK = 500;
+
+  /**
+   * The `args` key for a semantic command's current widget ID.
+   */
+  static readonly WIDGET = 'semanticWidget';
+
+  /**
+   * The command IDs used by this semantic command.
+   */
+  get ids(): string[] {
+    return this._commands.map(c => c.id);
+  }
 
   /**
    * Add a command to the semantic group
@@ -71,6 +83,18 @@ export class SemanticCommand {
 
     const command = commands[0] ?? { id: null };
     return command.id;
+  }
+
+  /**
+   * Remove a command ID.
+   *
+   * @param id Command ID to remove
+   */
+  remove(id: string): void {
+    const index = this._commands.findIndex(c => c.id === id);
+    if (index >= 0) {
+      this._commands.splice(index, 1);
+    }
   }
 
   protected _commands = new Array<Required<ISemanticCommand>>();

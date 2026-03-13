@@ -5,11 +5,11 @@
  * @module csvviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   InputDialog,
@@ -24,10 +24,13 @@ import {
 import { CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import type { CSVViewer } from '@jupyterlab/csvviewer';
 import type { TextRenderConfig } from '@jupyterlab/csvviewer';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import type { DataGrid } from '@lumino/datagrid';
@@ -144,7 +147,7 @@ function activateCsv(
 
   // The current styles for the data grids.
   let style: DataGrid.Style = Private.LIGHT_STYLE;
-  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
+  let rendererConfig: TextRenderConfig = Private.getTextRendererConfig();
 
   if (restorer) {
     // Handle state restoration.
@@ -161,12 +164,6 @@ function activateCsv(
   let searchProviderInitialized = false;
 
   factory.widgetCreated.connect(async (sender, widget) => {
-    if (searchRegistry && !searchProviderInitialized) {
-      const { CSVSearchProvider } = await import('./searchprovider');
-      searchRegistry.add('csv', CSVSearchProvider);
-      searchProviderInitialized = true;
-    }
-
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -179,9 +176,21 @@ function activateCsv(
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
-    // Set the theme for the new widget.
+
+    // Delay await to execute `widget.title` setters (above) synchronously
+    if (searchRegistry && !searchProviderInitialized) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('csv', CSVSearchProvider);
+      searchProviderInitialized = true;
+    }
+
+    // Set the theme for the new widget; requires `.content` to be loaded.
+    await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
+
+    // Make sure the theme is correctly set when new widgets are created.
+    updateThemes();
   });
 
   // Keep the themes up-to-date.
@@ -191,10 +200,9 @@ function activateCsv(
         ? themeManager.isLight(themeManager.theme)
         : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    rendererConfig = isLight
-      ? Private.LIGHT_TEXT_CONFIG
-      : Private.DARK_TEXT_CONFIG;
-    tracker.forEach(grid => {
+    rendererConfig = Private.getTextRendererConfig(isLight);
+    tracker.forEach(async grid => {
+      await grid.content.ready;
       grid.content.style = style;
       grid.content.rendererConfig = rendererConfig;
     });
@@ -223,7 +231,13 @@ function activateCsv(
         widget.content.goToLine(result.value);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (mainMenu) {
@@ -233,6 +247,12 @@ function activateCsv(
       isEnabled
     });
   }
+
+  const notify = () => {
+    commands.notifyCommandChanged(CommandIDs.CSVGoToLine);
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**
@@ -294,7 +314,7 @@ function activateTsv(
 
   // The current styles for the data grids.
   let style: DataGrid.Style = Private.LIGHT_STYLE;
-  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
+  let rendererConfig: TextRenderConfig = Private.getTextRendererConfig();
 
   if (restorer) {
     // Handle state restoration.
@@ -311,12 +331,6 @@ function activateTsv(
   let searchProviderInitialized = false;
 
   factory.widgetCreated.connect(async (sender, widget) => {
-    if (searchRegistry && !searchProviderInitialized) {
-      const { CSVSearchProvider } = await import('./searchprovider');
-      searchRegistry.add('tsv', CSVSearchProvider);
-      searchProviderInitialized = true;
-    }
-
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -329,7 +343,16 @@ function activateTsv(
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
-    // Set the theme for the new widget.
+
+    // Delay await to execute `widget.title` setters (above) synchronously
+    if (searchRegistry && !searchProviderInitialized) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('tsv', CSVSearchProvider);
+      searchProviderInitialized = true;
+    }
+
+    // Set the theme for the new widget; requires `.content` to be loaded.
+    await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
   });
@@ -341,10 +364,9 @@ function activateTsv(
         ? themeManager.isLight(themeManager.theme)
         : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    rendererConfig = isLight
-      ? Private.LIGHT_TEXT_CONFIG
-      : Private.DARK_TEXT_CONFIG;
-    tracker.forEach(grid => {
+    rendererConfig = Private.getTextRendererConfig(isLight);
+    tracker.forEach(async grid => {
+      await grid.content.ready;
       grid.content.style = style;
       grid.content.rendererConfig = rendererConfig;
     });
@@ -373,7 +395,13 @@ function activateTsv(
         widget.content.goToLine(result.value);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (mainMenu) {
@@ -383,6 +411,10 @@ function activateTsv(
       isEnabled
     });
   }
+
+  tracker.currentChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.TSVGoToLine);
+  });
 }
 
 /**
@@ -420,9 +452,28 @@ namespace Private {
   };
 
   /**
+   * Utility to get the text renderer config for light/dark theme.
+   */
+  export const getTextRendererConfig = (
+    isLight: boolean = true
+  ): TextRenderConfig => {
+    const style = window.getComputedStyle(document.body);
+    const fontFamily = style.getPropertyValue('--jp-datagrid-font-family');
+    const fallbackFontFamily = style.getPropertyValue(
+      '--jp-content-font-family'
+    );
+    const fontSize = style.getPropertyValue('--jp-datagrid-font-size');
+    return {
+      ...(isLight ? LIGHT_TEXT_CONFIG : DARK_TEXT_CONFIG),
+      fontSize: fontSize || undefined,
+      fontFamily: fontFamily || fallbackFontFamily || undefined
+    };
+  };
+
+  /**
    * The light config for the data grid renderer.
    */
-  export const LIGHT_TEXT_CONFIG: TextRenderConfig = {
+  const LIGHT_TEXT_CONFIG: Omit<TextRenderConfig, 'fontSize' | 'fontFamily'> = {
     textColor: '#111111',
     matchBackgroundColor: '#FFFFE0',
     currentMatchBackgroundColor: '#FFFF00',
@@ -432,7 +483,7 @@ namespace Private {
   /**
    * The dark config for the data grid renderer.
    */
-  export const DARK_TEXT_CONFIG: TextRenderConfig = {
+  const DARK_TEXT_CONFIG: Omit<TextRenderConfig, 'fontSize' | 'fontFamily'> = {
     textColor: '#F5F5F5',
     matchBackgroundColor: '#838423',
     currentMatchBackgroundColor: '#A3807A',

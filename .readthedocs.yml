@@ -1,0 +1,25 @@
+version: 2
+
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: latest
+    nodejs: latest
+  jobs:
+    post_install:
+      # this should have already run, but show some errors/warnings more cleanly
+      - jlpm
+      # again ensure all packages are built
+      - jlpm build:packages
+      # avoid the lengthy `typedoc` build inside `sphinx` for cleaner logs
+      - jlpm docs
+
+sphinx:
+  configuration: docs/source/conf.py
+
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs

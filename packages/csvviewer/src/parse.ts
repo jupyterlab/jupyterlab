@@ -20,7 +20,7 @@ Possible options to add to the parser:
 /**
  * Interface for a delimiter-separated data parser.
  *
- * @param options: The parser options
+ * @param options The parser options
  * @returns An object giving the offsets for the rows or columns parsed.
  *
  * #### Notes
@@ -147,7 +147,7 @@ enum ROW_DELIMITER {
 /**
  * Parse delimiter-separated data.
  *
- * @param options: The parser options
+ * @param options The parser options
  * @returns An object giving the offsets for the rows or columns parsed.
  *
  * #### Notes
@@ -191,8 +191,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     rowDelimiter === '\r\n'
       ? [CRLF, 2]
       : rowDelimiter === '\r'
-      ? [CR, 1]
-      : [LF, 1];
+        ? [CR, 1]
+        : [LF, 1];
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;
@@ -397,6 +397,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     i++;
 
     // Update return values based on state.
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (state) {
       case NEW_ROW:
         nrows++;
@@ -470,13 +471,13 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     }
   }
 
-  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
+  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
 }
 
 /**
  * Parse delimiter-separated data where no delimiter is quoted.
  *
- * @param options: The parser options
+ * @param options The parser options
  * @returns An object giving the offsets for the rows or columns parsed.
  *
  * #### Notes
@@ -573,5 +574,5 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     currRow = rowEnd + rowDelimiterLength;
   }
 
-  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
+  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
 }

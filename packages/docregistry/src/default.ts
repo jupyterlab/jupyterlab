@@ -3,15 +3,19 @@
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { Contents } from '@jupyterlab/services';
-import { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PartialJSONValue } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Title, Widget } from '@lumino/widgets';
-import { DocumentRegistry, IDocumentWidget } from './index';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Contents } from '@jupyterlab/services';
+import type { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title, Widget } from '@lumino/widgets';
+import type { DocumentRegistry, IDocumentWidget } from './index';
+import { createReadonlyLabel } from './components';
 
 /**
  * The default implementation of a document model.
@@ -325,8 +329,7 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U>
-{
+> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -344,6 +347,7 @@ export abstract class ABCWidgetFactory<
     this._shutdownOnClose = !!options.shutdownOnClose;
     this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
+    this._contentProviderId = options.contentProviderId;
   }
 
   /**
@@ -487,6 +491,25 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Identifier of the content provider required for the widget (if any).
+   *
+   * Throws Error if the content provider was already set.
+   *
+   * @experimental
+   */
+  get contentProviderId(): string | undefined {
+    return this._contentProviderId;
+  }
+  set contentProviderId(value: string | undefined) {
+    if (this._contentProviderId && value !== this._contentProviderId) {
+      throw Error(
+        `Cannot change content provider on factory with an existing provider: ${this._contentProviderId}`
+      );
+    }
+    this._contentProviderId = value;
+  }
+
+  /**
    * Create a widget for a context.
    */
   protected abstract createNewWidget(
@@ -501,6 +524,7 @@ export abstract class ABCWidgetFactory<
     return [];
   }
 
+  private _contentProviderId?: string;
   private _toolbarFactory:
     | ((
         widget: T
@@ -535,9 +559,9 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * A document widget implementation.
  */
 export class DocumentWidget<
-    T extends Widget = Widget,
-    U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-  >
+  T extends Widget = Widget,
+  U extends DocumentRegistry.IModel = DocumentRegistry.IModel
+>
   extends MainAreaWidget<T>
   implements IDocumentWidget<T, U>
 {
@@ -545,7 +569,7 @@ export class DocumentWidget<
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
-
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes
@@ -601,9 +625,11 @@ export class DocumentWidget<
     sender: DocumentRegistry.IContext<U>,
     path: string
   ): void {
-    this.title.label = PathExt.basename(sender.localPath);
-    // The document is not untitled any more.
-    this.isUntitled = false;
+    const newName = PathExt.basename(sender.localPath);
+    if (newName !== this.title.label) {
+      this.isUntitled = false;
+    }
+    this.title.label = newName;
   }
 
   /**
@@ -615,6 +641,19 @@ export class DocumentWidget<
   ): void {
     if (args.name === 'dirty') {
       this._handleDirtyState();
+    }
+    if (!this.context.model.dirty) {
+      if (this.context.contentsModel?.writable === false) {
+        const readOnlyIndicator = createReadonlyLabel(this);
+        let roi = this.toolbar.insertBefore(
+          'kernelName',
+          'read-only-indicator',
+          readOnlyIndicator
+        );
+        if (!roi) {
+          this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+        }
+      }
     }
   }
 
@@ -633,6 +672,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+  protected readonly _trans;
 
   /**
    * Whether the document has an auto-generated name or not.

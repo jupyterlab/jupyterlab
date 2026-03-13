@@ -20,8 +20,6 @@ export class BuildManager {
   constructor(options: BuildManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const { baseUrl, appUrl } = this.serverSettings;
-    this._url = URLExt.join(baseUrl, appUrl, BUILD_SETTINGS_URL);
   }
 
   /**
@@ -107,7 +105,13 @@ export class BuildManager {
     });
   }
 
-  private _url = '';
+  /**
+   * Get the build API URL.
+   */
+  private get _url(): string {
+    const { baseUrl, appUrl } = this.serverSettings;
+    return URLExt.join(baseUrl, appUrl, BUILD_SETTINGS_URL);
+  }
 }
 
 /**

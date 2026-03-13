@@ -7,8 +7,15 @@ import path from 'path';
 
 const esModules = [
   '@codemirror',
+  '@marijn',
+  '@microsoft',
+  '@jupyter/react-components',
+  '@jupyter/web-components',
   '@jupyter/ydoc',
+  'color',
+  'exenv-es6',
   'lib0',
+  'marked',
   'nanoid',
   'vscode-ws-jsonrpc',
   'y-protocols',
@@ -18,25 +25,8 @@ const esModules = [
 
 module.exports = function (baseDir: string) {
   return {
-    testEnvironment: 'jsdom',
-    moduleNameMapper: {
-      '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-      '\\.(gif|ttf|eot)$': '@jupyterlab/testing/lib/jest-file-mock.js'
-    },
-    transform: {
-      '\\.svg$': '@jupyterlab/testing/lib/jest-raw-loader.js',
-      // Extracted from https://github.com/kulshekhar/ts-jest/blob/v29.0.3/presets/index.js
-      '^.+\\.tsx?$': [
-        'ts-jest/legacy',
-        {
-          tsconfig: `./tsconfig.test.json`
-        }
-      ],
-      '^.+\\.jsx?$': 'babel-jest'
-    },
-    testTimeout: 10000,
-    setupFiles: ['@jupyterlab/testing/lib/jest-shim.js'],
-    testPathIgnorePatterns: ['/lib/', '/node_modules/'],
+    coverageReporters: ['json', 'lcov', 'text', 'html'],
+    coverageDirectory: path.join(baseDir, 'coverage'),
     moduleFileExtensions: [
       'ts',
       'tsx',
@@ -47,10 +37,23 @@ module.exports = function (baseDir: string) {
       'mjs',
       'cjs'
     ],
-    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
+    moduleNameMapper: {
+      '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
+      '\\.(gif|ttf|eot)$': '@jupyterlab/testing/lib/jest-file-mock.js'
+    },
     reporters: ['default', 'jest-junit', 'github-actions'],
-    coverageReporters: ['json', 'lcov', 'text', 'html'],
-    coverageDirectory: path.join(baseDir, 'coverage'),
-    testRegex: '/test/.*.spec.ts[x]?$'
+    resolver: '@jupyterlab/testing/lib/jest-resolver.js',
+    setupFiles: ['@jupyterlab/testing/lib/jest-shim.js'],
+    testEnvironment: '@jupyterlab/testing/lib/jest-env.js',
+    testPathIgnorePatterns: ['/lib/', '/node_modules/'],
+    testRegex: '/test/.*.spec.ts[x]?$',
+    testTimeout: 10000,
+    transform: {
+      '\\.svg$': '@jupyterlab/testing/lib/jest-raw-loader.js',
+      // Extracted from https://github.com/kulshekhar/ts-jest/blob/v29.0.3/presets/index.js
+      '^.+\\.tsx?$': ['ts-jest/legacy', { tsconfig: `./tsconfig.test.json` }],
+      '^.+\\.jsx?$': 'babel-jest'
+    },
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
   };
 };

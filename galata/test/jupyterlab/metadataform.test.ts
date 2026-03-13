@@ -2,14 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import { Page } from '@playwright/test';
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
-import { ObservableJSON } from '@jupyterlab/observables';
+import type { Page } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import type { ObservableJSON } from '@jupyterlab/observables';
 
 const nbFile = 'code_notebook.ipynb';
 test.use({
@@ -17,9 +13,7 @@ test.use({
   tmpPath: 'metadataform-test',
   waitForApplication: async ({ baseURL }, use, testInfo) => {
     const simpleWait = async (page: Page): Promise<void> => {
-      await page.waitForSelector('#jupyterlab-splash', {
-        state: 'detached'
-      });
+      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
     };
     void use(simpleWait);
   }
@@ -31,11 +25,6 @@ test.beforeAll(async ({ request, tmpPath }) => {
     path.resolve(__dirname, `./notebooks/${nbFile}`),
     `${tmpPath}/${nbFile}`
   );
-});
-
-test.afterAll(async ({ request, tmpPath }) => {
-  const contents = galata.newContentsHelper(request);
-  await contents.deleteDirectory(tmpPath);
 });
 
 /**
@@ -514,13 +503,16 @@ test.describe('Notebook level and cell type metadata', () => {
 
     // There should be 2 fields displayed.
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot('metadata-level.png');
+    expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['cell-metadata']).toBeUndefined();
     let nbMetadata = await getNotebookMetadata(page);
     expect(nbMetadata['nb-nested']).toBeUndefined();
+
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     // Fill the first level nested metadata.
     await formGroup.locator('input').first().fill('Cell input');
@@ -545,23 +537,27 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.goto(baseURL);
     await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
 
+    // Close the sidebar to avoid clicking on the cell toolbar when expecting
+    // clicking in the cell editor.
+    await page.sidebar.close('left');
+
     // Create a Markdown cell and select it.
     await page.notebook.addCell('markdown', 'Markdown cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Create a raw cell and select it.
     await page.notebook.addCell('raw', 'Raw cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Select the code cell again to retrieve full form.
     await page.notebook.selectCells(0);
@@ -714,5 +710,52 @@ test.describe('UISchema', () => {
       'type',
       'text'
     );
+  });
+});
+
+test.describe('Advanced tools', () => {
+  test('should remove a field from cellMedata and verify it is updated', async ({
+    page,
+    baseURL,
+    tmpPath
+  }) => {
+    // Open the Notebook.
+    await page.goto(baseURL);
+    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+
+    // Activate the property inspector.
+    await activatePropertyInspector(page);
+
+    // Retrieves the form from its header's text, it should be collapsed.
+    const form = page.locator('.jp-NotebookTools .jp-Collapse', {
+      hasText: 'Advanced Tools'
+    });
+    await form.click();
+    const cellMetadataEditor = page.locator(
+      '.jp-CellMetadataEditor .cm-content'
+    );
+
+    // Modifying the cell metadata - removing the "trusted": "true" line
+    const trustedLine = cellMetadataEditor.locator('.cm-line').filter({
+      has: page.locator('span', { hasText: 'trusted' })
+    });
+    await trustedLine.evaluate(element => {
+      element.remove();
+    });
+    await page
+      .locator(
+        '.jp-CellMetadataEditor .jp-JSONEditor-header [title="Commit changes to data"]'
+      )
+      .click();
+
+    // Close the sidebar
+    await page.locator('[title="Property Inspector"]').click();
+    // Reopen the sidebar
+    await activatePropertyInspector(page);
+
+    // Verify the updaetd cellMetadata
+    const cmLinesAfter = cellMetadataEditor.locator('.cm-line');
+    await expect(cmLinesAfter).toHaveCount(1);
+    await expect(cellMetadataEditor).toContainText('{}');
   });
 });

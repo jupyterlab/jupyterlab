@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { StreamLanguage } from '@codemirror/language';
-import { IYText } from '@jupyter/ydoc';
-import {
+import { LanguageSupport, StreamLanguage } from '@codemirror/language';
+import type { IYText } from '@jupyter/ydoc';
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -20,6 +20,7 @@ import {
   IEditorLanguageRegistry,
   IEditorThemeRegistry,
   parseMathIPython,
+  pythonBuiltin,
   ybinding
 } from '@jupyterlab/codemirror';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -28,7 +29,8 @@ import {
   FormComponent,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
-import { JSONExt, ReadonlyJSONValue } from '@lumino/coreutils';
+import type { ReadonlyJSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import type { FieldProps } from '@rjsf/utils';
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import React from 'react';
@@ -51,7 +53,8 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
 
     // Register default languages
     for (const language of EditorLanguageRegistry.getDefaultLanguages(
-      translator
+      translator,
+      (info: string) => languages.findBest(info)
     )) {
       languages.addLanguage(language);
     }
@@ -62,17 +65,22 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
       name: 'ipythongfm',
       mime: 'text/x-ipythongfm',
       load: async () => {
-        const [m, tex] = await Promise.all([
+        const [m, py, tex] = await Promise.all([
           import('@codemirror/lang-markdown'),
+          import('@codemirror/lang-python'),
           import('@codemirror/legacy-modes/mode/stex')
         ]);
-        return m.markdown({
+        const mdlang = m.markdown({
           base: m.markdownLanguage,
           codeLanguages: (info: string) => languages.findBest(info) as any,
           extensions: [
             parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
           ]
         });
+        return new LanguageSupport(mdlang.language, [
+          mdlang.support,
+          pythonBuiltin(py.pythonLanguage)
+        ]);
       }
     });
     return languages;
@@ -142,19 +150,24 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
+            let defaultFormData: Record<string, any>;
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
             ) as any;
-            const editorConfiguration =
-              (props.formContext.settings as ISettingRegistry.ISettings).id ===
-              SETTINGS_ID
-                ? registry.baseConfiguration
-                : registry.defaultConfiguration;
-            const defaultFormData: Record<string, any> = {};
+            if (props.name in props.formContext.defaultFormData) {
+              defaultFormData = props.formContext.defaultFormData[props.name];
+            } else {
+              defaultFormData = {};
+            }
             // Only provide customizable options
-            for (const [key, value] of Object.entries(editorConfiguration)) {
-              if (typeof properties[key] !== 'undefined') {
+            for (const [key, value] of Object.entries(
+              registry.defaultConfiguration
+            )) {
+              if (
+                typeof properties[key] !== 'undefined' &&
+                !(key in defaultFormData)
+              ) {
                 defaultFormData[key] = value;
               }
             }
@@ -199,6 +212,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
                   }}
                   tagName="div"
                   translator={translator ?? nullTranslator}
+                  buttonStyle="icons"
                 />
               </div>
             );
@@ -242,11 +256,7 @@ export const servicesPlugin: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   description: 'Provides the service to instantiate CodeMirror editors.',
   provides: IEditorServices,
-  requires: [
-    IEditorLanguageRegistry,
-    IEditorExtensionRegistry,
-    IEditorThemeRegistry
-  ],
+  requires: [IEditorLanguageRegistry, IEditorExtensionRegistry],
   optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,

@@ -5,10 +5,12 @@ import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
-import { Application, IPlugin } from '@lumino/application';
+import type { IPlugin } from '@lumino/application';
+import { Application } from '@lumino/application';
 import { Token } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { FocusTracker, Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
@@ -45,6 +47,9 @@ export abstract class JupyterFrontEnd<
    */
   constructor(options: JupyterFrontEnd.IOptions<T>) {
     super(options);
+
+    // Class to scope global Jupyter CSS rules
+    options.shell.addClass('jp-ThemedContainer');
 
     // render context menu/submenus with inline svg icon tweaks
     this.contextMenu = new ContextMenuSvg({
@@ -215,8 +220,10 @@ export namespace JupyterFrontEnd {
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
-  export interface IOptions<T extends IShell = IShell, U = any>
-    extends Application.IOptions<T> {
+  export interface IOptions<
+    T extends IShell = IShell,
+    U = any
+  > extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.
      */
@@ -275,6 +282,23 @@ export namespace JupyterFrontEnd {
      * or "focused" mean, depending on their user interface characteristics.
      */
     readonly currentWidget: Widget | null;
+
+    /**
+     * A signal emitted when the focused widget in the application shell changes.
+     *
+     * ### Notes
+     * Shells may not always have a {@link currentWidget} or it may not change.
+     * Therefore implementing this signal is only expected for shells with the ability
+     * to switch between active widgets.
+     *
+     * Although the signal argument type references a focus tracker, the shell
+     * current widget may not be the one focused as its definition is an implementation
+     * detail.
+     */
+    readonly currentChanged?: ISignal<
+      IShell,
+      FocusTracker.IChangedArgs<Widget>
+    >;
 
     /**
      * Returns an iterator for the widgets inside the application shell.

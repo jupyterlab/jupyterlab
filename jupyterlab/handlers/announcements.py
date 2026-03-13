@@ -6,10 +6,10 @@
 import abc
 import hashlib
 import json
-import xml.etree.ElementTree as ET  # noqa
+import xml.etree.ElementTree as ET
+from collections.abc import Awaitable
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Awaitable, Optional, Tuple, Union
 
 from jupyter_server.base.handlers import APIHandler
 from jupyterlab_server.translation_utils import translator
@@ -43,8 +43,8 @@ class Notification:
     createdAt: float  # noqa
     message: str
     modifiedAt: float  # noqa
-    type: str = "default"  # noqa
-    link: Tuple[str, str] = field(default_factory=tuple)
+    type: str = "default"
+    link: tuple[str, str] = field(default_factory=tuple)
     options: dict = field(default_factory=dict)
 
 
@@ -63,7 +63,7 @@ class CheckForUpdateABC(abc.ABC):
         self.version = version
 
     @abc.abstractmethod
-    async def __call__(self) -> Awaitable[Union[None, str, Tuple[str, Tuple[str, str]]]]:
+    async def __call__(self) -> Awaitable[None | str | tuple[str, tuple[str, str]]]:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -86,7 +86,7 @@ class CheckForUpdate(CheckForUpdateABC):
         logger - logging.Logger: Server logger
     """
 
-    async def __call__(self) -> Awaitable[Tuple[str, Tuple[str, str]]]:
+    async def __call__(self) -> Awaitable[tuple[str, tuple[str, str]]]:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -109,8 +109,8 @@ class CheckForUpdate(CheckForUpdateABC):
             if parse(self.version) < parse(last_version):
                 trans = translator.load("jupyterlab")
                 return (
-                    trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("Open changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    trans.gettext(f"A newer version ({last_version}) of JupyterLab is available."),
+                    (trans.gettext("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None
@@ -150,7 +150,7 @@ class CheckForUpdateHandler(APIHandler):
 
     def initialize(
         self,
-        update_checker: Optional[CheckForUpdate] = None,
+        update_checker: CheckForUpdate | None = None,
     ) -> None:
         super().initialize()
         self.update_checker = (
@@ -196,7 +196,7 @@ class NewsHandler(APIHandler):
 
     def initialize(
         self,
-        news_url: Optional[str] = None,
+        news_url: str | None = None,
     ) -> None:
         super().initialize()
         self.news_url = news_url
@@ -230,7 +230,7 @@ class NewsHandler(APIHandler):
                 tree = ET.fromstring(response.body)  # noqa S314
 
                 def build_entry(node):
-                    def get_xml_text(attr: str, default: Optional[str] = None) -> str:
+                    def get_xml_text(attr: str, default: str | None = None) -> str:
                         node_item = node.find(f"atom:{attr}", xml_namespaces)
                         if node_item is not None:
                             return node_item.text
@@ -238,7 +238,7 @@ class NewsHandler(APIHandler):
                             return default
                         else:
                             error_m = (
-                                f'atom feed entry does not contain a required attribute: {attr}'
+                                f"atom feed entry does not contain a required attribute: {attr}"
                             )
                             raise KeyError(error_m)
 
@@ -246,10 +246,10 @@ class NewsHandler(APIHandler):
                     entry_id = get_xml_text("id")
                     entry_updated = get_xml_text("updated")
                     entry_published = get_xml_text("published", entry_updated)
-                    entry_summary = get_xml_text("summary", default='')
+                    entry_summary = get_xml_text("summary", default="")
                     links = node.findall("atom:link", xml_namespaces)
                     if len(links) > 1:
-                        alternate = list(filter(lambda elem: elem.get('rel') == 'alternate', links))
+                        alternate = list(filter(lambda elem: elem.get("rel") == "alternate", links))
                         link_node = alternate[0] if alternate else links[0]
                     else:
                         link_node = links[0] if len(links) == 1 else None

@@ -1,38 +1,43 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IChangedArgs as IChangedArgsGeneric } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Contents, Kernel } from '@jupyterlab/services';
+import type { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
-  IChangedArgs as IChangedArgsGeneric,
-  PathExt
-} from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Contents, Kernel } from '@jupyterlab/services';
-import { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
+  audioIcon,
   fileIcon,
   folderIcon,
   imageIcon,
   jsonIcon,
   juliaIcon,
-  LabIcon,
   markdownIcon,
   notebookIcon,
   pdfIcon,
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
-  Toolbar,
+  videoIcon,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find } from '@lumino/algorithm';
-import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { DockLayout, Widget } from '@lumino/widgets';
+import type {
+  PartialJSONValue,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { DockLayout, Widget } from '@lumino/widgets';
 import { TextModelFactory } from './default';
 
 /**
@@ -491,9 +496,9 @@ export class DocumentRegistry implements IDisposable {
    * IWidgetFactoryOptions. This function can be used to override that after
    * the fact.
    *
-   * @param fileType: The name of the file type.
+   * @param fileType The name of the file type.
    *
-   * @param factory: The name of the factory.
+   * @param factory The name of the factory.
    *
    * #### Notes
    * If `factory` is undefined, then any override will be unset, and the
@@ -664,25 +669,36 @@ export class DocumentRegistry implements IDisposable {
   getFileTypeForModel(
     model: Partial<Contents.IModel>
   ): DocumentRegistry.IFileType {
+    let ft: DocumentRegistry.IFileType | null = null;
+    if (model.name || model.path) {
+      const name = model.name || PathExt.basename(model.path!);
+      const fts = this._getFileTypesForPath(name, model.type);
+      if (fts.length > 0) {
+        ft = fts[0];
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (model.type) {
       case 'directory':
+        if (ft !== null && ft.contentType === 'directory') {
+          return ft;
+        }
         return (
           find(this._fileTypes, ft => ft.contentType === 'directory') ||
           DocumentRegistry.getDefaultDirectoryFileType(this.translator)
         );
       case 'notebook':
+        if (ft !== null && ft.contentType === 'notebook') {
+          return ft;
+        }
         return (
           find(this._fileTypes, ft => ft.contentType === 'notebook') ||
           DocumentRegistry.getDefaultNotebookFileType(this.translator)
         );
       default:
         // Find the best matching extension.
-        if (model.name || model.path) {
-          const name = model.name || PathExt.basename(model.path!);
-          const fts = this.getFileTypesForPath(name);
-          if (fts.length > 0) {
-            return fts[0];
-          }
+        if (ft !== null) {
+          return ft;
         }
         return (
           this.getFileType('text') ||
@@ -699,12 +715,23 @@ export class DocumentRegistry implements IDisposable {
    * @returns An ordered list of matching file types.
    */
   getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+    return this._getFileTypesForPath(path);
+  }
+
+  private _getFileTypesForPath(
+    path: string,
+    type?: string
+  ): DocumentRegistry.IFileType[] {
     const fts: DocumentRegistry.IFileType[] = [];
     const name = PathExt.basename(path);
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return !!(ft.pattern && name.match(ft.pattern) !== null);
+      return !!(
+        (!type || ft.contentType == type) &&
+        ft.pattern &&
+        name.match(ft.pattern) !== null
+      );
     });
     if (ft) {
       fts.push(ft);
@@ -713,9 +740,11 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      const ftSubset = this._fileTypes.filter(ft =>
-        // In Private.extname, the extension is transformed to lower case
-        ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
+      const ftSubset = this._fileTypes.filter(
+        ft =>
+          // In Private.extname, the extension is transformed to lower case
+          (!type || ft.contentType == type) &&
+          ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
       );
       fts.push(...ftSubset);
       ext = '.' + ext.split('.').slice(2).join('.');
@@ -876,7 +905,7 @@ export namespace DocumentRegistry {
     /**
      * A signal emitted when the contentsModel changes.
      */
-    fileChanged: ISignal<this, Contents.IModel>;
+    fileChanged: ISignal<this, Omit<Contents.IModel, 'content'>>;
 
     /**
      * A signal emitted on the start and end of a saving operation.
@@ -892,6 +921,11 @@ export namespace DocumentRegistry {
      * Configurable margin used to detect document modification conflicts, in milliseconds
      */
     lastModifiedCheckMargin: number;
+
+    /**
+     * Whether the document can be saved via the Contents API.
+     */
+    canSave?: boolean;
 
     /**
      * The data model for the document.
@@ -920,9 +954,9 @@ export namespace DocumentRegistry {
      *
      * #### Notes
      * This will be null until the context is 'ready'. Since we only store
-     * metadata here, the `.contents` attribute will always be empty.
+     * metadata here, the `content` attribute is removed.
      */
-    readonly contentsModel: Contents.IModel | null;
+    readonly contentsModel: Omit<Contents.IModel, 'content'> | null;
 
     /**
      * The url resolver for the context.
@@ -952,7 +986,7 @@ export namespace DocumentRegistry {
     /**
      * Save the document to a different path chosen by the user.
      */
-    saveAs(): Promise<void>;
+    saveAs(): Promise<boolean>;
 
     /**
      * Save the document to a different path chosen by the user.
@@ -1033,15 +1067,22 @@ export namespace DocumentRegistry {
   /**
    * The options used to initialize a widget factory.
    */
-  export interface IWidgetFactoryOptions<T extends Widget = Widget>
-    extends Omit<
-      IRenderMime.IDocumentWidgetFactoryOptions,
-      'primaryFileType' | 'toolbarFactory'
-    > {
+  export interface IWidgetFactoryOptions<
+    T extends Widget = Widget
+  > extends Omit<
+    IRenderMime.IDocumentWidgetFactoryOptions,
+    'primaryFileType' | 'toolbarFactory'
+  > {
     /**
      * Whether to automatically start the preferred kernel
      */
     readonly autoStartDefault?: boolean;
+
+    /**
+     * Identifier of the content provider required for the widget (if any).
+     * @experimental
+     */
+    readonly contentProviderId?: string;
 
     /**
      * Whether the widget factory is read only.
@@ -1119,8 +1160,7 @@ export namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
-    extends IDisposable,
-      IWidgetFactoryOptions {
+    extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */
@@ -1135,6 +1175,12 @@ export namespace DocumentRegistry {
      * It should emit the [widgetCreated] signal with the new widget.
      */
     createNew(context: IContext<U>, source?: T): T;
+
+    /**
+     * Identifier of the content provider required for the widget (if any).
+     * @experimental
+     */
+    contentProviderId?: string;
   }
 
   /**
@@ -1409,6 +1455,17 @@ export namespace DocumentRegistry {
         icon: jsonIcon
       },
       {
+        name: 'jsonl',
+        displayName: trans.__('JSONLines File'),
+        extensions: ['.jsonl', '.ndjson'],
+        mimeTypes: [
+          'text/jsonl',
+          'application/jsonl',
+          'application/json-lines'
+        ],
+        icon: jsonIcon
+      },
+      {
         name: 'julia',
         displayName: trans.__('Julia File'),
         extensions: ['.jl'],
@@ -1498,6 +1555,142 @@ export namespace DocumentRegistry {
         extensions: ['.webp'],
         icon: imageIcon,
         fileFormat: 'base64'
+      },
+      {
+        name: 'aac',
+        displayName: trans.__('Audio'),
+        extensions: ['.aac'],
+        mimeTypes: ['audio/aac'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'midi',
+        displayName: trans.__('Audio'),
+        extensions: ['.midi', '.mid'],
+        mimeTypes: ['audio/midi', 'audio/x-midi'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'mp3',
+        displayName: trans.__('Audio'),
+        extensions: ['.mp3'],
+        mimeTypes: ['audio/mpeg'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'wav',
+        displayName: trans.__('Audio'),
+        extensions: ['.wav'],
+        mimeTypes: ['audio/wav', 'audio/x-wav'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'ogg',
+        displayName: trans.__('Audio'),
+        extensions: ['.ogg'],
+        mimeTypes: ['audio/ogg'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'm4a',
+        displayName: trans.__('Audio'),
+        extensions: ['.m4a'],
+        mimeTypes: ['audio/mp4'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'flac',
+        displayName: trans.__('Audio'),
+        extensions: ['.flac'],
+        mimeTypes: ['audio/flac'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'opus',
+        displayName: trans.__('Audio'),
+        extensions: ['.opus'],
+        mimeTypes: ['audio/opus'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'mp4',
+        displayName: trans.__('Video'),
+        extensions: ['.mp4'],
+        mimeTypes: ['video/mp4'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mpeg',
+        displayName: trans.__('Video'),
+        extensions: ['.mpeg'],
+        mimeTypes: ['video/mpeg'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'webm',
+        displayName: trans.__('Video'),
+        extensions: ['.webm'],
+        mimeTypes: ['video/webm'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'ogv',
+        displayName: trans.__('Video'),
+        extensions: ['.ogv', '.ogg'],
+        mimeTypes: ['video/ogg'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'avi',
+        displayName: trans.__('Video'),
+        extensions: ['.avi'],
+        mimeTypes: ['video/x-msvideo'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mov',
+        displayName: trans.__('Video'),
+        extensions: ['.mov'],
+        mimeTypes: ['video/quicktime'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'm4v',
+        displayName: trans.__('Video'),
+        extensions: ['.m4v'],
+        mimeTypes: ['video/mp4', 'video/x-m4v'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: '3gp',
+        displayName: trans.__('Video'),
+        extensions: ['.3gp'],
+        mimeTypes: ['video/3gpp'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mkv',
+        displayName: trans.__('Video'),
+        extensions: ['.mkv'],
+        mimeTypes: ['video/x-matroska'],
+        fileFormat: 'base64',
+        icon: videoIcon
       }
     ];
   }

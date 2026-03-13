@@ -312,9 +312,9 @@ src[STAR] = "(<|>)?=?\\s*\\*"
 
 # version name recovery for convenient
 RECOVERYVERSIONNAME = R()
-src[RECOVERYVERSIONNAME] = "v?({n})(?:\\.({n}))?{pre}?".format(
-    n=src[NUMERICIDENTIFIER], pre=src[PRERELEASELOOSE]
-)
+_n = src[NUMERICIDENTIFIER]
+_pre = src[PRERELEASELOOSE]
+src[RECOVERYVERSIONNAME] = f"v?({_n})(?:\\.({_n}))?{_pre}?"
 
 #  Compile to actual regexp objects.
 #  All are flag-free, unless they were created above with a flag.
@@ -410,7 +410,7 @@ class SemVer:
 
         self.format()  # xxx:
 
-    def format(self):  # noqa
+    def format(self):
         self.version = f"{self.major}.{self.minor}.{self.patch}"
         if len(self.prerelease) > 0:
             self.version += "-{}".format(".".join(str(v) for v in self.prerelease))
@@ -761,7 +761,7 @@ class Range:
     def __repr__(self):
         return f'<SemVer Range "{self.range}">'
 
-    def format(self):  # noqa
+    def format(self):
         self.range = "||".join(
             [" ".join(c.value for c in comps).strip() for comps in self.set]
         ).strip()
@@ -954,7 +954,7 @@ def replace_caret(comp, loose):
             else:
                 ret = ">=" + M + "." + m + "." + (p or "") + pr + " <" + str(int(M) + 1) + ".0.0"
         else:
-            if M == "0":  # noqa PLR5501
+            if M == "0":
                 if m == "0":
                     ret = (
                         ">="
@@ -1076,7 +1076,7 @@ def replace_stars(comp, loose):
 #  1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
 #  1.2 - 3.4 => >=1.2.0 <3.5.0
 def hyphen_replace(mob):
-    from_, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb = mob.groups()
+    from_, fM, fm, fp, _, _, to, tM, tm, tp, tpr, _ = mob.groups()
     if is_x(fM):
         from_ = ""
     elif is_x(fm):
@@ -1186,7 +1186,7 @@ def outside(version, range_, hilo, loose):
     else:
         raise ValueError("Must provide a hilo val of '<' or '>'")
 
-    #  If it satisifes the range it is not outside
+    #  If it satisfies the range it is not outside
     if satisfies(version, range_, loose):
         return False
 

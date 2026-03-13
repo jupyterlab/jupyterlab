@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import {
+import type {
   ClientNotifications,
   ClientRequests,
   IClientRequestHandler,
@@ -15,10 +16,10 @@ import {
   IServerRequestHandler,
   IServerRequestParams,
   IServerResult,
-  Method,
   ServerNotifications,
   ServerRequests
 } from './tokens';
+import { Method } from './tokens';
 import { untilReady } from './utils';
 import {
   registerServerCapability,
@@ -35,8 +36,7 @@ import type { MessageConnection } from 'vscode-ws-jsonrpc';
  */
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
-> implements IClientRequestHandler
-{
+> implements IClientRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -65,8 +65,7 @@ class ClientRequestHandler<
  */
 class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
-> implements IServerRequestHandler
-{
+> implements IServerRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -245,7 +244,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Signal emitted when the connection receives an error
-   * message..
+   * message.
    */
   get errorSignal(): ISignal<ILSPConnection, any> {
     return this._errorSignal;
@@ -268,9 +267,12 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     if (this.isDisposed) {
       return;
     }
-    Object.values(this.serverRequests).forEach(request =>
-      request.clearHandler()
-    );
+    if (this.serverRequests) {
+      // `serverRequests` may be undefined if dispose is called during initialization sequence
+      Object.values(this.serverRequests).forEach(request =>
+        request.clearHandler()
+      );
+    }
     this.close();
     super.dispose();
   }
@@ -315,10 +317,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   }
 
   /**
-   * Check if a provider is available in the registered capabilities.
+   * Check if a capability is available in the server capabilities.
    */
-  provides(provider: keyof lsp.ServerCapabilities): boolean {
-    return !!(this.serverCapabilities && this.serverCapabilities[provider]);
+  provides(capability: keyof lsp.ServerCapabilities): boolean {
+    return !!(this.serverCapabilities && this.serverCapabilities[capability]);
   }
 
   /**
@@ -334,7 +336,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   }
 
   /**
-   * initialize a connection over a web socket that speaks the LSP
+   * Initialize a connection over a web socket that speaks the LSP.
    */
   connect(socket: WebSocket): void {
     super.connect(socket);

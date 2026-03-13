@@ -4,15 +4,11 @@
 // We explicitly reference the jest typings since the jest.d.ts file shipped
 // with jest 26 masks the @types/jest typings
 
-/// <reference types="jest" />
+/// <reference types="jest" preserve="true"/>
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import {
-  Kernel,
-  KernelMessage,
-  ServiceManager,
-  Session
-} from '@jupyterlab/services';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { Kernel, Session } from '@jupyterlab/services';
+import { KernelMessage, ServiceManager } from '@jupyterlab/services';
 import {
   changeKernel,
   KERNEL_MODELS,
@@ -22,10 +18,11 @@ import {
 } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Context } from './context';
 import { TextModelFactory } from './default';
-import { DocumentRegistry, IDocumentWidget } from './registry';
+import type { DocumentRegistry, IDocumentWidget } from './registry';
 
 /**
  * Create a context for a file.
@@ -123,7 +120,7 @@ export function emitIopubMessage(
 }
 
 /**
- * Forceably change the status of a session context.
+ * Forcibly change the status of a session context.
  * An iopub message is emitted for the change.
  *
  * @param sessionContext The session context of interest.
@@ -219,6 +216,11 @@ export const SessionContextMock = jest.fn<
 
   session!.pendingInput.connect((_, args) => {
     (thisObject as any).pendingInput = args;
+  });
+
+  session!.propertyChanged.connect((_, arg) => {
+    (thisObject as any)[arg] = session![arg];
+    propertyChangedSignal.emit(arg);
   });
 
   (thisObject as any).statusChanged = statusChangedSignal;

@@ -9,7 +9,6 @@ This document describes the design of the "About JupyterLab" plugin. This docume
 - Male 25, Full Stack Engineer
 
 - Uses single notebook to explain a very specific topic or teach people something
-
   - Done with charts, graphs, tables (Matplotlib and Pandas), live code, images integrated in text
 
 ### Krista
@@ -17,17 +16,14 @@ This document describes the design of the "About JupyterLab" plugin. This docume
 - Female 40, Engineering Professor
 
 - Uses the Jupyter notebooks to teach her entire college courses
-
   - Done with Matplotlib graphs, & embeds in notebook, live code
 
 ## Other Solutions
 
 - Making the whole experience more visual, using GIFs to show firsthand what you can do with Jupyter Lab
-
   - Show that you can drag and drop tabs to rearrange, etc.
 
 - Outline the differences between Notebook and Lab to help users who are familiar with the former better understand the latter
-
   - Side-by-side GIFs showing some differences
 
 ## User Tasks
@@ -35,7 +31,6 @@ This document describes the design of the "About JupyterLab" plugin. This docume
 Users should be able to:
 
 - Learn how to get started using JupyterLab ("Scroll through tutorial")
-
   - _Mouse: Scrolling_
 
   - _UI: Clicking side pagination_
@@ -47,11 +42,9 @@ Users should be able to:
   - _Keyboard: Numbers_
 
 - Easily close the page if they don’t need it
-
   - _Mouse: Click to close_
 
 - Show users (with visual animation) how to perform JupyterLab actions
-
   - i.e. Click and drag window tabs to move and split windows
 
 - Not be intimidated by too many words ("About" should not feel like a commitment)
@@ -59,7 +52,6 @@ Users should be able to:
 - Have an **overview** of tutorial contents on "Page 1" before scrolling
 
 - Read/Take action at the end (similar to launcher)
-
   - _UI: Clicking Action_
 
 - Have a short description of JupyterLab capabilities
@@ -68,7 +60,7 @@ Users should be able to:
 
 ### Layout
 
-The new About plugin will feature a cleaner layout, with different "slides" that guide the user through the different features and actions of JupyterLab. These slides can be scrolled through like any website, but each section is automatically formatted to fit the viewport (we will be creating a framework similar to—if not using parts of—[fullpage.js](http://alvarotrigo.com/fullPage/)). We will be implementing the use of images and animations per slide to help users understand each new “feature” of JupyterLab better, and to understand how to use it.
+The new About plugin will feature a cleaner layout, with different "slides" that guide the user through the different features and actions of JupyterLab. These slides can be scrolled through like any website, but each section is automatically formatted to fit the viewport (we will be creating a framework similar to—if not using parts of—[fullpage.js](https://alvarotrigo.com/fullPage/)). We will be implementing the use of images and animations per slide to help users understand each new “feature” of JupyterLab better, and to understand how to use it.
 
 The title slide will contain the JupyterLab logo near the top, and welcome text underneath to make the user feel at home, and to explain the current release of their JupyterLab version. After this, we’re hoping to include an overview of the "features" (i.e. Main Area, Command Palette, File Browser, etc.), by giving each feature an icon and description. This can be clicked and will ultimately be linked to that feature’s slide.
 

@@ -5,18 +5,18 @@
  * @module imageviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
-  IImageTracker,
-  ImageViewer,
-  ImageViewerFactory
-} from '@jupyterlab/imageviewer';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { ImageViewer } from '@jupyterlab/imageviewer';
+import { IImageTracker, ImageViewerFactory } from '@jupyterlab/imageviewer';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -197,53 +197,108 @@ function addCommands(
     );
   }
 
-  commands.addCommand('imageviewer:zoom-in', {
+  commands.addCommand(CommandIDs.zoomIn, {
     execute: zoomIn,
     label: trans.__('Zoom In'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:zoom-out', {
+  commands.addCommand(CommandIDs.zoomOut, {
     execute: zoomOut,
     label: trans.__('Zoom Out'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:reset-image', {
+  commands.addCommand(CommandIDs.resetImage, {
     execute: resetImage,
     label: trans.__('Reset Image'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:rotate-clockwise', {
+  commands.addCommand(CommandIDs.rotateClockwise, {
     execute: rotateClockwise,
     label: trans.__('Rotate Clockwise'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:rotate-counterclockwise', {
+  commands.addCommand(CommandIDs.rotateCounterclockwise, {
     execute: rotateCounterclockwise,
     label: trans.__('Rotate Counterclockwise'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:flip-horizontal', {
+  commands.addCommand(CommandIDs.flipHorizontal, {
     execute: flipHorizontal,
     label: trans.__('Flip image horizontally'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:flip-vertical', {
+  commands.addCommand(CommandIDs.flipVertical, {
     execute: flipVertical,
     label: trans.__('Flip image vertically'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
-  commands.addCommand('imageviewer:invert-colors', {
+  commands.addCommand(CommandIDs.invertColors, {
     execute: invertColors,
     label: trans.__('Invert Colors'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
+
+  const notify = () => {
+    Object.values(CommandIDs).forEach(id => commands.notifyCommandChanged(id));
+  };
+  // All commands with isEnabled defined directly or in a semantic commands
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   function zoomIn(): void {
     const widget = tracker.currentWidget?.content;

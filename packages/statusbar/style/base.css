@@ -60,7 +60,9 @@
 }
 
 .jp-StatusBar-HoverItem {
-  box-shadow: '0px 4px 4px rgba(0, 0, 0, 0.25)';
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .jp-StatusBar-TextItem {
@@ -76,15 +78,19 @@
   flex-direction: row;
 }
 
-.jp-Statusbar-ProgressCircle svg {
+.jp-StatusBar-GroupItem:focus-visible {
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
+.jp-Statusbar-ProgressCircle > svg {
   display: block;
   margin: 0 auto;
   width: 16px;
-  height: 24px;
   align-self: normal;
 }
 
-.jp-Statusbar-ProgressCircle path {
+.jp-Statusbar-ProgressCircle .jp-Statusbar-ProgressCirclePath {
   fill: var(--jp-inverse-layout-color3);
 }
 

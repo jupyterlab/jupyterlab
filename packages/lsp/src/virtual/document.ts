@@ -1,17 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-import { IDocumentInfo } from '../ws-connection/types';
-import { IPosition } from '../positioning';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { IDocumentInfo } from '../ws-connection/types';
+import type { IPosition } from '../positioning';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Document, ILSPCodeExtractorsManager } from '../tokens';
+import type { Document, ILSPCodeExtractorsManager } from '../tokens';
 import { DocumentConnectionManager } from '../connection_manager';
-import { IForeignCodeExtractor } from '../extractors/types';
-import { LanguageIdentifier } from '../lsp';
-import {
+import type { IForeignCodeExtractor } from '../extractors/types';
+import type { LanguageIdentifier } from '../lsp';
+import type {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
@@ -241,7 +242,6 @@ export class VirtualDocument implements IDisposable {
     );
     this._remainingLifetime = 6;
 
-    this.unusedDocuments = new Set();
     this.documentInfo = new VirtualDocumentInfo(this);
     this.updateManager = new UpdateManager(this);
     this.updateManager.updateBegan.connect(this._updateBeganSlot, this);
@@ -446,7 +446,6 @@ export class VirtualDocument implements IDisposable {
 
     this.foreignDocuments.clear();
     this.sourceLines.clear();
-    this.unusedDocuments.clear();
     this.unusedStandaloneDocuments.clear();
     this.virtualLines.clear();
 
@@ -463,14 +462,16 @@ export class VirtualDocument implements IDisposable {
    * Clear the virtual document and all related stuffs
    */
   clear(): void {
-    for (let document of this.foreignDocuments.values()) {
-      document.clear();
-    }
-
-    // TODO - deep clear (assure that there is no memory leak)
     this.unusedStandaloneDocuments.clear();
 
-    this.unusedDocuments = new Set();
+    for (let document of this.foreignDocuments.values()) {
+      document.clear();
+      if (document.standalone) {
+        let set = this.unusedStandaloneDocuments.get(document.language);
+        set.push(document);
+      }
+    }
+
     this.virtualLines.clear();
     this.sourceLines.clear();
     this.lastVirtualLine = 0;
@@ -633,7 +634,7 @@ export class VirtualDocument implements IDisposable {
       this.virtualLines.set(this.lastVirtualLine + i, {
         skipInspect: [],
         editor: ceEditor,
-        // TODO this is incorrect, wont work if something was extracted
+        // TODO this is incorrect, won't work if something was extracted
         sourceLine: this.lastSourceLine + i
       });
     }
@@ -647,7 +648,7 @@ export class VirtualDocument implements IDisposable {
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: ceEditor,
         foreignDocumentsMap,
-        // TODO this is incorrect, wont work if something was extracted
+        // TODO this is incorrect, won't work if something was extracted
         virtualLine: this.lastVirtualLine + i
       });
     }
@@ -742,7 +743,7 @@ export class VirtualDocument implements IDisposable {
             );
             continue;
           }
-          let foreignDocument = this.chooseForeignDocument(extractor);
+          let foreignDocument = this._chooseForeignDocument(extractor);
           foreignDocumentsMap.set(result.range, {
             virtualLine: foreignDocument.lastVirtualLine,
             virtualDocument: foreignDocument,
@@ -806,10 +807,34 @@ export class VirtualDocument implements IDisposable {
    * Close all expired documents.
    */
   closeExpiredDocuments(): void {
-    for (let document of this.unusedDocuments.values()) {
+    const usedDocuments = new Set<VirtualDocument>();
+    for (const line of this.sourceLines.values()) {
+      for (const block of line.foreignDocumentsMap.values()) {
+        usedDocuments.add(block.virtualDocument);
+      }
+    }
+
+    const documentIDs = new Map<VirtualDocument, string[]>();
+    for (const [id, document] of this.foreignDocuments.entries()) {
+      const ids = documentIDs.get(document);
+      if (typeof ids !== 'undefined') {
+        documentIDs.set(document, [...ids, id]);
+      }
+      documentIDs.set(document, [id]);
+    }
+    const allDocuments = new Set<VirtualDocument>(documentIDs.keys());
+    const unusedVirtualDocuments = new Set(
+      [...allDocuments].filter(x => !usedDocuments.has(x))
+    );
+
+    for (let document of unusedVirtualDocuments.values()) {
       document.remainingLifetime -= 1;
       if (document.remainingLifetime <= 0) {
         document.dispose();
+        const ids = documentIDs.get(document)!;
+        for (const id of ids) {
+          this.foreignDocuments.delete(id);
+        }
       }
     }
   }
@@ -868,6 +893,19 @@ export class VirtualDocument implements IDisposable {
   }
 
   /**
+   * Compute the position in root document from the position of
+   * a virtual document.
+   */
+  transformVirtualToRoot(position: IVirtualPosition): IRootPosition | null {
+    const editor = this.virtualLines.get(position.line)?.editor;
+    const editorPosition = this.transformVirtualToEditor(position);
+    if (!editor || !editorPosition) {
+      return null;
+    }
+    return this.root.transformFromEditorToRoot(editor, editorPosition);
+  }
+
+  /**
    * Get the corresponding editor of the virtual line.
    */
   getEditorAtVirtualLine(pos: IVirtualPosition): Document.IEditor {
@@ -901,7 +939,7 @@ export class VirtualDocument implements IDisposable {
 
   /**
    * When this counter goes down to 0, the document will be destroyed and the associated connection will be closed;
-   * This is meant to reduce the number of open connections when a a foreign code snippet was removed from the document.
+   * This is meant to reduce the number of open connections when a foreign code snippet was removed from the document.
    *
    * Note: top level virtual documents are currently immortal (unless killed by other means); it might be worth
    * implementing culling of unused documents, but if and only if JupyterLab will also implement culling of
@@ -927,7 +965,6 @@ export class VirtualDocument implements IDisposable {
   protected sourceLines: Map<number, ISourceLine>;
   protected lineBlocks: Array<string>;
 
-  protected unusedDocuments: Set<VirtualDocument>;
   protected unusedStandaloneDocuments: DefaultMap<
     language,
     Array<VirtualDocument>
@@ -945,7 +982,7 @@ export class VirtualDocument implements IDisposable {
   /**
    * Get the foreign document that can be opened with the input extractor.
    */
-  private chooseForeignDocument(
+  private _chooseForeignDocument(
     extractor: IForeignCodeExtractor
   ): VirtualDocument {
     let foreignDocument: VirtualDocument;
@@ -956,11 +993,18 @@ export class VirtualDocument implements IDisposable {
     } else {
       // if (previous document does not exists) or (extractor produces standalone documents
       // and no old standalone document could be reused): create a new document
-      foreignDocument = this.openForeign(
-        extractor.language,
-        extractor.standalone,
-        extractor.fileExtension
+      let unusedStandalone = this.unusedStandaloneDocuments.get(
+        extractor.language
       );
+      if (extractor.standalone && unusedStandalone.length > 0) {
+        foreignDocument = unusedStandalone.pop()!;
+      } else {
+        foreignDocument = this.openForeign(
+          extractor.language,
+          extractor.standalone,
+          extractor.fileExtension
+        );
+      }
     }
     return foreignDocument;
   }
@@ -977,13 +1021,16 @@ export class VirtualDocument implements IDisposable {
     standalone: boolean,
     fileExtension: string
   ): VirtualDocument {
-    let document = new VirtualDocument({
+    let document = new (this.constructor as new (
+      ...args: ConstructorParameters<typeof VirtualDocument>
+    ) => VirtualDocument)({
       ...this.options,
       parent: this,
       standalone: standalone,
       fileExtension: fileExtension,
       language: language
     });
+
     const context: Document.IForeignContext = {
       foreignDocument: document,
       parentHost: this

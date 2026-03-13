@@ -1,19 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+import type { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
-import { Cell, CodeCell } from '@jupyterlab/cells';
+import type { Cell, CodeCell } from '@jupyterlab/cells';
 
-import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
+import type { IObservableMap } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**
  * A handler for consoles.
@@ -28,6 +32,13 @@ export class ConsoleHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._consolePanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
+    this.translator = options.translator || nullTranslator;
+
+    this._pausedOverlay = new DebuggerPausedOverlay({
+      debuggerService: this._debuggerService,
+      container: this._consolePanel.node,
+      translator: this.translator
+    });
 
     const codeConsole = this._consolePanel.console;
 
@@ -45,6 +56,30 @@ export class ConsoleHandler implements IDisposable {
     };
     addHandlers();
     this._consolePanel.console.cells.changed.connect(addHandlers);
+
+    // Connect debugger events
+    this._debuggerService.session?.eventMessage.connect((_, event) => {
+      const session = this._debuggerService.session;
+      const contextSession = this._consolePanel.sessionContext.session;
+
+      if (!session || !contextSession) {
+        return;
+      }
+      if (session.connection?.kernel?.id !== contextSession.kernel?.id) {
+        return;
+      }
+
+      if (event.event === 'stopped') {
+        void this._pausedOverlay.show();
+      } else if (event.event === 'continued' || event.event === 'terminated') {
+        void this._pausedOverlay.hide();
+      }
+    });
+
+    // If already paused when initialized
+    if (this._debuggerService.hasStoppedThreads()) {
+      void this._pausedOverlay.show();
+    }
   }
 
   /**
@@ -60,6 +95,9 @@ export class ConsoleHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+
+    this._pausedOverlay.dispose();
+
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
     Signal.clearData(this);
@@ -95,6 +133,8 @@ export class ConsoleHandler implements IDisposable {
   private _consolePanel: ConsolePanel;
   private _debuggerService: IDebugger;
   private _cellMap: IObservableMap<EditorHandler>;
+  private _pausedOverlay: DebuggerPausedOverlay;
+  protected translator: ITranslator;
 }
 
 /**
@@ -114,5 +154,10 @@ export namespace ConsoleHandler {
      * The widget to handle.
      */
     widget: ConsolePanel;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

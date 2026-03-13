@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
+import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { TableOfContents } from '@jupyterlab/toc';
 import {
-  TableOfContents,
   TableOfContentsFactory,
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { MarkdownDocument } from './widget';
+import type { MarkdownDocument } from './widget';
 
 /**
  * Interface describing a Markdown viewer heading.
@@ -70,17 +70,18 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
+  protected async getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const headings = TableOfContentsUtils.filterHeadings(
-      TableOfContentsUtils.Markdown.getHeadings(content),
-      {
-        ...this.configuration,
-        // Force base number to be equal to 1
-        baseNumbering: 1
-      }
+    const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+      content,
+      this.parser
     );
-    return Promise.resolve(headings);
+    const filteredHeadings = TableOfContentsUtils.filterHeadings(headings, {
+      ...this.configuration,
+      // Force base number to be equal to 1
+      baseNumbering: 1
+    });
+    return Promise.resolve(filteredHeadings);
   }
 }
 
@@ -96,7 +97,8 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
    */
   constructor(
     tracker: IWidgetTracker<MarkdownDocument>,
-    protected parser: IMarkdownParser | null
+    protected parser: IMarkdownParser | null,
+    protected sanitizer: IRenderMime.ISanitizer
   ) {
     super(tracker);
   }
@@ -140,6 +142,13 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
           ) {
             el.scrollIntoView({ block: 'center' });
           }
+        } else {
+          console.warn(
+            'Heading element not found for heading',
+            heading,
+            'in widget',
+            widget
+          );
         }
       }
     };
@@ -158,13 +167,18 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
         const elementId = await TableOfContentsUtils.Markdown.getHeadingId(
           this.parser!,
           heading.raw,
-          heading.level
+          heading.level,
+          this.sanitizer
         );
 
         if (!elementId) {
           return;
         }
-        const selector = `h${heading.level}[id="${elementId}"]`;
+        const attribute =
+          (this.sanitizer.allowNamedProperties ?? false)
+            ? 'id'
+            : 'data-jupyter-id';
+        const selector = `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`;
 
         headingToElement.set(
           heading,

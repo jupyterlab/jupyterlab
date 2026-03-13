@@ -1,0 +1,13 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/* @deprecated dead code to be removed in JupyterLab 5 */
+.jp-Toolbar-item.jp-Toolbar-kernelStatus {
+  display: inline-block;
+  width: 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}

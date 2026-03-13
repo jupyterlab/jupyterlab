@@ -1,62 +1,55 @@
 name: Benchmark Tests
 
 on:
-  # schedule:
-  #   - cron: '12 1 * * 0'
-  pull_request_review:
+  issue_comment:
+    types: [created, edited]
 
 jobs:
   test:
     name: Execute benchmark tests
-    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
-
-    runs-on: ubuntu-22.04
+    if: >
+      (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'COLLABORATOR' ||
+        github.event.issue.author_association == 'MEMBER'
+      ) && github.event.issue.pull_request && contains(github.event.comment.body, 'please run benchmarks')
+    runs-on: ubuntu-latest
 
     env:
       BENCHMARK_NUMBER_SAMPLES: 100
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
 
-      - name: Get hashes for schedule event
-        if: ${{ github.event_name == 'schedule' }}
-        run: |
-          echo "OLD_REF_SHA=$(git rev-parse 'main@{7 days ago}')" >> $GITHUB_ENV
-          echo "NEW_REF_SHA=$(git rev-parse 'main')" >> $GITHUB_ENV
-
-      - name: Get hashes for PR review event
-        if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const child_process = require("child_process");
-            const pull_request = context.payload.pull_request;
-
-            child_process.exec(`git merge-base ${pull_request.head.sha} ${pull_request.base.sha}`, (error, stdout, stderr) => {
-              if (error) {
-                console.log(error);
-                process.exit(1);
-                return;
-              }
-              if (stderr) {
-                console.log(stderr);
-                process.exit(1);
-                return;
-              }
-
-              core.exportVariable('OLD_REF_SHA', stdout.trim());
-              core.exportVariable('NEW_REF_SHA', pull_request.head.sha);
-              core.exportVariable('PULL_REQUEST_ID', pull_request.number);
-            });
-
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - uses: iterative/setup-cml@v1
+      - uses: iterative/setup-cml@v3
+
+      - name: Get PR Info
+        id: pr
+        env:
+          PR_NUMBER: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          COMMENT_AT: ${{ github.event.comment.created_at }}
+        run: |
+          pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
+          head_sha="$(echo "$pr" | jq -r .head.sha)"
+          base_sha="$(echo "$pr" | jq -r .base.sha)"
+          root_sha="$(git merge-base '${head_sha}' '${base_sha}')"
+          updated_at="$(echo "$pr" | jq -r .updated_at)"
+
+          if [[ $(date -d "$updated_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              exit 1
+          fi
+
+          echo "OLD_REF_SHA=$root_sha" >> $GITHUB_ENV
+          echo "NEW_REF_SHA=$head_sha" >> $GITHUB_ENV
 
       # First run the benchmark on the old reference
       - name: Checkout old reference
@@ -85,10 +78,7 @@ jobs:
         working-directory: galata
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Execute benchmark tests
         continue-on-error: true
@@ -129,10 +119,7 @@ jobs:
           jlpm run build
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Execute benchmark tests
         continue-on-error: true
@@ -190,7 +177,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: benchmark-assets
           path: |
@@ -205,23 +192,19 @@ jobs:
 
   memory-leak:
     name: Execute memory-leak tests
-    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
+    if: >
+      (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'COLLABORATOR' ||
+        github.event.issue.author_association == 'MEMBER'
+      ) && github.event.issue.pull_request && contains(github.event.comment.body, 'please run benchmarks')
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Get hashes for PR review event
-        if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const child_process = require("child_process");
-            const pull_request = context.payload.pull_request;
-            core.exportVariable('PULL_REQUEST_ID', pull_request.number);
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1

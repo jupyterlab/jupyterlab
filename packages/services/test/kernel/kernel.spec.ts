@@ -65,7 +65,7 @@ describe('kernel', () => {
     it('should throw an error for an invalid response', async () => {
       const settings = getRequestHandler(201, {});
       const promise = KernelAPI.listRunning(settings);
-      await expect(promise).rejects.toThrow(/Invalid response: 201 Created/);
+      await expect(promise).rejects.toThrow(/Invalid response: 201/);
     });
 
     it('should throw an error for an error response', async () => {
@@ -116,7 +116,7 @@ describe('kernel', () => {
       const data = { id: UUID.uuid4(), name: 'foo' };
       const serverSettings = getRequestHandler(200, data);
       const kernelPromise = KernelAPI.startNew({}, serverSettings);
-      await expect(kernelPromise).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(kernelPromise).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw an error for an error response', async () => {

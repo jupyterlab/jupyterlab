@@ -1,8 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testing';
-import { Contents, ContentsManager, Drive, ServerConnection } from '../../src';
+import { Signal } from '@lumino/signaling';
+import {
+  expectFailure,
+  JupyterServer,
+  signalToPromise
+} from '@jupyterlab/testing';
+import type { Contents, IContentProvider } from '../../src';
+import { ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
@@ -260,7 +266,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 201, DEFAULT_DIR);
       const get = contents.get('/foo');
-      await expect(get).rejects.toThrow(/Invalid response: 201 Created/);
+      await expect(get).rejects.toThrow(/Invalid response: 201/);
     });
 
     it('should store original server path for directory', async () => {
@@ -393,7 +399,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, DEFAULT_DIR);
       const newDir = contents.newUntitled();
-      await expect(newDir).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(newDir).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -428,7 +434,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, {});
       const del = contents.delete('/foo/bar.txt');
-      await expect(del).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(del).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw a specific error', async () => {
@@ -488,7 +494,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 201, DEFAULT_FILE);
       const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
-      await expect(rename).rejects.toThrow(/Invalid response: 201 Created/);
+      await expect(rename).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -540,7 +546,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 204, DEFAULT_FILE);
       const save = contents.save('/foo', { type: 'file', name: 'test' });
-      await expect(save).rejects.toThrow(/Invalid response: 204 No Content/);
+      await expect(save).rejects.toThrow(/Invalid response: 204/);
     });
   });
 
@@ -583,7 +589,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       const copy = contents.copy('/foo/bar.txt', '/baz');
-      await expect(copy).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(copy).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -615,7 +621,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, DEFAULT_CP);
       const checkpoint = contents.createCheckpoint('/foo/bar.txt');
-      await expect(checkpoint).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -650,9 +656,7 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 201, {});
       const checkpoints = contents.listCheckpoints('/foo/bar.txt');
-      await expect(checkpoints).rejects.toThrow(
-        /Invalid response: 201 Created/
-      );
+      await expect(checkpoints).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -683,7 +687,7 @@ describe('contents', () => {
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
-      await expect(checkpoint).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -710,7 +714,7 @@ describe('contents', () => {
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
-      await expect(checkpoint).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 });
@@ -821,7 +825,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_DIR);
       const get = drive.get('/foo');
-      await expect(get).rejects.toThrow(/Invalid response: 201 Created/);
+      await expect(get).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -918,7 +922,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_DIR);
       const newDir = drive.newUntitled();
-      await expect(newDir).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(newDir).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -953,7 +957,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 200, {});
       const del = drive.delete('/foo/bar.txt');
-      await expect(del).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(del).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw a specific error', async () => {
@@ -1015,7 +1019,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      await expect(rename).rejects.toThrow(/Invalid response: 201 Created/);
+      await expect(rename).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -1071,7 +1075,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 204, DEFAULT_FILE);
       const save = drive.save('/foo', { type: 'file', name: 'test' });
-      await expect(save).rejects.toThrow(/Invalid response: 204 No Content/);
+      await expect(save).rejects.toThrow(/Invalid response: 204/);
     });
   });
 
@@ -1117,7 +1121,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
       const copy = drive.copy('/foo/bar.txt', '/baz');
-      await expect(copy).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(copy).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1151,7 +1155,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_CP);
       const checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      await expect(checkpoint).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1188,9 +1192,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 201, {});
       const checkpoints = drive.listCheckpoints('/foo/bar.txt');
-      await expect(checkpoints).rejects.toThrow(
-        /Invalid response: 201 Created/
-      );
+      await expect(checkpoints).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -1213,7 +1215,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 200, {});
       const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      await expect(checkpoint).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1238,7 +1240,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 200, {});
       const checkpoint = drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      await expect(checkpoint).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1295,6 +1297,107 @@ describe('drive', () => {
       await contents.restoreCheckpoint('baz.txt', checkpoint.id);
       await contents.deleteCheckpoint('baz.txt', checkpoint.id);
       await contents.delete('baz.txt');
+    });
+  });
+
+  describe('#contentProviderRegistry', () => {
+    class DummyContentProvider implements IContentProvider {
+      async get(
+        localPath: string,
+        options?: Contents.IFetchOptions
+      ): Promise<Contents.IModel> {
+        return {
+          name: 'bar',
+          path: '',
+          type: '',
+          writable: true,
+          created: '',
+          last_modified: '',
+          mimetype: '',
+          content: '',
+          format: null
+        };
+      }
+
+      async save(
+        localPath: string,
+        options: Partial<Contents.IModel> = {}
+      ): Promise<Contents.IModel> {
+        return {
+          name: 'baz',
+          path: '',
+          type: '',
+          writable: true,
+          created: '',
+          last_modified: '',
+          mimetype: '',
+          content: '',
+          format: null
+        };
+      }
+    }
+
+    class ChangeEmittingContentProvider extends DummyContentProvider {
+      readonly fileChanged: Signal<IContentProvider, Contents.IChangedArgs> =
+        new Signal<IContentProvider, Contents.IChangedArgs>(this);
+    }
+
+    it('should use the registered content provider', async () => {
+      const drive = new Drive();
+      const contentProvider = new DummyContentProvider();
+      drive.contentProviderRegistry.register('dummy', contentProvider);
+      const model1 = await drive.get('foo', { contentProviderId: 'dummy' });
+      const model2 = await drive.save('foo', { contentProviderId: 'dummy' });
+      expect(model1.name).toBe('bar');
+      expect(model2.name).toBe('baz');
+    });
+
+    it('integration test with ContentsManager', async () => {
+      const drive = new Drive();
+      const contents = new ContentsManager({ defaultDrive: drive });
+      const contentProvider = new DummyContentProvider();
+      drive.contentProviderRegistry.register('dummy', contentProvider);
+      const model1 = await contents.get('foo', { contentProviderId: 'dummy' });
+      expect(model1.name).toBe('bar');
+    });
+
+    it('should proxy `fileChanged` signals emitted by providers', async () => {
+      const drive = new Drive();
+      const contentProvider = new ChangeEmittingContentProvider();
+      drive.contentProviderRegistry.register('dummy', contentProvider);
+      const promise = signalToPromise(drive.fileChanged);
+      contentProvider.fileChanged.emit({
+        oldValue: null,
+        newValue: 'test',
+        type: 'save'
+      } as Contents.IChangedArgs);
+      const [_, change] = await promise;
+      expect(change.newValue).toBe('test');
+    });
+
+    it('should throw when usage is attempted before registration or after disposal', async () => {
+      const drive = new Drive();
+      const options: Contents.IFetchOptions = {
+        type: 'file',
+        contentProviderId: 'dummy'
+      };
+      handleRequest(drive, 200, DEFAULT_FILE);
+      await expect(drive.get('foo', options)).rejects.toThrow();
+
+      const contentProvider = new DummyContentProvider();
+      const disposable = drive.contentProviderRegistry.register(
+        'dummy',
+        contentProvider
+      );
+
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const whenRegistered = await drive.get('foo', options);
+      expect(whenRegistered.name).toBe('bar');
+
+      disposable.dispose();
+
+      handleRequest(drive, 200, DEFAULT_FILE);
+      await expect(drive.get('foo', options)).rejects.toThrow();
     });
   });
 });

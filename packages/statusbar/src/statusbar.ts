@@ -2,14 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-import {
-  DisposableDelegate,
-  DisposableSet,
-  IDisposable
-} from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IStatusBar } from './tokens';
+import type { IStatusBar } from './tokens';
 
 /**
  * Main status bar object which contains all items.
@@ -29,6 +26,8 @@ export class StatusBar extends Widget implements IStatusBar {
     middlePanel.addClass('jp-StatusBar-Middle');
     rightPanel.addClass('jp-StatusBar-Right');
 
+    rightPanel.node.style.flexDirection = 'row';
+
     rootLayout.addWidget(leftPanel);
     rootLayout.addWidget(middlePanel);
     rootLayout.addWidget(rightPanel);
@@ -38,8 +37,9 @@ export class StatusBar extends Widget implements IStatusBar {
    * Register a new status item.
    *
    * @param id - a unique id for the status item.
-   *
    * @param statusItem - The item to add to the status bar.
+   *
+   * @returns Disposable status bar item
    */
   registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable {
     if (id in this._statusItems) {
@@ -51,7 +51,7 @@ export class StatusBar extends Widget implements IStatusBar {
       ...Private.statusItemDefaults,
       ...statusItem
     } as Private.IFullItem;
-    const { align, item, rank } = fullStatusItem;
+    const { align, item, rank, priority } = fullStatusItem;
 
     // Connect the activeStateChanged signal to refreshing the status item,
     // if the signal was provided.
@@ -62,7 +62,7 @@ export class StatusBar extends Widget implements IStatusBar {
       fullStatusItem.activeStateChanged.connect(onActiveStateChanged);
     }
 
-    const rankItem = { id, rank };
+    const rankItem = { id, rank, priority };
 
     fullStatusItem.item.addClass('jp-StatusBar-Item');
     this._statusItems[id] = fullStatusItem;
@@ -77,7 +77,10 @@ export class StatusBar extends Widget implements IStatusBar {
         this._leftSide.insertWidget(insertIndex, item);
       }
     } else if (align === 'right') {
-      const insertIndex = this._findInsertIndex(this._rightRankItems, rankItem);
+      const insertIndex = ArrayExt.findFirstIndex(
+        this._rightRankItems,
+        item => item.rank < rankItem.rank
+      );
       if (insertIndex === -1) {
         this._rightSide.addWidget(item);
         this._rightRankItems.push(rankItem);
@@ -112,6 +115,14 @@ export class StatusBar extends Widget implements IStatusBar {
     super.dispose();
   }
 
+  private _isWindowNarrow = () => {
+    // The value for 630px was chosen by trial and error.
+    // When the screen width drops below 630px, there is no
+    // longer enough space for all the items in the status bar
+    // (with notebook open), and items become clipped.
+    return window.innerWidth <= 630;
+  };
+
   /**
    * Handle an 'update-request' message to the status bar.
    */
@@ -129,7 +140,10 @@ export class StatusBar extends Widget implements IStatusBar {
 
   private _refreshItem(id: string) {
     const statusItem = this._statusItems[id];
-    if (statusItem.isActive()) {
+    if (
+      statusItem.isActive() &&
+      !(statusItem.priority === 0 && this._isWindowNarrow())
+    ) {
       statusItem.item.show();
       statusItem.item.update();
     } else {
@@ -163,6 +177,7 @@ namespace Private {
   export const statusItemDefaults: Omit<IStatusBar.IItem, 'item'> = {
     align: 'left',
     rank: 0,
+    priority: 0,
     isActive: () => true,
     activeStateChanged: undefined
   };
@@ -173,9 +188,10 @@ namespace Private {
   export interface IRankItem {
     id: string;
     rank: number;
+    priority?: number;
   }
 
-  export type DefaultKeys = 'align' | 'rank' | 'isActive';
+  export type DefaultKeys = 'align' | 'rank' | 'isActive' | 'priority';
 
   /**
    * Type of statusbar item with defaults filled in.

@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { IDisposable } from '@lumino/disposable';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 /**
@@ -92,6 +92,8 @@ export class SaveHandler implements IDisposable {
     this._autosaveTimer = window.setTimeout(() => {
       if (this._isConnectedCallback()) {
         this._save();
+      } else {
+        this._setTimer();
       }
     }, this._interval);
   }
@@ -109,10 +111,9 @@ export class SaveHandler implements IDisposable {
       return;
     }
 
-    // Bail if the model is not dirty or the file is not writable, or the dialog
+    // Bail if the model is not dirty or the file is not non-savable, or the dialog
     // is already showing.
-    const writable = context.contentsModel && context.contentsModel.writable;
-    if (!writable || !context.model.dirty || this._inDialog) {
+    if (!(context.canSave ?? true) || !context.model.dirty || this._inDialog) {
       return;
     }
 

@@ -4,25 +4,34 @@
 """Extension manager using pip as package manager and PyPi.org as packages source."""
 
 import asyncio
+import http.client
 import io
 import json
 import math
 import re
 import sys
+import tempfile
 import xmlrpc.client
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
+from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Optional
+from urllib.parse import urlparse
 from zipfile import ZipFile
 
+import httpx
 import tornado
 from async_lru import alru_cache
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import InvalidVersion, Version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
+from jupyterlab._version import __version__
 from jupyterlab.extensions.manager import (
     ActionResult,
     ExtensionManager,
@@ -31,29 +40,111 @@ from jupyterlab.extensions.manager import (
 )
 
 
-async def _fetch_package_metadata(name: str, latest_version: str, base_url: str) -> dict:
-    http_client = tornado.httpclient.AsyncHTTPClient()
-    response = await http_client.fetch(
+class ProxiedTransport(xmlrpc.client.Transport):
+    def set_proxy(self, host, port=None, headers=None):
+        self.proxy = host, port
+        self.proxy_headers = headers
+
+    def make_connection(self, host):
+        connection = http.client.HTTPConnection(*self.proxy)
+        connection.set_tunnel(host, headers=self.proxy_headers)
+        self._connection = host, connection
+        return connection
+
+
+all_proxy_url = environ.get("ALL_PROXY")
+# For historical reasons, we also support the lowercase environment variables.
+# Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
+http_proxy_url = environ.get("http_proxy") or environ.get("HTTP_PROXY") or all_proxy_url
+https_proxy_url = (
+    environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
+)
+
+# sniff ``httpx`` version for version-sensitive API
+_httpx_version = Version(httpx.__version__)
+_httpx_client_args = {}
+
+xmlrpc_transport_override = None
+
+if http_proxy_url:
+    http_proxy = urlparse(http_proxy_url)
+    proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
+
+    if _httpx_version >= Version("0.28.0"):
+        _httpx_client_args = {
+            "mounts": {
+                "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
+                "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
+            }
+        }
+    else:
+        _httpx_client_args = {
+            "proxies": {
+                "http://": http_proxy_url,
+                "https://": https_proxy_url,
+            }
+        }
+
+    xmlrpc_transport_override = ProxiedTransport()
+    xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
+
+
+def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
+    """Check if the current Python version satisfies the requires_python specifier.
+
+    Args:
+        requires_python: The requires_python specifier string from PyPI (e.g., ">=3.10")
+
+    Returns:
+        (compatible, explanation)
+        compatible: True if compatible or if requires_python is None/empty, False otherwise.
+        explanation: A string explaining the mismatch if incompatible, otherwise None.
+    """
+    if not requires_python:
+        return True, None
+    try:
+        current_version_str = sys.version.split()[0]
+        current_version = Version(current_version_str)
+        specifier = SpecifierSet(requires_python)
+        if current_version in specifier:
+            return True, None
+        return False, f"Requires Python {requires_python} but detected Python {current_version}"
+    except (InvalidSpecifier, InvalidVersion):
+        # If parsing fails, assume compatible to avoid false negatives
+        return True, None
+
+
+async def _fetch_package_metadata(
+    client: httpx.AsyncClient,
+    name: str,
+    latest_version: str,
+    base_url: str,
+) -> dict:
+    response = await client.get(
         base_url + f"/{name}/{latest_version}/json",
         headers={"Content-Type": "application/json"},
     )
-    data = json.loads(response.body).get("info")
+    if response.status_code < 400:  # noqa PLR2004
+        data = json.loads(response.text).get("info")
 
-    # Keep minimal information to limit cache size
-    return {
-        k: data.get(k)
-        for k in [
-            "author",
-            "bugtrack_url",
-            "docs_url",
-            "home_page",
-            "license",
-            "package_url",
-            "project_url",
-            "project_urls",
-            "summary",
-        ]
-    }
+        # Keep minimal information to limit cache size
+        return {
+            k: data.get(k)
+            for k in [
+                "author",
+                "bugtrack_url",
+                "docs_url",
+                "home_page",
+                "license",
+                "package_url",
+                "project_url",
+                "project_urls",
+                "requires_python",
+                "summary",
+            ]
+        }
+    else:
+        return {}
 
 
 class PyPIExtensionManager(ExtensionManager):
@@ -77,30 +168,36 @@ class PyPIExtensionManager(ExtensionManager):
 
     def __init__(
         self,
-        app_options: Optional[dict] = None,
-        ext_options: Optional[dict] = None,
-        parent: Optional[config.Configurable] = None,
+        app_options: dict | None = None,
+        ext_options: dict | None = None,
+        parent: config.Configurable | None = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
+        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)
         # Set configurable cache size to fetch function
-        self._fetch_package_metadata = _fetch_package_metadata
+        self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
-        self._http_client = tornado.httpclient.AsyncHTTPClient()
-        self._rpc_client = xmlrpc.client.ServerProxy(self.base_url)
+        self._rpc_client = xmlrpc.client.ServerProxy(
+            self.base_url, transport=xmlrpc_transport_override
+        )
         self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
         self.__all_packages_cache = None
 
         self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
+        if xmlrpc_transport_override:
+            self.log.info(
+                f"Extensions will be fetched using proxy, proxy host and port: {xmlrpc_transport_override.proxy}"
+            )
 
     @property
     def metadata(self) -> ExtensionManagerMetadata:
         """Extension manager metadata."""
         return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
-    async def get_latest_version(self, pkg: str) -> Optional[str]:
+    async def get_latest_version(self, pkg: str) -> str | None:
         """Return the latest available version for a given extension.
 
         Args:
@@ -109,16 +206,19 @@ class PyPIExtensionManager(ExtensionManager):
             The latest available version
         """
         try:
-            http_client = tornado.httpclient.AsyncHTTPClient()
-            response = await http_client.fetch(
-                self.base_url + f"/{pkg}/json",
-                headers={"Content-Type": "application/json"},
+            response = await self._httpx_client.get(
+                self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
             )
-            data = json.loads(response.body).get("info")
+
+            if response.status_code < 400:  # noqa PLR2004
+                data = json.loads(response.content).get("info", {})
+            else:
+                self.log.debug(f"Failed to get package information on PyPI; {response!s}")
+                return None
         except Exception:
             return None
         else:
-            return ExtensionManager.get_semver_version(data.get("version"))
+            return ExtensionManager.get_semver_version(data.get("version", "")) or None
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -175,20 +275,23 @@ class PyPIExtensionManager(ExtensionManager):
 
     @observe("package_metadata_cache_size")
     def _observe_package_metadata_cache_size(self, change):
-        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(_fetch_package_metadata)
+        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
+            partial(_fetch_package_metadata, self._httpx_client)
+        )
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], int | None]:
         """List the available extensions.
 
         Note:
             This will list the packages based on the classifier
                 Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
 
-            Then it filters it with the query
-
-            We do not try to check if they are compatible (version wise)
+            Then it filters it with the query and sorts by organization priority:
+            1. Project Jupyter (@jupyter)
+            2. JupyterLab Community (@jupyterlab-contrib)
+            3. Others
 
         Args:
             query: The search extension query
@@ -201,20 +304,13 @@ class PyPIExtensionManager(ExtensionManager):
         matches = await self.__get_all_extensions()
 
         extensions = {}
+        all_matches = []
 
-        counter = -1
-        min_index = (page - 1) * per_page
-        max_index = page * per_page
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
-            counter += 1
-            if counter < min_index or counter >= max_index:
-                continue
-
             _, latest_version = list(group)[-1]
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
-
             package_urls = data.get("project_urls") or {}
 
             source_url = package_urls.get("Source Code")
@@ -231,23 +327,75 @@ class PyPIExtensionManager(ExtensionManager):
                 or bug_tracker_url
             )
 
-            extensions[normalized_name] = ExtensionPackage(
+            # Check Python version compatibility
+            requires_python = data.get("requires_python")
+            python_compatible, version_explanation = _check_python_version_compatible(
+                requires_python
+            )
+
+            description = data.get("summary")
+            if version_explanation:
+                if description:
+                    description += f" ({version_explanation})"
+                else:
+                    description = version_explanation
+
+            extension = ExtensionPackage(
                 name=normalized_name,
-                description=data.get("summary"),
+                description=description,
                 homepage_url=best_guess_home_url,
                 author=data.get("author"),
                 license=data.get("license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
+                allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
                 package_manager_url=data.get("package_url"),
                 repository_url=source_url,
             )
 
-        return extensions, math.ceil((counter + 1) / per_page)
+            # Determine organization priority
+            priority = 3  # Default priority for other packages
+            urls_to_check = [
+                str(url).lower() for url in [source_url, homepage_url, best_guess_home_url] if url
+            ]
+            exclude = [
+                "https://github.com/jupyterlab/jupyterlab_apod",
+                "https://github.com/jupyterlab/extension-examples",
+            ]
 
-    async def __get_all_extensions(self) -> List[Tuple[str, str]]:
+            for url in urls_to_check:
+                if url in exclude:
+                    priority = 4
+                    break
+                if any(
+                    org in url
+                    for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
+                ):
+                    priority = 1
+                    break
+                elif "github.com/jupyterlab-contrib/" in url:
+                    priority = 2
+                    break
+
+            all_matches.append((priority, extension))
+
+        sorted_matches = sorted(all_matches, key=lambda x: (x[0], x[1].name))
+
+        # Apply pagination
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        page_matches = sorted_matches[start_idx:end_idx]
+
+        for _, extension in page_matches:
+            extensions[extension.name] = extension
+
+        total_pages = math.ceil(len(sorted_matches) / per_page)
+
+        return extensions, total_pages
+
+    async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
             tz=timezone.utc
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
@@ -276,100 +424,113 @@ class PyPIExtensionManager(ExtensionManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
+        with (
+            tempfile.TemporaryDirectory() as ve_dir,
+            tempfile.NamedTemporaryFile(mode="w+", dir=ve_dir, delete=False) as fconstraint,
+        ):
+            fconstraint.write(f"jupyterlab=={__version__}")
+            fconstraint.flush()
 
-        cmdline = [
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "--no-input",
-            "--quiet",
-            "--progress-bar",
-            "off",
-        ]
-        if version is not None:
-            cmdline.append(f"{name}=={version}")
-        else:
-            cmdline.append(name)
+            cmdline = [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--no-input",
+                "--quiet",
+                "--progress-bar",
+                "off",
+                "--constraint",
+                fconstraint.name,
+            ]
+            if version is not None:
+                cmdline.append(f"{name}=={version}")
+            else:
+                cmdline.append(name)
 
-        pkg_action = {}
-        try:
-            tmp_cmd = cmdline.copy()
-            tmp_cmd.insert(-1, "--dry-run")
-            tmp_cmd.insert(-1, "--report")
-            tmp_cmd.insert(-1, "-")
+            pkg_action = {}
+            try:
+                tmp_cmd = cmdline.copy()
+                tmp_cmd.insert(-1, "--dry-run")
+                tmp_cmd.insert(-1, "--report")
+                tmp_cmd.insert(-1, "-")
+                result = await current_loop.run_in_executor(
+                    None, partial(run, tmp_cmd, capture_output=True, check=True)
+                )
+
+                action_info = json.loads(result.stdout.decode("utf-8"))
+                pkg_action = next(
+                    filter(
+                        lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
+                        action_info.get("install", []),
+                    )
+                )
+            except CalledProcessError as e:
+                self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
+            except Exception as err:
+                self.log.debug("Fail to get installation report.", exc_info=err)
+            else:
+                self.log.debug(f"Actions to be executed by pip {json.dumps(action_info)}.")
+
+            self.log.debug(f"Executing '{' '.join(cmdline)}'")
+
             result = await current_loop.run_in_executor(
-                None, partial(run, tmp_cmd, capture_output=True, check=True)
+                None, partial(run, cmdline, capture_output=True)
             )
 
-            action_info = json.loads(result.stdout.decode("utf-8"))
-            pkg_action = list(
-                filter(
-                    lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
-                    action_info.get("install", []),
-                )
-            )[0]
-        except CalledProcessError as e:
-            self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
-        except Exception as err:
-            self.log.debug("Fail to get installation report.", exc_info=err)
-        else:
-            self.log.debug(f"Actions to be executed by pip {json.dumps(action_info)}.")
+            self.log.debug(f"return code: {result.returncode}")
+            self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
+            error = result.stderr.decode("utf-8")
+            if result.returncode == 0:
+                self.log.debug(f"stderr: {error}")
+                # Figure out if the package has server or kernel parts
+                jlab_metadata = None
+                try:
+                    download_url: str = pkg_action.get("download_info", {}).get("url")
+                    if download_url is not None:
+                        response = await self._httpx_client.get(download_url)
+                        if response.status_code < 400:  # noqa PLR2004
+                            if download_url.endswith(".whl"):
+                                with ZipFile(io.BytesIO(response.content)) as wheel:
+                                    for filename in filter(
+                                        lambda f: Path(f).name == "package.json",
+                                        wheel.namelist(),
+                                    ):
+                                        data = json.loads(wheel.read(filename))
+                                        jlab_metadata = data.get("jupyterlab")
+                                        if jlab_metadata is not None:
+                                            break
+                            elif download_url.endswith("tar.gz"):
+                                with TarFile(io.BytesIO(response.content)) as sdist:
+                                    for filename in filter(
+                                        lambda f: Path(f).name == "package.json",
+                                        sdist.getnames(),
+                                    ):
+                                        data = json.load(
+                                            sdist.extractfile(sdist.getmember(filename))
+                                        )
+                                        jlab_metadata = data.get("jupyterlab")
+                                        if jlab_metadata is not None:
+                                            break
+                        else:
+                            self.log.debug(f"Failed to get '{download_url}'; {response!s}")
+                except Exception as e:
+                    self.log.debug("Fail to get package.json.", exc_info=e)
 
-        self.log.debug(f"Executing '{' '.join(cmdline)}'")
+                follow_ups = [
+                    "frontend",
+                ]
+                if jlab_metadata is not None:
+                    discovery = jlab_metadata.get("discovery", {})
+                    if "kernel" in discovery:
+                        follow_ups.append("kernel")
+                    if "server" in discovery:
+                        follow_ups.append("server")
 
-        result = await current_loop.run_in_executor(
-            None, partial(run, cmdline, capture_output=True)
-        )
-
-        self.log.debug(f"return code: {result.returncode}")
-        self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
-        error = result.stderr.decode("utf-8")
-        if result.returncode == 0:
-            self.log.debug(f"stderr: {error}")
-            # Figure out if the package has server or kernel parts
-            jlab_metadata = None
-            try:
-                download_url: str = pkg_action.get("download_info", {}).get("url")
-                if download_url is not None:
-                    response = await self._http_client.fetch(download_url)
-                    if download_url.endswith(".whl"):
-                        with ZipFile(io.BytesIO(response.body)) as wheel:
-                            for name in filter(
-                                lambda f: Path(f).name == "package.json",
-                                wheel.namelist(),
-                            ):
-                                data = json.loads(wheel.read(name))
-                                jlab_metadata = data.get("jupyterlab")
-                                if jlab_metadata is not None:
-                                    break
-                    elif download_url.endswith("tar.gz"):
-                        with TarFile(io.BytesIO(response.body)) as sdist:
-                            for name in filter(
-                                lambda f: Path(f).name == "package.json",
-                                sdist.getnames(),
-                            ):
-                                data = json.load(sdist.extractfile(sdist.getmember(name)))
-                                jlab_metadata = data.get("jupyterlab")
-                                if jlab_metadata is not None:
-                                    break
-            except Exception as e:
-                self.log.debug("Fail to get package.json.", exc_info=e)
-
-            follow_ups = [
-                "frontend",
-            ]
-            if jlab_metadata is not None:
-                discovery = jlab_metadata.get("discovery", {})
-                if "kernel" in discovery:
-                    follow_ups.append("kernel")
-                if "server" in discovery:
-                    follow_ups.append("server")
-
-            return ActionResult(status="ok", needs_restart=follow_ups)
-        else:
-            self.log.error(f"Failed to installed {name}: code {result.returncode}\n{error}")
-            return ActionResult(status="error", message=error)
+                return ActionResult(status="ok", needs_restart=follow_ups)
+            else:
+                self.log.error(f"Failed to install {name}: code {result.returncode}\n{error}")
+                return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:
         """Uninstall the required extension.

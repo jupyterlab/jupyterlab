@@ -1,18 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition,
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
+import { VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { FileEditor } from './widget';
+import type { FileEditor } from './widget';
 
 export interface IFileEditorAdapterOptions extends IAdapterOptions {
   /**
@@ -44,6 +47,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
       .then(async () => {
         await this.initOnceReady();
         this._readyDelegate.resolve();
+        this._editorAdded.emit({
+          editor: this._virtualEditor
+        });
       })
       .catch(console.error);
   }
@@ -73,13 +79,13 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   get mimeType(): string {
     const mimeTypeFromModel = this.editor.model.mimeType;
     const codeMirrorMimeType: string = Array.isArray(mimeTypeFromModel)
-      ? mimeTypeFromModel[0] ?? 'text/plain'
+      ? (mimeTypeFromModel[0] ?? IEditorMimeTypeService.defaultMimeType)
       : mimeTypeFromModel;
     const contentsModel = this.editor.context.contentsModel;
 
     // when MIME type is not known it defaults to 'text/plain',
     // so if it is different we can accept it as it is
-    if (codeMirrorMimeType != 'text/plain') {
+    if (codeMirrorMimeType != IEditorMimeTypeService.defaultMimeType) {
       return codeMirrorMimeType;
     } else if (contentsModel) {
       // a script that does not have a MIME type known by the editor
@@ -150,6 +156,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
     if (this.isDisposed) {
       return;
     }
+    this._editorRemoved.emit({
+      editor: this._virtualEditor
+    });
     this.editor.model.mimeTypeChanged.disconnect(this.reloadConnection);
     super.dispose();
   }
@@ -174,6 +183,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * Get the index of editor from the cursor position in the virtual
    * document. Since there is only one editor, this method always return
    * 0
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    * @return  {number} - index of the virtual editor

@@ -6,6 +6,7 @@
 .jp-DebuggerSources {
   min-height: 50px;
   margin-top: 3px;
+  overflow-y: scroll;
 }
 
 [data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
@@ -28,4 +29,5 @@
   white-space: nowrap;
   font-size: var(--jp-ui-font-size0);
   color: var(--jp-ui-font-color1);
+  user-select: text;
 }

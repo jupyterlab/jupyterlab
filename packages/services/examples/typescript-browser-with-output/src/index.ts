@@ -1,6 +1,5 @@
 /* -----------------------------------------------------------------------------
-| Copyright (c) 2014-2017, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 /**

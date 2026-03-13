@@ -26,14 +26,17 @@
 import json
 import os
 import shutil
+import sys
 import time
 from collections import ChainMap
 from functools import partial
 from pathlib import Path
 from subprocess import check_call
-from typing import List
 
 HERE = Path(__file__).parent.resolve()
+
+# Add the _ext directory to Python path for custom extensions
+sys.path.insert(0, str(HERE / "_ext"))
 
 # -- General configuration ------------------------------------------------
 
@@ -49,9 +52,10 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
-myst_enable_extensions = ["html_image"]
+myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,7 +64,7 @@ templates_path = ["_templates"]
 # The file extensions of source files.
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {".md": "markdown"}
 
 # The master toctree document.
 master_doc = "index"
@@ -98,7 +102,9 @@ gettext_compact = False
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = [
+    "api/media/*.md",
+]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -109,7 +115,7 @@ def build_api_docs(out_dir: Path):
     """build js api docs"""
     docs = HERE.parent
     root = docs.parent
-    docs_api = docs / "api"
+    docs_api = docs / "source" / "api"
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
@@ -127,12 +133,15 @@ def build_api_docs(out_dir: Path):
     dest_dir = out_dir / "api"
     if dest_dir.exists():
         shutil.rmtree(str(dest_dir))
+
     shutil.copytree(str(docs_api), str(dest_dir))
 
 
 # Copy frontend files for snippet inclusion
 FILES_LIST = [  # File paths should be relative to jupyterlab root folder
-    "packages/settingregistry/src/plugin-schema.json"
+    "galata/test/documentation/data/custom-jupyter.css",
+    "galata/test/documentation/data/custom-markdown.css",
+    "packages/settingregistry/src/plugin-schema.json",
 ]
 SNIPPETS_FOLDER = "snippets"
 
@@ -163,7 +172,7 @@ IMAGES_FOLDER = "images"
 AUTOMATED_SCREENSHOTS_FOLDER = "galata/test/documentation"
 
 
-def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
+def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
     """Copy PlayWright automated screenshots in documentation folder.
 
     Args:
@@ -188,33 +197,150 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
 COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
 COMMANDS_LIST_DOC = "user/commands_list.md"
 PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
-PLUGINS_LIST_DOC = "extension/plugins_list.rst"
+PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
-TOKENS_LIST_DOC = "extension/tokens_list.rst"
+TOKENS_LIST_DOC = "extension/tokens_list.md"
+TOKENS_BLACKLIST = ["@jupyterlab/services-extension:default-content-provider"]
+
+
+def _clean_command_data(command: dict) -> None:
+    """Clean up command data by ensuring required keys exist and formatting values."""
+    for key in ("id", "label", "caption"):
+        if key not in command:
+            command[key] = ""
+        else:
+            command[key] = command[key].replace("\n", " ")
+
+
+def _format_shortcuts(shortcuts: list) -> str:
+    """Format shortcuts as HTML kbd elements."""
+    return " ".join(f"<kbd>{shortcut}</kbd>" for shortcut in shortcuts) if shortcuts else ""
+
+
+def _format_property(name: str, info: dict, required_args: set, indent: int = 0) -> str:
+    """Format a single property, recursively handling nested properties."""
+    arg_type = info.get("type", "")
+    type_str = (
+        f" (`{', '.join(arg_type) if isinstance(arg_type, list) else arg_type}`)"
+        if arg_type
+        else ""
+    )
+    required_str = " *(required)*" if name in required_args else ""
+    if "enum" in info:
+        enum_values = ", ".join('`"' + str(v) + '"`' for v in info["enum"])
+        enum_str = " - Options: " + enum_values
+    else:
+        enum_str = ""
+    desc_str = f": {info['description']}" if info.get("description") else ""
+
+    line = f"{'  ' * indent}- **{name}**{type_str}{required_str}{enum_str}{desc_str}\n"
+
+    if info.get("properties"):
+        nested_required = set(info.get("required", []))
+        for nested_name, nested_info in info["properties"].items():
+            line += _format_property(nested_name, nested_info, nested_required, indent + 1)
+
+    return line
+
+
+def _format_command_arguments(args_schema: dict) -> str:
+    """Format command arguments section."""
+    if "properties" not in args_schema or not args_schema["properties"]:
+        return "**Arguments:** None\n\n"
+
+    template = "**Arguments:**\n\n"
+    required_args = set(args_schema.get("required", []))
+
+    for arg_name, arg_info in args_schema["properties"].items():
+        template += _format_property(arg_name, arg_info, required_args)
+
+    return template + "\n"
+
+
+def _format_scope_name(scope: str) -> str:
+    """Format scope name for display."""
+    if scope.endswith("-extension"):
+        scope = scope[: -len("-extension")]
+
+    compound_suffixes = ["browser", "manager", "menu", "editor", "console", "viewer", "search"]
+    for suffix in compound_suffixes:
+        if scope.endswith(suffix) and scope != suffix:
+            prefix = scope[: -len(suffix)]
+            scope = f"{prefix}-{suffix}"
+            break
+
+    words = scope.split("-")
+    formatted_words = []
+
+    for word in words:
+        if word.lower() in ["ui", "css", "html", "pdf", "csv", "tsv", "toc", "lsp"]:
+            formatted_words.append(word.upper())
+        elif word.lower() == "javascript":
+            formatted_words.append("JavaScript")
+        elif word.lower() == "markdown":
+            formatted_words.append("Markdown")
+        else:
+            formatted_words.append(word.capitalize())
+
+    return " ".join(formatted_words)
+
+
+def _format_single_command(command: dict, is_last: bool = False) -> str:
+    """Format a single command entry."""
+    _clean_command_data(command)
+
+    shortcuts_text = _format_shortcuts(command.get("shortcuts", []))
+    template = f"## `{command['id']}`\n\n"
+
+    if command.get("label"):
+        template += f"**Label:** {command['label']}\n\n"
+
+    if shortcuts_text:
+        template += f"**Shortcuts:** {shortcuts_text}\n\n"
+
+    if "args" in command:
+        template += _format_command_arguments(command["args"])
+    else:
+        template += "**Arguments:** None\n\n"
+
+    if not is_last:
+        template += "---\n\n"
+
+    return template
 
 
 def document_commands_list(temp_folder: Path) -> None:
     """Generate the command list documentation page from application extraction."""
     list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
-
     commands_list = json.loads(list_path.read_text())
 
-    template = """| Command id | Label | Shortcuts |
-| ---------- | ----- | --------- |
-"""
+    commands_by_scope = {}
+    for command in commands_list:
+        command_id = command.get("id", "")
+        scope = command_id.split(":")[0] if ":" in command_id else "Other"
 
-    for command in sorted(commands_list, key=lambda c: c["id"]):
-        for key in ("id", "label", "caption"):
-            if key not in command:
-                command[key] = ""
-            else:
-                command[key] = command[key].replace("\n", " ")
-        shortcuts = command.get("shortcuts", [])
-        command["shortcuts"] = (
-            "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>" if len(shortcuts) else ""
-        )
+        display_scope = _format_scope_name(scope)
 
-        template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
+        if display_scope not in commands_by_scope:
+            commands_by_scope[display_scope] = []
+        commands_by_scope[display_scope].append(command)
+
+        sorted_scopes = sorted(commands_by_scope.keys(), key=str.lower)
+
+    template = ""
+    for scope_idx, scope in enumerate(sorted_scopes):
+        commands = sorted(commands_by_scope[scope], key=lambda c: c.get("id", ""))
+
+        template += f"# {scope}\n\n"
+
+        for i, command in enumerate(commands):
+            is_last_command_in_scope = i == len(commands) - 1
+            is_last_scope = scope_idx == len(sorted_scopes) - 1
+            is_last_overall = is_last_command_in_scope and is_last_scope
+            template += _format_single_command(command, is_last=is_last_overall)
+
+        if scope_idx != len(sorted_scopes) - 1:
+            template += "\n"
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
 
@@ -226,7 +352,12 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     template = ""
 
     for _name, _description in items.items():
-        template += f"- ``{_name}``: {_description}\n"
+        if _name in TOKENS_BLACKLIST:
+            continue
+
+        # Normalize line continuation indentation to 2 spaces (prettier standard for markdown lists)
+        _description = _description.replace("\n    ", "\n  ")
+        template += f"- `{_name}`: {_description}\n"
 
     output_path.write_text(template)
 
@@ -244,6 +375,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
+    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -262,21 +394,28 @@ html_theme_options = {
             "icon": "fab fa-discourse",
         },
         {
-            "name": "Gitter",
-            "url": "https://gitter.im/jupyterlab/jupyterlab",
-            "icon": "fab fa-gitter",
+            "name": "Zulip",
+            "url": "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab",
+            "icon": "fa-solid fa-comments",
         },
     ],
     "logo": {
-        "alt_text": "Lumino",
+        "image_light": "_static/logo-rectangle.svg",
+        "image_dark": "_static/logo-rectangle-dark.svg",
+        "alt_text": "JupyterLab",
     },
     "use_edit_page_button": True,
     "navbar_align": "left",
-    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
     "navbar_start": ["navbar-logo", "version-switcher"],
+    "navigation_with_keys": False,
     "footer_start": ["copyright.html"],
+    "footer_end": ["privacy_footer.html", "theme-version"],
     "switcher": {
-        "json_url": "https://jupyterlab.readthedocs.io/en/latest/_static/switcher.json",
+        # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
+        # otherwise older versions won't list newer versions
+        "json_url": "/".join(
+            ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
+        ),
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
     },
 }
@@ -388,10 +527,17 @@ epub_exclude_files = ["search.html"]
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):
+    # Enable Plausible.io stats
+    app.add_js_file("https://plausible.io/js/pa-Tem97Eeu4LJFfSRY89aW1.js", loading_method="async")
+    app.add_js_file(
+        filename=None,
+        body="window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init({hashBasedRouting:true})",
+    )
+
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
@@ -425,3 +571,6 @@ def setup(app):
     )
 
     app.connect("build-finished", partial(clean_code_files, tmp_files))
+
+    # Inherit some Jupyter branding CSS rules from the Jupyter Documentation
+    app.add_css_file("https://docs.jupyter.org/en/latest/_static/jupyter.css")

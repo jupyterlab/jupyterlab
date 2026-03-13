@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-types */
-// Copyright (c) Jupyter Development Team.
-// Copyright (c) Bloomberg Finance LP.
-// Distributed under the terms of the Modified BSD License.
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
+ */
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import type {
@@ -15,13 +16,13 @@ import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import { findIndex } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
-import {
+import type {
   IGalataInpage,
   INotebookRunCallback,
   IPluginNameToInterfaceMap,
-  IWaitForSelectorOptions,
-  PLUGIN_ID_GALATA_HELPERS
+  IWaitForSelectorOptions
 } from './tokens';
+import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
 
 const PLUGIN_ID_DOC_MANAGER = '@jupyterlab/docmanager-extension:manager';
 const PLUGIN_ID_ROUTER = '@jupyterlab/application-extension:router';
@@ -46,8 +47,8 @@ export class GalataInpage implements IGalataInpage {
       if (hasPlugin) {
         try {
           const appAny = app as any;
-          const plugin: any = appAny._plugins
-            ? appAny._plugins.get(pluginId)
+          const plugin: any = appAny.pluginRegistry._plugins
+            ? appAny.pluginRegistry._plugins.get(pluginId)
             : undefined;
           if (plugin.activated) {
             resolve(plugin.service);

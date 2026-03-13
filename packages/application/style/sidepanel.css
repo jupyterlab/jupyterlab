@@ -52,6 +52,12 @@
   position: relative;
 }
 
+.jp-SideBar .lm-TabBar-tab:focus-visible {
+  /* --accent-fill-focus is computed by the jp toolkit to ensure accessibility */
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+  outline-offset: -3px;
+}
+
 .jp-SideBar .lm-TabBar-tab.lm-mod-current::after {
   /* Internal border override pseudo-element */
   position: absolute;

@@ -1,8 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
-import { TableOfContents } from '../tokens';
+import { Sanitizer } from '@jupyterlab/apputils';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import { renderMarkdown } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { TableOfContents } from '../tokens';
 
 /**
  * Markdown heading
@@ -24,27 +27,36 @@ export interface IMarkdownHeading extends TableOfContents.IHeading {
  *
  * @param raw Raw markdown heading
  * @param level Heading level
+ * @param sanitizer HTML sanitizer
  */
 export async function getHeadingId(
-  parser: IMarkdownParser,
+  markdownParser: IMarkdownParser,
   raw: string,
-  level: number
+  level: number,
+  sanitizer?: IRenderMime.ISanitizer
 ): Promise<string | null> {
   try {
-    const innerHTML = await parser.render(raw);
+    const host = document.createElement('div');
 
-    if (!innerHTML) {
-      return null;
-    }
+    await renderMarkdown({
+      markdownParser,
+      host,
+      source: raw,
+      trusted: false,
+      sanitizer: sanitizer ?? new Sanitizer(),
+      shouldTypeset: false,
+      resolver: null,
+      linkHandler: null,
+      latexTypesetter: null
+    });
 
-    const container = document.createElement('div');
-    container.innerHTML = innerHTML;
-    const header = container.querySelector(`h${level}`);
+    const header = host.querySelector(`h${level}`);
     if (!header) {
       return null;
     }
-
-    return renderMarkdown.createHeaderId(header);
+    return sanitizer?.allowNamedProperties
+      ? header.id
+      : header.getAttribute('data-jupyter-id');
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
@@ -55,8 +67,62 @@ export async function getHeadingId(
 /**
  * Parses the provided string and returns a list of headings.
  *
+ * @param text - Markdown text
+ * @param parser - A Markdown parser instance used to render the content to HTML.
+ * @returns List of headings
+ *
+ * @remarks
+ * Renders Markdown to HTML and extracts `<h1>`–`<h6>` elements.
+ * Returns an empty list if the parser is `null`.
+ */
+export async function parseHeadings(
+  markdownText: string,
+  parser: IMarkdownParser | null
+): Promise<IMarkdownHeading[]> {
+  if (!parser || !parser.getHeadingTokens) {
+    console.warn(
+      'Unable to parse headings; Markdown parser is missing or does not implement getHeadingTokens().'
+    );
+    return [];
+  }
+
+  // Get the heading tokens from the parser, including the source line metadata
+  const headingTokens = await parser.getHeadingTokens(markdownText);
+
+  // Convert each heading token into HTML and extract the heading elements,
+  // as this provides a clean and reliable way to retrieve the headings.
+  const parseHeadings = await Promise.all(
+    headingTokens.map(async token => {
+      const renderedHtml = await parser.render(token.raw);
+      const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
+      const htmlHeadings = Array.from(
+        dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
+
+      return htmlHeadings.map(e => ({
+        text: e.textContent?.trim() || '',
+        line: token.line,
+        level: parseInt(e.tagName[1], 10),
+        raw: token.raw.replace(/\n+$/, ''),
+        skip: skipHeading.test(token.raw)
+      }));
+    })
+  );
+
+  return parseHeadings.reduce(
+    (acc, curr) => acc.concat(curr),
+    [] as IMarkdownHeading[]
+  );
+}
+
+/**
+ * @deprecated in favour of async parseHeadings()
+ *
+ * Parses the provided string and returns a list of headings.
+ *
  * @param text - Input text
  * @returns List of headings
+ *
  */
 export function getHeadings(text: string): IMarkdownHeading[] {
   // Split the text into lines:
@@ -65,6 +131,8 @@ export function getHeadings(text: string): IMarkdownHeading[] {
   // Iterate over the lines to get the header level and text for each line:
   const headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
+  let openingFence = 0;
+  let fenceType;
   let lineIdx = 0;
 
   // Don't check for Markdown headings if in a YAML frontmatter block.
@@ -94,8 +162,19 @@ export function getHeadings(text: string): IMarkdownHeading[] {
     }
 
     // Don't check for Markdown headings if in a code block
-    if (line.startsWith('```')) {
-      isCodeBlock = !isCodeBlock;
+    if (line.startsWith('```') || line.startsWith('~~~')) {
+      const closingFence = extractLeadingFences(line);
+      if (closingFence === 0) continue;
+      if (openingFence === 0) {
+        fenceType = line.charAt(0);
+        isCodeBlock = !isCodeBlock;
+        openingFence = closingFence;
+        continue;
+      } else if (fenceType === line.charAt(0) && closingFence >= openingFence) {
+        isCodeBlock = !isCodeBlock;
+        openingFence = 0;
+        fenceType = '';
+      }
     }
     if (isCodeBlock) {
       continue;
@@ -111,6 +190,14 @@ export function getHeadings(text: string): IMarkdownHeading[] {
     }
   }
   return headings;
+}
+
+// Returns the length of ``` or ~~~ fences.
+function extractLeadingFences(line: string) {
+  let match;
+  if (line.startsWith('`')) match = line.match(/^(`{3,})/);
+  else match = line.match(/^(~{3,})/);
+  return match ? match[0].length : 0;
 }
 
 const MARKDOWN_MIME_TYPE = [
@@ -140,7 +227,6 @@ export function isMarkdown(mime: string): boolean {
 
 /**
  * Interface describing a parsed heading result.
- *
  * @private
  */
 interface IHeader {

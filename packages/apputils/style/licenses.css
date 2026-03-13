@@ -1,0 +1,184 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* licenses */
+.jp-Licenses {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-Licenses-FormArea {
+  display: flex;
+  flex-direction: column;
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  width: calc(18 * var(--jp-ui-font-size1));
+}
+
+.jp-Licenses .lm-SplitPanel-handle:hover {
+  background-color: var(--jp-brand-color2);
+}
+
+/* filters */
+.jp-Licenses-Filters {
+  padding: var(--jp-ui-font-size1) calc(var(--jp-ui-font-size1) / 2) 0
+    var(--jp-ui-font-size1);
+}
+
+.jp-Licenses-Filters label {
+  display: block;
+}
+
+.jp-Licenses-Filters-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-RenderedHTMLCommon.jp-Licenses-Filters ul,
+.jp-RenderedHTMLCommon.jp-Licenses-Filters li {
+  list-style: none;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-Licenses-Filters input {
+  width: 100%;
+}
+
+.jp-RenderedHTMLCommon.jp-Licenses-Filters ul {
+  padding: 0 0 var(--jp-ui-font-size1) 0;
+  margin: 0;
+  padding-bottom: var(--jp-ui-font-size1);
+}
+
+/* bundles */
+.jp-Licenses-Bundles {
+  background-color: var(--jp-layout-color2);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-content {
+  width: 100%;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab {
+  padding: calc(var(--jp-ui-font-size1) / 2);
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tabLabel {
+  text-overflow: ellipsis;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab label {
+  background-color: var(--jp-layout-color2);
+  border-radius: var(--jp-ui-font-size1);
+  width: calc(2.5 * var(--jp-ui-font-size1));
+  padding: 0 calc(var(--jp-ui-font-size1) / 2);
+  text-align: center;
+  margin-left: calc(var(--jp-ui-font-size1) / 2);
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current {
+  background-color: var(--jp-brand-color1);
+  color: #fff;
+}
+
+.jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current label {
+  background-color: #fff;
+  color: var(--jp-brand-color1);
+}
+
+/* license grid */
+.jp-Licenses-Grid.jp-RenderedHTMLCommon {
+  min-width: calc(var(--jp-ui-font-size1) * 10);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.jp-Licenses-Grid.jp-RenderedHTMLCommon form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-RenderedHTMLCommon.jp-Licenses-Grid table {
+  flex: 1;
+  max-width: 100%;
+  border: solid var(--jp-border-width) var(--jp-border-color2);
+  border-top: 0;
+  border-bottom: 0;
+  margin: 0;
+}
+
+.jp-Licenses-Grid.jp-RenderedHTMLCommon td,
+.jp-Licenses-Grid.jp-RenderedHTMLCommon th {
+  text-align: left;
+}
+
+.jp-Licenses-Grid td:nth-child(1) {
+  max-width: calc(2 * var(--jp-ui-font-size1));
+}
+
+.jp-Licenses-Grid label {
+  width: 100%;
+}
+
+.jp-Licenses .jp-Licenses-Grid.jp-RenderedHTMLCommon code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.jp-Licenses-Grid.jp-RenderedHTMLCommon tr.jp-mod-selected {
+  background-color: var(--jp-brand-color1);
+  color: #fff;
+}
+
+.jp-Licenses-Grid.jp-RenderedHTMLCommon .jp-mod-selected code {
+  color: #fff;
+}
+
+/* license text */
+.jp-Licenses-Text {
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  padding: 0 0 0 var(--jp-ui-font-size1);
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Licenses-Text h1 {
+  flex: initial;
+  margin-bottom: 0;
+}
+
+.jp-Licenses-Text h1:empty {
+  display: none;
+}
+
+.jp-Licenses-Text blockquote {
+  flex: initial;
+}
+
+.jp-Licenses-Text.jp-RenderedHTMLCommon code {
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: var(--jp-ui-font-size1);
+  margin-bottom: 0;
+  padding-bottom: var(--jp-ui-font-size1);
+}
+
+.jp-Licenses-Text code:empty {
+  display: none;
+}

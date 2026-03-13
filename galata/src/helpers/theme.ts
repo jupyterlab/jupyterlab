@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
  * Theme helpers
@@ -14,6 +14,13 @@ export class ThemeHelper {
    */
   async setDarkTheme(): Promise<void> {
     await this.setTheme('JupyterLab Dark');
+  }
+
+  /**
+   * Set JupyterLab theme to Dark High Contrast
+   */
+  async setDarkHighContrastTheme(): Promise<void> {
+    await this.setTheme('JupyterLab Dark High Contrast');
   }
 
   /**
@@ -45,6 +52,6 @@ export class ThemeHelper {
       await window.galata.setTheme(themeName);
     }, themeName);
 
-    await page.waitForSelector('#jupyterlab-splash', { state: 'detached' });
+    await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
   }
 }

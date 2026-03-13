@@ -5,16 +5,16 @@
  * @module metadataform
  */
 
-import { CellType } from '@jupyterlab/nbformat';
-import { NotebookTools } from '@jupyterlab/notebook';
-import { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
-import {
-  PartialJSONObject,
-  ReadonlyJSONObject,
-  Token
-} from '@lumino/coreutils';
-import { MetadataFormWidget } from './metadataform';
+import type { CellType } from '@jupyterlab/nbformat';
+import type { NotebookTools } from '@jupyterlab/notebook';
+import type {
+  BaseSettings,
+  ISettingRegistry
+} from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { PartialJSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
+import type { MetadataFormWidget } from './metadataform';
 
 export namespace MetadataForm {
   /**
@@ -179,8 +179,8 @@ export namespace MetadataForm {
     /**
      * Update the metadata of the current cell or notebook.
      *
-     * @param formData: the cell metadata set in the form.
-     * @param reload: whether to update the form after updating the metadata.
+     * @param formData the cell metadata set in the form.
+     * @param reload whether to update the form after updating the metadata.
      *
      * ## Notes
      * Metadata are updated from root only. If some metadata is nested,

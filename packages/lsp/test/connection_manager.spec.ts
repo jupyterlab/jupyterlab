@@ -6,9 +6,12 @@
 import {
   DocumentConnectionManager,
   LanguageServerManager,
-  VirtualDocument
+  VirtualDocument,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
+import { LabShell } from '@jupyterlab/application';
 import { ServerConnection } from '@jupyterlab/services';
+import { LSPConnection } from '../src/connection';
 
 jest.mock('@jupyterlab/notebook');
 
@@ -54,7 +57,10 @@ describe('@jupyterlab/lsp', () => {
     let document: VirtualDocument;
     beforeEach(() => {
       manager = new DocumentConnectionManager({
-        languageServerManager: new LanguageServerManager({})
+        languageServerManager: new LanguageServerManager({}),
+        adapterTracker: new WidgetLSPAdapterTracker({
+          shell: new LabShell()
+        })
       });
       document = new VirtualDocument({
         language: 'python',
@@ -92,6 +98,18 @@ describe('@jupyterlab/lsp', () => {
         });
         expect(manager.unregisterDocument).toHaveBeenCalled();
         expect(manager.disconnectDocumentSignals).toHaveBeenCalled();
+      });
+    });
+    describe('#dispose()', () => {
+      it('should dispose of an uninitialized connection without errors', () => {
+        const connection = new LSPConnection({
+          capabilities: {},
+          languageId: '',
+          rootUri: '',
+          serverUri: ''
+        });
+        connection.dispose();
+        expect(connection.isDisposed).toBe(true);
       });
     });
   });

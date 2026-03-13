@@ -1,46 +1,56 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { closeBrackets } from '@codemirror/autocomplete';
-import { defaultKeymap, indentLess } from '@codemirror/commands';
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
+import { defaultKeymap } from '@codemirror/commands';
 import {
   bracketMatching,
   foldGutter,
   indentOnInput,
   indentUnit
 } from '@codemirror/language';
-import {
-  Compartment,
-  EditorState,
-  Extension,
-  StateEffect
-} from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
+import { Compartment, EditorState, Prec, StateEffect } from '@codemirror/state';
+import type { KeyBinding } from '@codemirror/view';
 import {
   crosshairCursor,
   drawSelection,
+  dropCursor,
   EditorView,
   highlightActiveLine,
+  highlightSpecialChars,
   highlightTrailingWhitespace,
   highlightWhitespace,
-  KeyBinding,
   keymap,
   lineNumbers,
   rectangularSelection,
-  scrollPastEnd
+  scrollPastEnd,
+  tooltips
 } from '@codemirror/view';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IObservableDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IObservableDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { StateCommands } from './commands';
-import { customTheme, CustomTheme, rulers } from './extensions';
-import {
+import type { CustomTheme } from './extensions';
+import { customTheme, rulers } from './extensions';
+import type {
   IConfigurableExtension,
   IEditorExtensionFactory,
   IEditorExtensionRegistry,
   IEditorThemeRegistry,
   IExtensionsHandler
 } from './token';
+import {
+  closeSearchPanel,
+  findNext,
+  findPrevious,
+  openSearchPanel,
+  selectSelectionMatches
+} from '@codemirror/search';
 
 /**
  * The class name added to read only editor widgets.
@@ -58,7 +68,7 @@ export interface IEditorHandlerOptions {
   /**
    * The configuration options for the editor.
    *
-   * They take precendence over the base configuration.
+   * They take precedence over the base configuration.
    */
   config?: Record<string, any>;
   /**
@@ -175,6 +185,7 @@ export class ExtensionsHandler
    * to `IExtensionsHandler.configChanged`.
    */
   setBaseOptions(options: Record<string, any>): void {
+    // Change values of baseConfig
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
       this._baseConfig = options;
@@ -187,6 +198,12 @@ export class ExtensionsHandler
             return agg;
           }, {})
         );
+      }
+    }
+    // Change values of config keys if present in options
+    for (const key of Object.keys(options)) {
+      if (key in this._config && this._config[key] != options[key]) {
+        this.setOption(key, options[key]);
       }
     }
   }
@@ -206,7 +223,6 @@ export class ExtensionsHandler
     const changed = this._getChangedOptions(options, this._config);
     if (changed.length > 0) {
       this._config = { ...options };
-
       this._configChanged.emit(
         changed.reduce<Record<string, any>>((agg, key) => {
           agg[key] = this._config[key] ?? this._baseConfig[key];
@@ -642,6 +658,15 @@ export namespace EditorExtensionRegistry {
         }
       }),
       Object.freeze({
+        name: 'highlightSpecialCharacters',
+        default: true,
+        factory: () => createConditionalExtension(highlightSpecialChars()),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Highlight special characters')
+        }
+      }),
+      Object.freeze({
         name: 'highlightTrailingWhitespace',
         default: false,
         factory: () =>
@@ -683,11 +708,51 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'keymap',
         default: [
-          ...defaultKeymap,
+          {
+            key: 'Mod-Enter',
+            run: StateCommands.insertBlankLineOnRun
+          },
+          {
+            key: 'Enter',
+            run: StateCommands.completerOrInsertNewLine
+          },
+          {
+            key: 'Escape',
+            run: StateCommands.simplifySelectionAndMaybeSwitchToCommandMode
+          },
+          ...defaultKeymap.filter(binding => {
+            // - Disable the default Mod-Enter handler as it always prevents default,
+            //   preventing us from running cells with Ctrl + Enter. Instead we provide
+            //   our own handler (insertBlankLineOnRun) which does not prevent default
+            //   when used in code runner editors.
+            // - Disable the default Shift-Mod-k handler because users prefer Ctrl+D
+            //   for deleting lines, and because it prevents opening Table of Contents
+            //   with Ctrl+Shift+K.
+            // - Disable shortcuts for toggling comments ("Mod-/" and "Alt-A")
+            //   as these as handled by lumino command
+            // - Disable Escape handler because it prevents default and we
+            //   want to run a cell action (switch to command mode) on Esc
+            // - Disable default Enter handler because it prevents us from
+            //   accepting a completer suggestion with Enter.
+            // - Disable Ctrl-m (Shift-Alt-m on Mac) which toggles tab focus mode;
+            //   JupyterLab binds `Esc` to an equivalent behavior (switching
+            //   between command end edit mode) in notebooks, but has no equivalent
+            //   in the File Editor; instead, a `codemirror:toggle-tab-focus-mode`
+            //   command can be bound to invoke this behaviour.
+            return ![
+              'Ctrl-m',
+              'Mod-Enter',
+              'Shift-Mod-k',
+              'Mod-/',
+              'Alt-A',
+              'Escape',
+              'Enter'
+            ].includes(binding.key as string);
+          }),
           {
             key: 'Tab',
             run: StateCommands.indentMoreOrInsertTab,
-            shift: indentLess
+            shift: StateCommands.dedentIfNotLaunchingTooltip
           }
         ],
         factory: () =>
@@ -712,9 +777,23 @@ export namespace EditorExtensionRegistry {
         }
       }),
       Object.freeze({
+        name: 'dropCursor',
+        default: true,
+        factory: () => createConditionalExtension(dropCursor()),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Drop Cursor')
+        }
+      }),
+      Object.freeze({
         name: 'matchBrackets',
         default: true,
-        factory: () => createConditionalExtension(bracketMatching()),
+        factory: () =>
+          createConditionalExtension([
+            bracketMatching(),
+            // closeBracketsKeymap must have higher precedence over defaultKeymap
+            Prec.high(keymap.of(closeBracketsKeymap))
+          ]),
         schema: {
           type: 'boolean',
           title: trans.__('Match Brackets')
@@ -764,6 +843,54 @@ export namespace EditorExtensionRegistry {
         }
       }),
       Object.freeze({
+        name: 'extendSelection',
+        default: true,
+        factory: () =>
+          createConditionalExtension(
+            keymap.of([
+              {
+                key: 'Mod-Shift-l',
+                run: selectSelectionMatches,
+                preventDefault: true
+              }
+            ])
+          )
+      }),
+      Object.freeze({
+        // Whether to activate the native CodeMirror search panel or not.
+        name: 'searchWithCM',
+        default: false,
+        factory: () =>
+          createConditionalExtension(
+            keymap.of([
+              {
+                key: 'Mod-f',
+                run: openSearchPanel,
+                scope: 'editor search-panel'
+              },
+              {
+                key: 'F3',
+                run: findNext,
+                shift: findPrevious,
+                scope: 'editor search-panel',
+                preventDefault: true
+              },
+              {
+                key: 'Mod-g',
+                run: findNext,
+                shift: findPrevious,
+                scope: 'editor search-panel',
+                preventDefault: true
+              },
+              {
+                key: 'Escape',
+                run: closeSearchPanel,
+                scope: 'editor search-panel'
+              }
+            ])
+          )
+      }),
+      Object.freeze({
         name: 'scrollPastEnd',
         default: false,
         factory: (options: IEditorExtensionFactory.IOptions) =>
@@ -778,6 +905,42 @@ export namespace EditorExtensionRegistry {
           title: trans.__('Smart Indentation')
         }
       }),
+      /**
+       * tabFocusable
+       *
+       * Can the user use the tab key to focus on / enter the CodeMirror editor?
+       * If this is false, the CodeMirror editor can still be focused (via
+       * mouse-click, for example), just not via tab key navigation.
+       *
+       * It can be useful to set tabFocusable to false when the editor is
+       * embedded in a context that provides an alternative to the tab key for
+       * navigation. For example, the Notebook widget allows the user to move
+       * from one cell to another using the up and down arrow keys and to enter
+       * and exit the CodeMirror editor associated with that cell by pressing
+       * the enter and escape keys, respectively.
+       */
+      Object.freeze({
+        name: 'tabFocusable',
+        // The default for this needs to be true because the CodeMirror editor
+        // is used in lots of different places. By default, a user should be
+        // able to tab into a CodeMirror editor on the page, and by default, the
+        // user should be able to get out of the editor by pressing the escape
+        // key then immediately pressing the tab key (or shift+tab to go
+        // backwards on the page). If there are places in the app where this
+        // model of user interaction doesn't make sense or is broken, those
+        // places should be remedied on a case-by-case basis, **not** by making
+        // `tabFocusable` false by default.
+        default: true,
+        factory: () =>
+          createConditionalExtension(
+            EditorView.contentAttributes.of({
+              tabIndex: '0'
+            }),
+            EditorView.contentAttributes.of({
+              tabIndex: '-1'
+            })
+          )
+      }),
       Object.freeze({
         name: 'tabSize',
         default: 4,
@@ -789,6 +952,19 @@ export namespace EditorExtensionRegistry {
           type: 'number',
           title: trans.__('Tab size')
         }
+      }),
+      Object.freeze({
+        name: 'tooltips',
+        factory: () =>
+          // we need `absolute` due to use of `contain: layout` in lumino;
+          // we attach to body to ensure cursor collaboration tooltip is
+          // visible in first line of the editor.
+          createImmutableExtension(
+            tooltips({
+              position: 'absolute',
+              parent: document.body
+            })
+          )
       }),
       Object.freeze({
         name: 'allowMultipleSelections',
@@ -893,7 +1069,10 @@ export namespace EditorExtensionRegistry {
             Completions: trans.__('Completions'),
             // @codemirror/lint
             Diagnostics: trans.__('Diagnostics'),
-            'No diagnostics': trans.__('No diagnostics')
+            'No diagnostics': trans.__('No diagnostics'),
+            // @jupyterlab/debugger
+            Breakpoint: trans.__('Breakpoint'),
+            'Selected breakpoint': trans.__('Selected breakpoint')
           },
           factory: () =>
             createConfigurableExtension<Record<string, string>>(value =>

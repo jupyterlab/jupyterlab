@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { ElementHandle, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -76,6 +76,8 @@ export async function getBaseUrl(page: Page): Promise<string> {
  *
  * @param element Element handle
  * @returns Classes list
+ *
+ * @deprecated You should use locator instead {@link getLocatorClassList}
  */
 export async function getElementClassList(
   element: ElementHandle
@@ -90,6 +92,21 @@ export async function getElementClassList(
     if (typeof classNameList === 'string') {
       return classNameList.split(' ');
     }
+  }
+
+  return [];
+}
+
+/**
+ * Get the classes of an locator
+ *
+ * @param locator Element locator
+ * @returns Classes list
+ */
+export async function getLocatorClassList(locator: Locator): Promise<string[]> {
+  const className = await locator.getAttribute('class');
+  if (className) {
+    return className.split(/\s/);
   }
 
   return [];
@@ -156,7 +173,7 @@ export async function getToken(page: Page): Promise<string> {
  */
 export async function waitForCondition(
   fn: () => boolean | Promise<boolean>,
-  timeout?: number
+  timeout: number = 15000
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let checkTimer: NodeJS.Timeout | null = null;
@@ -169,21 +186,19 @@ export async function waitForCondition(
         }
         resolve();
       } else {
-        checkTimer = setTimeout(check, 200);
+        checkTimer = setTimeout(check, 50);
       }
     };
 
     void check();
 
-    if (timeout) {
-      timeoutTimer = setTimeout(() => {
-        timeoutTimer = null;
-        if (checkTimer) {
-          clearTimeout(checkTimer);
-        }
-        reject(new Error('Timed out waiting for condition to be fulfilled.'));
-      }, timeout);
-    }
+    timeoutTimer = setTimeout(() => {
+      timeoutTimer = null;
+      if (checkTimer) {
+        clearTimeout(checkTimer);
+      }
+      reject(new Error('Timed out waiting for condition to be fulfilled.'));
+    }, timeout);
   });
 }
 
@@ -195,23 +210,37 @@ export async function waitForCondition(
  */
 export async function waitForTransition(
   page: Page,
-  element: ElementHandle<Element> | string
+  element: ElementHandle<Element> | Locator | string
 ): Promise<void> {
-  const el = typeof element === 'string' ? await page.$(element) : element;
-
-  if (el) {
-    return page.evaluate(el => {
+  let el = typeof element === 'string' ? page.locator(element) : element;
+  try {
+    return (el as Locator).evaluate(elem => {
       return new Promise(resolve => {
         const onEndHandler = () => {
-          el.removeEventListener('transitionend', onEndHandler);
+          elem.removeEventListener('transitionend', onEndHandler);
           resolve();
         };
-        el.addEventListener('transitionend', onEndHandler);
+        elem.addEventListener('transitionend', onEndHandler);
       });
-    }, el);
+    });
+  } catch {
+    if (el) {
+      console.warn(
+        'ElementHandle are deprecated, you should call "WaitForTransition()" \
+        with a Locator instead'
+      );
+      return page.evaluate(el => {
+        return new Promise(resolve => {
+          const onEndHandler = () => {
+            el.removeEventListener('transitionend', onEndHandler);
+            resolve();
+          };
+          el.addEventListener('transitionend', onEndHandler);
+        });
+      }, el as ElementHandle<Element>);
+    }
+    return Promise.reject();
   }
-
-  return Promise.reject();
 }
 
 // Selector builders
@@ -221,6 +250,8 @@ export async function waitForTransition(
  *
  * @param className Class name
  * @returns Selector
+ *
+ * @deprecated You should use locator CSS selector `locator('.className')`
  */
 export function xpContainsClass(className: string): string {
   return `contains(concat(" ", normalize-space(@class), " "), " ${className} ")`;
@@ -231,9 +262,11 @@ export function xpContainsClass(className: string): string {
  *
  * @param name Activity name
  * @returns Selector
+ *
+ * @deprecated You should use locator selector `getByRole('main').getByRole('tab', { name })`
  */
 export function xpBuildActivityTabSelector(name: string): string {
-  return `//div[${xpContainsClass('jp-Activity')}]/ul/li[${xpContainsClass(
+  return `//div[contains(@role, "main")]//ul/li[${xpContainsClass(
     'lm-TabBar-tab'
   )} and ./div[text()="${name}" and ${xpContainsClass('lm-TabBar-tabLabel')}]]`;
 }
@@ -243,6 +276,9 @@ export function xpBuildActivityTabSelector(name: string): string {
  *
  * @param id Activity id
  * @returns Selector
+ *
+ * @deprecated You should use locator selector `getByRole('main').getByRole('tabpanel', { name })`
+ *   where `name` is the name of the tab.
  */
 export function xpBuildActivityPanelSelector(id: string): string {
   return `//div[@id='${id}' and ${xpContainsClass(
@@ -254,11 +290,21 @@ export function xpBuildActivityPanelSelector(id: string): string {
  * Get the selector to look for the currently active activity tab
  *
  * @returns Selector
+ *
+ * @deprecated You should use locator selector `getByRole('main').locator('.jp-mod-current[role="tab"]')`
  */
 export function xpBuildActiveActivityTabSelector(): string {
-  return `//div[${xpContainsClass('jp-Activity')}]/ul/li[${xpContainsClass(
+  return `//div[contains(@role, "main")]//ul/li[${xpContainsClass(
     'lm-TabBar-tab'
-  )} and ${xpContainsClass('lm-mod-current')} and ./div[${xpContainsClass(
+  )} and ${xpContainsClass('jp-mod-current')} and ./div[${xpContainsClass(
     'lm-TabBar-tabLabel'
   )}]]`;
+}
+
+/**
+ * Whether JupyterLab is in simple mode or not
+ */
+export function isInSimpleMode(page: Page): Promise<boolean> {
+  const toggle = page.getByRole('switch', { name: 'Simple' });
+  return toggle.isChecked();
 }

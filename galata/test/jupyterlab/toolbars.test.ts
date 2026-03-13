@@ -5,6 +5,13 @@ import { test } from '@jupyterlab/galata';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { expect } from '@playwright/test';
 
+/**
+ * Normalize rgba color format for comparison (remove spaces, use .XX instead of 0.XX for decimals < 1)
+ */
+function normalizeColor(color: string): string {
+  return color.replace(/\s/g, '').replace(/,0\./g, ',.');
+}
+
 const toolbars: string[][] = [
   ['@jupyterlab/csvviewer-extension:csv', 'toolbar'],
   ['@jupyterlab/csvviewer-extension:tsv', 'toolbar'],
@@ -36,4 +43,57 @@ toolbars.forEach(([plugin, parameter]) => {
     );
     expect(missingCommands).toEqual([]);
   });
+});
+test.describe('Toolbar Button', () => {
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.notebook.createNew();
+  });
+
+  test('Render Switch Kernel ToolbarButton in default theme', async ({
+    page
+  }) => {
+    const label = await page.$(
+      'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
+    );
+    const labelColor = await page.evaluate(
+      el => getComputedStyle(el).color,
+      label
+    );
+
+    const color = await page.evaluate(() =>
+      getComputedStyle(document.body)
+        .getPropertyValue('--jp-ui-font-color1')
+        .trim()
+    );
+
+    expect(normalizeColor(labelColor)).toEqual(normalizeColor(color));
+  });
+
+  test('Render Switch Kernel ToolbarButton in dark theme', async ({ page }) => {
+    await page.theme.setDarkTheme();
+    const label = await page.$(
+      'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
+    );
+    const labelColor = await page.evaluate(
+      el => getComputedStyle(el).color,
+      label
+    );
+
+    const color = await page.evaluate(() =>
+      getComputedStyle(document.body)
+        .getPropertyValue('--jp-ui-font-color1')
+        .trim()
+    );
+
+    expect(normalizeColor(labelColor)).toEqual(normalizeColor(color));
+  });
+});
+test('Toolbar widget visibility', async ({ page }) => {
+  const workspaceSelector = page.locator('div.jp-WorkspaceSelector');
+  await expect(workspaceSelector).toHaveCount(0);
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(1);
+  await expect(workspaceSelector).toHaveText('default');
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(0);
 });

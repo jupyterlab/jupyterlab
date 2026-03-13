@@ -1,34 +1,44 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Prec } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
-import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
-import { ISessionContext } from '@jupyterlab/apputils';
-import {
+import type { ISharedRawCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils } from '@jupyterlab/apputils';
+import type {
   AttachmentsCellModel,
+  ICodeCellModel,
+  IRawCellModel
+} from '@jupyterlab/cells';
+import {
   Cell,
   CellDragUtils,
   CodeCell,
   CodeCellModel,
-  ICodeCellModel,
-  IRawCellModel,
   isCodeCellModel,
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { KernelMessage } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONObject, MimeData } from '@lumino/coreutils';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableList } from '@jupyterlab/observables';
+import { ObservableList } from '@jupyterlab/observables';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { JSONObject } from '@lumino/coreutils';
+import { MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { ConsoleHistory, IConsoleHistory } from './history';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import { Panel, PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
+import { runCell } from './cellexecutor';
+import type { IConsoleHistory } from './history';
+import { ConsoleHistory } from './history';
+import type { IConsoleCellExecutor } from './tokens';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -71,6 +81,14 @@ const CONTENT_CLASS = 'jp-CodeConsole-content';
 const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
+ * The class name added to the console when an element within it is focused
+ * and takes keyboard input, such as <input> and <div contenteditable>
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
+
+/**
  * The timeout in ms for execution requests to the kernel.
  */
 const EXECUTION_TIMEOUT = 250;
@@ -79,6 +97,11 @@ const EXECUTION_TIMEOUT = 250;
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+/**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
 
 /**
  * A widget containing a Jupyter console.
@@ -94,9 +117,11 @@ export class CodeConsole extends Widget {
   constructor(options: CodeConsole.IOptions) {
     super();
     this._translator = options.translator ?? nullTranslator;
+    this._executor = options.executor ?? Object.freeze({ runCell });
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
     this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
@@ -104,6 +129,8 @@ export class CodeConsole extends Widget {
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
     this._input = new Panel();
+    this._splitPanel = new SplitPanel({ spacing: 0 });
+    this._splitPanel.addClass('jp-CodeConsole-split');
 
     this.contentFactory = options.contentFactory;
     this.modelFactory = options.modelFactory ?? CodeConsole.defaultModelFactory;
@@ -115,9 +142,35 @@ export class CodeConsole extends Widget {
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
-    // Insert the content and input panes into the widget.
-    layout.addWidget(this._content);
-    layout.addWidget(this._input);
+    layout.addWidget(this._splitPanel);
+
+    // Listen for manual split panel resizing.
+    this._splitPanel.handleMoved.connect(() => {
+      this._setManualResize();
+    }, this);
+
+    // Listen for pointerdown to detect when user starts dragging the split
+    // handle. We need to catch this early to prevent the ResizeObserver from
+    // fighting with the user during the first drag.
+    this._splitPanel.node.addEventListener(
+      'pointerdown',
+      event => {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('lm-SplitPanel-handle')) {
+          this._setManualResize();
+        }
+      },
+      true
+    );
+
+    // initialize the console with defaults
+    this.setConfig({
+      clearCellsOnExecute: false,
+      clearCodeContentOnExecute: true,
+      hideCodeInput: false,
+      promptCellPosition: 'bottom',
+      showBanner: true
+    });
 
     this._history = new ConsoleHistory({
       sessionContext: this.sessionContext
@@ -186,7 +239,10 @@ export class CodeConsole extends Widget {
    * The console input prompt cell.
    */
   get promptCell(): CodeCell | null {
-    const inputLayout = this._input.layout as PanelLayout;
+    const inputLayout = this._input.layout as PanelLayout | null;
+    if (!inputLayout) {
+      return null;
+    }
     return (inputLayout.widgets[0] as CodeCell) || null;
   }
 
@@ -204,6 +260,9 @@ export class CodeConsole extends Widget {
    * the execution message id).
    */
   addCell(cell: CodeCell, msgId?: string): void {
+    if (this._config.clearCellsOnExecute) {
+      this.clear();
+    }
     cell.addClass(CONSOLE_CELL_CLASS);
     this._content.addWidget(cell);
     this._cells.push(cell);
@@ -290,6 +349,22 @@ export class CodeConsole extends Widget {
     if (this.isDisposed) {
       return;
     }
+
+    // Clean up ResizeObserver and content listener from the current prompt cell
+    const promptCell = this.promptCell;
+    if (promptCell) {
+      if (this._promptResizeObserver) {
+        this._promptResizeObserver.disconnect();
+        this._promptResizeObserver = null;
+      }
+      promptCell.model.sharedModel.changed.disconnect(
+        this._onPromptContentChanged,
+        this
+      );
+    }
+
+    this._cancelPendingResizeAdjustment();
+
     this._msgIdCells = null!;
     this._msgIds = null!;
     this._history.dispose();
@@ -363,6 +438,9 @@ export class CodeConsole extends Widget {
       cell.model.setMetadata(key, metadata[key]);
     }
     this.addCell(cell);
+    if (this._config.hideCodeInput) {
+      cell.inputArea?.setHidden(true);
+    }
     return this._execute(cell);
   }
 
@@ -388,6 +466,29 @@ export class CodeConsole extends Widget {
       return;
     }
     promptCell.editor!.replaceSelection?.(text);
+  }
+
+  /**
+   * Set configuration options for the console.
+   */
+  setConfig(config: CodeConsole.IConfig): void {
+    const {
+      clearCellsOnExecute,
+      clearCodeContentOnExecute,
+      hideCodeInput,
+      promptCellPosition,
+      showBanner
+    } = config;
+    this._config = {
+      clearCellsOnExecute:
+        clearCellsOnExecute ?? this._config.clearCellsOnExecute,
+      clearCodeContentOnExecute:
+        clearCodeContentOnExecute ?? this._config.clearCodeContentOnExecute,
+      hideCodeInput: hideCodeInput ?? this._config.hideCodeInput,
+      promptCellPosition: promptCellPosition ?? this._config.promptCellPosition,
+      showBanner: showBanner ?? this._config.showBanner
+    };
+    this._updateLayout();
   }
 
   /**
@@ -551,6 +652,15 @@ export class CodeConsole extends Widget {
       case 'mouseup':
         this._evtMouseUp(event as MouseEvent);
         break;
+      case 'resize':
+        this._splitPanel.fit();
+        break;
+      case 'focusin':
+        this._evtFocusIn(event as MouseEvent);
+        break;
+      case 'focusout':
+        this._evtFocusOut(event as MouseEvent);
+        break;
       default:
         break;
     }
@@ -564,6 +674,8 @@ export class CodeConsole extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
     node.addEventListener('mousedown', this);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -580,6 +692,8 @@ export class CodeConsole extends Widget {
     const node = this.node;
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('click', this);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
   }
 
   /**
@@ -600,15 +714,41 @@ export class CodeConsole extends Widget {
     let promptCell = this.promptCell;
     const input = this._input;
 
+    const previousContent = promptCell?.model.sharedModel.getSource() ?? '';
+    const previousCursorPosition = promptCell?.editor?.getCursorPosition();
+
     // Make the last prompt read-only, clear its signals, and move to content.
     if (promptCell) {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
-      Signal.clearData(promptCell.editor);
+
+      // Disconnect the content change listener
+      promptCell.model.sharedModel.changed.disconnect(
+        this._onPromptContentChanged,
+        this
+      );
+
+      // Schedule execution of signal clearance to happen later so that
+      // the `readOnly` configuration gets updated before editor signals
+      // get disconnected (see `Cell.onUpdateRequest`).
+      const oldCell = promptCell;
+      const promptResizeObserver = this._promptResizeObserver;
+      requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
+        Signal.clearData(oldCell.editor);
+
+        if (promptResizeObserver) {
+          promptResizeObserver.disconnect();
+        }
+      });
+
       // Ensure to clear the cursor
       promptCell.editor?.blur();
       const child = input.widgets[0];
       child.parent = null;
+      if (this._config.hideCodeInput) {
+        promptCell.inputArea?.setHidden(true);
+      }
       this.addCell(promptCell);
     }
 
@@ -623,6 +763,27 @@ export class CodeConsole extends Widget {
     this._input.addWidget(promptCell);
 
     this._history.editor = promptCell.editor;
+
+    // Detect height changes via ResizeObserver for when the cell grows
+    if (promptCell.node) {
+      this._promptResizeObserver = new ResizeObserver(() => {
+        this._scheduleInputSizeAdjustment();
+      });
+      this._promptResizeObserver.observe(promptCell.node);
+    }
+
+    // Also listen for content changes to handle shrinking when content is removed (e.g. line deletes)
+    promptCell.model.sharedModel.changed.connect(
+      this._onPromptContentChanged,
+      this
+    );
+
+    if (!this._config.clearCodeContentOnExecute) {
+      promptCell.model.sharedModel.setSource(previousContent);
+      if (previousCursorPosition) {
+        promptCell.editor?.setCursorPosition(previousCursorPosition);
+      }
+    }
     this._promptCellCreated.emit(promptCell);
   }
 
@@ -665,9 +826,25 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+  }
+
+  /**
+   * Handle `focusout` events for the widget.
+   */
+  private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+  }
+
+  /**
    * Execute the code in the current prompt cell.
    */
-  private _execute(cell: CodeCell): Promise<void> {
+  private async _execute(cell: CodeCell): Promise<void> {
     const source = cell.model.sharedModel.getSource();
     this._history.push(source);
     // If the source of the console is just "clear", clear the console as we
@@ -677,45 +854,36 @@ export class CodeConsole extends Widget {
       return Promise.resolve(void 0);
     }
     cell.model.contentChanged.connect(this.update, this);
-    const onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (value && value.content.status === 'ok') {
-        const content = value.content;
-        // Use deprecated payloads for backwards compatibility.
-        if (content.payload && content.payload.length) {
-          const setNextInput = content.payload.filter(i => {
-            return (i as any).source === 'set_next_input';
-          })[0];
-          if (setNextInput) {
-            const text = (setNextInput as any).text;
-            // Ignore the `replace` value and always set the next cell.
-            cell.model.sharedModel.setSource(text);
-          }
-        }
-      } else if (value && value.content.status === 'error') {
-        for (const cell of this._cells) {
-          if ((cell.model as ICodeCellModel).executionCount === null) {
-            cell.setPrompt('');
+
+    const options = {
+      cell,
+      sessionContext: this.sessionContext,
+      onCellExecuted: (args: {
+        cell: CodeCell;
+        executionDate: Date;
+        success: boolean;
+        error?: Error | null;
+      }) => {
+        this._executed.emit(args.executionDate);
+
+        if (args.error) {
+          for (const cell of this._cells) {
+            if ((cell.model as ICodeCellModel).executionCount === null) {
+              (cell.model as ICodeCellModel).executionState = 'idle';
+            }
           }
         }
       }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-      this._executed.emit(new Date());
-    };
-    const onFailure = () => {
-      if (this.isDisposed) {
-        return;
+    } satisfies IConsoleCellExecutor.IRunCellOptions;
+
+    try {
+      await this._executor.runCell(options);
+    } finally {
+      if (!this.isDisposed) {
+        cell.model.contentChanged.disconnect(this.update, this);
+        this.update();
       }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-    };
-    return CodeCell.execute(cell, this.sessionContext).then(
-      onSuccess,
-      onFailure
-    );
+    }
   }
 
   /**
@@ -723,12 +891,16 @@ export class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     if (info.status !== 'ok') {
-      this._banner!.model.sharedModel.setSource(
-        'Error in getting kernel banner'
-      );
+      if (this._banner) {
+        this._banner.model.sharedModel.setSource(
+          'Error in getting kernel banner'
+        );
+      }
       return;
     }
-    this._banner!.model.sharedModel.setSource(info.banner);
+    if (this._banner) {
+      this._banner.model.sharedModel.setSource(info.banner);
+    }
     const lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.promptCell) {
@@ -746,23 +918,11 @@ export class CodeConsole extends Widget {
     const rendermime = this.rendermime;
     const editorConfig = this.editorConfig;
 
-    // Suppress the default "Enter" key handling.
-    const onKeyDown = EditorView.domEventHandlers({
-      keydown: (event: KeyboardEvent, view: EditorView) => {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          return true;
-        }
-        return false;
-      }
-    });
-
     return {
       model,
       rendermime,
       contentFactory,
       editorConfig,
-      editorExtensions: [Prec.high(onKeyDown)],
       placeholder: false,
       translator: this._translator
     };
@@ -829,7 +989,9 @@ export class CodeConsole extends Widget {
       this._banner.dispose();
       this._banner = null;
     }
-    this.addBanner();
+    if (this._config.showBanner) {
+      this.addBanner();
+    }
     if (this.sessionContext.session?.kernel) {
       this._handleInfo(await this.sessionContext.session.kernel.info);
     }
@@ -841,16 +1003,218 @@ export class CodeConsole extends Widget {
   private async _onKernelStatusChanged(): Promise<void> {
     const kernel = this.sessionContext.session?.kernel;
     if (kernel?.status === 'restarting') {
-      this.addBanner();
+      if (this._config.showBanner) {
+        this.addBanner();
+      }
       this._handleInfo(await kernel?.info);
     }
+  }
+
+  /**
+   * Update the console node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    // TODO: de-duplicate with code in notebook/src/widget.ts
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
+  }
+
+  /**
+   * Calculate relative sizes for split panel based on prompt cell position.
+   */
+  private _calculateRelativeSizes(): number[] {
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    let sizes = [1, 1];
+    if (promptCellPosition === 'top') {
+      sizes = [1, 100];
+    } else if (promptCellPosition === 'bottom') {
+      sizes = [100, 1];
+    }
+    return sizes;
+  }
+
+  /**
+   * Set the manual resize flag and cancel any pending auto-resize.
+   */
+  private _setManualResize(): void {
+    this._hasManualResize = true;
+    this._cancelPendingResizeAdjustment();
+  }
+
+  /**
+   * Cancel any pending resize adjustment animation frame.
+   */
+  private _cancelPendingResizeAdjustment(): void {
+    if (this._resizeAnimationFrameId !== null) {
+      cancelAnimationFrame(this._resizeAnimationFrameId);
+      this._resizeAnimationFrameId = null;
+    }
+  }
+
+  /**
+   * Schedule an input size adjustment using requestAnimationFrame to coalesce
+   * multiple rapid events into a single layout update.
+   */
+  private _scheduleInputSizeAdjustment(): void {
+    // Don't schedule if manual resize is active
+    if (this._hasManualResize) {
+      return;
+    }
+    if (this._resizeAnimationFrameId === null) {
+      this._resizeAnimationFrameId = requestAnimationFrame(() => {
+        this._resizeAnimationFrameId = null;
+        this._adjustSplitPanelForInputGrowth();
+      });
+    }
+  }
+
+  /**
+   * Handle changes to the prompt cell content.
+   */
+  private _onPromptContentChanged(): void {
+    this._scheduleInputSizeAdjustment();
+  }
+
+  /**
+   * Adjust split panel sizes when the input cell grows or shrinks.
+   */
+  private _adjustSplitPanelForInputGrowth(): void {
+    if (
+      this.isDisposed ||
+      !this._input.node ||
+      !this._content.node ||
+      this._hasManualResize
+    ) {
+      return;
+    }
+
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    // Only adjust for vertical layouts (top/bottom positions)
+    if (promptCellPosition === 'left' || promptCellPosition === 'right') {
+      return;
+    }
+
+    const promptCell = this.promptCell;
+    if (!promptCell || !promptCell.editor) {
+      return;
+    }
+
+    // Get the editor's content height directly from CodeMirror.
+    // This gives us the intrinsic height needed regardless of container size.
+    const cmEditor = promptCell.editor as CodeMirrorEditor;
+    const editorContentHeight = cmEditor.editor.contentHeight;
+
+    // Get additional padding from the input area and cell
+    const cellPadding = this._getInputCellPadding();
+    const inputHeight = editorContentHeight + cellPadding;
+
+    const totalHeight = this._splitPanel.node.clientHeight;
+
+    if (totalHeight <= 0 || inputHeight <= 0) {
+      this._splitPanel.fit();
+      return;
+    }
+
+    const remainingHeight = totalHeight - inputHeight;
+    let contentRatio: number;
+    let inputRatio: number;
+
+    if (promptCellPosition === 'bottom') {
+      contentRatio = remainingHeight / totalHeight;
+      inputRatio = inputHeight / totalHeight;
+    } else {
+      inputRatio = inputHeight / totalHeight;
+      contentRatio = remainingHeight / totalHeight;
+    }
+
+    // Convert to the format expected by setRelativeSizes
+    const totalRatio = contentRatio + inputRatio;
+    if (totalRatio > 0) {
+      const normalizedSizes =
+        promptCellPosition === 'bottom'
+          ? [contentRatio / totalRatio, inputRatio / totalRatio]
+          : [inputRatio / totalRatio, contentRatio / totalRatio];
+
+      this._splitPanel.setRelativeSizes(normalizedSizes);
+    }
+  }
+
+  /**
+   * Get the total vertical padding for the input cell (excluding editor content).
+   */
+  private _getInputCellPadding(): number {
+    const inputPanelNode = this._input.node;
+    const inputPanelStyle = window.getComputedStyle(inputPanelNode);
+    const inputPanelPadding =
+      parseFloat(inputPanelStyle.paddingTop) +
+      parseFloat(inputPanelStyle.paddingBottom);
+
+    const promptCell = this.promptCell;
+    if (!promptCell) {
+      return inputPanelPadding;
+    }
+
+    const cellStyle = window.getComputedStyle(promptCell.node);
+    const cellPadding =
+      parseFloat(cellStyle.paddingTop) + parseFloat(cellStyle.paddingBottom);
+
+    // Account for editor wrapper border (CodeMirror's contentHeight includes its own padding)
+    const editorWrapper = promptCell.editorWidget?.node;
+    let editorBorder = 0;
+    if (editorWrapper) {
+      const editorStyle = window.getComputedStyle(editorWrapper);
+      editorBorder =
+        parseFloat(editorStyle.borderTopWidth) +
+        parseFloat(editorStyle.borderBottomWidth);
+    }
+
+    return inputPanelPadding + cellPadding + editorBorder;
+  }
+
+  /**
+   * Update the layout of the code console.
+   */
+  private _updateLayout(): void {
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    // Reset manual resize flag when layout changes
+    this._hasManualResize = false;
+
+    this._splitPanel.orientation = ['left', 'right'].includes(
+      promptCellPosition
+    )
+      ? 'horizontal'
+      : 'vertical';
+
+    // Insert the content and input panes into the widget.
+    SplitPanel.setStretch(this._content, 1);
+    SplitPanel.setStretch(this._input, 1);
+
+    if (promptCellPosition === 'bottom' || promptCellPosition === 'right') {
+      this._splitPanel.insertWidget(0, this._content);
+      this._splitPanel.insertWidget(1, this._input);
+    } else {
+      this._splitPanel.insertWidget(0, this._input);
+      this._splitPanel.insertWidget(1, this._content);
+    }
+
+    this._splitPanel.setRelativeSizes(this._calculateRelativeSizes());
+
+    requestAnimationFrame(() => {
+      // adjust the sizes if the prompt cell is moved with code in it
+      this._adjustSplitPanelForInputGrowth();
+    });
   }
 
   private _banner: RawCell | null = null;
   private _cells: IObservableList<Cell>;
   private _content: Panel;
+  private _executor: IConsoleCellExecutor;
   private _executed = new Signal<this, Date>(this);
   private _history: IConsoleHistory;
+  private _config: CodeConsole.IConfig = {};
   private _input: Panel;
   private _mimetype = 'text/x-ipython';
   private _mimeTypeService: IEditorMimeTypeService;
@@ -865,12 +1229,51 @@ export class CodeConsole extends Widget {
   private _drag: Drag | null = null;
   private _focusedCell: Cell | null = null;
   private _translator: ITranslator;
+  private _splitPanel: SplitPanel;
+  private _promptResizeObserver: ResizeObserver | null = null;
+  private _hasManualResize = false;
+  private _resizeAnimationFrameId: number | null = null;
 }
 
 /**
  * A namespace for CodeConsole statics.
  */
 export namespace CodeConsole {
+  /**
+   * Where the prompt cell is located.
+   */
+  export type PromptCellPosition = 'top' | 'bottom' | 'left' | 'right';
+
+  /**
+   * The configuration options for a console widget.
+   */
+  export interface IConfig {
+    /**
+     * Whether to clear the previous cells on execute.
+     */
+    clearCellsOnExecute?: boolean;
+
+    /**
+     * Whether to clear the code content of the prompt cell on execute.
+     */
+    clearCodeContentOnExecute?: boolean;
+
+    /**
+     * Whether to hide the code input after a cell is executed.
+     */
+    hideCodeInput?: boolean;
+
+    /**
+     * Where the prompt cell should be located.
+     */
+    promptCellPosition?: PromptCellPosition;
+
+    /**
+     * Whether to show the kernel banner.
+     */
+    showBanner?: boolean;
+  }
+
   /**
    * The initialization options for a console widget.
    */
@@ -879,6 +1282,11 @@ export namespace CodeConsole {
      * The content factory for the console widget.
      */
     contentFactory: IContentFactory;
+
+    /**
+     * Console cell executor
+     */
+    executor?: IConsoleCellExecutor;
 
     /**
      * The model factory for the console widget.

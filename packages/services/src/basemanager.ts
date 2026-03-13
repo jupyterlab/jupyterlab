@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IObservableDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IObservableDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { ServerConnection } from './serverconnection';
 
 /**
@@ -86,6 +87,7 @@ export abstract class BaseManager implements IManager {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     this._disposed.emit(undefined);
     Signal.clearData(this);
   }

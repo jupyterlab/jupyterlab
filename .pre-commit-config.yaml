@@ -9,7 +9,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
       - id: forbid-new-submodules
       - id: end-of-file-fixer
@@ -27,28 +27,27 @@ repos:
         exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.22.0
+    rev: 0.37.0
     hooks:
       - id: check-github-workflows
 
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.267
+  # Check ruff version is aligned with the one in pyproject.toml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.4
     hooks:
       - id: ruff
         args: ["--fix"]
+      - id: ruff-format
 
   - repo: local
     hooks:
       - id: prettier
         name: prettier
-        entry: 'npm run prettier:files'
+        entry: jlpm
+        args: [run, 'prettier:files']
         language: node
         types_or: [json, ts, tsx, javascript, jsx, css]
+        exclude: \.ipynb$
       - id: eslint
         name: eslint
         entry: 'npm run eslint:files'
@@ -63,4 +62,4 @@ repos:
         name: integrity
         entry: 'npm run integrity --force'
         language: node
-        stages: [push]
+        stages: [pre-push]

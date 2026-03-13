@@ -1,22 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject,
-  JSONPrimitive,
-  PromiseDelegate,
-  UUID
-} from '@lumino/coreutils';
+import type { JSONObject, JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import WebSocket from 'ws';
+import type { Contents, Kernel, Session, Terminal } from '../src';
 import {
-  Contents,
-  Kernel,
   KernelManager,
   KernelMessage,
   ServerConnection,
-  Session,
-  SessionManager,
-  Terminal
+  SessionManager
 } from '../src';
 import { deserialize, serialize } from '../src/kernel/serialize';
 
@@ -97,10 +90,9 @@ export const KERNELSPECS: JSONObject = {
  */
 export function getRequestHandler(
   status: number,
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any
 ): ServerConnection.ISettings {
-  const fetch = (info: RequestInfo, init: RequestInit) => {
+  const customFetch = (info: RequestInfo, init?: RequestInit) => {
     // Normalize the body.
     body = JSON.stringify(body);
 
@@ -108,7 +100,7 @@ export function getRequestHandler(
     const response = new Response(body, { status });
     return Promise.resolve(response as any);
   };
-  return ServerConnection.makeSettings({ fetch });
+  return ServerConnection.makeSettings({ fetch: customFetch });
 }
 
 /**
@@ -121,7 +113,6 @@ export interface IService {
 /**
  * Handle a single request with a mock response.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;
@@ -132,8 +123,12 @@ export function handleRequest(item: IService, status: number, body: any): void {
     (item.serverSettings as any).fetch = oldFetch;
 
     // Normalize the body.
-    if (typeof body !== 'string') {
+    if (typeof body !== 'string' && !(body instanceof File)) {
       body = JSON.stringify(body);
+    }
+    // Body should be null for these status codes
+    if (status === 204 || status === 205) {
+      body = null;
     }
 
     // Create the response and return it as a promise.

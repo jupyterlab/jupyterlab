@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRestorable, RestorablePool } from '@jupyterlab/statedb';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { FocusTracker, Widget } from '@lumino/widgets';
+import type { IRestorable } from '@jupyterlab/statedb';
+import { RestorablePool } from '@jupyterlab/statedb';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import { FocusTracker } from '@lumino/widgets';
 
 /**
  * A tracker that tracks widgets.
@@ -60,7 +63,7 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
   /**
    * Find the first instance in the tracker that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each instance.
+   * @param fn The filter function to call on each instance.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.
@@ -254,7 +257,7 @@ export class WidgetTracker<T extends Widget = Widget>
   /**
    * Find the first widget in the tracker that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each widget.
+   * @param fn The filter function to call on each widget.
    *
    * #### Notes
    * If no widget is found, the value returned is `undefined`.

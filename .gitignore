@@ -2,6 +2,7 @@
 coverage/
 .eslintcache
 .stylelintcache
+.prettiercache
 
 dev_mode/listings
 dev_mode/schemas
@@ -12,9 +13,9 @@ dev_mode/stats.json
 
 docs/_build
 docs/source/user/commands_list.md
-docs/source/extension/plugins_list.rst
-docs/source/extension/tokens_list.rst
-docs/api
+docs/source/extension/plugins_list.md
+docs/source/extension/tokens_list.md
+docs/source/api
 **/docs/source/_build
 
 examples/app/build
@@ -74,6 +75,7 @@ __pycache__
 pip-wheel-metadata
 Pipfile
 Pipfile.lock
+venv/
 
 # xeus-python debug logs
 xpython_debug_logs
@@ -117,6 +119,11 @@ yarn-error.log
 .pnp.*
 jupyterlab/staging/.yarn/*
 jupyterlab/staging/.pnp.*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.yarn/*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.pnp/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.yarn/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.pnp/*
+jupyterlab/tests/mock_packages/test-hyphens/.yarn/*
 
 # copied changelog file
 docs/source/getting_started/changelog.md
@@ -142,3 +149,16 @@ packages/lsp/src/_*
 
 # generated reports
 webpack-bundle-analyzer.html
+examples/**/test-results/
+
+# untitled (default name) files
+Untitled*.ipynb
+untitled*.md
+untitled*.py
+untitled*.txt
+
+# pixi environments
+.pixi
+
+# temporary files, useful for testing
+tmp

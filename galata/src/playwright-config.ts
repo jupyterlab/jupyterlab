@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PlaywrightTestConfig } from '@playwright/test';
+import type { PlaywrightTestConfig } from '@playwright/test';
 
 // Default Playwright configuration for JupyterLab
 module.exports = {
@@ -20,7 +20,7 @@ module.exports = {
     viewport: { width: 1024, height: 768 },
 
     // Artifacts
-    // trace: 'on-first-retry',
+    trace: 'on-first-retry',
     video: 'retain-on-failure'
   }
 } as PlaywrightTestConfig;

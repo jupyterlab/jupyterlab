@@ -1,13 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The document registry token.
@@ -26,6 +30,119 @@ export const IDocumentWidgetOpener = new Token<IDocumentWidgetOpener>(
   '@jupyterlab/docmanager:IDocumentWidgetOpener',
   `A service to open a widget.`
 );
+
+/**
+ * The recent documents database token.
+ */
+export const IRecentsManager = new Token<IRecentsManager>(
+  '@jupyterlab/docmanager:IRecentsManager',
+  `A service providing information about recently opened and closed documents`
+);
+
+/**
+ * The document manager dialogs token.
+ */
+export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
+  '@jupyterlab/docmanager:IDocumentManagerDialogs',
+  'A service for displaying dialogs related to document management.'
+);
+
+/**
+ * Namespace for dialog-related interfaces (argument/result) used by IDocumentManagerDialogs.
+ */
+export namespace IDocumentManagerDialogs {
+  /**
+   * Options and result types for the {@link IDocumentManagerDialogs.confirmClose} dialog.
+   */
+  export namespace ConfirmClose {
+    /**
+     * Options for {@link IDocumentManagerDialogs.confirmClose} dialog.
+     *
+     * @property fileName - The name of the file to be closed.
+     * @property isDirty - Whether the file has unsaved changes.
+     */
+    export interface IOptions {
+      fileName: string;
+      isDirty: boolean;
+    }
+
+    /**
+     * Result of {@link IDocumentManagerDialogs.confirmClose} dialog.
+     *
+     * @property shouldClose - Indicates whether the document should be closed.
+     * @property ignoreSave - If true, the document will be closed without saving changes.
+     * @property doNotAskAgain - If true, the confirmation dialog should not be shown again for this document.
+     */
+    export interface IResult {
+      shouldClose: boolean;
+      ignoreSave: boolean;
+      doNotAskAgain: boolean;
+    }
+  }
+
+  /**
+   * Options and result types for the {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+   */
+  export namespace SaveBeforeClose {
+    /**
+     * Options for {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+     *
+     * @property fileName - The name of the file to be saved.
+     * @property writable - Whether the file is writable. If not specified, defaults to false
+     */
+    export interface IOptions {
+      fileName: string;
+      writable?: boolean;
+    }
+
+    /**
+     * Result of {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+     *
+     * @property shouldClose - Indicates whether the document should be closed after the operation.
+     * @property ignoreSave - Indicates whether the save operation should be ignored (i.e., close without saving).
+     */
+    export interface IResult {
+      shouldClose: boolean;
+      ignoreSave: boolean;
+    }
+  }
+}
+
+/**
+ * Dialog interfaces for document management.
+ */
+export interface IDocumentManagerDialogs {
+  /**
+   * Show a dialog to rename a file.
+   *
+   * @param context - The document context
+   * @returns A promise that resolves when rename is complete or null if cancelled
+   */
+  rename(context: DocumentRegistry.Context): Promise<void | null>;
+
+  /**
+   * Show a dialog asking whether to close a document.
+   *
+   * This dialog is shown when closing a clean (non-dirty) document
+   * and confirmClosingDocument is true.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  confirmClose(
+    options: IDocumentManagerDialogs.ConfirmClose.IOptions
+  ): Promise<IDocumentManagerDialogs.ConfirmClose.IResult>;
+
+  /**
+   * Show a dialog asking whether to save before closing a dirty document.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  saveBeforeClose(
+    options: IDocumentManagerDialogs.SaveBeforeClose.IOptions
+  ): Promise<IDocumentManagerDialogs.SaveBeforeClose.IResult>;
+}
 
 /**
  * The interface for a document manager.
@@ -237,7 +354,8 @@ export interface IDocumentManager extends IDisposable {
     path: string,
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined;
 
   /**
@@ -279,3 +397,65 @@ export interface IDocumentWidgetOpener {
    */
   readonly opened: ISignal<IDocumentWidgetOpener, IDocumentWidget>;
 }
+
+/**
+ * Recent opened items manager.
+ */
+export interface IRecentsManager extends IDisposable {
+  /**
+   * Get the recently opened documents.
+   */
+  readonly recentlyOpened: RecentDocument[];
+
+  /**
+   * Get the recently closed items.
+   */
+  readonly recentlyClosed: RecentDocument[];
+
+  /**
+   * Signal emitted when either of the list changes.
+   */
+  readonly changed: ISignal<IRecentsManager, void>;
+
+  /**
+   * Check if the recent item is valid, remove if it from both lists if it is not.
+   */
+  validate(recent: RecentDocument): Promise<boolean>;
+
+  /**
+   * Add a new path to the recent list.
+   */
+  addRecent(
+    document: Omit<RecentDocument, 'root'>,
+    event: 'opened' | 'closed'
+  ): void;
+
+  /**
+   * Remove the document from recents list.
+   */
+  removeRecent(document: RecentDocument, event: 'opened' | 'closed'): void;
+}
+
+/**
+ * The interface for a recent document.
+ */
+export type RecentDocument = {
+  /**
+   * The server root path.
+   *
+   * Allows to select only the currently accessible documents.
+   */
+  root: string;
+  /**
+   * The path to the document.
+   */
+  path: string;
+  /**
+   * The document content type or `directory` literal for directories.
+   */
+  contentType: string;
+  /**
+   * The factory that was used when the document was most recently opened or closed.
+   */
+  factory?: string;
+};

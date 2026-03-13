@@ -8,10 +8,11 @@ import {
   LabIcon,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
-import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * Concrete implementation of IToolbarWidgetRegistry interface
@@ -143,20 +144,27 @@ export function createDefaultFactory(
           command: tId,
           args: tArgs,
           label: tLabel,
+          caption: tCaption,
           icon: tIcon
         } = toolbarItem;
         const id = tId ?? '';
         const args = { toolbar: true, ...tArgs };
         const icon = tIcon ? LabIcon.resolve({ icon: tIcon }) : undefined;
+
+        const toolbar = (widget as any).toolbar as Toolbar;
+
         // If there is an icon, undefined label will results in no label
         // otherwise the label will be set using the setting or the command label
-        const label = icon ?? commands.icon(id, args) ? tLabel ?? '' : tLabel;
+        const label =
+          (icon ?? commands.icon(id, args)) ? (tLabel ?? '') : tLabel;
         return new CommandToolbarButton({
           commands,
           id,
           args,
           icon,
-          label
+          label,
+          caption: tCaption as string,
+          noFocusOnClick: toolbar?.noFocusOnClick ?? false
         });
       }
       case 'spacer':

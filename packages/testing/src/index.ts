@@ -18,7 +18,13 @@ export {
   waitForDialog,
   acceptDialog,
   dangerDialog,
-  dismissDialog
+  dismissDialog,
+  simulate
 } from './common';
+
+export {
+  IFileSystemFileEntryOptions,
+  IFileSystemDirectoryEntryOptions
+} from './jest-data-transfer-mock';
 
 export { JupyterServer } from './start_jupyter_server';

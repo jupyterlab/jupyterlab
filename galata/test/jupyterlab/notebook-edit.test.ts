@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
 
@@ -23,9 +24,10 @@ test.describe('Notebook Edit', () => {
     await page.notebook.addCell('code', '2 ** 3');
     await page.notebook.runCell(1, true);
     const imageName = 'run-cell.png';
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Re-edit after execution', async ({ page }) => {
@@ -34,9 +36,58 @@ test.describe('Notebook Edit', () => {
     await page.notebook.setCell(1, 'code', '2 ** 6');
 
     const imageName = 'reedit-cell.png';
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Re-render Markdown after edit', async ({ page }) => {
+    // Add an image and render
+    await page.notebook.addCell('markdown', '![alt text](./image.png)');
+    await page.notebook.runCell(1, true);
+
+    // There should be no link rendered in the cell, just an image
+    const cell = await page.notebook.getCellLocator(1);
+    const image = cell!.locator('img');
+    const link = cell!.locator('a');
+    await expect(link).toHaveCount(0);
+    await expect(image).toHaveCount(1);
+
+    // Edit and re-render the cell
+    await page.notebook.setCell(1, 'markdown', '[link](https://jupyter.org)');
+    await page.notebook.runCell(1, true);
+
+    // There should be a link but not an image
+    await expect(link).toHaveCount(1);
+    await expect(image).toHaveCount(0);
+
+    // Double-check we see the right link
+    await expect(link).toContainText('link');
+  });
+
+  test('Cut from code and paste into a Markdown cell', async ({ page }) => {
+    const text = 'text to be pasted';
+    await page.notebook.addCell('code', text);
+    await page.notebook.addCell('markdown', '');
+
+    const codeCell = await page.notebook.getCellLocator(1);
+    const markdownCell = await page.notebook.getCellLocator(2);
+
+    await expect(codeCell!).toContainText(text);
+    await expect(markdownCell!).not.toContainText(text);
+
+    // Cut from the code cell
+    await page.notebook.enterCellEditingMode(1);
+    await page.keyboard.press('Control+KeyA');
+    await page.keyboard.press('Control+KeyX');
+
+    // Paste into the markdown cell
+    await page.notebook.enterCellEditingMode(2);
+    await page.keyboard.press('Control+KeyV');
+
+    await expect(codeCell!).not.toContainText(text);
+    await expect(markdownCell!).toContainText(text);
   });
 
   test('Execute again', async ({ page }) => {
@@ -45,9 +96,10 @@ test.describe('Notebook Edit', () => {
     await page.notebook.setCell(1, 'code', '2 ** 6');
 
     const imageName = 'execute-again.png';
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Copy-Paste cell', async ({ page }) => {
@@ -58,9 +110,10 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Copy Cell');
     await page.notebook.selectCells(0);
     await page.menu.clickMenuItem('Edit>Paste Cell Above');
-    let nbPanel = await page.notebook.getNotebookInPanel();
+    let nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Cut-Paste cell', async ({ page }) => {
@@ -71,9 +124,10 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Cut Cell');
     await page.notebook.selectCells(0);
     await page.menu.clickMenuItem('Edit>Paste Cell Below');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Paste-Replace cell', async ({ page }) => {
@@ -84,9 +138,10 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Copy Cell');
     await page.notebook.selectCells(2);
     await page.menu.clickMenuItem('Edit>Paste Cell and Replace');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Delete cell', async ({ page }) => {
@@ -95,9 +150,13 @@ test.describe('Notebook Edit', () => {
     const imageName = 'delete-cell.png';
     await page.notebook.selectCells(2);
     await page.menu.clickMenuItem('Edit>Delete Cell');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    // Here the toolbar should be hidden due to overlap with Markdown cell text
+    await nbPanel!
+      .locator('.jp-mod-active .jp-cell-toolbar')
+      .waitFor({ state: 'hidden' });
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Select all cells', async ({ page }) => {
@@ -105,9 +164,10 @@ test.describe('Notebook Edit', () => {
     const imageName = 'select-all-cells.png';
     await page.notebook.selectCells(2);
     await page.menu.clickMenuItem('Edit>Select All Cells');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Deselect all cells', async ({ page }) => {
@@ -115,9 +175,10 @@ test.describe('Notebook Edit', () => {
     const imageName = 'deselect-all-cells.png';
     await page.notebook.selectCells(1, 2);
     await page.menu.clickMenuItem('Edit>Deselect All Cells');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Move cells up', async ({ page }) => {
@@ -125,9 +186,19 @@ test.describe('Notebook Edit', () => {
     const imageName = 'move-cell-up.png';
     await page.notebook.selectCells(1);
     await page.menu.clickMenuItem('Edit>Move Cell Up');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    // Here the toolbar should be hidden due to overlap with Markdown cell text
+    await nbPanel!
+      .locator('.jp-mod-active .jp-cell-toolbar')
+      .waitFor({ state: 'hidden' });
+
+    // Also wait for the heading collapser icon to appear
+    await nbPanel!
+      .locator('.jp-mod-active .jp-collapseHeadingButton')
+      .waitFor();
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Move cells down', async ({ page }) => {
@@ -135,9 +206,10 @@ test.describe('Notebook Edit', () => {
     const imageName = 'move-cell-down.png';
     await page.notebook.selectCells(0);
     await page.menu.clickMenuItem('Edit>Move Cell Down');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Split cell', async ({ page }) => {
@@ -150,8 +222,9 @@ test.describe('Notebook Edit', () => {
     await page.keyboard.press('Home');
     await page.menu.clickMenuItem('Edit>Split Cell');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -162,8 +235,87 @@ test.describe('Notebook Edit', () => {
     const imageName = 'merge-cells.png';
     await page.notebook.selectCells(1, 2);
     await page.menu.clickMenuItem('Edit>Merge Selected Cells');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
+
+test.describe('Notebook Edit (defer mode)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+  });
+
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'defer'
+      }
+    }
+  });
+
+  test('Data-windowing-index consistency on merge', async ({ page }) => {
+    // Create 10 code cells with values 1 to 10
+    await page.notebook.setCell(0, 'code', '1');
+    for (let i = 2; i <= 10; i++) {
+      await page.notebook.addCell('code', `${i}`);
+    }
+
+    // Get windowing indices before merge
+    const indicesBeforeMerge = await getWindowingIndices(page);
+    expect(indicesBeforeMerge.length).toBe(10);
+
+    expect(verifyIncreasingByOne(indicesBeforeMerge)).toBeTruthy();
+
+    // We will select cells 6, 5, 4 in that order (multi-select)
+    const cell6 = await page.notebook.getCellLocator(6);
+
+    // Start by selecting cell 6
+    await cell6!.click();
+
+    // Enter command mode
+    await page.keyboard.press('Escape');
+
+    // Select cell 5 and 4
+    await page.keyboard.press('Shift+ArrowUp');
+    await page.keyboard.press('Shift+ArrowUp');
+
+    // Press M to merge
+    await page.keyboard.press('Shift+KeyM');
+
+    const indicesAfterMerge = await getWindowingIndices(page);
+    expect(indicesAfterMerge.length).toBe(8);
+
+    // Verify windowing indices increase by 1 after merge
+    expect(verifyIncreasingByOne(indicesAfterMerge)).toBeTruthy();
+  });
+});
+
+const getWindowingIndices = async (page: IJupyterLabPageFixture) => {
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+  const cellElements = await notebook!
+    .locator('[data-windowed-list-index]')
+    .all();
+  const indices: number[] = [];
+  if (cellElements) {
+    for (const element of cellElements) {
+      const idx = await element.getAttribute('data-windowed-list-index');
+      if (idx !== null) {
+        indices.push(parseInt(idx, 10));
+      }
+    }
+  }
+  return indices;
+};
+
+const verifyIncreasingByOne = (indices: number[]) => {
+  for (let i = 1; i < indices.length; i++) {
+    if (indices[i] !== indices[i - 1] + 1) {
+      return false;
+    }
+  }
+  return true;
+};

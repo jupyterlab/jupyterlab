@@ -5,8 +5,10 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
@@ -177,6 +179,19 @@ const EXTENSION_API_PATH = 'lab/api/extensions';
 export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
 
 /**
+ * Additional options for an action.
+ */
+export interface IActionOptions {
+  /**
+   * Install the version of the entry.
+   *
+   * #### Note
+   * This is ignored by all actions except install.
+   */
+  useVersion?: string;
+}
+
+/**
  * Model for an extension list.
  */
 export class ListModel extends VDomModel {
@@ -343,9 +358,13 @@ export class ListModel extends VDomModel {
    * Install an extension.
    *
    * @param entry An entry indicating which extension to install.
+   * @param options Additional options for the action.
    */
-  async install(entry: IEntry): Promise<void> {
-    await this.performAction('install', entry).then(data => {
+  async install(
+    entry: IEntry,
+    options: { useVersion?: string } = {}
+  ): Promise<void> {
+    await this.performAction('install', entry, options).then(data => {
       if (data.status !== 'ok') {
         reportInstallError(entry.name, data.message, this.translator);
       }
@@ -405,7 +424,7 @@ export class ListModel extends VDomModel {
       const [extensions] = await Private.requestAPI<IEntry[]>({
         refresh: force ? 1 : 0
       });
-      this._installed = extensions.sort(Private.comparator);
+      this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
       this.installedError = reason.toString();
     } finally {
@@ -449,9 +468,9 @@ export class ListModel extends VDomModel {
       }
 
       const installedNames = this._installed.map(pkg => pkg.name);
-      this._lastSearchResult = extensions
-        .filter(pkg => !installedNames.includes(pkg.name))
-        .sort(Private.comparator);
+      this._lastSearchResult = extensions.filter(
+        pkg => !installedNames.includes(pkg.name)
+      );
     } catch (reason) {
       this.searchError = reason.toString();
     } finally {
@@ -480,19 +499,27 @@ export class ListModel extends VDomModel {
    *
    * @param action A valid action to perform.
    * @param entry The extension to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
   protected performAction(
     action: string,
-    entry: IEntry
+    entry: IEntry,
+    actionOptions: IActionOptions = {}
   ): Promise<IActionReply> {
+    const bodyJson: Record<string, string> = {
+      cmd: action,
+      extension_name: entry.name
+    };
+
+    if (actionOptions.useVersion) {
+      bodyJson['extension_version'] = actionOptions.useVersion;
+    }
+
     const actionRequest = Private.requestAPI<IActionReply>(
       {},
       {
         method: 'POST',
-        body: JSON.stringify({
-          cmd: action,
-          extension_name: entry.name
-        })
+        body: JSON.stringify(bodyJson)
       }
     );
 
@@ -553,7 +580,7 @@ export class ListModel extends VDomModel {
     // Ensure action is removed when resolved
     const remove = () => {
       const i = this._pendingActions.indexOf(pending);
-      this._pendingActions.splice(i, 1);
+      void this._pendingActions.splice(i, 1);
       this.stateChanged.emit(undefined);
     };
     pending.then(remove, remove);
@@ -624,14 +651,13 @@ export namespace ListModel {
  */
 namespace Private {
   /**
-   * A comparator function that sorts allowedExtensions orgs to the top.
+   * A comparator function that sorts installed extensions.
+   *
+   * In past it used to sort allowedExtensions orgs to the top,
+   * which needs to be restored (or documentation updated).
    */
-  export function comparator(a: IEntry, b: IEntry): number {
-    if (a.name === b.name) {
-      return 0;
-    } else {
-      return a.name > b.name ? 1 : -1;
-    }
+  export function installedComparator(a: IEntry, b: IEntry): number {
+    return a.name.localeCompare(b.name);
   }
 
   const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;
@@ -641,14 +667,16 @@ namespace Private {
    *
    * @param queryArgs Query arguments
    * @param init Initial values for the request
+   * @param serverSettings The server settings to use for the request
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
     queryArgs: { [k: string]: any } = {},
-    init: RequestInit = {}
+    init: RequestInit = {},
+    serverSettings?: ServerConnection.ISettings
   ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
-    const settings = ServerConnection.makeSettings();
+    const settings = serverSettings ?? ServerConnection.makeSettings();
     const requestUrl = URLExt.join(
       settings.baseUrl,
       EXTENSION_API_PATH // API Namespace

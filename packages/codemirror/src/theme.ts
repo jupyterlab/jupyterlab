@@ -6,11 +6,12 @@ import {
   HighlightStyle,
   syntaxHighlighting
 } from '@codemirror/language';
-import { Extension } from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { tags as t } from '@lezer/highlight';
-import { IEditorTheme, IEditorThemeRegistry } from './token';
+import type { IEditorTheme, IEditorThemeRegistry } from './token';
 
 export const jupyterEditorTheme = EditorView.theme({
   /**
@@ -21,6 +22,40 @@ export const jupyterEditorTheme = EditorView.theme({
   '&': {
     background: 'var(--jp-layout-color0)',
     color: 'var(--jp-content-font-color1)'
+  },
+
+  /* Panels and buttons used by the native CodeMirror search function
+     (rarely used in JupyterLab, but still accessible)
+     and by the vim extension (among others).
+  */
+  '.cm-panels': {
+    color: 'var(--jp-ui-font-color2)',
+    backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-panels.cm-panels-bottom': {
+    borderTop: '1px solid var(--jp-border-color2)'
+  },
+
+  '.cm-button': {
+    background: 'var(--jp-layout-color2)',
+    border: 'var(--jp-border-width) solid var(--jp-border-color1)',
+    color: 'var(--jp-ui-font-color1)',
+    borderRadius: 'var(--jp-border-radius)'
+  },
+
+  '.cm-button:hover': {
+    background: 'var(--jp-layout-color1)'
+  },
+
+  '.cm-panel.cm-search > label': {
+    color: 'var(--jp-ui-font-color1)'
+  },
+
+  '.cm-textfield': {
+    backgroundColor: 'var(--jp-layout-color2)',
+    color: 'var(--jp-ui-font-color1)',
+    border: 'var(--jp-border-width) solid var(--jp-border-color1)'
   },
 
   /* In the notebook, we want this styling to be handled by its container */
@@ -46,7 +81,7 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-editor-selected-background)'
   },
 
-  '&.cm-focused .cm-selectionBackground': {
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
     backgroundColor: 'var(--jp-editor-selected-focused-background)'
   },
 
@@ -55,8 +90,13 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-layout-color2)'
   },
 
-  '.cm-gutter, .cm-activeLine': {
+  '.cm-gutter': {
     backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-activeLine': {
+    backgroundColor:
+      'color-mix(in srgb, var(--jp-layout-color3) 25%, transparent)'
   },
 
   '.cm-lineNumbers': {
@@ -72,6 +112,10 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor:
       'var(--jp-search-selected-match-background-color) !important',
     color: 'var(--jp-search-selected-match-color) !important'
+  },
+
+  '.cm-tooltip': {
+    backgroundColor: 'var(--jp-layout-color1)'
   }
 });
 

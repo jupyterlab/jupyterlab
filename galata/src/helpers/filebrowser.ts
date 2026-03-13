@@ -1,16 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
-import { ContentsHelper } from '../contents';
+import type { ContentsHelper } from '../contents';
 import * as Utils from '../utils';
 
 /**
  * File Browser Helpers
  */
 export class FileBrowserHelper {
-  constructor(readonly page: Page, readonly contents: ContentsHelper) {}
+  constructor(
+    readonly page: Page,
+    readonly contents: ContentsHelper
+  ) {}
 
   /**
    * Create the selector for a file in the file browser
@@ -51,9 +54,7 @@ export class FileBrowserHelper {
       await this.openDirectory(dirPath);
     }
 
-    await Utils.waitForCondition(async () => {
-      return await this.isFileListedInBrowser(fileName);
-    });
+    await Utils.waitForCondition(() => this.isFileListedInBrowser(fileName));
   }
 
   /**
@@ -63,10 +64,11 @@ export class FileBrowserHelper {
    * @returns File status
    */
   async isFileListedInBrowser(fileName: string): Promise<boolean> {
-    const item = await this.page.$(
-      `xpath=${this.xpBuildFileSelector(fileName)}`
-    );
-    return item !== null;
+    const item = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${fileName}`) });
+
+    return (await item.count()) > 0;
   }
 
   /**
@@ -95,21 +97,40 @@ export class FileBrowserHelper {
    * Note: This will double click on the file;
    * an editor needs to be available for the given file type.
    *
-   * @param filePath Notebook path
+   * @param filePath File path
+   * @param factory Document factory to use
    * @returns Action success status
    */
-  async open(filePath: string): Promise<boolean> {
+  async open(filePath: string, factory?: string): Promise<boolean> {
     await this.revealFileInBrowser(filePath);
     const name = path.basename(filePath);
 
-    const fileItem = await this.page.$(
-      `xpath=${this.xpBuildFileSelector(name)}`
-    );
-    if (fileItem) {
-      await fileItem.click({ clickCount: 2 });
-      await this.page.waitForSelector(Utils.xpBuildActivityTabSelector(name), {
-        state: 'visible'
-      });
+    const fileItem = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${name}`) });
+    if (await fileItem.count()) {
+      if (factory) {
+        await fileItem.click({ button: 'right' });
+        await this.page
+          .getByRole('listitem')
+          .filter({ hasText: 'Open With' })
+          .click();
+        await this.page
+          .getByRole('menuitem', { name: factory, exact: true })
+          .click();
+      } else {
+        await fileItem.dblclick();
+      }
+      // Use `last` as if a file is already open, it will simply be activated
+      // if not it will be opened with optionally another factory (but we don't have a way
+      // to know that from the DOM).
+      await this.page
+        .getByRole('main')
+        .getByRole('tab', { name: new RegExp(`^${name}`) })
+        .last()
+        .waitFor({
+          state: 'visible'
+        });
     } else {
       return false;
     }
@@ -123,10 +144,10 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = await this.page.$(
-      '.jp-FileBrowser .jp-FileBrowser-crumbs span'
-    );
-    if (!homeButton) {
+    const homeButton = this.page
+      .locator('.jp-FileBrowser .jp-FileBrowser-crumbs span')
+      .first();
+    if (!(await homeButton.count())) {
       return false;
     }
     await homeButton.click();
@@ -188,40 +209,38 @@ export class FileBrowserHelper {
    */
   async refresh(): Promise<void> {
     const page = this.page;
-    const item = await page.$(
-      `xpath=//div[@id='filebrowser']//button[${Utils.xpContainsClass(
-        'jp-ToolbarButtonComponent'
-      )} and .//*[@data-icon='ui-components:refresh']]`
-    );
+    const button = page
+      .locator('#filebrowser')
+      .locator(
+        '.jp-ToolbarButtonComponent[data-command="filebrowser:refresh"]'
+      );
 
-    if (item) {
-      // wait for network response or timeout
-      await Promise.race([
-        page.waitForTimeout(2000),
-        this.contents.waitForAPIResponse(async () => {
-          await item.click();
-        })
-      ]);
-      // wait for DOM rerender
-      await page.waitForTimeout(200);
-    } else {
-      throw new Error('Could not find refresh toolbar item');
-    }
+    // Use Promise.race to manage the network response timeout
+    // This is useful for lab-based applications not using the Jupyter Server Contents API.
+    // such as JupyterLite, to avoid having the waitForAPIResponse call fail.
+    await Promise.race([
+      page.waitForTimeout(2000),
+      this.contents.waitForAPIResponse(async () => {
+        await button.click();
+      })
+    ]);
+    // wait for DOM rerender
+    await page.waitForTimeout(200);
   }
 
   protected async _openDirectory(dirName: string): Promise<boolean> {
-    const item = await this.page.$(
-      `xpath=${this.xpBuildDirectorySelector(dirName)}`
-    );
-    if (item === null) {
-      return false;
-    }
+    const item = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${dirName}`) });
 
+    await Utils.waitForCondition(async () => (await item.count()) > 0);
     await this.contents.waitForAPIResponse(async () => {
-      await item.click({ clickCount: 2 });
+      await item.dblclick();
     });
-    // wait for DOM rerender
-    await this.page.waitForTimeout(200);
+    await this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByText(`/${dirName}/`)
+      .waitFor();
 
     return true;
   }

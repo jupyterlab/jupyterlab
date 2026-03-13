@@ -10,10 +10,16 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../codeeditor"
     },
     {
       "path": "../codemirror"
+    },
+    {
+      "path": "../notebook"
     },
     {
       "path": "../settingregistry"

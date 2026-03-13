@@ -2,21 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
-import { Contents, KernelSpec, Session } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { IScore } from '@jupyterlab/ui-components';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { shouldOverwrite } from '@jupyterlab/docmanager';
+import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
-import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -60,6 +61,7 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
+    this._allowFileUploads = options.allowFileUploads ?? true;
     this._model = {
       path: this.rootPath,
       name: PathExt.basename(this.rootPath),
@@ -234,22 +236,19 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Change directory.
    *
-   * @param path - The path to the file or directory.
+   * @param path The path to the file or directory.
    *
    * @returns A promise with the contents of the directory.
    */
-  async cd(newValue = '.'): Promise<void> {
-    if (newValue !== '.') {
-      newValue = this.manager.services.contents.resolvePath(
-        this._model.path,
-        newValue
-      );
+  async cd(path = '.'): Promise<void> {
+    if (path !== '.') {
+      path = this.manager.services.contents.resolvePath(this._model.path, path);
     } else {
-      newValue = this._pendingPath || this._model.path;
+      path = this._pendingPath || this._model.path;
     }
     if (this._pending) {
       // Collapse requests to the same directory.
-      if (newValue === this._pendingPath) {
+      if (path === this._pendingPath) {
         return this._pending;
       }
       // Otherwise wait for the pending request to complete before continuing.
@@ -257,13 +256,13 @@ export class FileBrowserModel implements IDisposable {
     }
     const oldValue = this.path;
     const options: Contents.IFetchOptions = { content: true };
-    this._pendingPath = newValue;
-    if (oldValue !== newValue) {
+    this._pendingPath = path;
+    if (oldValue !== path) {
       this._sessions.length = 0;
     }
     const services = this.manager.services;
     this._pending = services.contents
-      .get(newValue, options)
+      .get(path, options)
       .then(contents => {
         if (this.isDisposed) {
           return;
@@ -271,17 +270,17 @@ export class FileBrowserModel implements IDisposable {
         this.handleContents(contents);
         this._pendingPath = null;
         this._pending = null;
-        if (oldValue !== newValue) {
+        if (oldValue !== path) {
           // If there is a state database and a unique key, save the new path.
           // We don't need to wait on the save to continue.
           if (this._state && this._key) {
-            void this._state.save(this._key, { path: newValue });
+            void this._state.save(this._key, { path });
           }
 
           this._pathChanged.emit({
             name: 'path',
             oldValue,
-            newValue
+            newValue: path
           });
         }
         this.onRunningChanged(services.sessions, services.sessions.running());
@@ -290,11 +289,7 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (
-          error.response &&
-          error.response.status === 404 &&
-          newValue !== '/'
-        ) {
+        if (error.response && error.response.status === 404 && path !== '/') {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
@@ -387,9 +382,21 @@ export class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Whether uploads are allowed.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this._allowFileUploads = value;
+  }
+
+  /**
    * Upload a `File` object.
    *
    * @param file - The `File` object to upload.
+   * @param path - The directory into which the file should be uploaded; defaults to current directory.
    *
    * @returns A promise containing the new file contents model.
    *
@@ -399,7 +406,12 @@ export class FileBrowserModel implements IDisposable {
    * Jupyter Server, it will ask for confirmation then upload the file in 1 MB
    * chunks.
    */
-  async upload(file: File): Promise<Contents.IModel> {
+  async upload(file: File, path?: string): Promise<Contents.IModel> {
+    // Check if upload is allowed
+    if (!this._allowFileUploads) {
+      throw new Error(this._trans.__('File uploads are disabled'));
+    }
+
     // We do not support Jupyter Notebook version less than 4, and Jupyter
     // Server advertises itself as version 1 and supports chunked
     // uploading. We assume any version less than 4.0.0 to be Jupyter Server
@@ -435,7 +447,7 @@ export class FileBrowserModel implements IDisposable {
     }
     await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
-    return await this._upload(file, chunkedUpload);
+    return await this._upload(file, chunkedUpload, path);
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
@@ -458,10 +470,12 @@ export class FileBrowserModel implements IDisposable {
    */
   private async _upload(
     file: File,
-    chunked: boolean
+    chunked: boolean,
+    uploadPath?: string
   ): Promise<Contents.IModel> {
     // Gather the file model parameters.
-    let path = this._model.path;
+    let path =
+      typeof uploadPath === 'undefined' ? this._model.path : uploadPath;
     path = path ? path + '/' + file.name : file.name;
     const name = file.name;
     const type: Contents.ContentType = 'file';
@@ -613,12 +627,17 @@ export class FileBrowserModel implements IDisposable {
     const path = this._model.path;
     const { sessions } = this.manager.services;
     const { oldValue, newValue } = change;
+    const prefix = this.driveName.length > 0 ? this.driveName + ':' : '';
     const value =
-      oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
+      oldValue &&
+      oldValue.path &&
+      prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
-        : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-        ? newValue
-        : undefined;
+        : newValue &&
+            newValue.path &&
+            prefix + PathExt.dirname(newValue.path) === path
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
@@ -656,6 +675,7 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
+  private _allowFileUploads: boolean;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
@@ -712,6 +732,11 @@ export namespace FileBrowserModel {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Whether to allow file uploads. Defaults to `true`.
+     */
+    allowFileUploads?: boolean;
   }
 }
 
@@ -773,6 +798,7 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
         return {};
       });
     this._filterDirectories = options.filterDirectories ?? true;
+    this._useFuzzyFilter = options.useFuzzyFilter ?? true;
   }
 
   /**
@@ -783,6 +809,30 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   }
   set filterDirectories(value: boolean) {
     this._filterDirectories = value;
+  }
+
+  /**
+   * Whether to apply fuzzy filter.
+   */
+  get useFuzzyFilter(): boolean {
+    return this._useFuzzyFilter;
+  }
+  set useFuzzyFilter(value: boolean) {
+    if (this._useFuzzyFilter === value) {
+      return;
+    }
+    this._useFuzzyFilter = value;
+    this._filterSettingsChanged.emit({ useFuzzyFilter: value });
+  }
+
+  /**
+   * Signal for settings changed
+   */
+  get filterSettingsChanged(): ISignal<
+    FileBrowserModel,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  > {
+    return this._filterSettingsChanged;
   }
 
   /**
@@ -809,6 +859,11 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
 
   private _filter: (value: Contents.IModel) => Partial<IScore> | null;
   private _filterDirectories: boolean;
+  private _useFuzzyFilter: boolean;
+  private _filterSettingsChanged = new Signal<
+    FileBrowserModel,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >(this);
 }
 
 /**
@@ -828,5 +883,10 @@ export namespace FilterFileBrowserModel {
      * Filter directories
      */
     filterDirectories?: boolean;
+
+    /**
+     * Use Fuzzy Filter
+     */
+    useFuzzyFilter?: boolean;
   }
 }

@@ -421,6 +421,11 @@ export namespace IRenderMime {
      * @returns The sanitized string.
      */
     sanitize(dirty: string, options?: ISanitizerOptions): string;
+
+    /**
+     * @returns Whether to allow name and id properties.
+     */
+    readonly allowNamedProperties?: boolean;
   }
 
   /**
@@ -430,13 +435,41 @@ export namespace IRenderMime {
     /**
      * Add the link handler to the node.
      *
-     * @param node: the anchor node for which to handle the link.
+     * @param node the anchor node for which to handle the link.
      *
-     * @param path: the path to open when the link is clicked.
+     * @param path the path to open when the link is clicked.
      *
-     * @param id: an optional element id to scroll to when the path is opened.
+     * @param id an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
+    /**
+     * Add the path handler to the node.
+     *
+     * @param node the anchor node for which to handle the link.
+     *
+     * @param path the path to open when the link is clicked.
+     *
+     * @param scope the scope to which the path is bound.
+     *
+     * @param id an optional element id to scroll to when the path is opened.
+     */
+    handlePath?(
+      node: HTMLElement,
+      path: string,
+      scope: 'kernel' | 'server',
+      id?: string
+    ): void;
+  }
+
+  export interface IResolvedLocation {
+    /**
+     * Location scope.
+     */
+    scope: 'kernel' | 'server';
+    /**
+     * Resolved path.
+     */
+    path: string;
   }
 
   /**
@@ -446,7 +479,7 @@ export namespace IRenderMime {
     /**
      * Resolve a relative url to an absolute url path.
      */
-    resolveUrl(url: string): Promise<string>;
+    resolveUrl(url: string, context?: IResolveUrlContext): Promise<string>;
 
     /**
      * Get the download url for a given absolute url path.
@@ -460,12 +493,57 @@ export namespace IRenderMime {
      * Whether the URL should be handled by the resolver
      * or not.
      *
+     * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+     *
      * #### Notes
      * This is similar to the `isLocal` check in `URLExt`,
      * but can also perform additional checks on whether the
      * resolver should handle a given URL.
      */
-    isLocal?: (url: string) => boolean;
+    isLocal?: (url: string, allowRoot?: boolean) => boolean;
+
+    /**
+     * Resolve a path from Jupyter kernel to a path:
+     * - relative to `root_dir` (preferably) this is in jupyter-server scope,
+     * - path understood and known by kernel (if such a path exists).
+     * Returns `null` if there is no file matching provided path in neither
+     * kernel nor jupyter-server contents manager.
+     */
+    resolvePath?: (path: string) => Promise<IResolvedLocation | null>;
+  }
+
+  type UrlAttributes = 'href' | 'src';
+
+  type TagsAcceptingUrls = {
+    [K in keyof HTMLElementTagNameMap]: Extract<
+      keyof HTMLElementTagNameMap[K],
+      UrlAttributes
+    > extends never
+      ? never
+      : K;
+  }[keyof HTMLElementTagNameMap];
+
+  /**
+   * Context in which the URL is being resolved.
+   *
+   * This is useful to specify for applications which wish to base64-encode
+   * contents of certain local files referenced by URLs, e.g. images, short
+   * videos, or CSS styles. Because base64-encoding is not advisable or even
+   * impossible for some combinations of tags and attributes, the resolving
+   * function needs know both the tag and the attribute to decide whether
+   * to base64-encode or not. For example, passing encoding contents to `href`
+   * in the `<link>` context can be used to provide CSS styles, but doing the
+   * same for `href` in `<a>` context URL will prevent navigation.
+   */
+  export interface IResolveUrlContext {
+    /**
+     * Attribute for which the URL is being resolved.
+     */
+    attribute?: UrlAttributes;
+    /**
+     * Tag for which the URL is being resolved, e.g. `a` or `img`.
+     */
+    tag?: TagsAcceptingUrls;
   }
 
   /**
@@ -478,7 +556,7 @@ export namespace IRenderMime {
      * @param element - the DOM element to typeset. The typesetting may
      *   happen synchronously or asynchronously.
      */
-    typeset(element: HTMLElement): void;
+    typeset(element: HTMLElement): void | Promise<void>;
   }
 
   /**
@@ -486,10 +564,10 @@ export namespace IRenderMime {
    */
   export interface IMarkdownParser {
     /**
-     * Render a markdown source.
+     * Render a markdown source into unsanitized HTML.
      *
      * @param source - The string to render.
-     * @returns - A promise of the string.
+     * @returns - A promise of the string containing HTML which may require sanitization.
      */
     render(source: string): Promise<string>;
   }

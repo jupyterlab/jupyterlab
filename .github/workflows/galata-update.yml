@@ -11,23 +11,17 @@ permissions:
 jobs:
   update-galata-snapshots:
     name: Update Galata References
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
+    if: github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update galata snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure git to use https
-        run: git config --global hub.protocol https
-
-      - name: Checkout the branch from the PR that triggered the job
-        run: hub pr checkout ${{ github.event.issue.number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -45,16 +39,20 @@ jobs:
           test_folder: galata
           artifact_name: updated-galata-snapshots
           report_name: update-galata-report
+          npm_client: jlpm
 
       - name: Comment back on the PR
         run: |
-          hub api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-documentation-snapshots:
     name: Update Documentation Snapshots
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
+    if: github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update documentation snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
 
@@ -67,14 +65,12 @@ jobs:
         python-version: ['3.10.6']
 
     steps:
-      - name: Checkout JupyterLab
-        uses: actions/checkout@v3
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: core
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout demo project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -85,30 +81,16 @@ jobs:
           echo "JUPYTERLAB_GALATA_ROOT_DIR=$PWD" >> $GITHUB_ENV
         working-directory: demo
 
-      - name: Configure git to use https
-        run: git config --global hub.protocol https
-
-      - name: Checkout the branch from the PR that triggered the job
-        working-directory: core
-        run: hub pr checkout ${{ github.event.issue.number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Install dependencies
-        working-directory: core
+        env:
+          OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Install chinese font
-          sudo apt-get update
-          sudo apt-get install fonts-dejavu fonts-noto
-
-          # Freeze the packages to ensure consistent look and feel
-          # IPython is frozen because its version is displayed in
-          # the console header
-          pip install .[docs-screenshots]
+          # Note: any changes to dependency pins need to
+          # be done by updating the [docs-screenshots] group.
           bash ./scripts/ci_install.sh
 
           # Build dev-mode
@@ -118,14 +100,15 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab
-          test_folder: core/galata
+          test_folder: galata
           start_server_script: start:doc
           update_script: test:doc:update
           artifact_name: updated-documentation-snapshots
           report_name: update-documentation-report
+          npm_client: jlpm
 
       - name: Comment back on the PR
         run: |
-          hub api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

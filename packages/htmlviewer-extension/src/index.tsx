@@ -7,25 +7,25 @@
  * @module htmlviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   ICommandPalette,
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { HTMLViewer } from '@jupyterlab/htmlviewer';
 import {
-  HTMLViewer,
   HTMLViewerFactory,
   IHTMLViewerTracker,
   ToolbarItems
 } from '@jupyterlab/htmlviewer';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { html5Icon } from '@jupyterlab/ui-components';
@@ -192,6 +192,12 @@ function activateHTMLViewer(
       const sandbox = current.content.sandbox;
       return sandbox.indexOf('allow-scripts') !== -1;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       const current = tracker.currentWidget;
       if (!current) {
@@ -200,6 +206,11 @@ function activateHTMLViewer(
       current.trusted = !current.trusted;
     }
   });
+
+  tracker.currentChanged.connect(() => {
+    app.commands.notifyCommandChanged(CommandIDs.trustHTML);
+  });
+
   if (palette) {
     palette.addItem({
       command: CommandIDs.trustHTML,

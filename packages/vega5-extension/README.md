@@ -2,8 +2,6 @@
 
 A JupyterLab extension for rendering [Vega](https://vega.github.io/vega) 5 and [Vega-Lite](https://vega.github.io/vega-lite) 3.
 
-![demo](http://g.recordit.co/USoTkuCOfR.gif)
-
 This extension is in the official JupyterLab distribution.
 
 ## Usage

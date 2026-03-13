@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
-import { IObservableDisposable } from '@lumino/disposable';
+import type { IObservableDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
-import { IObjectPool, IRestorable } from './interfaces';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { IObjectPool, IRestorable } from './interfaces';
 
 /**
  * An object pool that supports restoration.
@@ -14,7 +15,8 @@ import { IObjectPool, IRestorable } from './interfaces';
  */
 export class RestorablePool<
   T extends IObservableDisposable = IObservableDisposable
-> implements IObjectPool<T>, IRestorable<T>
+>
+  implements IObjectPool<T>, IRestorable<T>
 {
   /**
    * Create a new restorable pool.
@@ -166,7 +168,7 @@ export class RestorablePool<
   /**
    * Find the first object in the pool that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each object.
+   * @param fn The filter function to call on each object.
    */
   find(fn: (obj: T) => boolean): T | undefined {
     const values = this._objects.values();

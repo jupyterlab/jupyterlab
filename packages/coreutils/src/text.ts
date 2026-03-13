@@ -23,7 +23,7 @@ export namespace Text {
    * @returns The unicode character offset
    */
   export function jsIndexToCharIndex(jsIdx: number, text: string): number {
-    if (HAS_SURROGATES) {
+    if (!HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return jsIdx;
     }
@@ -52,7 +52,7 @@ export namespace Text {
    * @returns The js-native index
    */
   export function charIndexToJsIndex(charIdx: number, text: string): number {
-    if (HAS_SURROGATES) {
+    if (!HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return charIdx;
     }
@@ -75,9 +75,9 @@ export namespace Text {
    * Given a 'snake-case', 'snake_case', 'snake:case', or
    * 'snake case' string, will return the camel case version: 'snakeCase'.
    *
-   * @param str: the snake-case input string.
+   * @param str the snake-case input string.
    *
-   * @param upper: default = false. If true, the first letter of the
+   * @param upper default = false. If true, the first letter of the
    * returned string will be capitalized.
    *
    * @returns the camel case version of the input string.
@@ -95,7 +95,7 @@ export namespace Text {
   /**
    * Given a string, title case the words in the string.
    *
-   * @param str: the string to title case.
+   * @param str the string to title case.
    *
    * @returns the same string, but with each word capitalized.
    */

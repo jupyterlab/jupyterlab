@@ -13,9 +13,14 @@ import { PromiseDelegate } from '@lumino/coreutils';
 const NBCONVERT_SETTINGS_URL = 'api/nbconvert';
 
 /**
+ * The url for the nbconvert export service.
+ */
+const NBCONVERT_EXPORT_URL = 'nbconvert';
+
+/**
  * The nbconvert API service manager.
  */
-export class NbConvertManager {
+export class NbConvertManager implements NbConvert.IManager {
   /**
    * Create a new nbconvert manager.
    */
@@ -32,7 +37,7 @@ export class NbConvertManager {
   /**
    * Fetch and cache the export formats from the expensive nbconvert handler.
    */
-  protected async fetchExportFormats(): Promise<NbConvertManager.IExportFormats> {
+  protected async fetchExportFormats(): Promise<NbConvert.IExportFormats> {
     this._requestingFormats = new PromiseDelegate();
     this._exportFormats = null;
     const base = this.serverSettings.baseUrl;
@@ -48,7 +53,7 @@ export class NbConvertManager {
       throw err;
     }
     const data = await response.json();
-    const exportList: NbConvertManager.IExportFormats = {};
+    const exportList: NbConvert.IExportFormats = {};
     const keys = Object.keys(data);
     keys.forEach(function (key) {
       const mimeType: string = data[key].output_mimetype;
@@ -64,7 +69,7 @@ export class NbConvertManager {
    */
   async getExportFormats(
     force: boolean = true
-  ): Promise<NbConvertManager.IExportFormats> {
+  ): Promise<NbConvert.IExportFormats> {
     if (this._requestingFormats) {
       return this._requestingFormats.promise;
     }
@@ -76,16 +81,39 @@ export class NbConvertManager {
     return this._exportFormats;
   }
 
-  protected _requestingFormats: PromiseDelegate<NbConvertManager.IExportFormats> | null;
-  protected _exportFormats: NbConvertManager.IExportFormats | null = null;
+  /**
+   * Export a notebook to a given format.
+   *
+   * @param options - The export options.
+   * @param options.format - The export format (e.g., 'html', 'pdf').
+   * @param options.path - The path to the notebook to export.
+   * @param options.exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
+   */
+  async exportAs(options: NbConvert.IExportOptions): Promise<void> {
+    const { format, path } = options;
+    const { download = false } = options.exporterOptions || {};
+
+    const baseUrl = this.serverSettings.baseUrl;
+    const notebookPath = URLExt.encodeParts(path);
+    let url = URLExt.join(baseUrl, NBCONVERT_EXPORT_URL, format, notebookPath);
+    if (download) {
+      url += '?download=true';
+    }
+
+    // Open the URL in a new tab if in a browser environment.
+    window?.open(url, '_blank', 'noopener');
+  }
+
+  protected _requestingFormats: PromiseDelegate<NbConvert.IExportFormats> | null;
+  protected _exportFormats: NbConvert.IExportFormats | null = null;
 }
 
 /**
- * A namespace for `BuildManager` statics.
+ * A namespace for `NbConvertManager` statics.
  */
 export namespace NbConvertManager {
   /**
-   * The instantiation options for a setting manager.
+   * The instantiation options for a nbconvert manager.
    */
   export interface IOptions {
     /**
@@ -95,7 +123,19 @@ export namespace NbConvertManager {
   }
 
   /**
-   * A namespace for nbconvert API interfaces.
+   * The interface for the export formats.
+   *
+   * @deprecated Kept for backward compatibility, use `NbConvert.IExportFormats` instead.
+   */
+  export interface IExportFormats extends NbConvert.IExportFormats {}
+}
+
+/**
+ * A namespace for nbconvert API interfaces.
+ */
+export namespace NbConvert {
+  /**
+   * The interface for the export formats.
    */
   export interface IExportFormats {
     /**
@@ -103,14 +143,52 @@ export namespace NbConvertManager {
      */
     [key: string]: { output_mimetype: string };
   }
-}
 
-/**
- * A namespace for builder API interfaces.
- */
-export namespace NbConvert {
   /**
-   * The interface for the build manager.
+   * The interface for the nbconvert export options.
    */
-  export interface IManager extends NbConvertManager {}
+  export interface IExportOptions {
+    /**
+     * The export format (e.g., 'html', 'pdf').
+     */
+    format: string;
+
+    /**
+     * The path to the notebook to export.
+     */
+    path: string;
+
+    /**
+     * Additional options for the exporter.
+     */
+    exporterOptions?: { [key: string]: any };
+  }
+
+  /**
+   * The interface for the nbconvert manager.
+   */
+  export interface IManager {
+    /**
+     * The server settings used to make API requests.
+     */
+    readonly serverSettings: ServerConnection.ISettings;
+
+    /**
+     * Get the list of export formats.
+     *
+     * @param force - Whether to force a refresh or use cached formats if available.
+     * @returns A promise that resolves with the list of export formats.
+     */
+    getExportFormats(force?: boolean): Promise<NbConvert.IExportFormats>;
+
+    /**
+     * Export a notebook to a given format.
+     *
+     * @param options - The export options.
+     * @param options.format - The export format (e.g., 'html', 'pdf').
+     * @param options.path - The path to the notebook to export.
+     * @param exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
+     */
+    exportAs?(options: NbConvert.IExportOptions): Promise<void>;
+  }
 }

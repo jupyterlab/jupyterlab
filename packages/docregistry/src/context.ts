@@ -1,33 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Dialog,
-  ISessionContext,
   SessionContext,
   SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
   Contents,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+
+import type { PartialJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { DocumentRegistry } from './registry';
+
+import type { DocumentRegistry } from './registry';
 
 /**
  * An implementation of a document context.
@@ -36,14 +38,14 @@ import { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T>
-{
+> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
   constructor(options: Context.IOptions<T>) {
     const manager = (this._manager = options.manager);
     this.translator = options.translator || nullTranslator;
+    this._contentProviderId = options.contentProviderId;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
     this._dialogs =
@@ -56,10 +58,11 @@ export class Context<
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     const sharedFactory = this._manager.contents.getSharedModelFactory(
-      this._path
+      this._path,
+      { contentProviderId: options.contentProviderId }
     );
     const sharedModel = sharedFactory?.createNew({
-      path: localPath,
+      path: this._path,
       format: this._factory.fileFormat,
       contentType: this._factory.contentType,
       collaborative: this._factory.collaborative
@@ -77,9 +80,10 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path: localPath,
+      path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -88,11 +92,18 @@ export class Context<
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
+    const urlResolverFactory = options.urlResolverFactory
+      ? options.urlResolverFactory
+      : {
+          createResolver: (
+            resolverOptions: RenderMimeRegistry.IUrlResolverOptions
+          ) => new RenderMimeRegistry.UrlResolver(resolverOptions)
+        };
+
+    this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
       contents: manager.contents
     });
-    this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
 
   /**
@@ -105,7 +116,7 @@ export class Context<
   /**
    * A signal emitted when the model is saved or reverted.
    */
-  get fileChanged(): ISignal<this, Contents.IModel> {
+  get fileChanged(): ISignal<this, Omit<Contents.IModel, 'content'>> {
     return this._fileChanged;
   }
 
@@ -163,14 +174,14 @@ export class Context<
   }
 
   /**
-   * The current contents model associated with the document.
+   * The document metadata, stored as a services contents model.
    *
    * #### Notes
-   * The contents model will be null until the context is populated.
-   * It will have an  empty `contents` field.
+   * The contents model will be `null` until the context is populated.
+   * It will not have a `content` field.
    */
-  get contentsModel(): Contents.IModel | null {
-    return this._contentsModel;
+  get contentsModel(): Omit<Contents.IModel, 'content'> | null {
+    return this._contentsModel ? { ...this._contentsModel } : null;
   }
 
   /**
@@ -224,14 +235,16 @@ export class Context<
   /**
    * Whether the document can be saved via the Contents API.
    */
-  protected get canSave(): boolean {
+  get canSave(): boolean {
     return !!(this._contentsModel?.writable && !this._model.collaborative);
   }
 
   /**
    * The url resolver for the context.
    */
-  readonly urlResolver: IRenderMime.IResolver;
+  get urlResolver(): IRenderMime.IResolver {
+    return this._urlResolver;
+  }
 
   /**
    * Initialize the context.
@@ -273,41 +286,55 @@ export class Context<
   /**
    * Save the document to a different path chosen by the user.
    *
-   * It will be rejected if the user abort providing a new path.
+   * @returns A promise that resolves to `true` if the save operation was initiated.
+   * Returns `false` if the user cancelled the operation.
+   *
+   * Note:
+   * - If the save operation proceeds but fails due to an error in the content manager,
+   *   the returned value will still be `true`.
+   * - Consumers interested in the actual result of the save should listen to the
+   *   {@link saveState} signal to be notified when the save succeeds or fails.
    */
-  async saveAs(): Promise<void> {
+  async saveAs(): Promise<boolean> {
     await this.ready;
     const localPath = this._manager.contents.localPath(this.path);
     const newLocalPath = await Private.getSavePath(localPath);
 
     if (this.isDisposed || !newLocalPath) {
-      return;
+      return false;
     }
 
     const drive = this._manager.contents.driveName(this.path);
     const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
 
     if (newPath === this._path) {
-      return this.save();
+      await this.save();
+      return true;
     }
 
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
-      await this._manager.contents.get(newPath);
+      await this._manager.contents.get(newPath, {
+        contentProviderId: this._contentProviderId,
+        content: false
+      });
       await this._maybeOverWrite(newPath);
     } catch (err) {
       if (!err.response || err.response.status !== 404) {
+        // Dialog rejection (user cancelled)
+        if (!err.response) {
+          return false;
+        }
         throw err;
       }
-      await this._finishSaveAs(newPath);
     }
+    await this._finishSaveAs(newPath);
+    return true;
   }
 
   /**
    * Download a file.
-   *
-   * @param path - The path of the file to be downloaded.
    *
    * @returns A promise which resolves when the file has begun
    *   downloading.
@@ -407,22 +434,6 @@ export class Context<
     });
   }
 
-  protected onStateChanged(sender: ISharedDocument, changes: DocumentChange) {
-    if (changes.stateChange) {
-      changes.stateChange.forEach(change => {
-        if (change.name === 'path') {
-          const driveName = this._manager.contents.driveName(this._path);
-          let newPath = change.newValue;
-          if (driveName) {
-            newPath = `${driveName}:${change.newValue}`;
-          }
-
-          this._updatePath(newPath);
-        }
-      });
-    }
-  }
-
   /**
    * Handle a change on the contents manager.
    */
@@ -430,6 +441,22 @@ export class Context<
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
+    if (change.type === 'save' && this._model.collaborative) {
+      // Skip if the change isn't related to current file.
+      if (this._contentsModel?.path !== change.newValue?.path) {
+        return;
+      }
+
+      // Update the contents model with the new values provided on save.
+      // This is needed for save operations performed on the server-side
+      // by the collaborative drive which needs to update the `hash`
+      // of the content when it changes on the backend.
+      this._updateContentsModel({
+        ...this._contentsModel,
+        ...change.newValue
+      } as Contents.IModel);
+      return;
+    }
     if (change.type !== 'rename') {
       return;
     }
@@ -443,7 +470,6 @@ export class Context<
 
       if (oldPath !== this._path) {
         newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
 
         // Update client file model from folder change
         changeModel = {
@@ -467,29 +493,47 @@ export class Context<
       return;
     }
 
-    this._updatePath(this.sessionContext.session!.path);
+    // The session uses local paths.
+    // We need to convert it to a global path.
+    const driveName = this._manager.contents.driveName(this.path);
+    let newPath = this._manager.contents.localPath(
+      this.sessionContext.session!.path
+    );
+    if (driveName) {
+      newPath = `${driveName}:${newPath}`;
+    }
+    this._updatePath(newPath);
   }
 
   /**
    * Update our contents model, without the content.
    */
-  private _updateContentsModel(model: Contents.IModel): void {
-    const writable = model.writable && !this._model.collaborative;
-    const newModel: Contents.IModel = {
+  private _updateContentsModel(
+    model: Contents.IModel | Omit<Contents.IModel, 'content'>
+  ): void {
+    const newModel: Omit<Contents.IModel, 'content'> = {
       path: model.path,
       name: model.name,
       type: model.type,
-      content: undefined,
-      writable,
+      writable: model.writable,
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format
+      format: model.format,
+      hash: model.hash,
+      hash_algorithm: model.hash_algorithm
     };
-    const mod = this._contentsModel ? this._contentsModel.last_modified : null;
+    const mod = this._contentsModel?.last_modified ?? null;
+    const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
-    this._model.sharedModel.setState('last_modified', newModel.last_modified);
-    if (!mod || newModel.last_modified !== mod) {
+    if (
+      // If neither modification date nor hash available, assume the file has changed
+      (!mod && !hash) ||
+      // Compare last_modified if no hash
+      (!hash && newModel.last_modified !== mod) ||
+      // Compare hash if available
+      (hash && newModel.hash !== hash)
+    ) {
       this._fileChanged.emit(newModel);
     }
   }
@@ -502,14 +546,14 @@ export class Context<
     this._path = newPath;
     const localPath = this._manager.contents.localPath(newPath);
     const name = PathExt.basename(localPath);
-    if (this.sessionContext.session?.path !== localPath) {
-      void this.sessionContext.session?.setPath(localPath);
+    if (this.sessionContext.session?.path !== newPath) {
+      void this.sessionContext.session?.setPath(newPath);
     }
     if (this.sessionContext.session?.name !== name) {
       void this.sessionContext.session?.setName(name);
     }
-    if ((this.urlResolver as RenderMimeRegistry.UrlResolver).path !== newPath) {
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    if (this._urlResolver.path !== newPath) {
+      this._urlResolver.path = newPath;
     }
     if (
       this._contentsModel &&
@@ -522,9 +566,6 @@ export class Context<
         path: newPath
       };
       this._updateContentsModel(contentsModel);
-    }
-    if (this._model.sharedModel.getState('path') !== localPath) {
-      this._model.sharedModel.setState('path', localPath);
     }
     this._pathChanged.emit(newPath);
   }
@@ -577,14 +618,6 @@ export class Context<
 
     // rename triggers a fileChanged which updates the contents model
     await this._manager.contents.rename(this.path, newPath);
-    await this.sessionContext.session?.setPath(newPath);
-    await this.sessionContext.session?.setName(newName);
-
-    this._path = newPath;
-    const localPath = this._manager.contents.localPath(this._path);
-    (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-    this._model.sharedModel.setState('path', localPath);
-    this._pathChanged.emit(newPath);
   }
 
   /**
@@ -595,9 +628,9 @@ export class Context<
     const options = this._createSaveOptions();
 
     try {
-      let value: Contents.IModel;
       await this._manager.ready;
-      value = await this._maybeSave(options);
+
+      const value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
       }
@@ -643,9 +676,11 @@ export class Context<
     const opts: Contents.IFetchOptions = {
       type: this._factory.contentType,
       content: this._factory.fileFormat !== null,
+      hash: this._factory.fileFormat !== null,
       ...(this._factory.fileFormat !== null
         ? { format: this._factory.fileFormat }
-        : {})
+        : {}),
+      contentProviderId: this._contentProviderId
     };
     const path = this._path;
     const model = this._model;
@@ -702,34 +737,83 @@ export class Context<
   ): Promise<Contents.IModel> {
     const path = this._path;
     // Make sure the file has not changed on disk.
-    const promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(path, {
+      content: false,
+      hash: true,
+      contentProviderId: this._contentProviderId
+    });
     return promise.then(
       model => {
         if (this.isDisposed) {
           return Promise.reject(new Error('Disposed'));
         }
+        // Since jupyter server may provide hash in model, we compare hash first
+        const hashAvailable =
+          this.contentsModel?.hash !== undefined &&
+          this.contentsModel?.hash !== null &&
+          model.hash !== undefined &&
+          model.hash !== null;
+        const hClient = this.contentsModel?.hash;
+        const hDisk = model.hash;
+        if (hashAvailable && hClient !== hDisk) {
+          console.warn(`Different hash found for ${this.path}`);
+          return this._raiseConflict(model, options);
+        }
+
+        // When hash is not provided, we compare last_modified
         // We want to check last_modified (disk) > last_modified (client)
         // (our last save)
         // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
         const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
-        const ycontextModified = this._model.sharedModel.getState(
-          'last_modified'
-        ) as string;
-        // prefer using the timestamp from the state because it is more up to date
-        const modified = ycontextModified || this.contentsModel?.last_modified;
+        const modified = this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
         if (
+          !hashAvailable &&
           modified &&
           tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin
         ) {
-          return this._timeConflict(tClient, model, options);
+          console.warn(
+            `Last saving performed ${tClient} ` +
+              `while the current file seems to have been saved ` +
+              `${tDisk}`
+          );
+          return this._raiseConflict(model, options);
         }
-        return this._manager.contents.save(path, options);
+        return this._manager.contents
+          .save(path, {
+            ...options,
+            contentProviderId: this._contentProviderId
+          })
+          .then(async contentsModel => {
+            const model = await this._manager.contents.get(path, {
+              content: false,
+              hash: true,
+              contentProviderId: this._contentProviderId
+            });
+            return {
+              ...contentsModel,
+              hash: model.hash,
+              hash_algorithm: model.hash_algorithm
+            } as Contents.IModel;
+          });
       },
       err => {
         if (err.response && err.response.status === 404) {
-          return this._manager.contents.save(path, options);
+          return this._manager.contents
+            .save(path, options)
+            .then(async contentsModel => {
+              const model = await this._manager.contents.get(path, {
+                content: false,
+                hash: true,
+                contentProviderId: this._contentProviderId
+              });
+              return {
+                ...contentsModel,
+                hash: model.hash,
+                hash_algorithm: model.hash_algorithm
+              } as Contents.IModel;
+            });
         }
         throw err;
       }
@@ -748,7 +832,7 @@ export class Context<
   }
 
   /**
-   * Add a checkpoint the file is writable.
+   * Add a checkpoint if the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
     let promise = Promise.resolve(void 0);
@@ -771,22 +855,14 @@ export class Context<
       }
     });
   }
-
   /**
    * Handle a time conflict.
    */
-  private _timeConflict(
-    tClient: Date,
+  private _raiseConflict(
     model: Contents.IModel,
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    const tDisk = new Date(model.last_modified);
-    console.warn(
-      `Last saving performed ${tClient} ` +
-        `while the current file seems to have been saved ` +
-        `${tDisk}`
-    );
-    if (this._timeConflictModalIsOpen) {
+    if (this._conflictModalIsOpen) {
       const error = new Error('Modal is already displayed');
       error.name = 'ModalDuplicateError';
       return Promise.reject(error);
@@ -805,18 +881,21 @@ or load the version on disk (revert)?`,
       label: this._trans.__('Overwrite'),
       actions: ['overwrite']
     });
-    this._timeConflictModalIsOpen = true;
+    this._conflictModalIsOpen = true;
     return showDialog({
       title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
-      this._timeConflictModalIsOpen = false;
+      this._conflictModalIsOpen = false;
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
       if (result.button.actions.includes('overwrite')) {
-        return this._manager.contents.save(this._path, options);
+        return this._manager.contents.save(this._path, {
+          ...options,
+          contentProviderId: this._contentProviderId
+        });
       }
       if (result.button.actions.includes('revert')) {
         return this.revert().then(() => {
@@ -854,6 +933,8 @@ or load the version on disk (revert)?`,
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
+      } else {
+        return Promise.reject(new Error('Cancelled'));
       }
     });
   }
@@ -920,6 +1001,7 @@ or load the version on disk (revert)?`,
   private _isDisposed = false;
   private _isPopulated = false;
   private _trans: TranslationBundle;
+  private _contentProviderId?: string;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
@@ -930,17 +1012,20 @@ or load the version on disk (revert)?`,
   private _path = '';
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
-  private _contentsModel: Contents.IModel | null = null;
+  private _contentsModel: Omit<Contents.IModel, 'content'> | null = null;
 
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _pathChanged = new Signal<this, string>(this);
-  private _fileChanged = new Signal<this, Contents.IModel>(this);
+  private _fileChanged = new Signal<this, Omit<Contents.IModel, 'content'>>(
+    this
+  );
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
+  private _urlResolver: RenderMimeRegistry.IUrlResolver;
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
-  private _timeConflictModalIsOpen = false;
+  private _conflictModalIsOpen = false;
 }
 
 /**
@@ -992,9 +1077,20 @@ export namespace Context {
     translator?: ITranslator;
 
     /**
-     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client.
      */
     lastModifiedCheckMargin?: number;
+
+    /**
+     * Identifier of the content provider used for file operations.
+     * @experimental
+     */
+    contentProviderId?: string;
+
+    /**
+     * A factory for the URL resolver.
+     */
+    urlResolverFactory?: IUrlResolverFactory;
   }
 }
 

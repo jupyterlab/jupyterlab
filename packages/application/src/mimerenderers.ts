@@ -1,19 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker, WidgetTracker } from '@jupyterlab/apputils';
-import {
-  DocumentRegistry,
-  MimeDocument,
-  MimeDocumentFactory
-} from '@jupyterlab/docregistry';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import type { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
+import { MimeDocumentFactory } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator } from '@jupyterlab/translation';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
+import type { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
 import { ILayoutRestorer } from './layoutrestorer';
 
 /**
@@ -58,7 +56,7 @@ export function createRendermimePlugins(
   // Also add a meta-plugin handling state restoration
   // and exposing the mime document widget tracker.
   plugins.push({
-    id: '@jupyterlab/application:mimedocument',
+    id: '@jupyterlab/application-extension:mimedocument',
     description: 'Provides a mime document widget tracker.',
     optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,

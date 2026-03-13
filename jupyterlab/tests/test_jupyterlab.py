@@ -35,8 +35,10 @@ from jupyterlab.commands import (
     install_extension,
     link_package,
     list_extensions,
+    lock_extension,
     uninstall_extension,
     unlink_package,
+    unlock_extension,
     update_extension,
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
@@ -52,7 +54,7 @@ def touch(file, mtime=None):
     dirname = os.path.dirname(file)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    open(file, "a").close()  # noqa
+    open(file, "a").close()
     # set explicit mtime
     if mtime:
         atime = os.stat(file).st_atime
@@ -292,8 +294,8 @@ class TestExtension(AppHandlerTest):
 
         # The archive file names are printed to stdout when run `npm pack`
         packages = [
-            subprocess.run(
-                ["npm", "pack", name],  # noqa S603 S607
+            subprocess.run(  # noqa S603
+                ["npm", "pack", name],  # noqa S607
                 stdout=subprocess.PIPE,
                 text=True,
                 check=True,
@@ -583,6 +585,19 @@ class TestExtension(AppHandlerTest):
         assert disable_extension("@jupyterlab/notebook-extension", app_options=options) is True
         assert check_extension(name, app_options=options)
         assert not check_extension("@jupyterlab/notebook-extension", app_options=options)
+
+    def test_lock_unlock_extension(self):
+        options = AppOptions(app_dir=self.tempdir())
+        assert install_extension(self.mock_extension, app_options=options) is True
+        name = self.pkg_names["extension"]
+        info = get_app_info(app_options=options)
+        assert info["locked"].get(name, False) is False
+        lock_extension(self.pkg_names["extension"], app_options=options)
+        info = get_app_info(app_options=options)
+        assert info["locked"].get(name, False) is True
+        unlock_extension(self.pkg_names["extension"], app_options=options)
+        info = get_app_info(app_options=options)
+        assert info["locked"].get(name, False) is False
 
     @pytest.mark.slow
     def test_build_check(self):

@@ -5,21 +5,21 @@
  * @module tooltip-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { Text } from '@jupyterlab/coreutils';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITooltipManager, Tooltip } from '@jupyterlab/tooltip';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -58,6 +58,12 @@ const manager: JupyterFrontEndPlugin<ITooltipManager> = {
         if (tooltip) {
           tooltip.dispose();
           tooltip = null;
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });
@@ -122,6 +128,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
         if (!!editor && !!kernel && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
   }
@@ -163,6 +175,12 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });
@@ -258,8 +276,14 @@ const files: JupyterFrontEndPlugin<void> = {
         const editor = anchor?.editor;
 
         // If all components necessary for rendering exist, create a tooltip.
-        if (!!editor && !!kernel && !!rendermime) {
+        if (!!editor && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });

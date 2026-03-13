@@ -56,6 +56,11 @@
       "command": "running:show-panel",
       "keys": ["Accel Shift B"],
       "selector": "body"
+    },
+    {
+      "command": "running:show-modal",
+      "keys": ["Accel Alt A"],
+      "selector": "body"
     }
   ],
   "properties": {},

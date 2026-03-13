@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PartialJSONObject } from '@lumino/coreutils';
+import type { PartialJSONObject } from '@lumino/coreutils';
 import { posix } from 'path';
 import urlparse from 'url-parse';
 
@@ -12,7 +12,7 @@ export namespace URLExt {
   /**
    * Parse a url into a URL object.
    *
-   * @param urlString - The URL string to parse.
+   * @param url - The URL string to parse.
    *
    * @returns A URL object.
    */
@@ -89,7 +89,7 @@ export namespace URLExt {
   /**
    * Return a serialized object string suitable for a query.
    *
-   * @param object - The source object.
+   * @param value The source object.
    *
    * @returns an encoded url query.
    *
@@ -124,30 +124,35 @@ export namespace URLExt {
     return value
       .replace(/^\?/, '')
       .split('&')
-      .reduce((acc, val) => {
-        const [key, value] = val.split('=');
+      .reduce(
+        (acc, val) => {
+          const [key, value] = val.split('=');
 
-        if (key.length > 0) {
-          acc[key] = decodeURIComponent(value || '');
-        }
+          if (key.length > 0) {
+            acc[key] = decodeURIComponent(value || '');
+          }
 
-        return acc;
-      }, {} as { [key: string]: string });
+          return acc;
+        },
+        {} as { [key: string]: string }
+      );
   }
 
   /**
    * Test whether the url is a local url.
    *
+   * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+   *
    * #### Notes
    * This function returns `false` for any fully qualified url, including
    * `data:`, `file:`, and `//` protocol URLs.
    */
-  export function isLocal(url: string): boolean {
+  export function isLocal(url: string, allowRoot: boolean = false): boolean {
     const { protocol } = parse(url);
 
     return (
       (!protocol || url.toLowerCase().indexOf(protocol) !== 0) &&
-      url.indexOf('/') !== 0
+      (allowRoot ? url.indexOf('//') !== 0 : url.indexOf('/') !== 0)
     );
   }
 

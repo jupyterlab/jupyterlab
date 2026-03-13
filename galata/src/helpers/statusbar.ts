@@ -1,14 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
-import { MenuHelper } from './menu';
+import type { Page } from '@playwright/test';
+import type { MenuHelper } from './menu';
 
 /**
  * Status Bar helpers
  */
 export class StatusBarHelper {
-  constructor(readonly page: Page, readonly menu: MenuHelper) {}
+  constructor(
+    readonly page: Page,
+    readonly menu: MenuHelper
+  ) {}
 
   /**
    * Whether the status bar is visible or not
@@ -34,9 +37,7 @@ export class StatusBarHelper {
     }
 
     await this.menu.clickMenuItem('View>Show Status Bar');
-    await this.page.waitForSelector('#jp-main-statusbar', {
-      state: 'visible'
-    });
+    await this.page.locator('#jp-main-statusbar').waitFor({ state: 'visible' });
   }
 
   /**
@@ -49,8 +50,6 @@ export class StatusBarHelper {
     }
 
     await this.menu.clickMenuItem('View>Show Status Bar');
-    await this.page.waitForSelector('#jp-main-statusbar', {
-      state: 'hidden'
-    });
+    await this.page.locator('#jp-main-statusbar').waitFor({ state: 'hidden' });
   }
 }

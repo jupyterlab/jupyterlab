@@ -5,12 +5,11 @@
  * @module help-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
   ICommandPalette,
@@ -18,23 +17,17 @@ import {
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  CommandToolbarButton,
-  copyrightIcon,
   IFrame,
   jupyterIcon,
-  jupyterlabWordmarkIcon,
-  refreshIcon,
-  Toolbar
+  jupyterlabWordmarkIcon
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import * as React from 'react';
-import { Licenses } from './licenses';
 
 /**
  * The command IDs used by the help plugin.
@@ -54,10 +47,9 @@ namespace CommandIDs {
 
   export const jupyterForum = 'help:jupyter-forum';
 
+  // Commands kept for backwards compatibility after the move to the apputils-extension
   export const licenses = 'help:licenses';
-
   export const licenseReport = 'help:license-report';
-
   export const refreshLicenses = 'help:licenses-refresh';
 }
 
@@ -70,6 +62,77 @@ const LAB_IS_SECURE = window.location.protocol === 'https:';
  * The class name added to the help widget.
  */
 const HELP_CLASS = 'jp-Help';
+
+/**
+ * A plugin to keep licenses commands that were previously defined in the help-extension.
+ * This is mostly for backwards compatibility, in case some other plugins were manually executing these commands.
+ */
+const licensesCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:licenses-commands',
+  autoStart: true,
+  optional: [ITranslator],
+  description: 'Add licenses commands for backwards compatibility.',
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null): void => {
+    const { commands } = app;
+
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const licensesText = trans.__('Licenses');
+    const downloadAsText = trans.__('Download All Licenses');
+    const refreshLicenses = trans.__('Refresh Licenses');
+
+    const apputilsLicencesCommand = 'apputils:licenses';
+    commands.addCommand(CommandIDs.licenses, {
+      label: licensesText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.licenses} is deprecated, use ${apputilsLicencesCommand} instead.`
+        );
+        return commands.execute(apputilsLicencesCommand, args);
+      }
+    });
+
+    const apputilsLicenseReportCommand = 'apputils:license-report';
+    commands.addCommand(CommandIDs.licenseReport, {
+      label: downloadAsText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.licenseReport} is deprecated, use ${apputilsLicenseReportCommand} instead.`
+        );
+        return commands.execute(apputilsLicenseReportCommand, args);
+      }
+    });
+
+    const apputilsRefreshLicensesCommand = 'apputils:licenses-refresh';
+    commands.addCommand(CommandIDs.refreshLicenses, {
+      label: refreshLicenses,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.refreshLicenses} is deprecated, use ${apputilsRefreshLicensesCommand} instead.`
+        );
+        return commands.execute(apputilsRefreshLicensesCommand, args);
+      }
+    });
+  }
+};
 
 /**
  * Add a command to show an About dialog.
@@ -91,6 +154,12 @@ const about: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.about, {
       label: trans.__('About %1', app.name),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Create the header of the about dialog
         const versionNumber = trans.__('Version %1', app.version);
@@ -135,7 +204,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2023 Project Jupyter Contributors')}
+            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2025)}
           </span>
         );
         const body = (
@@ -149,9 +218,8 @@ const about: JupyterFrontEndPlugin<void> = {
           title,
           body,
           buttons: [
-            Dialog.createButton({
-              label: trans.__('Dismiss'),
-              className: 'jp-About-button jp-mod-reject jp-mod-styled'
+            Dialog.cancelButton({
+              label: trans.__('Close')
             })
           ]
         });
@@ -184,6 +252,12 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.jupyterForum, {
       label: trans.__('Jupyter Forum'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         window.open('https://discourse.jupyter.org/c/jupyterlab');
       }
@@ -196,50 +270,25 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to add a list of resources to the help menu.
+ * A plugin to open resources in IFrames or new browser tabs.
  */
-const resources: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:resources',
-  description: 'Adds commands to Jupyter reference documentation websites.',
+const open: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:open',
+  description: 'Add command to open websites as panel or browser tab.',
   autoStart: true,
-  requires: [IMainMenu, ITranslator],
-  optional: [ILabShell, ICommandPalette, ILayoutRestorer],
+  requires: [ITranslator],
+  optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
-    mainMenu: IMainMenu,
     translator: ITranslator,
-    labShell: ILabShell | null,
-    palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
   ): void => {
+    const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
-    let counter = 0;
-    const category = trans.__('Help');
     const namespace = 'help-doc';
-    const { commands, shell, serviceManager } = app;
-    const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
-    const resources = [
-      {
-        text: trans.__('JupyterLab Reference'),
-        url: 'https://jupyterlab.readthedocs.io/en/latest/'
-      },
-      {
-        text: trans.__('JupyterLab FAQ'),
-        url: 'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
-      },
-      {
-        text: trans.__('Jupyter Reference'),
-        url: 'https://jupyter.org/documentation'
-      },
-      {
-        text: trans.__('Markdown Reference'),
-        url: 'https://commonmark.org/help/'
-      }
-    ];
 
-    resources.sort((a: any, b: any) => {
-      return a.text.localeCompare(b.text);
-    });
+    const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
+    let counter = 0;
 
     /**
      * Create a new HelpWidget widget.
@@ -251,7 +300,8 @@ const resources: JupyterFrontEndPlugin<void> = {
       // can prevent some content from being loaded onto the
       // help pages.
       const content = new IFrame({
-        sandbox: ['allow-scripts', 'allow-forms']
+        sandbox: ['allow-scripts', 'allow-forms'],
+        loading: 'lazy'
       });
       content.url = url;
       content.addClass(HELP_CLASS);
@@ -266,6 +316,26 @@ const resources: JupyterFrontEndPlugin<void> = {
       label: args =>
         (args['text'] as string) ??
         trans.__('Open the provided `url` in a tab.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The URL to open'
+            },
+            text: {
+              type: 'string',
+              description: 'The text label for the tab'
+            },
+            newBrowserTab: {
+              type: 'boolean',
+              description: 'Whether to open in a new browser tab'
+            }
+          },
+          required: ['url']
+        }
+      },
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;
@@ -298,6 +368,50 @@ const resources: JupyterFrontEndPlugin<void> = {
         name: widget => widget.content.url
       });
     }
+  }
+};
+
+/**
+ * A plugin to add a list of resources to the help menu.
+ */
+const resources: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:resources',
+  description: 'Adds menu entries to Jupyter reference documentation websites.',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ILabShell, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    mainMenu: IMainMenu,
+    translator: ITranslator,
+    labShell: ILabShell | null,
+    palette: ICommandPalette | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+    const { commands, serviceManager } = app;
+    const resources = [
+      {
+        text: trans.__('JupyterLab Reference'),
+        url: 'https://jupyterlab.readthedocs.io/en/latest/'
+      },
+      {
+        text: trans.__('JupyterLab FAQ'),
+        url: 'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
+      },
+      {
+        text: trans.__('Jupyter Reference'),
+        url: 'https://jupyter.org/documentation'
+      },
+      {
+        text: trans.__('Markdown Reference'),
+        url: 'https://commonmark.org/help/'
+      }
+    ];
+
+    resources.sort((a: any, b: any) => {
+      return a.text.localeCompare(b.text);
+    });
 
     // Populate the Help menu.
     const helpMenu = mainMenu.helpMenu;
@@ -386,7 +500,9 @@ const resources: JupyterFrontEndPlugin<void> = {
             isEnabled,
             execute: () => {
               // Create the header of the about dialog
-              const headerLogo = <img src={kernelIconUrl} />;
+              const headerLogo = (
+                <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
+              );
               const title = (
                 <span className="jp-About-header">
                   {headerLogo}
@@ -400,9 +516,8 @@ const resources: JupyterFrontEndPlugin<void> = {
                 title,
                 body,
                 buttons: [
-                  Dialog.createButton({
-                    label: trans.__('Dismiss'),
-                    className: 'jp-About-button jp-mod-reject jp-mod-styled'
+                  Dialog.cancelButton({
+                    label: trans.__('Close')
                   })
                 ]
               });
@@ -451,186 +566,12 @@ const resources: JupyterFrontEndPlugin<void> = {
   }
 };
 
-/**
- * A plugin to add a licenses reporting tools.
- */
-const licenses: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:licenses',
-  description: 'Adds licenses used report tools.',
-  autoStart: true,
-  requires: [ITranslator],
-  optional: [IMainMenu, ICommandPalette, ILayoutRestorer],
-  activate: (
-    app: JupyterFrontEnd,
-    translator: ITranslator,
-    menu: IMainMenu | null,
-    palette: ICommandPalette | null,
-    restorer: ILayoutRestorer | null
-  ) => {
-    // bail if no license API is available from the server
-    if (!PageConfig.getOption('licensesUrl')) {
-      return;
-    }
-
-    const { commands, shell } = app;
-    const trans = translator.load('jupyterlab');
-
-    // translation strings
-    const category = trans.__('Help');
-    const downloadAsText = trans.__('Download All Licenses as');
-    const licensesText = trans.__('Licenses');
-    const refreshLicenses = trans.__('Refresh Licenses');
-
-    // an incrementer for license widget ids
-    let counter = 0;
-
-    const licensesUrl =
-      URLExt.join(
-        PageConfig.getBaseUrl(),
-        PageConfig.getOption('licensesUrl')
-      ) + '/';
-
-    const licensesNamespace = 'help-licenses';
-    const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
-      namespace: licensesNamespace
-    });
-
-    /**
-     * Return a full license report format based on a format name
-     */
-    function formatOrDefault(format: string): Licenses.IReportFormat {
-      return (
-        Licenses.REPORT_FORMATS[format] ||
-        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
-      );
-    }
-
-    /**
-     * Create a MainAreaWidget for a license viewer
-     */
-    function createLicenseWidget(args: Licenses.ICreateArgs) {
-      const licensesModel = new Licenses.Model({
-        ...args,
-        licensesUrl,
-        trans,
-        serverSettings: app.serviceManager.serverSettings
-      });
-      const content = new Licenses({ model: licensesModel });
-      content.id = `${licensesNamespace}-${++counter}`;
-      content.title.label = licensesText;
-      content.title.icon = copyrightIcon;
-      const main = new MainAreaWidget({
-        content,
-        reveal: licensesModel.licensesReady
-      });
-
-      main.toolbar.addItem(
-        'refresh-licenses',
-        new CommandToolbarButton({
-          id: CommandIDs.refreshLicenses,
-          args: { noLabel: 1 },
-          commands
-        })
-      );
-
-      main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
-
-      for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
-        const button = new CommandToolbarButton({
-          id: CommandIDs.licenseReport,
-          args: { format, noLabel: 1 },
-          commands
-        });
-        main.toolbar.addItem(`download-${format}`, button);
-      }
-
-      return main;
-    }
-
-    // register license-related commands
-    commands.addCommand(CommandIDs.licenses, {
-      label: licensesText,
-      execute: (args: any) => {
-        const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
-        shell.add(licenseMain, 'main', { type: 'Licenses' });
-
-        // add to tracker so it can be restored, and update when choices change
-        void licensesTracker.add(licenseMain);
-        licenseMain.content.model.trackerDataChanged.connect(() => {
-          void licensesTracker.save(licenseMain);
-        });
-        return licenseMain;
-      }
-    });
-
-    commands.addCommand(CommandIDs.refreshLicenses, {
-      label: args => (args.noLabel ? '' : refreshLicenses),
-      caption: refreshLicenses,
-      icon: refreshIcon,
-      execute: async () => {
-        return licensesTracker.currentWidget?.content.model.initLicenses();
-      }
-    });
-
-    commands.addCommand(CommandIDs.licenseReport, {
-      label: args => {
-        if (args.noLabel) {
-          return '';
-        }
-        const format = formatOrDefault(`${args.format}`);
-        return `${downloadAsText} ${format.title}`;
-      },
-      caption: args => {
-        const format = formatOrDefault(`${args.format}`);
-        return `${downloadAsText} ${format.title}`;
-      },
-      icon: args => {
-        const format = formatOrDefault(`${args.format}`);
-        return format.icon;
-      },
-      execute: async args => {
-        const format = formatOrDefault(`${args.format}`);
-        return await licensesTracker.currentWidget?.content.model.download({
-          format: format.id
-        });
-      }
-    });
-
-    // handle optional integrations
-    if (palette) {
-      palette.addItem({ command: CommandIDs.licenses, category });
-    }
-
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.licenses }], 0);
-    }
-
-    if (restorer) {
-      void restorer.restore(licensesTracker, {
-        command: CommandIDs.licenses,
-        name: widget => 'licenses',
-        args: widget => {
-          const { currentBundleName, currentPackageIndex, packageFilter } =
-            widget.content.model;
-
-          const args: Licenses.ICreateArgs = {
-            currentBundleName,
-            currentPackageIndex,
-            packageFilter
-          };
-          return args as ReadonlyJSONObject;
-        }
-      });
-    }
-  }
-};
-
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
   jupyterForum,
-  resources,
-  licenses
+  licensesCommands,
+  open,
+  resources
 ];
 
 export default plugins;

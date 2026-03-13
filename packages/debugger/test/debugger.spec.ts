@@ -3,7 +3,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { Button } from '@jupyter/web-components';
+
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory,
@@ -13,7 +15,8 @@ import {
   ybinding
 } from '@jupyterlab/codemirror';
 
-import { KernelSpecManager, Session } from '@jupyterlab/services';
+import type { Session } from '@jupyterlab/services';
+import { KernelSpecManager } from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
@@ -31,14 +34,17 @@ import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
 
-import { DebuggerModel } from '../src/model';
+import type { DebuggerModel } from '../src/model';
 
-import { SourcesBody } from '../src/panels/sources/body';
+import type { SourcesBody } from '../src/panels/sources/body';
 
-import { IYText } from '@jupyter/ydoc';
-import { IDebugger } from '../src/tokens';
+import type { IYText } from '@jupyter/ydoc';
+import type { IDebugger } from '../src/tokens';
+import { DebuggerDisplayRegistry } from '../src';
 
 const server = new JupyterServer();
+
+const emptyFn = () => undefined;
 
 beforeAll(async () => {
   await server.start();
@@ -51,9 +57,18 @@ afterAll(async () => {
 describe('Debugger', () => {
   const specsManager = new KernelSpecManager();
   const config = new Debugger.Config();
-  const service = new DebuggerService({ specsManager, config });
+  const displayRegistry = new DebuggerDisplayRegistry();
+
   const registry = new CommandRegistry();
   const languages = new EditorLanguageRegistry();
+  const callstackToolbarCommands = {
+    continue: 'continue',
+    terminate: 'terminate',
+    next: 'next',
+    stepIn: 'stepIn',
+    stepOut: 'stepOut',
+    evaluate: 'evaluate'
+  };
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(lang => ['Python'].includes(lang.name))
     .forEach(lang => {
@@ -68,12 +83,18 @@ describe('Debugger', () => {
     factory: ({ model }) => {
       const m = model.sharedModel as IYText;
       return EditorExtensionRegistry.createImmutableExtension(
-        ybinding({ ytext: m.ysource })
+        ybinding({ ytext: m.ysource, undoManager: m.undoManager ?? undefined })
       );
     }
   });
   const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const service = new DebuggerService({
+    displayRegistry,
+    specsManager,
+    config,
+    mimeTypeService
+  });
   const lines = [3, 5];
   const code = [
     'i = 0',
@@ -101,16 +122,16 @@ describe('Debugger', () => {
     session = new Debugger.Session({ connection, config });
     service.session = session;
 
+    // Populate the command registry with fake command to render the button.
+    Object.keys(callstackToolbarCommands).forEach(command => {
+      registry.addCommand(command, { execute: emptyFn });
+    });
+
     sidebar = new Debugger.Sidebar({
       service,
       callstackCommands: {
         registry,
-        continue: '',
-        terminate: '',
-        next: '',
-        stepIn: '',
-        stepOut: '',
-        evaluate: ''
+        ...callstackToolbarCommands
       },
       breakpointsCommands: {
         registry,
@@ -199,10 +220,10 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Variables');
       });
       it('should have two buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
-        expect(buttons[0].title).toBe('Tree View');
-        expect(buttons[1].title).toBe('Table View');
+        expect((buttons[0] as Button).title).toBe('Tree View');
+        expect((buttons[1] as Button).title).toBe('Table View');
       });
     });
     describe('Callstack toolbar', () => {
@@ -224,7 +245,7 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Callstack');
       });
       it('should have six buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(6);
       });
     });
@@ -247,7 +268,7 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Breakpoints');
       });
       it('should have two buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
       });
     });
@@ -271,7 +292,7 @@ describe('Debugger', () => {
       });
 
       it('should have one button', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(1);
       });
     });

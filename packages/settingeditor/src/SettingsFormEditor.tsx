@@ -6,20 +6,20 @@
 import React from 'react';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
 import { FormComponent } from '@jupyterlab/ui-components';
-import {
-  JSONExt,
+import type {
   PartialJSONObject,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import { IChangeEvent } from '@rjsf/core';
+import type { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
-import { Field, UiSchema } from '@rjsf/utils';
-import { JSONSchema7 } from 'json-schema';
+import type { Field, UiSchema } from '@rjsf/utils';
+import type { JSONSchema7 } from 'json-schema';
 import { Button } from '@jupyterlab/ui-components';
 
 /**
@@ -110,14 +110,17 @@ export class SettingsFormEditor extends React.Component<
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const { settings } = props;
+    settings.changed.connect(this._syncFormDataWithSettings);
     this._formData = settings.composite as ReadonlyJSONObject;
+
     this.state = {
       isModified: settings.isModified,
       uiSchema: {},
       filteredSchema: this.props.settings.schema,
       formContext: {
         defaultFormData: this.props.settings.default(),
-        settings: this.props.settings
+        settings: this.props.settings,
+        schema: JSONExt.deepCopy(this.props.settings.schema)
       }
     };
     this.handleChange = this.handleChange.bind(this);
@@ -134,12 +137,13 @@ export class SettingsFormEditor extends React.Component<
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.settings !== this.props.settings) {
-      this.setState({
+      this.setState(previousState => ({
         formContext: {
+          ...previousState.formContext,
           settings: this.props.settings,
           defaultFormData: this.props.settings.default()
         }
-      });
+      }));
     }
   }
 
@@ -187,6 +191,13 @@ export class SettingsFormEditor extends React.Component<
     this.setState({ isModified: false });
   };
 
+  private _syncFormDataWithSettings = () => {
+    this._formData = this.props.settings.composite as ReadonlyJSONObject;
+    this.setState((prevState, props) => ({
+      isModified: props.settings.isModified
+    }));
+  };
+
   render(): JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
 
@@ -221,6 +232,10 @@ export class SettingsFormEditor extends React.Component<
           idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
           onChange={this._onChange}
           translator={this.props.translator}
+          experimental_defaultFormStateBehavior={{
+            emptyObjectFields: 'populateRequiredDefaults'
+          }}
+          buttonStyle="icons"
         />
       </>
     );
@@ -228,7 +243,27 @@ export class SettingsFormEditor extends React.Component<
 
   private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
     this.props.hasError(e.errors.length !== 0);
-    this._formData = e.formData as ReadonlyJSONObject;
+
+    // Create a deep copy of the current form data to work with
+    const updatedFormData = JSONExt.deepCopy(
+      this._formData as PartialJSONObject
+    );
+
+    // Only update fields that are actually present in the filtered view
+    if (e.formData) {
+      // Safely iterate over the keys in e.formData
+      Object.keys(e.formData).forEach(key => {
+        // Use type assertion to tell TypeScript this is safe
+        const formData = e.formData as PartialJSONObject;
+        if (formData && key in formData) {
+          updatedFormData[key] = formData[key];
+        }
+      });
+    }
+
+    // Convert back to ReadonlyJSONObject for this._formData
+    this._formData = updatedFormData as ReadonlyJSONObject;
+
     if (e.errors.length === 0) {
       this.props.updateDirtyState(true);
       void this._debouncer.invoke();
@@ -262,9 +297,14 @@ export class SettingsFormEditor extends React.Component<
   }
 
   private _setFilteredSchema(prevFilteredValues?: string[] | null) {
+    // Update the filtered value if the filter or the schema has changed.
     if (
       prevFilteredValues === undefined ||
-      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues)
+      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues) ||
+      !JSONExt.deepEqual(
+        this.state.formContext.schema,
+        this.props.settings.schema
+      )
     ) {
       /**
        * Only show fields that match search value.
@@ -281,8 +321,13 @@ export class SettingsFormEditor extends React.Component<
           }
         }
       }
-
-      this.setState({ filteredSchema });
+      this.setState(previousState => ({
+        filteredSchema,
+        formContext: {
+          ...previousState.formContext,
+          schema: JSONExt.deepCopy(this.props.settings.schema)
+        }
+      }));
     }
   }
 
@@ -292,6 +337,7 @@ export class SettingsFormEditor extends React.Component<
     if (!filteredSchema?.properties) {
       return this._formData;
     }
+
     const filteredFormData = JSONExt.deepCopy(
       this._formData as PartialJSONObject
     );

@@ -5,6 +5,7 @@
  * @module console
  */
 
+export * from './cellexecutor';
 export * from './foreign';
 export * from './history';
 export * from './panel';

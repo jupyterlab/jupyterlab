@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../mermaid"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../translation"
+    }
+  ]
+}

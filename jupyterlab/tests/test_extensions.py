@@ -2,15 +2,80 @@
 # Distributed under the terms of the Modified BSD License.
 
 import json
+import sys
 from unittest.mock import Mock, patch
 
 import pytest
 from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
-from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage
+from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage, PluginManager
+from jupyterlab.extensions.pypi import _check_python_version_compatible
 
 from . import fake_client_factory
+
+
+@pytest.mark.parametrize(
+    "requires_python, expected",
+    (
+        (None, True),  # No requirement
+        ("", True),  # Empty requirement
+        (">=3.6", True),  # Should pass on any modern Python
+        (">=3.6,<4", True),  # Common range
+        (">=99.0", False),  # Future version
+        ("<3.0", False),  # Very old Python
+        ("invalid-specifier", True),  # Invalid specifier should default to compatible
+    ),
+)
+def test_check_python_version_compatible(requires_python, expected):
+    """Test the Python version compatibility check function."""
+    result, _ = _check_python_version_compatible(requires_python)
+    assert result == expected
+
+
+def test_check_python_version_compatible_current_version():
+    """Test that current Python version is compatible with its own specifier."""
+    current = f">={sys.version_info.major}.{sys.version_info.minor}"
+    assert _check_python_version_compatible(current)[0] is True
+
+
+@pytest.mark.parametrize(
+    "requires_python, expected_allowed",
+    (
+        (">=3.6", True),  # Compatible with current Python
+        (">=99.0", False),  # Incompatible - future version
+        (None, True),  # No requirement - should be allowed
+    ),
+)
+@patch("jupyterlab.extensions.pypi.xmlrpc.client")
+async def test_extension_package_allowed_set_from_python_compatibility(
+    mocked_rpcclient, requires_python, expected_allowed
+):
+    """Test that allowed attribute is correctly set based on Python version compatibility."""
+    proxy = Mock(browse=Mock(return_value=[["test-extension", "1.0.0"]]))
+    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
+
+    manager = PyPIExtensionManager()
+
+    async def mock_pkg_metadata(name, version, base_url):
+        return {
+            "name": "test-extension",
+            "summary": "A test extension",
+            "requires_python": requires_python,
+        }
+
+    manager._fetch_package_metadata = mock_pkg_metadata
+
+    extensions, _ = await manager.list_extensions("test")
+
+    assert len(extensions) == 1
+    ext = extensions[0]
+    assert ext.name == "test-extension"
+    assert ext.allowed == expected_allowed
+    if not expected_allowed:
+        assert "Requires Python" in ext.description
+    else:
+        assert ext.description == "A test extension"
 
 
 @pytest.mark.parametrize(
@@ -152,6 +217,74 @@ async def test_ExtensionManager_uninstall():
 
 
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
+async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
+    extension_data = [
+        {
+            "name": "jupyterlab-apod",
+            "project_urls": {
+                "Homepage": "https://github.com/jupyterlab/jupyterlab_apod",
+            },
+        },
+        {
+            "name": "jupyterlab-gitlab",
+            "project_urls": {
+                "Homepage": "https://github.com/jupyterlab-contrib/jupyterlab-gitlab/issues",
+            },
+        },
+        {
+            "name": "jupyterlab-git",
+            "project_url": "https://github.com/jupyterlab/jupyterlab-git",
+        },
+        {
+            "name": "jupyterlab-rainbow-brackets",
+            "project_url": "https://github.com/krassowski/jupyterlab-rainbow-brackets",
+        },
+        {"name": "nbdime", "home_page": "https://github.com/jupyter/nbdime"},
+        {
+            "name": "rise",
+            "project_urls": {
+                "Source Code": "https://github.com/jupyterlab-contrib/rise",
+            },
+        },
+    ]
+
+    proxy = Mock(
+        browse=Mock(return_value=[[extension["name"], "1.0.0"] for extension in extension_data]),
+    )
+    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
+
+    manager = PyPIExtensionManager()
+
+    extensions = {
+        extension["name"]: {"version": "1.0.0", **extension} for extension in extension_data
+    }
+
+    async def mock_pkg_metadata(name, l, b):  # noqa
+        return extensions[name]
+
+    manager._fetch_package_metadata = mock_pkg_metadata
+
+    first_page, pages_count = await manager.list_extensions("", per_page=3)
+    assert [extension.name for extension in first_page] == [
+        # jupyter/jupyterlab
+        "jupyterlab-git",
+        "nbdime",
+        # jupyterlab-contrib
+        "jupyterlab-gitlab",
+    ]
+    assert pages_count == 2
+    second_page, pages_count = await manager.list_extensions("", page=2, per_page=3)
+    assert [extension.name for extension in second_page] == [
+        # jupyterlab-contrib
+        "rise",
+        # other third-party
+        "jupyterlab-rainbow-brackets",
+        # example extensions
+        "jupyterlab-apod",
+    ]
+
+
+@patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension1 = ExtensionPackage(
         name="jupyterlab-git",
@@ -239,18 +372,14 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                     "nbformat",
                     "packaging",
                     "pexpect",
-                    "black ; extra == 'dev'",
                     "coverage ; extra == 'dev'",
-                    "jupyter-packaging (~=0.7.9) ; extra == 'dev'",
                     "jupyterlab (~=3.0) ; extra == 'dev'",
                     "pre-commit ; extra == 'dev'",
                     "pytest ; extra == 'dev'",
                     "pytest-asyncio ; extra == 'dev'",
                     "pytest-cov ; extra == 'dev'",
                     "pytest-tornasync ; extra == 'dev'",
-                    "black ; extra == 'tests'",
                     "coverage ; extra == 'tests'",
-                    "jupyter-packaging (~=0.7.9) ; extra == 'tests'",
                     "jupyterlab (~=3.0) ; extra == 'tests'",
                     "pre-commit ; extra == 'tests'",
                     "pytest ; extra == 'tests'",
@@ -342,3 +471,32 @@ async def test_PyPiExtensionManager_custom_server_url():
     manager = PyPIExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL
+
+
+LEVELS = ["user", "sys_prefix", "system"]
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PyPiExtensionManager_custom_level(level):
+    parent = Configurable(config=Config({"PyPIExtensionManager": {"level": level}}))
+    manager = PyPIExtensionManager(parent=parent)
+    assert manager.level == level
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PyPiExtensionManager_inherits_custom_level(level):
+    parent = Configurable(config=Config({"PluginManager": {"level": level}}))
+    manager = PyPIExtensionManager(parent=parent)
+    assert manager.level == level
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PluginManager_custom_level(level):
+    parent = Configurable(config=Config({"PluginManager": {"level": level}}))
+    manager = PluginManager(parent=parent)
+    assert manager.level == level
+
+
+async def test_PluginManager_default_level():
+    manager = PluginManager()
+    assert manager.level == "sys_prefix"

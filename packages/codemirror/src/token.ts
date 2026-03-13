@@ -8,7 +8,8 @@ import type { Extension, StateEffect } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 
@@ -90,6 +91,14 @@ export interface IExtensionsHandler extends IDisposable {
    * is set.
    */
   setOptions(options: Record<string, any>): void;
+
+  /**
+   * Set a base config options for the editor.
+   *
+   * You will need to reconfigure the editor extensions by listening
+   * to `IExtensionsHandler.configChanged`.
+   */
+  setBaseOptions(options: Record<string, any>): void;
 
   /**
    * Returns the list of initial extensions of an editor.

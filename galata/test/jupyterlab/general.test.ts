@@ -37,4 +37,40 @@ test.describe('General Tests', () => {
 
     expect(await page.theme.getTheme()).toEqual('JupyterLab Light');
   });
+
+  test('Toggle Dark High Contrast theme', async ({ page }) => {
+    await page.theme.setDarkHighContrastTheme();
+    expect(await page.theme.getTheme()).toEqual(
+      'JupyterLab Dark High Contrast'
+    );
+  });
+
+  test('Toggle adaptive theme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.menu.clickMenuItem(
+      'Settings>Theme>Synchronize with System Settings'
+    );
+    // Wait for a short time to increase the chance that
+    // the setting was already saved on the backend.
+    await page.waitForTimeout(100);
+    await page.reload();
+    expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');
+  });
+
+  test('Browser tab name updates to file name in /doc mode', async ({
+    page
+  }) => {
+    // Switch to single-document mode
+    const currentUrl = page.url();
+    const docUrl = currentUrl.replace('/lab/', '/doc/');
+    await page.goto(docUrl);
+
+    // Create a new text file and wait for it to load
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.locator('.cm-editor:not(.jp-mod-readOnly)').first().waitFor();
+
+    // Verify the browser's tab name matches the new file name
+    const title = await page.title();
+    expect(title).toBe('untitled.txt - JupyterLab');
+  });
 });

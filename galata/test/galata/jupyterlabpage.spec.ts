@@ -34,7 +34,7 @@ test('should reload the application page and load hook', async ({ page }) => {
 test('should reset the UI', async ({ page }) => {
   await page.resetUI();
   expect(await page.menu.isAnyOpen()).toEqual(false);
-  expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+  await expect(page.launcher).toBeVisible();
   expect(await page.kernel.isAnyRunning()).toEqual(false);
   expect(await page.statusbar.isVisible()).toEqual(true);
   expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
@@ -59,12 +59,12 @@ test.describe('listeners', () => {
       window.galata.on('dialog', d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 100);
+        setTimeout(() => d?.reject(), 200);
       });
     });
 
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await Promise.all([
       page.locator('.jp-Dialog').waitFor(),
@@ -79,14 +79,14 @@ test.describe('listeners', () => {
       const callback = d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 100);
+        setTimeout(() => d?.reject(), 200);
         window.galata.off('dialog', callback);
       };
       window.galata.on('dialog', callback);
     });
 
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await Promise.all([
       page.locator('.jp-Dialog').waitFor(),
@@ -108,13 +108,13 @@ test.describe('listeners', () => {
       const callback = d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 100);
+        setTimeout(() => d?.reject(), 200);
       };
       window.galata.once('dialog', callback);
     });
 
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await Promise.all([
       page.locator('.jp-Dialog').waitFor(),
@@ -140,9 +140,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
       });
@@ -169,9 +167,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
         window.galata.off('notification', callback);
@@ -215,9 +211,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
       };

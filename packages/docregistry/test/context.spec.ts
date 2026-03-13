@@ -2,13 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContext } from '@jupyterlab/apputils';
-import {
-  Context,
-  DocumentRegistry,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Contents, Drive, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
+import { Drive } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
@@ -55,15 +53,16 @@ describe('docregistry/context', () => {
         expect(context).toBeInstanceOf(Context);
       });
 
-      it('should set the session path with local path', () => {
+      it('should set the session path with global path', () => {
         const localPath = `${UUID.uuid4()}.txt`;
+        const globalPath = `TestDrive:${localPath}`;
         context = new Context({
           manager,
           factory,
-          path: `TestDrive:${localPath}`
+          path: globalPath
         });
 
-        expect(context.sessionContext.path).toEqual(localPath);
+        expect(context.sessionContext.path).toEqual(globalPath);
       });
     });
 
@@ -89,6 +88,107 @@ describe('docregistry/context', () => {
         context.fileChanged.connect((sender, args) => {
           expect(sender).toBe(context);
           expect(args.path).toBe(path);
+          called = true;
+        });
+        await context.initialize(true);
+        expect(called).toBe(true);
+      });
+
+      it('should be emitted when the file hash changes', async () => {
+        let called = false;
+        context = new Context({
+          manager,
+          factory,
+          // The path below is a magic string instructing the `get()`
+          // method of the contents manager mock to return a random hash.
+          path: 'random-hash.txt'
+        });
+
+        await context.initialize(true);
+
+        context.fileChanged.connect((_sender, _args) => {
+          called = true;
+        });
+
+        const promise = context.save();
+
+        // Expect the correct dialog
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName(
+          'jp-Dialog'
+        )[0] as HTMLElement;
+        expect(dialog.innerHTML).toMatch(
+          'has changed on disk since the last time it was opened or saved'
+        );
+
+        // Accept dialog (overwrite)
+        await acceptDialog();
+        await promise;
+
+        // Expect the signal to have been emitted
+        expect(called).toBe(true);
+      });
+
+      it('should be emitted when the file timestamp changes and there is no hash', async () => {
+        let called = false;
+        context = new Context({
+          manager,
+          factory,
+          // The path below is a magic string instructing the `get()`
+          // method of the contents manager mock to return a newer timestamp and no hash.
+          path: 'newer-timestamp-no-hash.txt'
+        });
+
+        await context.initialize(true);
+
+        context.fileChanged.connect((_sender, _args) => {
+          called = true;
+        });
+
+        const promise = context.save();
+
+        // Expect the correct dialog
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName(
+          'jp-Dialog'
+        )[0] as HTMLElement;
+        expect(dialog.innerHTML).toMatch(
+          'has changed on disk since the last time it was opened or saved'
+        );
+
+        // Accept dialog (overwrite)
+        await acceptDialog();
+        await promise;
+
+        // Expect the signal to have been emitted
+        expect(called).toBe(true);
+      });
+
+      it('should not be emitted when the file hash is not changed', async () => {
+        let called = false;
+        context = new Context({
+          manager,
+          factory,
+          // The path below is a magic string instructing the `save()`
+          // method of the contents manager mock to not update time nor hash.
+          path: 'frozen-time-and-hash.txt'
+        });
+
+        await context.initialize(true);
+
+        context.fileChanged.connect(() => {
+          called = true;
+        });
+
+        await context.save();
+        expect(called).toBe(false);
+      });
+
+      it('should not contain the file content attribute', async () => {
+        let called = false;
+        context.fileChanged.connect((sender, args) => {
+          // @ts-expect-error content is omitted
+          expect(args['content']).toBeUndefined();
           called = true;
         });
         await context.initialize(true);
@@ -158,7 +258,7 @@ describe('docregistry/context', () => {
         });
 
         await expect(context.initialize(true)).rejects.toThrow(
-          'Invalid response: 403 Forbidden'
+          /Invalid response: 403/
         );
         expect(called).toBe(2);
         expect(checked).toBe('failed');
@@ -250,6 +350,8 @@ describe('docregistry/context', () => {
         void context.initialize(true);
         await context.ready;
         expect(context.contentsModel!.path).toBe(path);
+        // @ts-expect-error content is omitted
+        expect(context.contentsModel!['content']).toBeUndefined();
       });
     });
 
@@ -387,8 +489,11 @@ describe('docregistry/context', () => {
 
         const changed = signalToPromise(manager.contents.fileChanged);
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true on successful save
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -430,8 +535,11 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true when overwrite is accepted
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -464,8 +572,11 @@ describe('docregistry/context', () => {
         });
         await context.initialize(true);
         const promise = func();
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return false when overwrite is cancelled
+        expect(result).toBe(false);
         expect(context.path).toBe(oldPath);
       });
 
@@ -570,10 +681,25 @@ describe('docregistry/context', () => {
     });
 
     describe('#urlResolver', () => {
+      class TestResolver extends RenderMimeRegistry.UrlResolver {
+        // no-op
+      }
       it('should be a url resolver', () => {
         expect(context.urlResolver).toBeInstanceOf(
           RenderMimeRegistry.UrlResolver
         );
+        expect(context.urlResolver).not.toBeInstanceOf(TestResolver);
+      });
+      it('should use preferred url resolver', () => {
+        context = new Context({
+          manager,
+          factory,
+          path: UUID.uuid4() + '.txt',
+          urlResolverFactory: {
+            createResolver: options => new TestResolver(options)
+          }
+        });
+        expect(context.urlResolver).toBeInstanceOf(TestResolver);
       });
     });
 

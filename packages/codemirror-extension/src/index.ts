@@ -5,15 +5,17 @@
  * @module codemirror-extension
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { CodeEditor, IPositionModel, LineCol } from '@jupyterlab/codeeditor';
+import { ILabShell } from '@jupyterlab/application';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IPositionModel, LineCol } from '@jupyterlab/codeeditor';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
+import { commandsPlugin } from './commands';
 import {
   bindingPlugin,
   extensionPlugin,
@@ -47,6 +49,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     if (statusBar) {
       // Add the status item to the status bar.
       statusBar.registerStatusItem(lineColItem.id, {
+        priority: 1,
         item,
         align: 'right',
         rank: 2,
@@ -100,6 +103,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  commandsPlugin,
   languagePlugin,
   themePlugin,
   bindingPlugin,

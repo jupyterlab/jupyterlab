@@ -1,20 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
+import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
 import {
-  IOutputAreaModel,
   OutputArea,
-  OutputAreaModel
+  OutputAreaModel,
+  SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
+import type { Kernel } from '@jupyterlab/services';
 import { KernelManager } from '@jupyterlab/services';
-import { JupyterServer } from '@jupyterlab/testing';
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -142,7 +144,9 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBeLessThan(model.length);
         Widget.attach(widget, document.body);
         simulate(
-          widget.widgets[widget.widgets.length - 1].node.querySelector('a')!,
+          widget.widgets[widget.widgets.length - 1].node.querySelector(
+            'button'
+          )!,
           'click'
         );
         Widget.detach(widget);
@@ -190,6 +194,76 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(DEFAULT_OUTPUTS.length - 1);
         widget.model.clear();
         expect(widget.widgets.length).toBe(0);
+      });
+    });
+
+    describe('#pendingInput', () => {
+      let kernel: Kernel.IKernelConnection;
+
+      beforeEach(async () => {
+        const manager = new KernelManager();
+        kernel = await manager.startNew({ name: 'ipython' });
+      });
+
+      afterEach(async () => {
+        await kernel.shutdown();
+      });
+
+      it('should default to `false`', () => {
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should be `true` when pending user input', async () => {
+        // Prompt kernel to request input and wait until it is requested
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        const input = (await inputRequested)[1];
+
+        // Input is now pending
+        expect(widget.pendingInput).toBe(true);
+
+        // Submit input
+        (input as Stdin).handleEvent(
+          new KeyboardEvent('keydown', { key: 'Enter' })
+        );
+        await future.done;
+
+        // Input should no longer be flagged as pending.
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should reset to `false` when kernel gets shut down', async () => {
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        await inputRequested;
+        await kernel.shutdown();
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should reset to `false` when kernel restarts', async () => {
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        await inputRequested;
+        await kernel.restart();
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should reset to `false` when kernel cancels input after getting interrupted', async () => {
+        // This test requires an ipython kernel because the default echo kernel
+        // does not actually do anything on getting interrupted.
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        await inputRequested;
+        // Need to wait for status change because futures are not disposed on
+        // interrupt (differently to shutdown and restart).
+        const statusChanged = signalToPromise(kernel.statusChanged);
+        await kernel.interrupt();
+        await statusChanged;
+        expect(widget.pendingInput).toBe(false);
       });
     });
 
@@ -251,15 +325,41 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(0);
       });
 
-      it('should handle a set', () => {
+      it('should follow changes to initial stdout stream', () => {
+        model = new OutputAreaModel({
+          values: [DEFAULT_OUTPUTS[0]],
+          trusted: true
+        });
+        widget = new LogOutputArea({ rendermime, model });
+        // A stream output appended to the model should be seen in the widget.
+        const streamOutput = 'nctvjd745fdk56';
+        expect(widget.node.innerHTML).not.toContain(streamOutput);
+        widget.model.appendStreamOutput(streamOutput);
+        expect(widget.node.innerHTML).toContain(streamOutput);
+      });
+
+      it('should handle stream outputs of same name', () => {
         widget.model.clear();
-        widget.model.add(DEFAULT_OUTPUTS[0]);
-        widget.methods = [];
+        // An initial stdout stream creates an output.
         widget.model.add(DEFAULT_OUTPUTS[0]);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onModelChanged'])
         );
-        expect(widget.widgets.length).toBe(1);
+        // Another stdout stream only changes the "text" of the last output.
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).toEqual([]);
+        // A stderr stream creates a new output.
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[1]);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onModelChanged'])
+        );
+        // Another stderr stream only changes the "text" of the last output.
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[1]);
+        expect(widget.methods).toEqual([]);
+        expect(widget.widgets.length).toBe(2);
       });
 
       it('should rerender when preferred mimetype changes', () => {
@@ -435,6 +535,27 @@ describe('outputarea/widget', () => {
         expect(reply2!.content.status).toBe('ok');
         widget1.dispose();
         await ipySessionContext.shutdown();
+      });
+
+      it('should continuously render delayed outputs', async () => {
+        const model0 = new OutputAreaModel({ trusted: true });
+        const widget0 = new SimplifiedOutputArea({
+          model: model0,
+          rendermime: rendermime
+        });
+        let ipySessionContext: SessionContext;
+        ipySessionContext = await createSessionContext({
+          kernelPreference: { name: 'python3' }
+        });
+        await ipySessionContext.initialize();
+        const code = [
+          'import time',
+          'for i in range(3):',
+          '    print(f"Hello Jupyter! {i}")',
+          '    time.sleep(1)'
+        ].join('\n');
+        await SimplifiedOutputArea.execute(code, widget0, ipySessionContext);
+        expect(model0.toJSON()[0].text).toBe(widget0.node.textContent);
       });
     });
 

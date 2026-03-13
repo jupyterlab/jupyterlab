@@ -1,17 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentWidget } from '@jupyterlab/docregistry';
+import type { DocumentWidget } from '@jupyterlab/docregistry';
 
-import { FileEditor } from '@jupyterlab/fileeditor';
+import type { FileEditor } from '@jupyterlab/fileeditor';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**
  * A handler for files.
@@ -25,6 +28,7 @@ export class FileHandler implements IDisposable {
   constructor(options: FileHandler.IOptions) {
     this._debuggerService = options.debuggerService;
     this._fileEditor = options.widget.content;
+    this.translator = options.translator || nullTranslator;
 
     this._hasLineNumber =
       (this._fileEditor.editor.getOption('lineNumbers') as
@@ -36,6 +40,34 @@ export class FileHandler implements IDisposable {
       getEditor: () => this._fileEditor.editor,
       src: this._fileEditor.model.sharedModel
     });
+
+    this._pausedOverlay = new DebuggerPausedOverlay({
+      debuggerService: this._debuggerService,
+      container: options.widget.node,
+      translator: this.translator
+    });
+
+    this._debuggerService.session?.eventMessage.connect((_, event) => {
+      const session = this._debuggerService.session;
+      const contextSession = options.widget.context.sessionContext.session;
+
+      if (!session || !contextSession) {
+        return;
+      }
+      if (session.connection?.kernel?.id !== contextSession.kernel?.id) {
+        return;
+      }
+
+      if (event.event === 'stopped') {
+        void this._pausedOverlay.show();
+      } else if (event.event === 'continued' || event.event === 'terminated') {
+        void this._pausedOverlay.hide();
+      }
+    });
+
+    if (this._debuggerService.hasStoppedThreads()) {
+      void this._pausedOverlay.show();
+    }
   }
 
   /**
@@ -51,6 +83,9 @@ export class FileHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+
+    this._pausedOverlay.dispose();
+
     this._editorHandler?.dispose();
     // Restore editor options
     this._editorHandler?.editor!.setOptions({
@@ -62,7 +97,9 @@ export class FileHandler implements IDisposable {
   private _fileEditor: FileEditor;
   private _debuggerService: IDebugger;
   private _editorHandler: EditorHandler;
+  private _pausedOverlay: DebuggerPausedOverlay;
   private _hasLineNumber: boolean;
+  protected translator: ITranslator;
 }
 
 /**
@@ -82,5 +119,10 @@ export namespace FileHandler {
      * The widget to handle.
      */
     widget: DocumentWidget<FileEditor>;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

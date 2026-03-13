@@ -3,10 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  IEditorHeading,
-  PythonTableOfContentsModel
-} from '@jupyterlab/fileeditor';
+import type { IEditorHeading } from '@jupyterlab/fileeditor';
+import { PythonTableOfContentsModel } from '@jupyterlab/fileeditor';
 import { signalToPromise } from '@jupyterlab/testing';
 
 describe('@jupyterlab/fileeditor', () => {
@@ -20,6 +18,16 @@ describe('@jupyterlab/fileeditor', () => {
           [
             {
               text: 'def f(a, b):',
+              level: 1,
+              line: 0
+            }
+          ]
+        ],
+        [
+          'async def async_function():',
+          [
+            {
+              text: 'async def async_function():',
               level: 1,
               line: 0
             }

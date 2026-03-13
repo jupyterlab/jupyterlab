@@ -24,8 +24,10 @@ from .commands import (
     install_extension,
     link_package,
     list_extensions,
+    lock_extension,
     uninstall_extension,
     unlink_package,
+    unlock_extension,
     update_extension,
 )
 from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
@@ -77,6 +79,12 @@ uninstall_flags["all"] = (
     "Uninstall all extensions",
 )
 
+list_flags = copy(flags)
+list_flags["verbose"] = (
+    {"ListLabExtensionsApp": {"verbose": True}},
+    "Increase verbosity level",
+)
+
 aliases = dict(base_aliases)
 aliases["app-dir"] = "BaseExtensionApp.app_dir"
 aliases["dev-build"] = "BaseExtensionApp.dev_build"
@@ -91,6 +99,12 @@ enable_aliases["level"] = "EnableLabExtensionsApp.level"
 
 disable_aliases = copy(aliases)
 disable_aliases["level"] = "DisableLabExtensionsApp.level"
+
+lock_aliases = copy(aliases)
+lock_aliases["level"] = "LockLabExtensionsApp.level"
+
+unlock_aliases = copy(aliases)
+unlock_aliases["level"] = "UnlockLabExtensionsApp.level"
 
 VERSION = get_app_version()
 
@@ -140,7 +154,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     def _default_labextensions_path(self):
         lab = LabApp()
         lab.load_config_file()
-        return lab.extra_labextensions_path + lab.labextensions_path
+        return lab.labextensions_path + lab.extra_labextensions_path
 
     @default("splice_source")
     def _default_splice_source(self):
@@ -173,7 +187,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     def deprecation_warning(self, msg):
         return self.log.warning(
-            "\033[33m(Deprecated) %s\n\n%s \033[0m", msg, LABEXTENSION_COMMAND_WARNING
+            f"\033[33m(Deprecated) {msg}\n\n{LABEXTENSION_COMMAND_WARNING} \033[0m"
         )
 
     def _log_format_default(self):
@@ -300,9 +314,9 @@ class WatchLabExtensionApp(BaseExtensionApp):
     )
 
     aliases = {
-        "development": "BuildLabExtensionApp.development",
-        "source-map": "BuildLabExtensionApp.source_map",
-        "core-path": "BuildLabExtensionApp.core_path",
+        "core-path": "WatchLabExtensionApp.core_path",
+        "development": "WatchLabExtensionApp.development",
+        "source-map": "WatchLabExtensionApp.source_map",
     }
 
     def run_task(self):
@@ -322,7 +336,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
-    all = Bool(False, config=True, help="Whether to update all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to update all extensions")
 
     def run_task(self):
         self.deprecation_warning(
@@ -383,7 +397,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
     flags = uninstall_flags
 
-    all = Bool(False, config=True, help="Whether to uninstall all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to uninstall all extensions")
 
     def run_task(self):
         self.deprecation_warning(
@@ -404,6 +418,8 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
+    verbose = Bool(False, help="Increase verbosity level.").tag(config=True)
+    flags = list_flags
 
     def run_task(self):
         list_extensions(
@@ -412,6 +428,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
                 logger=self.log,
                 core_config=self.core_config,
                 labextensions_path=self.labextensions_path,
+                verbose=self.verbose,
             )
         )
 
@@ -441,7 +458,7 @@ class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
     aliases = disable_aliases
 
-    level = Unicode("sys_prefix", help="Level at which to enable: sys_prefix, user, system").tag(
+    level = Unicode("sys_prefix", help="Level at which to disable: sys_prefix, user, system").tag(
         config=True
     )
 
@@ -454,6 +471,51 @@ class DisableLabExtensionsApp(BaseExtensionApp):
         )
         [
             disable_extension(arg, app_options=app_options, level=self.level)
+            for arg in self.extra_args
+        ]
+        self.log.info(
+            "Starting with JupyterLab 4.1 individual plugins can be re-enabled"
+            " in the user interface. While all plugins which were previously"
+            " disabled have been locked, you need to explicitly lock any newly"
+            " disabled plugins by using `jupyter labextension lock` command."
+        )
+
+
+class LockLabExtensionsApp(BaseExtensionApp):
+    description = "Lock labextension(s) by name"
+    aliases = lock_aliases
+
+    level = Unicode("sys_prefix", help="Level at which to lock: sys_prefix, user, system").tag(
+        config=True
+    )
+
+    def run_task(self):
+        app_options = AppOptions(
+            app_dir=self.app_dir,
+            logger=self.log,
+            core_config=self.core_config,
+            labextensions_path=self.labextensions_path,
+        )
+        [lock_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
+
+
+class UnlockLabExtensionsApp(BaseExtensionApp):
+    description = "Unlock labextension(s) by name"
+    aliases = unlock_aliases
+
+    level = Unicode("sys_prefix", help="Level at which to unlock: sys_prefix, user, system").tag(
+        config=True
+    )
+
+    def run_task(self):
+        app_options = AppOptions(
+            app_dir=self.app_dir,
+            logger=self.log,
+            core_config=self.core_config,
+            labextensions_path=self.labextensions_path,
+        )
+        [
+            unlock_extension(arg, app_options=app_options, level=self.level)
             for arg in self.extra_args
         ]
 
@@ -512,6 +574,8 @@ class LabExtensionApp(JupyterApp):
         "unlink": (UnlinkLabExtensionApp, "Unlink labextension(s)"),
         "enable": (EnableLabExtensionsApp, "Enable labextension(s)"),
         "disable": (DisableLabExtensionsApp, "Disable labextension(s)"),
+        "lock": (LockLabExtensionsApp, "Lock labextension(s)"),
+        "unlock": (UnlockLabExtensionsApp, "Unlock labextension(s)"),
         "check": (CheckLabExtensionsApp, "Check labextension(s)"),
         "develop": (DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
         "build": (BuildLabExtensionApp, "(developer) Build labextension"),
@@ -525,7 +589,7 @@ class LabExtensionApp(JupyterApp):
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.
         subcmds = ", ".join(sorted(self.subcommands))
-        self.exit("Please supply at least one subcommand: %s" % subcmds)
+        self.exit(f"Please supply at least one subcommand: {subcmds}")
 
 
 main = LabExtensionApp.launch_instance

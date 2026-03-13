@@ -3,8 +3,8 @@
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IEditorLanguageRegistry } from './token';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IEditorLanguageRegistry } from './token';
 
 /**
  * The mime type service for CodeMirror.
@@ -16,6 +16,8 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    *
    * #### Notes
    * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
+   * There may be more than one mime type, but only the first one will be returned.
+   * To access all mime types, use `IEditorLanguageRegistry` instead.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
@@ -27,7 +29,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
       }
     );
     return mode
-      ? (mode.mime as string)
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 
@@ -36,6 +40,8 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    *
    * #### Notes
    * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
+   * There may be more than one mime type, but only the first one will be returned.
+   * To access all mime types, use `IEditorLanguageRegistry` instead.
    */
   getMimeTypeByFilePath(path: string): string {
     const ext = PathExt.extname(path);
@@ -46,9 +52,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     }
     const mode = this.languages.findByFileName(path);
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 }

@@ -2,35 +2,33 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import {
+import type {
   CellSearchProvider,
-  CodeCell,
-  createCellSearchProvider,
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import {
-  CodeMirrorEditor,
-  IHighlightAdjacentMatchOptions
-} from '@jupyterlab/codemirror';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import {
+import { CodeCell, createCellSearchProvider } from '@jupyterlab/cells';
+import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type {
   IFilter,
   IFilters,
   IReplaceOptions,
   IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
-  SearchProvider
+  SelectionState
 } from '@jupyterlab/documentsearch';
-import { IObservableList, IObservableMap } from '@jupyterlab/observables';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { SearchProvider } from '@jupyterlab/documentsearch';
+import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
-import { Widget } from '@lumino/widgets';
-import { CellList } from './celllist';
+import type { Widget } from '@lumino/widgets';
+import type { CellList } from './celllist';
 import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
+import type { Notebook } from './widget';
 
 /**
  * Notebook document search provider
@@ -166,6 +164,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     };
   }
 
+  getSelectionState(): SelectionState {
+    const cellMode = this._selectionSearchMode === 'cells';
+    const selectedCount = cellMode ? this._selectedCells : this._selectedLines;
+    return selectedCount > 1
+      ? 'multiple'
+      : selectedCount === 1 && !cellMode
+        ? 'single'
+        : 'none';
+  }
+
   /**
    * Dispose of the resources held by the search provider.
    *
@@ -225,6 +233,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
+        disabledDescription: trans.__(
+          'Search in the cell outputs (not available when replace options are shown).'
+        ),
         default: false,
         supportReplace: false
       },
@@ -275,16 +286,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns Initial value used to populate the search box.
    */
   getInitialQuery(): string {
-    const activeCell = this.widget.content.activeCell;
-    const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    if (!editor) {
-      return '';
-    }
-    const selection = editor.state.sliceDoc(
-      editor.state.selection.main.from,
-      editor.state.selection.main.to
-    );
-    return selection;
+    // Get whatever is selected in the browser window.
+    return window.getSelection()?.toString() || '';
   }
 
   /**
@@ -347,6 +350,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       return;
     }
     await this.endQuery();
+    this._searchActive = true;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -415,6 +419,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       })
     );
 
+    this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
   }
@@ -461,11 +466,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop);
+        await this.highlightNext(loop, { from: 'previous-match' });
       }
     }
 
-    // TODO: markdown undrendering/highlighting sequence is likely incorrect
+    // TODO: markdown unrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
     await unrenderMarkdownCell(true);
     return replaceOccurred;
@@ -508,7 +513,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const reply = await showDialog({
         title: trans.__('Confirmation'),
         body: trans.__(
-          'Searching outputs is expensive and requires to first rendered all outputs. Are you sure you want to search in the cell outputs?'
+          'Searching outputs requires you to run all cells and render their outputs. Are you sure you want to search in the cell outputs?'
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
@@ -541,7 +546,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this.widget.content.isSelectedOrActive(cell)
       )
       .then(() => {
-        void cellSearchProvider.startQuery(this._query, this._filters);
+        if (this._searchActive) {
+          void cellSearchProvider.startQuery(this._query, this._filters);
+        }
       });
   }
 
@@ -577,7 +584,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this._addCellProvider(changes.newIndex + index);
           this._removeCellProvider(changes.newIndex + index + 1);
         });
-
+        break;
+      case 'clear':
+        for (
+          let index = this._searchProviders.length - 1;
+          index >= 0;
+          index--
+        ) {
+          this._removeCellProvider(index);
+        }
         break;
     }
     this._stateChanged.emit();
@@ -641,6 +656,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (reverse && this.widget.content.mode === 'command') {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       const currentMatch = searchEngine.getCurrentMatch();
+
       if (!currentMatch) {
         this._currentProviderIndex -= 1;
       }
@@ -651,7 +667,30 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
+    // If we're looking for the next match after the previous match,
+    // and we've reached the end of the current cell, start at the next one, if possible
+    const from = options?.from ?? '';
+    const atEndOfCurrentCell =
+      from === 'previous-match' &&
+      this._searchProviders[this._currentProviderIndex].currentMatchIndex ===
+        null;
+
     const startIndex = this._currentProviderIndex;
+    // If we need to move to the next cell or loop, reset the position of the current search provider.
+    if (atEndOfCurrentCell) {
+      void this._searchProviders[this._currentProviderIndex].clearHighlight();
+    }
+
+    // If we're at the end of the last cell in the provider list and we need to loop, do so
+    if (
+      loop &&
+      atEndOfCurrentCell &&
+      this._currentProviderIndex + 1 >= this._searchProviders.length
+    ) {
+      this._currentProviderIndex = 0;
+    } else {
+      this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
+    }
     do {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
@@ -710,7 +749,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // change, and if selection is getting extended, we do not want to clear
       // highlights just to re-apply them shortly after, which has side effects
       // impacting the functionality and performance.
-      this._delayedActiveCellChangeHandler = setTimeout(() => {
+      this._delayedActiveCellChangeHandler = window.setTimeout(() => {
         this.delayedActiveCellChangeHandlerReady =
           this._handleHighlightsAfterActiveCellChange();
       }, 0);
@@ -824,7 +863,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       textMode = false;
     } else {
       // When search in selection is off we either search in full cells
-      // (toggling off isActive flag on search enginges of non-selected cells)
+      // (toggling off isActive flag on search engines of non-selected cells)
       // or in selected text of the active cell.
       textMode = this._selectionSearchMode === 'text';
     }
@@ -903,4 +942,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   > | null = null;
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
+  private _searchActive: boolean = false;
 }

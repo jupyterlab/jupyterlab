@@ -7,10 +7,14 @@
 
 export { Debugger } from './debugger';
 
+export { DebuggerDisplayRegistry } from './displayregistry';
+
 export {
   IDebugger,
   IDebuggerConfig,
   IDebuggerSources,
   IDebuggerSidebar,
-  IDebuggerHandler
+  IDebuggerHandler,
+  IDebuggerSourceViewer,
+  IDebuggerDisplayRegistry
 } from './tokens';

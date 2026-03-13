@@ -1,15 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@lumino/messaging';
-import {
-  AccordionLayout,
-  AccordionPanel,
-  Title,
-  Widget
-} from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { Title } from '@lumino/widgets';
+import { AccordionLayout, AccordionPanel, Widget } from '@lumino/widgets';
 import { caretDownIcon } from '../icon';
-import { Toolbar } from './toolbar';
+import type { Toolbar } from './toolbar';
 
 /**
  * Accordion panel layout that adds a toolbar in widget title if present.
@@ -64,6 +61,14 @@ class AccordionToolbarLayout extends AccordionLayout {
   }
 
   /**
+   * Called when a title attribute has changed, to attach again the toolbar node.
+   */
+  updateTitle(index: number, widget: Widget): void {
+    super.updateTitle(index, widget);
+    this._addToolbar(index, widget);
+  }
+
+  /**
    * Attach a widget to the parent's DOM node.
    *
    * @param index - The current index of the widget in the layout.
@@ -72,22 +77,7 @@ class AccordionToolbarLayout extends AccordionLayout {
    */
   protected attachWidget(index: number, widget: Widget): void {
     super.attachWidget(index, widget);
-
-    const toolbar = this._toolbars.get(widget);
-    if (toolbar) {
-      // Send a `'before-attach'` message if the parent is attached.
-      if (this.parent!.isAttached) {
-        MessageLoop.sendMessage(toolbar, Widget.Msg.BeforeAttach);
-      }
-
-      // Insert the toolbar in the title node.
-      this.titles[index].appendChild(toolbar.node);
-
-      // Send an `'after-attach'` message if the parent is attached.
-      if (this.parent!.isAttached) {
-        MessageLoop.sendMessage(toolbar, Widget.Msg.AfterAttach);
-      }
-    }
+    this._addToolbar(index, widget);
   }
 
   /**
@@ -177,6 +167,27 @@ class AccordionToolbarLayout extends AccordionLayout {
     this.notifyToolbars(msg);
   }
 
+  /**
+   * Add the toolbar to the title widget.
+   */
+  private _addToolbar(index: number, widget: Widget): void {
+    const toolbar = this._toolbars.get(widget);
+    if (toolbar) {
+      // Send a `'before-attach'` message if the parent is attached.
+      if (this.parent!.isAttached) {
+        MessageLoop.sendMessage(toolbar, Widget.Msg.BeforeAttach);
+      }
+
+      // Insert the toolbar in the title node.
+      this.titles[index].appendChild(toolbar.node);
+
+      // Send an `'after-attach'` message if the parent is attached.
+      if (this.parent!.isAttached) {
+        MessageLoop.sendMessage(toolbar, Widget.Msg.AfterAttach);
+      }
+    }
+  }
+
   private notifyToolbars(msg: Message): void {
     this.widgets.forEach(widget => {
       const toolbar = this._toolbars.get(widget);
@@ -233,7 +244,7 @@ export namespace AccordionToolbar {
    *
    * #### Note
    *
-   * Default titleSpace is 29 px (default var(--jp-private-toolbar-height) - but not styled)
+   * Default titleSpace is 32 px (default var(--jp-private-toolbar-height) - but not styled)
    */
   export function createLayout(
     options: AccordionPanel.IOptions
@@ -245,7 +256,7 @@ export namespace AccordionToolbar {
         orientation: options.orientation,
         alignment: options.alignment,
         spacing: options.spacing,
-        titleSpace: options.titleSpace ?? 29
+        titleSpace: options.titleSpace ?? 32
       })
     );
   }

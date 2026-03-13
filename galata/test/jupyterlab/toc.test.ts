@@ -6,7 +6,7 @@ import * as path from 'path';
 
 const fileName = 'toc_notebook.ipynb';
 
-test.use({ tmpPath: 'test-toc' });
+test.use({ tmpPath: 'test-toc-general' });
 
 test.describe('Table of Contents', () => {
   test.beforeAll(async ({ request, tmpPath }) => {
@@ -23,22 +23,19 @@ test.describe('Table of Contents', () => {
 
     await page.sidebar.openTab('table-of-contents');
 
-    await page.click('.jp-toc-numberingButton');
+    await page
+      .getByRole('button', { name: 'Show heading number in the' })
+      .click();
   });
 
   test.afterEach(async ({ page }) => {
     await page.notebook.close(true);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Open Table of Contents panel', async ({ page }) => {
     const imageName = 'toc-panel.png';
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
@@ -47,16 +44,14 @@ test.describe('Table of Contents', () => {
   test('Toggle list', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
-    const numberingButton = await tocPanel.$$(
-      'button[data-command="toc:display-numbering"]'
-    );
-    expect(numberingButton.length).toBe(1);
 
     const imageName = 'toggle-numbered-list.png';
-    await numberingButton[0].click();
+    await page
+      .getByRole('button', { name: 'Show heading number in the' })
+      .click();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
   });
@@ -64,30 +59,21 @@ test.describe('Table of Contents', () => {
   test('Notebook context menu', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
 
-    await Promise.all([
-      page.locator(
-        '.jp-TableOfContents-tree >> .jp-tocItem-active >> text="2. Multiple output types"'
-      ),
-      page
-        .locator('.jp-TableOfContents-tree >> text="2. Multiple output types"')
-        .click({
-          button: 'right'
-        })
-    ]);
+    await page.getByRole('treeitem', { name: 'Multiple output types' }).click({
+      button: 'right'
+    });
 
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
 
-    await (
-      await menu.$('text=Select and Run Cell(s) for this Heading')
-    ).click();
+    await menu
+      ?.getByRole('menuitem', { name: 'Select and Run Cell(s) for' })
+      .click();
 
-    await page
-      .locator('.jp-TableOfContents-tree >> text="2. HTML title"')
-      .waitFor();
+    await page.getByRole('treeitem', { name: 'HTML title' }).waitFor();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'notebook-output-headings.png'

@@ -5,23 +5,20 @@
  * @module launcher-extension
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-import {
-  FileBrowserModel,
-  IDefaultFileBrowser,
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+import type { FileBrowserModel } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
 import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import { JSONObject } from '@lumino/coreutils';
-import { DockPanel, TabBar, Widget } from '@lumino/widgets';
+import type { JSONObject } from '@lumino/coreutils';
+import type { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the launcher plugin.
@@ -38,12 +35,7 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: '@jupyterlab/launcher-extension:plugin',
   description: 'Provides the launcher tab service.',
   requires: [ITranslator],
-  optional: [
-    ILabShell,
-    ICommandPalette,
-    IDefaultFileBrowser,
-    IFileBrowserFactory
-  ],
+  optional: [ILabShell, ICommandPalette, IDefaultFileBrowser],
   provides: ILauncher,
   autoStart: true
 };
@@ -61,8 +53,7 @@ function activate(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
-  defaultBrowser: IDefaultFileBrowser | null,
-  factory: IFileBrowserFactory | null
+  defaultBrowser: IDefaultFileBrowser | null
 ): ILauncher {
   const { commands, shell } = app;
   const trans = translator.load('jupyterlab');
@@ -71,6 +62,31 @@ function activate(
   commands.addCommand(CommandIDs.create, {
     label: trans.__('New Launcher'),
     icon: args => (args.toolbar ? addIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          cwd: {
+            type: 'string',
+            description: trans.__('The current working directory')
+          },
+          toolbar: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from a toolbar'
+            )
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          },
+          ref: {
+            type: 'string',
+            description: trans.__('The reference widget id')
+          }
+        }
+      }
+    },
     execute: (args: JSONObject) => {
       const cwd = (args['cwd'] as string) ?? defaultBrowser?.model.path ?? '';
       const id = `launcher-${Private.id++}`;

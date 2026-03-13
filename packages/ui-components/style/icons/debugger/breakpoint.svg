@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+  <g fill="var(--jp-error-color1, #d32f2f)">
+    <circle cx="10" cy="7" r="6" />
+  </g>
+</svg>

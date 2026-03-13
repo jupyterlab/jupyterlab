@@ -11,6 +11,7 @@
   font-family: var(--jp-ui-font-family);
   padding: 2px 1px;
   resize: none;
+  white-space: pre;
 }
 
 .jp-DocumentSearch-overlay {
@@ -33,11 +34,16 @@
   outline: 0;
 }
 
-.jp-DocumentSearch-overlay button:hover {
+.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.jp-DocumentSearch-overlay button:not(:disabled):hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-overlay button:active {
+.jp-DocumentSearch-overlay button:not(:disabled):active {
   background-color: var(--jp-layout-color3);
 }
 
@@ -81,11 +87,13 @@
 }
 
 .jp-DocumentSearch-toggle-wrapper {
+  flex-shrink: 0;
   width: 14px;
   height: 14px;
 }
 
 .jp-DocumentSearch-button-wrapper {
+  flex-shrink: 0;
   width: var(--jp-private-document-search-button-height);
   height: var(--jp-private-document-search-button-height);
 }
@@ -152,11 +160,11 @@
   margin: 1px 5px 2px;
 }
 
-.jp-DocumentSearch-up-down-button:hover {
+button:not(:disabled) > .jp-DocumentSearch-up-down-button:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-up-down-button:active {
+button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   background-color: var(--jp-layout-color3);
 }
 
@@ -209,6 +217,7 @@
   margin: auto 2px;
   padding: 1px 4px;
   height: calc(var(--jp-private-document-search-button-height) + 2px);
+  flex-shrink: 0;
 }
 
 .jp-DocumentSearch-replace-button-wrapper:focus {
@@ -245,4 +254,38 @@
 
 .jp-DocumentSearch-replace-toggle:hover {
   background-color: var(--jp-layout-color2);
+}
+
+/*
+  The following few rules allow the search box to expand horizontally,
+  as the text within it grows. This is done by using putting
+  the text within a wrapper element and using that wrapper for sizing,
+  as <textarea> and <input> tags do not grow automatically.
+  This is the underlying technique:
+  https://til.simonwillison.net/css/resizing-textarea
+*/
+.jp-DocumentSearch-input-label::after {
+  content: attr(data-value) ' ';
+  visibility: hidden;
+  white-space: pre;
+}
+
+.jp-DocumentSearch-input-label {
+  display: inline-grid;
+  align-items: stretch;
+}
+
+.jp-DocumentSearch-input-label::after,
+.jp-DocumentSearch-input-label > .jp-DocumentSearch-input {
+  width: auto;
+  min-width: 1em;
+  grid-area: 1/2;
+  font: inherit;
+  padding: 2px 3px;
+  margin: 0;
+  resize: none;
+  background: none;
+  appearance: none;
+  border: none;
+  overflow: hidden;
 }

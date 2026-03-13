@@ -11,5 +11,4 @@
 @import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/application/style/index.css');
 @import url('~@jupyterlab/inspector/style/index.css');
-
 @import url('./base.css');

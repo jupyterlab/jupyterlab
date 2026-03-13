@@ -7,16 +7,16 @@
  * @module hub-extension
  */
 
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
   JupyterLab
 } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
+import type { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -57,15 +57,27 @@ function activateHubExtension(
   });
 
   // If hubServerName is set, use JupyterHub 1.0 URL.
-  const restartUrl = hubServerName
-    ? hubHost + URLExt.join(hubPrefix, 'spawn', hubUser, hubServerName)
-    : hubHost + URLExt.join(hubPrefix, 'spawn');
+  const spawnBase = URLExt.join(hubPrefix, 'spawn');
+  let restartUrl = hubHost + spawnBase;
+  if (hubServerName) {
+    const suffix = URLExt.join(spawnBase, hubUser, hubServerName);
+    if (!suffix.startsWith(spawnBase)) {
+      throw new Error('Can only be used for spawn requests');
+    }
+    restartUrl = hubHost + suffix;
+  }
 
   const { commands } = app;
 
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Server'),
     caption: trans.__('Request that the Hub restart this server'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       window.open(restartUrl, '_blank');
     }
@@ -74,6 +86,12 @@ function activateHubExtension(
   commands.addCommand(CommandIDs.controlPanel, {
     label: trans.__('Hub Control Panel'),
     caption: trans.__('Open the Hub control panel in a new browser tab'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       window.open(hubHost + URLExt.join(hubPrefix, 'home'), '_blank');
     }
@@ -82,6 +100,12 @@ function activateHubExtension(
   commands.addCommand(CommandIDs.logout, {
     label: trans.__('Log Out'),
     caption: trans.__('Log out of the Hub'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       window.location.href = hubHost + URLExt.join(baseUrl, 'logout');
     }

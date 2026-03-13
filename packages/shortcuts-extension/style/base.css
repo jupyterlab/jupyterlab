@@ -15,7 +15,7 @@
 }
 
 .jp-mod-hidden {
-  display: hidden;
+  display: none;
 }
 
 @keyframes slide-animation {
@@ -31,9 +31,9 @@
 }
 
 .jp-Shortcuts-Input {
-  animation-duration: 0.5 s;
+  animation-duration: 0.3s;
   animation-timing-function: ease-out;
-  animation-name: 'slide-animation';
+  animation-name: slide-animation;
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color3);
   border-style: solid;
@@ -68,7 +68,7 @@
 }
 
 .jp-mod-selected-InputText {
-  background-color: var(--jp-brand-color3);
+  background-color: var(--jp-shortcuts-button-background);
   overflow: hidden;
 }
 
@@ -116,9 +116,31 @@
   vertical-align: middle;
 }
 
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect {
+  position: relative;
+  max-width: 300px;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select {
+  max-width: 300px;
+  white-space: pre-wrap;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
+  top: 4px;
+}
+
+.jp-Shortcuts-Cell jp-button {
+  vertical-align: inherit;
+}
+
+.jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
+  margin-left: 10px;
+}
+
 .jp-Shortcuts-ShortcutCell {
   display: flex;
-  min-width: 100px;
+  min-width: max-content;
   flex-wrap: wrap;
 }
 
@@ -127,7 +149,6 @@
 }
 
 .jp-Shortcuts-Row {
-  padding: 10px;
   width: 100%;
   display: table-row;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -135,51 +156,60 @@
   background-color: var(--jp-layout-color0);
 }
 
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut
+  .jp-Shortcuts-Cell:first-of-type {
+  display: none;
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
+  width: 40%;
+}
+
+.jp-Shortcuts-Row-newShortcut
+  .jp-Shortcuts-SaveNew:not(:disabled)
+  .jp-icon3[fill] {
+  fill: var(--jp-ui-inverse-font-color0);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled) {
+  background: var(--jp-shortcuts-button-hover-background);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled):hover {
+  background: var(--jp-accept-color-normal);
+}
+
 .jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutKeys {
   border-color: var(--jp-border-color1);
   background: var(--jp-layout-color2);
 }
 
-.jp-Shortcuts-Row:hover #add-link,
-.jp-Shortcuts-Row:hover #or {
-  display: block;
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Plus,
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Or {
+  opacity: 1;
 }
 
 .jp-Shortcuts-ErrorMessage {
   color: var(--jp-error-color1);
-  margin-top: 9px;
+  align-self: center;
+}
+
+.jp-Shortcuts-RowWithConflict {
+  height: 45px;
+  position: relative;
 }
 
 .jp-Shortcuts-ErrorButton {
-  line-height: 34px;
-  margin-left: 10px;
+  margin-left: 12px;
+  white-space: nowrap;
 }
 
-.jp-Shortcuts-ErrorButton button:nth-of-type(1) {
-  height: 25px;
-  margin-right: 5px;
-  background-color: var(--jp-border-color0);
-  color: white;
-  outline: none;
-}
-
-.jp-Shortcuts-ErrorButton button:nth-of-type(1):active,
-.jp-Shortcuts-ErrorButton button:nth-of-type(1):focus {
-  outline: none;
-  border: none;
-}
-
-.jp-Shortcuts-ErrorButton button:nth-of-type(2) {
-  height: 25px;
-  background-color: var(--jp-error-color1);
-  color: white;
-  outline: none;
-}
-
-.jp-Shortcuts-ErrorButton button:nth-of-type(2):active,
-.jp-Shortcuts-ErrorButton button:nth-of-type(2):focus {
-  outline: none;
-  border: none;
+.jp-Shortcuts-ErrorButton > button {
+  margin-right: 12px;
 }
 
 .jp-Shortcuts-ShortcutContainer {
@@ -199,10 +229,18 @@
 }
 
 .jp-Shortcuts-ConflictContainer {
-  display: flex;
-  flex-wrap: wrap;
+  display: block;
   padding: 6px 12px;
-  margin-left: 20%;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.jp-Shortcuts-Conflict {
+  display: flex;
+  flex-wrap: nowrap;
 }
 
 .jp-Shortcuts-ShortcutKeys {
@@ -211,6 +249,7 @@
   border-radius: var(--jp-border-radius);
   padding: 5px 6px;
   margin: 3px 0;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Or {
@@ -218,19 +257,15 @@
   margin-left: 12px;
   margin-top: 8px;
   color: var(--jp-content-font-color3);
-  display: none;
+  opacity: 0;
 }
 
 .jp-Shortcuts-Or:hover {
-  display: block;
+  opacity: 1;
 }
 
-.jp-Shortcuts-OrTwo {
-  margin-right: 12px;
-  margin-left: 12px;
-  margin-top: 8px;
-  color: var(--jp-content-font-color3);
-  display: block;
+.jp-Shortcuts-Or-Forced {
+  opacity: 1;
 }
 
 .jp-Shortcuts-Comma {
@@ -240,17 +275,19 @@
 }
 
 .jp-Shortcuts-Plus {
-  display: none;
-  background: var(--jp-brand-color3);
+  opacity: 0;
+  background: var(--jp-shortcuts-button-background);
   border-color: var(--jp-layout-color0);
   border-radius: var(--jp-border-radius);
   border-width: var(--jp-border-width);
   margin: 3px 0;
   padding: 5px 6px;
+  color: var(--jp-ui-inverse-font-color1);
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Plus:hover {
-  background-color: var(--jp-brand-color2);
+  background: var(--jp-shortcuts-button-hover-background);
 }
 
 .jp-Shortcuts-Plus:active {
@@ -260,6 +297,7 @@
 .jp-Shortcuts-Reset {
   color: var(--jp-brand-color2);
   padding-left: 10px;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Reset:hover {
@@ -335,34 +373,44 @@
   padding-right: 10px;
 }
 
-.jp-Shortcuts-Search {
-  height: 30px;
-}
-
-.jp-Shortcuts-Search > input {
-  box-shadow: none;
-}
-
-.jp-Shortcuts-AdvancedOptionsSmall {
-  width: 30%;
-}
-
-.jp-Shortcuts-AdvancedOptionsRight {
-  margin-top: 8px;
+.jp-Shortcuts-AdvancedOptions {
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink {
   color: var(--jp-content-link-color);
-  text-decoration: none;
   margin-right: 15px;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:hover {
   color: var(--jp-brand-color0);
+  text-decoration: underline;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:active {
   color: var(--jp-brand-color0);
+  text-decoration: underline;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept {
+  background: var(--jp-shortcuts-button-hover-background);
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept:hover {
+  background: var(--jp-accept-color-normal);
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled .jp-icon3[fill] {
+  fill: var(--jp-ui-inverse-font-color0);
 }
 
 .jp-Shortcuts-HeaderRowContainer {
@@ -390,4 +438,35 @@
 .jp-Shortcuts-controlIcon {
   margin-left: 8px;
   margin-right: 16px;
+}
+
+.jp-Shortcuts-CustomOptionsDialogBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 500px;
+  height: 400px;
+  padding: 12px;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container label {
+  margin: 0;
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Shortcuts-CustomOptionDialog-container input {
+  padding: 8px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 2px;
+}
+
+.jp-JSONEditor {
+  flex: 1;
 }

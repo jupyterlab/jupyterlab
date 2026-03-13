@@ -14,19 +14,19 @@ jobs:
     strategy:
       matrix:
         group: [integrity, python, usage, usage2]
-        python-version: [3.11]
+        python-version: ["3.14"]
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Setup firefox
-        uses: browser-actions/setup-firefox@latest
+        run: brew install --cask firefox
 
       - name: Install dependencies
         env:

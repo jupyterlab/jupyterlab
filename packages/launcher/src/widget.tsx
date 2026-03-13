@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
   LabIcon,
@@ -14,12 +11,13 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { ArrayExt, map } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ILauncher } from './tokens';
+import type { ILauncher } from './tokens';
 
 /**
  * The class name added to Launcher instances.
@@ -174,6 +172,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
                 icon={icon}
                 iconClass={classes(iconClass, 'jp-Icon-cover')}
                 stylesheet="launcherSection"
+                aria-hidden="true"
               />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
@@ -274,9 +273,14 @@ function Card(
   };
 
   // With tabindex working, you can now pick a kernel by tabbing around and
-  // pressing Enter.
+  // pressing Enter or Space.
   const onkeypress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
+    if (
+      event.key === 'Enter' ||
+      event.key === ' ' ||
+      event.key === 'Spacebar'
+    ) {
+      event.preventDefault();
       onclick();
     }
   };
@@ -289,8 +293,9 @@ function Card(
     <div
       className="jp-LauncherCard"
       title={title}
+      role="button"
       onClick={onclick}
-      onKeyPress={onkeypress}
+      onKeyDown={onkeypress}
       tabIndex={0}
       data-category={item.category || trans.__('Other')}
       key={Private.keyProperty.get(item)}
@@ -298,7 +303,11 @@ function Card(
       <div className="jp-LauncherCard-icon">
         {kernel ? (
           item.kernelIconUrl ? (
-            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+            <img
+              src={item.kernelIconUrl}
+              className="jp-Launcher-kernelIcon"
+              alt={title}
+            />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}

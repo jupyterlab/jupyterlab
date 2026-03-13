@@ -1,17 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IChangedArgs, Time } from '@jupyterlab/coreutils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { Contents } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { Time } from '@jupyterlab/coreutils';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { Contents } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
+import type { IMessageHandler, Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import type { IDocumentManagerDialogs, IRecentsManager } from './tokens';
+import { DocumentManagerDialogs } from './dialogs';
 
 /**
  * The class name added to document widgets.
@@ -28,6 +37,8 @@ export class DocumentWidgetManager implements IDisposable {
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
     this.translator = options.translator || nullTranslator;
+    this._recentsManager = options.recentsManager || null;
+    this._dialogs = options.dialogs || null;
   }
 
   /**
@@ -257,8 +268,17 @@ export class DocumentWidgetManager implements IDisposable {
         void this.onClose(handler as Widget);
         return false;
       case 'activate-request': {
-        const context = this.contextForWidget(handler as Widget);
+        const widget = handler as Widget;
+        const context = this.contextForWidget(widget);
         if (context) {
+          context.ready
+            .then(() => {
+              // contentsModel is null until the context is ready
+              this._recordAsRecentlyOpened(widget, context.contentsModel!);
+            })
+            .catch(() => {
+              console.warn('Could not record the recents status for', context);
+            });
           this._activateRequested.emit(context.path);
         }
         break;
@@ -326,15 +346,34 @@ export class DocumentWidgetManager implements IDisposable {
       return true;
     }
     if (shouldClose) {
+      const context = Private.contextProperty.get(widget);
       if (!ignoreSave) {
-        const context = Private.contextProperty.get(widget);
         if (!context) {
           return true;
         }
         if (context.contentsModel?.writable) {
           await context.save();
         } else {
-          await context.saveAs();
+          const saveAsSuccessfull = await context.saveAs();
+          if (!saveAsSuccessfull) {
+            return false;
+          }
+        }
+      }
+      if (context) {
+        const result = await Promise.race([
+          context.ready,
+          new Promise(resolve => setTimeout(resolve, 3000, 'timeout'))
+        ]);
+        if (result === 'timeout') {
+          console.warn(
+            'Could not record the widget as recently closed because the context did not become ready in 3 seconds'
+          );
+        } else {
+          // Note: `contentsModel` is null until the the context is ready;
+          // we have to handle it after `await` rather than in a `then`
+          // to ensure we record it as recent before the widget gets disposed.
+          this._recordAsRecentlyClosed(widget, context.contentsModel!);
         }
       }
       if (widget.isDisposed) {
@@ -356,6 +395,50 @@ export class DocumentWidgetManager implements IDisposable {
   }
 
   /**
+   * Record the activated file, and its parent directory, as recently opened.
+   */
+  private _recordAsRecentlyOpened(
+    widget: Widget,
+    model: Omit<Contents.IModel, 'content'>
+  ) {
+    const recents = this._recentsManager;
+    if (!recents) {
+      // no-op
+      return;
+    }
+    const path = model.path;
+    const fileType = this._registry.getFileTypeForModel(model);
+    const contentType = fileType.contentType;
+    const factory = Private.factoryProperty.get(widget)?.name;
+    recents.addRecent({ path, contentType, factory }, 'opened');
+    // Add the containing directory, too
+    if (contentType !== 'directory') {
+      const parent =
+        path.lastIndexOf('/') > 0 ? path.slice(0, path.lastIndexOf('/')) : '';
+      recents.addRecent({ path: parent, contentType: 'directory' }, 'opened');
+    }
+  }
+
+  /**
+   * Record the activated file, and its parent directory, as recently opened.
+   */
+  private _recordAsRecentlyClosed(
+    widget: Widget,
+    model: Omit<Contents.IModel, 'content'>
+  ) {
+    const recents = this._recentsManager;
+    if (!recents) {
+      // no-op
+      return;
+    }
+    const path = model.path;
+    const fileType = this._registry.getFileTypeForModel(model);
+    const contentType = fileType.contentType;
+    const factory = Private.factoryProperty.get(widget)?.name;
+    recents.addRecent({ path, contentType, factory }, 'closed');
+  }
+
+  /**
    * Ask the user whether to close an unsaved file.
    */
   private async _maybeClose(
@@ -363,7 +446,6 @@ export class DocumentWidgetManager implements IDisposable {
     translator?: ITranslator
   ): Promise<[boolean, boolean]> {
     translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
     // Bail if the model is not dirty or other widgets are using the model.)
     const context = Private.contextProperty.get(widget);
     if (!context) {
@@ -388,72 +470,30 @@ export class DocumentWidgetManager implements IDisposable {
       context.model.dirty &&
       widgets.length <= 1 &&
       !(factory?.readOnly ?? true);
-
+    const dialogs =
+      this._dialogs ?? new DocumentManagerDialogs({ translator: translator });
     // Ask confirmation
     if (this.confirmClosingDocument) {
-      const buttons = [
-        Dialog.cancelButton(),
-        Dialog.okButton({
-          label: isDirty ? trans.__('Close and save') : trans.__('Close'),
-          ariaLabel: isDirty
-            ? trans.__('Close and save Document')
-            : trans.__('Close Document')
-        })
-      ];
-      if (isDirty) {
-        buttons.splice(
-          1,
-          0,
-          Dialog.warnButton({
-            label: trans.__('Close without saving'),
-            ariaLabel: trans.__('Close Document without saving')
-          })
-        );
-      }
+      const { shouldClose, ignoreSave, doNotAskAgain } =
+        await dialogs.confirmClose({
+          fileName,
+          isDirty
+        });
 
-      const confirm = await showDialog({
-        title: trans.__('Confirmation'),
-        body: trans.__('Please confirm you want to close "%1".', fileName),
-        checkbox: isDirty
-          ? null
-          : {
-              label: trans.__('Do not ask me again.'),
-              caption: trans.__(
-                'If checked, no confirmation to close a document will be asked in the future.'
-              )
-            },
-        buttons
-      });
-
-      if (confirm.isChecked) {
+      if (doNotAskAgain) {
         this.confirmClosingDocument = false;
       }
 
-      return Promise.resolve([
-        confirm.button.accept,
-        isDirty ? confirm.button.displayType === 'warn' : true
-      ]);
+      return Promise.resolve([shouldClose, ignoreSave]);
     } else {
       if (!isDirty) {
         return Promise.resolve([true, true]);
       }
-
-      const saveLabel = context.contentsModel?.writable
-        ? trans.__('Save')
-        : trans.__('Save as');
-      const result = await showDialog({
-        title: trans.__('Save your work'),
-        body: trans.__('Save changes in "%1" before closing?', fileName),
-        buttons: [
-          Dialog.cancelButton(),
-          Dialog.warnButton({
-            label: trans.__('Discard'),
-            ariaLabel: trans.__('Discard changes to file')
-          }),
-          Dialog.okButton({ label: saveLabel })
-        ]
+      const result = await dialogs?.saveBeforeClose({
+        fileName,
+        writable: context.contentsModel?.writable
       });
-      return [result.button.accept, result.button.displayType === 'warn'];
+      return [result.shouldClose, result.ignoreSave];
     }
   }
 
@@ -513,6 +553,8 @@ export class DocumentWidgetManager implements IDisposable {
   private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
     this
   );
+  private _recentsManager: IRecentsManager | null;
+  private _dialogs: IDocumentManagerDialogs | null;
 }
 
 /**
@@ -527,6 +569,16 @@ export namespace DocumentWidgetManager {
      * A document registry instance.
      */
     registry: DocumentRegistry;
+
+    /**
+     * The provider for document manager dialogs.
+     */
+    dialogs?: IDocumentManagerDialogs;
+
+    /**
+     * The manager for recent documents.
+     */
+    recentsManager?: IRecentsManager;
 
     /**
      * The application language translator.

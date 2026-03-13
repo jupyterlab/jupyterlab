@@ -16,7 +16,13 @@
       "path": "../docregistry"
     },
     {
+      "path": "../rendermime"
+    },
+    {
       "path": "../services"
+    },
+    {
+      "path": "../statedb"
     },
     {
       "path": "../statusbar"

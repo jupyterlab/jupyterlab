@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MimeData } from '@lumino/coreutils';
-import { Drag } from '@lumino/dragdrop';
-import { Message } from '@lumino/messaging';
+import type { MimeData } from '@lumino/coreutils';
+import type { Drag } from '@lumino/dragdrop';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { CodeEditor } from './';
+import type { CodeEditor } from './';
 
 /**
  * The class name added to an editor widget that has a primary selection.
@@ -216,16 +216,12 @@ export class CodeEditorWrapper extends Widget {
     if (data === undefined) {
       return;
     }
-    const coordinate = {
+    const coordinate: CodeEditor.ICoordinate = {
       top: event.y,
       bottom: event.y,
       left: event.x,
-      right: event.x,
-      x: event.x,
-      y: event.y,
-      width: 0,
-      height: 0
-    } as CodeEditor.ICoordinate;
+      right: event.x
+    };
     const position = this.editor.getPositionForCoordinate(coordinate);
     if (position === null) {
       return;

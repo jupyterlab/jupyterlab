@@ -3,7 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { FeatureManager, IFeature } from '@jupyterlab/lsp';
+import type { IFeature } from '@jupyterlab/lsp';
+import { FeatureManager } from '@jupyterlab/lsp';
 
 const feature1: IFeature = {
   id: 'foo',
@@ -33,7 +34,7 @@ describe('@jupyterlab/lsp', () => {
         manager.register(feature1);
         expect(manager.features.length).toEqual(1);
       });
-      it('should merge capabilites of features', async () => {
+      it('should merge capabilities of features', async () => {
         manager.register(feature1);
         manager.register(feature2);
         expect(manager.features.length).toEqual(2);

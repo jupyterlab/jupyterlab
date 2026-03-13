@@ -3,14 +3,16 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
+import type { JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
-import { shutdownTerminal, TERMINAL_SERVICE_URL } from './restapi';
+import type * as Terminal from './terminal';
+import { TerminalAPIClient } from './restapi';
 
 /**
  * An implementation of a terminal interface.
@@ -23,6 +25,9 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     this._name = options.model.name;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this._terminalAPIClient =
+      options.terminalAPIClient ??
+      new TerminalAPIClient({ serverSettings: this.serverSettings });
     this._createSocket();
   }
 
@@ -190,9 +195,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.error(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       this._reconnectTimeout = setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;
@@ -229,7 +232,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
    * Shut down the terminal session.
    */
   async shutdown(): Promise<void> {
-    await shutdownTerminal(this.name, this.serverSettings);
+    await this._terminalAPIClient.shutdown(this.name);
     this.dispose();
   }
 
@@ -237,7 +240,11 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
    * Clone the current terminal connection.
    */
   clone(): Terminal.ITerminalConnection {
-    return new TerminalConnection(this);
+    return new TerminalConnection({
+      model: this.model,
+      serverSettings: this.serverSettings,
+      terminalAPIClient: this._terminalAPIClient
+    });
   }
 
   /**
@@ -381,16 +388,10 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _pendingMessages: Terminal.IMessage[] = [];
+  private _terminalAPIClient: Terminal.ITerminalAPIClient;
 }
 
 namespace Private {
-  /**
-   * Get the url for a terminal.
-   */
-  export function getTermUrl(baseUrl: string, name: string): string {
-    return URLExt.join(baseUrl, TERMINAL_SERVICE_URL, encodeURIComponent(name));
-  }
-
   /**
    * Get a random integer between min and max, inclusive of both.
    *

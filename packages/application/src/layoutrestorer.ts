@@ -3,21 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { IDataConnector, IRestorer } from '@jupyterlab/statedb';
-import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type { IDataConnector, IRestorer } from '@jupyterlab/statedb';
+import type { CommandRegistry } from '@lumino/commands';
+import type {
   JSONObject,
   PartialJSONObject,
-  PromiseDelegate,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { DockPanel, Widget } from '@lumino/widgets';
-import { ILabShell } from './shell';
+import type { DockPanel, Widget } from '@lumino/widgets';
+import type { ILabShell } from './shell';
 
 /**
  * The layout restorer token.
@@ -184,7 +182,6 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     try {
       const [data] = await Promise.all([layout, this.restored]);
-
       if (!data) {
         return blank;
       }
@@ -337,6 +334,19 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.main = this.isDeferred
       ? this._deferredMainArea
       : this._dehydrateMainArea(layout.mainArea);
+
+    // Update only the current widget in the db when restoration is deferred.
+    // Useful for providing the tab title in doc mode.
+    if (this.isDeferred) {
+      const currentWidget = layout.mainArea?.currentWidget;
+      if (currentWidget) {
+        const widgetName = Private.nameProperty.get(currentWidget);
+        dehydrated.main = {
+          ...dehydrated.main,
+          current: widgetName || undefined
+        };
+      }
+    }
     dehydrated.down = this._dehydrateDownArea(layout.downArea);
     dehydrated.left = this._dehydrateSideArea(layout.leftArea);
     dehydrated.right = this._dehydrateSideArea(layout.rightArea);
@@ -461,6 +471,14 @@ export class LayoutRestorer implements ILayoutRestorer {
         .map(widget => Private.nameProperty.get(widget))
         .filter(name => !!name);
     }
+    if (area.widgetStates) {
+      dehydrated.widgetStates = area.widgetStates as {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      };
+    }
     return dehydrated;
   }
 
@@ -479,7 +497,13 @@ export class LayoutRestorer implements ILayoutRestorer {
         collapsed: true,
         currentWidget: null,
         visible: true,
-        widgets: null
+        widgets: null,
+        widgetStates: {
+          ['null']: {
+            sizes: null,
+            expansionStates: null
+          }
+        }
       };
     }
     const internal = this._widgets;
@@ -495,11 +519,18 @@ export class LayoutRestorer implements ILayoutRestorer {
             internal.has(`${name}`) ? internal.get(`${name}`) : null
           )
           .filter(widget => !!widget);
+    const widgetStates = area.widgetStates as {
+      [id: string]: {
+        sizes: number[] | null;
+        expansionStates: boolean[] | null;
+      };
+    };
     return {
       collapsed,
       currentWidget: currentWidget!,
       widgets: widgets as Widget[] | null,
-      visible: area.visible ?? true
+      visible: area.visible ?? true,
+      widgetStates: widgetStates
     };
   }
 

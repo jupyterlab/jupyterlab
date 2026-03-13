@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
 import { StateDB } from '@jupyterlab/statedb';
 import {
   acceptDialog,
@@ -34,9 +35,12 @@ class DelayedContentsManager extends ContentsManagerMock {
       const delay = this._delay;
       this._delay -= 500;
       void super.get(path, options).then(contents => {
-        setTimeout(() => {
-          resolve(contents);
-        }, Math.max(delay, 0));
+        setTimeout(
+          () => {
+            resolve(contents);
+          },
+          Math.max(delay, 0)
+        );
       });
     });
   }
@@ -147,6 +151,28 @@ describe('filebrowser/model', () => {
         });
         await manager.newUntitled({ type: 'file' });
         expect(called).toBe(true);
+      });
+
+      it('should be emitted when a file is created in a drive with a name', async () => {
+        await state.clear();
+        const driveName = 'RTC';
+        const modelWithName = new FileBrowserModel({
+          manager,
+          state,
+          driveName
+        });
+
+        let called = false;
+        modelWithName.fileChanged.connect((sender, args) => {
+          expect(sender).toBe(modelWithName);
+          expect(args.type).toBe('new');
+          expect(args.oldValue).toBeNull();
+          expect(args.newValue!.type).toBe('file');
+          called = true;
+        });
+        await manager.newUntitled({ type: 'file' });
+        expect(called).toBe(true);
+        modelWithName.dispose();
       });
 
       it('should be emitted when a file is renamed', async () => {
@@ -433,9 +459,8 @@ describe('filebrowser/model', () => {
               const file = new File([content], fname, { type: 'text/plain' });
               await model.upload(file);
               // Ensure we get the file back.
-              const contentModel = await model.manager.services.contents.get(
-                fname
-              );
+              const contentModel =
+                await model.manager.services.contents.get(fname);
               expect(contentModel.content.length).toBeGreaterThan(0);
             });
           }

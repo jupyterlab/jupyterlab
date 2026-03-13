@@ -20,7 +20,7 @@ test('Limit cell outputs', async ({ page }) => {
 
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
-  ).type(`from IPython.display import display, Markdown
+  ).fill(`from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
@@ -39,7 +39,7 @@ test("Don't limit cell outputs if input is requested", async ({ page }) => {
 
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
-  ).type(`from IPython.display import display, Markdown
+  ).fill(`from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
@@ -48,7 +48,7 @@ input('Your age:')
 `);
 
   await page.menu.clickMenuItem('Run>Run All Cells');
-  await page.waitForSelector('.jp-Stdin >> text=Your age:');
+  await page.locator('.jp-Stdin >> text=Your age:').waitFor();
   expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
     MAX_OUTPUTS
   );
@@ -61,7 +61,7 @@ test('Display input value', async ({ page }) => {
 
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
-  ).type(`from IPython.display import display, Markdown
+  ).fill(`from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
@@ -73,7 +73,7 @@ for i in range(10):
 `);
 
   await page.menu.clickMenuItem('Run>Run All Cells');
-  await page.waitForSelector('.jp-Stdin >> text=Your age:');
+  await page.locator('.jp-Stdin >> text=Your age:').waitFor();
 
   await page.keyboard.type('42');
   await page.keyboard.press('Enter');

@@ -3,20 +3,20 @@
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import { ElementHandle, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import * as path from 'path';
-import { ContentsHelper } from '../contents';
+import type { ContentsHelper } from '../contents';
 import type { INotebookRunCallback } from '../extension';
-import { galata } from '../galata';
+import type { galata } from '../galata';
 import * as Utils from '../utils';
-import { ActivityHelper } from './activity';
-import { FileBrowserHelper } from './filebrowser';
-import { MenuHelper } from './menu';
+import type { ActivityHelper } from './activity';
+import type { FileBrowserHelper } from './filebrowser';
+import type { MenuHelper } from './menu';
 
 /**
  * Maximal number of retries to get a cell
  */
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
 /**
  * Notebook helpers
@@ -37,8 +37,8 @@ export class NotebookHelper {
    * @returns Notebook opened status
    */
   async isOpen(name: string): Promise<boolean> {
-    const tab = await this.activity.getTab(name);
-    return tab !== null;
+    const tab = this.activity.getTabLocator(name);
+    return (await tab.count()) > 0;
   }
 
   /**
@@ -57,7 +57,7 @@ export class NotebookHelper {
    * @returns Notebook active status
    */
   async isAnyActive(): Promise<boolean> {
-    return (await this.getNotebookInPanel()) !== null;
+    return (await this.getNotebookInPanelLocator()) !== null;
   }
 
   /**
@@ -69,8 +69,13 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async open(name: string): Promise<boolean> {
-    const isListed = await this.filebrowser.isFileListedInBrowser(name);
-    if (!isListed) {
+    try {
+      // The notebook may not be rendered on the list if the upload
+      // has just completed but the listing was not refreshed yet.
+      await Utils.waitForCondition(() =>
+        this.filebrowser.isFileListedInBrowser(name)
+      );
+    } catch {
       return false;
     }
 
@@ -98,14 +103,30 @@ export class NotebookHelper {
    *
    * @param name Notebook name
    * @returns Handle to the Notebook panel
+   *
+   * @deprecated You should use locator instead {@link getNotebookInPanelLocator}
    */
   async getNotebookInPanel(
     name?: string
   ): Promise<ElementHandle<Element> | null> {
-    const nbPanel = await this.activity.getPanel(name);
+    return (
+      (await this.getNotebookInPanelLocator(name))?.elementHandle() ?? null
+    );
+  }
 
-    if (nbPanel) {
-      return await nbPanel.$('.jp-NotebookPanel-notebook');
+  /**
+   * Get the locator to a notebook panel
+   *
+   * @param name Notebook name
+   * @returns Locator to the Notebook panel
+   */
+  async getNotebookInPanelLocator(name?: string): Promise<Locator | null> {
+    const nbPanel = await this.activity.getPanelLocator(name);
+
+    if (nbPanel && (await nbPanel.count())) {
+      if (await nbPanel.locator('.jp-NotebookPanel-notebook').count()) {
+        return nbPanel.locator('.jp-NotebookPanel-notebook').first();
+      }
     }
 
     return null;
@@ -116,15 +137,25 @@ export class NotebookHelper {
    *
    * @param name Notebook name
    * @returns Handle to the Notebook toolbar
+   *
+   * @deprecated You should use locator instead {@link getToolbarLocator}
    */
   async getToolbar(name?: string): Promise<ElementHandle<Element> | null> {
-    const nbPanel = await this.activity.getPanel(name);
+    return (await this.getToolbarLocator(name))?.elementHandle() ?? null;
+  }
 
-    if (nbPanel) {
-      return await nbPanel.$('.jp-Toolbar');
-    }
-
-    return null;
+  /**
+   * Get the notebook toolbar locator
+   *
+   * @param name Notebook name
+   * @returns Locator to the Notebook toolbar
+   */
+  async getToolbarLocator(name?: string): Promise<Locator | null> {
+    return (
+      (await this.activity.getPanelLocator(name))
+        ?.locator('.jp-Toolbar')
+        .first() ?? null
+    );
   }
 
   /**
@@ -133,21 +164,41 @@ export class NotebookHelper {
    * @param itemIndex Toolbar item index
    * @param notebookName Notebook name
    * @returns Handle to the notebook toolbar item
+   *
+   * @deprecated You should use locator instead {@link getToolbarItemLocatorByIndex}
    */
   async getToolbarItemByIndex(
     itemIndex: number,
     notebookName?: string
   ): Promise<ElementHandle<Element> | null> {
+    return (
+      (
+        await this.getToolbarItemLocatorByIndex(itemIndex, notebookName)
+      )?.elementHandle() ?? null
+    );
+  }
+
+  /**
+   * Get the locator to a notebook toolbar item from its index
+   *
+   * @param itemIndex Toolbar item index
+   * @param notebookName Notebook name
+   * @returns locator to the notebook toolbar item
+   */
+  async getToolbarItemLocatorByIndex(
+    itemIndex: number,
+    notebookName?: string
+  ): Promise<Locator | null> {
     if (itemIndex === -1) {
       return null;
     }
 
-    const toolbar = await this.getToolbar(notebookName);
+    const toolbar = await this.getToolbarLocator(notebookName);
 
     if (toolbar) {
-      const toolbarItems = await toolbar.$$('.jp-Toolbar-item');
-      if (itemIndex < toolbarItems.length) {
-        return toolbarItems[itemIndex];
+      const toolbarItems = toolbar.locator('.jp-Toolbar-item');
+      if (itemIndex < (await toolbarItems.count())) {
+        return toolbarItems.nth(itemIndex);
       }
     }
 
@@ -160,19 +211,39 @@ export class NotebookHelper {
    * @param itemId Toolbar item id
    * @param notebookName Notebook name
    * @returns Handle to the notebook toolbar item
+   *
+   * @deprecated You should use locator instead {@link getToolbarItemLocator}
    */
   async getToolbarItem(
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<ElementHandle<Element> | null> {
-    const toolbar = await this.getToolbar(notebookName);
+    return (
+      (
+        await this.getToolbarItemLocator(itemId, notebookName)
+      )?.elementHandle() ?? null
+    );
+  }
+
+  /**
+   * Get the locator to a notebook toolbar item from its id
+   *
+   * @param itemId Toolbar item id
+   * @param notebookName Notebook name
+   * @returns Locator to the notebook toolbar item
+   */
+  async getToolbarItemLocator(
+    itemId: galata.NotebookToolbarItemId,
+    notebookName?: string
+  ): Promise<Locator | null> {
+    const toolbar = await this.getToolbarLocator(notebookName);
 
     if (toolbar) {
       const itemIndex = await this.page.evaluate(async (itemId: string) => {
         return window.galata.getNotebookToolbarItemIndex(itemId);
       }, itemId);
 
-      return this.getToolbarItemByIndex(itemIndex);
+      return this.getToolbarItemLocatorByIndex(itemIndex);
     }
 
     return null;
@@ -189,7 +260,17 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<boolean> {
-    const toolbarItem = await this.getToolbarItem(itemId, notebookName);
+    if (await this.isAnyActive()) {
+      const focusedMarkdownEditor = this.page.locator(
+        '.jp-MarkdownCell .jp-InputArea-editor.jp-mod-focused, .jp-MarkdownCell .cm-content.jp-mod-focused'
+      );
+      if ((await focusedMarkdownEditor.count()) > 0) {
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(25);
+      }
+    }
+
+    const toolbarItem = await this.getToolbarItemLocator(itemId, notebookName);
 
     if (toolbarItem) {
       await toolbarItem.click();
@@ -360,6 +441,11 @@ export class NotebookHelper {
         .locator('[data-icon="ui-components:not-trusted"]')
         .count()) === 1
     ) {
+      // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+      await this.page
+        .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+        .waitFor();
+
       await this.page.keyboard.press('Control+Shift+C');
       await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
       await this.page.getByText('Trust Notebook').click();
@@ -406,9 +492,9 @@ export class NotebookHelper {
     }
 
     const page = this.page;
-    const tab = await this.activity.getTab();
+    const tab = this.activity.getTabLocator();
 
-    if (!tab) {
+    if (!(await tab.count())) {
       return false;
     }
 
@@ -418,27 +504,24 @@ export class NotebookHelper {
       }
     }
 
-    const closeIcon = await tab.$('.lm-TabBar-tabCloseIcon');
-    if (!closeIcon) {
+    const closeIcon = tab.locator('.lm-TabBar-tabCloseIcon');
+    if (!(await closeIcon.count())) {
       return false;
     }
 
     await closeIcon.click();
 
     // close save prompt
-    const dialogSelector = '.jp-Dialog .jp-Dialog-content';
-    const dialog = await page.$(dialogSelector);
-    if (dialog) {
-      const dlgBtnSelector = revertChanges
-        ? 'button.jp-mod-accept.jp-mod-warn' // discard
-        : 'button.jp-mod-accept:not(.jp-mod-warn)'; // save
-      const dlgBtn = await dialog.$(dlgBtnSelector);
+    const dialog = page.locator('.jp-Dialog .jp-Dialog-content');
+    const dlgBtnSelector = revertChanges
+      ? 'button.jp-mod-accept.jp-mod-warn' // discard
+      : 'button.jp-mod-accept:not(.jp-mod-warn)'; // save
+    const dlgBtn = dialog.locator(dlgBtnSelector);
 
-      if (dlgBtn) {
-        await dlgBtn.click();
-      }
+    if (await dlgBtn.count()) {
+      await dlgBtn.click();
     }
-    await page.waitForSelector(dialogSelector, { state: 'hidden' });
+    await dialog.waitFor({ state: 'hidden' });
 
     return true;
   }
@@ -449,38 +532,37 @@ export class NotebookHelper {
    * @returns Number of cells
    */
   getCellCount = async (): Promise<number> => {
-    const notebook = await this.getNotebookInPanel();
+    const notebook = await this.getNotebookInPanelLocator();
     if (!notebook) {
       return -1;
     }
-
-    const scrollTop = await notebook.evaluate(node => node.scrollTop);
+    const scroller = notebook.locator('.jp-WindowedPanel-outer');
+    const scrollTop = await scroller.evaluate(node => node.scrollTop);
 
     // Scroll to bottom
     let previousScrollHeight = scrollTop;
     let scrollHeight =
       previousScrollHeight +
-      (await notebook.evaluate(node => node.clientHeight));
+      (await scroller.evaluate(node => node.clientHeight));
     do {
-      await notebook.evaluate((node, scrollTarget) => {
+      await scroller.evaluate((node, scrollTarget) => {
         node.scrollTo({ top: scrollTarget });
       }, scrollHeight);
       await this.page.waitForTimeout(50);
       previousScrollHeight = scrollHeight;
-      scrollHeight = await notebook.evaluate(
+      scrollHeight = await scroller.evaluate(
         node => node.scrollHeight - node.clientHeight
       );
     } while (scrollHeight > previousScrollHeight);
-
-    const lastCell = await notebook.$$('div.jp-Cell >> nth=-1');
+    const lastCell = notebook.locator('div.jp-Cell').last();
     const count =
       parseInt(
-        (await lastCell[0].getAttribute('data-windowed-list-index')) ?? '0',
+        (await lastCell.getAttribute('data-windowed-list-index')) ?? '0',
         10
       ) + 1;
 
     // Scroll back to original position
-    await notebook.evaluate((node, scrollTarget) => {
+    await scroller.evaluate((node, scrollTarget) => {
       node.scrollTo({ top: scrollTarget });
     }, scrollTop);
 
@@ -492,98 +574,79 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell
+   *
+   * @deprecated You should use locator instead {@link getCellLocator}
    */
   async getCell(cellIndex: number): Promise<ElementHandle<Element> | null> {
-    const notebook = await this.getNotebookInPanel();
+    return (await this.getCellLocator(cellIndex))?.elementHandle() ?? null;
+  }
+
+  /**
+   * Get a cell locator
+   *
+   * @param cellIndex Cell index
+   * @param name Notebook name
+   * @returns Handle to the cell
+   */
+  async getCellLocator(cellIndex: number): Promise<Locator | null> {
+    const notebook = await this.getNotebookInPanelLocator();
     if (!notebook) {
       return null;
     }
 
-    const allCells = await notebook.$$('div.jp-Cell');
-    const filters = await Promise.all(allCells.map(c => c.isVisible()));
-    const cells = allCells.filter((c, i) => filters[i]);
-
-    const firstCell = cells[0];
-    const lastCell = cells[cells.length - 1];
-
+    const cells = notebook.locator('.jp-Cell:visible');
     let firstIndex = parseInt(
-      (await firstCell.getAttribute('data-windowed-list-index')) ?? '0',
+      (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
       10
     );
     let lastIndex = parseInt(
-      (await lastCell.getAttribute('data-windowed-list-index')) ?? '0',
+      (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
       10
     );
-
     if (cellIndex < firstIndex) {
       // Scroll up
-      let scrollTop =
-        (await firstCell.boundingBox())?.y ??
-        (await notebook.evaluate(node => node.scrollTop - node.clientHeight));
-
+      const viewport = await notebook
+        .locator('.jp-WindowedPanel-outer')
+        .first()
+        .boundingBox();
+      await this.page.mouse.move(viewport!.x, viewport!.y);
       do {
-        await notebook.evaluate((node, scrollTarget) => {
-          node.scrollTo({ top: scrollTarget });
-        }, scrollTop);
+        await this.page.mouse.wheel(0, -100);
         await this.page.waitForTimeout(50);
-
-        const cells = await notebook.$$('div.jp-Cell');
-        const isVisible = await Promise.all(cells.map(c => c.isVisible()));
-        const firstCell = isVisible.findIndex(visibility => visibility);
-
         firstIndex = parseInt(
-          (await cells[firstCell].getAttribute('data-windowed-list-index')) ??
-            '0',
+          (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
           10
         );
-        scrollTop =
-          (await cells[firstCell].boundingBox())?.y ??
-          (await notebook.evaluate(node => node.scrollTop - node.clientHeight));
-      } while (scrollTop > 0 && firstIndex > cellIndex);
+      } while (cellIndex < firstIndex);
+      lastIndex = parseInt(
+        (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
+        10
+      );
     } else if (cellIndex > lastIndex) {
-      const clientHeight = await notebook.evaluate(node => node.clientHeight);
       // Scroll down
-      const viewport = await (
-        await notebook.$$('.jp-WindowedPanel-window')
-      )[0].boundingBox();
-      let scrollHeight = viewport!.y + viewport!.height;
-      let previousScrollHeight = 0;
-
+      const viewport = await notebook
+        .locator('.jp-WindowedPanel-outer')
+        .first()
+        .boundingBox();
+      await this.page.mouse.move(viewport!.x, viewport!.y);
       do {
-        previousScrollHeight = scrollHeight;
-        await notebook.evaluate((node, scrollTarget) => {
-          node.scrollTo({ top: scrollTarget });
-        }, scrollHeight);
+        await this.page.mouse.wheel(0, 100);
         await this.page.waitForTimeout(50);
-
-        const cells = await notebook.$$('div.jp-Cell');
-        const isVisible = await Promise.all(cells.map(c => c.isVisible()));
-        const lastCell = isVisible.lastIndexOf(true);
-
         lastIndex = parseInt(
-          (await cells[lastCell].getAttribute('data-windowed-list-index')) ??
-            '0',
+          (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
           10
         );
-
-        const viewport = await (
-          await notebook.$$('.jp-WindowedPanel-window')
-        )[0].boundingBox();
-        scrollHeight = viewport!.y + viewport!.height;
-        // Avoid jitter
-        scrollHeight = Math.max(
-          previousScrollHeight + clientHeight,
-          scrollHeight
-        );
-      } while (scrollHeight > previousScrollHeight && lastIndex < cellIndex);
+      } while (lastIndex < cellIndex);
+      firstIndex = parseInt(
+        (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
+        10
+      );
     }
 
     if (firstIndex <= cellIndex && cellIndex <= lastIndex) {
-      return (
-        await notebook.$$(
-          `div.jp-Cell[data-windowed-list-index="${cellIndex}"]`
-        )
-      )[0];
+      return notebook.locator(
+        `.jp-Cell[data-windowed-list-index="${cellIndex}"]`
+      );
     } else {
       return null;
     }
@@ -594,28 +657,73 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell input
+   *
+   * @deprecated You should use locator instead {@link getCellInputLocator}
    */
   async getCellInput(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (await this.getCellInputLocator(cellIndex))?.elementHandle() ?? null;
+  }
+
+  /**
+   * Get the locator to the input of a cell
+   *
+   * @param cellIndex Cell index
+   * @returns Locator to the cell input
+   */
+  async getCellInputLocator(cellIndex: number): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    const cellEditor = await cell.$('.jp-InputArea-editor');
-    if (!cellEditor) {
+    const cellEditor = cell.locator('.jp-InputArea-editor');
+    if (!(await cellEditor.count())) {
       return null;
     }
 
-    const isRenderedMarkdown = await cellEditor.evaluate(editor =>
-      editor.classList.contains('lm-mod-hidden')
-    );
+    const isRenderedMarkdown = (
+      await Utils.getLocatorClassList(cellEditor)
+    ).includes('lm-mod-hidden');
+
     if (isRenderedMarkdown) {
-      return await cell.$('.jp-MarkdownOutput');
+      return cell.locator('.jp-MarkdownOutput');
     }
 
     return cellEditor;
+  }
+
+  /**
+   * Get the content of the cell input
+   *
+   * @param cellIndex Cell index
+   * @returns the code input
+   */
+  async getCellTextInput(cellIndex: number): Promise<string> {
+    // Using textContent on handle does not preserve new lines, so we need to either:
+    // (a) use `evaluate()` operate on the codemirror instance directly to get the code
+    // (b) iterate the lines in representation and concatenate manually
+    // (c) copy-paste the content and read the clipboard
+    // Out of the three options only (c) does not touch implementation details of CodeMirror.
+    const wasInEditingMode = await this.isCellInEditingMode(cellIndex);
+    if (!wasInEditingMode) {
+      await this.enterCellEditingMode(cellIndex);
+    }
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Control+C');
+    try {
+      await this.page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not it it either
+    }
+    const handle = await this.page.evaluateHandle(() =>
+      navigator.clipboard.readText()
+    );
+    if (!wasInEditingMode) {
+      await this.leaveCellEditingMode(cellIndex);
+    }
+    return await handle.jsonValue();
   }
 
   /**
@@ -623,16 +731,33 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell input expander
+   *
+   * @deprecated You should use locator instead {@link getCellInputExpanderLocator}
    */
   async getCellInputExpander(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (
+      (await this.getCellInputExpanderLocator(cellIndex))?.elementHandle() ??
+      null
+    );
+  }
+
+  /**
+   * Get the locator to the input expander of a cell
+   *
+   * @param cellIndex Cell index
+   * @returns Locator to the cell input expander
+   */
+  async getCellInputExpanderLocator(
+    cellIndex: number
+  ): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    return await cell.$('.jp-InputCollapser');
+    return cell.locator('.jp-InputCollapser');
   }
 
   /**
@@ -642,12 +767,12 @@ export class NotebookHelper {
    * @returns Cell input expanded status
    */
   async isCellInputExpanded(cellIndex: number): Promise<boolean | null> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    return (await cell.$('.jp-InputPlaceholder')) === null;
+    return (await cell.locator('.jp-InputPlaceholder').count()) > 0;
   }
 
   /**
@@ -663,7 +788,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const inputExpander = await this.getCellInputExpander(cellIndex);
+    const inputExpander = await this.getCellInputExpanderLocator(cellIndex);
     if (!inputExpander) {
       return false;
     }
@@ -678,18 +803,35 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell output expander
+   *
+   * @deprecated You should use locator instead {@link getCellOutputExpanderLocator}
    */
   async getCellOutputExpander(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (
+      (await this.getCellInputExpanderLocator(cellIndex))?.elementHandle() ??
+      null
+    );
+  }
+
+  /**
+   * Get the locator to a cell output expander
+   *
+   * @param cellIndex Cell index
+   * @returns Handle to the cell output expander
+   */
+  async getCellOutputExpanderLocator(
+    cellIndex: number
+  ): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
     const cellType = await this.getCellType(cellIndex);
 
-    return cellType === 'code' ? await cell.$('.jp-OutputCollapser') : null;
+    return cellType === 'code' ? cell.locator('.jp-OutputCollapser') : null;
   }
 
   /**
@@ -699,12 +841,12 @@ export class NotebookHelper {
    * @returns Cell output expanded status
    */
   async isCellOutputExpanded(cellIndex: number): Promise<boolean | null> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    return (await cell.$('.jp-OutputPlaceholder')) === null;
+    return (await cell.locator('.jp-OutputPlaceholder').count()) > 0;
   }
 
   /**
@@ -720,7 +862,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const outputExpander = await this.getCellOutputExpander(cellIndex);
+    const outputExpander = await this.getCellOutputExpanderLocator(cellIndex);
     if (!outputExpander) {
       return false;
     }
@@ -735,22 +877,36 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Output cell handle
+   *
+   * @deprecated You should use locator instead {@link getCellOutputLocator}
    */
   async getCellOutput(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (
+      (await this.getCellOutputLocator(cellIndex))?.elementHandle() ?? null
+    );
+  }
+
+  /**
+   * Get the locator on a given output cell
+   *
+   * @param cellIndex Cell index
+   * @returns Locator cell handle
+   */
+  async getCellOutputLocator(cellIndex: number): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    const codeCellOutput = await cell.$('.jp-Cell-outputArea');
-    if (codeCellOutput) {
+    const codeCellOutput = cell.locator('.jp-Cell-outputArea');
+    if (await codeCellOutput.count()) {
       return codeCellOutput;
     }
 
-    const mdCellOutput = await cell.$('.jp-MarkdownOutput');
-    if (mdCellOutput) {
+    const mdCellOutput = cell.locator('.jp-MarkdownOutput');
+    if (await mdCellOutput.count()) {
       return mdCellOutput;
     }
 
@@ -764,20 +920,17 @@ export class NotebookHelper {
    * @returns List of text outputs
    */
   async getCellTextOutput(cellIndex: number): Promise<string[] | null> {
-    const cellOutput = await this.getCellOutput(cellIndex);
+    const cellOutput = await this.getCellOutputLocator(cellIndex);
     if (!cellOutput) {
       return null;
     }
 
-    const textOutputs = await cellOutput.$$('.jp-OutputArea-output');
-    if (textOutputs.length > 0) {
+    const textOutputs = cellOutput.locator('.jp-OutputArea-output');
+    const textOutputsNum = await textOutputs.count();
+    if (textOutputsNum > 0) {
       const outputs: string[] = [];
-      for (const textOutput of textOutputs) {
-        outputs.push(
-          (await (
-            await textOutput.getProperty('textContent')
-          ).jsonValue()) as string
-        );
+      for (let i = 0; i < textOutputsNum; i++) {
+        outputs.push((await textOutputs.nth(i).textContent()) ?? '');
       }
 
       return outputs;
@@ -787,25 +940,71 @@ export class NotebookHelper {
   }
 
   /**
-   * Whether the cell is in editing mode or not
+   * Whether the cell is in editing mode or not.
+   *
+   * This method is not suitable for checking if a cell is unrendered
+   * as it will return false when the cell is not active (not focused).
    *
    * @param cellIndex Cell index
    * @returns Editing mode
    */
   async isCellInEditingMode(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-InputArea-editor');
-    if (cellEditor) {
-      return await cellEditor.evaluate(editor =>
-        editor.classList.contains('jp-mod-focused')
+    const cellEditor = cell.locator('.jp-InputArea-editor');
+    if (await cellEditor.count()) {
+      return (await Utils.getLocatorClassList(cellEditor)).includes(
+        'jp-mod-focused'
       );
     }
 
     return false;
+  }
+
+  private async _setCellMode(
+    cell: Locator,
+    mode: 'Edit' | 'Command'
+  ): Promise<boolean> {
+    const isCellActive = (await cell.getAttribute('class'))
+      ?.split(/\s/)
+      .includes('jp-mod-active');
+    const modeLocator = this.page.getByText(`Mode: ${mode}`, { exact: true });
+    if ((await modeLocator.count()) == 1 && isCellActive) {
+      return false;
+    }
+    const cellInput = cell.locator('.jp-Cell-inputArea');
+    if (!(await cellInput.count())) {
+      return false;
+    }
+
+    let isMarkdown = false;
+    const cellType = await this.getCellLocatorType(cell);
+    if (cellType === 'markdown') {
+      const renderedMarkdown = cell.locator('.jp-MarkdownOutput');
+      if (await renderedMarkdown.count()) {
+        isMarkdown = true;
+      }
+    }
+
+    if (mode == 'Edit') {
+      if (isMarkdown) {
+        await cellInput.dblclick();
+      }
+      await cell.locator('.jp-Cell-inputArea').dblclick();
+      const cellEditor = cellInput.locator('.jp-InputArea-editor');
+      if (!cellEditor.count()) {
+        return false;
+      }
+
+      await cellEditor.click();
+    } else {
+      await cell.locator('.jp-Cell-inputArea').press('Escape');
+    }
+
+    return true;
   }
 
   /**
@@ -815,32 +1014,12 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async enterCellEditingMode(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-Cell-inputArea');
-    if (cellEditor) {
-      let isMarkdown = false;
-      const cellType = await this.getCellType(cellIndex);
-      if (cellType === 'markdown') {
-        const renderedMarkdown = await cell.$('.jp-MarkdownOutput');
-        if (renderedMarkdown) {
-          isMarkdown = true;
-        }
-      }
-
-      if (isMarkdown) {
-        await cellEditor.dblclick();
-      }
-
-      await cellEditor.click();
-
-      return true;
-    }
-
-    return false;
+    return this._setCellMode(cell, 'Edit');
   }
 
   /**
@@ -850,12 +1029,14 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async leaveCellEditingMode(cellIndex: number): Promise<boolean> {
-    if (await this.isCellInEditingMode(cellIndex)) {
-      await this.page.keyboard.press('Escape');
-      return true;
+    const cell = await this.getCellLocator(cellIndex);
+    if (!cell) {
+      return false;
     }
 
-    return false;
+    await this._setCellMode(cell, 'Command');
+
+    return true;
   }
 
   /**
@@ -876,15 +1057,8 @@ export class NotebookHelper {
       return false;
     }
 
-    const cell = await this.getCell(cellIndex);
-    const gutters = await cell!.$$(
-      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
-    );
-    if (gutters.length < lineNumber) {
-      return false;
-    }
-    await gutters[lineNumber].click();
-    return true;
+    const cell = await this.getCellLocator(cellIndex);
+    return this._clickOnGutter(cell!, lineNumber);
   }
 
   /**
@@ -893,11 +1067,11 @@ export class NotebookHelper {
    * @param cellIndex
    */
   async isCellGutterPresent(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return false;
     }
-    return (await cell.$('.cm-gutters')) !== null;
+    return await cell.locator('.cm-gutters')?.isVisible();
   }
 
   /**
@@ -905,13 +1079,8 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async waitForCellGutter(cellIndex: number): Promise<void> {
-    const cell = await this.getCell(cellIndex);
-    if (cell) {
-      await this.page.waitForSelector('.cm-gutters', {
-        state: 'attached'
-      });
-    }
+  waitForCellGutter(cellIndex: number): Promise<void> {
+    return Utils.waitForCondition(() => this.isCellGutterPresent(cellIndex));
   }
 
   /**
@@ -928,19 +1097,20 @@ export class NotebookHelper {
       return false;
     }
 
-    const panel = await this.activity.getPanel();
-    await panel!.waitForSelector(
-      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement',
-      { state: 'attached' }
-    );
-    const gutters = await panel!.$$(
-      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
-    );
-    if (gutters.length < lineNumber) {
+    const panel = await this.activity.getPanelLocator();
+    if (!panel) {
       return false;
     }
-    await gutters[lineNumber].click();
-    return true;
+    await Utils.waitForCondition(
+      async () =>
+        (await panel
+          .locator(
+            '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
+          )
+          .count()) > 0
+    );
+
+    return this._clickOnGutter(panel!, lineNumber);
   }
 
   /**
@@ -948,11 +1118,11 @@ export class NotebookHelper {
    *
    */
   async isCodeGutterPresent(): Promise<boolean> {
-    const panel = await this.activity.getPanel();
-    if (!panel) {
+    const panel = await this.activity.getPanelLocator();
+    if (!(panel && (await panel.count()))) {
       return false;
     }
-    return (await panel.$('.cm-gutters')) !== null;
+    return (await panel.locator('.cm-gutters')?.isVisible()) !== null;
   }
 
   /**
@@ -960,13 +1130,40 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async waitForCodeGutter(): Promise<void> {
-    const panel = await this.activity.getPanel();
-    if (panel) {
-      await this.page.waitForSelector('.cm-gutters', {
-        state: 'attached'
-      });
+  waitForCodeGutter(): Promise<void> {
+    return Utils.waitForCondition(() => this.isCodeGutterPresent());
+  }
+
+  protected async _clickOnGutter(
+    panel: Locator,
+    line: number
+  ): Promise<boolean> {
+    const gutters = panel.locator(
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
+    );
+    if ((await gutters.count()) < line) {
+      return false;
     }
+
+    // Sometime the breakpoint is not activated when clicking on the gutter, it can be
+    // useful to try it several times.
+    const gutter = gutters.nth(line);
+    for (let i = 0; i < 3; i++) {
+      await gutter.click({ position: { x: 5, y: 5 } });
+      let break_ = true;
+      try {
+        await Utils.waitForCondition(
+          async () => (await gutter.locator('.cm-breakpoint-icon').count()) > 0,
+          1000
+        );
+      } catch (reason) {
+        break_ = false;
+      }
+      if (break_) {
+        break;
+      }
+    }
+    return true;
   }
 
   /**
@@ -977,7 +1174,7 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async selectCells(startIndex: number, endIndex?: number): Promise<boolean> {
-    const startCell = await this.getCell(startIndex);
+    const startCell = await this.getCellLocator(startIndex);
     if (!startCell) {
       return false;
     }
@@ -987,7 +1184,7 @@ export class NotebookHelper {
     await startCell.click({ position: clickPosition });
 
     if (endIndex !== undefined) {
-      const endCell = await this.getCell(endIndex);
+      const endCell = await this.getCellLocator(endIndex);
       if (!endCell) {
         return false;
       }
@@ -1067,7 +1264,10 @@ export class NotebookHelper {
       return false;
     }
 
-    await this.setCellType(cellIndex, cellType);
+    const r = await this.setCellType(cellIndex, cellType);
+    if (!r) {
+      return false;
+    }
 
     if (
       !(await this.isCellSelected(cellIndex)) &&
@@ -1076,18 +1276,59 @@ export class NotebookHelper {
       return false;
     }
 
-    await this.enterCellEditingMode(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
 
-    const keyboard = this.page.keyboard;
-    await keyboard.press('Control+A');
-    // give CodeMirror time to style properly
-    await keyboard.type(source, { delay: cellType === 'code' ? 100 : 0 });
+    if (!cell) {
+      return false;
+    }
 
-    await this.leaveCellEditingMode(cellIndex);
+    await this._setCellMode(cell, 'Edit');
+    await cell.getByRole('textbox').press('Control+A');
+    await cell.getByRole('textbox').pressSequentially(source);
+    await this._setCellMode(cell, 'Command');
 
-    // give CodeMirror time to style properly
     if (cellType === 'code') {
-      await this.page.waitForTimeout(500);
+      // Wait until the CodeMirror highlighting is stable
+      // over 10 consecutive animation frames.
+      await cell.evaluate((cell: HTMLElement) => {
+        let _resolve: () => void;
+        let _reject: (reason?: string) => void;
+        const promise = new Promise<void>((resolve, reject) => {
+          _resolve = resolve;
+          _reject = reject;
+        });
+        let framesWithoutChange = 0;
+        let previousContent = cell.querySelector('.cm-content')!.innerHTML;
+        let newContent: string | null = null;
+        let cancelled = false;
+        const timeoutId = window.setTimeout(() => {
+          cancelled = true;
+          _reject(
+            `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${previousContent}; Current innerHTML: ${newContent}`
+          );
+        }, 10000);
+        const waitUntilNextFrame = () => {
+          window.requestAnimationFrame(() => {
+            newContent = cell.querySelector('.cm-content')!.innerHTML;
+            if (previousContent === newContent) {
+              framesWithoutChange += 1;
+            } else {
+              framesWithoutChange = 0;
+            }
+            previousContent = newContent;
+            if (framesWithoutChange < 10) {
+              if (!cancelled) {
+                waitUntilNextFrame();
+              }
+            } else {
+              window.clearTimeout(timeoutId);
+              _resolve();
+            }
+          });
+        };
+        waitUntilNextFrame();
+        return promise;
+      });
     }
 
     return true;
@@ -1104,13 +1345,13 @@ export class NotebookHelper {
     cellIndex: number,
     cellType: nbformat.CellType
   ): Promise<boolean> {
-    const nbPanel = await this.activity.getPanel();
-    if (!nbPanel) {
+    const nbPanel = await this.activity.getPanelLocator();
+    if (!(nbPanel && (await nbPanel.count()))) {
       return false;
     }
 
     if ((await this.getCellType(cellIndex)) === cellType) {
-      return false;
+      return true;
     }
 
     if (!(await this.selectCells(cellIndex))) {
@@ -1118,24 +1359,30 @@ export class NotebookHelper {
     }
 
     await this.clickToolbarItem('cellType');
-    const selectInput = await nbPanel.$(
-      'div.jp-Notebook-toolbarCellTypeDropdown select'
-    );
-    if (!selectInput) {
+    const selectInput = nbPanel.locator('.jp-Notebook-toolbarCellTypeDropdown');
+    if (!(await selectInput.count())) {
       return false;
     }
 
-    await selectInput.selectOption(cellType);
+    // Legay select
+    const select = selectInput.locator('select');
+    if (await select.count()) {
+      await select.selectOption(cellType);
+    } else {
+      await selectInput.evaluate((el, cellType) => {
+        (el as any).value = cellType;
+      }, cellType);
+    }
 
     // Wait for the new cell to be rendered
-    let cell: ElementHandle | null;
+    let cell: Locator | null;
     let counter = 1;
     do {
       await this.page.waitForTimeout(50);
-      cell = await this.getCell(cellIndex);
-    } while (cell === null && counter++ < MAX_RETRIES);
+      cell = await this.getCellLocator(cellIndex);
+    } while (!cell?.isVisible() && counter++ < MAX_RETRIES);
 
-    return true;
+    return counter < MAX_RETRIES;
   }
 
   /**
@@ -1145,18 +1392,23 @@ export class NotebookHelper {
    * @returns Cell type
    */
   async getCellType(cellIndex: number): Promise<nbformat.CellType | null> {
-    const notebook = await this.getNotebookInPanel();
-    if (!notebook) {
-      return null;
-    }
-
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
 
     if (!cell) {
       return null;
     }
 
-    const classList = await Utils.getElementClassList(cell);
+    return this.getCellLocatorType(cell);
+  }
+
+  /**
+   * Get the cell type of a cell from its locator
+   *
+   * @param cell Cell locator
+   * @returns Cell type
+   */
+  async getCellLocatorType(cell: Locator): Promise<nbformat.CellType | null> {
+    const classList = await Utils.getLocatorClassList(cell);
 
     if (classList.indexOf('jp-CodeCell') !== -1) {
       return 'code';
@@ -1170,13 +1422,33 @@ export class NotebookHelper {
   }
 
   /**
-   * Run a given cell
+   * Run a given cell.
+   *
+   * Note: cell execution relies on cell selection, thus this method
+   * is not reliable if cell selection changes before the cell gets run.
    *
    * @param cellIndex Cell index
-   * @param inplace Whether to stay on the cell or select the next one
+   * @param options Options for running cell; for compatibility a boolean can be passed as shorthand for `inplace`
+   * @param options.inplace Whether to stay on the cell or select the next one (default `false`)
+   * @param options.wait Whether to wait for the completion (default `true`)
    * @returns Action success status
    */
-  async runCell(cellIndex: number, inplace?: boolean): Promise<boolean> {
+  async runCell(
+    cellIndex: number,
+    options?:
+      | boolean
+      | {
+          inplace?: boolean;
+          wait?: boolean;
+        }
+  ): Promise<boolean> {
+    if (typeof options === 'boolean') {
+      options = {
+        inplace: options
+      };
+    }
+    const inplace = options?.inplace ?? false;
+    const wait = options?.wait ?? true;
     if (!(await this.isAnyActive())) {
       return false;
     }
@@ -1194,37 +1466,57 @@ export class NotebookHelper {
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
-    await this.waitForRun(cellIndex);
+    if (wait) {
+      await this.waitForRun(cellIndex);
+    }
 
     return true;
   }
 
   /**
-   * Create a new notebook
+   * Creates a new notebook.
    *
-   * @param name Name of the notebook
-   * @returns Name of the created notebook or null if it failed
+   * @param name - The name of the notebook. If provided, the notebook will be renamed to this name.
+   * @param options - Parameters for creating the notebook.
+   * @param options.kernel - The kernel to use for the notebook.
+   * @returns A Promise that resolves to the name of the created notebook, or `null` if the notebook creation failed.
    */
-  async createNew(name?: string): Promise<string | null> {
+  async createNew(
+    name?: string,
+    options?: { kernel?: string | null }
+  ): Promise<string | null> {
     await this.menu.clickMenuItem('File>New>Notebook');
 
     const page = this.page;
-    await page.waitForSelector('.jp-Dialog');
+    await page.locator('.jp-Dialog').waitFor();
+
+    if (options && options.kernel !== undefined) {
+      if (options.kernel === null) {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption('null');
+      } else {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption(`{"name":"${options.kernel}"}`);
+      }
+    }
+
     await page.click('.jp-Dialog .jp-mod-accept');
 
-    const activeTab = await this.activity.getTab();
-    if (!activeTab) {
+    const activeTab = this.activity.getTabLocator();
+    if (!(await activeTab.count())) {
       return null;
     }
 
-    const label = await activeTab.$('div.lm-TabBar-tabLabel');
-    if (!label) {
+    const label = activeTab.locator('div.lm-TabBar-tabLabel');
+    if (!(await label.count())) {
       return null;
     }
 
-    const assignedName = (await (
-      await label.getProperty('textContent')
-    ).jsonValue()) as string;
+    const assignedName = await label.textContent();
 
     if (!name) {
       return assignedName;
@@ -1235,9 +1527,9 @@ export class NotebookHelper {
       `${currentDir}/${assignedName}`,
       `${currentDir}/${name}`
     );
-    const renamedTab = await this.activity.getTab(name);
+    const renamedTab = this.activity.getTabLocator(name);
 
-    return renamedTab ? name : null;
+    return (await renamedTab.count()) ? name : null;
   }
 
   private _runCallbacksExposed = 0;

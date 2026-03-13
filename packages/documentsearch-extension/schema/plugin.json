@@ -17,6 +17,10 @@
             "rank": 10
           },
           {
+            "command": "documentsearch:startWithReplace",
+            "rank": 10
+          },
+          {
             "command": "documentsearch:highlightNext",
             "rank": 10
           },
@@ -39,6 +43,11 @@
       "selector": ".jp-mod-searchable"
     },
     {
+      "command": "documentsearch:startWithReplace",
+      "keys": ["Accel H"],
+      "selector": ".jp-mod-searchable"
+    },
+    {
       "command": "documentsearch:highlightNext",
       "keys": ["Accel G"],
       "selector": ".jp-mod-searchable"
@@ -49,9 +58,14 @@
       "selector": ".jp-mod-searchable"
     },
     {
+      "command": "documentsearch:toggleSearchInSelection",
+      "keys": ["Alt L"],
+      "selector": ".jp-mod-search-active"
+    },
+    {
       "command": "documentsearch:end",
       "keys": ["Escape"],
-      "selector": ".jp-mod-searchable"
+      "selector": ".jp-mod-search-active"
     }
   ],
   "properties": {
@@ -61,6 +75,13 @@
       "type": "number",
       "default": 500,
       "minimum": 0
+    },
+    "autoSearchInSelection": {
+      "title": "Search in selection automatically",
+      "description": "When starting search, the 'search in selection' mode will be enabled if `any` text/cell is selected, or when `multiple` lines or cells are selected, or `never`.",
+      "type": "string",
+      "enum": ["never", "multiple-selected", "any-selected"],
+      "default": "never"
     }
   },
   "additionalProperties": false,

@@ -5,12 +5,14 @@
  * @module mainmenu-extension
  */
 
-import {
-  createSemanticCommand,
-  ILabShell,
-  IRouter,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  addSemanticCommand,
+  ILabShell,
+  IRouter
 } from '@jupyterlab/application';
 import {
   Dialog,
@@ -19,31 +21,33 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import {
+import type {
   IEditMenu,
   IFileMenu,
   IHelpMenu,
   IKernelMenu,
-  IMainMenu,
   IRunMenu,
   ITabsMenu,
-  IViewMenu,
-  MainMenu
+  IViewMenu
 } from '@jupyterlab/mainmenu';
+import { IMainMenu, MainMenu } from '@jupyterlab/mainmenu';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
+import type { RankedMenu } from '@jupyterlab/ui-components';
 import {
   fastForwardIcon,
-  RankedMenu,
   refreshIcon,
   runIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Menu, Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { Menu } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
+import { recentsMenuPlugin } from './recents';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 
@@ -96,6 +100,8 @@ export namespace CommandIDs {
   export const wordWrap = 'viewmenu:word-wrap';
 
   export const lineNumbering = 'viewmenu:line-numbering';
+
+  export const minimap = 'viewmenu:show-minimap';
 
   export const matchBrackets = 'viewmenu:match-brackets';
 
@@ -191,41 +197,95 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     commands.addCommand(CommandIDs.openEdit, {
       label: trans.__('Open Edit Menu'),
-      execute: () => activateMenu(menu.editMenu)
+      execute: () => activateMenu(menu.editMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openFile, {
       label: trans.__('Open File Menu'),
-      execute: () => activateMenu(menu.fileMenu)
+      execute: () => activateMenu(menu.fileMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openKernel, {
       label: trans.__('Open Kernel Menu'),
-      execute: () => activateMenu(menu.kernelMenu)
+      execute: () => activateMenu(menu.kernelMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openRun, {
       label: trans.__('Open Run Menu'),
-      execute: () => activateMenu(menu.runMenu)
+      execute: () => activateMenu(menu.runMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openView, {
       label: trans.__('Open View Menu'),
-      execute: () => activateMenu(menu.viewMenu)
+      execute: () => activateMenu(menu.viewMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openSettings, {
       label: trans.__('Open Settings Menu'),
-      execute: () => activateMenu(menu.settingsMenu)
+      execute: () => activateMenu(menu.settingsMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openTabs, {
       label: trans.__('Open Tabs Menu'),
-      execute: () => activateMenu(menu.tabsMenu)
+      execute: () => activateMenu(menu.tabsMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openHelp, {
       label: trans.__('Open Help Menu'),
-      execute: () => activateMenu(menu.helpMenu)
+      execute: () => activateMenu(menu.helpMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openFirst, {
       label: trans.__('Open First Menu'),
       execute: () => {
         menu.activeIndex = 0;
         menu.openActiveMenu();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -265,67 +325,101 @@ function createEditMenu(
   menu: IEditMenu,
   trans: TranslationBundle
 ): void {
-  const commands = app.commands;
-
+  const { commands, shell } = app;
   // Add the undo/redo commands the the Edit menu.
-  commands.addCommand(
-    CommandIDs.undo,
-    createSemanticCommand(
-      app,
-      menu.undoers.undo,
-      {
-        label: trans.__('Undo')
-      },
-      trans
-    )
-  );
-  commands.addCommand(
-    CommandIDs.redo,
-    createSemanticCommand(
-      app,
-      menu.undoers.redo,
-      {
-        label: trans.__('Redo')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.undo,
+    commands,
+    shell,
+    semanticCommands: menu.undoers.undo,
+    default: {
+      label: trans.__('Undo')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+  addSemanticCommand({
+    id: CommandIDs.redo,
+    commands,
+    shell,
+    semanticCommands: menu.undoers.redo,
+    default: {
+      label: trans.__('Redo')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
   // Add the clear commands to the Edit menu.
-  commands.addCommand(
-    CommandIDs.clearCurrent,
-    createSemanticCommand(
-      app,
-      menu.clearers.clearCurrent,
-      {
-        label: trans.__('Clear')
-      },
-      trans
-    )
-  );
-  commands.addCommand(
-    CommandIDs.clearAll,
-    createSemanticCommand(
-      app,
-      menu.clearers.clearAll,
-      {
-        label: trans.__('Clear All')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.clearCurrent,
+    commands,
+    shell,
+    semanticCommands: menu.clearers.clearCurrent,
+    default: {
+      label: trans.__('Clear')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+  addSemanticCommand({
+    id: CommandIDs.clearAll,
+    commands,
+    shell,
+    semanticCommands: menu.clearers.clearAll,
+    default: {
+      label: trans.__('Clear All')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
-  commands.addCommand(
-    CommandIDs.goToLine,
-    createSemanticCommand(
-      app,
-      menu.goToLiners,
-      {
-        label: trans.__('Go to Line…')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.goToLine,
+    commands,
+    shell,
+    semanticCommands: menu.goToLiners,
+    default: {
+      label: trans.__('Go to Line…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 }
 
 /**
@@ -337,56 +431,77 @@ function createFileMenu(
   router: IRouter,
   trans: TranslationBundle
 ): void {
-  const commands = app.commands;
+  const { commands, shell } = app;
 
   // Add a delegator command for closing and cleaning up an activity.
   // This one is a bit different, in that we consider it enabled
   // even if it cannot find a delegate for the activity.
   // In that case, we instead call the application `close` command.
-  commands.addCommand(CommandIDs.closeAndCleanup, {
-    ...createSemanticCommand(
-      app,
-      menu.closeAndCleaners,
-      {
-        execute: 'application:close',
-        label: trans.__('Close and Shut Down'),
-        isEnabled: true
-      },
-      trans
-    ),
-    isEnabled: () =>
-      !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable
+  addSemanticCommand({
+    id: CommandIDs.closeAndCleanup,
+    commands,
+    shell,
+    semanticCommands: menu.closeAndCleaners,
+    default: {
+      execute: 'application:close',
+      label: trans.__('Close and Shut Down'),
+      isEnabled: true
+    },
+    overrides: {
+      isEnabled: () =>
+        !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
   });
 
   // Add a delegator command for creating a console for an activity.
-  commands.addCommand(
-    CommandIDs.createConsole,
-    createSemanticCommand(
-      app,
-      menu.consoleCreators,
-      {
-        label: trans.__('New Console for Activity')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.createConsole,
+    commands,
+    shell,
+    semanticCommands: menu.consoleCreators,
+    default: {
+      label: trans.__('New Console for Activity')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
-    caption: trans.__('Shut down JupyterLab'),
+    caption: trans.__('Shut down %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
-        body: trans.__('Please confirm you want to shut down JupyterLab.'),
+        body: trans.__('Please confirm you want to shut down %1.', app.name),
         buttons: [
           Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down') })
         ]
       }).then(async result => {
         if (result.button.accept) {
-          const setting = ServerConnection.makeSettings();
+          const setting = app.serviceManager.serverSettings;
           const apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
 
           // Shutdown all kernel and terminal sessions before shutting down the server
@@ -416,7 +531,8 @@ function createFileMenu(
                 );
                 const p2 = document.createElement('p');
                 p2.textContent = trans.__(
-                  'To use JupyterLab again, you will need to relaunch it.'
+                  'To use %1 again, you will need to relaunch it.',
+                  app.name
                 );
 
                 body.appendChild(p1);
@@ -441,9 +557,15 @@ function createFileMenu(
 
   commands.addCommand(CommandIDs.logout, {
     label: trans.__('Log Out'),
-    caption: trans.__('Log out of JupyterLab'),
+    caption: trans.__('Log out of %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       router.navigate('/logout', { hard: true });
     }
@@ -458,94 +580,152 @@ function createKernelMenu(
   menu: IKernelMenu,
   trans: TranslationBundle
 ): void {
-  const commands = app.commands;
+  const { commands, shell } = app;
 
-  commands.addCommand(CommandIDs.interruptKernel, {
-    ...createSemanticCommand(
-      app,
-      menu.kernelUsers.interruptKernel,
-      {
-        label: trans.__('Interrupt Kernel'),
-        caption: trans.__('Interrupt the kernel')
-      },
-      trans
-    ),
-    icon: args => (args.toolbar ? stopIcon : undefined)
+  addSemanticCommand({
+    id: CommandIDs.interruptKernel,
+    commands,
+    shell,
+    semanticCommands: menu.kernelUsers.interruptKernel,
+    default: {
+      label: trans.__('Interrupt Kernel'),
+      caption: trans.__('Interrupt the kernel')
+    },
+    overrides: {
+      icon: args => (args.toolbar ? stopIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
   });
 
-  commands.addCommand(
-    CommandIDs.reconnectToKernel,
-    createSemanticCommand(
-      app,
-      menu.kernelUsers.reconnectToKernel,
-      {
-        label: trans.__('Reconnect to Kernel')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.reconnectToKernel,
 
-  commands.addCommand(CommandIDs.restartKernel, {
-    ...createSemanticCommand(
-      app,
+    commands,
+    shell,
+    semanticCommands: menu.kernelUsers.reconnectToKernel,
+    default: {
+      label: trans.__('Reconnect to Kernel')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+
+  addSemanticCommand({
+    id: CommandIDs.restartKernel,
+    commands,
+    shell,
+    semanticCommands: menu.kernelUsers.restartKernel,
+    default: {
+      label: trans.__('Restart Kernel…'),
+      caption: trans.__('Restart the kernel')
+    },
+    overrides: {
+      icon: args => (args.toolbar ? refreshIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+
+  addSemanticCommand({
+    id: CommandIDs.restartKernelAndClear,
+    commands,
+    shell,
+    semanticCommands: [
       menu.kernelUsers.restartKernel,
-      {
-        label: trans.__('Restart Kernel…'),
-        caption: trans.__('Restart the kernel')
-      },
-      trans
-    ),
-    icon: args => (args.toolbar ? refreshIcon : undefined)
+      menu.kernelUsers.clearWidget
+    ],
+    default: {
+      label: trans.__('Restart Kernel and Clear…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
   });
 
-  commands.addCommand(
-    CommandIDs.restartKernelAndClear,
-    createSemanticCommand(
-      app,
-      [menu.kernelUsers.restartKernel, menu.kernelUsers.clearWidget],
-      {
-        label: trans.__('Restart Kernel and Clear…')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.changeKernel,
+    commands,
+    shell,
+    semanticCommands: menu.kernelUsers.changeKernel,
+    default: {
+      label: trans.__('Change Kernel…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
-  commands.addCommand(
-    CommandIDs.changeKernel,
-    createSemanticCommand(
-      app,
-      menu.kernelUsers.changeKernel,
-      {
-        label: trans.__('Change Kernel…')
-      },
-      trans
-    )
-  );
-
-  commands.addCommand(
-    CommandIDs.shutdownKernel,
-    createSemanticCommand(
-      app,
-      menu.kernelUsers.shutdownKernel,
-      {
-        label: trans.__('Shut Down Kernel'),
-        caption: trans.__('Shut down kernel')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.shutdownKernel,
+    commands,
+    shell,
+    semanticCommands: menu.kernelUsers.shutdownKernel,
+    default: {
+      label: trans.__('Shut Down Kernel'),
+      caption: trans.__('Shut down kernel')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
   commands.addCommand(CommandIDs.shutdownAllKernels, {
     label: trans.__('Shut Down All Kernels…'),
     isEnabled: () => {
       return !app.serviceManager.sessions.running().next().done;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       return showDialog({
         title: trans.__('Shut Down All?'),
-        body: trans.__('Shut down all kernels?'),
+        body: trans._n(
+          'Are you sure you want to permanently shut down the running kernel?',
+          'Are you sure you want to permanently shut down the %1 running kernels?',
+          app.serviceManager.kernels.runningCount
+        ),
         buttons: [
-          Dialog.cancelButton({ label: trans.__('Dismiss') }),
+          Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down All') })
         ]
       }).then(result => {
@@ -565,43 +745,83 @@ function createViewMenu(
   menu: IViewMenu,
   trans: TranslationBundle
 ): void {
-  const commands = app.commands;
+  const { commands, shell } = app;
 
-  commands.addCommand(
-    CommandIDs.lineNumbering,
-    createSemanticCommand(
-      app,
-      menu.editorViewers.toggleLineNumbers,
-      {
-        label: trans.__('Show Line Numbers')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.lineNumbering,
+    commands,
+    shell,
+    semanticCommands: menu.editorViewers.toggleLineNumbers,
+    default: {
+      label: trans.__('Show Line Numbers')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
-  commands.addCommand(
-    CommandIDs.matchBrackets,
-    createSemanticCommand(
-      app,
-      menu.editorViewers.toggleMatchBrackets,
-      {
-        label: trans.__('Match Brackets')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.minimap,
+    commands,
+    shell,
+    semanticCommands: menu.editorViewers.toggleMinimap,
+    default: {
+      label: trans.__('Show Minimap')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
-  commands.addCommand(
-    CommandIDs.wordWrap,
-    createSemanticCommand(
-      app,
-      menu.editorViewers.toggleWordWrap,
-      {
-        label: trans.__('Wrap Words')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.matchBrackets,
+    commands,
+    shell,
+    semanticCommands: menu.editorViewers.toggleMatchBrackets,
+    default: {
+      label: trans.__('Match Brackets')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+
+  addSemanticCommand({
+    id: CommandIDs.wordWrap,
+    commands,
+    shell,
+    semanticCommands: menu.editorViewers.toggleWordWrap,
+    default: {
+      label: trans.__('Wrap Words')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 }
 
 /**
@@ -612,45 +832,68 @@ function createRunMenu(
   menu: IRunMenu,
   trans: TranslationBundle
 ): void {
-  const commands = app.commands;
+  const { commands, shell } = app;
 
-  commands.addCommand(CommandIDs.run, {
-    ...createSemanticCommand(
-      app,
-      menu.codeRunners.run,
-      {
-        label: trans.__('Run Selected'),
-        caption: trans.__('Run Selected')
-      },
-      trans
-    ),
-    icon: args => (args.toolbar ? runIcon : undefined)
+  addSemanticCommand({
+    id: CommandIDs.run,
+    commands,
+    shell,
+    semanticCommands: menu.codeRunners.run,
+    default: {
+      label: trans.__('Run Selected'),
+      caption: trans.__('Run Selected')
+    },
+    overrides: {
+      icon: args => (args.toolbar ? runIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
   });
 
-  commands.addCommand(
-    CommandIDs.runAll,
-    createSemanticCommand(
-      app,
-      menu.codeRunners.runAll,
-      {
-        label: trans.__('Run All'),
-        caption: trans.__('Run All')
-      },
-      trans
-    )
-  );
+  addSemanticCommand({
+    id: CommandIDs.runAll,
+    commands,
+    shell,
+    semanticCommands: menu.codeRunners.runAll,
+    default: {
+      label: trans.__('Run All'),
+      caption: trans.__('Run All')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 
-  commands.addCommand(CommandIDs.restartAndRunAll, {
-    ...createSemanticCommand(
-      app,
-      [menu.codeRunners.restart, menu.codeRunners.runAll],
-      {
-        label: trans.__('Restart Kernel and Run All'),
-        caption: trans.__('Restart Kernel and Run All')
-      },
-      trans
-    ),
-    icon: args => (args.toolbar ? fastForwardIcon : undefined)
+  addSemanticCommand({
+    id: CommandIDs.restartAndRunAll,
+    commands,
+    shell,
+    semanticCommands: [menu.codeRunners.restart, menu.codeRunners.runAll],
+    default: {
+      label: trans.__('Restart Kernel and Run All'),
+      caption: trans.__('Restart Kernel and Run All')
+    },
+    overrides: {
+      icon: args => (args.toolbar ? fastForwardIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
   });
 }
 
@@ -684,6 +927,18 @@ function createTabsMenu(
       const id = args['id'] || '';
       return !!app.shell.currentWidget && app.shell.currentWidget.id === id;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('The widget id to activate')
+          }
+        },
+        required: ['id']
+      }
+    },
     execute: args => app.shell.activateById((args['id'] as string) || '')
   });
 
@@ -693,6 +948,12 @@ function createTabsMenu(
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
     label: trans.__('Activate Previously Used Tab'),
     isEnabled: () => !!previousId,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
 
@@ -745,21 +1006,29 @@ function createHelpMenu(
   menu: IHelpMenu,
   trans: TranslationBundle
 ): void {
-  app.commands.addCommand(
-    CommandIDs.getKernel,
-    createSemanticCommand(
-      app,
-      menu.getKernel,
-      {
-        label: trans.__('Get Kernel'),
-        isVisible: false
-      },
-      trans
-    )
-  );
+  const { commands, shell } = app;
+  addSemanticCommand({
+    id: CommandIDs.getKernel,
+    commands,
+    shell,
+    semanticCommands: menu.getKernel,
+    default: {
+      label: trans.__('Get Kernel'),
+      isVisible: false
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
 }
 
-export default plugin;
+export default [plugin, recentsMenuPlugin];
 
 /**
  * A namespace for Private data.

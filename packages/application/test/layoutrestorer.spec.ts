@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
+import type { ILabShell } from '@jupyterlab/application';
+import { LayoutRestorer } from '@jupyterlab/application';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { StateDB } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
@@ -60,13 +61,25 @@ describe('apputils', () => {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -94,13 +107,25 @@ describe('apputils', () => {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -142,13 +167,25 @@ describe('apputils', () => {
             currentWidget,
             collapsed: true,
             widgets: [currentWidget],
-            visible: true
+            visible: true,
+            widgetStates: {
+              [currentWidget.id]: {
+                sizes: null,
+                expansionStates: [true]
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -208,13 +245,25 @@ describe('apputils', () => {
             currentWidget: null,
             collapsed: true,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -242,13 +291,25 @@ describe('apputils', () => {
             currentWidget,
             collapsed: true,
             widgets: [currentWidget],
-            visible: true
+            visible: true,
+            widgetStates: {
+              [currentWidget.id]: {
+                sizes: null,
+                expansionStates: [true]
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }

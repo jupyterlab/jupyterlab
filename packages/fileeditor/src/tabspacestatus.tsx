@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Popup } from '@jupyterlab/statusbar';
+import { showPopup, TextItem } from '@jupyterlab/statusbar';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import { Menu } from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import React from 'react';
 
 /**
@@ -49,7 +51,15 @@ function TabSpaceComponent(
       : trans.__('Tab Indent');
   return (
     <TextItem
+      role="button"
+      aria-haspopup
+      tabIndex={0}
       onClick={props.handleClick}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.handleClick();
+        }
+      }}
       source={
         typeof props.tabSpace === 'number'
           ? `${description}: ${props.tabSpace}`
@@ -77,7 +87,7 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
   /**
    * Render the TabSpace status item.
    */
-  render(): React.ReactElement<TabSpaceComponent.IProps> | null {
+  render(): JSX.Element | null {
     if (!this.model?.indentUnit) {
       return null;
     } else {

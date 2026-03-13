@@ -25,6 +25,10 @@ export namespace ProgressCircle {
      * Element height
      */
     height?: number;
+    /**
+     * Click handler
+     */
+    onClick?: () => void;
   }
 }
 
@@ -54,6 +58,7 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={props.progress}
+      onClick={props.onClick}
     >
       <svg viewBox="0 0 250 250">
         <circle
@@ -65,6 +70,7 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
           fill="none"
         />
         <path
+          className={'jp-Statusbar-ProgressCirclePath'}
           transform="translate(125,125) scale(.9)"
           d={d(props.progress)}
           fill={'var(--jp-inverse-layout-color3)'}

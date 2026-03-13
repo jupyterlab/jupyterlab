@@ -6,6 +6,32 @@ const sanitizer = new Sanitizer();
 
 describe('sanitizer', () => {
   describe('#sanitize()', () => {
+    it('should preserve links containing user-defined schemes', () => {
+      const customSanitizer = new Sanitizer();
+      customSanitizer.setAllowedSchemes([
+        'http',
+        'https',
+        'mailto',
+        'ftp',
+        'tel',
+        'zoommtg'
+      ]);
+      const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
+      // The `rel="nofollow"` attribute is added to all `<a>` tags in _generateOptions()
+      const expected =
+        '<a href="zoommtg://meeting_link" rel="nofollow">Join Meeting</a>';
+
+      const result = customSanitizer.sanitize(link);
+      expect(result).toBe(expected);
+    });
+
+    it('should allow img tags with "attachment:" when using custom allowed schemes', () => {
+      const customSanitizer = new Sanitizer();
+      customSanitizer.setAllowedSchemes(['http', 'https']); // No 'attachment'
+      const img = '<img src="attachment:myimage.png" alt="img" />';
+      expect(customSanitizer.sanitize(img)).toBe(img);
+    });
+
     it('should allow h1 tags', () => {
       const h1 = '<h1>foo</h1>';
       expect(sanitizer.sanitize(h1)).toBe(h1);
@@ -180,6 +206,132 @@ describe('sanitizer', () => {
 
     it("should strip 'orphans' properties from inline CSS", () => {
       const div = '<div style="orphans: 3;"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    // Additional Grid tests with complex values
+    it('should allow grid-template-rows with complex values', () => {
+      const div =
+        '<div style="grid-template-rows:[header-top] auto [header-bottom main-top] 1fr [main-bottom]"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-template with named lines', () => {
+      const div =
+        '<div style="grid-template:[row1-start] 25px [row1-end row2-start] 25px [row2-end]"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-template-rows with minmax and repeat function', () => {
+      const div =
+        '<div style="grid-template-rows:repeat(2, minmax(100px, auto))"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-template with minmax and repeat function', () => {
+      const div =
+        '<div style="grid-template:repeat(2, minmax(100px, auto)) / repeat(3, minmax(100px, auto))"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-row with named line positions', () => {
+      const div = '<div style="grid-row:header-start / header-end"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow flex-direction with all valid values', () => {
+      const values = ['row', 'row-reverse', 'column', 'column-reverse'];
+      for (const value of values) {
+        const div = `<div style="flex-direction:${value}"></div>`;
+        expect(sanitizer.sanitize(div)).toBe(div);
+      }
+    });
+
+    it('should allow grid-row with named line and span syntax', () => {
+      const div = '<div style="grid-row:[header-top] / span 2"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-column with span and named line', () => {
+      const div = '<div style="grid-column:span 3 / [main-end]"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-template-rows with multiple named lines per track', () => {
+      const div =
+        '<div style="grid-template-rows:[header-start] 1fr [header-end main-start] 2fr [main-end footer-start] 1fr [footer-end]"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-row-start with named line', () => {
+      const div = '<div style="grid-row-start:[content-top]"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    // Negative test cases
+    it('should strip grid-template-rows with JavaScript URL', () => {
+      const div = '<div style="grid-template-rows:javascript:alert(1)"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    it('should strip grid-template with expression function', () => {
+      const div =
+        '<div style="grid-template:expression(document.cookie="secret=Access achieved")"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    it('should strip flex-direction with invalid value', () => {
+      const div = '<div style="flex-direction:invalid-value"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    it('should strip flex with potentially dangerous values', () => {
+      const div = '<div style="flex:url(evil.com)"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    it('should correctly reject malformed named lines', () => {
+      const div = '<div style="grid-template-rows:[header-top 1fr"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    // Edge cases and combinations
+    it('should allow complex combined grid properties', () => {
+      const div = `<div style="display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:auto 1fr auto; gap:10px; grid-template-areas:'header header header' 'sidebar main main' 'footer footer footer'"></div>`;
+      expect(sanitizer.sanitize(div)).toBe(div.replace(/;\s+/g, ';'));
+    });
+
+    it('should allow complex flexbox layout combination', () => {
+      const div = `<div style="display:flex; flex-direction:column; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px"></div>`;
+      expect(sanitizer.sanitize(div)).toBe(div.replace(/;\s+/g, ';'));
+    });
+
+    it('should handle grid-template-areas with unusual but valid syntax', () => {
+      const div =
+        "<div style=\"grid-template-areas:'.     .      .' '.     MAIN   .' '.     .      .'\"></div>";
+      expect(sanitizer.sanitize(div)).toBe(div.replace(/;\s+/g, ';'));
+    });
+
+    it('should allow decimal values in grid definitions', () => {
+      const div = '<div style="grid-template-columns:0.2fr 0.6fr 0.2fr"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow calc expressions in grid and flex properties', () => {
+      const div =
+        '<div style="grid-template-columns:calc(100% - 50px) 50px"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should strip grid properties with HTML entity encoding tricks', () => {
+      const div =
+        '<div style="grid-template:&#x004A;avascript:alert(1"Access achieved")"></div>';
+      expect(sanitizer.sanitize(div)).toBe('<div></div>');
+    });
+
+    it('should strip grid properties with escaped characters', () => {
+      const div =
+        '<div style="grid-template:pression(alert("Access achieved"))"></div>';
       expect(sanitizer.sanitize(div)).toBe('<div></div>');
     });
   });

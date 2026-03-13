@@ -3,7 +3,8 @@
 
 import { JupyterServer } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
-import { Session, SessionAPI } from '../../src';
+import type { Session } from '../../src';
+import { SessionAPI } from '../../src';
 import { createSessionModel, getRequestHandler, makeSettings } from '../utils';
 
 describe('session', () => {
@@ -143,6 +144,10 @@ describe('session', () => {
       await expect(
         SessionAPI.shutdownSession(UUID.uuid4())
       ).resolves.not.toThrow();
+    });
+
+    it('should reject invalid on invalid id', async () => {
+      await expect(SessionAPI.shutdownSession('../')).rejects.toThrow();
     });
   });
 });

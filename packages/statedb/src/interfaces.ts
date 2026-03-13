@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
-import {
+import type { CommandRegistry } from '@lumino/commands';
+import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * The description of a general purpose data connector.
@@ -92,8 +92,9 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
  *
  * @typeparam T - The type of object held in the pool.
  */
-export interface IObjectPool<T extends IObservableDisposable>
-  extends IDisposable {
+export interface IObjectPool<
+  T extends IObservableDisposable
+> extends IDisposable {
   /**
    * A signal emitted when an object is added.
    *
@@ -128,7 +129,7 @@ export interface IObjectPool<T extends IObservableDisposable>
   /**
    * Find the first object in the pool that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each object.
+   * @param fn The filter function to call on each object.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.
@@ -254,8 +255,9 @@ export namespace IRestorable {
    *
    * @typeparam T - The type of object held by the restorable collection.
    */
-  export interface IOptions<T extends IObservableDisposable>
-    extends IRestorer.IOptions<T> {
+  export interface IOptions<
+    T extends IObservableDisposable
+  > extends IRestorer.IOptions<T> {
     /**
      * The data connector to fetch restore data.
      */

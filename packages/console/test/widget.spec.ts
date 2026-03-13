@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
+import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   CodeCell,
@@ -9,10 +9,12 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
+import type { YCodeCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeConsole } from '@jupyterlab/console';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import {
   createConsoleFactory,
@@ -219,6 +221,25 @@ describe('console/widget', () => {
         await widget.inject(code);
         expect(widget.cells.length).toBeGreaterThan(0);
       });
+
+      it('should hide code input when hideCodeInput is true', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        // Set config to hide input
+        widget.setConfig({ hideCodeInput: true });
+
+        // Inject some code
+        const testCode = 'print(1 + 1)';
+        await widget.inject(testCode);
+
+        // Check the input is not visible in the executed cells
+        for (const cell of widget.cells) {
+          expect(cell.inputArea!.node.classList.contains('lm-mod-hidden')).toBe(
+            true
+          );
+        }
+      });
     });
 
     describe('#insertLinebreak()', () => {
@@ -280,6 +301,19 @@ describe('console/widget', () => {
           expect.arrayContaining(['newPromptCell'])
         );
       });
+
+      it('should make previous cell read-only after execution', async () => {
+        Widget.attach(widget, document.body);
+
+        const old = widget.promptCell;
+        const force = true;
+        expect(old).toBeInstanceOf(CodeCell);
+
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+
+        expect(old!.editor!.getOption('readOnly')).toBe(true);
+      });
     });
 
     describe('#onActivateRequest()', () => {
@@ -308,6 +342,79 @@ describe('console/widget', () => {
           expect.arrayContaining(['onAfterAttach'])
         );
         expect(widget.promptCell).toBeTruthy();
+      });
+    });
+
+    describe('#setConfig()', () => {
+      it('should clear cells on execute when clearCellsOnExecute is true', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        // First execute with default config (clearCellsOnExecute: false)
+        await widget.execute(true);
+        await widget.execute(true);
+        await widget.execute(true);
+        expect(widget.cells.length).toBe(3);
+
+        // Set config to clear cells
+        widget.setConfig({ clearCellsOnExecute: true });
+        await widget.execute(true);
+        expect(widget.cells.length).toBe(1);
+      });
+
+      it('should clear code content on execute when clearCodeContentOnExecute is true', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        // First execute with default config (clearCodeContentOnExecute: true)
+        widget.promptCell!.model.sharedModel.setSource('1 + 1');
+        await widget.execute(true);
+        expect(widget.promptCell!.model.sharedModel.getSource()).toBe('');
+
+        // Set config to not clear code content
+        widget.setConfig({ clearCodeContentOnExecute: false });
+        const testCode = '1 + 1';
+        widget.promptCell!.model.sharedModel.setSource(testCode);
+        await widget.execute(true);
+        expect(widget.promptCell!.model.sharedModel.getSource()).toBe(testCode);
+      });
+
+      it('should hide code input when hideCodeInput is true', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        // Set config to hide input
+        widget.setConfig({ hideCodeInput: true });
+
+        // Execute some code
+        const cell = widget.promptCell!;
+        const testCode = 'print(1 + 1)';
+        cell.model.sharedModel.setSource(testCode);
+        await widget.execute(true);
+
+        // Check the input is not visible in the executed cells
+        for (const cell of widget.cells) {
+          expect(cell.inputArea!.node.classList.contains('lm-mod-hidden')).toBe(
+            true
+          );
+        }
+      });
+
+      it('should show/hide banner based on showBanner config', async () => {
+        Widget.attach(widget, document.body);
+
+        // Default config (showBanner: true)
+        await widget.sessionContext.restartKernel();
+        const banner = widget.node.querySelector('.jp-CodeConsole-banner');
+        expect(banner).toBeTruthy();
+
+        // Set config to hide banner
+        widget.setConfig({ showBanner: false });
+        await widget.sessionContext.restartKernel();
+        const hiddenBanner = widget.node.querySelector(
+          '.jp-CodeConsole-banner'
+        );
+        expect(hiddenBanner).toBeFalsy();
       });
     });
 

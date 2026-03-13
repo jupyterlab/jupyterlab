@@ -27,7 +27,7 @@ test.describe('Toast', () => {
         });
       }, type);
 
-      await page.waitForSelector('.Toastify__toast');
+      await page.locator('.Toastify__toast').waitFor();
 
       expect(
         await page.locator('.Toastify__toast').screenshot({
@@ -70,16 +70,15 @@ test.describe('Toast', () => {
       });
     });
 
-    const handle = await page.waitForSelector('.Toastify__toast');
+    const handle = page.locator('.Toastify__toast');
+    await handle.waitFor();
 
     expect(await handle.screenshot({ animations: 'disabled' })).toMatchSnapshot(
-      {
-        name: `notification-with-actions.png`
-      }
+      { name: `notification-with-actions.png` }
     );
 
     await Promise.all([
-      handle.waitForElementState('hidden'),
+      handle.last().waitFor({ state: 'hidden' }),
       page.click('.Toastify__toast >> text=Button 2')
     ]);
 
@@ -113,7 +112,8 @@ test.describe('Toast', () => {
         });
       }, displayType);
 
-      const handle = await page.waitForSelector('.Toastify__toast');
+      const handle = page.locator('.Toastify__toast').first();
+      await handle.waitFor();
 
       expect(
         await handle.screenshot({ animations: 'disabled' })
@@ -134,7 +134,7 @@ test.describe('Toast', () => {
       });
     });
 
-    await page.waitForSelector('.Toastify__toast');
+    await page.locator('.Toastify__toast').first().waitFor();
 
     expect(
       await page.locator('.Toastify__toast-body').innerHTML()
@@ -151,7 +151,7 @@ test.describe('Toast', () => {
       });
     });
 
-    await page.waitForSelector('.Toastify__toast >> text=Simple note');
+    await page.locator('.Toastify__toast >> text=Simple note').waitFor();
 
     await page.evaluate(id => {
       return window.jupyterapp.commands.execute(
@@ -177,18 +177,16 @@ test.describe('Toast', () => {
       });
     });
 
-    await page.waitForSelector('.Toastify__toast >> text=Simple note');
+    await page.locator('.Toastify__toast >> text=Simple note').waitFor();
 
     await Promise.all([
-      page.waitForSelector('.Toastify__toast >> text=Simple note', {
-        state: 'detached'
-      }),
+      page
+        .locator('.Toastify__toast >> text=Simple note')
+        .waitFor({ state: 'detached' }),
       page.evaluate(id => {
         return window.jupyterapp.commands.execute(
           'apputils:dismiss-notification',
-          {
-            id
-          }
+          { id }
         );
       }, id)
     ]);
@@ -198,9 +196,7 @@ test.describe('Toast', () => {
 test.describe('Notification center', () => {
   test('should display no notification by default', async ({ page }) => {
     const status = page.locator('.jp-Notification-Status');
-    expect(await status.getAttribute('class')).not.toMatch(
-      /\s?jp-mod-selected\s?/
-    );
+    await expect(status).not.toHaveClass(/jp-mod-selected/);
     await expect(status).toHaveText('0');
 
     await status.click();
@@ -218,7 +214,7 @@ test.describe('Notification center', () => {
     });
 
     const status = page.locator('.jp-Notification-Status');
-    expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
+    await expect(status).toHaveClass(/jp-mod-selected/);
     await expect(status).toHaveText('1');
 
     await status.click();
@@ -246,12 +242,12 @@ test.describe('Notification center', () => {
     );
 
     await page
-      .locator('.jp-Notification-Header >> button[title="Hide notifications"]')
+      .locator(
+        '.jp-Notification-Header >> jp-button[title="Hide notifications"]'
+      )
       .click();
 
-    expect(await status.getAttribute('class')).not.toMatch(
-      /\s?jp-mod-selected\s?/
-    );
+    await expect(status).not.toHaveClass(/jp-mod-selected/);
     await expect(status).toHaveText('1');
   });
 

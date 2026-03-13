@@ -1,6 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2016, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
@@ -31,6 +30,7 @@
 .jp-Completer-docpanel {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 400px;
+  flex-shrink: 0;
   overflow-y: scroll;
   overflow-x: auto;
   padding: 8px;
@@ -49,7 +49,7 @@
   padding: 0;
   list-style-type: none;
   overflow-y: scroll;
-  overflow-x: auto;
+  overflow-x: hidden;
   max-height: calc((10 * var(--jp-private-completer-item-height)));
   min-height: calc(var(--jp-private-completer-item-height));
   width: 100%;
@@ -63,6 +63,7 @@
   min-width: 150px;
   display: grid;
   grid-template-columns: min-content 1fr min-content;
+  position: relative;
 }
 
 .jp-Completer-item .jp-Completer-match {
@@ -73,6 +74,7 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
+  white-space: nowrap;
 }
 
 .jp-Completer-deprecated .jp-Completer-match {
@@ -134,64 +136,67 @@
   color: inherit;
 }
 
+.jp-Completer-item.jp-mod-active .jp-Completer-typeExtended {
+  color: var(--jp-ui-font-color0);
+}
+
 .jp-Completer-type[data-color-index='0'] {
-  background: transparent;
+  background: var(--jp-completer-type-background0, transparent);
 }
 
 .jp-Completer-type[data-color-index='1'] {
-  background: #1f77b4;
+  background: var(--jp-completer-type-background1, #1f77b4);
 }
 
 .jp-Completer-type[data-color-index='2'] {
-  background: #ff7f0e;
+  background: var(--jp-completer-type-background2, #ff7f0e);
 }
 
 .jp-Completer-type[data-color-index='3'] {
-  background: #2ca02c;
+  background: var(--jp-completer-type-background3, #2ca02c);
 }
 
 .jp-Completer-type[data-color-index='4'] {
-  background: #d62728;
+  background: var(--jp-completer-type-background4, #d62728);
 }
 
 .jp-Completer-type[data-color-index='5'] {
-  background: #9467bd;
+  background: var(--jp-completer-type-background5, #9467bd);
 }
 
 .jp-Completer-type[data-color-index='6'] {
-  background: #8c564b;
+  background: var(--jp-completer-type-background6, #8c564b);
 }
 
 .jp-Completer-type[data-color-index='7'] {
-  background: #e377c2;
+  background: var(--jp-completer-type-background7, #e377c2);
 }
 
 .jp-Completer-type[data-color-index='8'] {
-  background: #7f7f7f;
+  background: var(--jp-completer-type-background8, #7f7f7f);
 }
 
 .jp-Completer-type[data-color-index='9'] {
-  background: #bcbd22;
+  background: var(--jp-completer-type-background9, #bcbd22);
 }
 
 .jp-Completer-type[data-color-index='10'] {
-  background: #17becf;
+  background: var(--jp-completer-type-background10, #17becf);
 }
 
 .jp-Completer-loading-bar-container {
   height: 2px;
-  width: 100%;
-  background-color: var(--jp-layout-color2);
+  width: calc(100% - var(--jp-private-completer-item-height));
+  left: var(--jp-private-completer-item-height);
   position: absolute;
   overflow: hidden;
   top: 0;
-  margin-left: -8px;
 }
 
 .jp-Completer-loading-bar {
   height: 100%;
   width: 50%;
-  background-color: var(--jp-layout-color4);
+  background-color: var(--jp-accent-color2);
   position: absolute;
   left: -50%;
   animation: jp-Completer-loading 2s ease-in 0.5s infinite;
@@ -202,7 +207,185 @@
     transform: translateX(0);
   }
 
-  to {
+  100% {
     transform: translateX(400%);
   }
+}
+
+.jp-GhostText {
+  color: var(--jp-ui-font-color0);
+  white-space: pre-wrap;
+  font-style: italic;
+  transition: opacity 0.2s ease;
+  opacity: 0.38;
+}
+
+.jp-GhostText-lineSpacer,
+.jp-GhostText-letterSpacer {
+  opacity: 0;
+  display: inline-block;
+  vertical-align: top;
+  /* stylelint-disable-next-line csstree/validator */
+  text-wrap: none;
+}
+
+.jp-GhostText-letterSpacer {
+  max-width: 0;
+}
+
+.jp-GhostText-lineSpacer {
+  /* duration and delay are overwritten by inline styles */
+  animation: jp-GhostText-hide 300ms 700ms ease-out forwards;
+}
+
+@keyframes jp-GhostText-hide {
+  0% {
+    font-size: unset;
+  }
+
+  100% {
+    font-size: 0;
+  }
+}
+
+.jp-GhostText-expandHidden {
+  border: 1px solid var(--jp-border-color0);
+  border-radius: var(--jp-border-radius);
+  background: var(--jp-layout-color0);
+  color: var(--jp-content-font-color3);
+  padding: 0 4px;
+  margin: 0 4px;
+  cursor: default;
+}
+
+.jp-GhostText-hiddenWrapper:hover > .jp-GhostText-hiddenLines {
+  display: inline;
+}
+
+.jp-GhostText-hiddenLines {
+  display: none;
+}
+
+.jp-GhostText[data-animation='uncover'] {
+  position: relative;
+}
+
+.jp-GhostText-streamedToken {
+  white-space: pre;
+}
+
+.jp-GhostText[data-animation='uncover'] > .jp-GhostText-streamedToken {
+  animation: jp-GhostText-typing 2s forwards;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+@keyframes jp-GhostText-typing {
+  from {
+    max-width: 0;
+  }
+
+  to {
+    max-width: 100%;
+  }
+}
+
+.jp-GhostText-streamingIndicator::after {
+  animation: jp-GhostText-streaming 2s infinite;
+  animation-delay: 400ms;
+  content: ' ';
+  background: var(--jp-layout-color4);
+  opacity: 0.2;
+}
+
+@keyframes jp-GhostText-streaming {
+  0% {
+    opacity: 0.2;
+  }
+
+  20% {
+    opacity: 0.4;
+  }
+
+  40% {
+    opacity: 0.2;
+  }
+}
+
+.jp-GhostText-errorIndicator::after {
+  animation: jp-GhostText-error 500ms 1;
+  animation-delay: 3500ms;
+  color: var(--jp-error-color1);
+  font-size: 150%;
+  line-height: 10px;
+  margin-left: 2px;
+  padding: 0 4px;
+  content: '⚠';
+  cursor: help;
+  position: relative;
+  top: 2px;
+}
+
+@keyframes jp-GhostText-error {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.jp-InlineCompleter {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.jp-InlineCompleter-progressBar {
+  height: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--jp-accent-color2);
+}
+
+.jp-InlineCompleter[data-display='onHover'] {
+  opacity: 0;
+  transition:
+    visibility 0s linear 0.1s,
+    opacity 0.1s linear;
+  visibility: hidden;
+}
+
+.jp-InlineCompleter[data-display='onHover']:hover,
+.jp-InlineCompleter-hover[data-display='onHover'] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.jp-InlineCompleter[data-display='never'] {
+  display: none;
+}
+
+.jp-InlineCompleter > .jp-Toolbar {
+  box-shadow: none;
+  border-bottom: none;
+  background: none;
+}
+
+.jp-InlineCompleter[data-show-shortcuts='false']
+  .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
+.jp-InlineCompleter [data-command='inline-completer:next'] > svg,
+.jp-InlineCompleter [data-command='inline-completer:previous'] > svg {
+  scale: 1.5;
 }

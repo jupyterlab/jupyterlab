@@ -5,19 +5,16 @@
  * @module extensionmanager-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { ExtensionsPanel, ListModel } from '@jupyterlab/extensionmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { extensionIcon } from '@jupyterlab/ui-components';
 
 const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';
@@ -134,7 +131,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
           shell.activateById(view.id);
         }
       },
-      isVisible: () => model.isEnabled
+      isVisible: () => model.isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.toggle, {
@@ -144,7 +147,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
           void registry.set(plugin.id, 'enabled', !model.isEnabled);
         }
       },
-      isToggled: () => model.isEnabled
+      isToggled: () => model.isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     if (palette) {

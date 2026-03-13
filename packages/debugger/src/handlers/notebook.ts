@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import {
-  IObservableList,
-  IObservableMap,
-  ObservableMap
-} from '@jupyterlab/observables';
-import { IDisposable } from '@lumino/disposable';
+import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**
  * A handler for notebooks.
@@ -26,9 +26,37 @@ export class NotebookHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._notebookPanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
+    this.translator = options.translator || nullTranslator;
+    this._pausedOverlay = new DebuggerPausedOverlay({
+      debuggerService: this._debuggerService,
+      container: this._notebookPanel.node,
+      translator: this.translator
+    });
 
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
+
+    this._debuggerService.session?.eventMessage.connect((_, event) => {
+      const session = this._debuggerService.session;
+      const contextSession = this._notebookPanel.sessionContext.session;
+
+      if (!session || !contextSession) {
+        return;
+      }
+      if (session.connection?.kernel?.id !== contextSession.kernel?.id) {
+        return;
+      }
+
+      if (event.event === 'stopped') {
+        void this._pausedOverlay.show();
+      } else if (event.event === 'continued' || event.event === 'terminated') {
+        void this._pausedOverlay.hide();
+      }
+    });
+
+    if (this._debuggerService.hasStoppedThreads() === true) {
+      void this._pausedOverlay.show();
+    }
 
     this._onCellsChanged();
   }
@@ -46,6 +74,9 @@ export class NotebookHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+
+    this._pausedOverlay.dispose();
+
     this._cellMap.values().forEach(handler => {
       handler.dispose();
       // Ensure to restore notebook editor settings
@@ -105,6 +136,8 @@ export class NotebookHandler implements IDisposable {
   private _debuggerService: IDebugger;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
+  private _pausedOverlay: DebuggerPausedOverlay;
+  protected translator: ITranslator;
 }
 
 /**
@@ -124,5 +157,10 @@ export namespace NotebookHandler {
      * The widget to handle.
      */
     widget: NotebookPanel;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

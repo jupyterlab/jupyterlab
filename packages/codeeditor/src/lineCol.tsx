@@ -1,12 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Popup } from '@jupyterlab/statusbar';
+import { showPopup, TextItem } from '@jupyterlab/statusbar';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
   lineFormIcon,
@@ -15,7 +13,8 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { CodeEditor } from './editor';
+import type { CodeEditor } from './editor';
+import { DOMUtils } from '@jupyterlab/apputils';
 
 /**
  * A namespace for LineFormComponent statics.
@@ -60,6 +59,10 @@ namespace LineFormComponent {
      * Whether the form has focus.
      */
     hasFocus: boolean;
+    /**
+     * A generated ID for the input field
+     */
+    textInputId: string;
   }
 }
 
@@ -79,7 +82,8 @@ class LineFormComponent extends React.Component<
     this._trans = this.translator.load('jupyterlab');
     this.state = {
       value: '',
-      hasFocus: false
+      hasFocus: false,
+      textInputId: DOMUtils.createDomID() + '-line-number-input'
     };
   }
 
@@ -106,6 +110,7 @@ class LineFormComponent extends React.Component<
           >
             <input
               type="text"
+              id={this.state.textInputId}
               className="jp-lineFormInput"
               onChange={this._handleChange}
               onFocus={this._handleFocus}
@@ -127,7 +132,10 @@ class LineFormComponent extends React.Component<
               />
             </div>
           </div>
-          <label className="jp-lineFormCaption">
+          <label
+            className="jp-lineFormCaption"
+            htmlFor={this.state.textInputId}
+          >
             {this._trans.__(
               'Go to line number between 1 and %1',
               this.props.maxLine
@@ -223,11 +231,28 @@ function LineColComponent(
 ): React.ReactElement<LineColComponent.IProps> {
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
+  const keydownHandler = (event: React.KeyboardEvent<HTMLImageElement>) => {
+    if (
+      event.key === 'Enter' ||
+      event.key === 'Spacebar' ||
+      event.key === ' '
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      props.handleClick();
+    } else {
+      return;
+    }
+  };
   return (
     <TextItem
+      role="button"
+      aria-haspopup
       onClick={props.handleClick}
       source={trans.__('Ln %1, Col %2', props.line, props.column)}
       title={trans.__('Go to line number…')}
+      tabIndex={0}
+      onKeyDown={keydownHandler}
     />
   );
 }
@@ -248,7 +273,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
   /**
    * Render the status item.
    */
-  render(): React.ReactElement<LineColComponent.IProps> | null {
+  render(): JSX.Element | null {
     if (this.model === null) {
       return null;
     } else {

@@ -14,7 +14,7 @@ export YARN_ENABLE_INLINE_BUILDS=1
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
-if [ $OSTYPE == "Linux" ]; then
+if [ $OSTYPE == "linux-gnu" ]; then
     sudo rm -rf $(which yarn)
     ! yarn
 fi
@@ -29,11 +29,30 @@ git config --global user.email foo@bar.com
 # Install and enable the server extension
 pip install -q --upgrade pip --user
 pip --version
+
+if [[ -z "${OPTIONAL_DEPENDENCIES+x}" ]]; then
+    # undefined - use default dev,test
+    SPEC=".[dev,test]"
+elif [[ -z "${OPTIONAL_DEPENDENCIES}" ]]; then
+    # defined but empty
+    SPEC="."
+else
+    # defined and non-empty
+    SPEC=".[${OPTIONAL_DEPENDENCIES}]"
+fi
+
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
-yarn --version
+pip install -e "${SPEC}" || pip install -v -e "${SPEC}"
+
 node -p process.versions
 jlpm config
+
+if [[ $GROUP != js-services ]]; then
+    # Tests run much faster in ipykernel 6, so use that except for
+    # ikernel.spec.ts in js-services, which tests subshell compatibility in
+    # ipykernel 7.
+    pip install "ipykernel<7"
+fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel

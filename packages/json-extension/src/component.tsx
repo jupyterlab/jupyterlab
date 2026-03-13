@@ -2,10 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { jupyterHighlightStyle } from '@jupyterlab/codemirror';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
-import { Tag, tags } from '@lezer/highlight';
-import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
+import type { Tag } from '@lezer/highlight';
+import { tags } from '@lezer/highlight';
+import type { JSONArray, JSONObject, JSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
 import Highlighter from 'react-highlight-words';
 import { JSONTree } from 'react-json-tree';
@@ -75,7 +78,7 @@ export class Component extends React.Component<IProps, IState> {
         <InputGroup
           className="filter"
           type="text"
-          placeholder={trans.__('Filter…')}
+          placeholder={trans.__('Find…')}
           onChange={this.handleChange}
           value={this.state.value}
           rightIcon="ui-components:search"

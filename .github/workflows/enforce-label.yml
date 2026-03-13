@@ -1,5 +1,10 @@
 name: Enforce PR label
 
+#####
+# This workflow is triggered by pull_request_target event.
+# Never checkout the PR and run ANY local code on it.
+#####
+
 on:
   pull_request_target:
     types: [labeled, unlabeled, opened, edited, synchronize]

@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon } from '@jupyterlab/ui-components';
 import { UUID } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
 type TDict = { [key: string]: any };
@@ -203,6 +204,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     any,
     [hash: string, property: ISettingProperty]
   >(setProperty);
+  const textInputId = useRef<string>(
+    DOMUtils.createDomID() + '-line-number-input'
+  );
   return (
     <div className="array-item">
       <div className="form-group ">
@@ -212,11 +216,15 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
               <div className="form-group small-field">
                 <div className="jp-modifiedIndicator jp-errorIndicator"></div>
                 <div className="jp-FormGroup-content">
-                  <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
+                  <label
+                    htmlFor={textInputId.current}
+                    className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem"
+                  >
                     {props.trans.__('Server name:')}
-                  </h3>
+                  </label>
                   <div className="jp-inputFieldWrapper jp-FormGroup-contentItem">
                     <input
+                      id={textInputId.current}
                       className="form-control"
                       type="text"
                       required={true}

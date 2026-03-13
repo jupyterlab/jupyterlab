@@ -4,7 +4,7 @@
 import getpass
 import os
 from pathlib import Path
-from tempfile import mkdtemp
+from tempfile import NamedTemporaryFile, mkdtemp
 
 
 def configure_jupyter_server(c):
@@ -28,13 +28,20 @@ def configure_jupyter_server(c):
     # Add test helpers extension shipped with JupyterLab.
     # You can replace the following line by the two following one
     #   import jupyterlab
-    #   c.LabApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
-    c.LabApp.extra_labextensions_path = str(Path(__file__).parent)
+    #   c.LabServerApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
+    c.LabServerApp.extra_labextensions_path = str(Path(__file__).parent)
 
+    c.LabApp.workspaces_dir = mkdtemp(prefix="galata-workspaces-")
+
+    with NamedTemporaryFile(mode="w", delete=False) as tmp:
+        tmp.write('PS1="$ "\n')
+        rcfile_path = tmp.name
+
+    c.ServerApp.terminado_settings = {"shell_command": ["/bin/bash", "--rcfile", rcfile_path]}
     c.ServerApp.root_dir = os.environ.get(
         "JUPYTERLAB_GALATA_ROOT_DIR", mkdtemp(prefix="galata-test-")
     )
-    c.ServerApp.token = ""
+    c.IdentityProvider.token = ""
     c.ServerApp.password = ""
     c.ServerApp.disable_check_xsrf = True
     c.LabApp.expose_app_in_browser = True

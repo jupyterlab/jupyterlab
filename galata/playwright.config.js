@@ -5,6 +5,9 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
 module.exports = {
   ...baseConfig,
+  reporter: process.env.CI
+    ? [['blob'], ['json', { outputFile: 'test-results/report.json' }]]
+    : [['list'], ['html', { open: 'on-failure' }]],
   projects: [
     {
       name: 'documentation',
@@ -27,17 +30,33 @@ module.exports = {
     },
     {
       name: 'jupyterlab',
-      testMatch: 'test/jupyterlab/**',
+      testMatch: 'test/jupyterlab/**/*.test.ts',
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {
           permissions: ['clipboard-read', 'clipboard-write']
         }
       }
+    },
+    {
+      name: 'jupyterlab-firefox',
+      testMatch: 'test/jupyterlab/**/*.test.ts',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        contextOptions: {
+          // https://github.com/microsoft/playwright/issues/13037
+          permissions: []
+        },
+        browserName: 'firefox'
+      },
+      // We do not want to match exactly on Firefox
+      ignoreSnapshots: true
     }
   ],
   // Switch to 'always' to keep raw assets for all tests
   preserveOutput: 'failures-only', // Breaks HTML report if use.video == 'on'
   // Try one retry as some tests are flaky
-  retries: process.env.CI ? 1 : 0
+  retries: process.env.CI ? 1 : 0,
+  // For equal spread across shards
+  fullyParallel: true
 };

@@ -3,80 +3,51 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { TranslationBundle } from '@jupyterlab/translation';
+import { Button } from '@jupyter/react-components';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import {
+  checkIcon,
+  editIcon,
+  HTMLSelect,
+  infoIcon
+} from '@jupyterlab/ui-components';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
-import {
-  ErrorObject,
-  ShortcutInput,
-  ShortcutObject,
-  TakenByObject
-} from './ShortcutInput';
-import { IShortcutUIexternal } from './TopNav';
+import { CustomOptionsDialog } from './ShortcutCustomOptions';
+import type { IConflicts } from './ShortcutInput';
+import { CONFLICT_CONTAINER_CLASS, ShortcutInput } from './ShortcutInput';
+import { ShortcutRegistry } from '../registry';
+import type {
+  IKeybinding,
+  ISearchResult,
+  IShortcutRegistry,
+  IShortcutTarget,
+  IShortcutUI
+} from '../types';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
-  shortcut: ShortcutObject | ErrorObject;
-  handleUpdate: Function;
-  resetShortcut: Function;
-  deleteShortcut: Function;
+  shortcut: IShortcutTarget;
+  addKeybinding: IShortcutUI['addKeybinding'];
+  replaceKeybinding: IShortcutUI['replaceKeybinding'];
+  resetKeybindings: IShortcutUI['resetKeybindings'];
+  deleteKeybinding: IShortcutUI['deleteKeybinding'];
+  findConflictsFor: IShortcutRegistry['findConflictsFor'];
+  setCustomOptions: IShortcutUI['setCustomOptions'];
   showSelectors: boolean;
-  keyBindingsUsed: { [index: string]: TakenByObject };
-  sortConflict: Function;
-  clearConflicts: Function;
-  contextMenu: Function;
-  external: IShortcutUIexternal;
+  external: IShortcutUI.IExternalBundle;
+  newShortcutUtils?: {
+    searchQuery: string;
+    updateCommand: (command: string, category: string) => void;
+    saveShortcut: () => Promise<void>;
+  };
 }
 
 /** State for ShortcutItem component */
 export interface IShortcutItemState {
   displayNewInput: boolean;
-  displayReplaceInputLeft: boolean;
-  displayReplaceInputRight: boolean;
-  numShortcuts: number;
-}
-
-enum ShortCutLocation {
-  Left,
-  Right
-}
-
-/** Describe commands that are used by shortcuts */
-function getCommands(trans: TranslationBundle): {
-  [key: string]: { commandId: string; label: string; caption: string };
-} {
-  return {
-    shortcutEditLeft: {
-      commandId: 'shortcutui:EditLeft',
-      label: trans.__('Edit First'),
-      caption: trans.__('Edit existing shortcut')
-    },
-    shortcutEditRight: {
-      commandId: 'shortcutui:EditRight',
-      label: trans.__('Edit Second'),
-      caption: trans.__('Edit existing shortcut')
-    },
-    shortcutEdit: {
-      commandId: 'shortcutui:Edit',
-      label: trans.__('Edit'),
-      caption: trans.__('Edit existing shortcut')
-    },
-    shortcutAddNew: {
-      commandId: 'shortcutui:AddNew',
-      label: trans.__('Add'),
-      caption: trans.__('Add new shortcut')
-    },
-    shortcutAddAnother: {
-      commandId: 'shortcutui:AddAnother',
-      label: trans.__('Add'),
-      caption: trans.__('Add another shortcut')
-    },
-    shortcutReset: {
-      commandId: 'shortcutui:Reset',
-      label: trans.__('Reset'),
-      caption: trans.__('Reset shortcut back to default')
-    }
-  };
+  displayReplaceInput: Readonly<Record<number, boolean>>;
+  conflicts: ReadonlyMap<IKeybinding | null, IConflicts>;
 }
 
 /** React component for each command shortcut item */
@@ -86,107 +57,56 @@ export class ShortcutItem extends React.Component<
 > {
   constructor(props: IShortcutItemProps) {
     super(props);
-
-    this._commands = getCommands(props.external.translator.load('jupyterlab'));
+    this._trans = this.props.external.translator.load('jupyterlab');
 
     this.state = {
       displayNewInput: false,
-      displayReplaceInputLeft: false,
-      displayReplaceInputRight: false,
-      numShortcuts: Object.keys(this.props.shortcut.keys).filter(
-        key => this.props.shortcut.keys[key][0] !== ''
-      ).length
+      displayReplaceInput: Object.freeze({}),
+      conflicts: new Map()
     };
+  }
+
+  componentDidMount(): void {
+    this.props.external.actionRequested.connect(this._onActionRequested, this);
+  }
+
+  componentWillUnmount(): void {
+    this.props.external.actionRequested.disconnect(
+      this._onActionRequested,
+      this
+    );
+  }
+
+  private async _onActionRequested(
+    _: unknown,
+    action: IShortcutUI.ActionRequest
+  ): Promise<void> {
+    if (
+      'shortcutId' in action &&
+      action.shortcutId !== this.props.shortcut.id
+    ) {
+      return;
+    }
+    if (action.request === 'add-keybinding') {
+      return this.toggleInputNew();
+    }
+    if (action.request === 'edit-keybinding') {
+      this.toggleInputReplaceMethod(action.keybinding);
+    }
+    if (action.request === 'delete-keybinding') {
+      const target = this.props.shortcut;
+      const binding = target.keybindings[action.keybinding];
+      this.props.deleteKeybinding(target, binding).catch(console.error);
+    }
   }
 
   /** Toggle display state of input box */
   private toggleInputNew = (): void => {
     this.setState({
-      displayNewInput: !this.state.displayNewInput
+      displayNewInput: !this.state.displayNewInput,
+      // reset conflicts
+      conflicts: new Map()
     });
-  };
-
-  private toggleInputReplaceLeft = (): void => {
-    this.setState({
-      displayReplaceInputLeft: !this.state.displayReplaceInputLeft
-    });
-  };
-
-  private toggleInputReplaceRight = (): void => {
-    this.setState({
-      displayReplaceInputRight: !this.state.displayReplaceInputRight
-    });
-  };
-
-  private addCommandIfNeeded = (command: any, action: () => void): void => {
-    const key =
-      this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
-
-    if (!this.props.external.hasCommand(command.commandId + key)) {
-      this.props.external.addCommand(command.commandId + key, {
-        label: command.label,
-        caption: command.caption,
-        execute: action
-      });
-    }
-  };
-
-  private handleRightClick = (e: any): void => {
-    this.addCommandIfNeeded(this._commands.shortcutEdit, () =>
-      this.toggleInputReplaceLeft()
-    );
-    this.addCommandIfNeeded(this._commands.shortcutEditLeft, () =>
-      this.toggleInputReplaceLeft()
-    );
-    this.addCommandIfNeeded(this._commands.shortcutEditRight, () =>
-      this.toggleInputReplaceRight()
-    );
-    this.addCommandIfNeeded(this._commands.shortcutAddNew, () =>
-      this.toggleInputNew()
-    );
-    this.addCommandIfNeeded(this._commands.shortcutAddAnother, () =>
-      this.toggleInputNew()
-    );
-    this.addCommandIfNeeded(this._commands.shortcutReset, () =>
-      this.props.resetShortcut(this.props.shortcut)
-    );
-
-    const key =
-      this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
-
-    this.setState(
-      {
-        numShortcuts: Object.keys(this.props.shortcut.keys).filter(
-          key => this.props.shortcut.keys[key][0] !== ''
-        ).length
-      },
-      () => {
-        let commandList: any[] = [];
-        if (this.state.numShortcuts == 2) {
-          commandList = commandList.concat([
-            this._commands.shortcutEditLeft.commandId + key,
-            this._commands.shortcutEditRight.commandId + key
-          ]);
-        } else if (this.state.numShortcuts == 1) {
-          commandList = commandList.concat([
-            this._commands.shortcutEdit.commandId + key,
-            this._commands.shortcutAddAnother.commandId + key
-          ]);
-        } else {
-          commandList = commandList.concat([
-            this._commands.shortcutAddNew.commandId + key
-          ]);
-        }
-
-        if (this.props.shortcut.source === 'Custom') {
-          commandList = commandList.concat([
-            this._commands.shortcutReset.commandId + key
-          ]);
-        }
-
-        this.props.contextMenu(e, commandList);
-      }
-    );
   };
 
   /** Transform special key names into unicode characters */
@@ -208,34 +128,6 @@ export class ShortcutItem extends React.Component<
     }, '');
   };
 
-  getErrorRow(): JSX.Element {
-    const trans = this.props.external.translator.load('jupyterlab');
-
-    return (
-      <div className="jp-Shortcuts-Row">
-        <div className="jp-Shortcuts-ConflictContainer">
-          <div className="jp-Shortcuts-ErrorMessage">
-            {trans.__(
-              'Shortcut already in use by %1. Overwrite it?',
-              (this.props.shortcut as ErrorObject).takenBy.takenByLabel
-            )}
-          </div>
-          <div className="jp-Shortcuts-ErrorButton">
-            <button>{trans.__('Cancel')}</button>
-            <button
-              id="no-blur"
-              onClick={() => {
-                document.getElementById('overwrite')?.click();
-              }}
-            >
-              {trans.__('Overwrite')}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   getCategoryCell(): JSX.Element {
     return (
       <div className="jp-Shortcuts-Cell">{this.props.shortcut.category}</div>
@@ -243,32 +135,128 @@ export class ShortcutItem extends React.Component<
   }
 
   getLabelCell(): JSX.Element {
-    return (
-      <div className="jp-Shortcuts-Cell">
-        <div className="jp-label">{this.props.shortcut.label}</div>
-      </div>
-    );
+    if (this.props.newShortcutUtils) {
+      const filteredShortcuts = this._getFilteredCommands();
+      return (
+        <div className="jp-Shortcuts-Cell">
+          <HTMLSelect
+            value={this.props.shortcut.command}
+            options={[
+              { value: '', label: this._trans.__('Select a command') },
+              ...filteredShortcuts.map(shortcut => ({
+                value: shortcut.command,
+                label: `${shortcut.category}: ${shortcut.label}`
+              }))
+            ]}
+            onChange={e => {
+              const shortcut = filteredShortcuts.find(
+                shortcut => shortcut.command === e.target.value
+              );
+              this.props.newShortcutUtils?.updateCommand(
+                shortcut?.command ?? '',
+                shortcut?.category ?? ''
+              );
+            }}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="jp-Shortcuts-Cell">
+          <div className="jp-label">
+            {this.props.shortcut.label ??
+              this._trans.__('(Command label missing)')}
+          </div>
+        </div>
+      );
+    }
   }
 
   getResetShortCutLink(): JSX.Element {
-    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <a
         className="jp-Shortcuts-Reset"
-        onClick={() => this.props.resetShortcut(this.props.shortcut)}
+        onClick={() => this.props.resetKeybindings(this.props.shortcut)}
       >
-        {trans.__('Reset')}
+        {this.props.shortcut.userDefined
+          ? this._trans.__('Delete')
+          : this._trans.__('Reset')}
       </a>
     );
   }
 
   getSourceCell(): JSX.Element {
+    const allDefault = this.props.shortcut.keybindings.every(
+      binding => binding.isDefault
+    );
+    const editable =
+      this.props.shortcut.userDefined || !!this.props.newShortcutUtils;
+    const showOptionsButtonTitle = editable
+      ? this._trans.__('Custom options')
+      : this._trans.__('Show options');
+
     return (
       <div className="jp-Shortcuts-Cell">
-        <div className="jp-Shortcuts-SourceCell">
-          {this.props.shortcut.source}
-        </div>
-        {this.props.shortcut.source === 'Custom' && this.getResetShortCutLink()}
+        {!this.props.newShortcutUtils && (
+          <div className="jp-Shortcuts-SourceCell">
+            {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
+          </div>
+        )}
+        {!allDefault ? this.getResetShortCutLink() : ''}
+        {this.props.external.editorFactory && (
+          <Button
+            className="jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions"
+            onClick={async () => {
+              if (!this.props.external.editorFactory) {
+                console.error('Cannot build the custom options form');
+                return;
+              }
+              const dialog = new CustomOptionsDialog({
+                shortcut: this.props.shortcut,
+                translator: this.props.external.translator,
+                editorFactory: this.props.external.editorFactory,
+                readOnly: !editable
+              });
+
+              const result = await dialog.launch();
+              if (result.button.accept && editable && result.value) {
+                await this.props.setCustomOptions(
+                  this.props.shortcut,
+                  result.value
+                );
+              }
+            }}
+            title={showOptionsButtonTitle}
+            aria-label={showOptionsButtonTitle}
+            appearance={'neutral'}
+          >
+            {editable ? (
+              <editIcon.react tag={null} />
+            ) : (
+              <infoIcon.react tag={null} />
+            )}
+          </Button>
+        )}
+        {!!this.props.newShortcutUtils && (
+          <>
+            <Button
+              className="jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew"
+              onClick={this.props.newShortcutUtils?.saveShortcut}
+              title={this._trans.__('Save shortcut')}
+              aria-label={this._trans.__('Save shortcut')}
+              appearance="neutral"
+              disabled={
+                !this.props.shortcut.command ||
+                !this.props.shortcut.keybindings.length ||
+                this.props.shortcut.keybindings.every(
+                  binding => !binding.keys || binding.keys.length === 0
+                )
+              }
+            >
+              <checkIcon.react tag={null} />
+            </Button>
+          </>
+        )}
       </div>
     );
   }
@@ -281,9 +269,9 @@ export class ShortcutItem extends React.Component<
     ) : null;
   }
 
-  getClassNameForShortCuts(nonEmptyKeys: string[]): string {
+  getClassNameForShortCuts(nonEmptyBindings: IKeybinding[]): string {
     const classes = ['jp-Shortcuts-ShortcutCell'];
-    switch (nonEmptyKeys.length) {
+    switch (nonEmptyBindings.length) {
       case 1:
         classes.push('jp-Shortcuts-SingleCell');
         break;
@@ -294,126 +282,104 @@ export class ShortcutItem extends React.Component<
     return classes.join(' ');
   }
 
-  getToggleInputReplaceMethod(location: ShortCutLocation): () => void {
-    switch (location) {
-      case ShortCutLocation.Left:
-        return this.toggleInputReplaceLeft;
-      case ShortCutLocation.Right:
-        return this.toggleInputReplaceRight;
+  toggleInputReplaceMethod(location: number): void {
+    const previous = this.state.displayReplaceInput[location];
+    this.setState({
+      displayReplaceInput: {
+        ...this.state.displayReplaceInput,
+        [location]: !previous
+      },
+      // Clear old conflicts
+      conflicts: new Map()
+    });
+  }
+
+  getDisplayReplaceInput(location: number): boolean {
+    return this.state.displayReplaceInput[location];
+  }
+
+  getOrDisplayIfNeeded(force: boolean): JSX.Element {
+    const classes = ['jp-Shortcuts-Or'];
+    if (force || this.state.displayNewInput) {
+      classes.push('jp-Shortcuts-Or-Forced');
     }
+    return <div className={classes.join(' ')}>{this._trans.__('or')}</div>;
   }
 
-  getDisplayReplaceInput(location: ShortCutLocation): boolean {
-    switch (location) {
-      case ShortCutLocation.Left:
-        return this.state.displayReplaceInputLeft;
-      case ShortCutLocation.Right:
-        return this.state.displayReplaceInputRight;
-    }
-  }
-
-  getOrDiplayIfNeeded(nonEmptyKeys: string[]): JSX.Element {
-    const trans = this.props.external.translator.load('jupyterlab');
-    return (
-      <div
-        className={
-          nonEmptyKeys.length == 2 || this.state.displayNewInput
-            ? 'jp-Shortcuts-OrTwo'
-            : 'jp-Shortcuts-Or'
-        }
-        id={
-          nonEmptyKeys.length == 2
-            ? 'secondor'
-            : this.state.displayReplaceInputLeft
-            ? 'noor'
-            : 'or'
-        }
-      >
-        {trans.__('or')}
-      </div>
-    );
-  }
-
-  getShortCutAsInput(key: string, location: ShortCutLocation): JSX.Element {
+  getShortCutAsInput(binding: IKeybinding, location: number): JSX.Element {
     return (
       <ShortcutInput
-        handleUpdate={this.props.handleUpdate}
-        deleteShortcut={this.props.deleteShortcut}
-        toggleInput={this.getToggleInputReplaceMethod(location)}
+        addKeybinding={this.props.addKeybinding}
+        replaceKeybinding={this.props.replaceKeybinding}
+        deleteKeybinding={this.props.deleteKeybinding}
+        findConflictsFor={this.props.findConflictsFor}
+        toggleInput={() => this.toggleInputReplaceMethod(location)}
         shortcut={this.props.shortcut}
-        shortcutId={key}
+        keybinding={binding}
+        displayConflicts={(data: IConflicts) => {
+          const conflicts = new Map(this.state.conflicts);
+          conflicts.set(binding, data);
+          this.setState({ conflicts });
+        }}
         toSymbols={this.toSymbols}
-        keyBindingsUsed={this.props.keyBindingsUsed}
-        sortConflict={this.props.sortConflict}
-        clearConflicts={this.props.clearConflicts}
         displayInput={this.getDisplayReplaceInput(location)}
-        newOrReplace={'replace'}
-        placeholder={this.toSymbols(this.props.shortcut.keys[key].join(', '))}
+        placeholder={this.toSymbols(binding.keys.join(', '))}
         translator={this.props.external.translator}
       />
     );
   }
 
-  getShortCutForDisplayOnly(key: string): JSX.Element[] {
-    return this.props.shortcut.keys[key].map(
-      (keyBinding: string, index: number) => (
-        <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
-          <div className="jp-Shortcuts-ShortcutKeys">
-            {this.toSymbols(keyBinding)}
-          </div>
-          {index + 1 < this.props.shortcut.keys[key].length ? (
-            <div className="jp-Shortcuts-Comma">,</div>
-          ) : null}
+  getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element[] {
+    return binding.keys.map((keyboardKey: string, index: number) => (
+      <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
+        <div className="jp-Shortcuts-ShortcutKeys">
+          {this.toSymbols(keyboardKey)}
         </div>
-      )
-    );
+        {index + 1 < binding.keys.length ? (
+          <div className="jp-Shortcuts-Comma">,</div>
+        ) : null}
+      </div>
+    ));
   }
 
-  isLocationBeingEdited(location: ShortCutLocation): boolean {
-    return (
-      (location === ShortCutLocation.Left &&
-        this.state.displayReplaceInputLeft) ||
-      (location === ShortCutLocation.Right &&
-        this.state.displayReplaceInputRight)
-    );
-  }
-
-  getLocationFromIndex(index: number): ShortCutLocation {
-    return index === 0 ? ShortCutLocation.Left : ShortCutLocation.Right;
+  isLocationBeingEdited(location: number): boolean {
+    return this.state.displayReplaceInput[location];
   }
 
   getDivForKey(
     index: number,
-    key: string,
-    nonEmptyKeys: string[]
+    binding: IKeybinding,
+    nonEmptyBindings: IKeybinding[]
   ): JSX.Element {
-    const location = this.getLocationFromIndex(index);
     return (
       <div
         className="jp-Shortcuts-ShortcutContainer"
         key={this.props.shortcut.id + '_' + index}
-        onClick={this.getToggleInputReplaceMethod(location)}
+        data-keybinding={index}
+        data-shortcut={this.props.shortcut.id}
+        onClick={() => this.toggleInputReplaceMethod(index)}
       >
-        {this.isLocationBeingEdited(location)
-          ? this.getShortCutAsInput(key, location)
-          : this.getShortCutForDisplayOnly(key)}
-        {location === ShortCutLocation.Left &&
-          this.getOrDiplayIfNeeded(nonEmptyKeys)}
+        {this.isLocationBeingEdited(index)
+          ? this.getShortCutAsInput(binding, index)
+          : this.getShortCutForDisplayOnly(binding)}
+        {!(
+          index === this._nonEmptyBindings.length - 1 &&
+          Object.values(this.state.displayReplaceInput).some(Boolean)
+        ) &&
+          this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
       </div>
     );
   }
 
   getAddLink(): JSX.Element {
-    const trans = this.props.external.translator.load('jupyterlab');
     return (
       <a
         className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
         onClick={() => {
-          this.toggleInputNew(), this.props.clearConflicts();
+          this.toggleInputNew();
         }}
-        id="add-link"
       >
-        {trans.__('Add')}
+        {this._trans.__('Add')}
       </a>
     );
   }
@@ -421,17 +387,19 @@ export class ShortcutItem extends React.Component<
   getInputBoxWhenToggled(): JSX.Element {
     return this.state.displayNewInput ? (
       <ShortcutInput
-        handleUpdate={this.props.handleUpdate}
-        deleteShortcut={this.props.deleteShortcut}
+        addKeybinding={this.props.addKeybinding}
+        replaceKeybinding={this.props.replaceKeybinding}
+        deleteKeybinding={this.props.deleteKeybinding}
+        findConflictsFor={this.props.findConflictsFor}
         toggleInput={this.toggleInputNew}
         shortcut={this.props.shortcut}
-        shortcutId=""
+        displayConflicts={(data: IConflicts) => {
+          const conflicts = new Map(this.state.conflicts);
+          conflicts.set(null, data);
+          this.setState({ conflicts });
+        }}
         toSymbols={this.toSymbols}
-        keyBindingsUsed={this.props.keyBindingsUsed}
-        sortConflict={this.props.sortConflict}
-        clearConflicts={this.props.clearConflicts}
         displayInput={this.state.displayNewInput}
-        newOrReplace={'new'}
         placeholder={''}
         translator={this.props.external.translator}
       />
@@ -440,18 +408,18 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getShortCutsCell(nonEmptyKeys: string[]): JSX.Element {
+  getShortCutsCell(nonEmptyBindings: IKeybinding[]): JSX.Element {
     return (
       <div className="jp-Shortcuts-Cell">
-        <div className={this.getClassNameForShortCuts(nonEmptyKeys)}>
-          {nonEmptyKeys.map((key, index) =>
-            this.getDivForKey(index, key, nonEmptyKeys)
+        <div className={this.getClassNameForShortCuts(nonEmptyBindings)}>
+          {nonEmptyBindings.map((key, index) =>
+            this.getDivForKey(index, key, nonEmptyBindings)
           )}
-          {nonEmptyKeys.length === 1 &&
+          {nonEmptyBindings.length >= 1 &&
             !this.state.displayNewInput &&
-            !this.state.displayReplaceInputLeft &&
+            !Object.values(this.state.displayReplaceInput).some(Boolean) &&
             this.getAddLink()}
-          {nonEmptyKeys.length === 0 &&
+          {nonEmptyBindings.length === 0 &&
             !this.state.displayNewInput &&
             this.getAddLink()}
           {this.getInputBoxWhenToggled()}
@@ -460,32 +428,137 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  render(): JSX.Element {
-    const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
-      (key: string) => this.props.shortcut.keys[key][0] !== ''
+  getConflicts(): JSX.Element {
+    const conflicts = [...this.state.conflicts.values()].filter(
+      conflict => conflict.conflictsWith.length !== 0
     );
-    if (this.props.shortcut.id === 'error_row') {
-      return this.getErrorRow();
-    } else {
-      return (
+    if (conflicts.length === 0) {
+      return <></>;
+    }
+    return (
+      <div className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
+        <div className={CONFLICT_CONTAINER_CLASS}>
+          {conflicts.map(conflict => {
+            const key =
+              conflict.keys.join(' ') +
+              '_' +
+              conflict.conflictsWith.map(target => target.id).join('');
+            return (
+              <div className="jp-Shortcuts-Conflict" key={key}>
+                <div className="jp-Shortcuts-ErrorMessage">
+                  {this._trans.__(
+                    'Shortcut already in use by %1. Overwrite it?',
+                    conflict.conflictsWith
+                      .map(target => target.label ?? target.command)
+                      .join(', ')
+                  )}
+                </div>
+                <div className="jp-Shortcuts-ErrorButton">
+                  <button
+                    className="jp-Button jp-mod-reject jp-mod-styled"
+                    onClick={() => {
+                      this._clearConflict(conflict);
+                      conflict.cancel();
+                    }}
+                  >
+                    {this._trans.__('Cancel')}
+                  </button>
+                  <button
+                    className="jp-Button jp-mod-warn jp-mod-styled"
+                    onClick={() => {
+                      // Clear the conflict first to prevent user from accidentally clicking this button twice
+                      this._clearConflict(conflict);
+                      conflict.overwrite();
+                    }}
+                  >
+                    {this._trans.__('Overwrite')}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Mark conflict as resolved.
+   */
+  private _clearConflict(conflictToClear: IConflicts) {
+    const conflicts = new Map();
+    const idToSkip = this._conflictId(conflictToClear);
+    for (const [binding, conflict] of this.state.conflicts.entries()) {
+      if (this._conflictId(conflict) !== idToSkip) {
+        conflicts.set(binding, conflict);
+      }
+    }
+    this.setState({ conflicts });
+  }
+
+  /**
+   * Create a unique conflict identifier.
+   */
+  private _conflictId(conflict: IConflicts): string {
+    return (
+      conflict.keys.join(' ') +
+      '_' +
+      conflict.conflictsWith.map(target => target.id).join('')
+    );
+  }
+
+  private _getFilteredCommands(): IShortcutTarget[] {
+    const registry = new ShortcutRegistry({
+      commandRegistry: this.props.external.commandRegistry,
+      allCommands: true
+    });
+    const filteredShortcuts = ShortcutRegistry.matchItems(
+      registry,
+      this.props.newShortcutUtils?.searchQuery ?? ''
+    )
+      .map((item: ISearchResult) => item.item)
+      .filter(target => !target.command.startsWith('__internal:'));
+
+    filteredShortcuts.sort((a: IShortcutTarget, b: IShortcutTarget) => {
+      const compareA: string = a.category;
+      const compareB: string = b.category;
+      const compareResult = compareA.localeCompare(compareB);
+      if (compareResult) {
+        return compareResult;
+      } else {
+        const aLabel = a['label'] ?? '';
+        const bLabel = b['label'] ?? '';
+        return aLabel.localeCompare(bLabel);
+      }
+    });
+    return filteredShortcuts;
+  }
+
+  private get _nonEmptyBindings() {
+    return this.props.shortcut.keybindings.filter(
+      binding => binding.keys.filter(k => k != '').length !== 0
+    );
+  }
+
+  render(): JSX.Element {
+    return (
+      <>
         <div
-          className="jp-Shortcuts-Row"
-          onContextMenu={e => {
-            e.persist();
-            this.handleRightClick(e);
-          }}
+          className={`jp-Shortcuts-Row${
+            this.props.newShortcutUtils ? ' jp-Shortcuts-Row-newShortcut' : ''
+          }`}
+          data-shortcut={this.props.shortcut.id}
         >
           {this.getCategoryCell()}
           {this.getLabelCell()}
-          {this.getShortCutsCell(nonEmptyKeys)}
+          {this.getShortCutsCell(this._nonEmptyBindings)}
           {this.getSourceCell()}
           {this.getOptionalSelectorCell()}
         </div>
-      );
-    }
+        {this.getConflicts()}
+      </>
+    );
   }
 
-  private _commands: {
-    [key: string]: { commandId: string; label: string; caption: string };
-  };
+  private _trans: TranslationBundle;
 }

@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { YCodeCell, YMarkdownCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   Cell,
@@ -22,13 +23,14 @@ import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
-import { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
+import type { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
 import {
   framePromise,
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -546,6 +548,27 @@ describe('cells/widget', () => {
       });
     });
 
+    describe('#headings', () => {
+      it('should not throw when outputs contain an array of strings', () => {
+        const modelheadings = new CodeCellModel();
+        const widget = new CodeCell({
+          contentFactory: NBTestUtils.createCodeCellFactory(),
+          model: modelheadings,
+          rendermime
+        });
+        widget.initializeState();
+        widget.model.outputs.add({
+          output_type: 'display_data',
+          data: {
+            'text/html': ['Some ', ' thing']
+          },
+          metadata: {}
+        });
+        // try if headings got a problem with multi line html
+        expect(widget.headings).toEqual([]);
+      });
+    });
+
     describe('#outputArea', () => {
       it('should be the output area used by the cell', () => {
         const widget = new CodeCell({
@@ -957,6 +980,26 @@ describe('cells/widget', () => {
           `[${(msg as IExecuteReplyMsg).content.execution_count}]:`
         );
       });
+
+      it('should set the cell prompt properly on server-side execution', async () => {
+        const widget = new CodeCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        const sharedModel = widget.model.sharedModel;
+        // Clearing execution count should not overwrite the execution state:
+        sharedModel.executionState = 'running';
+        sharedModel.execution_count = null;
+        expect(sharedModel.executionState).toEqual('running');
+        expect(widget.promptNode!.textContent).toEqual('[*]:');
+        // Setting execution count should also set execution state to idle:
+        sharedModel.execution_count = 1;
+        expect(sharedModel.executionState).toEqual('idle');
+        expect(widget.promptNode!.textContent).toEqual('[1]:');
+      });
     });
   });
 
@@ -995,6 +1038,47 @@ describe('cells/widget', () => {
         });
         widget.initializeState();
         expect(widget.model.mimeType).toEqual('text/x-ipythongfm');
+      });
+
+      it('should accept a custom placehodler', async () => {
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false,
+          emptyPlaceholder: 'this is empty'
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        expect(widget.node.textContent).toBe('this is empty');
+      });
+    });
+
+    describe('#getEditorOptions()', () => {
+      it('should normalise line endings on paste', () => {
+        const model = new MarkdownCellModel({
+          sharedModel: createStandaloneCell({
+            cell_type: 'markdown'
+          }) as YMarkdownCell
+        });
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        document.body.appendChild(widget.node);
+        // todo: replace with user-event
+        const dt = new DataTransfer();
+        dt.setData('text/plain', '\r\nTest\r\nString\r\n.\r\n');
+        const event = new ClipboardEvent('paste', { clipboardData: dt });
+        widget.editor!.host.querySelector('.cm-content')!.dispatchEvent(event);
+
+        expect(widget.model.sharedModel.getSource()).toEqual(
+          '\nTest\nString\n.\n'
+        );
       });
     });
 

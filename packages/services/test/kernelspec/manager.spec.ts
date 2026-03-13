@@ -3,7 +3,8 @@
 
 import { JupyterServer } from '@jupyterlab/testing';
 import { JSONExt } from '@lumino/coreutils';
-import { KernelSpec, KernelSpecManager } from '../../src';
+import type { KernelSpec } from '../../src';
+import { KernelSpecManager } from '../../src';
 import {
   handleRequest,
   KERNELSPECS,
@@ -56,6 +57,17 @@ describe('kernel/manager', () => {
           standby: 'never'
         });
         expect(manager instanceof KernelSpecManager).toBe(true);
+      });
+    });
+
+    describe('#isDisposed', () => {
+      it('should be false when instantiating', () => {
+        expect(manager.isDisposed).toBe(false);
+      });
+
+      it('should true when disposing', () => {
+        manager.dispose();
+        expect(manager.isDisposed).toBe(true);
       });
     });
 

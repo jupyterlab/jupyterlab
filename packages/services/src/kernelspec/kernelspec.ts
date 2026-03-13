@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
-import { IManager as IBaseManager } from '../basemanager';
+import type { IManager as IBaseManager } from '../basemanager';
 import { ISpecModel, ISpecModels } from './restapi';
+import type { ServerConnection } from '..';
 export { ISpecModel, ISpecModels };
 
 /**
@@ -37,4 +38,24 @@ export interface IManager extends IBaseManager {
    * since the manager maintains its internal state.
    */
   refreshSpecs(): Promise<void>;
+}
+
+/**
+ * Interface for making requests to the Kernel Spec API.
+ */
+export interface IKernelSpecAPIClient {
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Fetch all of the kernel specs.
+   *
+   * @returns A promise that resolves with the kernel specs.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   */
+  get(): Promise<ISpecModels>;
 }

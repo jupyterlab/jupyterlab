@@ -4,21 +4,19 @@
 |----------------------------------------------------------------------------*/
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
-import { JsonSettingEditor } from './jsonsettingeditor';
+import type { JsonSettingEditor } from './jsonsettingeditor';
 
 /**
  * The class name added to all plugin editors.

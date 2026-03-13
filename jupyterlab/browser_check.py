@@ -5,6 +5,7 @@
 This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
+
 import asyncio
 import inspect
 import logging
@@ -21,7 +22,7 @@ from jupyter_server.utils import pathname2url, urljoin
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.websocket import WebSocketClosedError
-from traitlets import Bool
+from traitlets import Bool, Unicode
 
 from .labapp import LabApp, get_app_dir
 from .tests.test_app import TestEnv
@@ -36,14 +37,15 @@ test_aliases = dict(aliases)
 test_aliases["app-dir"] = "BrowserApp.app_dir"
 
 
-class LogErrorHandler(logging.Handler):
+class LogErrorHandler(logging.StreamHandler):
     """A handler that exits with 1 on a logged error."""
 
     def __init__(self):
-        super().__init__(level=logging.ERROR)
+        super().__init__(stream=sys.stderr)
+        self.setLevel(logging.ERROR)
         self.errored = False
 
-    def filter(self, record):  # noqa
+    def filter(self, record):
         # Handle known StreamClosedError from Tornado
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
@@ -53,12 +55,12 @@ class LogErrorHandler(logging.Handler):
             and record.exc_info is not None
             and isinstance(record.exc_info[1], (StreamClosedError, WebSocketClosedError))
         ):
-            return
+            return False
         return super().filter(record)
 
     def emit(self, record):
-        print(record.msg, file=sys.stderr)
         self.errored = True
+        super().emit(record)
 
 
 def run_test(app, func):
@@ -140,23 +142,33 @@ async def run_async_process(cmd, **kwargs):
 
 async def run_browser(url):
     """Run the browser test and return an exit code."""
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["npm", "init", "-y"], cwd=target)
         await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
+    await run_async_process(["npx", "playwright", "install", browser], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
 def run_browser_sync(url):
     """Run the browser test and return an exit code."""
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
         subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
         subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
+    subprocess.call(["npx", "playwright", "install", browser], cwd=target)  # noqa S603 S607
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 
@@ -170,7 +182,7 @@ class BrowserApp(LabApp):
     open_browser = False
 
     serverapp_config = {"base_url": "/foo/"}
-    default_url = "/lab?reset"
+    default_url = Unicode("/lab?reset", config=True, help="The default URL to redirect to from `/`")
     ip = "127.0.0.1"
     flags = test_flags
     aliases = test_aliases
@@ -184,9 +196,12 @@ class BrowserApp(LabApp):
         super().initialize_settings()
 
     def initialize_handlers(self):
-        func = run_browser if self.test_browser else lambda url: 0
-        if os.name == "nt" and func == run_browser:
-            func = run_browser_sync
+        def func(*args, **kwargs):
+            return 0
+
+        if self.test_browser:
+            func = run_browser_sync if os.name == "nt" else run_browser
+
         run_test(self.serverapp, func)
         super().initialize_handlers()
 
@@ -206,4 +221,4 @@ if __name__ == "__main__":
             BrowserApp.test_browser = False
             sys.argv.remove(option)
 
-        BrowserApp.launch_instance()
+    BrowserApp.launch_instance()

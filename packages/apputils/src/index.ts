@@ -5,7 +5,7 @@
  * @module apputils
  */
 import { Toolbar as UIToolbar } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**
@@ -39,6 +39,7 @@ export * from './dialog';
 export * from './domutils';
 export * from './inputdialog';
 export * from './kernelstatuses';
+export * from './licenses';
 export * from './mainareawidget';
 export * from './menufactory';
 export * from './notification';

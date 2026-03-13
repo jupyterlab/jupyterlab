@@ -16,11 +16,8 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
-import {
-  ensurePackage,
-  ensureUiComponents,
-  IEnsurePackageOptions
-} from './ensure-package';
+import type { IEnsurePackageOptions } from './ensure-package';
+import { ensurePackage, ensureUiComponents } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
 
@@ -43,10 +40,10 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['path', 'webpack'],
+  '@jupyterlab/buildutils': ['assert', 'child_process', 'fs', 'path'],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
-  '@jupyterlab/testing': ['fs', 'path'],
+  '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
@@ -75,8 +72,6 @@ const UNUSED: Dict<string[]> = {
     'path-browserify',
     'process',
     'style-loader',
-    'terser-webpack-plugin',
-    'webpack-cli',
     'worker-loader',
     'source-map-loader'
   ],
@@ -103,12 +98,16 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/markedparser-extension': [
+    // only (but always) imported asynchronously
+    'marked-gfm-heading-id',
+    'marked-mangle'
+  ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
     '@babel/preset-env',
     'fs-extra',
-    'node-fetch',
     'identity-obj-proxy',
     'jest-environment-jsdom',
     'jest-junit'
@@ -125,6 +124,14 @@ const UNUSED: Dict<string[]> = {
 
 // Packages that are allowed to have differing versions
 const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+
+// Packages that have backward versions support
+const BACKWARD_VERSIONS: Record<string, Record<string, string>> = {
+  '@jupyterlab/rendermime-interfaces': {
+    '@lumino/coreutils': '^1.11.0',
+    '@lumino/widgets': '^1.37.2'
+  }
+};
 
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -196,6 +203,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/outputarea',
     '@jupyterlab/cells',
     '@jupyterlab/notebook',
+    '@jupyterlab/audio-extension',
+    '@jupyterlab/video-extension',
     '@jupyterlab/cell-toolbar',
     '@jupyterlab/cell-toolbar-extension',
     '@jupyterlab/celltags-extension',
@@ -237,14 +246,19 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/markdownviewer-extension',
     '@jupyterlab/markedparser-extension',
     '@jupyterlab/mathjax-extension',
+    '@jupyterlab/mermaid',
+    '@jupyterlab/mermaid-extension',
     '@jupyterlab/metadataform',
     '@jupyterlab/metadataform-extension',
     '@jupyterlab/nbconvert-css',
     '@jupyterlab/notebook-extension',
     '@jupyterlab/pdf-extension',
+    '@jupyterlab/pluginmanager',
+    '@jupyterlab/pluginmanager-extension',
     '@jupyterlab/rendermime-extension',
     '@jupyterlab/running',
     '@jupyterlab/running-extension',
+    '@jupyterlab/services-extension',
     '@jupyterlab/settingeditor',
     '@jupyterlab/settingeditor-extension',
     '@jupyterlab/shortcuts-extension',
@@ -259,9 +273,16 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
-    '@jupyterlab/vega5-extension'
+    '@jupyterlab/vega5-extension',
+    '@jupyterlab/workspaces-extension'
   ],
-  '@jupyterlab/notebook': ['@jupyterlab/application'],
+  '@jupyterlab/notebook': [
+    '@jupyterlab/application',
+    '@jupyterlab/markedparser-extension' // only used in tests
+  ],
+  '@jupyterlab/notebook-extension': [
+    '@jupyterlab/cell-toolbar' // Only used for CellBarExtension.WIDGET_ID_ARG
+  ],
   '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],
   '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
   '@jupyterlab/testutils': [
@@ -796,11 +817,18 @@ export async function ensureIntegrity(): Promise<boolean> {
       locals,
       cssImports: cssImports[name],
       cssModuleImports: cssModuleImports[name],
-      differentVersions: DIFFERENT_VERSIONS
+      differentVersions: DIFFERENT_VERSIONS,
+      backwardVersions: BACKWARD_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {
       options.noUnused = false;
+    }
+
+    if (name === '@jupyterlab/galata') {
+      // Most of the galata codebase runs on the Node.js runtime,
+      // with the exception being the `extension` subpackage.
+      options.allowNodeDependencies = true;
     }
 
     const pkgMessages = await ensurePackage(options);
@@ -826,46 +854,8 @@ export async function ensureIntegrity(): Promise<boolean> {
     messages['top'] = ['Update package.json'];
   }
 
-  // Handle the refs in the top level tsconfigdoc.json
-  const tsConfigDocExclude = [
-    'application-extension',
-    'metapackage',
-    'nbconvert-css',
-    'testing'
-  ];
-  const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
-  const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
-  tsConfigdocData.references = utils
-    .getCorePaths()
-    .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
-    .map(pth => {
-      return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
-    });
-  utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
-
   // Handle buildutils
   ensureBuildUtils();
-
-  // Handle the pyproject.toml file
-  const pyprojectPath = path.resolve('.', 'pyproject.toml');
-  const curr = utils.getPythonVersion();
-  let tag = 'latest';
-  if (!/\d+\.\d+\.\d+$/.test(curr)) {
-    tag = 'next';
-  }
-  const publishCommand = `npm publish --tag ${tag}`;
-  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
-  if (pyprojectText.indexOf(publishCommand) === -1) {
-    pyprojectText = pyprojectText.replace(
-      /npm publish --tag [a-z]+/,
-      publishCommand
-    );
-    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
-    if (!messages['top']) {
-      messages['top'] = [];
-    }
-    messages['top'].push('Update npm publish command in pyproject.toml');
-  }
 
   // Handle the federated example application
   pkgMessages = ensureFederatedExample();

@@ -26,9 +26,15 @@ test.describe('Notebook Trust', () => {
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
   });
 
-  test('Trust is lost after manually editing notebook', async ({ page }) => {
+  test('Trust is lost after manually editing notebook', async ({
+    page,
+    browserName
+  }) => {
     const browserContext = page.context();
-    await browserContext.grantPermissions(['clipboard-read']);
+    if (browserName !== 'firefox') {
+      // Firefox does not support clipboard-read but does not it it either
+      await browserContext.grantPermissions(['clipboard-read']);
+    }
     // Add text to first cell
     await page.notebook.setCell(0, 'code', 'TEST_TEXT');
     await page.notebook.save();
@@ -42,10 +48,9 @@ test.describe('Notebook Trust', () => {
     });
     await page.hover('text=Open With');
     await page.click('.lm-Menu li[role="menuitem"]:has-text("Editor")');
-    const editorContent = await page.waitForSelector(
-      '.jp-FileEditor .cm-content'
-    );
-    await editorContent.waitForSelector('text=TEST_TEXT');
+    const editorContent = page.locator('.jp-FileEditor .cm-content');
+    await editorContent.waitFor();
+    await editorContent.locator('text=TEST_TEXT').waitFor();
     const originalContent = await page.evaluate(async () => {
       await window.jupyterapp.commands.execute('fileeditor:select-all');
       await window.jupyterapp.commands.execute('fileeditor:cut');

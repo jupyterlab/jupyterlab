@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The search provider registry token.
@@ -29,6 +29,10 @@ export interface IFilter {
    * Filter description
    */
   description: string;
+  /**
+   * Filter description to be used when the filter is disabled in replace mode.
+   */
+  disabledDescription?: string;
   /**
    * Default value
    */
@@ -76,6 +80,11 @@ export interface IReplaceOptionsSupport {
    */
   preserveCase?: boolean;
 }
+
+/**
+ * How many items are selected?
+ */
+export type SelectionState = 'multiple' | 'single' | 'none';
 
 /**
  * React search component state
@@ -374,4 +383,14 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * Signal emitted when filter definition changed.
    */
   filtersChanged?: ISignal<ISearchProvider, void>;
+
+  /**
+   * Is there one or more objects selected?
+   *
+   * The selection can be made of one or more lines, notebook cells, or other
+   * objects (e.g. spreadsheet cells). The provider can decide whether it counts
+   * multiple characters (as opposed to lines) as multiple selection or not,
+   * which will influence the heuristic auto-enabling "search in selection" mode.
+   */
+  getSelectionState?(): SelectionState;
 }

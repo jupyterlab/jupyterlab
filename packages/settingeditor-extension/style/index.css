@@ -9,4 +9,5 @@
 @import url('~@jupyterlab/codeeditor/style/index.css');
 @import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/application/style/index.css');
+@import url('~@jupyterlab/pluginmanager/style/index.css');
 @import url('~@jupyterlab/settingeditor/style/index.css');

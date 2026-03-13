@@ -1,16 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CompletionHandler } from '../handler';
-import { ICompletionContext, ICompletionProvider } from '../tokens';
+import type { CompletionHandler } from '../handler';
+import type { ICompletionContext, ICompletionProvider } from '../tokens';
 
 export const CONTEXT_PROVIDER_ID = 'CompletionProvider:context';
 /**
  * A context connector for completion handlers.
  */
 export class ContextCompleterProvider implements ICompletionProvider {
+  readonly identifier = CONTEXT_PROVIDER_ID;
+
+  readonly rank: number = 500;
+
+  readonly renderer = null;
+
   /**
    * The context completion provider is applicable on all cases.
    * @param context - additional information about context of completion request
@@ -36,9 +42,6 @@ export class ContextCompleterProvider implements ICompletionProvider {
       resolve(Private.contextHint(editor!));
     });
   }
-
-  readonly identifier = CONTEXT_PROVIDER_ID;
-  readonly renderer = null;
 }
 
 /**

@@ -17,5 +17,4 @@
 @import url('~@jupyterlab/toc/style/index.css');
 @import url('~@jupyterlab/cells/style/index.css');
 @import url('~@jupyterlab/lsp/style/index.css');
-
 @import url('./base.css');

@@ -4,8 +4,12 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
+import type {
+  ISettingConnector,
+  ISettingRegistry
+} from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import { DataConnector } from '@jupyterlab/statedb';
 import { Throttler } from '@lumino/polling';
 
 /**
@@ -14,10 +18,10 @@ import { Throttler } from '@lumino/polling';
  * #### Notes
  * This connector adds a query parameter to the base services setting manager.
  */
-export class SettingConnector extends DataConnector<
-  ISettingRegistry.IPlugin,
-  string
-> {
+export class SettingConnector
+  extends DataConnector<ISettingRegistry.IPlugin, string>
+  implements ISettingConnector
+{
   constructor(connector: IDataConnector<ISettingRegistry.IPlugin, string>) {
     super();
     this._connector = connector;
@@ -45,7 +49,7 @@ export class SettingConnector extends DataConnector<
   async list(
     query: 'active' | 'all' | 'ids' = 'all'
   ): Promise<{ ids: string[]; values?: ISettingRegistry.IPlugin[] }> {
-    const { isDeferred, isDisabled } = PageConfig.Extension;
+    const { isDisabled } = PageConfig.Extension;
     const { ids, values } = await this._connector.list(
       query === 'ids' ? 'ids' : undefined
     );
@@ -59,8 +63,8 @@ export class SettingConnector extends DataConnector<
     }
 
     return {
-      ids: ids.filter(id => !isDeferred(id) && !isDisabled(id)),
-      values: values.filter(({ id }) => !isDeferred(id) && !isDisabled(id))
+      ids: ids.filter(id => !isDisabled(id)),
+      values: values.filter(({ id }) => !isDisabled(id))
     };
   }
 

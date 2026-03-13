@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import {
   BasicKeyHandler,
   BasicMouseHandler,
@@ -10,17 +10,15 @@ import {
   DataModel,
   TextRenderer
 } from '@lumino/datagrid';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 
-import { IThemeManager } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IThemeManager } from '@jupyterlab/apputils';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 import { Debugger } from '../../';
 
 /**
@@ -156,7 +154,7 @@ namespace Grid {
  */
 export class GridModel extends DataModel {
   /**
-   * Create gird model
+   * Create grid model
    * @param translator optional translator
    */
   constructor(translator?: ITranslator) {
@@ -250,8 +248,7 @@ export class GridModel extends DataModel {
   setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
     this.emitChanged({
-      type: 'model-reset',
-      region: 'body'
+      type: 'model-reset'
     });
     const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
     const variables = scope?.variables ?? [];
@@ -345,7 +342,10 @@ namespace Private {
     node = palette.querySelector('.jp-mod-selection');
     const selectionFillColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-text');
-    const textColor = getComputedStyle(node!).color;
+    const textStyle = getComputedStyle(node!);
+    const textColor = textStyle.color;
+    const fontFamily = textStyle.fontFamily;
+    const fontSize = textStyle.fontSize;
     document.body.removeChild(palette);
     return {
       style: {
@@ -359,7 +359,7 @@ namespace Private {
         selectionFillColor
       },
       textRenderer: new TextRenderer({
-        font: '12px sans-serif',
+        font: `${fontSize} ${fontFamily}`,
         textColor,
         backgroundColor: '',
         verticalAlignment: 'center',

@@ -1,4 +1,5 @@
 {
-  "out": "../../docs/api/javascript-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "name": "javascript-extension"
 }

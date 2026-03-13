@@ -5,7 +5,7 @@
 
 @import './fonts.css';
 
-.jp-OutputArea-output.jp-RenderedLatex .MJX-DISPLAY {
-  margin: 0;
-  text-align: left;
+/* This can be removed after upgrading to MathJax 4, as the issue will be fixed in the new version */
+mjx-assistive-mml {
+  bottom: 0;
 }

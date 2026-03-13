@@ -12,6 +12,10 @@ on:
       post_version_spec:
         description: "Post Version Specifier"
         required: false
+      silent:
+        description: "Set a placeholder in the changelog and don't publish the release."
+        required: false
+        type: boolean
       since:
         description: "Use PRs with activity since this date or git reference"
         required: false
@@ -22,6 +26,8 @@ on:
 jobs:
   prep_release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
@@ -29,8 +35,9 @@ jobs:
         id: prep-release
         uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@v2
         with:
-          token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: ${{ github.event.inputs.version_spec }}
+          silent: ${{ github.event.inputs.silent }}
           post_version_spec: ${{ github.event.inputs.post_version_spec }}
           target: ${{ github.event.inputs.target }}
           branch: ${{ github.event.inputs.branch }}

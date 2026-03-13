@@ -8,17 +8,18 @@
 # [JupyterLab](https://jupyterlab.readthedocs.io)
 
 [![PyPI version](https://badge.fury.io/py/jupyterlab.svg)](https://badge.fury.io/py/jupyterlab)
-[![Downloads](https://pepy.tech/badge/jupyterlab/month)](https://pepy.tech/project/jupyterlab/month)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/jupyterlab?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/jupyterlab)
 [![Build Status](https://github.com/jupyterlab/jupyterlab/workflows/Linux%20Tests/badge.svg)](https://github.com/jupyterlab/jupyterlab/actions?query=branch%3Amain+workflow%3A%22Linux+Tests%22)
 [![Build Status](https://github.com/jupyterlab/jupyterlab/workflows/Windows%20Tests/badge.svg)](https://github.com/jupyterlab/jupyterlab/actions?query=branch%3Amain+workflow%3A%22Windows+Tests%22)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](http://jupyterlab.readthedocs.io/en/stable/)
 [![Crowdin](https://badges.crowdin.net/jupyterlab/localized.svg)](https://crowdin.com/project/jupyterlab)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8675/badge)](https://www.bestpractices.dev/projects/8675)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jupyterlab/jupyterlab/badge)](https://scorecard.dev/viewer/?uri=github.com/jupyterlab/jupyterlab)
 [![GitHub](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/jupyterlab/jupyterlab/issues)
 [![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
-[![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
-[![Gitpod](https://img.shields.io/badge/gitpod_editor-open-blue.svg)](https://gitpod.io/#https://github.com/jupyterlab/jupyterlab)
+[![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg)](https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/75ab1750f37b27db8e135c2c4f2139da6b641609?urlpath=lab/tree/demo)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/HEAD?urlpath=lab/tree/demo)
 
 An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture.
@@ -37,6 +38,9 @@ You can also find JupyterLab extensions exploring GitHub topic [jupyterlab-exten
 To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
 
 Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
+
+> [!IMPORTANT]
+> JupyterLab 3 reached its end of maintenance date on May 15, 2024. Fixes for critical issues were backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
 
 ---
 
@@ -58,7 +62,7 @@ If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.read
   ```shell
   pip install jupyterlab
   ```
-  If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (e.g., FreeBSD, GNU/Linux, macOS), you can do this by running `export PATH="$HOME/.local/bin:$PATH"`. If you are using a macOS version that comes with Python 2, run `pip3` instead of `pip`.
+  If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (e.g., FreeBSD, GNU/Linux, macOS), you can do this by running `export PATH="$HOME/.local/bin:$PATH"`.
 
 For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html). Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
@@ -127,43 +131,48 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+JupyterLab is part of [Project Jupyter](https://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole. JupyterLab falls under the [Jupyter Frontends Council](https://jupyterlab-team-compass.readthedocs.io/en/latest/index.html).
 
-JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
+The team of maintainers includes:
+
+- decision-making contributors listed on the [council team members](https://jupyterlab-team-compass.readthedocs.io/en/latest/team.html) page
+- code contributors listed on the [contributors graph](https://github.com/jupyterlab/jupyterlab/graphs/contributors) page
+
+<details>
+
+<summary>Archival list of maintainers</summary>
+
+Prior to transition to the new governance model with the JupyterLab and then Frontends council, these people contributed to and maintained JupyterLab:
 
 - Mehmet Bektas, Netflix (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
-- Frédéric Collonval, QuantStack (general development, extensions).
-- Martha Cryan, IBM (general development, extensions).
+- Frédéric Collonval, WebScIT (general development, extensions).
+- Martha Cryan, Mito (general development, extensions).
 - Afshin Darian, QuantStack (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Databricks (co-creator, vision, general development).
-- Michał Krassowski, University of Oxford (general development, extensions).
+- Michał Krassowski, Quansight (general development, extensions).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
-- Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Steven Silvester, MongoDB (co-creator, release management, packaging,
   prolific contributions throughout the code base).
-- Jeremy Tuloup, QuantStack (general development, extensions).
-
-Maintainer emeritus:
-
+- Jeremy Tuloup, QuantStack (general development, extensions)
 - Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, PhosphorJS)
 - Jessica Forde, Project Jupyter (demo, documentation)
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
 - Cameron Oelsen, Cal Poly (UI/UX design).
+- Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Ian Rose, Quansight/City of LA (general core development, extensions).
 - Andrew Schlaepfer, Bloomberg (general development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
 
-This list is provided to give the reader context on who we are and how our team functions.
-To be listed, please submit a pull request with your information.
+</details>
 
 ---
 
@@ -173,8 +182,8 @@ We have videoconference meetings every week where we discuss what we have been w
 
 Anyone is welcome to attend, if they would like to discuss a topic or just listen in.
 
-- When: Wednesdays [9:00 AM Pacific Time (USA)](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
-- Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
+- When: Wednesdays 9:00 AM Pacific Time (USA)
+- Where: [`jovyan` Zoom](https://zoom.us/j/95228013874?pwd=Ep7HIk8t9JP6VToxt1Wj4P7K5PshC0.1)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 
-> Notes are archived on [GitHub JupyterLab team compass](https://github.com/jupyterlab/team-compass/issues).
+> Notes are archived on [GitHub Jupyter Frontends team compass](https://github.com/jupyterlab/frontends-team-compass/issues).

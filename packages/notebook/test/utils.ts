@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-import { INotebookContent } from '@jupyterlab/nbformat';
-import {
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { Context, DocumentRegistry } from '@jupyterlab/docregistry';
+import type { INotebookContent } from '@jupyterlab/nbformat';
+import type {
   INotebookModel,
   Notebook,
   NotebookPanel,
@@ -38,8 +39,8 @@ export function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
 /**
  * Create a notebook widget.
  */
-export function createNotebook(): Notebook {
-  return NBTestUtils.createNotebook();
+export function createNotebook(sessionContext?: ISessionContext): Notebook {
+  return NBTestUtils.createNotebook(sessionContext);
 }
 
 /**
@@ -62,6 +63,7 @@ export const editorFactory = NBTestUtils.editorFactory;
 export const mimeTypeService = NBTestUtils.mimeTypeService;
 export const defaultEditorConfig = NBTestUtils.defaultEditorConfig;
 export const clipboard = NBTestUtils.clipboard;
+export const systemClipboard = NBTestUtils.systemClipboard;
 
 export function defaultRenderMime(): any {
   return NBTestUtils.defaultRenderMime();

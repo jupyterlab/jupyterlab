@@ -9,16 +9,15 @@
 
 /* All input areas */
 .jp-InputArea {
-  display: table;
-  table-layout: fixed;
+  display: flex;
+  flex-direction: row;
   width: 100%;
   overflow: hidden;
 }
 
 .jp-InputArea-editor {
-  display: table-cell;
+  flex: 1 1 auto;
   overflow: hidden;
-  vertical-align: top;
 
   /* This is the non-active, default styling */
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
@@ -27,8 +26,7 @@
 }
 
 .jp-InputPrompt {
-  display: table-cell;
-  vertical-align: top;
+  flex: 0 0 var(--jp-cell-prompt-width);
   width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-inprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
@@ -53,16 +51,39 @@
 }
 
 /*-----------------------------------------------------------------------------
-| Mobile
+| Print
 |----------------------------------------------------------------------------*/
-@media only screen and (max-width: 760px) {
+@media print {
+  .jp-InputArea {
+    display: table;
+    table-layout: fixed;
+  }
+
   .jp-InputArea-editor {
-    display: table-row;
-    margin-left: var(--jp-notebook-padding);
+    display: table-cell;
+    vertical-align: top;
   }
 
   .jp-InputPrompt {
-    display: table-row;
+    display: table-cell;
+    vertical-align: top;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (width <= 760px) {
+  .jp-InputArea {
+    flex-direction: column;
+  }
+
+  .jp-InputArea-editor {
+    margin-left: var(--jp-code-padding);
+  }
+
+  .jp-InputPrompt {
+    flex: 0 0 auto;
     text-align: left;
   }
 }

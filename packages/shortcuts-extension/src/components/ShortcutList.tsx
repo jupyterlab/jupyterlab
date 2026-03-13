@@ -4,25 +4,23 @@
  */
 
 import * as React from 'react';
-import { ShortcutObject, TakenByObject } from './ShortcutInput';
 import { ShortcutItem } from './ShortcutItem';
-import { IShortcutUIexternal } from './TopNav';
+import type { IShortcutRegistry, IShortcutTarget, IShortcutUI } from '../types';
 
 const TOPNAV_HEIGHT: number = 115;
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
-  shortcuts: ShortcutObject[];
-  handleUpdate: Function;
-  resetShortcut: Function;
-  deleteShortcut: Function;
+  shortcuts: IShortcutTarget[];
+  addKeybinding: IShortcutUI['addKeybinding'];
+  replaceKeybinding: IShortcutUI['replaceKeybinding'];
+  resetKeybindings: IShortcutUI['resetKeybindings'];
+  deleteKeybinding: IShortcutUI['deleteKeybinding'];
+  findConflictsFor: IShortcutRegistry['findConflictsFor'];
+  setCustomOptions: IShortcutUI['setCustomOptions'];
   showSelectors: boolean;
-  keyBindingsUsed: { [index: string]: TakenByObject };
-  sortConflict: Function;
-  clearConflicts: Function;
   height: number;
-  contextMenu: Function;
-  external: IShortcutUIexternal;
+  external: IShortcutUI.IExternalBundle;
 }
 
 /** React component for list of shortcuts */
@@ -37,19 +35,18 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         id="shortcutListContainer"
       >
         <div className="jp-Shortcuts-ShortcutList">
-          {this.props.shortcuts.map((shortcut: ShortcutObject) => {
+          {this.props.shortcuts.map((shortcut: IShortcutTarget) => {
             return (
               <ShortcutItem
-                key={shortcut.commandName + '_' + shortcut.selector}
-                resetShortcut={this.props.resetShortcut}
+                key={shortcut.id}
+                addKeybinding={this.props.addKeybinding}
+                replaceKeybinding={this.props.replaceKeybinding}
+                deleteKeybinding={this.props.deleteKeybinding}
+                resetKeybindings={this.props.resetKeybindings}
+                findConflictsFor={this.props.findConflictsFor}
+                setCustomOptions={this.props.setCustomOptions}
                 shortcut={shortcut}
-                handleUpdate={this.props.handleUpdate}
-                deleteShortcut={this.props.deleteShortcut}
                 showSelectors={this.props.showSelectors}
-                keyBindingsUsed={this.props.keyBindingsUsed}
-                sortConflict={this.props.sortConflict}
-                clearConflicts={this.props.clearConflicts}
-                contextMenu={this.props.contextMenu}
                 external={this.props.external}
               />
             );

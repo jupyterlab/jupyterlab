@@ -1,18 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import mergeWith from 'lodash.mergewith';
 
-import { ClientCapabilities } from './lsp';
-import { IFeature, ILSPFeatureManager } from './tokens';
+import type { ClientCapabilities } from './lsp';
+import type { IFeature, ILSPFeatureManager } from './tokens';
+import type { EditorAdapter } from './adapters/editorAdapter';
 
 /**
  * Class to manager the registered features of the language servers.
  */
 export class FeatureManager implements ILSPFeatureManager {
   constructor() {
-    this._featuresRegistered = new Signal(this);
+    this._featureRegistered = new Signal(this);
   }
   /**
    * List of registered features
@@ -22,8 +24,8 @@ export class FeatureManager implements ILSPFeatureManager {
   /**
    * Signal emitted when a new feature is registered.
    */
-  get featuresRegistered(): ISignal<ILSPFeatureManager, IFeature> {
-    return this._featuresRegistered;
+  get featureRegistered(): ISignal<ILSPFeatureManager, IFeature> {
+    return this._featureRegistered;
   }
 
   /**
@@ -36,7 +38,7 @@ export class FeatureManager implements ILSPFeatureManager {
       );
     } else {
       this.features.push(feature);
-      this._featuresRegistered.emit(feature);
+      this._featureRegistered.emit(feature);
     }
   }
 
@@ -54,5 +56,19 @@ export class FeatureManager implements ILSPFeatureManager {
     return capabilities;
   }
 
-  private _featuresRegistered: Signal<ILSPFeatureManager, IFeature>;
+  /**
+   * Get the extension factories of all clients.
+   */
+  extensionFactories(): EditorAdapter.ILSPEditorExtensionFactory[] {
+    const factories: EditorAdapter.ILSPEditorExtensionFactory[] = [];
+    for (const feature of this.features) {
+      if (!feature.extensionFactory) {
+        continue;
+      }
+      factories.push(feature.extensionFactory);
+    }
+    return factories;
+  }
+
+  private _featureRegistered: Signal<ILSPFeatureManager, IFeature>;
 }

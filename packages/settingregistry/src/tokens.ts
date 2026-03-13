@@ -3,19 +3,27 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CellType } from '@jupyterlab/nbformat';
-import { IDataConnector } from '@jupyterlab/statedb';
-import {
+import type { CellType } from '@jupyterlab/nbformat';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type {
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { ISchemaValidator } from './settingregistry';
+import { Token } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { ISchemaValidator } from './settingregistry';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
+
+/**
+ * A service to connect to the settings endpoint.
+ */
+export const ISettingConnector = new Token<ISettingConnector>(
+  '@jupyterlab/coreutils:ISettingConnector',
+  'A service to connect to the settings endpoint.'
+);
 
 /**
  * The setting registry token.
@@ -26,6 +34,14 @@ export const ISettingRegistry = new Token<ISettingRegistry>(
   Use this if you want to store settings for your application.
   See "schemaDir" for more information.`
 );
+
+/**
+ * The settings connector interface.
+ */
+export interface ISettingConnector extends IDataConnector<
+  ISettingRegistry.IPlugin,
+  string
+> {}
 
 /**
  * The settings registry interface.
@@ -480,7 +496,9 @@ export namespace ISettingRegistry {
   /**
    * An interface for manipulating the settings of a specific plugin.
    */
-  export interface ISettings extends IDisposable {
+  export interface ISettings<
+    O extends ReadonlyPartialJSONObject = ReadonlyPartialJSONObject
+  > extends IDisposable {
     /**
      * A signal that emits when the plugin's settings have changed.
      */
@@ -489,7 +507,7 @@ export namespace ISettingRegistry {
     /**
      * The composite of user settings and extension defaults.
      */
-    readonly composite: ReadonlyPartialJSONObject;
+    readonly composite: O;
 
     /**
      * The plugin's ID.
@@ -514,7 +532,7 @@ export namespace ISettingRegistry {
     /**
      * The user settings.
      */
-    readonly user: ReadonlyPartialJSONObject;
+    readonly user: O;
 
     /**
      * The published version of the NPM package containing these settings.

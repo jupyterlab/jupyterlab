@@ -27,7 +27,11 @@ export async function requestTranslationsAPI<T>(
   const settings = serverSettings ?? ServerConnection.makeSettings();
   translationsUrl =
     translationsUrl || `${settings.appUrl}/${TRANSLATIONS_SETTINGS_URL}`;
-  const requestUrl = URLExt.join(settings.baseUrl, translationsUrl, locale);
+  const translationsBase = URLExt.join(settings.baseUrl, translationsUrl);
+  const requestUrl = URLExt.join(translationsBase, locale);
+  if (!requestUrl.startsWith(translationsBase)) {
+    throw new Error('Can only be used for translations requests');
+  }
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);

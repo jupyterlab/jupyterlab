@@ -2,13 +2,14 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as renderers from './renderers';
 
@@ -148,11 +149,17 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
   setFragment(fragment: string): void {
     let el;
     try {
-      el = this.node.querySelector(
-        fragment.startsWith('#')
-          ? `#${CSS.escape(fragment.slice(1))}`
-          : fragment
-      );
+      if (fragment.startsWith('#')) {
+        const id = fragment.slice(1);
+        const escapedId = CSS.escape(id);
+        if (this.sanitizer.allowNamedProperties) {
+          el = this.node.querySelector(`#${escapedId}`);
+        } else {
+          el = this.node.querySelector(`[data-jupyter-id="${escapedId}"]`);
+        }
+      } else {
+        el = this.node.querySelector(fragment);
+      }
     } catch (error) {
       console.warn('Unable to set URI fragment identifier.', error);
     }
@@ -184,7 +191,7 @@ export class RenderedHTML extends RenderedHTMLCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderHTML({
+    return (this._rendered = renderers.renderHTML({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
@@ -194,17 +201,24 @@ export class RenderedHTML extends RenderedHTMLCommon {
       shouldTypeset: this.isAttached,
       latexTypesetter: this.latexTypesetter,
       translator: this.translator
-    });
+    }));
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -229,22 +243,30 @@ export class RenderedLatex extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderLatex({
+    return (this._rendered = renderers.renderLatex({
       host: this.node,
       source: String(model.data[this.mimeType]),
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter
-    });
+      latexTypesetter: this.latexTypesetter,
+      resolver: this.resolver
+    }));
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -306,7 +328,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderMarkdown({
+    return (this._rendered = renderers.renderMarkdown({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
@@ -317,7 +339,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       latexTypesetter: this.latexTypesetter,
       markdownParser: this.markdownParser,
       translator: this.translator
-    });
+    }));
   }
 
   /**
@@ -335,10 +357,17 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -366,23 +395,30 @@ export class RenderedSVG extends RenderedCommon {
     const metadata = model.metadata[this.mimeType] as
       | ReadonlyJSONObject
       | undefined;
-    return renderers.renderSVG({
+    return (this._rendered = renderers.renderSVG({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
       unconfined: metadata && (metadata.unconfined as boolean | undefined),
       translator: this.translator
-    });
+    }));
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -411,6 +447,24 @@ export class RenderedText extends RenderedCommon {
       host: this.node,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
+      translator: this.translator
+    });
+  }
+}
+
+export class RenderedError extends RenderedCommon {
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.addClass('jp-RenderedText');
+  }
+
+  render(model: IRenderMime.IMimeModel): Promise<void> {
+    return renderers.renderError({
+      host: this.node,
+      sanitizer: this.sanitizer,
+      source: String(model.data[this.mimeType]),
+      linkHandler: this.linkHandler,
+      resolver: this.resolver,
       translator: this.translator
     });
   }
@@ -446,5 +500,30 @@ export class RenderedJavaScript extends RenderedCommon {
       source: trans.__('JavaScript output is disabled in JupyterLab'),
       translator: this.translator
     });
+  }
+}
+
+/**
+ * The namespace for module implementation details.
+ */
+namespace Private {
+  /**
+   * Run typesetter on the given node and harden links.
+   */
+  export function typeset(
+    host: HTMLElement,
+    latexTypesetter: IRenderMime.ILatexTypesetter,
+    resolver?: IRenderMime.IResolver | null
+  ) {
+    const result = latexTypesetter.typeset(host);
+    // Harden anchors to contain secure target/rel attributes.
+    if (result instanceof Promise) {
+      // If promised was returned, await for rendering to complete.
+      result
+        .then(() => renderers.hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      renderers.hardenAnchorLinks(host, resolver);
+    }
   }
 }

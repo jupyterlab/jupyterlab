@@ -1,20 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import {
-  CodeConsole,
-  ConsolePanel,
-  ForeignHandler,
-  IConsoleTracker
-} from '@jupyterlab/console';
+import type { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+import { ForeignHandler, IConsoleTracker } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
 
 /**
@@ -94,8 +90,25 @@ function activateForeign(
         ?.enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      tracker.currentWidget === shell.currentWidget,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
+
+  const notify = () => {
+    commands.notifyCommandChanged(toggleShowAllActivity);
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     palette.addItem({

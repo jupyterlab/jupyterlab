@@ -1,18 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
-import { ISplashScreen, IThemeManager } from './tokens';
+import type { ISplashScreen, IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -25,6 +25,7 @@ const REQUEST_INTERVAL = 75;
 const REQUEST_THRESHOLD = 20;
 
 type Dict<T> = { [key: string]: T };
+type ThemedProp<T> = { light: T; dark: T };
 
 /**
  * A class that provides theme management.
@@ -61,10 +62,57 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Get the name of the preferred light theme.
+   */
+  get preferredLightTheme(): string {
+    return this._settings.composite['preferred-light-theme'] as string;
+  }
+
+  /**
+   * Get the name of the preferred dark theme.
+   */
+  get preferredDarkTheme(): string {
+    return this._settings.composite['preferred-dark-theme'] as string;
+  }
+
+  /**
+   * Get the name of the preferred theme
+   * When `adaptive-theme` is disabled, get current theme;
+   * Else, depending on the system settings, get preferred light or dark theme.
+   */
+  get preferredTheme(): string | null {
+    if (!this.isToggledAdaptiveTheme()) {
+      return this.theme;
+    }
+    if (this.isSystemColorSchemeDark()) {
+      return this.preferredDarkTheme;
+    }
+    return this.preferredLightTheme;
+  }
+
+  /**
    * The names of the registered themes.
    */
   get themes(): ReadonlyArray<string> {
     return Object.keys(this._themes);
+  }
+
+  /**
+   * Get the names of the light themes.
+   */
+  get lightThemes(): ReadonlyArray<string> {
+    return Object.entries(this._themes)
+      .filter(([_, theme]) => theme.isLight)
+      .map(([name, _]) => name);
+  }
+
+  /**
+   * Get the names of the dark themes.
+   */
+  get darkThemes(): ReadonlyArray<string> {
+    return Object.entries(this._themes)
+      .filter(([_, theme]) => !theme.isLight)
+      .map(([name, _]) => name);
   }
 
   /**
@@ -75,6 +123,16 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Test if the system's preferred color scheme is dark
+   */
+  isSystemColorSchemeDark(): boolean {
+    return (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+  }
+
+  /**
    * Get the value of a CSS variable from its key.
    *
    * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
@@ -82,8 +140,13 @@ export class ThemeManager implements IThemeManager {
    * @returns value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
+    let val = this._overrides[key];
+    if (val && typeof val !== 'string') {
+      const isLight = this._current ? this.isLight(this._current) : true;
+      val = isLight ? val.light : val.dark;
+    }
     return (
-      this._overrides[key] ??
+      val ??
       getComputedStyle(document.documentElement).getPropertyValue(`--jp-${key}`)
     );
   }
@@ -113,9 +176,6 @@ export class ThemeManager implements IThemeManager {
 
       document.body.appendChild(link);
       links.push(link);
-
-      // add any css overrides to document
-      this.loadCSSOverrides();
     });
   }
 
@@ -125,11 +185,16 @@ export class ThemeManager implements IThemeManager {
    */
   loadCSSOverrides(): void {
     const newOverrides =
-      (this._settings.user['overrides'] as Dict<string>) ?? {};
+      (this._settings.user['overrides'] as Dict<string | ThemedProp<string>>) ??
+      {};
 
     // iterate over the union of current and new CSS override keys
     Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
-      const val = newOverrides[key];
+      let val = newOverrides[key];
+      if (val && typeof val !== 'string') {
+        const isLight = this._current ? this.isLight(this._current) : true;
+        val = isLight ? val.light : val.dark;
+      }
 
       if (val && this.validateCSS(key, val)) {
         // validation succeeded, set the override
@@ -216,6 +281,20 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Set the preferred light theme.
+   */
+  setPreferredLightTheme(name: string): Promise<void> {
+    return this._settings.set('preferred-light-theme', name);
+  }
+
+  /**
+   * Set the preferred dark theme.
+   */
+  setPreferredDarkTheme(name: string): Promise<void> {
+    return this._settings.set('preferred-dark-theme', name);
+  }
+
+  /**
    * Test whether a given theme is light.
    */
   isLight(name: string): boolean {
@@ -271,6 +350,23 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Test if the user enables adaptive theme.
+   */
+  isToggledAdaptiveTheme(): boolean {
+    return !!this._settings.composite['adaptive-theme'];
+  }
+
+  /**
+   * Toggle the `adaptive-theme` setting.
+   */
+  toggleAdaptiveTheme(): Promise<void> {
+    return this._settings.set(
+      'adaptive-theme',
+      !this._settings.composite['adaptive-theme']
+    );
+  }
+
+  /**
    * Get the display name of the theme.
    */
   getDisplayName(name: string): string {
@@ -299,20 +395,35 @@ export class ThemeManager implements IThemeManager {
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {
-      // override validation is against the CSS property in the description
-      // field. Example: for key ui-font-family, .description is font-family
-      let description;
+      // Map each override key to its corresponding CSS property for
+      // validation via CSS.supports(). These must be hardcoded rather
+      // than read from schema description fields, which get translated
+      // by the i18n system and break CSS validation in non-English locales.
+      let cssProp;
       switch (key) {
+        case 'code-font-family':
+        case 'content-font-family':
+        case 'ui-font-family':
+          cssProp = 'font-family';
+          break;
         case 'code-font-size':
         case 'content-font-size1':
         case 'ui-font-size1':
-          description = 'font-size';
+          cssProp = 'font-size';
+          break;
+        case 'rendermime-error-background':
+          cssProp = 'background';
           break;
         default:
-          description = overidesSchema[key].description;
+          console.warn(
+            `No CSS property mapping for override key '${key}'. ` +
+              'CSS validation will be skipped for this key.'
+          );
           break;
       }
-      this._overrideProps[key] = description;
+      if (cssProp) {
+        this._overrideProps[key] = cssProp;
+      }
     });
   }
 
@@ -332,7 +443,15 @@ export class ThemeManager implements IThemeManager {
 
     const settings = this._settings;
     const themes = this._themes;
-    const theme = settings.composite['theme'] as string;
+
+    let theme = settings.composite['theme'] as string;
+    if (this.isToggledAdaptiveTheme()) {
+      if (this.isSystemColorSchemeDark()) {
+        theme = this.preferredDarkTheme;
+      } else {
+        theme = this.preferredLightTheme;
+      }
+    }
 
     // If another promise is outstanding, wait until it finishes before
     // attempting to load the settings. Because outstanding promises cannot
@@ -412,9 +531,15 @@ export class ThemeManager implements IThemeManager {
 
     const themeProps = this._settings.schema.properties?.theme;
     if (themeProps) {
-      themeProps.enum = Object.keys(themes).map(
-        value => themes[value].displayName ?? value
-      );
+      // Use oneOf with const/title so the stored value is always the
+      // untranslated theme name while the dropdown shows the translated
+      // displayName. Using enum with displayNames broke validation in
+      // non-English locales (see #18543).
+      delete themeProps.enum;
+      themeProps.oneOf = Object.keys(themes).map(value => ({
+        const: value,
+        title: themes[value].displayName ?? value
+      }));
     }
 
     // Unload the previously loaded theme.
@@ -423,6 +548,10 @@ export class ThemeManager implements IThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
+
+        // Load the overrides settings
+        this.loadCSSOverrides();
+
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
@@ -464,7 +593,7 @@ export class ThemeManager implements IThemeManager {
   private _current: string | null = null;
   private _host: Widget;
   private _links: HTMLLinkElement[] = [];
-  private _overrides: Dict<string> = {};
+  private _overrides: Dict<string | ThemedProp<string>> = {};
   private _overrideProps: Dict<string> = {};
   private _outstanding: Promise<void> | null = null;
   private _pending = 0;

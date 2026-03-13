@@ -3,15 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
-import { viewBreakpointIcon } from '../../icons';
-import { IDebugger } from '../../tokens';
-import { SourcePathComponent } from './sourcepath';
-import { SourcesBody } from './body';
-import { ReactWidget } from '@jupyterlab/ui-components';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import {
+  PanelWithToolbar,
+  ReactWidget,
+  ToolbarButton,
+  viewBreakpointIcon
+} from '@jupyterlab/ui-components';
 import React from 'react';
+import type { IDebugger } from '../../tokens';
+import { SourcesBody } from './body';
+import { SourcePathComponent } from './sourcepath';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -29,6 +33,10 @@ export class Sources extends PanelWithToolbar {
     this.title.label = trans.__('Source');
 
     this.toolbar.addClass('jp-DebuggerSources-header');
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      trans.__('Sources preview panel toolbar')
+    );
     const body = new SourcesBody({
       service,
       model,
@@ -43,7 +51,7 @@ export class Sources extends PanelWithToolbar {
       })
     );
     const sourcePath = ReactWidget.create(
-      <SourcePathComponent model={model} />
+      <SourcePathComponent model={model} trans={trans} />
     );
 
     this.toolbar.addItem('sourcePath', sourcePath);

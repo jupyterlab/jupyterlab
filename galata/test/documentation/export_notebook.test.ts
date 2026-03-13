@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -14,14 +13,14 @@ test.describe('Export Notebook', () => {
   test('Export Menu', async ({ page }) => {
     await page.goto();
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Lorenz.ipynb');
 
-    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 
     await page.click('text=File');
     await page.click(
@@ -30,7 +29,7 @@ test.describe('Export Notebook', () => {
 
     // Wait for Latex renderer
     // note: requires the a11y/assistive-mml MathJax extension
-    await page.waitForSelector('text=(σ, β, ρ)');
+    await page.locator('text=(σ, β, ρ)').waitFor();
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 0, width: 700, height: 700 } })
@@ -40,7 +39,7 @@ test.describe('Export Notebook', () => {
   test('Slides', async ({ page }) => {
     await page.goto();
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page
       .locator('[aria-label="File Browser Section"]')

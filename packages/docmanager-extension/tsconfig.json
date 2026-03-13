@@ -22,10 +22,16 @@
       "path": "../docregistry"
     },
     {
+      "path": "../rendermime"
+    },
+    {
       "path": "../services"
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
     },
     {
       "path": "../statusbar"

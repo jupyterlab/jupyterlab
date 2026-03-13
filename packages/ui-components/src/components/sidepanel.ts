@@ -1,11 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { AccordionPanel, Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { AccordionToolbar } from './accordiontoolbar';
 import { Toolbar } from './toolbar';
@@ -112,11 +109,6 @@ export class SidePanel extends Widget {
   private addToolbar(toolbar?: Toolbar) {
     const theToolbar = (this._toolbar = toolbar ?? new Toolbar());
     theToolbar.addClass('jp-SidePanel-toolbar');
-    theToolbar.node.setAttribute('role', 'navigation');
-    theToolbar.node.setAttribute(
-      'aria-label',
-      this._trans.__('side panel actions')
-    );
     (this.layout as PanelLayout).insertWidget(
       (this.layout as PanelLayout).widgets.length - 1,
       theToolbar

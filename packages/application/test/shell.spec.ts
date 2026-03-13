@@ -5,8 +5,9 @@ import { LabShell, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
 import { framePromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import { Message } from '@lumino/messaging';
-import { DockPanel, Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { DockPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 class ContentWidget extends Widget {
@@ -515,6 +516,63 @@ describe('LabShell', () => {
       expect(widget.isVisible).toBe(false);
       shell.mode = 'single-document';
       expect(widget.isVisible).toBe(false);
+    });
+  });
+
+  describe('#accessibility', () => {
+    it('menu handler should have a role of navigation and aria label of main', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const menu = document.getElementById('jp-menu-panel');
+      expect(menu?.getAttribute('role')).toEqual('navigation');
+      expect(menu?.getAttribute('aria-label')).toEqual('main menu');
+    });
+
+    it('top handler should have a role of banner', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'top');
+      const topHandler = document.getElementById('jp-top-panel');
+      expect(topHandler?.getAttribute('role')).toEqual('banner');
+    });
+
+    it('bottom panel should have a role of content info', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const bottomPanel = document.getElementById('jp-bottom-panel');
+      expect(bottomPanel?.getAttribute('role')).toEqual('contentinfo');
+    });
+
+    it('left handler should have a role of compelementary and aria label of main sidebar', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const leftHandler = document.getElementsByClassName('jp-mod-left');
+      expect(leftHandler[0]?.getAttribute('role')).toEqual('complementary');
+      expect(leftHandler[0]?.getAttribute('aria-label')).toEqual(
+        'main sidebar'
+      );
+    });
+
+    it('right handler should have a role of complementary and aria label of alternate sidebar', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+      const rightHandler = document.getElementsByClassName('jp-mod-right');
+      expect(rightHandler[0]?.getAttribute('role')).toEqual('complementary');
+      expect(rightHandler[0]?.getAttribute('aria-label')).toEqual(
+        'alternate sidebar'
+      );
+    });
+
+    it('dock panel should have a role of main', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const dock = document.getElementById('jp-main-dock-panel');
+      expect(dock?.getAttribute('role')).toEqual('main');
     });
   });
 });

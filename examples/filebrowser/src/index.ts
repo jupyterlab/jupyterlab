@@ -7,11 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/codemirror/style/index.css';
-import '@jupyterlab/filebrowser/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -35,15 +32,12 @@ import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationManager
-} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator, TranslationManager } from '@jupyterlab/translation';
 
 import { addIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
-const LANG = 'en';
+const LANG = 'default';
 
 async function main(): Promise<void> {
   // init translator
@@ -312,6 +306,12 @@ function createApp(
     const y = event.clientY;
     menu.open(x, y);
   });
+
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  menu.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

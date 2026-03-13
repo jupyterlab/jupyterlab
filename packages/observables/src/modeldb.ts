@@ -1,21 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONExt,
+import type {
   JSONObject,
   JSONValue,
   PartialJSONValue
 } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { IObservableJSON, ObservableJSON } from './observablejson';
-import { IObservableMap, ObservableMap } from './observablemap';
-import { IObservableString, ObservableString } from './observablestring';
-import {
-  IObservableUndoableList,
-  ObservableUndoableList
-} from './undoablelist';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { IObservableJSON } from './observablejson';
+import { ObservableJSON } from './observablejson';
+import type { IObservableMap } from './observablemap';
+import { ObservableMap } from './observablemap';
+import type { IObservableString } from './observablestring';
+import { ObservableString } from './observablestring';
+import type { IObservableUndoableList } from './undoablelist';
+import { ObservableUndoableList } from './undoablelist';
 
 /**
  * String type annotations for Observable objects that can be
@@ -150,7 +153,7 @@ export interface IModelDB extends IDisposable {
   /**
    * Get a value for a path.
    *
-   * @param path: the path for the object.
+   * @param path the path for the object.
    *
    * @returns an `IObservable`.
    */
@@ -159,7 +162,7 @@ export interface IModelDB extends IDisposable {
   /**
    * Whether the `IModelDB` has an object at this path.
    *
-   * @param path: the path for the object.
+   * @param path the path for the object.
    *
    * @returns a boolean for whether an object is at `path`.
    */
@@ -168,7 +171,7 @@ export interface IModelDB extends IDisposable {
   /**
    * Create a string and insert it in the database.
    *
-   * @param path: the path for the string.
+   * @param path the path for the string.
    *
    * @returns the string that was created.
    */
@@ -177,7 +180,7 @@ export interface IModelDB extends IDisposable {
   /**
    * Create an undoable list and insert it in the database.
    *
-   * @param path: the path for the list.
+   * @param path the path for the list.
    *
    * @returns the list that was created.
    *
@@ -190,7 +193,7 @@ export interface IModelDB extends IDisposable {
   /**
    * Create a map and insert it in the database.
    *
-   * @param path: the path for the map.
+   * @param path the path for the map.
    *
    * @returns the map that was created.
    *
@@ -203,7 +206,7 @@ export interface IModelDB extends IDisposable {
   /**
    * Create an opaque value and insert it in the database.
    *
-   * @param path: the path for the value.
+   * @param path the path for the value.
    *
    * @returns the value that was created.
    */
@@ -213,7 +216,7 @@ export interface IModelDB extends IDisposable {
    * Get a value at a path, or `undefined if it has not been set
    * That value must already have been created using `createValue`.
    *
-   * @param path: the path for the value.
+   * @param path the path for the value.
    */
   getValue(path: string): JSONValue | undefined;
 
@@ -221,16 +224,16 @@ export interface IModelDB extends IDisposable {
    * Set a value at a path. That value must already have
    * been created using `createValue`.
    *
-   * @param path: the path for the value.
+   * @param path the path for the value.
    *
-   * @param value: the new value.
+   * @param value the new value.
    */
   setValue(path: string, value: JSONValue): void;
 
   /**
    * Create a view onto a subtree of the model database.
    *
-   * @param basePath: the path for the root of the subtree.
+   * @param basePath the path for the root of the subtree.
    *
    * @returns an `IModelDB` with a view onto the original
    *   `IModelDB`, with `basePath` prepended to all paths.
@@ -250,7 +253,7 @@ export class ObservableValue implements IObservableValue {
   /**
    * Constructor for the value.
    *
-   * @param initialValue: the starting value for the `ObservableValue`.
+   * @param initialValue the starting value for the `ObservableValue`.
    */
   constructor(initialValue: JSONValue = null) {
     this._value = initialValue;
@@ -390,7 +393,7 @@ export class ModelDB implements IModelDB {
   /**
    * Get a value for a path.
    *
-   * @param path: the path for the object.
+   * @param path the path for the object.
    *
    * @returns an `IObservable`.
    */
@@ -401,7 +404,7 @@ export class ModelDB implements IModelDB {
   /**
    * Whether the `IModelDB` has an object at this path.
    *
-   * @param path: the path for the object.
+   * @param path the path for the object.
    *
    * @returns a boolean for whether an object is at `path`.
    */
@@ -412,7 +415,7 @@ export class ModelDB implements IModelDB {
   /**
    * Create a string and insert it in the database.
    *
-   * @param path: the path for the string.
+   * @param path the path for the string.
    *
    * @returns the string that was created.
    */
@@ -426,7 +429,7 @@ export class ModelDB implements IModelDB {
   /**
    * Create an undoable list and insert it in the database.
    *
-   * @param path: the path for the list.
+   * @param path the path for the list.
    *
    * @returns the list that was created.
    *
@@ -446,7 +449,7 @@ export class ModelDB implements IModelDB {
   /**
    * Create a map and insert it in the database.
    *
-   * @param path: the path for the map.
+   * @param path the path for the map.
    *
    * @returns the map that was created.
    *
@@ -464,7 +467,7 @@ export class ModelDB implements IModelDB {
   /**
    * Create an opaque value and insert it in the database.
    *
-   * @param path: the path for the value.
+   * @param path the path for the value.
    *
    * @returns the value that was created.
    */
@@ -479,7 +482,7 @@ export class ModelDB implements IModelDB {
    * Get a value at a path, or `undefined if it has not been set
    * That value must already have been created using `createValue`.
    *
-   * @param path: the path for the value.
+   * @param path the path for the value.
    */
   getValue(path: string): JSONValue | undefined {
     const val = this.get(path);
@@ -493,9 +496,9 @@ export class ModelDB implements IModelDB {
    * Set a value at a path. That value must already have
    * been created using `createValue`.
    *
-   * @param path: the path for the value.
+   * @param path the path for the value.
    *
-   * @param value: the new value.
+   * @param value the new value.
    */
   setValue(path: string, value: JSONValue): void {
     const val = this.get(path);
@@ -508,7 +511,7 @@ export class ModelDB implements IModelDB {
   /**
    * Create a view onto a subtree of the model database.
    *
-   * @param basePath: the path for the root of the subtree.
+   * @param basePath the path for the root of the subtree.
    *
    * @returns an `IModelDB` with a view onto the original
    *   `IModelDB`, with `basePath` prepended to all paths.
@@ -524,9 +527,9 @@ export class ModelDB implements IModelDB {
    * be called by user code, instead use the
    * `create*` factory methods.
    *
-   * @param path: the path to set the value at.
+   * @param path the path to set the value at.
    *
-   * @param value: the value to set at the path.
+   * @param value the value to set at the path.
    */
   set(path: string, value: IObservable): void {
     this._db.set(this._resolvePath(path), value);

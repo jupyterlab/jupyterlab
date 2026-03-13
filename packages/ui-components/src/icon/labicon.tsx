@@ -1,12 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
+import type {
+  ElementAttrs,
+  VirtualElement,
+  VirtualNode
+} from '@lumino/virtualdom';
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
@@ -42,7 +47,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * Resolve an icon name or a \{name, svgstr\} pair into an
    * actual LabIcon.
    *
-   * @param icon - either a string with the name of an existing icon
+   * @param options - icon: either a string with the name of an existing icon
    * or an object with \{name: string, svgstr: string\} fields.
    *
    * @returns a LabIcon instance
@@ -332,28 +337,39 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       return document.createElement('div');
     }
 
-    let returnSvgElement = true;
     if (container) {
       // take ownership by removing any existing children
       while (container.firstChild) {
         container.firstChild.remove();
       }
-    } else {
+    } else if (tag) {
       // create a container if needed
       container = document.createElement(tag);
-
-      returnSvgElement = false;
     }
+
+    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
+    if (!container) {
+      if (label) {
+        console.warn();
+      }
+      return svgElement;
+    }
+
     if (label != null) {
       container.textContent = label;
     }
-    Private.initContainer({ container, className, styleProps, title });
+
+    Private.initContainer({
+      container: container!,
+      className,
+      styleProps,
+      title
+    });
 
     // add the svg node to the container
-    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
     container.appendChild(svgElement);
 
-    return returnSvgElement ? svgElement : container;
+    return container;
   }
 
   render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
@@ -446,6 +462,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           container,
           label,
           title,
+          slot,
           tag = 'div',
           ...styleProps
         }: LabIcon.IProps = { ...this._props, ...props };
@@ -468,7 +485,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         });
 
         // make it so that tag can be used as a jsx component
-        const Tag = tag;
+        const Tag = tag ?? React.Fragment;
 
         // ensure that svg html is valid
         if (!(this.svgInnerHTML && this.svgReactAttrs)) {
@@ -476,8 +493,21 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           return <></>;
         }
 
+        const svgProps = { ...this.svgReactAttrs };
+        if (!tag) {
+          Object.assign(svgProps, {
+            className:
+              className || styleProps
+                ? classes(className, LabIconStyle.styleClass(styleProps))
+                : undefined,
+            title: title,
+            slot: slot
+          });
+        }
+
         const svgComponent = (
           <svg
+            {...svgProps}
             {...this.svgReactAttrs}
             dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
             ref={ref}
@@ -494,15 +524,19 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             </React.Fragment>
           );
         } else {
-          return (
-            <Tag
-              className={
+          let attributes = {};
+          if (Tag !== React.Fragment) {
+            attributes = {
+              className:
                 className || styleProps
                   ? classes(className, LabIconStyle.styleClass(styleProps))
-                  : undefined
-              }
-              title={title}
-            >
+                  : undefined,
+              title: title,
+              slot: slot
+            };
+          }
+          return (
+            <Tag {...attributes}>
               {svgComponent}
               {label}
             </Tag>
@@ -552,6 +586,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
       if (title) {
         Private.setTitleSvg(svgElement, title);
+      } else {
+        // mark as a decorative
+        svgElement.setAttribute('aria-hidden', 'true');
       }
     }
 
@@ -670,13 +707,22 @@ export namespace LabIcon {
     /**
      * HTML element tag used to create the icon's outermost container node,
      * if no container is passed in
+     *
+     * #### Notes
+     * If `null` is provided and no container is defined, the icon SVG will return directly
+     * ignoring all other attributes (label, title,...)
      */
-    tag?: 'div' | 'span';
+    tag?: 'div' | 'span' | null;
 
     /**
      * Optional title that will be set on the icon's outermost container node
      */
     title?: string;
+
+    /**
+     * Optional slot property to specify the position of the icon in the template
+     */
+    slot?: string | null;
   }
 
   export interface IResolverProps {
@@ -727,6 +773,7 @@ namespace Private {
     label,
     title,
     tag = 'div',
+    slot,
     ...styleProps
   }: LabIcon.IProps): HTMLElement {
     if (container?.className === className) {
@@ -741,7 +788,7 @@ namespace Private {
       }
     } else {
       // create a container if needed
-      container = document.createElement(tag);
+      container = document.createElement(tag ?? 'div');
     }
     if (label != null) {
       container.textContent = label;
@@ -764,7 +811,7 @@ namespace Private {
       ref: LabIcon.IReactRef
     ) => {
       // make it so that tag can be used as a jsx component
-      const Tag = tag;
+      const Tag = tag ?? 'div';
 
       if (container) {
         initContainer({ container, className, styleProps, title });
@@ -878,7 +925,6 @@ namespace Private {
       protected _rendererOptions?: LabIcon.IRendererOptions
     ) {}
 
-    // eslint-disable-next-line
     render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {}
     unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
   }

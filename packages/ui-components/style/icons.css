@@ -295,7 +295,7 @@
    splash, the splash icon can loose theming. To prevent that, we set a
    default for its color variable */
 :root {
-  --jp-warn-color0: var(--md-orange-700);
+  --jp-warn-color0: var(--md-orange-700, #f57c00);
 }
 
 /* not sure what to do with this one, used in filebrowser listing */

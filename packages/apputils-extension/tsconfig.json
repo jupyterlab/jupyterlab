@@ -19,9 +19,6 @@
       "path": "../docregistry"
     },
     {
-      "path": "../filebrowser"
-    },
-    {
       "path": "../mainmenu"
     },
     {
@@ -44,6 +41,9 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../workspaces"
     }
   ]
 }

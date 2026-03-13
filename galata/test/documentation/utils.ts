@@ -3,9 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+
+/**
+ * Filter directory content
+ *
+ * @param array Array of content models
+ * @returns Filtered array
+ */
+export function filterContent(array: any[]): any[] {
+  return array.filter(
+    item =>
+      item['type'] !== 'directory' ||
+      !(item['name'] as string).startsWith('test-')
+  );
+}
 
 /**
  * Generate a SVG arrow to inject in a HTML document.
@@ -74,12 +88,12 @@ export interface IPositionInElement {
 /**
  * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
  *
- * @param element A playwright handle for the target DOM element
+ * @param element A playwright handle or locator for the target DOM element
  * @param position A position within the target element (default: bottom right quarter).
  * @returns The svg to inject in the page
  */
 export async function positionMouseOver(
-  element: ElementHandle,
+  element: ElementHandle | Locator,
   position: IPositionInElement = {}
 ): Promise<string> {
   const top = position.top ?? 0.75;
@@ -93,39 +107,6 @@ export async function positionMouseOver(
   });
 }
 
-/**
- * Set the sidebar width
- *
- * @param page Page object
- * @param width Sidebar width in pixels
- * @param side Which sidebar to set: 'left' or 'right'
- */
-export async function setSidebarWidth(
-  page: Page,
-  width = 251,
-  side: 'left' | 'right' = 'left'
-): Promise<void> {
-  const handles = page.locator(
-    '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
-  );
-  const splitHandle =
-    side === 'left'
-      ? await handles.first().elementHandle()
-      : await handles.last().elementHandle();
-  const handleBBox = await splitHandle.boundingBox();
-
-  await page.mouse.move(
-    handleBBox.x + 0.5 * handleBBox.width,
-    handleBBox.y + 0.5 * handleBBox.height
-  );
-  await page.mouse.down();
-  await page.mouse.move(
-    side === 'left' ? 33 + width : page.viewportSize().width - 33 - width,
-    handleBBox.y + 0.5 * handleBBox.height
-  );
-  await page.mouse.up();
-}
-
 export async function stubGitHubUserIcons(page: Page): Promise<void> {
   // stub out github user icons
   // only first and last icon for now
@@ -137,4 +118,47 @@ export async function stubGitHubUserIcons(page: Page): Promise<void> {
       body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
     });
   });
+}
+
+export async function freeezeKernelIds(
+  node: Locator,
+  mockMap: Record<string, string>
+): Promise<void> {
+  const KERNEL_ID_SELECTOR = '.jp-RunningSessions-item-label-kernel-id';
+  // wait for the kernel IDs to be rendered.
+  await node.locator(KERNEL_ID_SELECTOR).first().waitFor();
+
+  return node.evaluate(
+    (node, [KERNEL_ID_SELECTOR, mockMap]) => {
+      const isTree = node.querySelector('.jp-TreeView');
+      for (const [notebook, kernelId] of Object.entries(mockMap)) {
+        const selector = isTree
+          ? `[title*='${notebook}'] ${KERNEL_ID_SELECTOR}`
+          : `${KERNEL_ID_SELECTOR}[title='${notebook}']`;
+        const element = node.querySelector(selector) as HTMLElement;
+        element.innerText = `(${kernelId})`;
+      }
+    },
+    [KERNEL_ID_SELECTOR, mockMap]
+  );
+}
+
+export async function setTerminalTitle(page: Page, title: string) {
+  const terminal = page.locator('.jp-Terminal-body');
+  await terminal.waitFor();
+  await terminal.focus();
+  if (process.platform === 'win32') {
+    const escapedTitle = title.replace(/"/g, '""').replace(/'/g, "''");
+    // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe
+    await page.keyboard.type(
+      `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`
+    );
+  } else {
+    // Linux and Mac
+    const escapedTitle = title.replace(/'/g, `'\\''`);
+    await page.keyboard.type(
+      `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`
+    );
+  }
+  await page.keyboard.press('Enter');
 }

@@ -1,4 +1,5 @@
 {
-  "out": "../../docs/api/codemirror-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "name": "codemirror-extension"
 }

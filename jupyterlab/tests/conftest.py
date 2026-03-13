@@ -20,6 +20,14 @@ def labserverapp(jp_serverapp, make_labserver_extension_app):
     app.handlers.extend(
         [
             (
+                r"/custom/(.*)(?<!\.js)$",
+                jp_serverapp.web_app.settings["static_handler_class"],
+                {
+                    "path": jp_serverapp.web_app.settings["static_custom_path"],
+                    "no_cache_paths": ["/"],  # don't cache anything in custom
+                },
+            ),
+            (
                 check_update_handler_path,
                 CheckForUpdateHandler,
                 {

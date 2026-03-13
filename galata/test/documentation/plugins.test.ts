@@ -2,57 +2,102 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { test } from '@jupyterlab/galata';
-import { Token } from '@lumino/coreutils';
+import type { Token } from '@lumino/coreutils';
 import { expect } from '@playwright/test';
 import * as fs from 'fs-extra';
+
+// As the test is run in the documentation environment, some plugins and tokens are not from core.
+const IGNORED_PLUGINS = [
+  /^@jupyterlab\/geojson-extension:factory$/,
+  /^@jupyterlab\/galata-extension:helpers$/,
+  /^@jupyter-widgets\//,
+  /^jupyterlab_pygments/,
+  // Deprecated plugins
+  /^@jupyterlab\/services-extension:default-content-provider$/,
+  /^@jupyterlab\/services-extension:content-provider-warning$/
+];
 
 test('All plugins and tokens must have a description', async ({
   page
 }, testInfo) => {
-  const { plugins, tokens } = await page.evaluate(async () => {
-    // As the test is ran in the documentation environments, some plugins and tokens are not from core.
-    const IGNORED_PLUGINS = [
-      '@jupyterlab/geojson-extension:factory',
-      '@jupyterlab/galata-extension:helpers'
-    ];
-
+  const { plugins, tokens } = await page.evaluate(async ignored => {
     const pluginIDs = window.jupyterapp.listPlugins();
+    pluginIDs.sort();
 
     const plugins: Record<string, string> = {};
-    const tokens: Record<string, string> = {};
+    const tokens: Record<string, string | undefined> = {};
     pluginIDs.forEach(id => {
-      if (!id.startsWith('@jupyterlab/') || IGNORED_PLUGINS.includes(id)) {
+      if (
+        !id.startsWith('@jupyterlab/') ||
+        ignored.some(pattern => pattern.test(id))
+      ) {
         return;
       }
 
       plugins[id] = window.jupyterapp.getPluginDescription(id);
       const plugin = (
-        (window.jupyterapp as any)._plugins as Map<
+        (window.jupyterapp as any).pluginRegistry._plugins as Map<
           string,
-          { provides: Token<any> | null }
+          {
+            optional?: Token<any>[];
+            provides?: Token<any>;
+            requires: Token<any>[];
+          }
         >
       ).get(id);
-      if (plugin?.provides) {
-        const token = plugin.provides;
+      const referencedTokens = [
+        ...(plugin?.provides ? [plugin?.provides] : []),
+        ...(plugin?.optional ?? []),
+        ...(plugin?.requires ?? [])
+      ];
+      for (const token of referencedTokens) {
         tokens[token.name] = token.description;
       }
     });
 
-    return Promise.resolve({ plugins, tokens });
-  });
+    // sort the tokens
+    const tokenKeys = Object.keys(tokens).sort();
+    const sortedTokens: Record<string, string | undefined> = {};
+    tokenKeys.forEach(key => {
+      sortedTokens[key] = tokens[key];
+    });
+
+    return Promise.resolve({ plugins, tokens: sortedTokens });
+  }, IGNORED_PLUGINS);
 
   if (!(await fs.pathExists(testInfo.snapshotDir))) {
     await fs.mkdir(testInfo.snapshotDir);
   }
-  await fs.writeJSON(testInfo.snapshotPath('plugins.json'), plugins, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
 
-  await fs.writeJSON(testInfo.snapshotPath('tokens.json'), tokens, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
+  const pluginsSnapshotPath = testInfo.snapshotPath('plugins.json');
+  const tokensSnapshotPath = testInfo.snapshotPath('tokens.json');
+
+  const existingPlugins: Record<string, string> =
+    await fs.readJSON(pluginsSnapshotPath);
+  const existingTokens: Record<string, string | undefined> =
+    await fs.readJSON(tokensSnapshotPath);
+
+  // Update snapshots only when explicitly requested with --update-snapshots
+  if (testInfo.config.updateSnapshots === 'all') {
+    await fs.writeJSON(pluginsSnapshotPath, plugins, {
+      encoding: 'utf-8',
+      spaces: 2
+    });
+
+    await fs.writeJSON(tokensSnapshotPath, tokens, {
+      encoding: 'utf-8',
+      spaces: 2
+    });
+  }
+
+  expect(
+    plugins,
+    'Plugins list has changed. Run with --update-snapshots to update.'
+  ).toEqual(existingPlugins);
+  expect(
+    tokens,
+    'Tokens list has changed. Run with --update-snapshots to update.'
+  ).toEqual(existingTokens);
 
   // All plugins must define a description
   const missingPluginDescriptions = Object.entries(plugins).filter(
@@ -66,4 +111,23 @@ test('All plugins and tokens must have a description', async ({
   // Test against empty list to get directly the plugins/tokens missing description in test output
   expect.soft(missingPluginDescriptions).toEqual([]);
   expect(missingTokenDescriptions).toEqual([]);
+});
+
+test('Plugins must be named using the same convention', async ({
+  page
+}, testInfo) => {
+  const pluginIDs = await page.evaluate(async ignored => {
+    return window.jupyterapp.listPlugins().filter(id => {
+      return !ignored.some(pattern => pattern.test(id));
+    });
+  }, IGNORED_PLUGINS);
+
+  // Create a list so it's easier to find the plugins not following the convention
+  const invalidNames = pluginIDs.filter(id => {
+    // Plugin ids should match the @jupyterlab/<name>-extension:<type> convention
+    const pattern = /^@jupyterlab\/[a-z0-9-]+?-extension:[a-zA-Z0-9-]+$/;
+    return !pattern.test(id);
+  });
+
+  expect(invalidNames).toEqual([]);
 });

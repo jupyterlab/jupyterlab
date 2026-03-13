@@ -1,15 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
-import {
-  IOutputModel,
-  IRenderMimeRegistry,
-  OutputModel
-} from '@jupyterlab/rendermime';
-import { ISignal, Signal } from '@lumino/signaling';
-import {
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IOutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaModel } from '@jupyterlab/outputarea';
+import type { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { OutputModel } from '@jupyterlab/rendermime';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type {
   IContentChange,
   ILogger,
   ILoggerOutputAreaModel,
@@ -193,7 +192,7 @@ export class Logger implements ILogger {
   /**
    * Construct a Logger.
    *
-   * @param source - The name of the log source.
+   * @param options Constructor options
    */
   constructor(options: Logger.IOptions) {
     this.source = options.source;
@@ -201,6 +200,7 @@ export class Logger implements ILogger {
       contentFactory: new LogConsoleModelContentFactory(),
       maxLength: options.maxLength
     });
+    this._level = options.level ?? 'warning';
   }
 
   /**
@@ -408,10 +408,16 @@ export class Logger implements ILogger {
   private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
   private _version = 0;
-  private _level: LogLevel = 'warning';
+  private _level: LogLevel;
 }
 
+/**
+ * The namespace for Logger class statics.
+ */
 export namespace Logger {
+  /**
+   * The options used to initialize a Logger.
+   */
   export interface IOptions {
     /**
      * The log source identifier.
@@ -421,10 +427,20 @@ export namespace Logger {
      * The maximum number of messages to store.
      */
     maxLength: number;
+    /**
+     * The default log level.
+     */
+    level?: LogLevel;
   }
 }
 
+/**
+ * The namespace for Logger class private statics.
+ */
 namespace Private {
+  /**
+   * The log level enum.
+   */
   export enum LogLevel {
     debug,
     info,

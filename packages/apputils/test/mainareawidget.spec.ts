@@ -23,6 +23,25 @@ describe('@jupyterlab/apputils', () => {
         expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
         expect(widget.toolbar).toBe(toolbar);
       });
+
+      it('toolbar should have an aria label of main area toolbar and a role of toolbar', () => {
+        const content = new Widget();
+        const toolbar = new Toolbar();
+        const widget = new MainAreaWidget({ content, toolbar });
+        expect(widget.toolbar.node.getAttribute('aria-label')).toEqual(
+          'main area toolbar'
+        );
+        expect(widget.toolbar.node.getAttribute('role')).toEqual('toolbar');
+      });
+
+      it('content should have an aria-label of main area content and a role of region', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        expect(widget.content.node.getAttribute('aria-label')).toEqual(
+          'main area content'
+        );
+        expect(widget.content.node.getAttribute('role')).toEqual('region');
+      });
     });
 
     describe('contentHeader', () => {

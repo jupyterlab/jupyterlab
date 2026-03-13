@@ -2,9 +2,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Session, TerminalAPI, User } from '@jupyterlab/services';
-import {
-  test as base,
+import type { Kernel, Session, TerminalAPI, User } from '@jupyterlab/services';
+import type {
   Page,
   PlaywrightTestArgs,
   PlaywrightTestOptions,
@@ -12,10 +11,11 @@ import {
   PlaywrightWorkerOptions,
   TestType
 } from '@playwright/test';
+import { test as base } from '@playwright/test';
 import * as path from 'path';
 import { ContentsHelper } from './contents';
 import { galata } from './galata';
-import { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
+import type { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
 
 /**
  * Galata test arguments
@@ -56,6 +56,22 @@ export type GalataOptions = {
    * Default: true
    */
   autoGoto: boolean;
+  /**
+   * Whether to reset workspace state when loading the page.
+   *
+   * Default: true.
+   */
+  resetWorkspace: boolean;
+  /**
+   * Kernels created during the test.
+   *
+   * Possible values are:
+   * - null: The kernels API won't be mocked
+   * - Map<string, Kernel.IModel>: The kernels created during a test.
+   *
+   * By default the kernels created during a test will be tracked and disposed at the end.
+   */
+  kernels: Map<string, Kernel.IModel> | null;
   /**
    * Mock JupyterLab config in-memory or not.
    *
@@ -180,6 +196,30 @@ export const test: TestType<
    * Note: Setting it to false allows to register new route mock-ups for example.
    */
   autoGoto: [true, { option: true }],
+  /**
+   * Whether to reset workspace state when loading the page.
+   *
+   * Default: true.
+   */
+  resetWorkspace: [true, { option: true }],
+  /**
+   * Kernels created during the test.
+   *
+   * Possible values are:
+   * - null: The kernels API won't be mocked
+   * - Map<string, Kernel.IModel>: The kernels created during a test.
+   *
+   * By default the kernels created during a test will be tracked and disposed at the end.
+   */
+  kernels: async ({ request }, use) => {
+    const kernels = new Map<string, Kernel.IModel>();
+
+    await use(kernels);
+
+    if (kernels.size > 0) {
+      await galata.Mock.clearRunners(request, [...kernels.keys()], 'kernels');
+    }
+  },
   /**
    * Mock JupyterLab config in-memory or not.
    *
@@ -321,9 +361,7 @@ export const test: TestType<
       page: Page,
       helpers: IJupyterLabPage
     ): Promise<void> => {
-      await page.waitForSelector('#jupyterlab-splash', {
-        state: 'detached'
-      });
+      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
       await helpers.waitForCondition(() => {
         return helpers.activity.isTabActive('Launcher');
       });
@@ -355,11 +393,13 @@ export const test: TestType<
       appPath,
       autoGoto,
       baseURL,
+      kernels,
       mockConfig,
       mockSettings,
       mockState,
       mockUser,
       page,
+      resetWorkspace,
       sessions,
       terminals,
       tmpPath,
@@ -367,21 +407,29 @@ export const test: TestType<
     },
     use
   ) => {
-    await use(
-      await galata.initTestPage(
-        appPath,
-        autoGoto,
-        baseURL!,
-        mockConfig,
-        mockSettings,
-        mockState,
-        mockUser,
-        page,
-        sessions,
-        terminals,
-        tmpPath,
-        waitForApplication
-      )
-    );
+    try {
+      await use(
+        await galata.initTestPage(
+          appPath,
+          autoGoto,
+          baseURL!,
+          mockConfig,
+          mockSettings,
+          mockState,
+          mockUser,
+          page,
+          sessions,
+          terminals,
+          tmpPath,
+          waitForApplication,
+          kernels,
+          resetWorkspace
+        )
+      );
+    } finally {
+      if (!page.isClosed()) {
+        await page.unrouteAll({ behavior: 'ignoreErrors' });
+      }
+    }
   }
 });

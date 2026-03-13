@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * A list which can be observed for changes.
@@ -95,7 +96,7 @@ export interface IObservableList<T> extends IDisposable, Iterable<T> {
   /**
    * Move a value from one index to another.
    *
-   * @parm fromIndex - The index of the element to move.
+   * @param fromIndex - The index of the element to move.
    *
    * @param toIndex - The index to move the element to.
    *
@@ -241,7 +242,12 @@ export namespace IObservableList {
     /**
      * An item was set in the list.
      */
-    | 'set';
+    | 'set'
+
+    /**
+     * The list was cleared.
+     */
+    | 'clear';
 
   /**
    * The changed args object which is emitted by an observable list.
@@ -489,6 +495,7 @@ export class ObservableList<T> implements IObservableList<T> {
     const index = ArrayExt.findFirstIndex(this._array, item => {
       return itemCmp(item, value);
     });
+    if (index < 0) return index;
     this.remove(index);
     return index;
   }
@@ -538,7 +545,7 @@ export class ObservableList<T> implements IObservableList<T> {
     const copy = this._array.slice();
     this._array.length = 0;
     this._changed.emit({
-      type: 'remove',
+      type: 'clear',
       oldIndex: 0,
       newIndex: 0,
       newValues: [],
@@ -549,7 +556,7 @@ export class ObservableList<T> implements IObservableList<T> {
   /**
    * Move a value from one index to another.
    *
-   * @parm fromIndex - The index of the element to move.
+   * @param fromIndex - The index of the element to move.
    *
    * @param toIndex - The index to move the element to.
    *

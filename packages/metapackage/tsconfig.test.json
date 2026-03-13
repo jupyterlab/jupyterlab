@@ -18,6 +18,9 @@
       "path": "../attachments"
     },
     {
+      "path": "../audio-extension"
+    },
+    {
       "path": "../cell-toolbar"
     },
     {
@@ -165,6 +168,12 @@
       "path": "../mathjax-extension"
     },
     {
+      "path": "../mermaid"
+    },
+    {
+      "path": "../mermaid-extension"
+    },
+    {
       "path": "../metadataform"
     },
     {
@@ -189,6 +198,12 @@
       "path": "../pdf-extension"
     },
     {
+      "path": "../pluginmanager"
+    },
+    {
+      "path": "../pluginmanager-extension"
+    },
+    {
       "path": "../property-inspector"
     },
     {
@@ -208,6 +223,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../services-extension"
     },
     {
       "path": "../settingeditor"
@@ -240,6 +258,9 @@
       "path": "../theme-dark-extension"
     },
     {
+      "path": "../theme-dark-high-contrast-extension"
+    },
+    {
       "path": "../theme-light-extension"
     },
     {
@@ -268,6 +289,15 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../video-extension"
+    },
+    {
+      "path": "../workspaces"
+    },
+    {
+      "path": "../workspaces-extension"
     },
     {
       "path": "."

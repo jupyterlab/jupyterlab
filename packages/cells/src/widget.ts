@@ -3,74 +3,74 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Extension } from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
 
 import { EditorView } from '@codemirror/view';
 
+import { ElementExt } from '@lumino/domutils';
+
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils } from '@jupyterlab/apputils';
 
-import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { DirListing } from '@jupyterlab/filebrowser';
+import type { DirListing } from '@jupyterlab/filebrowser';
 
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 
+import type { IOutputPrompt, IStdin } from '@jupyterlab/outputarea';
 import {
-  IOutputPrompt,
-  IStdin,
   OutputArea,
   OutputPrompt,
   SimplifiedOutputArea,
   Stdin
 } from '@jupyterlab/outputarea';
 
-import {
-  imageRendererFactory,
-  IRenderMime,
-  IRenderMimeRegistry,
-  MimeModel
-} from '@jupyterlab/rendermime';
+import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { imageRendererFactory, MimeModel } from '@jupyterlab/rendermime';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { IMapChange } from '@jupyter/ydoc';
+import type { IMapChange } from '@jupyter/ydoc';
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { addIcon } from '@jupyterlab/ui-components';
+import { addIcon, collapseIcon, expandIcon } from '@jupyterlab/ui-components';
 
-import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { some } from '@lumino/algorithm';
 
-import { Drag } from '@lumino/dragdrop';
+import type { Drag } from '@lumino/dragdrop';
 
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 
 import { Debouncer } from '@lumino/polling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
-import {
-  CellFooter,
-  CellHeader,
-  ICellFooter,
-  ICellHeader
-} from './headerfooter';
+import type { ICellFooter, ICellHeader } from './headerfooter';
+import { CellFooter, CellHeader } from './headerfooter';
 
-import { IInputPrompt, InputArea, InputPrompt } from './inputarea';
+import type { IInputPrompt } from './inputarea';
+import { InputArea, InputPrompt } from './inputarea';
 
-import {
+import type {
   CellModel,
   IAttachmentsCellModel,
   ICellModel,
@@ -167,11 +167,6 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
 
 /**
- * The text applied to an empty markdown cell.
- */
-const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
-
-/**
  * The timeout to wait for change activity to have ceased before rendering.
  */
 const RENDER_TIMEOUT = 1000;
@@ -202,9 +197,12 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     // Set up translator for aria labels
     this.translator = options.translator ?? nullTranslator;
 
-    this._editorConfig = options.editorConfig ?? {};
+    // For cells disable searching with CodeMirror search panel.
+    this._editorConfig = { searchWithCM: false, ...options.editorConfig };
+    this._editorExtensions = options.editorExtensions ?? [];
+    this._editorExtensions.push(this._scrollHandlerExtension);
     this._placeholder = true;
-    this._inViewport = false;
+    this._inViewport = null;
     this.placeholder = options.placeholder ?? true;
 
     model.metadataChanged.connect(this.onMetadataChanged, this);
@@ -237,9 +235,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Whether the cell is in viewport or not.
+   *
+   * #### Notes
+   * This property is managed by the windowed container which holds the cell.
+   * When a cell is not in a windowed container, it always returns `false`,
+   * but this may change in the future major version.
    */
   get inViewport(): boolean {
-    return this._inViewport;
+    return this._inViewport ?? false;
   }
   set inViewport(v: boolean) {
     if (this._inViewport !== v) {
@@ -309,11 +312,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Cell headings
+   *
+   * @deprecated Use the asynchronous {@link getHeadings} method instead.
+   * This getter only returns the last cached value.
    */
   get headings(): Cell.IHeading[] {
     return new Array<Cell.IHeading>();
   }
 
+  /**
+   * Async Cell headings
+   *
+   */
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
+    return [];
+  }
   /**
    * Get the model used by the cell.
    */
@@ -394,8 +408,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Set the prompt for the widget.
+   * @deprecated - set the `executionState` on the model instead.
    */
   setPrompt(value: string): void {
+    return this._setPrompt(value);
+  }
+
+  /**
+   * Set the prompt for the widget.
+   *
+   * Note: this method is protected because it is needed in the CodeCell subclass,
+   * but it cannot be defined there because input is private to Cell class.
+   */
+  protected _setPrompt(value: string): void {
     this.prompt = value;
     this._input?.setPrompt(value);
   }
@@ -546,8 +571,15 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
-      this.editor.setOptions(this._editorConfig);
+      this.editor.setBaseOptions(this._editorConfig);
     }
+  }
+
+  /**
+   * Signal emitted when cell requests scrolling to its element.
+   */
+  get scrollRequested(): ISignal<Cell, Cell.IScrollRequest> {
+    return this._scrollRequested;
   }
 
   /**
@@ -614,7 +646,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * @returns Editor options
    */
   protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
-    return { config: this.editorConfig };
+    return { config: this.editorConfig, extensions: this._editorExtensions };
   }
 
   /**
@@ -691,13 +723,43 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected prompt = '';
   protected translator: ITranslator;
   protected _displayChanged = new Signal<this, void>(this);
+  protected _scrollRequested = new Signal<Cell, Cell.IScrollRequest>(this);
+  protected _inViewport: boolean | null;
+
+  /**
+   * Editor extension emitting `scrollRequested` signal on scroll.
+   *
+   * Scrolling within editor will be prevented when a cell is out out viewport.
+   * Windowed containers including cells should listen to the scroll request
+   * signal and invoke the `scrollWithinCell()` callback after scrolling the cell
+   * back into the view (and after updating the `inViewport` property).
+   */
+  private _scrollHandlerExtension = EditorView.scrollHandler.of(
+    (view, range, options) => {
+      // When cell is in the viewport we can scroll within the editor immediately.
+      // When cell is out of viewport, the windowed container needs to first
+      // scroll the cell into the viewport (otherwise CodeMirror is unable to
+      // calculate the correct scroll delta) before invoking scrolling in editor.
+      const inWindowedContainer = this._inViewport !== null;
+      const preventDefault = inWindowedContainer && !this._inViewport;
+      this._scrollRequested.emit({
+        defaultPrevented: preventDefault,
+        scrollWithinCell: () => {
+          view.dispatch({
+            effects: EditorView.scrollIntoView(range, options)
+          });
+        }
+      });
+      return preventDefault;
+    }
+  );
 
   private _editorConfig: Record<string, any> = {};
+  private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
   private _inputWrapper: Widget | null;
   private _inputPlaceholder: InputPlaceholder | null;
-  private _inViewport: boolean;
   private _inViewportChanged: Signal<Cell, boolean> = new Signal<Cell, boolean>(
     this
   );
@@ -749,6 +811,11 @@ export namespace Cell {
      * The maximum number of output items to display in cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder?: boolean;
 
     /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
@@ -815,8 +882,7 @@ export namespace Cell {
    * widgets.
    */
   export interface IContentFactory
-    extends OutputArea.IContentFactory,
-      InputArea.IContentFactory {
+    extends OutputArea.IContentFactory, InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */
@@ -899,6 +965,25 @@ export namespace Cell {
        */
       editorFactory: CodeEditor.Factory;
     }
+  }
+
+  /**
+   * Value of the signal emitted by cell on editor scroll request.
+   */
+  export interface IScrollRequest {
+    /**
+     * Scrolls to the target cell part, fulfilling the scroll request.
+     *
+     * ### Notes
+     * This method is intended for use by windowed containers that
+     * require the cell to be first scrolled into the viewport to
+     * then enable proper scrolling within cell.
+     */
+    scrollWithinCell: (options: { scroller: HTMLElement }) => void;
+    /**
+     * Whether the default scrolling was prevented due to the cell being out of viewport.
+     */
+    defaultPrevented: boolean;
   }
 }
 
@@ -1017,13 +1102,18 @@ export class CodeCell extends Cell<ICodeCellModel> {
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
       promptOverlay: true,
-      inputHistoryScope: options.inputHistoryScope
+      inputHistoryScope: options.inputHistoryScope,
+      showInputPlaceholder: options.showInputPlaceholder
     }));
+    output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
+
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
     });
-
+    output.initialize.connect(() => {
+      this.updatePromptOverlayIcon();
+    });
     // Defer setting placeholder as OutputArea must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
 
@@ -1031,6 +1121,65 @@ export class CodeCell extends Cell<ICodeCellModel> {
     model.outputs.stateChanged.connect(this.onOutputChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
   }
+
+  /**
+   * Detect the movement of the caret in the output area.
+   *
+   * Emits scroll request if the caret moved.
+   */
+  private _detectCaretMovementInOuput = (e: KeyboardEvent) => {
+    const inWindowedContainer = this._inViewport !== null;
+    const defaultPrevented = inWindowedContainer && !this._inViewport;
+
+    // Because we do not want to scroll on any key, but only on keys which
+    // move the caret (this on keys which cause input and on keys like left,
+    // right, top, bottom arrow, home, end, page down/up - but only if the
+    // cursor is not at the respective end of the input) we need to listen
+    // to the `selectionchange` event on target inputs/textareas, etc.
+    const target = e.target;
+
+    if (!target || !(target instanceof HTMLElement)) {
+      return;
+    }
+
+    // Make sure the previous listener gets disconnected
+    if (this._lastTarget) {
+      this._lastTarget.removeEventListener(
+        'selectionchange',
+        this._lastOnCaretMovedHandler
+      );
+      document.removeEventListener(
+        'selectionchange',
+        this._lastOnCaretMovedHandler
+      );
+    }
+
+    const onCaretMoved = () => {
+      this._scrollRequested.emit({
+        scrollWithinCell: ({ scroller }) => {
+          ElementExt.scrollIntoViewIfNeeded(scroller, target);
+        },
+        defaultPrevented
+      });
+    };
+
+    // Remember the most recent target/handler to disconnect them next time.
+    this._lastTarget = target;
+    this._lastOnCaretMovedHandler = onCaretMoved;
+
+    // Firefox only supports `selectionchange` on the actual input element,
+    // all other browsers only support it on the top-level document.
+    target.addEventListener('selectionchange', onCaretMoved, { once: true });
+    document.addEventListener('selectionchange', onCaretMoved, {
+      once: true
+    });
+
+    // Schedule removal of the listener.
+    setTimeout(() => {
+      target.removeEventListener('selectionchange', onCaretMoved);
+      document.removeEventListener('selectionchange', onCaretMoved);
+    }, 250);
+  };
 
   /**
    * Maximum number of outputs to display.
@@ -1047,7 +1196,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
     super.initializeDOM();
 
-    this.setPrompt(this.prompt);
+    this._updatePrompt();
 
     // Insert the output before the cell footer.
     const outputWrapper = (this._outputWrapper = new Panel());
@@ -1064,7 +1213,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this._output.outputLengthChanged.connect(this._outputLengthHandler, this);
     outputWrapper.addWidget(this._output);
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(layout.widgets.length - 1, new ResizeHandle(this.node));
+    const resizeHandle = new ResizeHandle(this.node);
+    resizeHandle.sizeChanged.connect(this._sizeChangedHandler, this);
+    layout.insertWidget(layout.widgets.length - 1, resizeHandle);
     layout.insertWidget(layout.widgets.length - 1, outputWrapper);
 
     if (this.model.isDirty) {
@@ -1138,11 +1289,15 @@ export class CodeCell extends Cell<ICodeCellModel> {
     super.initializeState();
     this.loadScrolledState();
 
-    this.setPrompt(`${this.model.executionCount || ''}`);
+    this._updatePrompt();
     return this;
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
       const headings: Cell.IHeading[] = [];
 
@@ -1164,9 +1319,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
         // Parse HTML output
         if (htmlType) {
+          let htmlData = m.data[htmlType] as string | string[];
+          if (typeof htmlData !== 'string') {
+            htmlData = htmlData.join('\n');
+          }
           headings.push(
             ...TableOfContentsUtils.getHTMLHeadings(
-              this._rendermime.sanitizer.sanitize(m.data[htmlType] as string)
+              this._rendermime.sanitizer.sanitize(htmlData)
             ).map(heading => {
               return {
                 ...heading,
@@ -1176,10 +1335,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
+          const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
+            m.data[mdType] as string,
+            this._rendermime.markdownParser
+          );
+
           headings.push(
-            ...TableOfContentsUtils.Markdown.getHeadings(
-              m.data[mdType] as string
-            ).map(heading => {
+            ...mdHeading.map(heading => {
               return {
                 ...heading,
                 outputIndex: j,
@@ -1189,7 +1351,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
           );
         }
       }
-
       this._headingsCache = headings;
     }
 
@@ -1248,26 +1409,30 @@ export class CodeCell extends Cell<ICodeCellModel> {
     // to changes in metadata until we have fully committed our changes.
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
-    this.model.sharedModel.transact(() => {
-      super.saveCollapseState();
+    this.model.sharedModel.transact(
+      () => {
+        super.saveCollapseState();
 
-      const collapsed = this.model.getMetadata('collapsed');
+        const collapsed = this.model.getMetadata('collapsed');
 
-      if (
-        (this.outputHidden && collapsed === true) ||
-        (!this.outputHidden && collapsed === undefined)
-      ) {
-        return;
-      }
+        if (
+          (this.outputHidden && collapsed === true) ||
+          (!this.outputHidden && collapsed === undefined)
+        ) {
+          return;
+        }
 
-      // Do not set jupyter.outputs_hidden since it is redundant. See
-      // and https://github.com/jupyter/nbformat/issues/137
-      if (this.outputHidden) {
-        this.model.setMetadata('collapsed', true);
-      } else {
-        this.model.deleteMetadata('collapsed');
-      }
-    }, false);
+        // Do not set jupyter.outputs_hidden since it is redundant. See
+        // and https://github.com/jupyter/nbformat/issues/137
+        if (this.outputHidden) {
+          this.model.setMetadata('collapsed', true);
+        } else {
+          this.model.deleteMetadata('collapsed');
+        }
+      },
+      false,
+      'silent-change'
+    );
   }
 
   /**
@@ -1293,8 +1458,41 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.syncScrolled) {
       this.saveScrolledState();
     }
+    this.updatePromptOverlayIcon();
   }
 
+  /**
+   * Update the Prompt Overlay Icon
+   */
+  updatePromptOverlayIcon(): void {
+    const overlay = DOMUtils.findElement(
+      this.node,
+      'jp-OutputArea-promptOverlay'
+    );
+    if (!overlay) {
+      return;
+    }
+    // If you are changing this, don't forget about svg.
+    const ICON_HEIGHT = 16 + 4 + 4; // 4px for padding
+    if (overlay.clientHeight <= ICON_HEIGHT) {
+      overlay.firstChild?.remove();
+      return;
+    }
+    let overlayTitle: string;
+    if (this._outputsScrolled) {
+      expandIcon.element({
+        container: overlay
+      });
+      overlayTitle = 'Expand Output';
+    } else {
+      collapseIcon.element({
+        container: overlay
+      });
+      overlayTitle = 'Collapse Output';
+    }
+    const trans = this.translator.load('jupyterlab');
+    overlay.title = trans.__(overlayTitle);
+  }
   /**
    * Save view collapse state to model
    */
@@ -1310,6 +1508,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.outputsScrolled) {
       this.model.setMetadata('scrolled', true);
     } else {
+      this.outputArea.node.style.height = '';
       this.model.deleteMetadata('scrolled');
     }
   }
@@ -1397,6 +1596,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this._outputLengthHandler,
       this
     );
+    this._output.node.removeEventListener(
+      'keydown',
+      this._detectCaretMovementInOuput
+    );
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
@@ -1410,7 +1613,14 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
-        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        if (args.newValue !== null) {
+          // Mark execution state if execution count was set.
+          this.model.executionState = 'idle';
+        }
+        this._updatePrompt();
+        break;
+      case 'executionState':
+        this._updatePrompt();
         break;
       case 'isDirty':
         if ((model as ICodeCellModel).isDirty) {
@@ -1431,6 +1641,17 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this._headingsCache = null;
     if (this._outputPlaceholder && this.outputHidden) {
       this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
+    }
+    // This is to hide/show icon on single line output.
+    this.updatePromptOverlayIcon();
+
+    // Clear output area when empty
+    const height = this.outputArea.node.style.height;
+    if (this.model.outputs.length === 0 && height !== '') {
+      this._lastOutputHeight = height;
+      this.outputArea.node.style.height = '';
+    } else if (this.model.outputs.length > 0 && height === '') {
+      this.outputArea.node.style.height = this._lastOutputHeight;
     }
   }
 
@@ -1455,6 +1676,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
     super.onMetadataChanged(model, args);
   }
 
+  private _updatePrompt(): void {
+    let prompt: string;
+    if (this.model.executionState == 'running') {
+      prompt = '*';
+    } else {
+      prompt = `${this.model.executionCount || ''}`;
+    }
+    this._setPrompt(prompt);
+  }
+
   /**
    * Handle changes in the number of outputs in the output area.
    */
@@ -1468,6 +1699,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.node.setAttribute('aria-label', ariaLabel);
   }
 
+  /**
+   * Handle changes in input/output proportions in side-by-side mode.
+   */
+  private _sizeChangedHandler(sender: ResizeHandle) {
+    this._displayChanged.emit();
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _rendermime: IRenderMimeRegistry;
   private _outputHidden = false;
@@ -1476,6 +1714,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
   private _syncScrolled = false;
+  private _lastOnCaretMovedHandler: () => void;
+  private _lastTarget: HTMLElement | null = null;
+  private _lastOutputHeight = '';
 }
 
 /**
@@ -1519,11 +1760,16 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.sharedModel.transact(() => {
-      model.clearExecution();
-      cell.outputHidden = false;
-    }, false);
-    cell.setPrompt('*');
+    model.sharedModel.transact(
+      () => {
+        model.clearExecution();
+        cell.outputHidden = false;
+      },
+      false,
+      'silent-change'
+    );
+    // note: in future we would like to distinguish running from scheduled
+    model.executionState = 'running';
     model.trusted = true;
     let future:
       | Kernel.IFuture<
@@ -1542,6 +1788,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
           let label: string;
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (msg.header.msg_type) {
             case 'status':
               label = `status.${
@@ -1594,7 +1841,16 @@ export namespace CodeCell {
       // If we started executing, and the cell is still indicating this
       // execution, clear the prompt.
       if (future && !cell.isDisposed && cell.outputArea.future === future) {
-        cell.setPrompt('');
+        cell.model.executionState = 'idle';
+        if (recordTiming && future.isDisposed) {
+          // Record the time when the cell execution was aborted
+          const timingInfo: any = Object.assign(
+            {},
+            model.getMetadata('execution')
+          );
+          timingInfo['execution_failed'] = new Date().toISOString();
+          model.setMetadata('execution', timingInfo);
+        }
       }
       throw e;
     }
@@ -1711,7 +1967,8 @@ export abstract class AttachmentsCell<
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    if (event.clipboardData) {
+    const isEditable = this.model.getMetadata('editable') ?? true;
+    if (event.clipboardData && isEditable) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         if (items[i].type === 'text/plain') {
@@ -1720,7 +1977,9 @@ export abstract class AttachmentsCell<
             continue;
           }
           items[i].getAsString(text => {
-            this.editor!.replaceSelection?.(text);
+            this.editor!.replaceSelection?.(
+              text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+            );
           });
         }
         this._attachFiles(event.clipboardData.items);
@@ -1917,6 +2176,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
+
+    this._cachedHeadingText = this.model.sharedModel.getSource();
+    this._emptyPlaceholder =
+      options.emptyPlaceholder ?? trans.__('Type Markdown and LaTeX: $ α^2 $');
   }
 
   /**
@@ -1940,14 +2203,28 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  /**
+   * Parses and returns the list of Markdown headings in the cell.
+   *
+   * @returns A promise that resolves to an array of cell headings.
+   *
+   * @remarks
+   * This method caches the result after the first call to avoid redundant parsing.
+   **/
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      // Use table of content algorithm for consistency
-      const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.sharedModel.getSource()
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+        this.model.sharedModel.getSource(),
+        this._rendermime.markdownParser
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
+      this._headingResolved = true;
+      this.renderCollapseButtons();
     }
 
     return [...this._headingsCache!];
@@ -2158,7 +2435,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected onContentChanged(): void {
     super.onContentChanged();
-    this._headingsCache = null;
+    const model = this.model;
+    const text = model && model.sharedModel.getSource();
+    // Do not set headingCache to null, if the text has not changed.
+    if (text !== this._cachedHeadingText) {
+      this._cachedHeadingText = text;
+      this._headingsCache = null;
+      this._headingResolved = false;
+    }
   }
 
   /**
@@ -2166,7 +2450,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * and for collapsed heading cells render the "expand hidden cells"
    * button.
    */
-  protected renderCollapseButtons(widget: Widget): void {
+  protected renderCollapseButtons(widget?: Widget): void {
     this.node.classList.toggle(
       MARKDOWN_HEADING_COLLAPSED,
       this._headingCollapsed
@@ -2198,10 +2482,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         .getSource()
         .match(/^#+/g) || [''])[0].length;
       if (numHashAtStart > 0) {
-        this.inputArea!.editor.setCursorPosition({
-          column: numHashAtStart + 1,
-          line: 0
-        });
+        this.inputArea!.editor.setCursorPosition(
+          {
+            column: numHashAtStart + 1,
+            line: 0
+          },
+          { scroll: false }
+        );
       }
     }
   }
@@ -2258,7 +2545,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     const model = this.model;
     const text =
-      (model && model.sharedModel.getSource()) || DEFAULT_MARKDOWN_TEXT;
+      (model && model.sharedModel.getSource()) || this._emptyPlaceholder;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -2282,6 +2569,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  get headingsResolved(): boolean {
+    return this._headingResolved;
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _headingCollapsed: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
@@ -2293,6 +2584,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
   private _showEditorForReadOnlyMarkdown = true;
+  private _cachedHeadingText = '';
+  private _headingResolved: boolean = false;
+  private _emptyPlaceholder: string;
 }
 
 /**
@@ -2312,6 +2606,11 @@ export namespace MarkdownCell {
      * Show editor for read-only Markdown cells.
      */
     showEditorForReadOnlyMarkdown?: boolean;
+
+    /**
+     * Placeholder shown for empty Markdown cells when rendered.
+     */
+    emptyPlaceholder?: string;
   }
 
   /**

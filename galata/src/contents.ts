@@ -24,7 +24,10 @@ export class ContentsHelper {
    * @param request Playwright API request context
    * @param page Playwright page model object
    */
-  constructor(request?: APIRequestContext, readonly page?: Page) {
+  constructor(
+    request?: APIRequestContext,
+    readonly page?: Page
+  ) {
     if (request) {
       this.request = request;
     } else if (page) {
@@ -345,15 +348,19 @@ export class ContentsHelper {
    * @param trigger Action to trigger while waiting
    */
   async waitForAPIResponse(
-    trigger?: () => Promise<void> | void
+    trigger?: () => Promise<void> | void,
+    options?: {
+      timeout?: number;
+    }
   ): Promise<void> {
     if (!this.page) {
       return Promise.reject('No page available.');
     }
 
     await Promise.all([
-      this.page.waitForResponse(response =>
-        response.url().includes('api/contents')
+      this.page.waitForResponse(
+        response => response.url().includes('api/contents'),
+        options
       ),
       Promise.resolve(trigger?.call(this))
     ]);

@@ -3,6 +3,7 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
+import type { ITerminal, ITerminalAPIClient } from './terminal';
 
 /**
  * The url for the terminal service.
@@ -101,7 +102,11 @@ export async function shutdownTerminal(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
   Private.errorIfNotAvailable();
-  const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL, name);
+  const workspacesBase = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
+  const url = URLExt.join(workspacesBase, name);
+  if (!url.startsWith(workspacesBase)) {
+    throw new Error('Can only be used for terminal requests');
+  }
   const init = { method: 'DELETE' };
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status === 404) {
@@ -116,6 +121,70 @@ export async function shutdownTerminal(
   }
 }
 
+/**
+ * The Terminal API client.
+ *
+ * #### Notes
+ * Use this class to interact with the Jupyter Server Terminal API.
+ * This class adheres to the Jupyter Server API endpoints.
+ */
+export class TerminalAPIClient implements ITerminalAPIClient {
+  /**
+   * Create a new Terminal API client.
+   */
+  constructor(options: { serverSettings?: ServerConnection.ISettings } = {}) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Whether terminals are available.
+   */
+  get isAvailable(): boolean {
+    return isAvailable();
+  }
+
+  /**
+   * Start a new terminal session.
+   *
+   * @param options - The options used to create the terminal.
+   *
+   * @returns A promise that resolves with the terminal session model.
+   */
+  async startNew(options: ITerminal.IOptions = {}): Promise<IModel> {
+    const { name, cwd } = options;
+    return startNew(this.serverSettings, name, cwd);
+  }
+
+  /**
+   * List the running terminal sessions.
+   *
+   * @returns A promise that resolves with the list of running session models.
+   */
+  async listRunning(): Promise<IModel[]> {
+    return listRunning(this.serverSettings);
+  }
+
+  /**
+   * Shut down a terminal session by name.
+   *
+   * @param name - The name of the target session.
+   *
+   * @returns A promise that resolves when the session is shut down.
+   */
+  async shutdown(name: string): Promise<void> {
+    return shutdownTerminal(name, this.serverSettings);
+  }
+}
+
+/**
+ * Namespace for private statics.
+ */
 namespace Private {
   /**
    * Throw an error if terminals are not available.

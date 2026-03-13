@@ -5,8 +5,10 @@
 
 // Inspired by https://discuss.codemirror.net/t/how-to-implement-ruler/4616/
 
-import { Extension, Facet } from '@codemirror/state';
-import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import type { Extension } from '@codemirror/state';
+import { Facet } from '@codemirror/state';
+import type { ViewUpdate } from '@codemirror/view';
+import { EditorView, ViewPlugin } from '@codemirror/view';
 import { JSONExt } from '@lumino/coreutils';
 
 const RULERS_CLASSNAME = 'cm-rulers';
@@ -57,6 +59,8 @@ const plugin = ViewPlugin.fromClass(
 
       const defaultCharacterWidth = view.defaultCharacterWidth;
       const widths = view.state.facet(rulerConfig);
+      const guttersWidths =
+        view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
       this.rulers = widths.map(width => {
         const ruler = this.rulersContainer.appendChild(
           document.createElement('div')
@@ -64,7 +68,7 @@ const plugin = ViewPlugin.fromClass(
         ruler.classList.add(RULERS_CLASSNAME);
         ruler.style.cssText = `
                 position: absolute;
-                left: ${width * defaultCharacterWidth}px;
+                left: ${guttersWidths + width * defaultCharacterWidth}px;
                 height: 100%;
             `;
         // FIXME: This should be equal to the amount of padding on a line.
@@ -80,11 +84,16 @@ const plugin = ViewPlugin.fromClass(
 
       if (
         update.viewportChanged ||
+        update.geometryChanged ||
         !JSONExt.deepEqual(widths, update.startState.facet(rulerConfig))
       ) {
+        const guttersWidth =
+          update.view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
         const defaultCharacterWidth = update.view.defaultCharacterWidth;
         this.rulers.forEach((ruler, rulerIdx) => {
-          ruler.style.left = `${widths[rulerIdx] * defaultCharacterWidth}px`;
+          ruler.style.left = `${
+            guttersWidth + widths[rulerIdx] * defaultCharacterWidth
+          }px`;
         });
       }
     }

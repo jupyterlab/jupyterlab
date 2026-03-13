@@ -1,14 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
-import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
-import { IConsoleTracker } from '@jupyterlab/console';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import type {
+  CodeEditorWrapper,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
+import type { IConsoleTracker } from '@jupyterlab/console';
+import type { IEditorTracker } from '@jupyterlab/fileeditor';
+import type { INotebookTracker } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
 
 /**
  * The source and editor manager for a debugger instance.
@@ -105,9 +108,11 @@ export class DebuggerSources implements IDebugger.ISources {
         if (focus) {
           notebook.activeCellIndex = i;
           if (notebook.activeCell) {
-            notebook.scrollToItem(notebook.activeCellIndex).catch(reason => {
-              // no-op
-            });
+            notebook
+              .scrollToItem(notebook.activeCellIndex, 'smart')
+              .catch(reason => {
+                // no-op
+              });
           }
           this._shell.activateById(notebookPanel.id);
         }
@@ -115,7 +120,7 @@ export class DebuggerSources implements IDebugger.ISources {
         editors.push(
           Object.freeze({
             get: () => cell.editor,
-            reveal: () => notebook.scrollToItem(i),
+            reveal: () => notebook.scrollToItem(i, 'smart'),
             src: cell.model.sharedModel
           })
         );

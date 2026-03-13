@@ -1,24 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  createStandaloneCell,
+import type {
   ISharedCodeCell,
   YCodeCell,
   YMarkdownCell,
   YRawCell
 } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
 import {
   CellModel,
   CodeCellModel,
   MarkdownCellModel,
   RawCellModel
 } from '@jupyterlab/cells';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type * as nbformat from '@jupyterlab/nbformat';
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 import { DEFAULT_OUTPUTS } from '@jupyterlab/rendermime/lib/testutils';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -56,7 +56,7 @@ describe('cells/model', () => {
         }) as YRawCell;
         const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.sharedModel.getSource()).toBe('foo\n\nbar\n\nbaz');
+        expect(model.sharedModel.getSource()).toBe('foo\nbar\nbaz');
       });
 
       it('should use the cell id if an id is supplied', () => {
@@ -261,7 +261,7 @@ describe('cells/model', () => {
         const model = new TestModel({
           sharedModel: createStandaloneCell(cell)
         });
-        cell.source = (cell.source as string[]).join('\n');
+        cell.source = (cell.source as string[]).join('');
         expect(model.toJSON()).not.toBe(cell);
         expect(model.toJSON()).toEqual(cell);
       });
@@ -499,17 +499,28 @@ describe('cells/model', () => {
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
-        model.executionCount = 1;
+        // Not executed or running: source change does not set dirty
+        model.sharedModel.setSource('foo');
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
-        model.sharedModel.setSource('foo');
+        // Dirty set when running and source changes
+        model.executionState = 'running';
+        model.sharedModel.setSource('bar');
         expect(model.isDirty).toBe(true);
         expect(called).toBe(1);
 
-        model.executionCount = 2;
+        // Dirty cleared when source is restored
+        model.sharedModel.setSource('foo');
         expect(model.isDirty).toBe(false);
         expect(called).toBe(2);
+
+        // Dirty set again after idle and source changes
+        model.executionState = 'idle';
+        model.executionCount = 1;
+        model.sharedModel.setSource('bar');
+        expect(model.isDirty).toBe(true);
+        expect(called).toBe(3);
       });
     });
 
@@ -614,7 +625,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(1);
-        expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output0);
+        expect(sharedModel.ymodel.get('outputs').get(0).toJSON()).toEqual(
+          output0
+        );
 
         const newEvent1 = {
           type: 'add',
@@ -625,7 +638,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-        expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output1);
+        expect(sharedModel.ymodel.get('outputs').get(1).toJSON()).toEqual(
+          output1
+        );
       });
 
       it('should set new items correctly', () => {
@@ -644,7 +659,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-        expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output2);
+        expect(sharedModel.ymodel.get('outputs').get(0).toJSON()).toEqual(
+          output2
+        );
         const newEvent1 = {
           type: 'set',
           newValues: [{ toJSON: () => output2 }],
@@ -654,7 +671,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-        expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output2);
+        expect(sharedModel.ymodel.get('outputs').get(1).toJSON()).toEqual(
+          output2
+        );
       });
 
       it('should remove items correctly', () => {
@@ -671,6 +690,23 @@ describe('cells/model', () => {
           newIndex: 0
         } as any;
         model['onOutputsChange'](null as any, newEvent0);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(0);
+      });
+
+      it('should clear the outputs', () => {
+        const model = new CodeCellModel({
+          sharedModel: createStandaloneCell(cell) as ISharedCodeCell
+        });
+        const sharedModel = model.sharedModel as YCodeCell;
+        expect(sharedModel.getOutputs().length).toBe(2);
+        const clearEvent = {
+          type: 'clear',
+          newValues: [],
+          oldValues: [],
+          oldIndex: 0,
+          newIndex: 0
+        } as any;
+        model['onOutputsChange'](null as any, clearEvent);
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
       });
     });

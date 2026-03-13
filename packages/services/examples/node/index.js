@@ -1,6 +1,5 @@
 /* -----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 'use strict';
@@ -17,7 +16,6 @@ const options = {
   }
 };
 
-/* eslint-disable no-console */
 console.log('Starting session…');
 const kernelManager = new services.KernelManager();
 const sessionManager = new services.SessionManager({ kernelManager });

@@ -3,8 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Cell } from '@jupyterlab/cells';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Cell } from '@jupyterlab/cells';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   notTrustedIcon,
   trustedIcon,
@@ -12,7 +13,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { INotebookModel, Notebook } from '.';
+import type { INotebookModel, Notebook } from '.';
 
 const TRUST_CLASS = 'jp-StatusItem-trust';
 
@@ -50,7 +51,7 @@ function cellTrust(
 /**
  * A pure function for a notebook trust status component.
  *
- * @param props: the props for the component.
+ * @param props the props for the component.
  *
  * @returns a tsx component for notebook trust.
  */

@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   Button,
   closeIcon,
@@ -11,7 +12,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { WidgetTracker } from './widgettracker';
@@ -44,7 +46,7 @@ export function showErrorMessage(
   buttons?: ReadonlyArray<Dialog.IButton>
 ): Promise<void> {
   const trans = Dialog.translator.load('jupyterlab');
-  buttons = buttons ?? [Dialog.okButton({ label: trans.__('Dismiss') })];
+  buttons = buttons ?? [Dialog.cancelButton({ label: trans.__('Close') })];
   console.warn('Showing error:', error);
 
   // Cache promises to prevent multiple copies of identical dialogs showing
@@ -88,6 +90,7 @@ export class Dialog<T> extends Widget {
     dialogNode.ariaModal = 'true';
     super({ node: dialogNode });
     this.addClass('jp-Dialog');
+    this.addClass('jp-ThemedContainer');
     const normalized = Private.handleOptions(options);
     const renderer = normalized.renderer;
 
@@ -245,6 +248,9 @@ export class Dialog<T> extends Widget {
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
+      case 'input':
+        this._evtInput(event as InputEvent);
+        break;
       case 'focus':
         this._evtFocus(event as FocusEvent);
         break;
@@ -267,6 +273,7 @@ export class Dialog<T> extends Widget {
     node.addEventListener('click', this, true);
     document.addEventListener('mousedown', this, true);
     document.addEventListener('focus', this, true);
+    document.addEventListener('input', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
 
@@ -309,6 +316,7 @@ export class Dialog<T> extends Widget {
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
     document.removeEventListener('mousedown', this, true);
+    document.removeEventListener('input', this, true);
     this._original.focus();
   }
 
@@ -320,6 +328,30 @@ export class Dialog<T> extends Widget {
       this.reject();
     }
     super.onCloseRequest(msg);
+  }
+
+  /**
+   * Handle the `'input'` event for dialog's children.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtInput(_event: InputEvent): void {
+    this._checkValidation();
+  }
+
+  /**
+   * Check that every input in the dialog is valid.
+   * It looks for :invalid pseudo class of inputs, or .jp-mod-error class.
+   */
+  protected _checkValidation(): void {
+    this._hasValidationErrors =
+      !!this.node.querySelector(':invalid') ||
+      !!this.node.querySelector('.jp-mod-error');
+    for (let i = 0; i < this._buttons.length; i++) {
+      if (this._buttons[i].accept) {
+        this._buttonNodes[i].disabled = this._hasValidationErrors;
+      }
+    }
   }
 
   /**
@@ -367,7 +399,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
-          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) - 1;
+          let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
           if (idx < 0) {
@@ -386,7 +418,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
-          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) + 1;
+          let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
           if (idx == this._buttons.length) {
@@ -417,12 +449,16 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl as HTMLElement);
+          const index = this._buttonNodes.indexOf(activeEl);
+          if (index !== -1) {
+            this.resolve(index);
+          }
+        } else if (!(activeEl instanceof HTMLTextAreaElement)) {
+          const index = this._defaultButton;
+          this.resolve(index);
         }
-        this.resolve(index);
         break;
       }
       default:
@@ -460,6 +496,10 @@ export class Dialog<T> extends Widget {
    * Resolve a button item.
    */
   private _resolve(button: Dialog.IButton): void {
+    if (this._hasValidationErrors && button.accept) {
+      // Do not allow accepting with validation errors
+      return;
+    }
     // Prevent loopback.
     const promise = this._promise;
     if (!promise) {
@@ -487,8 +527,9 @@ export class Dialog<T> extends Widget {
     });
   }
 
+  private _hasValidationErrors: boolean = false;
   private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
-  private _buttonNodes: ReadonlyArray<HTMLElement>;
+  private _buttonNodes: ReadonlyArray<HTMLButtonElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
   private _original: HTMLElement;
@@ -656,7 +697,7 @@ export namespace Dialog {
     checkbox: Partial<ICheckbox> | null;
 
     /**
-     * The index of the default button.  Defaults to the last button.
+     * The index of the default button. Defaults to the last button.
      */
     defaultButton: number;
 
@@ -726,7 +767,7 @@ export namespace Dialog {
      *
      * @returns A node for the button.
      */
-    createButtonNode(button: IButton): HTMLElement;
+    createButtonNode(button: IButton): HTMLButtonElement;
 
     /**
      * Create a checkbox node for the dialog.
@@ -870,12 +911,7 @@ export namespace Dialog {
                 title={trans.__('Cancel')}
                 minimal
               >
-                <LabIcon.resolveReact
-                  icon={closeIcon}
-                  iconClass="jp-Icon"
-                  className="jp-ToolbarButtonComponent-icon"
-                  tag="span"
-                />
+                <LabIcon.resolveReact icon={closeIcon} tag="span" />
               </Button>
             )}
           </>
@@ -954,9 +990,12 @@ export namespace Dialog {
           '<div class="jp-Dialog-spacer"></div>'
         );
       }
+      const footerButton = document.createElement('div');
+      footerButton.classList.add('jp-Dialog-footerButtons');
       for (const button of buttons) {
-        footer.node.appendChild(button);
+        footerButton.appendChild(button);
       }
+      footer.node.appendChild(footerButton);
       Styling.styleNode(footer.node);
 
       return footer;
@@ -969,7 +1008,7 @@ export namespace Dialog {
      *
      * @returns A node for the button.
      */
-    createButtonNode(button: IButton): HTMLElement {
+    createButtonNode(button: IButton): HTMLButtonElement {
       const e = document.createElement('button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));

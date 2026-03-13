@@ -7,3 +7,6 @@
 import '@jupyterlab/rendermime/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/codemirror/style/index.js';
+import '@jupyterlab/mermaid/style/index.js';
+
+import './base.css';

@@ -2,14 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel } from '@jupyterlab/ui-components';
-import { IObservableDisposable } from '@lumino/disposable';
+import type { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
-import {
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type {
   IFilter,
   IFilters,
   IReplaceOptionsSupport,
-  ISearchProvider
+  ISearchProvider,
+  SelectionState
 } from './tokens';
 
 /**
@@ -38,7 +40,7 @@ export class SearchDocumentModel
       }
     }
 
-    searchProvider.stateChanged.connect(this.refresh, this);
+    searchProvider.stateChanged.connect(this._onProviderStateChanged, this);
 
     this._searchDebouncer = new Debouncer(() => {
       this._updateSearch().catch(reason => {
@@ -103,13 +105,8 @@ export class SearchDocumentModel
     return this._initialQuery;
   }
   set initialQuery(v: string) {
-    if (v) {
-      // Usually the value comes from user selection (set by search provider).
-      this._initialQuery = v;
-    } else {
-      // If user selection is empty, we fall back to most recent value (if any).
-      this._initialQuery = this._searchExpression;
-    }
+    // The value comes from user selection (set by search provider).
+    this._initialQuery = v;
   }
 
   /**
@@ -119,6 +116,18 @@ export class SearchDocumentModel
    */
   get suggestedInitialQuery(): string {
     return this.searchProvider.getInitialQuery();
+  }
+
+  /**
+   * Whether the selection includes a single item or multiple items;
+   * this is used by the heuristic auto-enabling "search in selection" mode.
+   *
+   * Returns `undefined` if the provider does not expose this information.
+   */
+  get selectionState(): SelectionState | undefined {
+    return this.searchProvider.getSelectionState
+      ? this.searchProvider.getSelectionState()
+      : undefined;
   }
 
   /**
@@ -235,7 +244,10 @@ export class SearchDocumentModel
       });
     }
 
-    this.searchProvider.stateChanged.disconnect(this.refresh, this);
+    this.searchProvider.stateChanged.disconnect(
+      this._onProviderStateChanged,
+      this
+    );
 
     this._searchDebouncer.dispose();
     super.dispose();
@@ -245,6 +257,7 @@ export class SearchDocumentModel
    * End the query.
    */
   async endQuery(): Promise<void> {
+    this._searchActive = false;
     await this.searchProvider.endQuery();
     this.stateChanged.emit();
   }
@@ -338,10 +351,14 @@ export class SearchDocumentModel
           )
         : null;
       if (query) {
+        this._searchActive = true;
         await this.searchProvider.startQuery(query, this._filters);
-        // Emit state change as the index needs to be updated
-        this.stateChanged.emit();
+      } else {
+        this._searchActive = false;
+        await this.searchProvider.endQuery();
       }
+      // Emit state change as the index needs to be updated
+      this.stateChanged.emit();
     } catch (reason) {
       this._parsingError = reason.toString();
       this.stateChanged.emit();
@@ -352,6 +369,12 @@ export class SearchDocumentModel
     }
   }
 
+  private _onProviderStateChanged() {
+    if (this._searchActive) {
+      this.refresh();
+    }
+  }
+
   private _caseSensitive = false;
   private _disposed = new Signal<this, void>(this);
   private _parsingError = '';
@@ -359,6 +382,7 @@ export class SearchDocumentModel
   private _initialQuery = '';
   private _filters: IFilters = {};
   private _replaceText: string = '';
+  private _searchActive = false;
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';
   private _useRegex = false;

@@ -63,8 +63,7 @@ export namespace PageConfig {
           fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
         }
         if (fullPath) {
-          // Force Webpack to ignore this require.
-          // eslint-disable-next-line
+          // Force Rspack to ignore this require and not treat it as requiring a package.
           configData = eval('require')(fullPath) as { [key: string]: string };
         }
       } catch (e) {
@@ -124,7 +123,7 @@ export namespace PageConfig {
   /**
    * Get the tree url for shareable links.
    * Usually the same as treeUrl,
-   * but overrideable e.g. when sharing with JupyterHub.
+   * but overridable e.g. when sharing with JupyterHub.
    */
   export function getTreeShareUrl(): string {
     return URLExt.normalize(URLExt.join(getShareUrl(), getOption('treeUrl')));

@@ -1,21 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { SessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
-  SessionContext,
   SessionContextDialogs,
   Toolbar,
-  ToolbarRegistry,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+
+const DEFAULT_LANGUAGE_CODE = 'en';
 
 const server = new JupyterServer();
 
@@ -74,9 +76,7 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
-          const node = item.node.querySelector(
-            '.jp-ToolbarButtonComponent-label'
-          )!;
+          const node = item.node.querySelector('.jp-Toolbar-kernelName')!;
           expect(node.textContent).toBe(sessionContext.kernelDisplayName);
         });
       });
@@ -299,7 +299,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -408,7 +408,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -509,7 +509,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -603,7 +603,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 

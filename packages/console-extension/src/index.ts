@@ -5,49 +5,71 @@
  * @module console-extension
  */
 
-import {
-  ILabStatus,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
   ISanitizer,
-  ISessionContext,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   Sanitizer,
+  SemanticCommand,
   SessionContextDialogs,
+  setToolbar,
   showDialog,
+  Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import {
-  CodeEditor,
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import type { CodeConsole } from '@jupyterlab/console';
+import {
+  ConsolePanel,
+  IConsoleCellExecutor,
+  IConsoleTracker
+} from '@jupyterlab/console';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { consoleIcon, IFormRendererRegistry } from '@jupyterlab/ui-components';
-import { find } from '@lumino/algorithm';
 import {
-  JSONExt,
+  clearIcon,
+  consoleIcon,
+  dockBottomIcon,
+  dockLeftIcon,
+  dockRightIcon,
+  dockTopIcon,
+  dotsIcon,
+  IFormRendererRegistry,
+  redoIcon,
+  refreshIcon,
+  runIcon,
+  ToolbarButton,
+  undoIcon
+} from '@jupyterlab/ui-components';
+import { find } from '@lumino/algorithm';
+import type {
   JSONObject,
   ReadonlyJSONValue,
-  ReadonlyPartialJSONObject,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt, UUID } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout, Widget } from '@lumino/widgets';
+import type { DockLayout, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import foreign from './foreign';
+import { cellExecutor } from './cellexecutor';
 
 /**
  * The command IDs used by the console plugin.
@@ -79,15 +101,15 @@ namespace CommandIDs {
 
   export const getKernel = 'console:get-kernel';
 
-  export const enterToExecute = 'console:enter-to-execute';
-
-  export const shiftEnterToExecute = 'console:shift-enter-to-execute';
-
   export const interactionMode = 'console:interaction-mode';
+
+  export const redo = 'console:redo';
 
   export const replaceSelection = 'console:replace-selection';
 
   export const shutdown = 'console:shutdown';
+
+  export const undo = 'console:undo';
 
   export const invokeCompleter = 'completer:invoke-console';
 
@@ -104,6 +126,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   requires: [
     ConsolePanel.IContentFactory,
     IEditorServices,
+    IConsoleCellExecutor,
     IRenderMimeRegistry,
     ISettingRegistry
   ],
@@ -116,7 +139,9 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ILabStatus,
     ISessionContextDialogs,
     IFormRendererRegistry,
-    ITranslator
+    ITranslator,
+    ISessionContextDialogs,
+    IToolbarWidgetRegistry
   ],
   activate: activateConsole,
   autoStart: true
@@ -232,7 +257,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   foreign,
   kernelStatus,
   lineColStatus,
-  completerPlugin
+  completerPlugin,
+  cellExecutor
 ];
 export default plugins;
 
@@ -243,6 +269,7 @@ async function activateConsole(
   app: JupyterFrontEnd,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
+  executor: IConsoleCellExecutor,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
@@ -253,7 +280,9 @@ async function activateConsole(
   status: ILabStatus | null,
   sessionDialogs_: ISessionContextDialogs | null,
   formRegistry: IFormRendererRegistry | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  sessionContextDialogs: ISessionContextDialogs | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): Promise<IConsoleTracker> {
   const translator = translator_ ?? nullTranslator;
   const trans = translator.load('jupyterlab');
@@ -262,6 +291,68 @@ async function activateConsole(
   const category = trans.__('Console');
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
+
+  const pluginId = '@jupyterlab/console-extension:tracker';
+  const promptCellPositions: CodeConsole.PromptCellPosition[] = [
+    'top',
+    'bottom',
+    'left',
+    'right'
+  ];
+
+  // Instantiate the toolbar factory for console panel at plugin activation time
+  // since the plugin defines toolbar items and "jupyter.lab.toolbars" is set to true.
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
+  if (toolbarRegistry) {
+    const factory = 'ConsolePanel';
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      factory,
+      pluginId,
+      translator
+    );
+
+    if (sessionContextDialogs) {
+      toolbarRegistry.addFactory<ConsolePanel>(factory, 'kernelName', panel =>
+        Toolbar.createKernelNameItem(
+          panel.sessionContext,
+          sessionContextDialogs,
+          translator
+        )
+      );
+    }
+
+    toolbarRegistry.addFactory<ConsolePanel>(factory, 'kernelStatus', panel => {
+      const sessionContext = panel.sessionContext;
+      // TODO: update use of deprecated APIs, without having to depend on @jupyterlab/notebook
+      const indicator = Toolbar.createKernelStatusItem(sessionContext);
+      return indicator;
+    });
+
+    const promptMenu = new Menu({ commands });
+    promptMenu.addClass('jp-CodeConsolePromptMenu');
+    promptCellPositions.forEach(position => {
+      promptMenu.addItem({ command: `console:prompt-to-${position}` });
+    });
+
+    toolbarRegistry.addFactory<ConsolePanel>(
+      factory,
+      'promptPosition',
+      panel => {
+        const button = new ToolbarButton({
+          tooltip: trans.__('Change Console Prompt Position'),
+          icon: dotsIcon,
+          onClick: () => {
+            const right = button.node.getBoundingClientRect().right;
+            const bottom = button.node.getBoundingClientRect().bottom;
+            promptMenu.open(right, bottom, { horizontalAlignment: 'right' });
+          }
+        });
+        return button;
+      }
+    );
+  }
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
@@ -357,6 +448,11 @@ async function activateConsole(
      * Its typical value is: a factory name or the widget id (if singleton)
      */
     type?: string;
+
+    /**
+     * Whether to create a subshell or main shell for this console
+     */
+    subshell?: boolean;
   }
 
   /**
@@ -371,10 +467,15 @@ async function activateConsole(
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
       sessionDialogs,
+      executor,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
+
+    if (toolbarFactory) {
+      setToolbar(panel, toolbarFactory);
+    }
 
     const interactionMode: string = (
       await settingRegistry.get(
@@ -391,6 +492,33 @@ async function activateConsole(
       void tracker.save(panel);
     });
 
+    if (options.subshell) {
+      panel.sessionContext.kernelChanged.connect(async () => {
+        if (!panel.sessionContext.isDisposed) {
+          panel.sessionContext.ready
+            .then(async () => {
+              if (panel.sessionContext.session === null) {
+                console.error('Cannot create subshell without session');
+              } else if (panel.sessionContext.session.kernel === null) {
+                console.error('Cannot create subshell without kernel');
+              } else {
+                const { kernel } = panel.sessionContext.session;
+                // Ensure kernel has received kernel_info.
+                await kernel.info;
+                const replyMsg = await kernel.requestCreateSubshell({}).done;
+                kernel.subshellId = replyMsg.content.subshell_id;
+              }
+            })
+            .catch(reason => {
+              console.error(
+                'Failed to initialize SessionContext or create new subshell.',
+                reason
+              );
+            });
+        }
+      });
+    }
+
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
@@ -400,9 +528,13 @@ async function activateConsole(
     return panel;
   }
 
-  const pluginId = '@jupyterlab/console-extension:tracker';
+  let clearCellsOnExecute: boolean;
+  let clearCodeContentOnExecute: boolean;
+  let hideCodeInput: boolean;
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
+  let promptCellPosition: CodeConsole.PromptCellPosition;
+  let showBanner: boolean;
 
   /**
    * Update settings for one console or all consoles.
@@ -410,10 +542,23 @@ async function activateConsole(
    * @param panel Optional - single console to update.
    */
   async function updateSettings(panel?: ConsolePanel) {
+    clearCellsOnExecute = (
+      await settingRegistry.get(pluginId, 'clearCellsOnExecute')
+    ).composite as boolean;
+    clearCodeContentOnExecute = (
+      await settingRegistry.get(pluginId, 'clearCodeContentOnExecute')
+    ).composite as boolean;
+    hideCodeInput = (await settingRegistry.get(pluginId, 'hideCodeInput'))
+      .composite as boolean;
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
       .composite as JSONObject;
+    promptCellPosition = (
+      await settingRegistry.get(pluginId, 'promptCellPosition')
+    ).composite as CodeConsole.PromptCellPosition;
+    showBanner = (await settingRegistry.get(pluginId, 'showBanner'))
+      .composite as boolean;
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
@@ -421,6 +566,14 @@ async function activateConsole(
       widget.console.editorConfig = promptCellConfig;
       // Update promptCell already on screen
       widget.console.promptCell?.editor?.setOptions(promptCellConfig);
+      // Set other config options
+      widget.console.setConfig({
+        clearCellsOnExecute,
+        clearCodeContentOnExecute,
+        hideCodeInput,
+        promptCellPosition,
+        showBanner
+      });
     };
 
     if (panel) {
@@ -462,7 +615,18 @@ async function activateConsole(
       await settingRegistry.set(pluginId, 'promptCellConfig', promptCellConfig);
     },
     label: trans.__('Auto Close Brackets for Code Console Prompt'),
-    isToggled: () => promptCellConfig.autoClosingBrackets as boolean
+    isToggled: () => promptCellConfig.autoClosingBrackets as boolean,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          force: {
+            type: 'boolean',
+            description: trans.__('Whether to force the toggle state')
+          }
+        }
+      }
+    }
   });
 
   /**
@@ -471,7 +635,8 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      (tracker.currentWidget === shell.currentWidget ||
+        tracker.currentWidget.node.contains(document.activeElement))
     );
   }
 
@@ -485,9 +650,24 @@ async function activateConsole(
     activate?: boolean;
   }
 
-  let command = CommandIDs.open;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.open, {
     label: trans.__('Open a console for the provided `path`.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('The path of the session to open')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the console widget')
+          }
+        },
+        required: ['path']
+      }
+    },
     execute: (args: IOpenOptions) => {
       const path = args['path'];
       const widget = tracker.find(value => {
@@ -512,8 +692,7 @@ async function activateConsole(
     }
   });
 
-  command = CommandIDs.create;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.create, {
     label: args => {
       if (args['isPalette']) {
         return trans.__('New Console');
@@ -530,6 +709,97 @@ async function activateConsole(
       return trans.__('Console');
     },
     icon: args => (args['isPalette'] ? undefined : consoleIcon),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          isPalette: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from the palette'
+            )
+          },
+          isLauncher: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from the launcher'
+            )
+          },
+          kernelPreference: {
+            type: 'object',
+            description: trans.__(
+              'The kernel preference for the console. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.'
+            ),
+            properties: {
+              id: {
+                type: 'string',
+                description: trans.__('The id of an existing kernel')
+              },
+              name: {
+                type: 'string',
+                description: trans.__('The name of the kernel')
+              },
+              language: {
+                type: 'string',
+                description: trans.__('The preferred kernel language')
+              },
+              shouldStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel should be started automatically (default `true`)'
+                )
+              },
+              canStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel can be started (default `true`)'
+                )
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description: trans.__(
+                  'Shut down the session when session context is disposed (default `false`)'
+                )
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description: trans.__(
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+                )
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description: trans.__(
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+                )
+              }
+            }
+          },
+          basePath: {
+            type: 'string',
+            description: trans.__('The base path for the console')
+          },
+          cwd: {
+            type: 'string',
+            description: trans.__('The current working directory')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          },
+          ref: {
+            type: 'string',
+            description: trans.__(
+              'The reference widget id for the insert location'
+            )
+          },
+          insertMode: {
+            type: 'string',
+            description: trans.__('The tab insert mode')
+          }
+        }
+      }
+    },
     execute: args => {
       const basePath =
         ((args['basePath'] as string) ||
@@ -542,16 +812,176 @@ async function activateConsole(
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
-    const widget = tracker.currentWidget;
+    const widget = args[SemanticCommand.WIDGET]
+      ? (tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ??
+        null)
+      : tracker.currentWidget;
     const activate = args['activate'] !== false;
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget ?? null;
+    return widget;
   }
+
+  /**
+   * Create commands to change the position of the prompt cell.
+   */
+  const iconMap = {
+    top: dockTopIcon,
+    bottom: dockBottomIcon,
+    right: dockRightIcon,
+    left: dockLeftIcon
+  };
+  promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
+    const command = `console:prompt-to-${position}`;
+    commands.addCommand(command, {
+      execute: args => {
+        const current = getCurrent(args);
+        if (!current) {
+          return;
+        }
+        current.console.setConfig({ promptCellPosition: position });
+      },
+      isEnabled: () =>
+        !!tracker.currentWidget && tracker.currentWidget.isVisible,
+      label: trans.__(`Prompt to ${position}`),
+      icon: args => (args['isPalette'] ? undefined : iconMap[position]),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            activate: {
+              type: 'boolean',
+              description: trans.__('Whether to activate the widget')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is executed from palette'
+              )
+            }
+          }
+        }
+      }
+    });
+
+    if (palette) {
+      palette.addItem({
+        command,
+        category,
+        args: { isPalette: true }
+      });
+    }
+  });
+
+  /**
+   * Add undo command
+   */
+  commands.addCommand(CommandIDs.undo, {
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (!current) {
+        return;
+      }
+
+      const editor = current.console.promptCell?.editor;
+      if (!editor) {
+        return;
+      }
+      editor.undo();
+    },
+    isEnabled: args => {
+      if (!isEnabled()) {
+        return false;
+      }
+
+      const editor = getCurrent(args)?.console?.promptCell?.editor;
+
+      if (!editor) {
+        return false;
+      }
+
+      return editor.model.sharedModel.canUndo();
+    },
+    icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Undo'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
+  });
+
+  /**
+   * Add redo command
+   */
+  commands.addCommand(CommandIDs.redo, {
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (!current) {
+        return;
+      }
+
+      const editor = current.console.promptCell?.editor;
+      if (!editor) {
+        return;
+      }
+      editor.redo();
+    },
+    isEnabled: args => {
+      if (!isEnabled()) {
+        return false;
+      }
+
+      const editor = getCurrent(args)?.console?.promptCell?.editor;
+
+      if (!editor) {
+        return false;
+      }
+
+      return editor.model.sharedModel.canRedo();
+    },
+    icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Redo'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
+  });
 
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
+    icon: args => (args.toolbar ? clearIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -564,6 +994,22 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.runUnforced, {
     label: trans.__('Run Cell (unforced)'),
+    icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -576,6 +1022,22 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.runForced, {
     label: trans.__('Run Cell (forced)'),
+    icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -588,6 +1050,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.linebreak, {
     label: trans.__('Insert Line Break'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -600,6 +1073,21 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Console'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: trans.__('The text to replace the selection with')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -613,6 +1101,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -628,6 +1127,22 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
+    icon: args => (args.toolbar ? refreshIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -640,6 +1155,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -684,11 +1210,46 @@ async function activateConsole(
         }
       });
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.inject, {
     label: trans.__('Inject some code in a console.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('The path of the console session')
+          },
+          code: {
+            type: 'string',
+            description: trans.__('The code to inject')
+          },
+          metadata: {
+            type: 'object',
+            description: trans.__('The metadata for the code')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        },
+        required: ['path', 'code']
+      }
+    },
     execute: args => {
       const path = args['path'];
       tracker.find(widget => {
@@ -710,6 +1271,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -722,6 +1294,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.getKernel, {
     label: trans.__('Get Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent({ activate: false, ...args });
       if (!current) {
@@ -731,6 +1314,17 @@ async function activateConsole(
     },
     isEnabled
   });
+
+  // All commands with isEnabled defined directly or in a semantic commands
+
+  const skip = [CommandIDs.create];
+  const notify = () => {
+    Object.values(CommandIDs)
+      .filter(id => !skip.includes(id))
+      .forEach(id => app.commands.notifyCommandChanged(id));
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     // Add command palette items
@@ -790,6 +1384,16 @@ async function activateConsole(
       isEnabled
     });
 
+    // Add undo/redo hooks to the edit menu.
+    mainMenu.editMenu.undoers.redo.add({
+      id: CommandIDs.redo,
+      isEnabled
+    });
+    mainMenu.editMenu.undoers.undo.add({
+      id: CommandIDs.undo,
+      isEnabled
+    });
+
     // Add kernel information to the application help menu.
     mainMenu.helpMenu.getKernel.add({
       id: CommandIDs.getKernel,
@@ -824,7 +1428,19 @@ async function activateConsole(
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       }
     },
-    isToggled: args => args['interactionMode'] === interactionMode
+    isToggled: args => args['interactionMode'] === interactionMode,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          interactionMode: {
+            type: 'string',
+            enum: ['notebook', 'terminal'],
+            description: trans.__('The interaction mode for the console')
+          }
+        }
+      }
+    }
   });
 
   return tracker;
@@ -855,6 +1471,12 @@ function activateConsoleCompleterService(
       if (id) {
         return manager.invoke(id);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -865,6 +1487,12 @@ function activateConsoleCompleterService(
 
       if (id) {
         return manager.select(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });

@@ -2,38 +2,35 @@
 // Distributed under the terms of the Modified BSD License.
 import { selectAll } from '@codemirror/commands';
 import { findNext, gotoLine } from '@codemirror/search';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  Clipboard,
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import type {
   ICommandPalette,
   ISessionContextDialogs,
-  MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
+import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
-  CodeEditor,
   CodeViewerWidget,
-  IEditorServices
+  IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
-import {
+import type {
   CodeMirrorEditor,
   IEditorExtensionRegistry,
   IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { IConsoleTracker } from '@jupyterlab/console';
+import type { ICompletionProviderManager } from '@jupyterlab/completer';
+import type { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { ILauncher } from '@jupyterlab/launcher';
-import { IMainMenu } from '@jupyterlab/mainmenu';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import type { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import type { ILauncher } from '@jupyterlab/launcher';
+import type { IMainMenu } from '@jupyterlab/mainmenu';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,
@@ -46,12 +43,10 @@ import {
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONObject,
-  ReadonlyJSONObject,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -125,14 +120,6 @@ export namespace CommandIDs {
   export const goToLine = 'fileeditor:go-to-line';
 }
 
-export interface IFileTypeData extends ReadonlyJSONObject {
-  fileExt: string;
-  iconName: string;
-  launcherLabel: string;
-  paletteLabel: string;
-  caption: string;
-}
-
 /**
  * The name of the factory that creates editor widgets.
  */
@@ -189,7 +176,7 @@ export namespace Commands {
   ): void {
     config =
       (settings.get('editorConfig').composite as Record<string, any>) ?? {};
-    scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
     commands.notifyCommandChanged(CommandIDs.lineNumbers);
@@ -221,6 +208,7 @@ export namespace Commands {
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
     editor.setOptions({ ...config, scrollPastEnd });
+    widget.toggleClass('jp-mod-scrollPastEnd', scrollPastEnd);
   }
 
   /**
@@ -233,11 +221,12 @@ export namespace Commands {
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    defaultBrowser: IDefaultFileBrowser,
+    defaultBrowser: IDefaultFileBrowser | null,
     extensions: IEditorExtensionRegistry,
     languages: IEditorLanguageRegistry,
     consoleTracker: IConsoleTracker | null,
-    sessionDialogs: ISessionContextDialogs
+    sessionDialogs: ISessionContextDialogs,
+    shell: JupyterFrontEnd.IShell
   ): void {
     /**
      * Add a command to change font size for File Editor
@@ -256,11 +245,14 @@ export namespace Commands {
           style.getPropertyValue('--jp-code-font-size'),
           10
         );
+        if (!config.customStyles) {
+          config.customStyles = {};
+        }
         const currentSize =
           (config['customStyles']['fontSize'] ??
             extensions.baseConfiguration['customStyles']['fontSize']) ||
           cssSize;
-        config.fontSize = currentSize + delta;
+        config.customStyles.fontSize = currentSize + delta;
         return settingRegistry
           .set(id, 'editorConfig', config)
           .catch((reason: Error) => {
@@ -268,20 +260,38 @@ export namespace Commands {
           });
       },
       label: args => {
-        const delta = Number(args['delta']);
-        if (Number.isNaN(delta)) {
-          console.error(
-            `${CommandIDs.changeFontSize}: delta arg must be a number`
-          );
-        }
+        const delta = Number(args.delta ?? 0);
+
         if (delta > 0) {
           return args.isMenu
             ? trans.__('Increase Text Editor Font Size')
             : trans.__('Increase Font Size');
-        } else {
+        } else if (delta < 0) {
           return args.isMenu
             ? trans.__('Decrease Text Editor Font Size')
             : trans.__('Decrease Font Size');
+        } else {
+          return trans.__('Change Font Size');
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            delta: {
+              type: 'number',
+              description: trans.__(
+                'The font size change delta (positive to increase, negative to decrease)'
+              )
+            },
+            isMenu: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is called from a menu context'
+              )
+            }
+          },
+          required: ['delta']
         }
       }
     });
@@ -303,7 +313,13 @@ export namespace Commands {
       isEnabled,
       isToggled: () =>
         config.lineNumbers ?? extensions.baseConfiguration.lineNumbers,
-      label: trans.__('Show Line Numbers')
+      label: trans.__('Show Line Numbers'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.currentLineNumbers, {
@@ -325,6 +341,12 @@ export namespace Commands {
             | boolean
             | undefined) ?? false
         );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -348,7 +370,18 @@ export namespace Commands {
           (config.lineWrap ?? extensions.baseConfiguration.lineWrap)
         );
       },
-      label: trans.__('Word Wrap')
+      label: trans.__('Word Wrap'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            mode: {
+              type: 'boolean',
+              description: trans.__('Whether to enable word wrap')
+            }
+          }
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.currentLineWrap, {
@@ -368,6 +401,12 @@ export namespace Commands {
         return (
           (widget?.content.editor.getOption('lineWrap') as boolean) ?? false
         );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -401,6 +440,19 @@ export namespace Commands {
         return args['size']
           ? args['size'] === currentIndentUnit
           : 'Tab' == currentIndentUnit;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            size: {
+              type: 'string',
+              description: trans.__(
+                'The number of spaces for indentation (or Tab for tab indentation)'
+              )
+            }
+          }
+        }
       }
     });
 
@@ -421,7 +473,13 @@ export namespace Commands {
       label: trans.__('Match Brackets'),
       isEnabled,
       isToggled: () =>
-        config.matchBrackets ?? extensions.baseConfiguration.matchBrackets
+        config.matchBrackets ?? extensions.baseConfiguration.matchBrackets,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.currentMatchBrackets, {
@@ -443,6 +501,12 @@ export namespace Commands {
             | boolean
             | undefined) ?? false
         );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -467,7 +531,20 @@ export namespace Commands {
       label: trans.__('Auto Close Brackets in Text Editor'),
       isToggled: () =>
         config.autoClosingBrackets ??
-        extensions.baseConfiguration.autoClosingBrackets
+        extensions.baseConfiguration.autoClosingBrackets,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            force: {
+              type: 'boolean',
+              description: trans.__(
+                'Force enable/disable auto closing brackets'
+              )
+            }
+          }
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.autoClosingBracketsUniversal, {
@@ -496,7 +573,13 @@ export namespace Commands {
       isToggled: () =>
         commands.isToggled(CommandIDs.autoClosingBrackets) ||
         commands.isToggled(autoClosingBracketsNotebook) ||
-        commands.isToggled(autoClosingBracketsConsole)
+        commands.isToggled(autoClosingBracketsConsole),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -518,7 +601,22 @@ export namespace Commands {
         }
       },
       isToggled: args =>
-        args['theme'] === (config.theme ?? extensions.baseConfiguration.theme)
+        args['theme'] === (config.theme ?? extensions.baseConfiguration.theme),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            theme: {
+              type: 'string',
+              description: trans.__('The theme name to change to')
+            },
+            displayName: {
+              type: 'string',
+              description: trans.__('The display name of the theme')
+            }
+          }
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.find, {
@@ -531,7 +629,13 @@ export namespace Commands {
         const editor = widget.content.editor as CodeMirrorEditor;
         editor.execCommand(findNext);
       },
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.goToLine, {
@@ -554,7 +658,22 @@ export namespace Commands {
           editor.execCommand(gotoLine);
         }
       },
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            line: {
+              type: 'number',
+              description: trans.__('The line number to go to (1-indexed)')
+            },
+            column: {
+              type: 'number',
+              description: trans.__('The column number to go to (1-indexed)')
+            }
+          }
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.changeLanguage, {
@@ -567,7 +686,13 @@ export namespace Commands {
         if (name && widget) {
           const spec = languages.findByName(name);
           if (spec) {
-            widget.content.model.mimeType = spec.mime as string;
+            if (Array.isArray(spec.mime)) {
+              widget.content.model.mimeType =
+                (spec.mime[0] as string) ??
+                IEditorMimeTypeService.defaultMimeType;
+            } else {
+              widget.content.model.mimeType = spec.mime as string;
+            }
           }
         }
       },
@@ -581,6 +706,21 @@ export namespace Commands {
         const spec = languages.findByMIME(mime);
         const name = spec && spec.name;
         return args['name'] === name;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: trans.__('The language name to change to')
+            },
+            displayName: {
+              type: 'string',
+              description: trans.__('The display name of the language')
+            }
+          }
+        }
       }
     });
 
@@ -598,7 +738,20 @@ export namespace Commands {
         widget.content.editor.replaceSelection?.(text);
       },
       isEnabled,
-      label: trans.__('Replace Selection in Editor')
+      label: trans.__('Replace Selection in Editor'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: trans.__(
+                'The text to replace the current selection with'
+              )
+            }
+          }
+        }
+      }
     });
 
     /**
@@ -616,7 +769,13 @@ export namespace Commands {
       },
       isEnabled,
       icon: consoleIcon,
-      label: trans.__('Create Console for Editor')
+      label: trans.__('Create Console for Editor'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -638,7 +797,13 @@ export namespace Commands {
         }
       },
       label: trans.__('Restart Kernel'),
-      isEnabled: () => consoleTracker !== null && isEnabled()
+      isEnabled: () => consoleTracker !== null && isEnabled(),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -684,13 +849,16 @@ export namespace Commands {
           // no selection, submit whole line and advance
           code = editor.getLine(selection.start.line);
           const cursor = editor.getCursorPosition();
+          const nextLine = editor.getLine(cursor.line + 1);
+
           if (cursor.line + 1 === editor.lineCount) {
             const text = editor.model.sharedModel.getSource();
             editor.model.sharedModel.setSource(text + '\n');
           }
+
           editor.setCursorPosition({
             line: cursor.line + 1,
-            column: cursor.column
+            column: nextLine?.length ?? 0 // Place cursor at end of line if line has content else place at start of line
           });
         }
 
@@ -702,7 +870,13 @@ export namespace Commands {
         }
       },
       isEnabled,
-      label: trans.__('Run Selected Code')
+      label: trans.__('Run Selected Code'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -740,7 +914,13 @@ export namespace Commands {
         }
       },
       isEnabled,
-      label: trans.__('Run All Code')
+      label: trans.__('Run All Code'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -767,7 +947,13 @@ export namespace Commands {
         );
       },
       icon: markdownIcon,
-      label: trans.__('Show Markdown Preview')
+      label: trans.__('Show Markdown Preview'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -791,12 +977,48 @@ export namespace Commands {
               icon: (args.iconName as string) ?? textEditorIcon
             }),
       execute: args => {
-        const cwd = args.cwd || defaultBrowser.model.path;
+        const cwd = args.cwd || (defaultBrowser?.model.path ?? '.');
         return createNew(
           commands,
           cwd as string,
           (args.fileExt as string) ?? 'txt'
         );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            cwd: {
+              type: 'string',
+              description: trans.__('The current working directory path')
+            },
+            fileExt: {
+              type: 'string',
+              description: trans.__('The file extension for the new file')
+            },
+            isPalette: {
+              type: 'boolean',
+              description:
+                'Whether the command is being called from the command palette'
+            },
+            paletteLabel: {
+              type: 'string',
+              description: trans.__('The label to show in the command palette')
+            },
+            launcherLabel: {
+              type: 'string',
+              description: trans.__('The label to show in the launcher')
+            },
+            caption: {
+              type: 'string',
+              description: trans.__('The caption for the command')
+            },
+            iconName: {
+              type: 'string',
+              description: trans.__('The name of the icon to use')
+            }
+          }
+        }
       }
     });
 
@@ -811,8 +1033,24 @@ export namespace Commands {
       caption: trans.__('Create a new markdown file'),
       icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
-        const cwd = args['cwd'] || defaultBrowser.model.path;
+        const cwd = args['cwd'] || (defaultBrowser?.model.path ?? '.');
         return createNew(commands, cwd as string, 'md');
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            cwd: {
+              type: 'string',
+              description: trans.__('The current working directory path')
+            },
+            isPalette: {
+              type: 'boolean',
+              description:
+                'Whether the command is being called from the command palette'
+            }
+          }
+        }
       }
     });
 
@@ -839,12 +1077,17 @@ export namespace Commands {
         if (!widget) {
           return false;
         }
-        // Ideally enable it when there are undo events stored
-        // Reference issue #8590: Code mirror editor could expose the history of undo/redo events
-        return true;
+
+        return widget.editor.model.sharedModel.canUndo();
       },
       icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Undo')
+      label: trans.__('Undo'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -870,12 +1113,17 @@ export namespace Commands {
         if (!widget) {
           return false;
         }
-        // Ideally enable it when there are redo events stored
-        // Reference issue #8590: Code mirror editor could expose the history of undo/redo events
-        return true;
+
+        return widget.editor.model.sharedModel.canRedo();
       },
       icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Redo')
+      label: trans.__('Redo'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -910,7 +1158,13 @@ export namespace Commands {
         return isSelected(widget.editor as CodeMirrorEditor);
       },
       icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Cut')
+      label: trans.__('Cut'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -944,7 +1198,13 @@ export namespace Commands {
         return isSelected(widget.editor as CodeMirrorEditor);
       },
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Copy')
+      label: trans.__('Copy'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -971,7 +1231,13 @@ export namespace Commands {
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Paste')
+      label: trans.__('Paste'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     /**
@@ -989,8 +1255,44 @@ export namespace Commands {
         editor.execCommand(selectAll);
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
-      label: trans.__('Select All')
+      label: trans.__('Select All'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
+
+    // All commands with isEnabled defined directly or in a semantic commands
+    const commandIds = [
+      CommandIDs.lineNumbers,
+      CommandIDs.currentLineNumbers,
+      CommandIDs.lineWrap,
+      CommandIDs.currentLineWrap,
+      CommandIDs.matchBrackets,
+      CommandIDs.currentMatchBrackets,
+      CommandIDs.find,
+      CommandIDs.goToLine,
+      CommandIDs.changeLanguage,
+      CommandIDs.replaceSelection,
+      CommandIDs.createConsole,
+      CommandIDs.restartConsole,
+      CommandIDs.runCode,
+      CommandIDs.runAllCode,
+      CommandIDs.undo,
+      CommandIDs.redo,
+      CommandIDs.cut,
+      CommandIDs.copy,
+      CommandIDs.paste,
+      CommandIDs.selectAll,
+      CommandIDs.createConsole
+    ];
+    const notify = () => {
+      commandIds.forEach(id => commands.notifyCommandChanged(id));
+    };
+    tracker.currentChanged.connect(notify);
+    shell.currentChanged?.connect(notify);
   }
 
   export function addCompleterCommands(
@@ -1009,6 +1311,12 @@ export namespace Commands {
         if (id) {
           return manager.invoke(id);
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -1019,6 +1327,12 @@ export namespace Commands {
           editorTracker.currentWidget && editorTracker.currentWidget.id;
         if (id) {
           return manager.select(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });
@@ -1118,20 +1432,33 @@ export namespace Commands {
 
   /**
    * Add ___ File items to the Launcher for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
    */
   export function addKernelLanguageLauncherItems(
     launcher: ILauncher,
     trans: TranslationBundle,
-    availableKernelFileTypes: Iterable<IFileTypeData>
-  ): void {
-    for (let ext of availableKernelFileTypes) {
-      launcher.add({
-        command: CommandIDs.createNew,
-        category: trans.__('Other'),
-        rank: 3,
-        args: ext
-      });
+    availableKernelFileTypes: Iterable<IRenderMime.IFileType>
+  ): IDisposable {
+    const disposables = new DisposableSet();
+
+    for (const filetype of availableKernelFileTypes) {
+      disposables.add(
+        launcher.add({
+          command: CommandIDs.createNew,
+          category: trans.__('Other'),
+          rank: 3,
+          args: {
+            fileExt: filetype.extensions[0],
+            iconName: filetype.icon?.toString() ?? '',
+            launcherLabel: trans.__('%1 File', filetype.displayName),
+            paletteLabel: trans.__('New %1 File', filetype.displayName),
+            caption: trans.__('Create a new %1 File', filetype.displayName)
+          }
+        })
+      );
     }
+
+    return disposables;
   }
 
   /**
@@ -1221,20 +1548,34 @@ export namespace Commands {
 
   /**
    * Add New ___ File commands to the File Editor palette for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
    */
   export function addKernelLanguagePaletteItems(
     palette: ICommandPalette,
     trans: TranslationBundle,
-    availableKernelFileTypes: Iterable<IFileTypeData>
-  ): void {
+    availableKernelFileTypes: Iterable<IRenderMime.IFileType>
+  ): IDisposable {
+    const disposables = new DisposableSet();
     const paletteCategory = trans.__('Text Editor');
-    for (let ext of availableKernelFileTypes) {
-      palette.addItem({
-        command: CommandIDs.createNew,
-        args: { ...ext, isPalette: true },
-        category: paletteCategory
-      });
+
+    for (const filetype of availableKernelFileTypes) {
+      disposables.add(
+        palette.addItem({
+          command: CommandIDs.createNew,
+          args: {
+            fileExt: filetype.extensions[0],
+            iconName: filetype.icon?.toString() ?? '',
+            launcherLabel: trans.__('%1 File', filetype.displayName),
+            paletteLabel: trans.__('New %1 File', filetype.displayName),
+            caption: trans.__('Create a new %1 File', filetype.displayName),
+            isPalette: true
+          },
+          category: paletteCategory
+        })
+      );
     }
+
+    return disposables;
   }
 
   /**
@@ -1278,24 +1619,38 @@ export namespace Commands {
 
     // Add a code runner to the run menu.
     if (consoleTracker) {
-      addCodeRunnersToRunMenu(menu, consoleTracker);
+      addCodeRunnersToRunMenu(menu, consoleTracker, isEnabled);
     }
   }
 
   /**
    * Add Create New ___ File commands to the File menu for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
    */
   export function addKernelLanguageMenuItems(
     menu: IMainMenu,
-    availableKernelFileTypes: Iterable<IFileTypeData>
-  ): void {
-    for (let ext of availableKernelFileTypes) {
-      menu.fileMenu.newMenu.addItem({
-        command: CommandIDs.createNew,
-        args: ext,
-        rank: 31
-      });
+    trans: TranslationBundle,
+    availableKernelFileTypes: Iterable<IRenderMime.IFileType>
+  ): IDisposable {
+    const disposables = new DisposableSet();
+
+    for (const filetype of availableKernelFileTypes) {
+      disposables.add(
+        menu.fileMenu.newMenu.addItem({
+          command: CommandIDs.createNew,
+          args: {
+            fileExt: filetype.extensions[0],
+            iconName: filetype.icon?.toString() ?? '',
+            launcherLabel: trans.__('%1 File', filetype.displayName),
+            paletteLabel: trans.__('New %1 File', filetype.displayName),
+            caption: trans.__('Create a new %1 File', filetype.displayName)
+          },
+          rank: 31
+        })
+      );
     }
+
+    return disposables;
   }
 
   /**
@@ -1303,24 +1658,26 @@ export namespace Commands {
    */
   export function addCodeRunnersToRunMenu(
     menu: IMainMenu,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    isEnabled: () => boolean
   ): void {
-    const isEnabled = (current: IDocumentWidget<FileEditor>) =>
+    const isEnabled_ = (current: IDocumentWidget<FileEditor>) =>
+      isEnabled() &&
       current.context &&
       !!consoleTracker.find(
         widget => widget.sessionContext.session?.path === current.context.path
       );
     menu.runMenu.codeRunners.restart.add({
       id: CommandIDs.restartConsole,
-      isEnabled
+      isEnabled: isEnabled_
     });
     menu.runMenu.codeRunners.run.add({
       id: CommandIDs.runCode,
-      isEnabled
+      isEnabled: isEnabled_
     });
     menu.runMenu.codeRunners.runAll.add({
       id: CommandIDs.runAllCode,
-      isEnabled
+      isEnabled: isEnabled_
     });
   }
 
@@ -1377,6 +1734,36 @@ export namespace Commands {
       label: trans.__('Open Code Viewer'),
       execute: (args: any) => {
         return openCodeViewer(args);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            content: {
+              type: 'string',
+              description: trans.__('The content to display in the code viewer')
+            },
+            label: {
+              type: 'string',
+              description: trans.__('The label for the code viewer')
+            },
+            mimeType: {
+              type: 'string',
+              description: trans.__('The MIME type of the content')
+            },
+            extension: {
+              type: 'string',
+              description: trans.__(
+                'The file extension to derive MIME type from'
+              )
+            },
+            widgetId: {
+              type: 'string',
+              description: trans.__('The ID to assign to the widget')
+            }
+          },
+          required: ['content']
+        }
       }
     });
   }

@@ -1,4 +1,5 @@
 {
-  "out": "../../docs/api/outputarea",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "name": "outputarea"
 }

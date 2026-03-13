@@ -7,11 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/cells/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '@jupyterlab/completer/style/index.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import {
   Toolbar as AppToolbar,
@@ -32,6 +29,7 @@ import {
   CodeMirrorMimeTypeService,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
+  EditorThemeRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -54,7 +52,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -65,17 +63,23 @@ function main(): void {
   const specsManager = new KernelSpecManager();
   const sessionManager = new SessionManager({ kernelManager });
   const sessionContext = new SessionContext({
+    kernelManager,
     sessionManager,
     specsManager,
     name: 'Example'
   });
   const editorExtensions = () => {
+    const themes = new EditorThemeRegistry();
+    EditorThemeRegistry.getDefaultThemes().forEach(theme => {
+      themes.addTheme(theme);
+    });
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
-      {}
-    )) {
-      registry.addExtension(extensionFactory);
-    }
+
+    EditorExtensionRegistry.getDefaultExtensions({ themes }).forEach(
+      extensionFactory => {
+        registry.addExtension(extensionFactory);
+      }
+    );
     registry.addExtension({
       name: 'shared-model-binding',
       factory: options => {
@@ -133,7 +137,11 @@ function main(): void {
   sessionContext.kernelChanged.connect(() => {
     void sessionContext.session?.kernel?.info.then(info => {
       const lang = info.language_info;
-      const mimeType = mimeService.getMimeTypeByLanguage(lang);
+      const mimeTypes = mimeService.getMimeTypeByLanguage(lang);
+      const mimeType =
+        Array.isArray(mimeTypes) && mimeTypes.length !== 0
+          ? mimeTypes[0]
+          : mimeTypes;
       cellWidget.model.mimeType = mimeType;
     });
   });
@@ -210,6 +218,12 @@ function main(): void {
   panel.addWidget(cellWidget);
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
+
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  completer.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

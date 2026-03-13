@@ -180,13 +180,18 @@
       "command": "filebrowser:duplicate",
       "keys": ["Accel D"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:select-all",
+      "keys": ["Accel A"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {
     "navigateToCurrentDirectory": {
       "type": "boolean",
-      "title": "Navigate to current directory",
-      "description": "Whether to automatically navigate to a document's current directory",
+      "title": "Navigate to current folder",
+      "description": "Whether to automatically navigate to a document's current folder",
       "default": false
     },
     "useFuzzyFilter": {
@@ -197,8 +202,8 @@
     },
     "filterDirectories": {
       "type": "boolean",
-      "title": "Filter directories",
-      "description": "Whether to apply the search on directories",
+      "title": "Filter folders",
+      "description": "Whether to apply the search on folders",
       "default": true
     },
     "showLastModifiedColumn": {
@@ -225,10 +230,77 @@
       "description": "Whether to show checkboxes next to files and folders",
       "default": false
     },
+    "showFullPath": {
+      "type": "boolean",
+      "title": "Show full path in browser bread crumbs",
+      "description": "Whether to show full path in browser bread crumbs",
+      "default": false
+    },
     "sortNotebooksFirst": {
       "type": "boolean",
       "title": "When sorting by name, group notebooks before other files",
       "description": "Whether to group the notebooks away from files",
+      "default": false
+    },
+    "sortFileNamesNaturally": {
+      "type": "boolean",
+      "title": "Sort file names naturally",
+      "description": "When sorting by name, use natural order (e.g. file2 before file10). When disabled, use lexicographic order (e.g. file10 before file2).",
+      "default": true
+    },
+    "singleClickNavigation": {
+      "type": "boolean",
+      "title": "Navigate files and directories with single click",
+      "description": "Whether to allow single click selection on file browser items",
+      "default": false
+    },
+    "autoOpenUploads": {
+      "type": "boolean",
+      "title": "Auto-open uploads",
+      "description": "Automatically open uploaded notebooks and supported files",
+      "default": true
+    },
+    "maxAutoOpenSizeMB": {
+      "type": "number",
+      "title": "Max auto-open size",
+      "description": "Maximum file size (MB) to auto-open files on upload",
+      "default": 50
+    },
+    "allowFileUploads": {
+      "type": "boolean",
+      "title": "Allow file uploads",
+      "description": "Whether to allow uploading files",
+      "default": true
+    },
+    "breadcrumbs": {
+      "title": "Breadcrumbs",
+      "description": "Settings related to breadcrumbs display and behavior.",
+      "type": "object",
+      "default": {
+        "minimumLeftItems": 0,
+        "minimumRightItems": 2
+      },
+      "properties": {
+        "minimumLeftItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs left items",
+          "description": "Minimum number of directory items to display on the left side of the breadcrumbs ellipsis",
+          "default": 0,
+          "minimum": 0
+        },
+        "minimumRightItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs right items",
+          "description": "Minimum number of directory items to display on the right side of the breadcrumbs ellipsis",
+          "default": 2,
+          "minimum": 0
+        }
+      }
+    },
+    "showFileFilter": {
+      "type": "boolean",
+      "title": "Show Filter Bar by Default",
+      "description": "Show the filter bar by default in the file browser.",
       "default": false
     }
   },

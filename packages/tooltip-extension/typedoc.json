@@ -1,4 +1,5 @@
 {
-  "out": "../../docs/api/tooltip-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "name": "tooltip-extension"
 }

@@ -6,11 +6,11 @@
 @import './variables.css';
 
 /* Set the default typography for monospace elements */
-tt,
-code,
-kbd,
-samp,
-pre {
+.jp-ThemedContainer tt,
+.jp-ThemedContainer code,
+.jp-ThemedContainer kbd,
+.jp-ThemedContainer samp,
+.jp-ThemedContainer pre {
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);

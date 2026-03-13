@@ -46,7 +46,7 @@ describe('terminal', () => {
         session = await manager.startNew();
         const emission = testEmission(session.messageReceived, {
           test: (sender, msg) => {
-            return msg.type === 'stdout';
+            expect(msg.type).toBe('stdout');
           }
         });
         session.send({ type: 'stdin', content: ['cd\r'] });

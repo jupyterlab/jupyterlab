@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import * as webpack from 'webpack';
+import * as rspack from '@rspack/core';
 import { Build } from './build';
 import { WPPlugin } from './webpack-plugins';
 import { merge } from 'webpack-merge';
@@ -11,7 +11,7 @@ import * as glob from 'glob';
 import Ajv from 'ajv';
 
 const baseConfig = require('./webpack.config.base');
-const { ModuleFederationPlugin } = webpack.container;
+const { ModuleFederationPlugin } = rspack.container;
 
 export interface IOptions {
   packagePath?: string;
@@ -29,7 +29,7 @@ function generateConfig({
   mode = 'production',
   devtool = mode === 'development' ? 'source-map' : undefined,
   watchMode = false
-}: IOptions = {}): webpack.Configuration[] {
+}: IOptions = {}): rspack.Configuration[] {
   const data = require(path.join(packagePath, 'package.json'));
 
   const ajv = new Ajv({ useDefaults: true, strict: false });
@@ -79,7 +79,7 @@ function generateConfig({
     ...(coreData.resolutions ?? {})
   };
 
-  // Alow extensions to match a wider range than the core dependency
+  // Allow extensions to match a wider range than the core dependency
   // To ensure forward compatibility.
   Object.keys(coreDeps).forEach(element => {
     shared[element] = {
@@ -91,7 +91,7 @@ function generateConfig({
   // Add package dependencies.
   Object.keys(data.dependencies).forEach(element => {
     // TODO: make sure that the core dependency semver range is a subset of our
-    // data.depencies version range for any packages in the core deps.
+    // data.dependencies version range for any packages in the core deps.
     if (!shared[element]) {
       shared[element] = {};
     }
@@ -257,7 +257,7 @@ function generateConfig({
     rules.push({
       test: /\.js$/,
       enforce: 'pre',
-      use: ['source-map-loader']
+      use: [require.resolve('source-map-loader')]
     });
   }
 

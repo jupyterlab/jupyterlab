@@ -7,10 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/console/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -23,6 +21,7 @@ import {
   CodeMirrorMimeTypeService,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
+  EditorThemeRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -33,17 +32,14 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationManager
-} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator, TranslationManager } from '@jupyterlab/translation';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 async function main(): Promise<any> {
   const translator = new TranslationManager();
-  await translator.fetch('en');
+  await translator.fetch('default');
   const trans = translator.load('jupyterlab');
 
   console.debug(trans.__('in main'));
@@ -93,12 +89,17 @@ function startApp(
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const editorExtensions = () => {
+    const themes = new EditorThemeRegistry();
+    EditorThemeRegistry.getDefaultThemes().forEach(theme => {
+      themes.addTheme(theme);
+    });
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
-      {}
-    )) {
-      registry.addExtension(extensionFactory);
-    }
+
+    EditorExtensionRegistry.getDefaultExtensions({ themes }).forEach(
+      extensionFactory => {
+        registry.addExtension(extensionFactory);
+      }
+    );
     registry.addExtension({
       name: 'shared-model-binding',
       factory: options => {
@@ -149,6 +150,9 @@ function startApp(
   SplitPanel.setStretch(consolePanel, 1);
   panel.addWidget(palette);
   panel.addWidget(consolePanel);
+
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

@@ -8,20 +8,20 @@ Javascript client for the Jupyter services REST APIs
 
 Note: All functions and classes using the REST API allow a `serverSettings`
 parameter to configure requests.
-Requests are made using the `fetch` API, which is available in modern browsers
-or via `npm install fetch` for node users. The `whatwg-fetch` npm package
-can be used to polyfill browsers that do not support the `fetch` API.
+
+Requests are made using the `fetch` API, which is available in modern browsers or in Node 18+.
 
 ## Package Install
 
 **Prerequisites**
 
 - [node](http://nodejs.org/)
-- [python](https://www.anaconda.com/distribution/)
+- Python, e.g. via [conda](https://www.anaconda.com/download)
 
 ```bash
 npm install --save @jupyterlab/services
-conda install notebook  # notebook 4.3+ required
+conda install jupyter-server # jupyter-server 2.0+ is recommended
+# or `pip install jupyter-server`
 ```
 
 ## Source Build
@@ -71,14 +71,14 @@ This can be as a `<script>` tag in the browser or by using the `requirejs`
 package in node (`npm install requirejs` and setting
 `global.requirejs = require('requirejs');`).
 
-## Starting the Notebook Server
+## Starting the Jupyter Server
 
 Follow the package install instructions first.
 
-The library requires a running Jupyter Notebook server, launched as:
+The library requires a running Jupyter Server, launched as:
 
 ```bash
-jupyter notebook
+jupyter server
 ```
 
 or
@@ -91,7 +91,7 @@ jupyter lab
 
 Follow the package install instructions first.
 
-See `examples/browser` for an example of using Webpack to bundle the library.
+See `examples/browser` for an example of using Rspack to bundle the library.
 
 ## Usage from Node.js
 
