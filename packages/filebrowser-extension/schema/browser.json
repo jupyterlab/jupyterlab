@@ -224,6 +224,14 @@
       "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
       "default": false
     },
+    "timestampFormat": {
+      "type": "string",
+      "title": "Timestamp format",
+      "description": "Display format for file timestamps",
+      "default": "absolute",
+      "enum": ["absolute", "relative"],
+      "enumNames": ["Absolute", "Relative"]
+    },
     "showFileCheckboxes": {
       "type": "boolean",
       "title": "Use checkboxes to select items",
