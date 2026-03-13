@@ -126,7 +126,7 @@ function activate(
     fileTypes: ['markdown'],
     defaultRendered: ['markdown']
   });
-  factory.widgetCreated.connect((sender: MarkdownViewerFactory, widget: MarkdownDocument) => {
+  factory.widgetCreated.connect((sender, widget) => {
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
@@ -213,7 +213,7 @@ function activate(
         tracker,
         rendermime.markdownParser,
         sanitizer ?? rendermime.sanitizer
-      )
+      ) as any
     );
   }
 

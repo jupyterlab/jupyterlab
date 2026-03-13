@@ -284,7 +284,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
-    registry.add('jp-fileeditorSearchProvider', FileEditorSearchProvider);
+    registry.add('jp-fileeditorSearchProvider', FileEditorSearchProvider as any);
   }
 };
 
@@ -581,9 +581,9 @@ function activate(
     });
 
   if (tocRegistry) {
-    tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
-    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker, parser));
-    tocRegistry.add(new PythonTableOfContentsFactory(tracker));
+    tocRegistry.add(new LaTeXTableOfContentsFactory(tracker) as any);
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker, parser) as any);
+    tocRegistry.add(new PythonTableOfContentsFactory(tracker) as any);
   }
 
   return tracker;

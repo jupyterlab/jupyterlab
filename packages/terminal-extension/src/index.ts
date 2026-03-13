@@ -204,8 +204,8 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as any)[key] = settings.composite[key];
+    Object.keys(settings.composite).forEach((key) => {
+      (options as any)[key] = settings.composite[key as keyof ITerminal.IOptions];
     });
   }
 
@@ -217,8 +217,8 @@ function activate(
     if (!terminal) {
       return;
     }
-    Object.keys(options).forEach((key: keyof ITerminal.IOptions) => {
-      terminal.setOption(key, options[key]);
+    Object.keys(options).forEach((key) => {
+      terminal.setOption(key as keyof ITerminal.IOptions, options[key as keyof ITerminal.IOptions]);
     });
   }
 
@@ -350,7 +350,7 @@ function activate(
   }
 
   if (searchRegistry) {
-    searchRegistry.add('terminal', TerminalSearchProvider);
+    searchRegistry.add('terminal', TerminalSearchProvider as any);
   }
 
   return tracker;
@@ -534,8 +534,8 @@ function addCommands(
         if (current) {
           current.content.activate();
         }
-      } catch (err) {
-        Private.showErrorMessage(err);
+      } catch (err: unknown) {
+        Private.showErrorMessage(err as any);
       }
     },
     icon: args =>
@@ -661,8 +661,8 @@ function addCommands(
       if (fontSize && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
-        } catch (err) {
-          Private.showErrorMessage(err);
+        } catch (err: unknown) {
+          Private.showErrorMessage(err as any);
         }
       }
     },
@@ -681,8 +681,8 @@ function addCommands(
       if (fontSize && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
-        } catch (err) {
-          Private.showErrorMessage(err);
+        } catch (err: unknown) {
+          Private.showErrorMessage(err as any);
         }
       }
     },
@@ -724,9 +724,9 @@ function addCommands(
       try {
         await settingRegistry.set(plugin.id, 'theme', theme);
         commands.notifyCommandChanged(CommandIDs.setTheme);
-      } catch (err) {
+      } catch (err: unknown) {
         console.log(err);
-        Private.showErrorMessage(err);
+        Private.showErrorMessage(err as any);
       }
     },
     describedBy: {

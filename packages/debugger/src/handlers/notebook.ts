@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
-import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { CellList, NotebookPanel } from '@jupyterlab/notebook';
 import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ObservableMap } from '@jupyterlab/observables';
 import type { IDisposable } from '@lumino/disposable';

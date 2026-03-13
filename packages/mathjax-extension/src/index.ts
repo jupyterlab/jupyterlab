@@ -5,6 +5,7 @@
  * @module mathjax-extension
  */
 
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import type {
@@ -103,9 +104,9 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
     });
 
     app.commands.addCommand(CommandIDs.scale, {
-      execute: async (args: CommandArgs.scale) => {
+      execute: async (args: ReadonlyPartialJSONObject) => {
         const md = await typesetter.mathDocument();
-        const scale = args['scale'] || 1.0;
+        const scale = (typeof args['scale'] === 'number' ? args['scale'] : null) || 1.0;
         md.outputJax.options.scale = scale;
         md.rerender();
 
