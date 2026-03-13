@@ -1,0 +1,29 @@
+
+{
+  "name": "my-extension",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@jupyterlab/application": "^4.5.5",
+    "@jupyterlab/apputils": "^4.6.5",
+    "@lumino/widgets": "^2.7.5"
+  }
+}
+"scripts": {
+  "build": "tsc",
+  "watch": "tsc -w"
+}
+"scripts": {
+  "build": "tsc",
+  "watch": "tsc -w",
+  "start": "jupyter labextension develop .",
+  "test": "jest"
+}
