@@ -15,7 +15,7 @@ myst:
 
 # Using JupyterLab components
 
-JupyterLab is built with many re-usable components that are
+JupyterLab is built with many reusable components that are
 independently [published on npm](https://www.npmjs.com/search?q=%40jupyterlab).
 JupyterLab itself assembles these components together to provide a full,
 IDE-like experience. However, developers are encouraged to use these to bring

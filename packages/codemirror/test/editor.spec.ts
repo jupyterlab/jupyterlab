@@ -482,7 +482,7 @@ describe('CodeMirrorEditor', () => {
         value: 'import'
       });
     });
-    it('should return token of parent when erronous leaf is found', async () => {
+    it('should return token of parent when erroneous leaf is found', async () => {
       model.mimeType = 'text/x-python';
       model.sharedModel.setSource('a = "/home');
       // Needed to have the sharedModel content transferred to the editor document
