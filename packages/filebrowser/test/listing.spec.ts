@@ -1062,12 +1062,18 @@ describe('filebrowser/listing', () => {
     });
 
     describe('singleClickNavigation', () => {
+      let directoryNode: HTMLElement;
+      let fileNode: HTMLElement;
+
       beforeEach(async () => {
         await dirListing.model.manager.newUntitled({
           type: 'directory'
         });
         await dirListing.model.cd('.');
         await signalToPromise(dirListing.updated);
+
+        directoryNode = dirListing.contentNode.children[0] as HTMLElement;
+        fileNode = dirListing.contentNode.children[1] as HTMLElement;
       });
 
       it('should open a file on single click', async () => {
@@ -1076,7 +1082,7 @@ describe('filebrowser/listing', () => {
         const fileOpened = jest.fn();
         dirListing.onItemOpened.connect(fileOpened);
 
-        simulate(dirListing.contentNode.children[1]!, 'click');
+        simulate(fileNode!, 'click');
 
         expect(fileOpened).toHaveBeenCalledTimes(1);
         const openedFile = fileOpened.mock.calls[0][1];
@@ -1088,8 +1094,7 @@ describe('filebrowser/listing', () => {
       it('should navigate to directory on single click', async () => {
         dirListing.setAllowSingleClickNavigation(true);
 
-        const firstNode = dirListing.contentNode.children[0] as HTMLElement;
-        simulate(firstNode, 'click');
+        simulate(directoryNode, 'click');
         await signalToPromise(dirListing.updated);
         expect(getItemTitles(dirListing)).toHaveLength(0);
       });
@@ -1100,10 +1105,10 @@ describe('filebrowser/listing', () => {
         const fileOpened = jest.fn();
         dirListing.onItemOpened.connect(fileOpened);
 
-        simulate(dirListing.contentNode.children[1]!, 'click');
+        simulate(fileNode!, 'click');
         expect(fileOpened).not.toHaveBeenCalled();
 
-        simulate(dirListing.contentNode.children[0]!, 'click');
+        simulate(directoryNode!, 'click');
         await Promise.race([
           signalToPromise(dirListing.updated),
           new Promise(r => setTimeout(r, 100))
@@ -1119,12 +1124,12 @@ describe('filebrowser/listing', () => {
         const fileOpened = jest.fn();
         dirListing.onItemOpened.connect(fileOpened);
 
-        simulate(dirListing.contentNode.children[1]!, 'dblclick');
+        simulate(fileNode!, 'dblclick');
         expect(fileOpened).toHaveBeenCalledTimes(1);
         const openedFile = fileOpened.mock.calls[0][1];
         expect(openedFile.type).toBe('file');
 
-        simulate(dirListing.contentNode.children[0]!, 'dblclick');
+        simulate(directoryNode!, 'dblclick');
         await signalToPromise(dirListing.updated);
         expect(getItemTitles(dirListing)).toHaveLength(0);
 
@@ -1137,9 +1142,8 @@ describe('filebrowser/listing', () => {
         const fileOpened = jest.fn();
         dirListing.onItemOpened.connect(fileOpened);
 
-        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
         const checkbox = dirListing.renderer.getCheckboxNode!(
-          itemNode
+          directoryNode
         ) as HTMLInputElement;
         simulate(checkbox, 'click');
 
