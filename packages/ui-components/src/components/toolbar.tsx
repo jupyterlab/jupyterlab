@@ -872,6 +872,7 @@ export function ToolbarButtonComponent(
 
   return (
     <Button
+      role="button"
       appearance="stealth"
       className={
         props.className
