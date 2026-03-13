@@ -477,7 +477,7 @@ export abstract class EditorSearchProvider<
         const start = editor.getOffsetAt(this._inSelection.start);
         const end = editor.getOffsetAt(this._inSelection.end);
         this.cmHandler.matches = allMatches.filter(
-          match => match.position >= start && match.position <= end
+          (match: ISearchMatch) => match.position >= start && match.position <= end
         );
         // A special case to always have a current match when in line selection mode.
         if (
@@ -654,7 +654,7 @@ export class CodeMirrorSearchHighlighter {
   set protectSelection(v: boolean) {
     this._protectSelection = v;
   }
-  private _protectSelection: boolean;
+  private _protectSelection!: boolean;
 
   /**
    * Clear all highlighted matches

@@ -165,7 +165,7 @@ export class SessionAPIClient implements ISessionAPIClient {
   /**
    * The server settings used by the client.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * List the running sessions.

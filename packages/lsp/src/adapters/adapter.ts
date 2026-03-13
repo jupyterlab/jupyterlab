@@ -612,10 +612,10 @@ export abstract class WidgetLSPAdapter<
   private readonly _connectionManager: ILSPDocumentConnectionManager;
   private readonly _trans: TranslationBundle;
 
-  private _isConnected: boolean;
-  private _updateFinished: Promise<void>;
+  private _isConnected!: boolean;
+  private _updateFinished!: Promise<void>;
   private _virtualDocument: VirtualDocument | null = null;
-  private _editorToAdapter: WeakMap<Document.IEditor, EditorAdapter>;
+  private _editorToAdapter!: WeakMap<Document.IEditor, EditorAdapter>;
 
   private _onEditorAdded(
     sender: WidgetLSPAdapter<T>,

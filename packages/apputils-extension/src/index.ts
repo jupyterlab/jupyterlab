@@ -491,14 +491,15 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           }
         }
       },
-      execute: async (args: IRouter.ILocation) => {
+      execute: async (args: any) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
         if (resolved) {
           return;
         }
 
-        const { hash, path, search } = args;
+        const location = args as IRouter.ILocation;
+        const { hash, path, search } = location;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'
@@ -522,7 +523,8 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             resolved = true;
             transform.resolve({ type: 'overwrite', contents: saved.data });
           }
-        } catch ({ message }) {
+        } catch (error) {
+          const message = (error as { message?: string }).message;
           console.warn(`Fetching workspace "${workspace}" failed.`, message);
 
           // If the workspace does not exist, cancel the data transformation
@@ -568,7 +570,8 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           }
         }
       },
-      execute: async ({ reload }: { reload: boolean }) => {
+      execute: async (args: any) => {
+        const { reload } = args as { reload: boolean };
         await db.clear();
         await save.invoke();
         if (reload) {
@@ -600,8 +603,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           }
         }
       },
-      execute: (args: IRouter.ILocation) => {
-        const { hash, path, search } = args;
+      execute: (args: any) => {
+        const location = args as IRouter.ILocation;
+        const { hash, path, search } = location;
         const query = URLExt.queryStringToObject(search || '');
         const reset = 'reset' in query;
         const clone = 'clone' in query;

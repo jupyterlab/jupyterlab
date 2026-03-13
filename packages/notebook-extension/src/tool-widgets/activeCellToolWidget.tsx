@@ -114,7 +114,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   private _tracker: INotebookTracker;
-  private _cellModel: ICellModel | null;
+  private _cellModel!: ICellModel | null;
   private _refreshDebouncer: Debouncer<void, void, null[]>;
   private _editorEl: HTMLPreElement;
   private _inputPrompt: InputPrompt;

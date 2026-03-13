@@ -637,7 +637,7 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
 
   uiSchema['ui:options'] = { ...DEFAULT_UI_OPTIONS, ...uiSchema['ui:options'] };
 
-  others.uiSchema = uiSchema;
+  others.uiSchema = uiSchema as any;
 
   const { FieldTemplate, ArrayFieldTemplate, ObjectFieldTemplate } =
     props.templates || JSONExt.emptyObject;

@@ -1743,17 +1743,17 @@ export class WindowedList<
   private _viewportPaddingTop: number = 0;
   private _viewportPaddingBottom: number = 0;
   private _innerElement: HTMLElement;
-  private _isParentHidden: boolean;
+  private _isParentHidden!: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
-  private _resetScrollToItemTimeout: number | null;
+  private _resetScrollToItemTimeout!: number | null;
   private _requiresTotalSizeUpdate: boolean = false;
-  private _areaResizeObserver: ResizeObserver | null;
+  private _areaResizeObserver!: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
   private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
-  private _scrollbarResizeObserver: ResizeObserver | null;
+  private _scrollbarResizeObserver!: ResizeObserver | null;
   private _scrollRepaint: number | null;
   private _scrollToItem:
     | [

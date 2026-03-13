@@ -50,12 +50,12 @@ class ClientRequestHandler<
     });
     return this.connection
       .sendRequest(this.method, params)
-      .then((result: IClientResult[T]) => {
+      .then((result: unknown) => {
         this.emitter.log(MessageKind.resultForClient, {
           method: this.method,
           message: params
         });
-        return result;
+        return result as IClientResult[T];
       });
   }
 }
@@ -223,12 +223,12 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   /**
    * Requests comes from the client.
    */
-  clientRequests: ClientRequests;
+  clientRequests!: ClientRequests;
 
   /**
    * Responses comes from the server.
    */
-  serverRequests: ServerRequests;
+  serverRequests!: ServerRequests;
 
   /**
    * Should log all communication?

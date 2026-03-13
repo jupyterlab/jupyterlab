@@ -72,10 +72,10 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   /**
    * The execution count for the prompt.
    */
-  executionCount: nbformat.ExecutionCount;
+  executionCount: nbformat.ExecutionCount = null;
 
-  private _timestamp: Date;
-  private _level: FullLogLevel;
+  private _timestamp!: Date;
+  private _level!: FullLogLevel;
   private _timestampNode: HTMLDivElement;
 }
 
@@ -87,7 +87,7 @@ class LogConsoleOutputArea extends OutputArea {
   /**
    * Output area model used by the widget.
    */
-  readonly model: LoggerOutputAreaModel;
+  readonly model!: LoggerOutputAreaModel;
 
   /**
    * Create an output item with a prompt and actual output
@@ -210,9 +210,9 @@ export class ScrollingWidget<T extends Widget> extends Widget {
 
   private _content: T;
   private _observer: IntersectionObserver | null = null;
-  private _scrollHeight: number;
+  private _scrollHeight!: number;
   private _sentinel: HTMLDivElement;
-  private _tracking: boolean;
+  private _tracking!: boolean;
 }
 
 export namespace ScrollingWidget {

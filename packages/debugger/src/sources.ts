@@ -3,13 +3,14 @@
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import type { Cell } from '@jupyterlab/cells';
 import type {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
 import type { IConsoleTracker } from '@jupyterlab/console';
 import type { IEditorTracker } from '@jupyterlab/fileeditor';
-import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import type { IDebugger } from './tokens';
 
@@ -82,7 +83,7 @@ export class DebuggerSources implements IDebugger.ISources {
     const { focus, kernel, path, source } = params;
 
     const editors: IDebugger.ISources.IEditor[] = [];
-    this._notebookTracker.forEach(notebookPanel => {
+    this._notebookTracker.forEach((notebookPanel: NotebookPanel) => {
       const sessionContext = notebookPanel.sessionContext;
 
       if (path !== sessionContext.path) {
@@ -95,7 +96,7 @@ export class DebuggerSources implements IDebugger.ISources {
       }
 
       const cells = notebookPanel.content.widgets;
-      cells.forEach((cell, i) => {
+      cells.forEach((cell: Cell, i: number) => {
         // check the event is for the correct cell
         const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
@@ -110,7 +111,7 @@ export class DebuggerSources implements IDebugger.ISources {
           if (notebook.activeCell) {
             notebook
               .scrollToItem(notebook.activeCellIndex, 'smart')
-              .catch(reason => {
+              .catch((reason: unknown) => {
                 // no-op
               });
           }

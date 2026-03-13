@@ -87,9 +87,9 @@ export class ToolbarWidgetRegistry implements IToolbarWidgetRegistry {
       namespace = new Map<string, (main: Widget) => Widget>();
       this._widgets.set(widgetFactory, namespace);
     }
-    namespace.set(toolbarItemName, factory);
+    namespace.set(toolbarItemName, factory as (main: Widget) => Widget);
     this._factoryAdded.emit(toolbarItemName);
-    return oldFactory;
+    return oldFactory as ((main: T) => Widget) | undefined;
   }
 
   /**

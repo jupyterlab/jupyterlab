@@ -1842,13 +1842,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _idTypeMap = new Map<string, string>();
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
-  private _userLayout: {
+  private _userLayout!: {
     'single-document': ILabShell.IUserLayout;
     'multiple-document': ILabShell.IUserLayout;
   };
   private _delayedWidget = new Array<ILabShell.IDelayedWidget>();
-  private _translator: ITranslator;
-  private _layoutRestorer: LayoutRestorer;
+  private _translator!: ITranslator;
+  private _layoutRestorer!: LayoutRestorer;
 }
 
 namespace Private {
@@ -2120,11 +2120,12 @@ namespace Private {
           expansionStates: boolean[] | null;
         };
       } = {};
-      this._stackedPanel.widgets.forEach((w: SidePanel) => {
-        if (w.id && w.content instanceof SplitPanel) {
-          widgetStates[w.id] = {
-            sizes: w.content.relativeSizes() as number[],
-            expansionStates: w.content.widgets.map(wi => wi.isVisible)
+      this._stackedPanel.widgets.forEach((w) => {
+        const sidePanel = w as SidePanel;
+        if (sidePanel.id && sidePanel.content instanceof SplitPanel) {
+          widgetStates[sidePanel.id] = {
+            sizes: sidePanel.content.relativeSizes() as number[],
+            expansionStates: sidePanel.content.widgets.map(wi => wi.isVisible)
           };
         }
       });
@@ -2151,20 +2152,21 @@ namespace Private {
         this.hide();
       }
       if (data.widgetStates) {
-        this._stackedPanel.widgets.forEach((w: SidePanel) => {
-          if (w.id && w.content instanceof SplitPanel) {
-            const state = data.widgetStates[w.id] ?? {};
-            w.content.widgets.forEach((wi, widx) => {
+        this._stackedPanel.widgets.forEach((w) => {
+        const sidePanel = w as SidePanel;
+          if (sidePanel.id && sidePanel.content instanceof SplitPanel) {
+            const state = data.widgetStates[sidePanel.id] ?? {};
+            sidePanel.content.widgets.forEach((wi, widx) => {
               const expansion = (state.expansionStates ?? [])[widx];
               if (
                 typeof expansion === 'boolean' &&
-                w.content instanceof AccordionPanel
+                sidePanel.content instanceof AccordionPanel
               ) {
-                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+                expansion ? sidePanel.content.expand(widx) : sidePanel.content.collapse(widx);
               }
             });
             if (state.sizes) {
-              w.content.setRelativeSizes(state.sizes);
+              sidePanel.content.setRelativeSizes(state.sizes);
             }
           }
         });

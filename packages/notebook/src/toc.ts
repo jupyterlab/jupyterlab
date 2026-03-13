@@ -254,7 +254,7 @@ export class NotebookToCModel extends TableOfContentsModel<
                   cellRef: cell,
                   collapsed: false,
                   isRunning: RunningStatus.Idle
-                };
+                } as INotebookHeading;
               })
             );
           }
@@ -272,7 +272,7 @@ export class NotebookToCModel extends TableOfContentsModel<
               cellRef: cell,
               collapsed: false,
               isRunning: RunningStatus.Idle
-            };
+            } as INotebookHeading;
           });
           // If there are multiple headings, only collapse the highest heading (i.e. minimal level)
           // consistent with the cell.headingInfo
@@ -356,8 +356,12 @@ export class NotebookToCModel extends TableOfContentsModel<
 
   protected onActiveCellChanged(
     notebook: Notebook,
-    cell: Cell<ICellModel>
+    cell: Cell<ICellModel> | null
   ): void {
+    if (!cell) {
+      this.setActiveHeading(null, false);
+      return;
+    }
     // Highlight the first title as active (if multiple titles are in the same cell)
     const activeHeading = this.getCellHeadings(cell)[0];
     this.setActiveHeading(activeHeading ?? null, false);
@@ -378,7 +382,7 @@ export class NotebookToCModel extends TableOfContentsModel<
       notebook: Notebook;
       cell: Cell;
       success: boolean;
-      error: KernelError | null;
+      error?: KernelError | null;
     }
   ): void {
     this._runningCells.forEach((cell, index) => {
@@ -552,7 +556,7 @@ export class NotebookToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Notebook files.
  */
-export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
+export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel, INotebookHeading> {
   /**
    * Constructor
    *
@@ -589,7 +593,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
   protected _createNew(
     widget: NotebookPanel,
     configuration?: TableOfContents.IConfig
-  ): TableOfContentsModel<TableOfContents.IHeading, NotebookPanel> {
+  ): NotebookToCModel {
     const model = new NotebookToCModel(
       widget,
       this.parser,
@@ -602,7 +606,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     let headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
     const onActiveHeadingChanged = (
-      model: NotebookToCModel,
+      model: TableOfContents.IModel<INotebookHeading>,
       heading: INotebookHeading | null
     ) => {
       if (heading) {
@@ -710,7 +714,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       });
     };
 
-    const onHeadingsChanged = (model: NotebookToCModel) => {
+    const onHeadingsChanged = (model: TableOfContents.IModel<INotebookHeading>) => {
       if (!this.parser) {
         return;
       }
@@ -726,7 +730,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     const onHeadingCollapsed = (
-      _: NotebookToCModel,
+      _: TableOfContents.IModel<INotebookHeading>,
       heading: INotebookHeading | null
     ) => {
       if (model.configuration.syncCollapseState) {
@@ -747,8 +751,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         }
       }
     };
-    const onCellCollapsed = (_: unknown, cell: MarkdownCell) => {
-      if (model.configuration.syncCollapseState) {
+    const onCellCollapsed = (_: unknown, cell: Cell<ICellModel>) => {
+      if (model.configuration.syncCollapseState && cell instanceof MarkdownCell) {
         const h = model.getCellHeadings(cell)[0];
         if (h) {
           model.toggleCollapse({
@@ -759,7 +763,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    const onCellInViewportChanged = (_: unknown, cell: Cell) => {
+    const onCellInViewportChanged = (_: unknown, cell: Cell<ICellModel>) => {
       if (cell.inViewport) {
         findHeadingElement(cell);
       } else {

@@ -170,7 +170,7 @@ export class ModalCommandPalette extends Panel {
     }
   }
 
-  private _commandPalette: CommandPalette;
+  private _commandPalette!: CommandPalette;
   private _options: ModalCommandPalette.IOptions;
 }
 

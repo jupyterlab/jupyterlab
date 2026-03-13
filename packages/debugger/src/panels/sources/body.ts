@@ -113,7 +113,7 @@ export class SourcesBody extends Widget {
 
   private _model: IDebugger.Model.ISources;
   private _editor: CodeEditorWrapper;
-  private _editorHandler: EditorHandler;
+  private _editorHandler!: EditorHandler;
   private _debuggerService: IDebugger;
 }
 

@@ -7,8 +7,6 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 import { FormComponent } from '@jupyterlab/ui-components';
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import type { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
@@ -46,7 +44,7 @@ export class FormWidget extends ReactWidget {
         uiSchema={this._props.uiSchema}
         liveValidate
         idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
-        onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
+        onChange={(e) => {
           this._props.metadataFormWidget.updateMetadata(e.formData || {});
         }}
         compact={true}

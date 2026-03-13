@@ -30,7 +30,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import type { CodeCell } from '@jupyterlab/cells';
 import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
@@ -917,7 +917,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
-    registry.add('jp-notebookSearchProvider', NotebookSearchProvider);
+    registry.add('jp-notebookSearchProvider', NotebookSearchProvider as any);
   }
 };
 
@@ -936,7 +936,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ): void => {
     const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
-    tocRegistry.add(nbTocFactory);
+    tocRegistry.add(nbTocFactory as any);
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
         .then(([_, setting]) => {
@@ -1427,6 +1427,9 @@ function activateClonedOutputs(
         }
         cell = current.content.activeCell as CodeCell;
         index = current.content.activeCellIndex;
+        if (index < 0) {
+          return;
+        }
       }
       // Create a MainAreaWidget
       const content = new Private.ClonedOutputArea({
@@ -2483,20 +2486,22 @@ function addCommands(
 
   // Set up signal handler to keep the collapse state consistent
   tracker.currentChanged.connect(
-    (sender: INotebookTracker, panel: NotebookPanel) => {
+    (sender, panel) => {
       if (!panel?.content?.model?.cells) {
         return;
       }
       panel.content.model.cells.changed.connect(
-        (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
+        (list, args) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
         }
       );
       panel.content.activeCellChanged.connect(
-        (notebook: Notebook, cell: Cell) => {
-          NotebookActions.expandParent(cell, notebook);
+        (notebook, cell) => {
+          if (cell) {
+            NotebookActions.expandParent(cell, notebook);
+          }
         }
       );
     }

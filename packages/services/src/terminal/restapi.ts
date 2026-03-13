@@ -140,7 +140,7 @@ export class TerminalAPIClient implements ITerminalAPIClient {
   /**
    * The server settings for the client.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Whether terminals are available.

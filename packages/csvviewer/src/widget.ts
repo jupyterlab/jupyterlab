@@ -38,19 +38,19 @@ export class TextRenderConfig {
   /**
    * default text color
    */
-  textColor: string;
+  textColor!: string;
   /**
    * background color for a search match
    */
-  matchBackgroundColor: string;
+  matchBackgroundColor!: string;
   /**
    * background color for the current search match.
    */
-  currentMatchBackgroundColor: string;
+  currentMatchBackgroundColor!: string;
   /**
    * horizontalAlignment of the text
    */
-  horizontalAlignment: DataGridModule.TextRenderer.HorizontalAlignment;
+  horizontalAlignment!: DataGridModule.TextRenderer.HorizontalAlignment;
   /**
    * font size
    */
@@ -415,9 +415,9 @@ export class CSVViewer extends Widget {
   }
 
   private _context: DocumentRegistry.Context;
-  private _grid: DataGridModule.DataGrid;
-  private _defaultStyle: typeof DataGridModule.DataGrid.defaultStyle;
-  private _searchService: GridSearchService;
+  private _grid!: DataGridModule.DataGrid;
+  private _defaultStyle!: typeof DataGridModule.DataGrid.defaultStyle;
+  private _searchService!: GridSearchService;
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
     null;
   private _delimiter = ',';

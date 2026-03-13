@@ -188,7 +188,7 @@ class OpenDialogBody
         this._browser = browser;
 
         // Add toolbar items
-        setToolbar(this._browser, (browser: FileBrowser) => [
+        setToolbar(this._browser, (browser: any) => [
           {
             name: 'new-folder',
             widget: new ToolbarButton({
@@ -204,7 +204,7 @@ class OpenDialogBody
             widget: new ToolbarButton({
               icon: refreshIcon,
               onClick: () => {
-                browser.model.refresh().catch(reason => {
+                browser.model.refresh().catch((reason: any) => {
                   console.error(
                     'Failed to refresh file browser in open dialog.',
                     reason
@@ -285,7 +285,7 @@ class OpenDialogBody
   }
 
   private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
-  private _browser: FileBrowser;
+  private _browser!: FileBrowser;
 }
 
 namespace Private {

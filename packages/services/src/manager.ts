@@ -124,7 +124,7 @@ export class ServiceManager implements ServiceManager.IManager {
   /**
    * The server settings of the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Get the session manager instance.

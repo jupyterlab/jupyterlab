@@ -55,7 +55,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * The server settings for the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.
@@ -254,12 +254,12 @@ export class SessionManager extends BaseManager implements Session.IManager {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.
-      if (
-        err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503 ||
-        err.response?.status === 424
-      ) {
-        this._connectionFailure.emit(err);
+      const isNetworkError = err instanceof ServerConnection.NetworkError;
+      const hasResponse = typeof err === 'object' && err !== null && 'response' in err;
+      const status = hasResponse ? (err as any).response?.status : undefined;
+
+      if (isNetworkError || status === 503 || status === 424) {
+        this._connectionFailure.emit(err instanceof Error ? err : new Error(String(err)));
       }
       throw err;
     }
@@ -333,7 +333,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   private _isReady = false;
   private _sessionConnections = new Set<SessionConnection>();
   private _models = new Map<string, Session.IModel>();
-  private _pollModels: Poll;
+  private _pollModels!: Poll;
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
@@ -345,7 +345,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
     return this._kernelManager.connectTo(options);
   };
 
-  private _kernelManager: Kernel.IManager;
+  private _kernelManager!: Kernel.IManager;
   private _sessionAPIClient: Session.ISessionAPIClient;
 }
 

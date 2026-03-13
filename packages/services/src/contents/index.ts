@@ -702,7 +702,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * The server settings associated with the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * A signal emitted when a file operation takes place.
@@ -1191,7 +1191,7 @@ export class Drive implements Contents.IDrive {
   /**
    * The server settings of the drive.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager has been disposed.

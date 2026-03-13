@@ -131,5 +131,5 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
     return Promise.resolve();
   }
 
-  private _query: RegExp;
+  private _query!: RegExp;
 }

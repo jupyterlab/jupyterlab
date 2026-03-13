@@ -34,7 +34,7 @@ export class EditorAdapter implements IDisposable {
   /**
    * Whether the handler is disposed.
    */
-  isDisposed: boolean;
+  isDisposed!: boolean;
 
   /**
    * Dispose the handler.

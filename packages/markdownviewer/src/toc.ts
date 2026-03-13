@@ -88,7 +88,10 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Markdown viewer files.
  */
-export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory<MarkdownDocument> {
+export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory<
+  MarkdownDocument,
+  IMarkdownViewerHeading
+> {
   /**
    * Constructor
    *
@@ -113,7 +116,7 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
   protected _createNew(
     widget: MarkdownDocument,
     configuration?: TableOfContents.IConfig
-  ): TableOfContentsModel<TableOfContents.IHeading, MarkdownDocument> {
+  ): TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument> {
     const model = new MarkdownViewerTableOfContentsModel(
       widget,
       this.parser,
@@ -126,7 +129,7 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
     >();
 
     const onActiveHeadingChanged = (
-      model: TableOfContentsModel<IMarkdownViewerHeading, MarkdownDocument>,
+      model: TableOfContents.IModel<IMarkdownViewerHeading>,
       heading: IMarkdownViewerHeading | null
     ) => {
       if (heading) {

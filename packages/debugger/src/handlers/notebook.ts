@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
-import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { CellList, NotebookPanel } from '@jupyterlab/notebook';
 import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ObservableMap } from '@jupyterlab/observables';
 import type { IDisposable } from '@lumino/disposable';
@@ -64,7 +64,7 @@ export class NotebookHandler implements IDisposable {
   /**
    * Whether the handler is disposed.
    */
-  isDisposed: boolean;
+  isDisposed = false;
 
   /**
    * Dispose the handler.
@@ -92,10 +92,10 @@ export class NotebookHandler implements IDisposable {
    * Handle a notebook cells changed event.
    */
   private _onCellsChanged(
-    cells?: any,
+    cells?: CellList,
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    this._notebookPanel.content.widgets.forEach(cell =>
+    this._notebookPanel.content.widgets.forEach((cell: Cell) =>
       this._addEditorHandler(cell)
     );
 

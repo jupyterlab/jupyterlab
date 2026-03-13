@@ -73,7 +73,7 @@ export class FileHandler implements IDisposable {
   /**
    * Whether the handler is disposed.
    */
-  isDisposed: boolean;
+  isDisposed = false;
 
   /**
    * Dispose the handler.

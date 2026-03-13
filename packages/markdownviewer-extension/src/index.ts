@@ -90,8 +90,8 @@ function activate(
    * Update the settings of a widget.
    */
   function updateWidget(widget: MarkdownViewer): void {
-    Object.keys(config).forEach((k: keyof MarkdownViewer.IConfig) => {
-      widget.setOption(k, config[k] ?? null);
+    Object.keys(config).forEach((k) => {
+      widget.setOption(k as keyof MarkdownViewer.IConfig, config[k as keyof MarkdownViewer.IConfig] ?? null);
     });
   }
 
@@ -213,7 +213,7 @@ function activate(
         tracker,
         rendermime.markdownParser,
         sanitizer ?? rendermime.sanitizer
-      )
+      ) as any
     );
   }
 

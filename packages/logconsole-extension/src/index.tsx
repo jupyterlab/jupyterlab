@@ -38,6 +38,7 @@ import {
   listIcon,
   ReactWidget
 } from '@jupyterlab/ui-components';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
 import type { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
@@ -188,8 +189,10 @@ function activateLogConsole(
       notifyCommands();
     });
 
-    logConsolePanel.sourceDisplayed.connect((panel, { source, version }) => {
-      status.model.sourceDisplayed(source, version);
+    logConsolePanel.sourceDisplayed.connect((panel: LogConsolePanel, { source, version }: { source: string | null, version: number | null }) => {
+      if (source !== null && version !== null) {
+        status.model.sourceDisplayed(source, version);
+      }
     });
 
     logConsoleWidget.disposed.connect(() => {
@@ -280,15 +283,15 @@ function activateLogConsole(
 
   app.commands.addCommand(CommandIDs.setLevel, {
     // TODO: find good icon class
-    execute: (args: { level: LogLevel }) => {
-      if (logConsolePanel?.logger) {
-        logConsolePanel.logger.level = args.level;
+    execute: (args: ReadonlyPartialJSONObject) => {
+      if (logConsolePanel?.logger && typeof args.level === 'string') {
+        logConsolePanel.logger.level = args.level as LogLevel;
       }
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    label: args =>
-      args['level']
-        ? trans.__('Set Log Level to %1', toTitleCase(args.level as string))
+    label: (args: ReadonlyPartialJSONObject) =>
+      args['level'] && typeof args.level === 'string'
+        ? trans.__('Set Log Level to %1', toTitleCase(args.level))
         : trans.__('Set log level to `level`.'),
     describedBy: {
       args: {

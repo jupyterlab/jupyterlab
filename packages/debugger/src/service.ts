@@ -15,8 +15,6 @@ import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
-import type { VariablesModel } from './panels/variables/model';
-
 import type { IDebugger } from './tokens';
 import type { IDebuggerDisplayRegistry } from './tokens';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
@@ -41,7 +39,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model({
       displayRegistry: options.displayRegistry,
-      getSource: this.getSource.bind(this),
+      getSource: async () => {
+        return { content: '', mimeType: '', path: '' };
+      },
       mimeTypeService: options.mimeTypeService || null
     });
     this._debuggerSources = options.debuggerSources ?? null;
@@ -222,8 +222,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('continue', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -285,8 +286,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('next', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -516,8 +518,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('pause', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -532,8 +535,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('stepIn', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -548,8 +552,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.session.sendRequest('stepOut', {
         threadId: this._currentThread()
       });
-    } catch (err) {
-      console.error('Error:', err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Error:', message);
     }
   }
 
@@ -954,7 +959,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private async _onCurrentFrameChanged(
     _: IDebugger.Model.ICallstack,
-    frame: IDebugger.IStackFrame
+    frame: IDebugger.IStackFrame | null
   ): Promise<void> {
     if (!frame) {
       return;
@@ -974,7 +979,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param variable The expanded variable.
    */
   private async _onVariableExpanded(
-    _: VariablesModel,
+    _: IDebugger.Model.IVariables,
     variable: DebugProtocol.Variable
   ): Promise<DebugProtocol.Variable[]> {
     if (!this.session) {

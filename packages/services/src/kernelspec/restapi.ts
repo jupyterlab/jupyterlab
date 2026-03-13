@@ -57,7 +57,7 @@ export class KernelSpecAPIClient implements IKernelSpecAPIClient {
   /**
    * The server settings for the client.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Fetch all of the kernel specs.

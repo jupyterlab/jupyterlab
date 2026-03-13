@@ -211,7 +211,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
 
-  private _mimeType: string;
+  private _mimeType!: string;
   private _scale = 1;
   private _matrix = [1, 0, 0, 1];
   private _colorinversion = 0;

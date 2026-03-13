@@ -263,7 +263,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * notified the user about.
    */
   private _autorestarting = false;
-  translator: ITranslator;
+  translator!: ITranslator;
 }
 
 /**

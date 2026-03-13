@@ -116,8 +116,8 @@ export class SidePanel extends Widget {
   }
 
   protected _content: Panel;
-  protected _header: Panel;
-  protected _toolbar: Toolbar;
+  protected _header!: Panel;
+  protected _toolbar!: Toolbar;
   protected _trans: TranslationBundle;
 }
 

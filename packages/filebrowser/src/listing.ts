@@ -586,7 +586,7 @@ export class DirListing extends Widget {
       await state.remove(key);
     }
   }
-  private _stateColumnsKey: string;
+  private _stateColumnsKey!: string;
 
   /**
    * Shut down kernels on the applicable currently selected items.
@@ -2379,10 +2379,10 @@ export class DirListing extends Widget {
   private async _delete(paths: string[]): Promise<void> {
     await Promise.all(
       paths.map(path =>
-        this._model.manager.deleteFile(path).catch(err => {
+        this._model.manager.deleteFile(path).catch((err: unknown) => {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Delete Failed'),
-            err
+            err as string | Dialog.IError
           );
         })
       )
@@ -2464,7 +2464,7 @@ export class DirListing extends Widget {
         if (error !== 'File not renamed') {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Rename Error'),
-            error
+            error as string | Dialog.IError
           );
         }
         finalFilename = original;
@@ -2671,8 +2671,8 @@ export class DirListing extends Widget {
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
-  private _modifiedWidth: number;
-  private _modifiedStyle: Time.HumanStyle;
+  private _modifiedWidth!: number;
+  private _modifiedStyle!: Time.HumanStyle;
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;

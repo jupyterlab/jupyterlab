@@ -5,6 +5,7 @@
 
 import React from 'react';
 import type { FieldProps } from '@rjsf/utils';
+import type { ICellModel } from '@jupyterlab/cells';
 import type { INotebookTracker } from '@jupyterlab/notebook';
 import { addIcon, checkIcon, LabIcon } from '@jupyterlab/ui-components';
 import { reduce } from '@lumino/algorithm';
@@ -68,7 +69,7 @@ export class CellTagField {
     }
     const allTags = reduce(
       cells,
-      (allTags: string[], cell) => {
+      (allTags: string[], cell: ICellModel) => {
         const tags: string[] = (cell.getMetadata('tags') as string[]) ?? [];
         return [...allTags, ...tags];
       },

@@ -429,21 +429,21 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Timeout value for the completion provider.
    */
-  private _timeout: number;
+  private _timeout!: number;
 
   /**
    * Flag to show or hide the document panel.
    */
-  private _showDoc: boolean;
+  private _showDoc!: boolean;
 
   /**
    * Flag to enable/disable continuous hinting.
    */
-  private _autoCompletion: boolean;
+  private _autoCompletion!: boolean;
 
-  private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
-  private _selected: Signal<ICompletionProviderManager, ICompleterSelection>;
-  private _inlineCompleterFactory: IInlineCompleterFactory | null;
+  private _activeProvidersChanged!: Signal<ICompletionProviderManager, void>;
+  private _selected!: Signal<ICompletionProviderManager, ICompleterSelection>;
+  private _inlineCompleterFactory!: IInlineCompleterFactory | null;
   private _inlineCompleterSettings = InlineCompleter.defaultSettings;
-  private _suppressIfInlineCompleterActive: boolean;
+  private _suppressIfInlineCompleterActive!: boolean;
 }

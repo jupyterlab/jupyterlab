@@ -66,11 +66,11 @@ function activateNBOutput(
     // iopubMessage signal. However, unhandled messages warrant a higher log
     // severity, so we'll accept that they are logged twice.
     nb.context.sessionContext.iopubMessage.connect(
-      (_, msg: KernelMessage.IIOPubMessage) => logOutput(msg, 'info', 'info')
+      (_, msg) => logOutput(msg as KernelMessage.IIOPubMessage, 'info', 'info')
     );
     nb.context.sessionContext.unhandledMessage.connect(
-      (_, msg: KernelMessage.IIOPubMessage) =>
-        logOutput(msg, 'warning', 'error')
+      (_, msg) =>
+        logOutput(msg as KernelMessage.IIOPubMessage, 'warning', 'error')
     );
   }
   nbtracker.forEach(nb => registerNB(nb));

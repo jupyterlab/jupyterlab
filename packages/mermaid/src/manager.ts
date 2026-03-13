@@ -26,16 +26,17 @@ import {
  * A mermaid diagram manager with cache.
  */
 export class MermaidManager implements IMermaidManager {
-  protected _diagrams: LruCache<string, HTMLElement>;
+  protected _diagrams!: LruCache<string, HTMLElement>;
   protected _themes: IThemeManager | null;
 
   constructor(options: MermaidManager.IOptions = {}) {
     this._diagrams = new LruCache({ maxSize: options.maxCacheSize || null });
+    this._themes = options.themes || null;
 
     // handle reacting to themes
-    if (options.themes) {
-      Private.initThemes(options.themes || null);
-      options.themes.themeChanged.connect(this.initialize, this);
+    if (this._themes) {
+      Private.initThemes(this._themes);
+      this._themes.themeChanged.connect(this.initialize, this);
     }
   }
 

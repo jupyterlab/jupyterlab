@@ -151,7 +151,7 @@ export class InputArea extends Widget {
 
   private _prompt: IInputPrompt;
   private _editor: CodeEditorWrapper;
-  private _rendered: Widget;
+  private _rendered!: Widget;
 }
 
 /**

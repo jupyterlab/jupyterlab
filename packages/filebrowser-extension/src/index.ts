@@ -27,6 +27,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
@@ -1017,11 +1018,14 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
           const req = await fetch(url);
           blob = await req.blob();
           type = req.headers.get('Content-Type') ?? '';
-        } catch (reason) {
-          if (reason.response && reason.response.status !== 200) {
-            reason.message = trans.__('Could not open URL: %1', url);
+        } catch (reason: unknown) {
+          if (reason && typeof reason === 'object' && 'response' in reason) {
+            const err = reason as any;
+            if (err.response && err.response.status !== 200) {
+              err.message = trans.__('Could not open URL: %1', url);
+            }
           }
-          return showErrorMessage(trans.__('Cannot fetch'), reason);
+          return showErrorMessage(trans.__('Cannot fetch'), reason as string);
         }
 
         // upload the content of the file to the server
@@ -1032,10 +1036,10 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
           return commands.execute('docmanager:open', {
             path: model.path
           });
-        } catch (error) {
+        } catch (error: unknown) {
           return showErrorMessage(
             trans._p('showErrorMessage', 'Upload Error'),
-            error
+            error as string
           );
         }
       },
@@ -1419,11 +1423,14 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
-      } catch (reason) {
-        if (reason.response && reason.response.status === 404) {
-          reason.message = trans.__('Could not find path: %1', path);
+      } catch (reason: unknown) {
+        if (reason && typeof reason === 'object' && 'response' in reason) {
+          const err = reason as any;
+          if (err.response && err.response.status === 404) {
+            err.message = trans.__('Could not find path: %1', path);
+          }
         }
-        return showErrorMessage(trans.__('Cannot open'), reason);
+        return showErrorMessage(trans.__('Cannot open'), reason as string);
       }
     },
     describedBy: {
@@ -1548,20 +1555,22 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.createNewFile, {
-    execute: (args: { ext: string; label: string }) => {
+    execute: (args: ReadonlyPartialJSONObject) => {
       const widget = tracker.currentWidget;
 
       if (widget) {
-        return widget.createNewFile({ ext: args.ext ?? 'txt' });
+        const ext = typeof args.ext === 'string' ? args.ext : 'txt';
+        return widget.createNewFile({ ext });
       }
     },
-    icon: (args: { iconName: string }) => {
-      return args.iconName
+    icon: (args: ReadonlyPartialJSONObject) => {
+      return args.iconName && typeof args.iconName === 'string'
         ? LabIcon.resolve({ icon: args.iconName })
         : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
     },
-    label: (args: { ext: string; label: string }) => {
-      return trans.__(args.label ?? 'New File');
+    label: (args: ReadonlyPartialJSONObject) => {
+      const label = typeof args.label === 'string' ? args.label : 'New File';
+      return trans.__(label);
     },
     describedBy: {
       args: {

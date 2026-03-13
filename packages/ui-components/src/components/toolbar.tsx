@@ -731,7 +731,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   private _widgetPositions = new Map<string, number>();
   // The zoom property is not the real browser zoom, but a value proportional to
   // the zoom, which is modified when the zoom changes.
-  private _zoom: number;
+  private _zoom!: number;
   private _zoomChanged = true;
 }
 

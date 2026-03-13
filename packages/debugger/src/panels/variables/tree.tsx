@@ -26,8 +26,6 @@ import { Debugger } from '../../debugger';
 
 import type { IDebugger } from '../../tokens';
 
-import type { VariablesModel } from './model';
-
 /**
  * The body for tree of variables.
  */
@@ -106,7 +104,7 @@ export class VariablesBodyTree extends ReactWidget {
    *
    * @param model The variables model.
    */
-  private _updateScopes(model: VariablesModel): void {
+  private _updateScopes(model: IDebugger.Model.IVariables): void {
     if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
       return;
     }

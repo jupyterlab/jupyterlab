@@ -598,7 +598,7 @@ export class ThemeManager implements IThemeManager {
   private _outstanding: Promise<void> | null = null;
   private _pending = 0;
   private _requests: { [theme: string]: number } = {};
-  private _settings: ISettingRegistry.ISettings;
+  private _settings!: ISettingRegistry.ISettings;
   private _splash: ISplashScreen | null;
   private _themes: { [key: string]: IThemeManager.ITheme } = {};
   private _themeChanged = new Signal<this, IChangedArgs<string, string | null>>(

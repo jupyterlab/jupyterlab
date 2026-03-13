@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
-import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import type { ConsolePanel } from '@jupyterlab/console';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type { DocumentWidget } from '@jupyterlab/docregistry';
@@ -122,7 +122,14 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       return this.updateWidget(widget, connection);
     }
 
-    const kernelChanged = (): void => {
+    const kernelChanged = (
+      _: Session.ISessionConnection,
+      args: IChangedArgs<
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
+        'kernel'
+      >
+    ): void => {
       void this.updateWidget(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
@@ -183,7 +190,14 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     sessionContext: ISessionContext
   ): Promise<void> {
-    const connectionChanged = (): void => {
+    const connectionChanged = (
+      _: ISessionContext,
+      args: IChangedArgs<
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
+        'kernel'
+      >
+    ): void => {
       const { session: connection } = sessionContext;
       void this.update(widget, connection);
     };
@@ -424,8 +438,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
-  private _previousConnection: Session.ISessionConnection | null;
-  private _activeWidget:
+  private _previousConnection: Session.ISessionConnection | null = null;
+  private _activeWidget!:
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null;
   private _handlers: {
@@ -435,10 +449,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
   private _contextKernelChangedHandlers: {
     [id: string]: (
-      sender: SessionContext,
+      sender: ISessionContext,
       args: IChangedArgs<
-        Kernel.IKernelConnection,
-        Kernel.IKernelConnection,
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
         'kernel'
       >
     ) => void;
@@ -447,8 +461,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     [id: string]: (
       sender: Session.ISessionConnection,
       args: IChangedArgs<
-        Kernel.IKernelConnection,
-        Kernel.IKernelConnection,
+        Kernel.IKernelConnection | null,
+        Kernel.IKernelConnection | null,
         'kernel'
       >
     ) => void;

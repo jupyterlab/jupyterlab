@@ -74,7 +74,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * The server settings for the kernel.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Handle comm messages
@@ -400,10 +400,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _sendKernelShellControl<
     REQUEST extends KernelMessage.IShellControlMessage,
     REPLY extends KernelMessage.IShellControlMessage,
-    KFH extends new (...params: any[]) => KernelFutureHandler<REQUEST, REPLY>,
     T extends KernelMessage.IMessage
   >(
-    ctor: KFH,
+    ctor: new (...params: any[]) => any,
     msg: T,
     expectReply = false,
     disposeOnDone = true
@@ -445,8 +444,18 @@ export class KernelConnection implements Kernel.IKernelConnection {
       disposeOnDone,
       this
     );
-    this._futures.set(msg.header.msg_id, future);
-    return future;
+    const typedFuture = future as unknown as Kernel.IFuture<
+      KernelMessage.IShellControlMessage,
+      KernelMessage.IShellControlMessage
+    >;
+    this._futures.set(
+      msg.header.msg_id,
+      future as unknown as KernelFutureHandler<
+        KernelMessage.IShellControlMessage,
+        KernelMessage.IShellControlMessage
+      >
+    );
+    return typedFuture;
   }
 
   /**
@@ -1488,11 +1497,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
         // Handle network errors, as well as cases where we are on a
         // JupyterHub and the server is not running. JupyterHub returns a
         // 503 (<2.0) or 424 (>2.0) in that case.
-        if (
-          err instanceof ServerConnection.NetworkError ||
-          err.response?.status === 503 ||
-          err.response?.status === 424
-        ) {
+        const isNetworkError = err instanceof ServerConnection.NetworkError;
+        const hasResponse = typeof err === 'object' && err !== null && 'response' in err;
+        const status = hasResponse ? (err as any).response?.status : undefined;
+
+        if (isNetworkError || status === 503 || status === 424) {
           const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
           setTimeout(getKernelModel, timeout, evt);
         } else {
@@ -1777,7 +1786,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       );
       validate.validateMessage(msg);
     } catch (error) {
-      error.message = `Kernel message validation error: ${error.message}`;
+      if (error instanceof Error) {
+        error.message = `Kernel message validation error: ${error.message}`;
+      }
       // We throw the error so that it bubbles up to the top, and displays the right stack.
       throw error;
     }
@@ -1864,7 +1875,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   } = Object.create(null);
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
   private _pendingMessages: KernelMessage.IMessage[] = [];
-  private _specPromise: Promise<KernelSpec.ISpecModel | undefined>;
+  private _specPromise!: Promise<KernelSpec.ISpecModel | undefined>;
   private _statusChanged = new Signal<this, KernelMessage.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this

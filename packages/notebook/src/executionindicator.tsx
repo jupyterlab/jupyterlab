@@ -631,7 +631,7 @@ export namespace ExecutionIndicator {
     /**
      * Current activated notebook.
      */
-    private _currentNotebook: Notebook;
+    private _currentNotebook!: Notebook;
 
     /**
      * A weak map to hold execution status of multiple notebooks.

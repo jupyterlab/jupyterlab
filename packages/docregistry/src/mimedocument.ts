@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Printing, showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, Printing, showErrorMessage } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -169,7 +169,7 @@ export class MimeContent extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason as string | Dialog.IError
       );
     }
   }
@@ -203,7 +203,7 @@ export class MimeContent extends Widget {
   private _trans: TranslationBundle;
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _fragment = '';
-  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
+  private _monitor!: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
   private _isRendering = false;

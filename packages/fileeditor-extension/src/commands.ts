@@ -306,8 +306,9 @@ export namespace Commands {
         );
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set ${id}: ${message}`);
         }
       },
       isEnabled,
@@ -358,8 +359,9 @@ export namespace Commands {
         config.lineWrap = (args['mode'] as boolean) ?? false;
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set ${id}: ${message}`);
         }
       },
       isEnabled,
@@ -430,8 +432,9 @@ export namespace Commands {
             : 'Tab';
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set ${id}: ${message}`);
         }
       },
       isToggled: args => {
@@ -466,8 +469,9 @@ export namespace Commands {
         );
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set ${id}: ${message}`);
         }
       },
       label: trans.__('Match Brackets'),
@@ -524,8 +528,9 @@ export namespace Commands {
         );
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set ${id}: ${message}`);
         }
       },
       label: trans.__('Auto Close Brackets in Text Editor'),
@@ -596,8 +601,9 @@ export namespace Commands {
 
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
-        } catch (reason) {
-          console.error(`Failed to set theme - ${reason.message}`);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          console.error(`Failed to set theme - ${message}`);
         }
       },
       isToggled: args =>

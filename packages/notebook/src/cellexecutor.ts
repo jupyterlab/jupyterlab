@@ -111,14 +111,14 @@ export async function runCell({
               throw new KernelError(reply.content);
             }
           })();
-        } catch (reason) {
-          if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+        } catch (reason: any) {
+          if (cell.isDisposed || reason.message?.startsWith('Canceled')) {
             ran = false;
           } else {
             onCellExecuted({
               cell,
               success: false,
-              error: reason
+              error: reason as KernelError
             });
             throw reason;
           }

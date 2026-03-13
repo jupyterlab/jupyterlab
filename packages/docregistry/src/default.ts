@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
+import { MainAreaWidget, setToolbar, ToolbarRegistry } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -191,7 +191,7 @@ export class DocumentModel
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: ISharedFile;
+  readonly sharedModel!: ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
@@ -481,7 +481,7 @@ export abstract class ABCWidgetFactory<
     // Add toolbar
     setToolbar(
       widget,
-      this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)
+      (this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)) as (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> | ToolbarRegistry.IToolbarItem[]
     );
 
     // Emit widget created signal
@@ -567,9 +567,10 @@ export class DocumentWidget<
 {
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
-    options.reveal = Promise.all([options.reveal, options.context.ready]);
-    super(options);
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    const opts = options as MainAreaWidget.IOptions<T> & DocumentWidget.IOptions<T, U>;
+    opts.reveal = Promise.all([opts.reveal, options.context.ready]);
+    super(opts);
+    this._trans = (opts.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes
@@ -596,7 +597,7 @@ export class DocumentWidget<
   /**
    * Handle a title change.
    */
-  private async _onTitleChanged(_sender: Title<this>) {
+  private async _onTitleChanged(_sender: Title<Widget>) {
     const validNameExp = /[\/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name

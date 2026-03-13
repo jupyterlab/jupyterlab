@@ -27,6 +27,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { CodeCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
@@ -509,7 +510,7 @@ async function activateConsole(
                 kernel.subshellId = replyMsg.content.subshell_id;
               }
             })
-            .catch(reason => {
+            .catch((reason: unknown) => {
               console.error(
                 'Failed to initialize SessionContext or create new subshell.',
                 reason
@@ -645,6 +646,10 @@ async function activateConsole(
    */
   interface IOpenOptions extends Partial<ConsolePanel.IOptions> {
     /**
+     * The path of the session to open.
+     */
+    path?: string;
+    /**
      * Whether to activate the console.  Defaults to `true`.
      */
     activate?: boolean;
@@ -669,7 +674,7 @@ async function activateConsole(
       }
     },
     execute: (args: IOpenOptions) => {
-      const path = args['path'];
+      const path = args.path;
       const widget = tracker.find(value => {
         return value.console.sessionContext.session?.path === path;
       });
@@ -806,7 +811,7 @@ async function activateConsole(
           (args['cwd'] as string) ||
           filebrowser?.model.path) ??
         '';
-      return createConsole({ basePath, ...args });
+      return createConsole({ basePath, ...args } as ICreateOptions);
     }
   });
 
@@ -826,7 +831,7 @@ async function activateConsole(
   /**
    * Create commands to change the position of the prompt cell.
    */
-  const iconMap = {
+  const iconMap: Record<CodeConsole.PromptCellPosition, any> = {
     top: dockTopIcon,
     bottom: dockBottomIcon,
     right: dockRightIcon,
@@ -1424,8 +1429,9 @@ async function activateConsole(
           'interactionMode',
           args['interactionMode'] as string
         );
-      } catch (reason) {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+      } catch (reason: unknown) {
+        const message = reason instanceof Error ? reason.message : String(reason);
+        console.error(`Failed to set ${pluginId}:${key} - ${message}`);
       }
     },
     isToggled: args => args['interactionMode'] === interactionMode,
@@ -1502,14 +1508,14 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+  const updateCompleter = async (_: IConsoleTracker, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,
       widget: consolePanel
     };
     await manager.updateCompleter(completerContext);
-    consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
+    consolePanel.console.promptCellCreated.connect((codeConsole: CodeConsole, cell: CodeCell) => {
       const newContext = {
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
@@ -1530,8 +1536,8 @@ function activateConsoleCompleterService(
   };
   consoles.widgetAdded.connect(updateCompleter);
   manager.activeProvidersChanged.connect(() => {
-    consoles.forEach(consoleWidget => {
-      updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
+    consoles.forEach((consoleWidget: ConsolePanel) => {
+      updateCompleter(consoles, consoleWidget).catch(e => console.error(e));
     });
   });
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import type { Cell, ICellModel } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type {
@@ -106,7 +106,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       return [];
     }
 
-    return notebook.widgets.map(cell => {
+    return notebook.widgets.map((cell: any) => {
       return {
         ceEditor: this._getCellEditor(cell),
         type: cell.model.type,
@@ -141,7 +141,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   getEditorIndexAt(position: IVirtualPosition): number {
     let cell = this._getCellAt(position);
     let notebook = this.widget.content;
-    return notebook.widgets.findIndex(otherCell => {
+    return notebook.widgets.findIndex((otherCell: any) => {
       return cell === otherCell;
     });
   }
@@ -176,7 +176,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param change - Changed data
    */
   async onKernelChanged(
-    _session: SessionContext,
+    _session: ISessionContext,
     change: Session.ISessionConnection.IKernelChangedArgs
   ): Promise<void> {
     if (!change.newValue) {
@@ -486,7 +486,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Metadata of the notebook
    */
-  private _languageInfo: ILanguageInfoMetadata;
+  private _languageInfo!: ILanguageInfoMetadata;
 
   private _type: nbformat.CellType = 'code';
 

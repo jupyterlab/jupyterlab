@@ -59,9 +59,10 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 function notifyCommands(commands: CommandRegistry): void {
-  Object.values(Debugger.CommandIDs).forEach(command => {
+  Object.values(Debugger.CommandIDs).forEach((command) => {
     if (commands.hasCommand(command)) {
       commands.notifyCommandChanged(command);
     }
@@ -388,7 +389,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
       });
     } else {
-      notebookTracker.currentChanged.connect((_, notebookPanel) => {
+      notebookTracker.currentChanged.connect((_: any, notebookPanel: NotebookPanel | null) => {
         if (notebookPanel) {
           void updateHandlerAndCommands(notebookPanel);
         }
@@ -410,7 +411,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         getDisplayName(source: IDebugger.Source): string {
           let displayName = source.path ?? '';
 
-          notebookTracker.forEach(panel => {
+          notebookTracker.forEach((panel: NotebookPanel) => {
             for (const cell of panel.content.widgets) {
               const model = cell.model;
               if (!isCodeCellModel(model)) {
@@ -866,8 +867,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 
     const onCurrentFrameChanged = (
       _: IDebugger.Model.ICallstack,
-      frame: IDebugger.IStackFrame
+      frame: IDebugger.IStackFrame | null
     ): void => {
+      if (!frame) {
+        return;
+      }
       debuggerSources
         .find({
           focus: true,
@@ -875,7 +879,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           path: service.session?.connection?.path ?? '',
           source: frame?.source?.path ?? ''
         })
-        .forEach(editor => {
+        .forEach((editor: IDebugger.ISources.IEditor) => {
           requestAnimationFrame(() => {
             void editor.reveal().then(() => {
               const edit = editor.get();
@@ -904,7 +908,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       });
       if (results.length > 0) {
         if (breakpoint && typeof breakpoint.line !== 'undefined') {
-          results.forEach(editor => {
+          results.forEach((editor: IDebugger.ISources.IEditor) => {
             void editor.reveal().then(() => {
               editor.get()?.revealPosition({
                 line: (breakpoint.line as number) - 1,
@@ -1166,7 +1170,7 @@ const main: JupyterFrontEndPlugin<void> = {
         } else {
           let items: string[] = [];
           service.session?.exceptionBreakpointFilters?.forEach(
-            availableFilter => {
+            (availableFilter: DebugProtocol.ExceptionBreakpointsFilter) => {
               items.push(availableFilter.filter);
             }
           );
@@ -1211,7 +1215,7 @@ const main: JupyterFrontEndPlugin<void> = {
       setting.changed.connect(updateSettings);
     }
 
-    service.eventMessage.connect((_, event): void => {
+    service.eventMessage.connect((_, event: IDebugger.ISession.Event): void => {
       updateState(app.commands, service);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
@@ -1225,7 +1229,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    service.sessionChanged.connect(_ => {
+    service.sessionChanged.connect((_, session: IDebugger.ISession | null) => {
       updateState(app.commands, service);
     });
 
@@ -1271,23 +1275,24 @@ const main: JupyterFrontEndPlugin<void> = {
     if (sourceViewer) {
       const { model } = service;
       const onKernelSourceOpened = (
-        _: IDebugger.Model.IKernelSources | null,
-        source: IDebugger.Source,
-        breakpoint?: IDebugger.IBreakpoint
+        _: IDebugger.Model.IKernelSources,
+        source: IDebugger.Source | null
       ): void => {
         if (!source) {
           return;
         }
-        sourceViewer.open(source, breakpoint);
+        sourceViewer.open(source);
       };
 
       model.sources.currentSourceOpened.connect(
-        (_: IDebugger.Model.ISources | null, source: IDebugger.Source) => {
-          sourceViewer.open(source);
+        (_, source: IDebugger.Source | null) => {
+          if (source) {
+            sourceViewer.open(source);
+          }
         }
       );
       model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
-      model.breakpoints.clicked.connect(async (_, breakpoint) => {
+      model.breakpoints.clicked.connect(async (_, breakpoint: IDebugger.IBreakpoint) => {
         const path = breakpoint.source?.path;
         const source = await service.getSource({
           sourceReference: 0,
@@ -1388,7 +1393,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
 
       // Close console when debugger is terminated
-      service.eventMessage.connect((_, event): void => {
+      service.eventMessage.connect((_, event: IDebugger.ISession.Event): void => {
         if (labShell && event.event === 'terminated') {
           debugConsoleWidget?.dispose();
         }

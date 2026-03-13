@@ -257,7 +257,7 @@ export class KernelAPIClient implements IKernelAPIClient {
   /**
    * The server settings for the client.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * List the running kernels.
