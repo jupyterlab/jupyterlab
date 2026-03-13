@@ -20,6 +20,7 @@ import {
   showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CommandToolbarButton,

@@ -1275,14 +1275,13 @@ const main: JupyterFrontEndPlugin<void> = {
     if (sourceViewer) {
       const { model } = service;
       const onKernelSourceOpened = (
-        _: IDebugger.Model.IKernelSources | null,
-        source: IDebugger.Source,
-        breakpoint?: IDebugger.IBreakpoint
+        _: IDebugger.Model.IKernelSources,
+        source: IDebugger.Source | null
       ): void => {
         if (!source) {
           return;
         }
-        sourceViewer.open(source, breakpoint);
+        sourceViewer.open(source);
       };
 
       model.sources.currentSourceOpened.connect(
