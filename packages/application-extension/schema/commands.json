@@ -401,7 +401,15 @@
       }
     ]
   },
-  "properties": {},
+  "properties": {
+    "tabSwitchModifier": {
+      "type": "string",
+      "title": "Tab Switch Modifier",
+      "description": "Modifier key(s) for switching tabs by index (1-8, 9 for last). Use with number keys 1-9.",
+      "enum": ["Accel Alt", "Ctrl Alt", "Alt", "Ctrl", "disabled"],
+      "default": "Accel Alt"
+    }
+  },
   "additionalProperties": false,
   "type": "object"
 }
