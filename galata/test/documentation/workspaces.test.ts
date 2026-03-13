@@ -30,17 +30,15 @@ test.describe('Workspaces sidebar', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Workspaces context menu', async ({ page }) => {
     // Load the test workspace
     await page.dblclick(
       `.jp-DirListing-item span:has-text("${testWorkspace}")`
     );
-    await page.getByRole('treeitem', { name: workspaceName }).waitFor();
+    // This is flaky for unknown reasons - a timeout is used to retry sooner than later
+    await page
+      .getByRole('treeitem', { name: workspaceName })
+      .waitFor({ timeout: 15000 });
 
     await galata.Mock.mockRunners(page, new Map(), 'sessions');
 

@@ -1,37 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Dialog,
-  ISessionContext,
   SessionContext,
   SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import {
-  IUrlResolverFactory,
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {
+import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
   Contents,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-import { DocumentRegistry } from './registry';
+import type { DocumentRegistry } from './registry';
 
 /**
  * An implementation of a document context.
@@ -40,8 +38,7 @@ import { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T>
-{
+> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
@@ -289,37 +286,51 @@ export class Context<
   /**
    * Save the document to a different path chosen by the user.
    *
-   * It will be rejected if the user abort providing a new path.
+   * @returns A promise that resolves to `true` if the save operation was initiated.
+   * Returns `false` if the user cancelled the operation.
+   *
+   * Note:
+   * - If the save operation proceeds but fails due to an error in the content manager,
+   *   the returned value will still be `true`.
+   * - Consumers interested in the actual result of the save should listen to the
+   *   {@link saveState} signal to be notified when the save succeeds or fails.
    */
-  async saveAs(): Promise<void> {
+  async saveAs(): Promise<boolean> {
     await this.ready;
     const localPath = this._manager.contents.localPath(this.path);
     const newLocalPath = await Private.getSavePath(localPath);
 
     if (this.isDisposed || !newLocalPath) {
-      return;
+      return false;
     }
 
     const drive = this._manager.contents.driveName(this.path);
     const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
 
     if (newPath === this._path) {
-      return this.save();
+      await this.save();
+      return true;
     }
 
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
       await this._manager.contents.get(newPath, {
-        contentProviderId: this._contentProviderId
+        contentProviderId: this._contentProviderId,
+        content: false
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
       if (!err.response || err.response.status !== 404) {
+        // Dialog rejection (user cancelled)
+        if (!err.response) {
+          return false;
+        }
         throw err;
       }
-      await this._finishSaveAs(newPath);
     }
+    await this._finishSaveAs(newPath);
+    return true;
   }
 
   /**
@@ -459,7 +470,6 @@ export class Context<
 
       if (oldPath !== this._path) {
         newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
 
         // Update client file model from folder change
         changeModel = {
@@ -923,6 +933,8 @@ or load the version on disk (revert)?`,
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
+      } else {
+        return Promise.reject(new Error('Cancelled'));
       }
     });
   }

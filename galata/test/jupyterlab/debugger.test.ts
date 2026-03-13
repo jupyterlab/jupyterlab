@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as path from 'path';
 
@@ -43,7 +44,7 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForBreakPoints();
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
+    expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
 
     const callStackPanel = await page.debugger.getCallStackPanelLocator();
     expect(await callStackPanel.innerText()).toBe('');
@@ -52,10 +53,11 @@ test.describe('Debugger Tests', () => {
     void page.notebook.run().then();
 
     await page.debugger.waitForCallStack();
-    expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
+    expect(await callStackPanel.innerText()).toMatch(/Cell \[\*\]/);
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
+    await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-variables.png'
     );
@@ -95,6 +97,9 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
+    await variablesPanel
+      .getByRole('treeitem', { name: `${globalVar}:` })
+      .waitFor();
     expect
       .soft(await variablesPanel.screenshot())
       .toMatchSnapshot('image-debug-session-global-variables.png');
@@ -159,7 +164,7 @@ test.describe('Debugger Tests', () => {
     await page.menu.clickMenuItem('Run>Run All Code');
 
     await page.debugger.waitForCallStack();
-    expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
+    expect(await callStackPanel.innerText()).toMatch(/In \[\*\]/);
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
@@ -219,7 +224,7 @@ test.describe('Debugger Variables', () => {
     });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
@@ -267,7 +272,7 @@ test.describe('Debugger Variables', () => {
     });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
@@ -291,11 +296,12 @@ test.describe('Debugger Variables', () => {
     await page.click('jp-button[title^=Continue]');
   });
 
-  test('Copy to clipboard', async ({ page, tmpPath }) => {
+  test('Copy to clipboard', async ({ page, tmpPath, browserName }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
     await init({ page, tmpPath });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();

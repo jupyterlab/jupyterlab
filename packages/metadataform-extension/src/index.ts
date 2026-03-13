@@ -5,7 +5,7 @@
  * @module metadataform-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -13,11 +13,12 @@ import { INotebookTools } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
-import { JSONExt, PartialJSONArray } from '@lumino/coreutils';
+import type { PartialJSONArray } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
+import type { MetadataForm } from '@jupyterlab/metadataform';
 import {
   IMetadataFormProvider,
-  MetadataForm,
   MetadataFormProvider,
   MetadataFormWidget
 } from '@jupyterlab/metadataform';

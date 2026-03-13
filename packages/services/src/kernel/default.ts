@@ -3,29 +3,29 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { CommsOverSubshells, ServerConnection } from '..';
 
 import { CommHandler } from './comm';
 
-import * as Kernel from './kernel';
+import type * as Kernel from './kernel';
 
 import * as KernelMessage from './messages';
 
-import {
-  KernelControlFutureHandler,
-  KernelFutureHandler,
-  KernelShellFutureHandler
-} from './future';
+import type { KernelFutureHandler } from './future';
+import { KernelControlFutureHandler, KernelShellFutureHandler } from './future';
 
 import * as validate from './validate';
-import { KernelSpec } from '../kernelspec';
+import type { KernelSpec } from '../kernelspec';
 
 import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 // Stub for requirejs.
 declare let requirejs: any;
@@ -1121,7 +1121,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Register an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook will intercept.
+   * @param msgId - The parent_header message id the hook will intercept.
    *
    * @param hook - The callback invoked for the message.
    *
@@ -1154,7 +1154,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Remove an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook intercepted.
+   * @param msgId - The parent_header message id the hook intercepted.
    *
    * @param hook - The callback invoked for the message.
    *
@@ -1628,8 +1628,18 @@ export class KernelConnection implements Kernel.IKernelConnection {
       }
     }
     if (msg.channel === 'iopub') {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.header.msg_type) {
         case 'status': {
+          const untrackedMessageTypesRaw = PageConfig.getOption(
+            'untracked_message_types'
+          );
+          let untrackedMessageTypes = JSON.parse(
+            untrackedMessageTypesRaw || '[]'
+          );
+          if (untrackedMessageTypes.includes(msg.parent_header.msg_type)) {
+            break;
+          }
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
@@ -1702,9 +1712,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.warn(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       // Try reconnection with subprotocols if the server had supported them.
       // Otherwise, try reconnection without subprotocols.
@@ -1887,6 +1895,7 @@ namespace Private {
    * Log the current kernel status.
    */
   export function logKernelStatus(kernel: Kernel.IKernelConnection): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (kernel.status) {
       case 'idle':
       case 'busy':

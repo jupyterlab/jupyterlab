@@ -2,19 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser,
+  IRenderMime
+} from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
-  IMarkdownParser,
-  IRenderMime,
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
   svgRendererFactory,
   textRendererFactory
 } from '@jupyterlab/rendermime';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 function createModel(
@@ -293,7 +296,11 @@ describe('rendermime/factories', () => {
 
       beforeAll(() => {
         markdownParser = {
-          render: (content: string): Promise<string> => Promise.resolve(content)
+          render: (content: string): Promise<string> =>
+            Promise.resolve(content),
+          getHeadingTokens: (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 
@@ -409,6 +416,38 @@ describe('rendermime/factories', () => {
         Widget.detach(w);
       });
 
+      it('should scroll to data-jupyter-id element on anchor click', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = '<a href="#my-heading">link</a>';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser: { render: content => content },
+          resolver: {
+            resolveUrl: async (url: string) => url,
+            getDownloadUrl: async (url: string) => url,
+            isLocal: () => true
+          }
+        });
+        await w.renderModel(model);
+        Widget.attach(w, document.body);
+
+        const target = document.createElement('h2');
+        target.setAttribute('data-jupyter-id', 'my-heading');
+        w.node.appendChild(target);
+
+        const anchor = w.node.querySelector('a') as HTMLAnchorElement;
+        const scrollMock = jest.fn();
+        target.scrollIntoView = scrollMock;
+
+        anchor.click();
+
+        expect(scrollMock).toHaveBeenCalled();
+        Widget.detach(w);
+      });
+
       it('should sanitize the html', async () => {
         const f = markdownRendererFactory;
         const source = '<p>hello</p><script>alert("foo")</script>';
@@ -430,6 +469,18 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
           '<pre><a href="https://jupyter.org" rel="noopener" target="_blank">link</a></pre>'
+        );
+      });
+
+      it('should not add target="_blank" to local URLs', async () => {
+        const source = '<a href="#section-in-notebook">link</a>';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre><a href="#section-in-notebook" rel="noopener" target="_blank">link</a></pre>'
         );
       });
 
@@ -456,6 +507,34 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
           '<a href="https://jupyter.org" target="_blank" rel="noopener">link</a>'
+        );
+        w.dispose();
+      });
+
+      it('should not add target to local URLs introduced by latex typesetter', async () => {
+        const source = '$$\\href{https://jupyter.org}{link}$$';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const pretendLatexTypesetter: IRenderMime.ILatexTypesetter = {
+          typeset: (element: HTMLElement): void => {
+            element.innerHTML = '';
+            const link = document.createElement('a');
+            link.textContent = 'link';
+            link.href = '#section-in-notebook';
+            link.target = '_self';
+            element.appendChild(link);
+          }
+        };
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          latexTypesetter: pretendLatexTypesetter
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<a href="#section-in-notebook" target="_self" rel="noopener">link</a>'
         );
         w.dispose();
       });

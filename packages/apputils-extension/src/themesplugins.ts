@@ -3,17 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   ICommandPalette,
   ISplashScreen,
   IThemeManager,
   ThemeManager
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -63,7 +61,10 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     const trans = translator.load('jupyterlab');
     const host = app.shell;
     const commands = app.commands;
-    const url = URLExt.join(PageConfig.getBaseUrl(), paths.urls.themes);
+    const url = URLExt.join(
+      app.serviceManager.serverSettings.baseUrl,
+      paths.urls.themes
+    );
     const key = themesPlugin.id;
     const manager = new ThemeManager({
       key,
@@ -304,6 +305,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.incrFontSize, {
       label: args => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (args.key) {
           case 'code-font-size':
             return trans.__('Increase Code Font Size');
@@ -334,6 +336,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.decrFontSize, {
       label: args => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (args.key) {
           case 'code-font-size':
             return trans.__('Decrease Code Font Size');

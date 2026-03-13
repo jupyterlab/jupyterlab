@@ -1,26 +1,24 @@
-/* eslint-disable @typescript-eslint/ban-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
 import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
+import type { Extension, StateCommand, Text } from '@codemirror/state';
 import {
   Compartment,
   EditorSelection,
   EditorState,
-  Extension,
-  Prec,
-  StateCommand,
-  Text
+  Prec
 } from '@codemirror/state';
-import { Command, EditorView, ViewUpdate } from '@codemirror/view';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { SyntaxNodeRef } from '@lezer/common';
+import type { Command, ViewUpdate } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ExtensionsHandler } from './extension';
 import { EditorLanguageRegistry } from './language';
-import {
+import type {
   IEditorExtensionRegistry,
   IEditorLanguageRegistry,
   IExtensionsHandler
@@ -289,6 +287,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Brings browser focus to this editor text.
    */
   focus(): void {
+    // Add the focused class before the editor focus event fires
+    // to avoid layout trashing when it gets called in response
+    // to focus event from CodeMirror.
+    this.host.classList.add('jp-mod-focused');
     this._editor.focus();
   }
 

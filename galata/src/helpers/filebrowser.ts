@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
-import { ContentsHelper } from '../contents';
+import type { ContentsHelper } from '../contents';
 import * as Utils from '../utils';
 
 /**

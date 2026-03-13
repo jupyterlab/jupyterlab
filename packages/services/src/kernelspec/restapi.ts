@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '../serverconnection';
-import { IKernelSpecAPIClient } from './kernelspec';
+import type { IKernelSpecAPIClient } from './kernelspec';
 import { validateSpecModels } from './validate';
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { PartialJSONObject } from '@lumino/coreutils';
+import type { PartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The url for the kernelspec service.
@@ -17,7 +17,6 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
  * Fetch all of the kernel specs.
  *
  * @param settings - The optional server settings.
- * @param useCache - Whether to use the cache. If false, always request.
  *
  * @returns A promise that resolves with the kernel specs.
  *
@@ -109,6 +108,12 @@ export interface ISpecModel extends PartialJSONObject {
    * A mapping of resource file name to download path.
    */
   readonly resources: { [key: string]: string };
+
+  /**
+   * Specifiy the interrupt mode (v5.3).
+   * [ref](https://jupyter-client.readthedocs.io/en/stable/messaging.html#kernel-interrupt)
+   */
+  readonly interrupt_mode?: 'message' | 'signal';
 
   /**
    * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.

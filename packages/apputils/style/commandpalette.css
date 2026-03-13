@@ -92,7 +92,6 @@
 
 .jp-SearchIconGroup {
   color: white;
-  background-color: var(--jp-brand-color1);
   position: absolute;
   top: 4px;
   right: 4px;
@@ -105,7 +104,7 @@
 }
 
 .jp-SearchIconGroup .jp-icon3[fill] {
-  fill: var(--jp-layout-color0);
+  fill: var(--jp-inverse-layout-color3);
 }
 
 .lm-CommandPalette-input {

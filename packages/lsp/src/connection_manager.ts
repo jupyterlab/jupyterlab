@@ -2,13 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters';
+import type { WidgetLSPAdapter } from './adapters';
 import { LSPConnection } from './connection';
-import { ClientCapabilities } from './lsp';
-import { AskServersToSendTraceNotifications } from './plugin';
-import {
+import type { ClientCapabilities } from './lsp';
+import type { AskServersToSendTraceNotifications } from './plugin';
+import type {
   Document,
   IDocumentConnectionData,
   ILanguageServerManager,
@@ -21,7 +22,7 @@ import {
   TServerKeys
 } from './tokens';
 import { expandDottedPaths, sleep, untilReady } from './utils';
-import { VirtualDocument } from './virtual/document';
+import type { VirtualDocument } from './virtual/document';
 
 import type * as protocol from 'vscode-languageserver-protocol';
 
@@ -30,9 +31,7 @@ import type * as protocol from 'vscode-languageserver-protocol';
  * (see JupyterLabWidgetAdapter). Using id_path instead of uri led to documents being overwritten
  * as two identical id_paths could be created for two different notebooks.
  */
-export class DocumentConnectionManager
-  implements ILSPDocumentConnectionManager
-{
+export class DocumentConnectionManager implements ILSPDocumentConnectionManager {
   constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
     this.documents = new Map();

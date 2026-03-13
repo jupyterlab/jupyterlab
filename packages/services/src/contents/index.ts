@@ -5,11 +5,13 @@ import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import { PartialJSONObject } from '@lumino/coreutils';
+import type { PartialJSONObject } from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
@@ -184,7 +186,7 @@ export namespace Contents {
     /**
      * Whether to include the file content.
      *
-     * The default is `true`.
+     * The default is `false`.
      */
     content?: boolean;
 
@@ -403,7 +405,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @param path A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -976,7 +978,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1147,13 +1149,19 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const restContentProvider = new RestContentProvider({
+    this._restContentProvider = new RestContentProvider({
+      ...options,
       apiEndpoint: this._apiEndpoint,
       serverSettings: this.serverSettings
     });
-    this.contentProviderRegistry = new ContentProviderRegistry({
-      defaultProvider: restContentProvider
-    });
+
+    if (options.defaultContentProvider) {
+      this.contentProviderRegistry = new ContentProviderRegistry({
+        defaultProvider: options.defaultContentProvider
+      });
+    } else {
+      this.contentProviderRegistry = new ContentProviderRegistry();
+    }
     this.contentProviderRegistry.fileChanged.connect(
       (registry, change: Contents.IChangedArgs) => {
         this._fileChanged.emit(change);
@@ -1221,7 +1229,12 @@ export class Drive implements Contents.IDrive {
     const contentProvider = this.contentProviderRegistry.getProvider(
       options?.contentProviderId
     );
-    return contentProvider.get(localPath, options);
+
+    if (contentProvider) {
+      return contentProvider.get(localPath, options);
+    }
+
+    return await this._restContentProvider.get(localPath, options);
   }
 
   /**
@@ -1383,7 +1396,15 @@ export class Drive implements Contents.IDrive {
     const contentProvider = this.contentProviderRegistry.getProvider(
       options?.contentProviderId
     );
-    const data = await contentProvider.save(localPath, options);
+
+    let data: Contents.IModel;
+
+    if (contentProvider) {
+      data = await contentProvider.save(localPath, options);
+    } else {
+      data = await this._restContentProvider.save(localPath, options);
+    }
+
     this._fileChanged.emit({
       type: 'save',
       oldValue: null,
@@ -1395,7 +1416,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Copy a file into a given directory.
    *
-   * @param localPath - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1560,6 +1581,7 @@ export class Drive implements Contents.IDrive {
     return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
   }
 
+  private _restContentProvider: RestContentProvider;
   private _apiEndpoint: string;
   private _isDisposed = false;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
@@ -1610,6 +1632,13 @@ export namespace Drive {
      * REST API given by [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
      */
     apiEndpoint?: string;
+
+    /**
+     * The default content provider.
+     *
+     * @deprecated since 4.5.1 and will be removed in 5.0
+     */
+    defaultContentProvider?: IContentProvider;
   }
 }
 
@@ -1633,15 +1662,16 @@ namespace Private {
 /**
  * The default registry of content providers.
  */
-class ContentProviderRegistry implements IContentProviderRegistry {
+export class ContentProviderRegistry implements IContentProviderRegistry {
   /**
    * Construct a new content provider registry.
    *
    * @param options - The options used to initialize the registry.
    */
-  constructor(options: ContentProviderRegistry.IOptions) {
-    this.register('default', options.defaultProvider);
-    this._defaultProvider = options.defaultProvider;
+  constructor(options?: ContentProviderRegistry.IOptions) {
+    if (options?.defaultProvider) {
+      this.register('default', options.defaultProvider);
+    }
   }
 
   /**
@@ -1687,9 +1717,9 @@ class ContentProviderRegistry implements IContentProviderRegistry {
    *
    * @param identifier - identifier of the content provider.
    */
-  getProvider(identifier?: string): IContentProvider {
+  getProvider(identifier?: string): IContentProvider | null {
     if (!identifier) {
-      return this._defaultProvider;
+      return null;
     }
     const provider = this._providers.get(identifier);
     if (!provider) {
@@ -1706,22 +1736,22 @@ class ContentProviderRegistry implements IContentProviderRegistry {
   }
 
   private _providers: Map<string, IContentProvider> = new Map();
-  private _defaultProvider: IContentProvider;
   private _fileChanged = new Signal<
     IContentProviderRegistry,
     Contents.IChangedArgs
   >(this);
 }
 
-namespace ContentProviderRegistry {
+export namespace ContentProviderRegistry {
   /**
    * Initialization options for `ContentProviderRegistry`.
    */
   export interface IOptions {
     /**
      * Default provider for the registry.
+     * @deprecated Since 4.5.1 and will be removed in 5.0
      */
-    defaultProvider: IContentProvider;
+    defaultProvider?: IContentProvider;
   }
 }
 
@@ -1858,12 +1888,11 @@ export interface IContentProviderRegistry {
   /**
    * Get a content provider matching provided identifier.
    *
-   * If no identifier is provided, return the default provider.
-   * Throws an error if a provider with given identifier is not found.
+   * If no identifier is provided or the provider is not found, returns null.
    *
    * @param identifier - identifier of the content provider.
    */
-  getProvider(identifier?: string): IContentProvider;
+  getProvider(identifier?: string): IContentProvider | null;
 
   /**
    * A proxy of the file changed signal for all the providers.
@@ -1888,8 +1917,10 @@ export interface IContentProviderRegistry {
  *
  * @experimental
  */
-export interface IContentProvider
-  extends Pick<Contents.IDrive, 'get' | 'save' | 'sharedModelFactory'> {
+export interface IContentProvider extends Pick<
+  Contents.IDrive,
+  'get' | 'save' | 'sharedModelFactory'
+> {
   /**
    * A signal emitted when a file operation takes place.
    *

@@ -14,7 +14,7 @@
 .jp-left-truncated {
   overflow: hidden;
   text-overflow: ellipsis;
-  direction: rtl;
+  direction: ltr;
 }
 
 #jp-debugger .jp-switch-label {
@@ -28,4 +28,43 @@
 
 .jp-DebuggerBugButton[aria-pressed='true'] path {
   fill: var(--jp-warn-color0);
+}
+
+.jp-DebuggerPausedOverlay {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  background: var(--jp-layout-color2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-DebuggerPausedButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.jp-DebuggerPausedButton:hover {
+  background: var(--jp-layout-color3);
+}
+
+.jp-DebuggerStopButton path {
+  fill: var(--jp-error-color0) !important;
 }

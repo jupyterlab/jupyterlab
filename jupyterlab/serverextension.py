@@ -6,7 +6,7 @@ from tornado.web import RedirectHandler
 
 
 def load_jupyter_server_extension(serverapp):
-    from .labapp import LabApp
+    from .labapp import LabApp  # noqa: PLC0415
 
     """Temporary server extension shim when using
     old notebook server.

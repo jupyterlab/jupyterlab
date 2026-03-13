@@ -26,9 +26,15 @@ test.describe('Notebook Trust', () => {
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
   });
 
-  test('Trust is lost after manually editing notebook', async ({ page }) => {
+  test('Trust is lost after manually editing notebook', async ({
+    page,
+    browserName
+  }) => {
     const browserContext = page.context();
-    await browserContext.grantPermissions(['clipboard-read']);
+    if (browserName !== 'firefox') {
+      // Firefox does not support clipboard-read but does not it it either
+      await browserContext.grantPermissions(['clipboard-read']);
+    }
     // Add text to first cell
     await page.notebook.setCell(0, 'code', 'TEST_TEXT');
     await page.notebook.save();

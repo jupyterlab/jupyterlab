@@ -3,11 +3,12 @@
 
 import { Poll } from '@lumino/polling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
+import type * as Terminal from './terminal';
 import { BaseManager } from '../basemanager';
 import { TerminalAPIClient } from './restapi';
 import { TerminalConnection } from './default';
@@ -34,7 +35,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     }
 
     // Start polling with exponential backoff.
-    this._pollModels = new Poll({
+    const pollModels = (this._pollModels = new Poll({
       auto: false,
       factory: () => this.requestRunning(),
       frequency: {
@@ -44,12 +45,12 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
       },
       name: `@jupyterlab/services:TerminalManager#models`,
       standby: options.standby ?? 'when-hidden'
-    });
+    }));
 
     // Initialize internal data.
     this._ready = (async () => {
-      await this._pollModels.start();
-      await this._pollModels.tick;
+      await pollModels.start();
+      await pollModels.tick;
       this._isReady = true;
     })();
   }
@@ -96,7 +97,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     }
     this._names.length = 0;
     this._terminalConnections.forEach(x => x.dispose());
-    this._pollModels.dispose();
+    this._pollModels?.dispose();
     super.dispose();
   }
 
@@ -155,8 +156,10 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * since the manager maintains its internal state.
    */
   async refreshRunning(): Promise<void> {
-    await this._pollModels.refresh();
-    await this._pollModels.tick;
+    if (this._pollModels) {
+      await this._pollModels.refresh();
+      await this._pollModels.tick;
+    }
   }
 
   /**
@@ -277,7 +280,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     });
   }
 
-  private _pollModels: Poll;
+  private _pollModels: Poll | undefined;
   private _terminalConnections = new Set<Terminal.ITerminalConnection>();
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Terminal.IModel[]>(this);

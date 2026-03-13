@@ -86,5 +86,37 @@ describe('@jupyterlab/lsp', () => {
         expect(match.has('pyls' as any)).toEqual(true);
       });
     });
+    describe('#statusUrl', () => {
+      it('should use baseUrl from server settings when no baseUrl override is provided', () => {
+        const customBaseUrl = 'http://custom-server:8888';
+        const customSettings = ServerConnection.makeSettings({
+          baseUrl: customBaseUrl
+        });
+
+        const customManager = new LanguageServerManager({
+          settings: customSettings
+        });
+
+        expect(customManager.statusUrl).toContain(customBaseUrl);
+        expect(customManager.statusUrl).toContain('lsp/status');
+      });
+
+      it('should prefer baseUrl override over server settings baseUrl', () => {
+        const serverBaseUrl = 'http://server:8888';
+        const overrideBaseUrl = 'http://override:9999';
+        const customSettings = ServerConnection.makeSettings({
+          baseUrl: serverBaseUrl
+        });
+
+        const customManager = new LanguageServerManager({
+          settings: customSettings,
+          baseUrl: overrideBaseUrl
+        });
+
+        expect(customManager.statusUrl).toContain(overrideBaseUrl);
+        expect(customManager.statusUrl).not.toContain(serverBaseUrl);
+        expect(customManager.statusUrl).toContain('lsp/status');
+      });
+    });
   });
 });

@@ -1,24 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import {
-  ILanguageServerManager,
+import type {
   TLanguageServerConfigurations,
   TLanguageServerId,
   TSessionMap,
   TSpecsMap
 } from './tokens';
-import { ServerSpecProperties } from './schema';
+import { ILanguageServerManager } from './tokens';
+import type { ServerSpecProperties } from './schema';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 export class LanguageServerManager implements ILanguageServerManager {
   constructor(options: ILanguageServerManager.IOptions) {
     this._settings = options.settings || ServerConnection.makeSettings();
-    this._baseUrl = options.baseUrl || PageConfig.getBaseUrl();
+    this._baseUrlOverride = options.baseUrl;
     this._retries = options.retries || 2;
     this._retriesInterval = options.retriesInterval || 10000;
     this._statusCode = -1;
@@ -279,6 +280,13 @@ export class LanguageServerManager implements ILanguageServerManager {
   }
 
   /**
+   * Get the base URL for language server requests.
+   */
+  private get _baseUrl(): string {
+    return this._baseUrlOverride || this._settings.baseUrl;
+  }
+
+  /**
    * map of language server sessions.
    */
   private _sessions: TSessionMap = new Map();
@@ -296,7 +304,7 @@ export class LanguageServerManager implements ILanguageServerManager {
   /**
    * Base URL to connect to the language server handler.
    */
-  private _baseUrl: string;
+  private _baseUrlOverride: string | undefined;
 
   /**
    * Status code of server response

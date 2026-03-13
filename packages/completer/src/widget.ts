@@ -2,17 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMime, renderText } from '@jupyterlab/rendermime';
-import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
-import { JSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { renderText } from '@jupyterlab/rendermime';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import { HoverBox } from '@jupyterlab/ui-components';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-import { CompletionHandler } from './handler';
+import type { CompletionHandler } from './handler';
 
 /**
  * The class name added to completer menu items.
@@ -1144,8 +1147,8 @@ export namespace Completer {
    * A renderer for completer widget nodes.
    */
   export interface IRenderer<
-    T extends
-      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends CompletionHandler.ICompletionItem =
+      CompletionHandler.ICompletionItem
   > {
     /**
      * Create an item node (an `li` element) from a ICompletionItem

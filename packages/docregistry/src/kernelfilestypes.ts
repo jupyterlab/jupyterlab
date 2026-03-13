@@ -1,5 +1,10 @@
-import { KernelSpec } from '@jupyterlab/services';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+import type { KernelSpec } from '@jupyterlab/services';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * Use available kernels to determine which common file types should have 'Create New'

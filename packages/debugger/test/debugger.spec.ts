@@ -3,9 +3,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { Button } from '@jupyter/web-components';
+import type { Button } from '@jupyter/web-components';
 
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory,
@@ -15,7 +15,8 @@ import {
   ybinding
 } from '@jupyterlab/codemirror';
 
-import { KernelSpecManager, Session } from '@jupyterlab/services';
+import type { Session } from '@jupyterlab/services';
+import { KernelSpecManager } from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
@@ -33,12 +34,13 @@ import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
 
-import { DebuggerModel } from '../src/model';
+import type { DebuggerModel } from '../src/model';
 
-import { SourcesBody } from '../src/panels/sources/body';
+import type { SourcesBody } from '../src/panels/sources/body';
 
-import { IYText } from '@jupyter/ydoc';
-import { IDebugger } from '../src/tokens';
+import type { IYText } from '@jupyter/ydoc';
+import type { IDebugger } from '../src/tokens';
+import { DebuggerDisplayRegistry } from '../src';
 
 const server = new JupyterServer();
 
@@ -55,7 +57,8 @@ afterAll(async () => {
 describe('Debugger', () => {
   const specsManager = new KernelSpecManager();
   const config = new Debugger.Config();
-  const service = new DebuggerService({ specsManager, config });
+  const displayRegistry = new DebuggerDisplayRegistry();
+
   const registry = new CommandRegistry();
   const languages = new EditorLanguageRegistry();
   const callstackToolbarCommands = {
@@ -86,6 +89,12 @@ describe('Debugger', () => {
   });
   const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const service = new DebuggerService({
+    displayRegistry,
+    specsManager,
+    config,
+    mimeTypeService
+  });
   const lines = [3, 5];
   const code = [
     'i = 0',

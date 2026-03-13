@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
-import { Kernel, KernelMessage } from '../kernel';
+import type { Kernel, KernelMessage } from '../kernel';
 
-import { ServerConnection } from '..';
+import type { ServerConnection } from '..';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { DeepPartial } from './restapi';
+import type { DeepPartial } from './restapi';
 
 /**
  * Interface of a session object.
@@ -322,9 +322,8 @@ export interface IManager extends IDisposable {
   /**
    * Connect to a running session.
    *
-   * @param model - The model of the target session.
-   *
-   * @param options - The session options to use.
+   * @param options - The session options to use
+   * @param options.model - The model of the target session.
    *
    * @returns The new session instance.
    */

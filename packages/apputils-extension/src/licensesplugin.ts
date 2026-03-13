@@ -3,11 +3,11 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   ICommandPalette,
   ILicensesClient,
@@ -15,7 +15,7 @@ import {
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ITranslator } from '@jupyterlab/translation';
 import {
@@ -24,7 +24,7 @@ import {
   refreshIcon,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * The command IDs used by the licenses plugin.
@@ -46,13 +46,8 @@ export const licensesClient: JupyterFrontEndPlugin<ILicensesClient> = {
   autoStart: true,
   provides: ILicensesClient,
   activate: (app: JupyterFrontEnd) => {
-    const licensesUrl =
-      URLExt.join(
-        PageConfig.getBaseUrl(),
-        PageConfig.getOption('licensesUrl')
-      ) + '/';
     const serverSettings = app.serviceManager.serverSettings;
-    return new Licenses.LicensesClient({ licensesUrl, serverSettings });
+    return new Licenses.LicensesClient({ serverSettings });
   }
 };
 

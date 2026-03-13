@@ -2,21 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '@jupyterlab/services';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   jsonIcon,
-  LabIcon,
   markdownIcon,
   spreadsheetIcon,
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { h, VirtualElement } from '@lumino/virtualdom';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
 import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ILicensesClient } from './tokens';
+import type { ILicensesClient } from './tokens';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 const FILTER_SECTION_TITLE_CLASS = 'jp-Licenses-Filters-title';
 
@@ -303,7 +307,7 @@ export namespace Licenses {
      * Create a new license client.
      */
     constructor(options: ILicenseClientOptions = {}) {
-      this._licensesUrl = options.licensesUrl || '';
+      this._preferredLicensesUrl = options.licensesUrl;
       this._serverSettings =
         options.serverSettings ?? ServerConnection.makeSettings();
     }
@@ -335,8 +339,23 @@ export namespace Licenses {
       return response.json();
     }
 
+    /**
+     * The licences URL.
+     *
+     * This respects runtime changes to the `licensesUrl` page config option.
+     */
+    private get _licensesUrl(): string {
+      return (
+        this._preferredLicensesUrl ??
+        URLExt.join(
+          this._serverSettings.baseUrl,
+          PageConfig.getOption('licensesUrl')
+        ) + '/'
+      );
+    }
+
     private _serverSettings: ServerConnection.ISettings;
-    private _licensesUrl: string;
+    private _preferredLicensesUrl: string | undefined;
   }
 
   /**
@@ -482,9 +501,7 @@ export namespace Licenses {
     }
 
     get title(): string {
-      return `${this._currentBundleName || ''} ${this._trans.__(
-        'Licenses'
-      )}`.trim();
+      return `${this._currentBundleName || ''} ${this._trans.__('Licenses')}`.trim();
     }
 
     /**

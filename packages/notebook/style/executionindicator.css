@@ -32,6 +32,7 @@
   padding: 0 5px;
   position: fixed;
   display: table;
+  transition: visibility 0s linear 0.1s;
 }
 
 .jp-Notebook-ExecutionIndicator-tooltip.up {
@@ -46,8 +47,10 @@
   display: none;
 }
 
-.jp-Notebook-ExecutionIndicator:hover .jp-Notebook-ExecutionIndicator-tooltip {
+.jp-Notebook-ExecutionIndicator:hover .jp-Notebook-ExecutionIndicator-tooltip,
+.jp-Notebook-ExecutionIndicator-tooltip:hover {
   visibility: visible;
+  transition-delay: 0s;
 }
 
 .jp-Notebook-ExecutionIndicator span {
@@ -62,4 +65,18 @@
   display: flex;
   justify-content: center;
   height: 100%;
+}
+
+.jp-Notebook-ExecutionIndicator-jumpButton {
+  margin-top: 4px;
+  margin-bottom: 3px;
+  width: 100%;
+  font-size: var(--jp-ui-font-size1);
+  border: 1px solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color0);
+  transition: all 0.1s ease;
+}
+
+.jp-Notebook-ExecutionIndicator-jumpButton:hover {
+  background-color: var(--jp-layout-color3) !important;
 }

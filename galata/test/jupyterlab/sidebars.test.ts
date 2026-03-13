@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import type { galata } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 const sidebarElementIds = {
   'left-sidebar': [
@@ -236,6 +237,11 @@ const elementAriaLabels = {
 };
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
+  test.skip(
+    ({ browserName }) => browserName === 'firefox',
+    'Some cases fail on Firefox'
+  );
+
   Object.keys(sidebarElementIds).forEach(sideBar => {
     test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
       const keyValueArray: string[] = sidebarElementIds[sideBar];

@@ -62,6 +62,13 @@
 
 .jp-Notebook .jp-Cell {
   overflow: visible;
+
+  /* Prevent scroll anchoring to inactive cells */
+  overflow-anchor: none;
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active {
+  overflow-anchor: auto;
 }
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
@@ -517,7 +524,7 @@ div.jp-Cell-Placeholder-content-3 {
 
 .jp-Notebook .jp-scrollbarItem-executionIndicator {
   display: inline-block;
-  font-family: monospace;
+  font-family: var(--jp-cell-prompt-font-family);
   font-size: 80%;
   line-height: 100%;
   margin-left: -1px;
@@ -546,7 +553,7 @@ div.jp-Cell-Placeholder-content-3 {
 }
 
 /* Lazy rendering to notebook cells: content outside viewport won't be rendered until scrolled into view */
-.jp-Notebook-cell.jp-content-visibility {
+.jp-content-visibility-mode > .jp-Notebook-cell {
   content-visibility: auto;
   contain: layout style paint; /* Isolates layout, style, and paint for this element */
 }

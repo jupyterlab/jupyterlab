@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
+import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   CodeCell,
@@ -9,10 +9,12 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
+import type { YCodeCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeConsole } from '@jupyterlab/console';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import {
   createConsoleFactory,
@@ -218,6 +220,25 @@ describe('console/widget', () => {
         expect(widget.cells.length).toBe(0);
         await widget.inject(code);
         expect(widget.cells.length).toBeGreaterThan(0);
+      });
+
+      it('should hide code input when hideCodeInput is true', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        // Set config to hide input
+        widget.setConfig({ hideCodeInput: true });
+
+        // Inject some code
+        const testCode = 'print(1 + 1)';
+        await widget.inject(testCode);
+
+        // Check the input is not visible in the executed cells
+        for (const cell of widget.cells) {
+          expect(cell.inputArea!.node.classList.contains('lm-mod-hidden')).toBe(
+            true
+          );
+        }
       });
     });
 

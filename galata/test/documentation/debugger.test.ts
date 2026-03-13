@@ -1,12 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import { positionMouseOver } from './utils';
 
 test.use({
@@ -118,7 +114,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -165,7 +161,7 @@ test.describe('Debugger', () => {
     await keyboard.press('Backspace');
     await keyboard.type('except:\n2/0\n', { delay: 100 });
 
-    void page.notebook.runCell(0);
+    await page.notebook.runCell(0, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -193,7 +189,7 @@ test.describe('Debugger', () => {
 
     await menu.locator('li div.lm-Menu-itemLabel:text("raised")').click();
 
-    void page.notebook.runCell(0);
+    await page.notebook.runCell(0, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -252,7 +248,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed
     await page.debugger.waitForCallStack();
@@ -279,7 +275,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -310,13 +306,13 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
 
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel.*\/\d+.py/);
+    expect(await breakpointsPanel.innerText()).toMatch(/Cell \[\d+\]/);
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path
@@ -340,12 +336,12 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
     await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
-      '/tmp/ipykernel_'
+      'Cell ['
     );
 
     // Don't compare screenshot as the kernel id varies

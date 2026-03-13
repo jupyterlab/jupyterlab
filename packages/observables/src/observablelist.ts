@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * A list which can be observed for changes.
@@ -494,6 +495,7 @@ export class ObservableList<T> implements IObservableList<T> {
     const index = ArrayExt.findFirstIndex(this._array, item => {
       return itemCmp(item, value);
     });
+    if (index < 0) return index;
     this.remove(index);
     return index;
   }

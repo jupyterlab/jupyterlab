@@ -7,14 +7,10 @@
  * It is a simplification of https://github.com/yjs/y-codemirror.next
  * licensed under MIT License by Kevin Jahns
  */
-import {
-  Annotation,
-  EditorSelection,
-  Extension,
-  Facet,
-  SelectionRange
-} from '@codemirror/state';
-import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import type { Extension, SelectionRange } from '@codemirror/state';
+import { Annotation, EditorSelection, Facet } from '@codemirror/state';
+import type { EditorView, ViewUpdate } from '@codemirror/view';
+import { ViewPlugin } from '@codemirror/view';
 import {
   yUndoManager,
   YUndoManagerConfig,
@@ -267,17 +263,15 @@ export const ySync = ViewPlugin.fromClass(
  * Extension for CodeMirror 6 binding the Yjs text (source of truth)
  * and the editor state.
  *
- * @param ytext Yjs text to bind
- * @param undoManager Yjs text undo manager
+ * @param options.ytext Yjs text to bind
+ * @param options.undoManager Yjs text undo manager
  * @returns CodeMirror 6 extension
  */
-export function ybinding({
-  ytext,
-  undoManager
-}: {
+export function ybinding(options: {
   ytext: Text;
   undoManager?: UndoManager;
 }): Extension {
+  const { ytext, undoManager } = options;
   const ySyncConfig = new YSyncConfig(ytext);
   const plugins = [ySyncFacet.of(ySyncConfig), ySync];
   if (undoManager) {

@@ -7,18 +7,31 @@
  * @module services-extension
  */
 
+import type {
+  Contents,
+  Event,
+  IContentProvider,
+  Kernel,
+  KernelSpec,
+  NbConvert,
+  ServiceManagerPlugin,
+  Session,
+  Setting,
+  Terminal,
+  User,
+  Workspace
+} from '@jupyterlab/services';
 import {
   ConfigSection,
   ConfigSectionManager,
   ConnectionStatus,
-  Contents,
   ContentsManager,
   Drive,
-  Event,
   EventManager,
   IConfigSectionManager,
   IConnectionStatus,
   IContentsManager,
+  IDefaultContentProvider,
   IDefaultDrive,
   IEventManager,
   IKernelManager,
@@ -31,24 +44,16 @@ import {
   ITerminalManager,
   IUserManager,
   IWorkspaceManager,
-  Kernel,
   KernelManager,
-  KernelSpec,
   KernelSpecManager,
-  NbConvert,
   NbConvertManager,
+  RestContentProvider,
   ServerConnection,
   ServiceManager,
-  ServiceManagerPlugin,
-  Session,
   SessionManager,
-  Setting,
   SettingManager,
-  Terminal,
   TerminalManager,
-  User,
   UserManager,
-  Workspace,
   WorkspaceManager
 } from '@jupyterlab/services';
 
@@ -105,6 +110,45 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
       defaultDrive,
       serverSettings
     });
+  }
+};
+
+/**
+ * The default IContentProvider plugin.
+ */
+const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
+  id: '@jupyterlab/services-extension:default-content-provider',
+  description: 'The default content provider for the contents manager.',
+  autoStart: true,
+  provides: IDefaultContentProvider,
+  optional: [IServerSettings],
+  activate: (
+    _: null,
+    serverSettings: ServerConnection.ISettings | null
+  ): IContentProvider => {
+    const apiEndpoint = 'api/contents';
+    serverSettings = serverSettings ?? ServerConnection.makeSettings();
+    return new RestContentProvider({ serverSettings, apiEndpoint });
+  }
+};
+
+/**
+ * Content provider plugin warning
+ *
+ * A plugin that errors out if users are overwritting the deprecated defaultContentProvider
+ */
+const contentProviderWarning: ServiceManagerPlugin<void> = {
+  id: '@jupyterlab/services-extension:content-provider-warning',
+  description:
+    'Warn if user is overwriting the deprecated contentprovider plugin.',
+  autoStart: true,
+  requires: [IDefaultContentProvider],
+  activate: (_: null, contentProvider: IContentProvider) => {
+    if (!(contentProvider instanceof RestContentProvider)) {
+      console.error(
+        'Defining a IDefaultContentProvider plugin is deprecated since JupyterLab 4.5.1 and does not be have any effect.'
+      );
+    }
   }
 };
 
@@ -397,6 +441,8 @@ export default [
   configSectionManager,
   connectionStatusPlugin,
   contentsManagerPlugin,
+  defaultContentProvider,
+  contentProviderWarning,
   defaultDrivePlugin,
   eventManagerPlugin,
   kernelManagerPlugin,

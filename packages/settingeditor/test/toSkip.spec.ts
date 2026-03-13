@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 /**
  * Test file to verify the configurable toSkip functionality
  * This would be part of a proper test suite
@@ -5,7 +10,7 @@
 
 import { expect } from '@jest/globals';
 import { PluginList } from '../src/pluginlist';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TestConnector, TestRegistry } from './utils';
 
 describe('Configurable toSkip functionality', () => {

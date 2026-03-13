@@ -3,12 +3,9 @@
 
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
-import { IDebugger } from '../../tokens';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IDebugger } from '../../tokens';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   breakpointIcon,
   selectedBreakpointIcon
@@ -34,9 +31,6 @@ export class BreakpointsBody extends ReactWidget {
     this.addClass('jp-DebuggerBreakpoints-body');
   }
 
-  /**
-   * Render the BreakpointsComponent.
-   */
   render(): JSX.Element {
     return (
       <BreakpointsComponent model={this._model} translator={this._translator} />
@@ -52,6 +46,7 @@ export class BreakpointsBody extends ReactWidget {
  *
  * @param {object} props The component props.
  * @param props.model The model for the breakpoints.
+ * @returns A JSX element.
  */
 const BreakpointsComponent = ({
   model,
@@ -124,6 +119,7 @@ const BreakpointsComponent = ({
  * @param {object} props The component props.
  * @param props.breakpoints The list of breakpoints.
  * @param props.model The model for the breakpoints.
+ * @returns A JSX element.
  */
 const BreakpointCellComponent = ({
   breakpoints,
@@ -164,6 +160,7 @@ const BreakpointCellComponent = ({
  * @param {object} props The component props.
  * @param props.breakpoint The breakpoint.
  * @param props.model The model for the breakpoints.
+ * @returns A JSX element.
  */
 const BreakpointComponent = ({
   breakpoint,
@@ -176,15 +173,12 @@ const BreakpointComponent = ({
   isSelected: boolean;
   trans: TranslationBundle;
 }): JSX.Element => {
-  const moveToEndFirstCharIfSlash = (breakpointSourcePath: string): string => {
-    return breakpointSourcePath[0] === '/'
-      ? breakpointSourcePath.slice(1) + '/'
-      : breakpointSourcePath;
-  };
+  const display = model.getDisplayName(breakpoint);
+
   return (
     <div
-      className={'jp-DebuggerBreakpoint'}
-      onClick={(): void => model.clicked.emit(breakpoint)}
+      className="jp-DebuggerBreakpoint"
+      onClick={() => model.clicked.emit(breakpoint)}
       title={breakpoint.source?.path}
     >
       <span className="jp-DebuggerBreakpoint-container">
@@ -199,9 +193,9 @@ const BreakpointComponent = ({
         )}
       </span>
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
-        {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
+        {display}
       </span>
-      <span className={'jp-DebuggerBreakpoint-line'}>{breakpoint.line}</span>
+      <span className="jp-DebuggerBreakpoint-line">{breakpoint.line}</span>
     </div>
   );
 };

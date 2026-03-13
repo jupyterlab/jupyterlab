@@ -4,15 +4,12 @@
  */
 
 import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import type { FieldProps } from '@rjsf/utils';
+import type { INotebookTracker } from '@jupyterlab/notebook';
 import { addIcon, checkIcon, LabIcon } from '@jupyterlab/ui-components';
 import { reduce } from '@lumino/algorithm';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to the cell-tags field.
@@ -126,9 +123,7 @@ export class CellTagField {
       document.body.appendChild(tmp);
       event.target.style.setProperty(
         'width',
-        `calc(${
-          tmp.getBoundingClientRect().width
-        }px + var(--jp-add-tag-extra-width))`
+        `calc(${tmp.getBoundingClientRect().width}px + var(--jp-add-tag-extra-width))`
       );
       document.body.removeChild(tmp);
     }

@@ -5,11 +5,11 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { Settings } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
-import { IFormRendererRegistry } from '@jupyterlab/ui-components';
-import { ISignal } from '@lumino/signaling';
-import { PluginList } from './pluginlist';
+import type { Settings } from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { IFormRendererRegistry } from '@jupyterlab/ui-components';
+import type { ISignal } from '@lumino/signaling';
+import type { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 

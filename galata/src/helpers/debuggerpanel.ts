@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Locator, Page } from '@playwright/test';
-import { SidebarHelper } from './sidebar';
-import { NotebookHelper } from './notebook';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
+import type { SidebarHelper } from './sidebar';
+import type { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
 
 /**
@@ -52,7 +52,12 @@ export class DebuggerHelper {
     if (!(await this.isOn(name))) {
       await button!.click();
     }
-    await waitForCondition(async () => await this.isOn(name));
+    try {
+      await waitForCondition(async () => await this.isOn(name), 2000);
+    } catch (error) {
+      // Retry
+      await this.switchOn(name);
+    }
   }
 
   /**
@@ -112,7 +117,7 @@ export class DebuggerHelper {
   async renderVariable(name: string): Promise<void> {
     await this.page
       .getByRole('treeitem', { name: `${name}:` })
-      .click({ button: 'right' });
+      .click({ button: 'right', timeout: 10000 });
     await this.page.getByRole('menuitem', { name: 'Render Variable' }).click();
     await this.page.locator('.jp-VariableRendererPanel-renderer').waitFor();
   }

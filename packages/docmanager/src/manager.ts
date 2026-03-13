@@ -1,30 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import {
-  Context,
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { SessionContextDialogs } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { IUrlResolverFactory } from '@jupyterlab/rendermime';
+import { Context } from '@jupyterlab/docregistry';
+import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 
-import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
-import {
+import type {
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager
 } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
+import { DocumentManagerDialogs } from './dialogs';
 
 /**
  * The document manager.
@@ -44,6 +50,9 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
+    this._docManagerDialogs =
+      options.docManagerDialogs ??
+      new DocumentManagerDialogs({ translator: this.translator });
     this._dialogs =
       options.sessionDialogs ??
       new SessionContextDialogs({ translator: options.translator });
@@ -55,7 +64,8 @@ export class DocumentManager implements IDocumentManager {
     const widgetManager = new DocumentWidgetManager({
       registry: this.registry,
       translator: this.translator,
-      recentsManager: options.recentsManager
+      recentsManager: options.recentsManager,
+      dialogs: this._docManagerDialogs
     });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     widgetManager.stateChanged.connect(this._onWidgetStateChanged, this);
@@ -469,7 +479,7 @@ export class DocumentManager implements IDocumentManager {
    */
   openOrReveal(
     path: string,
-    widgetName = 'default',
+    widgetName: string | null = null,
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions,
     kernelPreference?: ISessionContext.IKernelPreference
@@ -477,12 +487,18 @@ export class DocumentManager implements IDocumentManager {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget, {
-        type: widgetName,
+        type: widgetName || 'default',
         ...options
       });
       return widget;
     }
-    return this.open(path, widgetName, kernel, options ?? {}, kernelPreference);
+    return this.open(
+      path,
+      widgetName || 'default',
+      kernel,
+      options ?? {},
+      kernelPreference
+    );
   }
 
   /**
@@ -741,6 +757,7 @@ export class DocumentManager implements IDocumentManager {
   private _dialogs: ISessionContext.IDialogs;
   private _isConnectedCallback: () => boolean;
   private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
+  private _docManagerDialogs: IDocumentManagerDialogs;
 }
 
 /**
@@ -780,6 +797,11 @@ export namespace DocumentManager {
      * The provider for session dialogs.
      */
     sessionDialogs?: ISessionContext.IDialogs;
+
+    /**
+     * The provider for document manager dialogs.
+     */
+    docManagerDialogs?: IDocumentManagerDialogs;
 
     /**
      * The application language translator.

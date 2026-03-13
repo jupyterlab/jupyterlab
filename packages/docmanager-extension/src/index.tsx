@@ -5,20 +5,18 @@
  * @module docmanager-extension
  */
 
-import {
-  ILabShell,
-  ILabStatus,
+import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILabStatus, JupyterLab } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   addCommandToolbarButtonClass,
   CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
   InputDialog,
-  ISessionContext,
   ISessionContextDialogs,
   Notification,
   ReactWidget,
@@ -27,32 +25,36 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  DocumentManagerDialogs,
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager,
   PathStatus,
-  renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { IUrlResolverFactory } from '@jupyterlab/rendermime';
-import { Contents, Kernel } from '@jupyterlab/services';
+import type { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
@@ -122,7 +124,9 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
         if (!widget.isAttached) {
           shell.add(widget, 'main', options || {});
         }
-        shell.activateById(widget.id);
+        if (options?.activate ?? true) {
+          shell.activateById(widget.id);
+        }
         this._opened.emit(widget);
       }
 
@@ -178,7 +182,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     ISessionContextDialogs,
     JupyterLab.IInfo,
     IRecentsManager,
-    IUrlResolverFactory
+    IUrlResolverFactory,
+    IDocumentManagerDialogs
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -188,12 +193,15 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null,
     recentsManager: IRecentsManager | null,
-    urlResolverFactory: IUrlResolverFactory | null
+    urlResolverFactory: IUrlResolverFactory | null,
+    docManagerDialogs_: IDocumentManagerDialogs | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
+    const docManagerDialogs =
+      docManagerDialogs_ ?? new DocumentManagerDialogs({ translator });
     const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
@@ -211,7 +219,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         return true;
       },
       recentsManager: recentsManager ?? undefined,
-      urlResolverFactory: urlResolverFactory ?? undefined
+      urlResolverFactory: urlResolverFactory ?? undefined,
+      docManagerDialogs: docManagerDialogs
     });
 
     return docManager;
@@ -226,7 +235,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds commands and settings to the document manager.',
   autoStart: true,
   requires: [IDocumentManager, IDocumentWidgetOpener, ISettingRegistry],
-  optional: [ITranslator, ICommandPalette, ILabShell],
+  optional: [ITranslator, ICommandPalette, ILabShell, IDocumentManagerDialogs],
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
@@ -234,7 +243,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry,
     translator: ITranslator | null,
     palette: ICommandPalette | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    dialogs: IDocumentManagerDialogs | null
   ): void => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
@@ -248,7 +258,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       settingRegistry,
       translator,
       labShell,
-      palette
+      palette,
+      dialogs
     );
 
     // Keep up to date with the settings registry.
@@ -589,6 +600,23 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides the default dialogs for three document management operations:
+ * Rename, Confirm Close, and Save Before Close.
+ *
+ * To customize these dialogs, implement a custom plugin that provides the `IDocumentManagerDialogs` token.
+ */
+const dialogsPlugin: JupyterFrontEndPlugin<IDocumentManagerDialogs> = {
+  id: '@jupyterlab/docmanager-extension:dialogs',
+  description: 'Provides default dialogs for document management operations.',
+  autoStart: true,
+  provides: IDocumentManagerDialogs,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    return new DocumentManagerDialogs({ translator });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -600,7 +628,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   downloadPlugin,
   openBrowserTabPlugin,
   openerPlugin,
-  recentsManagerPlugin
+  recentsManagerPlugin,
+  dialogsPlugin
 ];
 export default plugins;
 
@@ -672,7 +701,8 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  dialogs: IDocumentManagerDialogs | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -697,10 +727,19 @@ function addCommands(
       { autoClose: 5000 }
     );
   };
-
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, widgetOpener, translator);
+    if (!dialogs) {
+      dialogs = new DocumentManagerDialogs({ translator: translator });
+    }
+    addLabCommands(
+      app,
+      docManager,
+      labShell,
+      widgetOpener,
+      translator,
+      dialogs
+    );
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -820,16 +859,90 @@ function addCommands(
           },
           kernel: {
             type: 'object',
-            description: 'The kernel model to use'
+            description:
+              'The kernel model to use. See the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) for more information.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'Unique identifier of the kernel on the server'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              }
+            }
           },
           kernelPreference: {
             type: 'object',
             description:
-              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values'
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'The id of an existing kernel'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              },
+              language: {
+                type: 'string',
+                description: 'The preferred kernel language'
+              },
+              shouldStart: {
+                type: 'boolean',
+                description:
+                  'A kernel should be started automatically (default `true`)'
+              },
+              canStart: {
+                type: 'boolean',
+                description: 'A kernel can be started (default `true`)'
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description:
+                  'Shut down the session when session context is disposed (default `false`)'
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description:
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description:
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+              }
+            }
           },
           options: {
             type: 'object',
-            description: 'Additional options for opening'
+            description: 'Additional options for opening the widget',
+            properties: {
+              ref: {
+                type: 'string',
+                description:
+                  'The reference widget id for the insert location (default `null`)'
+              },
+              mode: {
+                type: 'string',
+                description:
+                  'The insertion mode relative to a reference widget ("split-top", "split-bottom", "split-left", "split-right", "tab-before", "tab-after")'
+              },
+              activate: {
+                type: 'boolean',
+                description: 'Whether to activate the widget (default `true`)'
+              },
+              rank: {
+                type: 'number',
+                description: 'The rank order of the widget among its siblings'
+              },
+              type: {
+                type: 'string',
+                description:
+                  'Type of widget to open, used to load user customization (typically a factory name or widget id)'
+              }
+            }
           },
           icon: {
             type: 'string',
@@ -1096,8 +1209,12 @@ function addCommands(
           try {
             await context.save();
 
+            if (newName !== oldName) {
+              await context.rename(newName);
+            }
+
             if (!widget?.isDisposed) {
-              return context!.createCheckpoint();
+              await context!.createCheckpoint();
             }
           } catch (err) {
             // If the save was canceled by user-action, do nothing.
@@ -1107,9 +1224,6 @@ function addCommands(
             throw err;
           } finally {
             saveInProgress.delete(context);
-            if (newName !== oldName) {
-              await context.rename(newName);
-            }
           }
         }
       }
@@ -1250,7 +1364,8 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   widgetOpener: IDocumentWidgetOpener,
-  translator: ITranslator
+  translator: ITranslator,
+  dialogs: IDocumentManagerDialogs
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -1319,7 +1434,7 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return renameDialog(docManager, context!);
+        return dialogs.rename(context!);
       }
     },
     describedBy: {

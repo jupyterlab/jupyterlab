@@ -5,8 +5,10 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
@@ -578,7 +580,7 @@ export class ListModel extends VDomModel {
     // Ensure action is removed when resolved
     const remove = () => {
       const i = this._pendingActions.indexOf(pending);
-      this._pendingActions.splice(i, 1);
+      void this._pendingActions.splice(i, 1);
       this.stateChanged.emit(undefined);
     };
     pending.then(remove, remove);
@@ -665,14 +667,16 @@ namespace Private {
    *
    * @param queryArgs Query arguments
    * @param init Initial values for the request
+   * @param serverSettings The server settings to use for the request
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
     queryArgs: { [k: string]: any } = {},
-    init: RequestInit = {}
+    init: RequestInit = {},
+    serverSettings?: ServerConnection.ISettings
   ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
-    const settings = ServerConnection.makeSettings();
+    const settings = serverSettings ?? ServerConnection.makeSettings();
     const requestUrl = URLExt.join(
       settings.baseUrl,
       EXTENSION_API_PATH // API Namespace

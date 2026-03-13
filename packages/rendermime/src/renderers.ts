@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { removeMath, replaceMath } from './latex';
 
@@ -256,7 +257,7 @@ export async function renderLatex(
   options: renderLatex.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, shouldTypeset, latexTypesetter } = options;
+  const { host, source, shouldTypeset, latexTypesetter, resolver } = options;
 
   // Set the source on the node.
   host.textContent = source;
@@ -266,9 +267,11 @@ export async function renderLatex(
     const maybePromise = latexTypesetter.typeset(host);
     if (maybePromise instanceof Promise) {
       // Harden anchors to contain secure target/rel attributes.
-      maybePromise.then(() => hardenAnchorLinks(host)).catch(console.warn);
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
     } else {
-      hardenAnchorLinks(host);
+      hardenAnchorLinks(host, resolver);
     }
   }
 }
@@ -300,6 +303,11 @@ export namespace renderLatex {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * An optional url resolver.
+     */
+    resolver?: IRenderMime.IResolver | null;
   }
 }
 
@@ -1373,21 +1381,35 @@ namespace Private {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href') || '';
+    if (!href) {
+      return;
+    }
+    const hash = anchor.hash;
+    if (hash && hash === href) {
+      anchor.target = '_self';
+      anchor.addEventListener('click', (event: MouseEvent) => {
+        const id = hash.slice(1);
+        const escapedId = CSS.escape(id);
+        const doc = anchor.ownerDocument;
+        const el =
+          doc.querySelector(`[data-jupyter-id="${escapedId}"]`) ||
+          doc.querySelector(`#${escapedId}`);
+        if (el) {
+          event.preventDefault();
+          el.scrollIntoView();
+        }
+      });
+      return;
+    }
     const isLocal = resolver.isLocal
       ? resolver.isLocal(href)
       : URLExt.isLocal(href);
     // Bail if it is not a file-like url.
-    if (!href || !isLocal) {
+    if (!isLocal) {
       return;
     }
     // Remove the hash until we can handle it.
-    const hash = anchor.hash;
     if (hash) {
-      // Handle internal link in the file.
-      if (hash === href) {
-        anchor.target = '_self';
-        return;
-      }
       // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
@@ -1650,6 +1672,7 @@ namespace Private {
 
       while (numbers.length) {
         const n = numbers.shift();
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (n) {
           case 0:
             fg = bg = [];

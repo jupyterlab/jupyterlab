@@ -7,7 +7,7 @@
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -218,7 +218,7 @@ namespace Private {
    * Utility function to harden anchor links in a given element
    */
   export function hardenAnchorLinks(element: HTMLElement): void {
-    const anchors = element.querySelectorAll('a');
+    const anchors = element.querySelectorAll<HTMLAnchorElement>('.MathJax a');
     anchors.forEach(anchor => {
       // Add rel="noopener" if not already present
       const existingRel = anchor.rel || '';
