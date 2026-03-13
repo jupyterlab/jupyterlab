@@ -24,6 +24,8 @@ import { Variables as VariablesPanel } from './panels/variables';
 
 import type { IDebugger } from './tokens';
 
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 /**
  * A debugger sidebar.
  */
@@ -47,7 +49,14 @@ export class DebuggerSidebar extends SidePanel {
       service,
       themeManager
     } = options;
+
     const model = service.model;
+    this._sourcesOptions = {
+      model: model.sources,
+      service,
+      editorServices,
+      translator
+    };
 
     this.variables = new VariablesPanel({
       model: model.variables,
@@ -70,13 +79,6 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    this.sources = new SourcesPanel({
-      model: model.sources,
-      service,
-      editorServices,
-      translator
-    });
-
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
       service,
@@ -95,8 +97,33 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    this.addWidget(this.sources);
     this.addWidget(this.kernelSources);
+  }
+
+  get showSourcesPanel(): boolean {
+    return this._showSourcesPanel;
+  }
+
+  set showSourcesPanel(value: boolean) {
+    if (value === this._showSourcesPanel) {
+      return;
+    }
+
+    this._showSourcesPanel = value;
+
+    if (value) {
+      // ShowSourcesPanel is true => ensure widget exists
+
+      if (!this._sources || this._sources.isDisposed) {
+        this._sources = new SourcesPanel(this._sourcesOptions);
+        this.insertWidget(3, this._sources);
+      }
+    } else {
+      // ShowSourcesPanel is false => remove widget if present
+      if (this._sources && !this._sources.isDisposed) {
+        this._sources.dispose();
+      }
+    }
   }
 
   /**
@@ -117,9 +144,17 @@ export class DebuggerSidebar extends SidePanel {
   /**
    * The sources widget.
    */
-  readonly sources: SourcesPanel;
+  get sources(): SourcesPanel | undefined {
+    return this._sources;
+  }
 
   readonly kernelSources: KernelSourcesPanel;
+
+  private _sources?: SourcesPanel;
+
+  private _showSourcesPanel: boolean;
+
+  private _sourcesOptions: SourcesPanel.IOptions;
 }
 
 /**
@@ -149,6 +184,11 @@ export namespace DebuggerSidebar {
      * The editor services.
      */
     editorServices: IEditorServices;
+
+    /**
+     * Settings from the setting registry
+     */
+    settings?: ISettingRegistry.ISettings | null;
 
     /**
      * An optional application theme manager to detect theme changes.
