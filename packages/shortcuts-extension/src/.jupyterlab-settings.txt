@@ -1,0 +1,14 @@
+{
+  "shortcuts": [
+    {
+      "command": "shortcuts:add-keybinding",
+      "keys": ["Accel K"],
+      "selector": "body"
+    },
+    {
+      "command": "shortcuts:delete-keybinding",
+      "keys": ["Accel D"],
+      "selector": "body"
+    }
+  ]
+}

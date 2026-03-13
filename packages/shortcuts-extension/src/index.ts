@@ -97,7 +97,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     const translator_ = translator ?? nullTranslator;
     const trans = translator_.load('jupyterlab');
     const { commands } = app;
-    let canonical: ISettingRegistry.ISchema | null;
+    let canonical: ISettingRegistry.ISchema | null = null;
     // Stores initial value of the shortcuts `default` value,
     // which reflects the `overrides.json` contents.
     let cannonicalOverrides: PartialJSONValue | undefined;
@@ -237,13 +237,31 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
      * Populate the plugin's schema defaults.
      */
     function populate(schema: ISettingRegistry.ISchema) {
-      const commands = app.commands.listCommands().join('\n');
+      const commandsList = app.commands.listCommands().join('\n');
+
+      // Ensure cannonicalOverrides has a value
       if (!cannonicalOverrides) {
         cannonicalOverrides = JSONExt.deepCopy(
-          schema.properties!.shortcuts.default!
+          schema.properties!.shortcuts.default ?? []
         );
       }
+
       loaded = {};
+
+      // Add default shortcuts manually so array is never empty
+      const defaultShortcuts: ISettingRegistry.IShortcut[] = [
+        {
+          command: 'shortcuts:add-keybinding',
+          keys: ['Accel K'],
+          selector: 'body'
+        },
+        {
+          command: 'shortcuts:delete-keybinding',
+          keys: ['Accel D'],
+          selector: 'body'
+        }
+      ];
+
       schema.properties!.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
           const shortcuts =
@@ -251,13 +269,11 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .concat([cannonicalOverrides as any[]])
+        .concat([cannonicalOverrides as any[], defaultShortcuts]) // add your defaults here
         .reduce((acc, val) => {
           if (Platform.IS_MAC) {
             return acc.concat(val);
           } else {
-            // If platform is not MacOS, remove all shortcuts containing Cmd
-            // as they will be modified; e.g. `Cmd A` becomes `A`
             return acc.concat(
               val.filter(
                 shortcut =>
@@ -271,48 +287,55 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         }, []) // flatten one level
         .sort((a, b) => a.command.localeCompare(b.command));
 
-      schema.properties!.shortcuts.description = trans.__(
-        `Note: To disable a system default shortcut,
-copy it to User Preferences and add the
-"disabled" key, for example:
-{
-    "command": "application:activate-next-tab",
-    "keys": [
-        "Ctrl Shift ]"
-    ],
-    "selector": "body",
-    "disabled": true
-}
+      schema.properties!.shortcuts.description = trans.__(`
+    Note: To disable a system default shortcut,
+    copy it to User Preferences and add the
+    "disabled" key, for example:
+    {
+        "command": "application:activate-next-tab",
+        "keys": [
+            "Ctrl Shift ]"
+        ],
+        "selector": "body",
+        "disabled": true
+    }
 
-List of commands followed by keyboard shortcuts:
-%1
+    List of commands followed by keyboard shortcuts:
+    %1
 
-List of keyboard shortcuts:`,
-        commands
-      );
+    List of keyboard shortcuts:`, commandsList);
     }
 
     registry.pluginChanged.connect(async (_, plugin) => {
       if (plugin !== shortcuts.id) {
-        // If the plugin changed its shortcuts, reload everything.
         const oldShortcuts = loaded[plugin];
+        const changedPlugin = registry.plugins[plugin];
         const newShortcuts =
-          registry.plugins[plugin]!.schema['jupyter.lab.shortcuts'] || [];
+          changedPlugin?.schema['jupyter.lab.shortcuts'] || [];
         if (
           oldShortcuts === undefined ||
           !JSONExt.deepEqual(oldShortcuts, newShortcuts)
         ) {
-          // Empty the default values to avoid shortcut collisions.
           canonical = null;
-          const schema = registry.plugins[shortcuts.id]!.schema;
-          schema.properties!.shortcuts.default = cannonicalOverrides;
 
-          // Reload the settings.
+          // Guard: only reset schema if the shortcuts plugin is already loaded
+          const shortcutsPlugin = registry.plugins[shortcuts.id];
+          if (shortcutsPlugin?.schema?.properties?.shortcuts) {
+            shortcutsPlugin.schema.properties.shortcuts.default =
+              cannonicalOverrides;
+          }
+
           await registry.load(shortcuts.id, true);
         }
       }
     });
+    
 
+        const rawPlugin = registry.plugins[shortcuts.id];
+    if (rawPlugin) {
+      canonical = JSONExt.deepCopy(rawPlugin.schema);
+      populate(canonical);
+    }
     // Transform the plugin object to return different schema than the default.
     registry.transform(shortcuts.id, {
       compose: plugin => {
@@ -354,20 +377,44 @@ List of keyboard shortcuts:`,
       }
     });
 
-    try {
-      // Repopulate the canonical variable after the setting registry has
-      // preloaded all initial plugins.
-      canonical = null;
+      try {
+    const settings = await registry.load(shortcuts.id);
 
-      const settings = await registry.load(shortcuts.id);
-
-      Private.loadShortcuts(commands, settings.composite);
-      settings.changed.connect(() => {
-        Private.loadShortcuts(commands, settings.composite);
-      });
-    } catch (error) {
-      console.error(`Loading ${shortcuts.id} failed.`, error);
+    // Force populate canonical if it still hasn't been set
+    if (!canonical) {
+      const pluginData = registry.plugins[shortcuts.id];
+      if (pluginData) {
+        canonical = JSONExt.deepCopy(pluginData.schema);
+        populate(canonical);
+        // Reload so the transform picks up the populated canonical
+        await registry.load(shortcuts.id, true);
+      }
     }
+
+    const composite = settings.composite as { shortcuts: ISettingRegistry.IShortcut[] };
+    const reconciled = composite.shortcuts ?? [];
+
+    Private.loadShortcuts(commands, { shortcuts: reconciled });
+
+    settings.changed.connect(() => {
+      const updatedComposite = settings.composite as { shortcuts: ISettingRegistry.IShortcut[] };
+      Private.loadShortcuts(commands, { shortcuts: updatedComposite.shortcuts ?? [] });
+    });
+
+    console.log('Shortcuts schema loaded:', settings.schema);
+
+    console.table(
+      reconciled.map(s => ({
+        command: s.command,
+        keys: s.keys.join(', '),
+        selector: s.selector,
+        disabled: s.disabled ?? false
+      }))
+    );
+
+  } catch (error) {
+    console.error(`Loading ${shortcuts.id} failed.`, error);
+  }
   },
   autoStart: true
 };
