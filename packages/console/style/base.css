@@ -20,6 +20,15 @@
   padding: var(--jp-cell-padding);
 }
 
+.jp-CodeConsole:focus-visible {
+  outline-width: 5px;
+  outline-color: red;
+  outline-style: solid;
+  outline-offset: -5px;
+  /* Add transparent border to ensure outline is visible even with negative offset */
+  border: 2px solid transparent;
+}
+
 /*-----------------------------------------------------------------------------
 | Content (already run cells)
 |----------------------------------------------------------------------------*/
@@ -62,6 +71,13 @@
   box-shadow: var(--jp-elevation-z2);
   background: var(--jp-brand-color1);
   opacity: var(--jp-cell-collapser-not-active-hover-opacity);
+}
+
+.jp-CodeConsole-content:focus-visible {
+  outline-width: 5px;
+  outline-color: greenyellow;
+  outline-style: solid;
+  outline-offset: -2px;
 }
 
 /*-----------------------------------------------------------------------------
