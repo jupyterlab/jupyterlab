@@ -128,6 +128,151 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(56); // (1 source_line + 1 output_line) * 17 (line_height) + 22 (cell_margin)
     });
 
+    test('should prefer text/markdown over text/plain for height estimation', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/markdown': '# Header\n\nSome paragraph\n\nAnother paragraph',
+            'text/plain': 'short fallback'
+          },
+          execution_count: 1,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['display(md)'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // markdown has 3 non-empty lines: "# Header", "Some paragraph", "Another paragraph"
+      // source has 1 line
+      expect(height).toBe(90); // (1 + 3) * 17 + 22
+    });
+
+    test('should count lines from stdout stream output', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'line 1\nline 2\nline 3\n',
+          data: {
+            'application/vnd.jupyter.stdout': 'line 1\nline 2\nline 3\n'
+          }
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['print("line 1")\nprint("line 2")\nprint("line 3")'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 3 source lines, 3 non-empty output lines
+      expect(height).toBe(124); // (3 + 3) * 17 + 22
+    });
+
+    test('should count lines from stderr stream output', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stderr',
+          text: 'Warning: something\nTraceback:\n  File "test.py"\n',
+          data: {
+            'application/vnd.jupyter.stderr':
+              'Warning: something\nTraceback:\n  File "test.py"\n'
+          }
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['import warnings\nwarnings.warn("something")'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 2 source lines, 3 non-empty stderr lines
+      expect(height).toBe(107); // (2 + 3) * 17 + 22
+    });
+
+    test('should handle multiple outputs from different cells', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          data: {
+            'application/vnd.jupyter.stdout': 'hello\nworld'
+          }
+        },
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': '42'
+          },
+          execution_count: 1,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['print("hello")\nprint("world")\n42'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 3 source lines, 2 stdout lines + 1 text/plain line = 3 output lines
+      expect(height).toBe(124); // (3 + 3) * 17 + 22
+    });
+
+    test('should skip empty lines in output for height estimation', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': 'line1\n\n\nline2\n\n'
+          },
+          execution_count: 1,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['x'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 2 non-empty output lines ("line1", "line2")
+      expect(height).toBe(73); // (1 + 2) * 17 + 22
+    });
+
     test('should calculate height based on number of lines in source and output (string[] output)', () => {
       const outputObj = [
         {
@@ -157,7 +302,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(124); // (2 source_line + 4 output_line) * 17 (line_height) + 22 (cell_margin)
+      expect(height).toBe(107); // (2 source_lines + 3 non-empty output_lines) * 17 (line_height) + 22 (cell_margin)
     });
   });
 });
