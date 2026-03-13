@@ -329,7 +329,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-    
+
 
         const rawPlugin = registry.plugins[shortcuts.id];
     if (rawPlugin) {
