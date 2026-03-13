@@ -140,6 +140,8 @@ export class CodeConsole extends Widget {
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
+    // Make content panel focusable for keyboard scrolling
+    this._content.node.tabIndex = 0;
     this._input.addClass(INPUT_CLASS);
 
     layout.addWidget(this._splitPanel);
@@ -264,6 +266,8 @@ export class CodeConsole extends Widget {
       this.clear();
     }
     cell.addClass(CONSOLE_CELL_CLASS);
+    // Make cells in content area not tabbable (output cells)
+    cell.editor?.setOption('tabFocusable', false);
     this._content.addWidget(cell);
     this._cells.push(cell);
     if (msgId) {
@@ -310,7 +314,8 @@ export class CodeConsole extends Widget {
         scrollPastEnd: false,
         smartIndent: false,
         tabSize: 4,
-        theme: 'jupyter'
+        theme: 'jupyter',
+        tabFocusable: false // Banner is in content area, not tabbable
       }
     })).initializeState();
     banner.addClass(BANNER_CLASS);
@@ -722,6 +727,9 @@ export class CodeConsole extends Widget {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
 
+      // Make the cell not tabbable when it becomes read-only output
+      promptCell.editor?.setOption('tabFocusable', false);
+
       // Disconnect the content change listener
       promptCell.model.sharedModel.changed.disconnect(
         this._onPromptContentChanged,
@@ -758,6 +766,9 @@ export class CodeConsole extends Widget {
     promptCell = factory.createCodeCell(options);
     promptCell.model.mimeType = this._mimetype;
     promptCell.addClass(PROMPT_CLASS);
+
+    // Make the prompt cell tabbable (input should be accessible via keyboard)
+    promptCell.editor?.setOption('tabFocusable', true);
 
     // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
@@ -1319,7 +1330,8 @@ export namespace CodeConsole {
    */
   export const defaultEditorConfig: Record<string, any> = {
     codeFolding: false,
-    lineNumbers: false
+    lineNumbers: false,
+    tabFocusable: false
   };
 
   /**
