@@ -45,6 +45,13 @@ export interface IUploadModel {
   progress: number;
 }
 
+export class UploadCancelledError extends Error {
+  constructor(path: string) {
+    super(`Upload cancelled: ${path}`);
+    this.name = 'UploadCancelledError';
+  }
+}
+
 /**
  * An implementation of a file browser model.
  *
@@ -450,6 +457,16 @@ export class FileBrowserModel implements IDisposable {
     return await this._upload(file, chunkedUpload, path);
   }
 
+  cancelUpload(path: string): void {
+    const controller = this._uploadAbortControllers.get(path);
+
+    if (controller) {
+      controller.abort();
+    } else {
+      console.log('No upload found for path: ', path);
+    }
+  }
+
   private async _shouldUploadLarge(file: File): Promise<boolean> {
     const { button } = await showDialog({
       title: this._trans.__('Large file size warning'),
@@ -473,17 +490,20 @@ export class FileBrowserModel implements IDisposable {
     chunked: boolean,
     uploadPath?: string
   ): Promise<Contents.IModel> {
+    const abortController = new AbortController();
     // Gather the file model parameters.
     let path =
       typeof uploadPath === 'undefined' ? this._model.path : uploadPath;
     path = path ? path + '/' + file.name : file.name;
+    this._uploadAbortControllers.set(path, abortController);
     const name = file.name;
     const type: Contents.ContentType = 'file';
     const format: Contents.FileFormat = 'base64';
 
     const uploadInner = async (
       blob: Blob,
-      chunk?: number
+      chunk?: number,
+      signal?: AbortSignal
     ): Promise<Contents.IModel> => {
       await this._uploadCheckDisposed();
       const reader = new FileReader();
@@ -503,18 +523,62 @@ export class FileBrowserModel implements IDisposable {
         format,
         name,
         chunk,
-        content
+        content,
+        signal: signal
       };
       return await this.manager.services.contents.save(path, model);
     };
 
     if (!chunked) {
+      const upload = { path, progress: 0 };
+      this._uploads.push(upload);
+      this._uploadChanged.emit({
+        name: 'start',
+        newValue: upload,
+        oldValue: null
+      });
+
       try {
-        return await uploadInner(file);
+        const currentModel = await uploadInner(
+          file,
+          undefined,
+          abortController.signal
+        );
+
+        this._uploads.splice(this._uploads.indexOf(upload));
+        this._uploadChanged.emit({
+          name: 'finish',
+          newValue: null,
+          oldValue: upload
+        });
+
+        return currentModel;
       } catch (err) {
         ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
           return file.name === uploadIndex.path;
         });
+
+        if (
+          err.name === 'AbortError' ||
+          (err.cause && err.cause.name === 'AbortError')
+        ) {
+          console.log('Upload cancelled, cleaning up partial file... ');
+          this._uploadAbortControllers.delete(path);
+          this.manager.services.contents.delete(path).catch(() => {});
+
+          this._uploadChanged.emit({
+            name: 'cancelled',
+            newValue: null,
+            oldValue: upload
+          });
+          throw new UploadCancelledError(path);
+        } else {
+          this._uploadChanged.emit({
+            name: 'failure',
+            newValue: upload,
+            oldValue: null
+          });
+        }
         throw err;
       }
     }
@@ -545,17 +609,37 @@ export class FileBrowserModel implements IDisposable {
 
       let currentModel: Contents.IModel;
       try {
-        currentModel = await uploadInner(file.slice(start, end), chunk);
+        currentModel = await uploadInner(
+          file.slice(start, end),
+          chunk,
+          abortController.signal
+        );
       } catch (err) {
         ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
           return file.name === uploadIndex.path;
         });
 
-        this._uploadChanged.emit({
-          name: 'failure',
-          newValue: upload,
-          oldValue: null
-        });
+        if (
+          err.name === 'AbortError' ||
+          (err.cause && err.cause.name === 'AbortError')
+        ) {
+          console.log('Upload cancelled, cleaning up partial file... ');
+          this._uploadAbortControllers.delete(path);
+          this.manager.services.contents.delete(path).catch(() => {});
+
+          this._uploadChanged.emit({
+            name: 'cancelled',
+            newValue: upload,
+            oldValue: null
+          });
+          throw new UploadCancelledError(path);
+        } else {
+          this._uploadChanged.emit({
+            name: 'failure',
+            newValue: upload,
+            oldValue: null
+          });
+        }
 
         throw err;
       }
@@ -684,6 +768,7 @@ export class FileBrowserModel implements IDisposable {
   );
   private _unloadEventListener: (e: Event) => string | undefined;
   private _poll: Poll;
+  private _uploadAbortControllers = new Map<string, AbortController>();
 }
 
 /**
