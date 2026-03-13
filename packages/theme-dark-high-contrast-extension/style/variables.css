@@ -476,6 +476,14 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-200);
   --jp-switch-color: var(--md-grey-400);
   --jp-switch-true-position-color: var(--md-orange-700);
+
+  /* Outline styles for focus-visible states needed for keyboard navigation.
+      2px is the minimum size required for accessibility.
+      This color is slightly darker than --jp-brand-color1 to ensure there is
+      enough contrast with the white borders.
+  */
+  --jp-focus-outline-color: #2796f1;
+  --jp-focus-outline-width: 2px;
 }
 
 /* Completer specific styles */
