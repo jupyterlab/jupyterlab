@@ -30,7 +30,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import type { CodeCell } from '@jupyterlab/cells';
 import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';

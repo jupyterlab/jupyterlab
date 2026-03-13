@@ -867,8 +867,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 
     const onCurrentFrameChanged = (
       _: IDebugger.Model.ICallstack,
-      frame: IDebugger.IStackFrame
+      frame: IDebugger.IStackFrame | null
     ): void => {
+      if (!frame) {
+        return;
+      }
       debuggerSources
         .find({
           focus: true,
@@ -876,7 +879,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           path: service.session?.connection?.path ?? '',
           source: frame?.source?.path ?? ''
         })
-        .forEach((editor: Debugger.ISources.IEditor) => {
+        .forEach((editor: IDebugger.ISources.IEditor) => {
           requestAnimationFrame(() => {
             void editor.reveal().then(() => {
               const edit = editor.get();
@@ -905,7 +908,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       });
       if (results.length > 0) {
         if (breakpoint && typeof breakpoint.line !== 'undefined') {
-          results.forEach((editor: Debugger.ISources.IEditor) => {
+          results.forEach((editor: IDebugger.ISources.IEditor) => {
             void editor.reveal().then(() => {
               editor.get()?.revealPosition({
                 line: (breakpoint.line as number) - 1,
@@ -1212,7 +1215,7 @@ const main: JupyterFrontEndPlugin<void> = {
       setting.changed.connect(updateSettings);
     }
 
-    service.eventMessage.connect((_: Debugger, event: Debugger.ISession.Event): void => {
+    service.eventMessage.connect((_, event: IDebugger.ISession.Event): void => {
       updateState(app.commands, service);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
@@ -1226,7 +1229,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    service.sessionChanged.connect((_: Debugger, session: Debugger.ISession | null) => {
+    service.sessionChanged.connect((_, session: IDebugger.ISession | null) => {
       updateState(app.commands, service);
     });
 
@@ -1283,12 +1286,14 @@ const main: JupyterFrontEndPlugin<void> = {
       };
 
       model.sources.currentSourceOpened.connect(
-        (_: IDebugger.Model.ISources | null, source: IDebugger.Source) => {
-          sourceViewer.open(source);
+        (_, source: IDebugger.Source | null) => {
+          if (source) {
+            sourceViewer.open(source);
+          }
         }
       );
       model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
-      model.breakpoints.clicked.connect(async (_: Debugger.Model.IBreakpoints, breakpoint: Debugger.IBreakpoint) => {
+      model.breakpoints.clicked.connect(async (_, breakpoint: IDebugger.IBreakpoint) => {
         const path = breakpoint.source?.path;
         const source = await service.getSource({
           sourceReference: 0,
@@ -1389,7 +1394,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
 
       // Close console when debugger is terminated
-      service.eventMessage.connect((_: Debugger, event: Debugger.ISession.Event): void => {
+      service.eventMessage.connect((_, event: IDebugger.ISession.Event): void => {
         if (labShell && event.event === 'terminated') {
           debugConsoleWidget?.dispose();
         }

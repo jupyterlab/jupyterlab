@@ -225,12 +225,12 @@ export class SettingsFormEditor extends React.Component<
           validator={validatorAjv8}
           schema={this.state.filteredSchema as JSONSchema7}
           formData={this._getFilteredFormData(this.state.filteredSchema)}
-          uiSchema={this.state.uiSchema}
+          uiSchema={this.state.uiSchema as any}
           fields={this.props.renderers[this.props.settings.id]}
           formContext={this.state.formContext}
           liveValidate
           idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
-          onChange={this._onChange}
+          onChange={this._onChange as any}
           translator={this.props.translator}
           experimental_defaultFormStateBehavior={{
             emptyObjectFields: 'populateRequiredDefaults'

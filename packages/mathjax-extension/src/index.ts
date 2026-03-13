@@ -30,12 +30,6 @@ namespace CommandIDs {
   export const scale = 'mathjax:scale';
 }
 
-namespace CommandArgs {
-  export type scale = {
-    scale: number;
-  };
-}
-
 /**
  * The MathJax Typesetter.
  */
