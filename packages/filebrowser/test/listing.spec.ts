@@ -1094,8 +1094,12 @@ describe('filebrowser/listing', () => {
       it('should navigate to directory on single click', async () => {
         dirListing.setAllowSingleClickNavigation(true);
 
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
         simulate(directoryNode, 'click');
         await signalToPromise(dirListing.updated);
+        expect(directoryOpened).toHaveBeenCalled();
         expect(getItemTitles(dirListing)).toHaveLength(0);
       });
 
@@ -1108,11 +1112,11 @@ describe('filebrowser/listing', () => {
         simulate(fileNode!, 'click');
         expect(fileOpened).not.toHaveBeenCalled();
 
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
         simulate(directoryNode!, 'click');
-        await Promise.race([
-          signalToPromise(dirListing.updated),
-          new Promise(r => setTimeout(r, 100))
-        ]);
+        expect(directoryOpened).not.toHaveBeenCalled();
         expect(getItemTitles(dirListing)).toHaveLength(5);
 
         dirListing.onItemOpened.disconnect(fileOpened);
@@ -1129,8 +1133,12 @@ describe('filebrowser/listing', () => {
         const openedFile = fileOpened.mock.calls[0][1];
         expect(openedFile.type).toBe('file');
 
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
         simulate(directoryNode!, 'dblclick');
         await signalToPromise(dirListing.updated);
+        expect(directoryOpened).toHaveBeenCalled();
         expect(getItemTitles(dirListing)).toHaveLength(0);
 
         dirListing.onItemOpened.disconnect(fileOpened);
