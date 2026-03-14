@@ -351,7 +351,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   get notifications(): Promise<Notification.INotification[]> {
     return this.page.evaluate(async () => window.galata.getNotifications());
   }
-  
+
   /**
    * Webbrowser performance helpers
    */
