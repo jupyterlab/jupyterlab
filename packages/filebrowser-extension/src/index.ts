@@ -254,29 +254,37 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
         /**
          * File browser default configuration.
          */
-        const defaultFileBrowserConfig = {
-          navigateToCurrentDirectory: false,
-          singleClickNavigation: false,
-          showLastModifiedColumn: true,
-          showFileSizeColumn: false,
-          showHiddenFiles: false,
-          showFileCheckboxes: false,
-          sortNotebooksFirst: false,
-          sortFileNamesNaturally: true,
-          showFullPath: false,
-          allowFileUploads: true,
-          timestampFormat: 'absolute' as const
-        };
 
         browser.showFileFilter = settings.get('showFileFilter')
           .composite as boolean;
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
-          let key: keyof typeof defaultFileBrowserConfig;
-          for (key in defaultFileBrowserConfig) {
-            const value = settings.get(key).composite as boolean | string;
-            browser[key] = value;
-          }
+          browser.navigateToCurrentDirectory = settings.get(
+            'navigateToCurrentDirectory'
+          ).composite as boolean;
+          browser.singleClickNavigation = settings.get('singleClickNavigation')
+            .composite as boolean;
+          browser.showLastModifiedColumn = settings.get(
+            'showLastModifiedColumn'
+          ).composite as boolean;
+          browser.showFileSizeColumn = settings.get('showFileSizeColumn')
+            .composite as boolean;
+          browser.showHiddenFiles = settings.get('showHiddenFiles')
+            .composite as boolean;
+          browser.showFileCheckboxes = settings.get('showFileCheckboxes')
+            .composite as boolean;
+          browser.sortNotebooksFirst = settings.get('sortNotebooksFirst')
+            .composite as boolean;
+          browser.sortFileNamesNaturally = settings.get(
+            'sortFileNamesNaturally'
+          ).composite as boolean;
+          browser.showFullPath = settings.get('showFullPath')
+            .composite as boolean;
+          browser.allowFileUploads = settings.get('allowFileUploads')
+            .composite as boolean;
+          browser.timestampFormat = settings.get('timestampFormat')
+            .composite as 'absolute' | 'relative';
+
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
           browser.minimumBreadcrumbsLeftItems = breadcrumbs.minimumLeftItems;
