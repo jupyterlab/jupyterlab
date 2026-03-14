@@ -283,9 +283,10 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
-            const value = settings.get(key).composite as boolean | string;
-            browser[key] = value;
+            const value = settings.get(key).composite as (typeof defaultFileBrowserConfig)[typeof key];
+            (browser as any)[key] = value;
           }
+
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
           browser.minimumBreadcrumbsLeftItems = breadcrumbs.minimumLeftItems;
