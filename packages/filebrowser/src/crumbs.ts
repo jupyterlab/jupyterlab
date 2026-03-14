@@ -221,8 +221,9 @@ export class BreadCrumbs extends Widget {
     // Calculate adaptive items based on available width
     const adaptiveItems = this._calculateAdaptiveItems(localPath);
 
-    const state = {
+    const state: Private.ICrumbsState = {
       path: localPath,
+      root: this._model.root,
       hasPreferred: this._hasPreferred,
       fullPath: this._fullPath,
       minimumLeftItems: adaptiveItems.left,
@@ -675,6 +676,7 @@ namespace Private {
   export interface ICrumbsState {
     [key: string]: string | boolean | number;
     path: string;
+    root: string;
     hasPreferred: boolean;
     fullPath: boolean;
     minimumLeftItems: number;
@@ -696,24 +698,41 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    if (state.hasPreferred) {
-      node.appendChild(breadcrumbs[Crumb.Home]);
-      node.appendChild(createCrumbSeparator());
+    // Calculate the starting index for breadcrumbs based on root restriction
+    const rootParts = state.root
+      ? state.root.split('/').filter(part => part !== '')
+      : [];
+    const rootDepth = rootParts.length;
+
+    // Only show home/preferred if there's no root restriction
+    if (!state.root) {
+      if (state.hasPreferred) {
+        node.appendChild(breadcrumbs[Crumb.Home]);
+        node.appendChild(createCrumbSeparator());
+      } else {
+        node.appendChild(createCrumbSeparator());
+      }
     } else {
+      // With root restriction, just add an initial separator
       node.appendChild(createCrumbSeparator());
     }
 
     const parts = state.path.split('/').filter(part => part !== '');
-    if (!state.fullPath && parts.length > 0) {
+    // Filter parts to only show those at or below the root
+    const visibleParts = state.root ? parts.slice(rootDepth) : parts;
+    const visibleStartIndex = rootDepth;
+
+    if (!state.fullPath && visibleParts.length > 0) {
       const minimumLeftItems = state.minimumLeftItems;
       const minimumRightItems = state.minimumRightItems;
 
-      // Check if we need ellipsis
-      if (parts.length > minimumLeftItems + minimumRightItems) {
+      // Check if we need ellipsis (based on visible parts)
+      if (visibleParts.length > minimumLeftItems + minimumRightItems) {
         // Add left items
         for (let i = 0; i < minimumLeftItems; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          const elem = createBreadcrumbElement(visibleParts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(createCrumbSeparator());
         }
@@ -721,37 +740,43 @@ namespace Private {
         // Add ellipsis
         node.appendChild(breadcrumbs[Crumb.Ellipsis]);
         const hiddenStartIndex = minimumLeftItems;
-        const hiddenEndIndex = parts.length - minimumRightItems;
-        const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
-        const hiddenFolders = hiddenParts.join('/');
+        const hiddenEndIndex = visibleParts.length - minimumRightItems;
+        const hiddenVisibleParts = visibleParts.slice(
+          hiddenStartIndex,
+          hiddenEndIndex
+        );
+        const hiddenFolders = hiddenVisibleParts.join('/');
         const hiddenPath =
-          hiddenParts.length > 0
-            ? parts.slice(0, hiddenEndIndex).join('/')
-            : parts.slice(0, minimumLeftItems).join('/');
+          hiddenVisibleParts.length > 0
+            ? parts.slice(0, visibleStartIndex + hiddenEndIndex).join('/')
+            : parts.slice(0, visibleStartIndex + minimumLeftItems).join('/');
         breadcrumbs[Crumb.Ellipsis].title = hiddenFolders;
         breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
         node.appendChild(createCrumbSeparator());
 
         // Add right items
-        const rightStartIndex = parts.length - minimumRightItems;
-        for (let i = rightStartIndex; i < parts.length; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
+        const rightStartIndex = visibleParts.length - minimumRightItems;
+        for (let i = rightStartIndex; i < visibleParts.length; i++) {
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          const elem = createBreadcrumbElement(visibleParts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(createCrumbSeparator());
         }
       } else {
-        for (let i = 0; i < parts.length; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
+        for (let i = 0; i < visibleParts.length; i++) {
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          const elem = createBreadcrumbElement(visibleParts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(createCrumbSeparator());
         }
       }
-    } else if (state.fullPath && parts.length > 0) {
-      for (let i = 0; i < parts.length; i++) {
-        const elemPath = parts.slice(0, i + 1).join('/');
-        const elem = createBreadcrumbElement(parts[i], elemPath);
+    } else if (state.fullPath && visibleParts.length > 0) {
+      for (let i = 0; i < visibleParts.length; i++) {
+        const fullIndex = visibleStartIndex + i;
+        const elemPath = parts.slice(0, fullIndex + 1).join('/');
+        const elem = createBreadcrumbElement(visibleParts[i], elemPath);
         node.appendChild(elem);
         node.appendChild(createCrumbSeparator());
       }
