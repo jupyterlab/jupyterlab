@@ -152,6 +152,7 @@ test.describe('Terminal with screenReaderMode', () => {
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/terminal-extension:plugin': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/terminal-extension:plugin'],
         screenReaderMode: true
       }
     }
@@ -219,6 +220,7 @@ test.describe('Open in Terminal from File Browser', () => {
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/terminal-extension:plugin': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/terminal-extension:plugin'],
         screenReaderMode: true
       }
     }
