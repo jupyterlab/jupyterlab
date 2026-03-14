@@ -2284,7 +2284,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "query": {
+          "description": "Search query to pre-fill in the extension manager",
+          "type": "string"
+        }
+      }
     }
   },
   {
@@ -3452,6 +3457,16 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
     "shortcuts": [],
     "args": {
       "type": "object",
