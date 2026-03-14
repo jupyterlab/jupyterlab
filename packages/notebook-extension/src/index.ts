@@ -3364,11 +3364,11 @@ function addCommands(
       if (!current) {
         return false;
       }
+      /* the 'deletable' metadata is optional, null and undefined values should be made truthy */
       const deletable =
-        current.content.activeCell?.model.getMetadata('deletable');
-      if (deletable === undefined) {
-        return true;
-      }
+        (current.content.activeCell?.model.getMetadata(
+          'deletable'
+        ) as unknown as boolean) !== false;
       if (!deletable) {
         return false;
       }
