@@ -123,9 +123,7 @@ export class CellTagField {
       document.body.appendChild(tmp);
       event.target.style.setProperty(
         'width',
-        `calc(${
-          tmp.getBoundingClientRect().width
-        }px + var(--jp-add-tag-extra-width))`
+        `calc(${tmp.getBoundingClientRect().width}px + var(--jp-add-tag-extra-width))`
       );
       document.body.removeChild(tmp);
     }

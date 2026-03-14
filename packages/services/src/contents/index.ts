@@ -186,7 +186,7 @@ export namespace Contents {
     /**
      * Whether to include the file content.
      *
-     * The default is `true`.
+     * The default is `false`.
      */
     content?: boolean;
 
@@ -1917,8 +1917,10 @@ export interface IContentProviderRegistry {
  *
  * @experimental
  */
-export interface IContentProvider
-  extends Pick<Contents.IDrive, 'get' | 'save' | 'sharedModelFactory'> {
+export interface IContentProvider extends Pick<
+  Contents.IDrive,
+  'get' | 'save' | 'sharedModelFactory'
+> {
   /**
    * A signal emitted when a file operation takes place.
    *

@@ -21,8 +21,7 @@ const RENDER_TIMEOUT = 200;
 export abstract class TableOfContentsFactory<
   W extends IDocumentWidget,
   H extends TableOfContents.IHeading = TableOfContents.IHeading
-> implements TableOfContents.IFactory<W, H>
-{
+> implements TableOfContents.IFactory<W, H> {
   /**
    * Constructor
    *

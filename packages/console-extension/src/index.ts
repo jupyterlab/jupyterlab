@@ -813,7 +813,8 @@ async function activateConsole(
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
     const widget = args[SemanticCommand.WIDGET]
-      ? tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null
+      ? (tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ??
+        null)
       : tracker.currentWidget;
     const activate = args['activate'] !== false;
     if (activate && widget) {

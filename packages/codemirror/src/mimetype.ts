@@ -31,7 +31,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     return mode
       ? typeof mode.mime === 'string'
         ? mode.mime
-        : mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 
@@ -54,7 +54,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     return mode
       ? typeof mode.mime === 'string'
         ? mode.mime
-        : mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 }

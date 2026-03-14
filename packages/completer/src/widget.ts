@@ -1147,8 +1147,8 @@ export namespace Completer {
    * A renderer for completer widget nodes.
    */
   export interface IRenderer<
-    T extends
-      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends CompletionHandler.ICompletionItem =
+      CompletionHandler.ICompletionItem
   > {
     /**
      * Create an item node (an `li` element) from a ICompletionItem

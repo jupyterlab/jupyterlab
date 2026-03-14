@@ -125,8 +125,7 @@ test.describe('Stdin for ipdb (flaky)', () => {
     await page.locator('.jp-Stdin-input').waitFor();
 
     // Note: this test does not wait for subsequent inputs on purpose
-
-    await page.getByText('before sleep').waitFor();
+    const output = (await page.notebook.getCellOutputLocator(0))!;
 
     // Press enter five times (should do nothing)
     for (let j = 0; j < 5; j++) {
@@ -134,10 +133,20 @@ test.describe('Stdin for ipdb (flaky)', () => {
     }
     // Press a key which should go to the input
     await page.keyboard.press('x');
+    // Should submit
+    await page.keyboard.press('Enter');
 
-    await page.getByText('after sleep').waitFor();
+    await output.getByText('before sleep').waitFor();
 
-    // Press enter five times (should submit and then do nothing)
+    // Press enter five times (should do nothing)
+    for (let j = 0; j < 5; j++) {
+      await page.keyboard.press('Enter');
+    }
+
+    // Wait for timer cell execution to complete
+    await output.getByText('after sleep').waitFor();
+
+    // Press enter five times (should do nothing)
     for (let j = 0; j < 5; j++) {
       await page.keyboard.press('Enter');
     }

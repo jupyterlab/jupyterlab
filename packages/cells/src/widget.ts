@@ -882,8 +882,7 @@ export namespace Cell {
    * widgets.
    */
   export interface IContentFactory
-    extends OutputArea.IContentFactory,
-      InputArea.IContentFactory {
+    extends OutputArea.IContentFactory, InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */
@@ -1789,6 +1788,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
           let label: string;
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (msg.header.msg_type) {
             case 'status':
               label = `status.${

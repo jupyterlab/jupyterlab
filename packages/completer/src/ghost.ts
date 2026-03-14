@@ -20,7 +20,9 @@ const HIDDEN_LINES_CLASS = 'jp-GhostText-hiddenLines';
  * A single, shared language registry to efficiently highlight ghost text.
  */
 const GHOST_TEXT_LANGUAGE_REGISTRY = new EditorLanguageRegistry();
-EditorLanguageRegistry.getDefaultLanguages().forEach(lang => {
+EditorLanguageRegistry.getDefaultLanguages(null, (info: string) =>
+  GHOST_TEXT_LANGUAGE_REGISTRY.findBest(info)
+).forEach(lang => {
   GHOST_TEXT_LANGUAGE_REGISTRY.addLanguage(lang);
 });
 

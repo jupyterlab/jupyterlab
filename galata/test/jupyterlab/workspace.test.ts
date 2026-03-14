@@ -32,11 +32,6 @@ test.describe('Workspace', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should reset the workspace', async ({ page, tmpPath }) => {
     await page.goto();
 
@@ -264,11 +259,6 @@ test.describe('Workspace in doc mode', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   // Use non-default state to have the running session panel displayed
   test.use({
     mockState: {
@@ -421,11 +411,6 @@ test.describe('Restore non-default-type editor', () => {
       path.resolve(__dirname, `./notebooks/${nbFile}`),
       `${tmpPath}/${nbFile}`
     );
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   // Use non-default state to have the running session panel displayed
