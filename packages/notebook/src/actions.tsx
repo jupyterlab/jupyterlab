@@ -624,7 +624,8 @@ export namespace NotebookActions {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    translator?: ITranslator,
+    headingLevel?: number
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -1585,9 +1586,11 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const activeCellIndex = notebook.activeCellIndex;
 
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
+    notebook.activeCellIndex = activeCellIndex;
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2007,15 +2010,10 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
+    
 
     level = Math.min(Math.max(level, 1), 6);
-    notebook.widgets.forEach((child, index) => {
-      if (notebook.isSelectedOrActive(child)) {
-        Private.setMarkdownHeader(cells.get(index), level);
-      }
-    });
-    Private.changeCellType(notebook, 'markdown', translator);
+    Private.changeCellType(notebook, 'markdown', translator, level);
     void Private.handleState(notebook, state);
   }
 
@@ -2866,7 +2864,8 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    translator?: ITranslator,
+    headingLevel?: number
   ): void {
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
@@ -2902,9 +2901,19 @@ namespace Private {
       }
       if (child.model.type !== value) {
         const raw = child.model.toJSON();
+        let newSource = raw.source as string;
+        if (headingLevel !== undefined) {
+          const regex = /^(#+\s*)|^(\s*)/;
+          const newHeader = Array(headingLevel + 1).join('#') + ' ';
+          const matches = regex.exec(newSource);
+          if (matches) {
+            newSource = newSource.slice(matches[0].length);
+          }
+          newSource = newHeader + newSource;
+        }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
-          if (value === 'code') {
+      if (value === 'code') {
             // After change of type outputs are deleted so cell can be trusted.
             raw.metadata.trusted = true;
           } else {
@@ -2915,7 +2924,7 @@ namespace Private {
           const newCell = notebookSharedModel.insertCell(index, {
             id: raw.id,
             cell_type: value,
-            source: raw.source,
+            source: newSource,
             metadata: raw.metadata
           });
           if (raw.attachments && ['markdown', 'raw'].includes(value)) {
