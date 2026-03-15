@@ -279,6 +279,22 @@ describe('@jupyterlab/filebrowser', () => {
       expect(items[0].path).toBe('');
     });
 
+    it('should return the root path if nothing is selected and root is set', async () => {
+      const dialog = FileDialog.getOpenFiles({
+        manager,
+        root: testDirectory
+      });
+
+      await acceptDialog();
+
+      const result = await dialog;
+      const items = result.value!;
+
+      expect(items.length).toBe(1);
+      expect(items[0].type).toBe('directory');
+      expect(items[0].path).toBe(testDirectory);
+    });
+
     it('should return one selected file whose path matches default path', async () => {
       const node = document.createElement('div');
 
@@ -327,6 +343,25 @@ describe('@jupyterlab/filebrowser', () => {
       expect(fileDirectory).toEqual(testDirectory);
 
       document.body.removeChild(node);
+    });
+
+    it('should fall back to the root when defaultPath is outside the root', async () => {
+      const dialog = FileDialog.getOpenFiles({
+        manager,
+        root: testDirectory,
+        defaultPath: '',
+        filter: (value: Contents.IModel) =>
+          value.type === 'notebook' ? {} : null
+      });
+
+      await acceptDialog();
+
+      const result = await dialog;
+      const items = result.value!;
+
+      expect(items.length).toBe(1);
+      expect(items[0].type).toBe('directory');
+      expect(items[0].path).toBe(testDirectory);
     });
   });
 

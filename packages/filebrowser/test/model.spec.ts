@@ -232,6 +232,15 @@ describe('filebrowser/model', () => {
         restrictedModel.dispose();
       });
 
+      it('should initialize path to the root when set', () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        expect(restrictedModel.path).toBe(subDir);
+        restrictedModel.dispose();
+      });
+
       it('should block navigation outside the root', async () => {
         const restrictedModel = new FileBrowserModel({
           manager,

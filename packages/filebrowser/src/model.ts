@@ -63,9 +63,10 @@ export class FileBrowserModel implements IDisposable {
     this._driveName = options.driveName || '';
     this._root = options.root || '';
     this._allowFileUploads = options.allowFileUploads ?? true;
+    const initialPath = this._root || this.rootPath;
     this._model = {
-      path: this.rootPath,
-      name: PathExt.basename(this.rootPath),
+      path: initialPath,
+      name: PathExt.basename(initialPath),
       type: 'directory',
       content: undefined,
       writable: false,
