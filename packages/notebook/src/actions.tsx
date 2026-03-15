@@ -2010,7 +2010,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    
+
 
     level = Math.min(Math.max(level, 1), 6);
     Private.changeCellType(notebook, 'markdown', translator, level);
