@@ -331,6 +331,7 @@ test.describe('Open in Terminal from File Browser', () => {
 
       // Ensure the body is visible then run pwd via helper
       await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
+      await activeTerminalContainer.locator(TERMINAL_INPUT_SELECTOR).waitFor();
       await runCommand(page, activeTerminalContainer, 'pwd');
 
       const activeBody = activeTerminalContainer.locator(
