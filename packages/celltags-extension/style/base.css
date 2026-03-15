@@ -45,6 +45,7 @@
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color2);
+  font-family: var(--jp-ui-font-family);
 }
 
 .jp-CellTags-Holder {

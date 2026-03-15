@@ -47,6 +47,7 @@ def test_check_python_version_compatible_current_version():
         (None, True),  # No requirement - should be allowed
     ),
 )
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_extension_package_allowed_set_from_python_compatibility(
     mocked_rpcclient, requires_python, expected_allowed
@@ -216,6 +217,7 @@ async def test_ExtensionManager_uninstall():
     assert result.message == "Extension removal not supported."
 
 
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
     extension_data = [
@@ -284,6 +286,7 @@ async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
     ]
 
 
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension1 = ExtensionPackage(
