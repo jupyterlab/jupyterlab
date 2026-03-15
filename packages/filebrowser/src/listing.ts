@@ -3308,29 +3308,12 @@ export namespace DirListing {
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle
     ): void {
-      // Formatting dates is expensive (0.1-0.2ms per call,
-      // so over 150 files can easily already choke the renderer),
-      // let's do the bare minimum check of comparing if an update
-      // is needed using a last update cache:
-      const previousUpdate = this._modifiedColumnLastUpdate.get(modified);
-      if (
-        previousUpdate?.date === modifiedDate &&
-        previousUpdate?.style === modifiedStyle
-      ) {
-        return;
-      }
-
-      const parsedDate = new Date(modifiedDate);
-      // Render the date in one of multiple formats, depending on the container's size
-      const modText = Time.formatHuman(parsedDate, modifiedStyle);
-      const modTitle = Time.format(parsedDate);
-
-      modified.textContent = modText;
-      modified.title = modTitle;
-      this._modifiedColumnLastUpdate.set(modified, {
-        date: modifiedDate,
-        style: modifiedStyle
-      });
+      this._updateItemDate(
+        modified,
+        modifiedDate,
+        modifiedStyle,
+        this._modifiedColumnLastUpdate
+      );
     }
 
     /**
@@ -3347,29 +3330,49 @@ export namespace DirListing {
       createdDate: string,
       createdStyle: Time.HumanStyle
     ): void {
-      // Formatting dates is expensive (0.1-0.2ms per call,
-      // so over 150 files can easily already choke the renderer),
-      // let's do the bare minimum check of comparing if an update
-      // is needed using a last update cache:
-      const previousUpdate = this._createdColumnLastUpdate.get(created);
+      this._updateItemDate(
+        created,
+        createdDate,
+        createdStyle,
+        this._createdColumnLastUpdate
+      );
+    }
+
+    /**
+     * Shared implementation for updating a date column element.
+     *
+     * Formatting dates is expensive (0.1-0.2ms per call, so over 150 files
+     * can easily already choke the renderer), so we do the bare minimum check
+     * of comparing if an update is needed using a last update cache.
+     *
+     * @param element - The date column element to update.
+     *
+     * @param dateString - String representation of the date.
+     *
+     * @param style - The date style: narrow, short, or long.
+     *
+     * @param cache - The WeakMap cache tracking the last rendered state for
+     *   this column.
+     */
+    private _updateItemDate(
+      element: HTMLElement,
+      dateString: string,
+      style: Time.HumanStyle,
+      cache: WeakMap<HTMLElement, { date: string; style: Time.HumanStyle }>
+    ): void {
+      const previousUpdate = cache.get(element);
       if (
-        previousUpdate?.date === createdDate &&
-        previousUpdate?.style === createdStyle
+        previousUpdate?.date === dateString &&
+        previousUpdate?.style === style
       ) {
         return;
       }
 
-      const parsedDate = new Date(createdDate);
+      const parsedDate = new Date(dateString);
       // Render the date in one of multiple formats, depending on the container's size
-      const createdText = Time.formatHuman(parsedDate, createdStyle);
-      const createdTitle = Time.format(parsedDate);
-
-      created.textContent = createdText;
-      created.title = createdTitle;
-      this._createdColumnLastUpdate.set(created, {
-        date: createdDate,
-        style: createdStyle
-      });
+      element.textContent = Time.formatHuman(parsedDate, style);
+      element.title = Time.format(parsedDate);
+      cache.set(element, { date: dateString, style });
     }
 
     /**
