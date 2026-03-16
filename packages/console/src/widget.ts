@@ -264,10 +264,6 @@ export class CodeConsole extends Widget {
       this.clear();
     }
     cell.addClass(CONSOLE_CELL_CLASS);
-    cell.node.tabIndex = -1;
-    cell.node.querySelectorAll<HTMLElement>(
-      '[tabindex], input, button, textarea, select, a'
-    ).forEach(el => el.setAttribute('tabindex', '-1'));
     this._content.addWidget(cell);
     this._cells.push(cell);
     if (msgId) {
@@ -276,15 +272,6 @@ export class CodeConsole extends Widget {
     }
     cell.disposed.connect(this._onCellDisposed, this);
     this.update();
-  }
-
-  private _applyBannerAccessibility(banner: RawCell): void {
-    banner.node.tabIndex = 0;
-    banner.node.setAttribute('role', 'note');
-    banner.node.setAttribute('aria-label', 'Kernel Banner');
-    banner.node.querySelectorAll<HTMLElement>(
-      'input, button, textarea, select, a, [tabindex]'
-    ).forEach(el => el.setAttribute('tabindex', '-1'));
   }
 
   /**
@@ -329,7 +316,6 @@ export class CodeConsole extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
-    this._applyBannerAccessibility(banner);
   }
 
   /**
@@ -690,43 +676,6 @@ export class CodeConsole extends Widget {
     node.addEventListener('mousedown', this);
     node.addEventListener('focusin', this);
     node.addEventListener('focusout', this);
-
-    node.tabIndex = -1;
-
-    const contentNode = this._content.node;
-    contentNode.tabIndex = 0;
-    contentNode.setAttribute('role', 'log');
-    contentNode.setAttribute('aria-label', 'Console Output');
-    contentNode.setAttribute('aria-live', 'polite');
-
-    this._input.node.tabIndex = -1;
-
-    contentNode.addEventListener('keydown', (event: KeyboardEvent) => {
-      const lineHeight = 24;
-      if (event.key === 'ArrowUp') {
-        contentNode.scrollBy({ top: -lineHeight, behavior: 'smooth' });
-        event.preventDefault();
-      } else if (event.key === 'ArrowDown') {
-        contentNode.scrollBy({ top: lineHeight, behavior: 'smooth' });
-        event.preventDefault();
-      } else if (event.key === 'PageUp') {
-        contentNode.scrollBy({ top: -contentNode.clientHeight, behavior: 'smooth' });
-        event.preventDefault();
-      } else if (event.key === 'PageDown') {
-        contentNode.scrollBy({ top: contentNode.clientHeight, behavior: 'smooth' });
-        event.preventDefault();
-      } else if (event.key === 'Home') {
-        contentNode.scrollTo({ top: 0, behavior: 'smooth' });
-        event.preventDefault();
-      } else if (event.key === 'End') {
-        contentNode.scrollTo({ top: contentNode.scrollHeight, behavior: 'smooth' });
-        event.preventDefault();
-      } else if (event.key === 'Escape') {
-        this.promptCell?.editor?.focus();
-        event.preventDefault();
-      }
-    });
-
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -787,6 +736,7 @@ export class CodeConsole extends Widget {
       requestIdleCallback(() => {
         // Clear the signals to avoid memory leaks
         Signal.clearData(oldCell.editor);
+
         if (promptResizeObserver) {
           promptResizeObserver.disconnect();
         }
@@ -834,118 +784,6 @@ export class CodeConsole extends Widget {
         promptCell.editor?.setCursorPosition(previousCursorPosition);
       }
     }
-
-    requestAnimationFrame(() => {
-      const editorNode = promptCell.editorWidget?.node;
-      if (editorNode) {
-        editorNode.tabIndex = 0;
-        editorNode.setAttribute('aria-label', 'Console Input');
-
-        // Dismiss any stale autocomplete/tooltip menu when focus returns to the
-        // editor from an external element (e.g. after Tab-navigation).
-        // We dispatch a real Escape keydown event so CodeMirror closes its
-        // internal completion state cleanly, rather than just removing the DOM
-        // node (which CodeMirror would immediately re-render).
-        editorNode.addEventListener('focusin', () => {
-          const tooltip = promptCell.node.querySelector(
-            '.cm-tooltip-autocomplete, .cm-tooltip, .jp-Completer'
-          );
-          if (tooltip) {
-            const escapeEvent = new KeyboardEvent('keydown', {
-              key: 'Escape',
-              code: 'Escape',
-              keyCode: 27,
-              which: 27,
-              bubbles: true,
-              cancelable: true
-            });
-            editorNode.dispatchEvent(escapeEvent);
-          }
-        });
-      }
-
-      const cmContent = promptCell.node.querySelector<HTMLElement>(
-        '.cm-content, .cm-editor [contenteditable]'
-      );
-      if (cmContent) {
-        cmContent.addEventListener('keydown', (evt: KeyboardEvent) => {
-          if (evt.key === 'Escape') {
-            evt.preventDefault();
-            evt.stopImmediatePropagation();
-            setTimeout(() => {
-              if (!this.isDisposed) {
-                promptCell.editor?.focus();
-              }
-            }, 0);
-            return;
-          }
-
-          if (evt.key === 'Tab') {
-            const autocompleteOpen = promptCell.node.querySelector(
-              '.cm-tooltip-autocomplete, .jp-Completer, [data-id="completer"]'
-            );
-
-            if (autocompleteOpen) {
-              // Dispatch Escape to let CodeMirror close its completion state
-              // cleanly (just removing the DOM node is not enough; CM re-renders it).
-              evt.preventDefault();
-              evt.stopImmediatePropagation();
-              const escapeEvent = new KeyboardEvent('keydown', {
-                key: 'Escape',
-                code: 'Escape',
-                keyCode: 27,
-                which: 27,
-                bubbles: true,
-                cancelable: true
-              });
-              cmContent.dispatchEvent(escapeEvent);
-              return;
-            }
-
-            // Dismiss any remaining tooltips before moving focus by dispatching
-            // Escape so CodeMirror tears down its completion state properly.
-            const dismissTooltips = () => {
-              const tip = promptCell.node.querySelector(
-                '.cm-tooltip-autocomplete, .cm-tooltip, .jp-Completer'
-              );
-              if (tip) {
-                const esc = new KeyboardEvent('keydown', {
-                  key: 'Escape',
-                  code: 'Escape',
-                  keyCode: 27,
-                  which: 27,
-                  bubbles: true,
-                  cancelable: true
-                });
-                cmContent.dispatchEvent(esc);
-              }
-            };
-
-            if (!evt.shiftKey) {
-              evt.stopImmediatePropagation();
-              evt.preventDefault();
-              dismissTooltips();
-              const focusable = Array.from(
-                document.querySelectorAll<HTMLElement>(
-                  '[tabindex="0"], button:not([disabled]), a[href], input:not([disabled])'
-                )
-              ).filter(el => el.offsetParent !== null);
-              const idx = focusable.indexOf(editorNode!);
-              const next = focusable[idx + 1];
-              if (next) {
-                next.focus();
-              }
-            } else {
-              evt.stopImmediatePropagation();
-              evt.preventDefault();
-              dismissTooltips();
-              this._content.node.focus();
-            }
-          }
-        }, true);
-      }
-    });
-
     this._promptCellCreated.emit(promptCell);
   }
 
@@ -970,12 +808,8 @@ export class CodeConsole extends Widget {
     } else if (event.keyCode === 27 && editor.hasFocus()) {
       // Set to command mode
       event.preventDefault();
-      event.stopImmediatePropagation();
-      setTimeout(() => {
-        if (!this.isDisposed) {
-          editor.focus();
-        }
-      }, 0);
+      event.stopPropagation();
+      this.node.focus();
     }
   }
 
