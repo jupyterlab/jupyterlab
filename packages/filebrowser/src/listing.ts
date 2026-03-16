@@ -3523,6 +3523,7 @@ export namespace DirListing {
       const showModified = !hiddenColumns?.has('last_modified');
       if (modified && !showModified) {
         node.removeChild(modified);
+        modified = undefined;
       } else if (showModified && !modified) {
         modified = this.itemFactories.last_modified();
         nameColumn.insertAdjacentElement('afterend', modified);
@@ -3531,6 +3532,7 @@ export namespace DirListing {
       const showCreated = !hiddenColumns?.has('date_created');
       if (created && !showCreated) {
         node.removeChild(created);
+        created = undefined;
       } else if (showCreated && !created) {
         created = this.itemFactories.date_created();
         (modified ?? nameColumn).insertAdjacentElement('afterend', created);
