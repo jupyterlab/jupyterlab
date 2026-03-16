@@ -624,7 +624,8 @@ export namespace NotebookActions {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    translator?: ITranslator,
+    headingLevel?: number
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -1585,9 +1586,11 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const activeCellIndex = notebook.activeCellIndex;
 
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
+    notebook.activeCellIndex = activeCellIndex;
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2007,15 +2010,12 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
 
     level = Math.min(Math.max(level, 1), 6);
-    notebook.widgets.forEach((child, index) => {
-      if (notebook.isSelectedOrActive(child)) {
-        Private.setMarkdownHeader(cells.get(index), level);
-      }
+    Private.changeCellType(notebook, 'markdown', {
+      translator,
+      headingLevel: level
     });
-    Private.changeCellType(notebook, 'markdown', translator);
     void Private.handleState(notebook, state);
   }
 
@@ -2866,8 +2866,22 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    // we keep translator for backward compatibility
+    options?:
+      | {
+          translator?: ITranslator;
+          headingLevel?: number;
+        }
+      | ITranslator
   ): void {
+    const translator =
+      options instanceof Object && 'load' in (options as object)
+        ? (options as ITranslator)
+        : (options as { translator?: ITranslator })?.translator;
+    const headingLevel =
+      options instanceof Object && 'load' in (options as object)
+        ? undefined
+        : (options as { headingLevel?: number })?.headingLevel;
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
@@ -2877,8 +2891,7 @@ namespace Private {
         child.model.type === 'code' &&
         (child as CodeCell).outputArea.pendingInput
       ) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when input is pending
         void showDialog({
           title: trans.__('Cell type not changed due to pending input'),
@@ -2890,8 +2903,8 @@ namespace Private {
         return;
       }
       if (child.model.getMetadata('editable') == false) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
+        // Do not permit changing cell type when the cell is readonly
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
           title: trans.__('Cell is read-only'),
@@ -2902,6 +2915,16 @@ namespace Private {
       }
       if (child.model.type !== value) {
         const raw = child.model.toJSON();
+        let newSource = raw.source as string;
+        if (headingLevel !== undefined) {
+          const regex = /^(#+\s*)|^(\s*)/;
+          const newHeader = Array(headingLevel + 1).join('#') + ' ';
+          const matches = regex.exec(newSource);
+          if (matches) {
+            newSource = newSource.slice(matches[0].length);
+          }
+          newSource = newHeader + newSource;
+        }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
@@ -2915,7 +2938,7 @@ namespace Private {
           const newCell = notebookSharedModel.insertCell(index, {
             id: raw.id,
             cell_type: value,
-            source: raw.source,
+            source: newSource,
             metadata: raw.metadata
           });
           if (raw.attachments && ['markdown', 'raw'].includes(value)) {
