@@ -1482,4 +1482,5 @@ namespace Private {
   export function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
   }
+
 }

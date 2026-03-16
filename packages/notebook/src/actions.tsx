@@ -2011,9 +2011,11 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-
     level = Math.min(Math.max(level, 1), 6);
-    Private.changeCellType(notebook, 'markdown', translator, level);
+    Private.changeCellType(notebook, 'markdown', {
+      translator,
+      headingLevel: level
+    });
     void Private.handleState(notebook, state);
   }
 
@@ -2864,9 +2866,22 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator,
-    headingLevel?: number
+    // we keep translator for backward compatibility
+    options?:
+      | {
+          translator?: ITranslator;
+          headingLevel?: number;
+        }
+      | ITranslator
   ): void {
+    const translator =
+      options instanceof Object && 'load' in (options as object)
+        ? (options as ITranslator)
+        : (options as { translator?: ITranslator })?.translator;
+    const headingLevel =
+      options instanceof Object && 'load' in (options as object)
+        ? undefined
+        : (options as { headingLevel?: number })?.headingLevel;
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
@@ -2876,8 +2891,7 @@ namespace Private {
         child.model.type === 'code' &&
         (child as CodeCell).outputArea.pendingInput
       ) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when input is pending
         void showDialog({
           title: trans.__('Cell type not changed due to pending input'),
@@ -2889,8 +2903,8 @@ namespace Private {
         return;
       }
       if (child.model.getMetadata('editable') == false) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
+        // Do not permit changing cell type when the cell is readonly
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
           title: trans.__('Cell is read-only'),
@@ -2913,7 +2927,7 @@ namespace Private {
         }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
-      if (value === 'code') {
+          if (value === 'code') {
             // After change of type outputs are deleted so cell can be trusted.
             raw.metadata.trusted = true;
           } else {
