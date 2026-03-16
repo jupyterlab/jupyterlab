@@ -39,7 +39,7 @@
               },
               {
                 "const": false,
-                "title": "Undeletable"
+                "title": "Not deletable"
               }
             ]
           },
