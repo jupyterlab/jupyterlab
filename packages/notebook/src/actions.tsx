@@ -624,8 +624,11 @@ export namespace NotebookActions {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator,
-    headingLevel?: number
+    // we keep translator for backward compatibility
+    options?: {
+      translator?: ITranslator;
+      headingLevel?: number;
+    } | ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -633,7 +636,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value, translator);
+    Private.changeCellType(notebook, value, options);
     void Private.handleState(notebook, state);
   }
 
