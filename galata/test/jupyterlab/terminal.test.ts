@@ -155,7 +155,8 @@ test.describe('Terminal with screenReaderMode', () => {
         ...galata.DEFAULT_SETTINGS['@jupyterlab/terminal-extension:plugin'],
         screenReaderMode: true
       }
-    }
+    },
+    tmpPath: 'terminal-screen-reader-test'
   });
 
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
