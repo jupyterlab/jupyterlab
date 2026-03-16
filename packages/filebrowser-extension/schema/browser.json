@@ -114,12 +114,12 @@
       {
         "command": "filebrowser:toggle-file-checkboxes",
         "selector": ".jp-DirListing-header",
-        "rank": 16
+        "rank": 17
       },
       {
         "command": "filebrowser:toggle-sort-notebooks-first",
         "selector": ".jp-DirListing-header",
-        "rank": 17
+        "rank": 18
       },
       {
         "command": "filebrowser:share-main",
