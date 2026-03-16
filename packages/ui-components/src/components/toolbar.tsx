@@ -528,7 +528,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
    * Invokes resizing to ensure correct display of items.
    */
   onAfterShow(msg: Message): void {
-    void this._resizer.invoke(true);
+    void this._resizer.stop().then(() => void this._resizer.invoke(true));
   }
 
   /**
