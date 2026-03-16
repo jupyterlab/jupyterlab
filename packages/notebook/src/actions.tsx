@@ -625,10 +625,12 @@ export namespace NotebookActions {
     notebook: Notebook,
     value: nbformat.CellType,
     // we keep translator for backward compatibility
-    options?: {
-      translator?: ITranslator;
-      headingLevel?: number;
-    } | ITranslator
+    options?:
+      | {
+          translator?: ITranslator;
+          headingLevel?: number;
+        }
+      | ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -2920,7 +2922,7 @@ namespace Private {
         const raw = child.model.toJSON();
         let newSource = raw.source as string;
         if (headingLevel !== undefined) {
-          const regex = /^(#+\s*)|^(\s*)/;
+          const regex = /^(#+\s*)/;
           const newHeader = Array(headingLevel + 1).join('#') + ' ';
           const matches = regex.exec(newSource);
           if (matches) {
