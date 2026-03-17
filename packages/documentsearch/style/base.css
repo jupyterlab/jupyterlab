@@ -54,16 +54,19 @@
 }
 
 .jp-DocumentSearch-button-content {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
 }
 
-.jp-DocumentSearch-button-content svg {
-  width: 100%;
-  height: 100%;
+.jp-DocumentSearch-button-content svg,
+.jp-DocumentSearch-search-filter-button svg {
+  width: 80%;
+  height: 80%;
 }
 
 .jp-DocumentSearch-input-wrapper {
@@ -71,6 +74,8 @@
   display: flex;
   background-color: var(--jp-layout-color0);
   margin: 2px;
+  column-gap: 2px;
+  padding: 2px;
 }
 
 .jp-DocumentSearch-input-wrapper:focus-within {
@@ -130,15 +135,21 @@
 }
 
 .jp-DocumentSearch-input-button-off {
-  opacity: var(--jp-search-toggle-off-opacity);
+  background-color: var(--jp-toolbar-background);
 }
 
-.jp-DocumentSearch-input-button-off:hover {
-  opacity: var(--jp-search-toggle-hover-opacity);
+.jp-DocumentSearch-input-button-off .jp-icon-accent2[fill] {
+  fill: var(--jp-inverse-layout-color3);
 }
 
+.jp-DocumentSearch-input-button-off:hover,
 .jp-DocumentSearch-input-button-on {
-  opacity: var(--jp-search-toggle-on-opacity);
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-input-button-off:hover .jp-icon-accent2[fill],
+.jp-DocumentSearch-input-button-on .jp-icon-accent2[fill] {
+  fill: var(--jp-ui-font-color2);
 }
 
 .jp-DocumentSearch-index-counter {
@@ -211,6 +222,7 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
 .jp-DocumentSearch-search-filter {
   display: flex;
   align-items: center;
+  justify-content: center;
   user-select: none;
 }
 
