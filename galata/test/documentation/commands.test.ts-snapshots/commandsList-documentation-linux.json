@@ -963,7 +963,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable",
     "shortcuts": [
       "Alt A"
     ],
@@ -2304,7 +2304,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "query": {
+          "description": "Search query to pre-fill in the extension manager",
+          "type": "string"
+        }
+      }
     }
   },
   {
@@ -2593,16 +2598,6 @@
     "shortcuts": [
       "F2"
     ],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
-    "id": "filebrowser:search",
-    "label": "Search on File Names",
-    "caption": "",
-    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3482,6 +3477,16 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -5500,6 +5505,16 @@
       "required": [
         "name"
       ]
+    }
+  },
+  {
+    "id": "terminal:open-folder-in-terminal",
+    "label": "Open in Terminal",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {

@@ -32,11 +32,6 @@ test.describe('Table of Contents', () => {
     await page.notebook.close(true);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Open Table of Contents panel', async ({ page }) => {
     const imageName = 'toc-panel.png';
     const tocPanel = page.sidebar.getContentPanelLocator(

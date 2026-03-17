@@ -43,11 +43,16 @@ test.describe('Run Cells', () => {
     await page.notebook.enterCellEditingMode(0);
     const initialOutput = await page.notebook.getCellTextOutput(0);
     expect(initialOutput).toBe(null);
+
+    // This starts execution, but does not wait for it to finish,
+    // which is why we need to use `expect().toPass()` below.
     await page.keyboard.press('Control+Enter');
 
     // Confirm that the cell has be executed by checking output
-    const output = await page.notebook.getCellTextOutput(0);
-    expect(output).toEqual(['4294967296']);
+    await expect(async () => {
+      const output = await page.notebook.getCellTextOutput(0);
+      expect(output).toEqual(['4294967296']);
+    }).toPass();
 
     // Expect the input to NOT include an extra line;
     const text = await page.notebook.getCellTextInput(0);

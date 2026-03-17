@@ -819,6 +819,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * @param area Name of area to activate
    */
   activateArea(area: ILabShell.Area = 'main'): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area) {
       case 'main':
         {
@@ -1379,6 +1380,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IterableIterator<Widget> {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
@@ -1635,8 +1637,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
-
-    options = options || {};
 
     const { title } = widget;
     // Add widget ID to tab so that we can get a handle on the tab's widget

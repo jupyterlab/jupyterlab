@@ -293,6 +293,7 @@ export class OutputArea extends Widget {
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add':
         const output = args.newValues[0];
@@ -735,6 +736,7 @@ export class OutputArea extends Widget {
     const transient = ((msg.content as any).transient || {}) as JSONObject;
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
       case 'execute_result':
       case 'display_data':

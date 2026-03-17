@@ -18,10 +18,27 @@ However, if an extension uses the experimental {ref}`webpackConfig` option, it
 may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
 Webpack config to Rspack.
 
+### For theme authors
+
+- Fonts in data grids (used by CSV/TSV viewer, debugger variable table) can now be customized with:
+  - new `--jp-datagrid-font-size` variable controlling the font size; if not specified by a theme, the fallback of 12px will be used,
+  - new `--jp-datagrid-font-family` variable controlling the font family; if not specified, `--jp-content-font-family` will be used as a fallback.
+
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
 - The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
+
+### Testing with Galata
+
+- The `runCell()` method of notebook helper now takes `options: {inplace?: boolean; wait?: boolean}` as a second argument.
+  Setting the `wait` option to `false` skips waiting for the cell execution to finish, but still waits until the execution
+  has been scheduled.
+- When `autoGoto` is enabled, the workspace is now reset automatically; to opt out, set `resetWorkspace` fixture to `false`.
+- The galata's `page.waitForCondition()` now uses a default timeout of 15 seconds, simplifying debugging and reducing time to retry.
+  The `timeout` argument can be used to control the timeout duration.
+- Errors after page fixture teardown are now gracefully ignored to prevent the errors from delayed server requests
+  from failing tests during the teardown phase.
 
 ## JupyterLab 4.5.0 to 4.5.1
 
@@ -419,7 +436,6 @@ package configuration.
 - Create a file `.yarnrc.yml` containing:
 
 ```yaml
-enableImmutableInstalls: false
 nodeLinker: node-modules
 ```
 
