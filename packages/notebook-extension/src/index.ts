@@ -3973,16 +3973,20 @@ function addCommands(
         const notebook = current.content;
         const cell = notebook.activeCell;
 
-        // If in edit mode, undo text changes inside the cell editor
         if (notebook.mode === 'edit' && cell) {
           cell.inputHidden = false;
           return cell.editor?.undo();
         }
 
-        // If in command mode, undo notebook-level cell operations
         return NotebookActions.undo(notebook);
       }
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
