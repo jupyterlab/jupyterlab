@@ -3970,19 +3970,19 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        const cell = current.content.activeCell;
-        if (cell) {
+        const notebook = current.content;
+        const cell = notebook.activeCell;
+
+        // If in edit mode, undo text changes inside the cell editor
+        if (notebook.mode === 'edit' && cell) {
           cell.inputHidden = false;
           return cell.editor?.undo();
         }
+
+        // If in command mode, undo notebook-level cell operations
+        return NotebookActions.undo(notebook);
       }
     },
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
   });
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
@@ -4719,12 +4719,12 @@ function populatePalette(
  */
 function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   // Add undo/redo hooks to the edit menu.
-    mainMenu.editMenu.undoers.redo.add({
-    id: CommandIDs.redoCellAction,
+  mainMenu.editMenu.undoers.redo.add({
+    id: CommandIDs.redo,
     isEnabled
   });
   mainMenu.editMenu.undoers.undo.add({
-    id: CommandIDs.undoCellAction,
+    id: CommandIDs.undo,
     isEnabled
   });
 
