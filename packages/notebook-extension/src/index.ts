@@ -4719,12 +4719,12 @@ function populatePalette(
  */
 function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   // Add undo/redo hooks to the edit menu.
-  mainMenu.editMenu.undoers.redo.add({
-    id: CommandIDs.redo,
+    mainMenu.editMenu.undoers.redo.add({
+    id: CommandIDs.redoCellAction,
     isEnabled
   });
   mainMenu.editMenu.undoers.undo.add({
-    id: CommandIDs.undo,
+    id: CommandIDs.undoCellAction,
     isEnabled
   });
 

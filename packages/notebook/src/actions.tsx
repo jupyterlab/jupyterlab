@@ -625,12 +625,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     value: nbformat.CellType,
     // we keep translator for backward compatibility
-    options?:
-      | {
-          translator?: ITranslator;
-          headingLevel?: number;
-        }
-      | ITranslator
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -638,7 +633,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value, options);
+    Private.changeCellType(notebook, value, { translator });
     void Private.handleState(notebook, state);
   }
 
@@ -1595,7 +1590,7 @@ export namespace NotebookActions {
 
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
-    notebook.activeCellIndex = activeCellIndex;
+    notebook.activeCellIndex = activeCellIndex;             //used because using undo can sometimes shift the user’s focus to a different cell unexpectedly
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2872,21 +2867,12 @@ namespace Private {
     notebook: Notebook,
     value: nbformat.CellType,
     // we keep translator for backward compatibility
-    options?:
-      | {
-          translator?: ITranslator;
-          headingLevel?: number;
-        }
-      | ITranslator
+    options?: {
+      translator?: ITranslator;
+      headingLevel?: number;
+    }
   ): void {
-    const translator =
-      options instanceof Object && 'load' in (options as object)
-        ? (options as ITranslator)
-        : (options as { translator?: ITranslator })?.translator;
-    const headingLevel =
-      options instanceof Object && 'load' in (options as object)
-        ? undefined
-        : (options as { headingLevel?: number })?.headingLevel;
+    const { translator, headingLevel } = options ?? {};
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
