@@ -142,14 +142,22 @@
   fill: var(--jp-inverse-layout-color3);
 }
 
-.jp-DocumentSearch-input-button-off:hover,
 .jp-DocumentSearch-input-button-on {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-input-button-off:hover .jp-icon-accent2[fill],
 .jp-DocumentSearch-input-button-on .jp-icon-accent2[fill] {
   fill: var(--jp-ui-font-color2);
+}
+
+.jp-DocumentSearch-input-button-off:hover,
+.jp-DocumentSearch-input-button-on:hover {
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-DocumentSearch-input-button-off:hover .jp-icon-accent2[fill],
+.jp-DocumentSearch-input-button-on:hover .jp-icon-accent2[fill] {
+  fill: var(--jp-ui-font-color3);
 }
 
 .jp-DocumentSearch-index-counter {
