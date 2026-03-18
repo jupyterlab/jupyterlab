@@ -32,13 +32,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antfu/utils@npm:^9.2.0":
-  version: 9.3.0
-  resolution: "@antfu/utils@npm:9.3.0"
-  checksum: 7893a291971f8bf3ffd0d428077fdea3129ba849baf66b9d2f397b9d36f0554dbc12fa484ce8891d747107efe1bc9de29a24309f2194ea685fc0c69e133400d9
-  languageName: node
-  linkType: hard
-
 "@arcanis/slice-ansi@npm:^1.1.1":
   version: 1.1.1
   resolution: "@arcanis/slice-ansi@npm:1.1.1"
@@ -1839,6 +1832,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/noto-sans-sc@npm:^5.2.10":
+  version: 5.2.10
+  resolution: "@fontsource-variable/noto-sans-sc@npm:5.2.10"
+  checksum: 48a2bbdbf1b416fa191d6a52df90d3fd25883abf92237dd28f3fce3a055de93ea4ea8a4c24d5779b705ad3349284a042d1693ce234d1e12f62b1b297ea75be19
+  languageName: node
+  linkType: hard
+
 "@fortawesome/fontawesome-free@npm:^5.12.0":
   version: 5.15.4
   resolution: "@fortawesome/fontawesome-free@npm:5.15.4"
@@ -1909,19 +1909,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/utils@npm:^3.0.1":
-  version: 3.0.2
-  resolution: "@iconify/utils@npm:3.0.2"
+"@iconify/utils@npm:^3.0.2":
+  version: 3.1.0
+  resolution: "@iconify/utils@npm:3.1.0"
   dependencies:
     "@antfu/install-pkg": ^1.1.0
-    "@antfu/utils": ^9.2.0
     "@iconify/types": ^2.0.0
-    debug: ^4.4.1
-    globals: ^15.15.0
-    kolorist: ^1.8.0
-    local-pkg: ^1.1.1
-    mlly: ^1.7.4
-  checksum: a71af73cdc198a4aafedb784d2283af2792c1c929f79ae115700b4b4fab74a545b817eff7ae701c90dcc2e4b14ea3c2300d84173149e74a544b0bb5a238cd7b8
+    mlly: ^1.8.0
+  checksum: b4055a322a13289740b2ecef424a1807ccb1567a200b716e4d1e2f40ad24dd9e24fa7b9a1aa1a275eea30ef3f08a32a4640a1a66f013d32cfe31117ac76b4075
   languageName: node
   linkType: hard
 
@@ -2356,19 +2351,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/application-extension@^4.6.0-alpha.3, @jupyterlab/application-extension@workspace:packages/application-extension, @jupyterlab/application-extension@~4.6.0-alpha.3":
+"@jupyterlab/application-extension@^4.6.0-alpha.4, @jupyterlab/application-extension@workspace:packages/application-extension, @jupyterlab/application-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-extension@workspace:packages/application-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/property-inspector": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/property-inspector": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -2384,64 +2379,64 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-top@workspace:dev_mode"
   dependencies:
-    "@jupyterlab/application": ~4.6.0-alpha.3
-    "@jupyterlab/application-extension": ~4.6.0-alpha.3
-    "@jupyterlab/apputils-extension": ~4.6.0-alpha.3
-    "@jupyterlab/audio-extension": ~4.6.0-alpha.3
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/buildutils": ^4.6.0-alpha.3
-    "@jupyterlab/cell-toolbar-extension": ~4.6.0-alpha.3
-    "@jupyterlab/celltags-extension": ~4.6.0-alpha.3
-    "@jupyterlab/codemirror-extension": ~4.6.0-alpha.3
-    "@jupyterlab/completer-extension": ~4.6.0-alpha.3
-    "@jupyterlab/console-extension": ~4.6.0-alpha.3
-    "@jupyterlab/coreutils": ~6.6.0-alpha.3
-    "@jupyterlab/csvviewer-extension": ~4.6.0-alpha.3
-    "@jupyterlab/debugger-extension": ~4.6.0-alpha.3
-    "@jupyterlab/docmanager-extension": ~4.6.0-alpha.3
-    "@jupyterlab/documentsearch-extension": ~4.6.0-alpha.3
-    "@jupyterlab/extensionmanager-extension": ~4.6.0-alpha.3
-    "@jupyterlab/filebrowser-extension": ~4.6.0-alpha.3
-    "@jupyterlab/fileeditor-extension": ~4.6.0-alpha.3
-    "@jupyterlab/help-extension": ~4.6.0-alpha.3
-    "@jupyterlab/htmlviewer-extension": ~4.6.0-alpha.3
-    "@jupyterlab/hub-extension": ~4.6.0-alpha.3
-    "@jupyterlab/imageviewer-extension": ~4.6.0-alpha.3
-    "@jupyterlab/inspector-extension": ~4.6.0-alpha.3
-    "@jupyterlab/javascript-extension": ~4.6.0-alpha.3
-    "@jupyterlab/json-extension": ~4.6.0-alpha.3
-    "@jupyterlab/launcher-extension": ~4.6.0-alpha.3
-    "@jupyterlab/logconsole-extension": ~4.6.0-alpha.3
-    "@jupyterlab/lsp-extension": ~4.6.0-alpha.3
-    "@jupyterlab/mainmenu-extension": ~4.6.0-alpha.3
-    "@jupyterlab/markdownviewer-extension": ~4.6.0-alpha.3
-    "@jupyterlab/markedparser-extension": ~4.6.0-alpha.3
-    "@jupyterlab/mathjax-extension": ~4.6.0-alpha.3
-    "@jupyterlab/mermaid-extension": ~4.6.0-alpha.3
-    "@jupyterlab/metadataform-extension": ~4.6.0-alpha.3
-    "@jupyterlab/notebook-extension": ~4.6.0-alpha.3
-    "@jupyterlab/pdf-extension": ~4.6.0-alpha.3
-    "@jupyterlab/pluginmanager-extension": ~4.6.0-alpha.3
-    "@jupyterlab/rendermime-extension": ~4.6.0-alpha.3
-    "@jupyterlab/running-extension": ~4.6.0-alpha.3
-    "@jupyterlab/services-extension": ~4.6.0-alpha.3
-    "@jupyterlab/settingeditor-extension": ~4.6.0-alpha.3
-    "@jupyterlab/shortcuts-extension": ~5.4.0-alpha.3
-    "@jupyterlab/statusbar-extension": ~4.6.0-alpha.3
-    "@jupyterlab/terminal-extension": ~4.6.0-alpha.3
-    "@jupyterlab/theme-dark-extension": ~4.6.0-alpha.3
-    "@jupyterlab/theme-dark-high-contrast-extension": ~4.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ~4.6.0-alpha.3
-    "@jupyterlab/toc-extension": ~6.6.0-alpha.3
-    "@jupyterlab/tooltip-extension": ~4.6.0-alpha.3
-    "@jupyterlab/translation-extension": ~4.6.0-alpha.3
-    "@jupyterlab/ui-components-extension": ~4.6.0-alpha.3
-    "@jupyterlab/vega5-extension": ~4.6.0-alpha.3
-    "@jupyterlab/video-extension": ~4.6.0-alpha.3
-    "@jupyterlab/workspaces-extension": ~4.6.0-alpha.3
+    "@jupyterlab/application": ~4.6.0-alpha.4
+    "@jupyterlab/application-extension": ~4.6.0-alpha.4
+    "@jupyterlab/apputils-extension": ~4.6.0-alpha.4
+    "@jupyterlab/audio-extension": ~4.6.0-alpha.4
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/buildutils": ^4.6.0-alpha.4
+    "@jupyterlab/cell-toolbar-extension": ~4.6.0-alpha.4
+    "@jupyterlab/celltags-extension": ~4.6.0-alpha.4
+    "@jupyterlab/codemirror-extension": ~4.6.0-alpha.4
+    "@jupyterlab/completer-extension": ~4.6.0-alpha.4
+    "@jupyterlab/console-extension": ~4.6.0-alpha.4
+    "@jupyterlab/coreutils": ~6.6.0-alpha.4
+    "@jupyterlab/csvviewer-extension": ~4.6.0-alpha.4
+    "@jupyterlab/debugger-extension": ~4.6.0-alpha.4
+    "@jupyterlab/docmanager-extension": ~4.6.0-alpha.4
+    "@jupyterlab/documentsearch-extension": ~4.6.0-alpha.4
+    "@jupyterlab/extensionmanager-extension": ~4.6.0-alpha.4
+    "@jupyterlab/filebrowser-extension": ~4.6.0-alpha.4
+    "@jupyterlab/fileeditor-extension": ~4.6.0-alpha.4
+    "@jupyterlab/help-extension": ~4.6.0-alpha.4
+    "@jupyterlab/htmlviewer-extension": ~4.6.0-alpha.4
+    "@jupyterlab/hub-extension": ~4.6.0-alpha.4
+    "@jupyterlab/imageviewer-extension": ~4.6.0-alpha.4
+    "@jupyterlab/inspector-extension": ~4.6.0-alpha.4
+    "@jupyterlab/javascript-extension": ~4.6.0-alpha.4
+    "@jupyterlab/json-extension": ~4.6.0-alpha.4
+    "@jupyterlab/launcher-extension": ~4.6.0-alpha.4
+    "@jupyterlab/logconsole-extension": ~4.6.0-alpha.4
+    "@jupyterlab/lsp-extension": ~4.6.0-alpha.4
+    "@jupyterlab/mainmenu-extension": ~4.6.0-alpha.4
+    "@jupyterlab/markdownviewer-extension": ~4.6.0-alpha.4
+    "@jupyterlab/markedparser-extension": ~4.6.0-alpha.4
+    "@jupyterlab/mathjax-extension": ~4.6.0-alpha.4
+    "@jupyterlab/mermaid-extension": ~4.6.0-alpha.4
+    "@jupyterlab/metadataform-extension": ~4.6.0-alpha.4
+    "@jupyterlab/notebook-extension": ~4.6.0-alpha.4
+    "@jupyterlab/pdf-extension": ~4.6.0-alpha.4
+    "@jupyterlab/pluginmanager-extension": ~4.6.0-alpha.4
+    "@jupyterlab/rendermime-extension": ~4.6.0-alpha.4
+    "@jupyterlab/running-extension": ~4.6.0-alpha.4
+    "@jupyterlab/services-extension": ~4.6.0-alpha.4
+    "@jupyterlab/settingeditor-extension": ~4.6.0-alpha.4
+    "@jupyterlab/shortcuts-extension": ~5.4.0-alpha.4
+    "@jupyterlab/statusbar-extension": ~4.6.0-alpha.4
+    "@jupyterlab/terminal-extension": ~4.6.0-alpha.4
+    "@jupyterlab/theme-dark-extension": ~4.6.0-alpha.4
+    "@jupyterlab/theme-dark-high-contrast-extension": ~4.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ~4.6.0-alpha.4
+    "@jupyterlab/toc-extension": ~6.6.0-alpha.4
+    "@jupyterlab/tooltip-extension": ~4.6.0-alpha.4
+    "@jupyterlab/translation-extension": ~4.6.0-alpha.4
+    "@jupyterlab/ui-components-extension": ~4.6.0-alpha.4
+    "@jupyterlab/vega5-extension": ~4.6.0-alpha.4
+    "@jupyterlab/video-extension": ~4.6.0-alpha.4
+    "@jupyterlab/workspaces-extension": ~4.6.0-alpha.4
     "@rsdoctor/rspack-plugin": ^1.3.12
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     chokidar: ^3.4.0
     duplicate-package-checker-webpack-plugin: ^3.0.0
     fs-extra: ^10.1.0
@@ -2460,21 +2455,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/application@^4.6.0-alpha.3, @jupyterlab/application@workspace:packages/application, @jupyterlab/application@~4.6.0-alpha.3":
+"@jupyterlab/application@^4.6.0-alpha.4, @jupyterlab/application@workspace:packages/application, @jupyterlab/application@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application@workspace:packages/application"
   dependencies:
     "@fortawesome/fontawesome-free": ^5.12.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/application": ^2.4.8
     "@lumino/commands": ^2.3.3
@@ -2492,24 +2487,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/apputils-extension@^4.6.0-alpha.3, @jupyterlab/apputils-extension@workspace:packages/apputils-extension, @jupyterlab/apputils-extension@~4.6.0-alpha.3":
+"@jupyterlab/apputils-extension@^4.6.0-alpha.4, @jupyterlab/apputils-extension@workspace:packages/apputils-extension, @jupyterlab/apputils-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/apputils-extension@workspace:packages/apputils-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
-    "@jupyterlab/workspaces": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
+    "@jupyterlab/workspaces": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -2527,20 +2522,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/apputils@^4.7.0-alpha.3, @jupyterlab/apputils@workspace:packages/apputils":
+"@jupyterlab/apputils@^4.7.0-alpha.4, @jupyterlab/apputils@workspace:packages/apputils":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/apputils@workspace:packages/apputils"
   dependencies:
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -2561,14 +2556,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/attachments@^4.6.0-alpha.3, @jupyterlab/attachments@workspace:packages/attachments":
+"@jupyterlab/attachments@^4.6.0-alpha.4, @jupyterlab/attachments@workspace:packages/attachments":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/attachments@workspace:packages/attachments"
   dependencies:
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
     rimraf: ~5.0.5
@@ -2576,16 +2571,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/audio-extension@^4.6.0-alpha.3, @jupyterlab/audio-extension@workspace:packages/audio-extension, @jupyterlab/audio-extension@~4.6.0-alpha.3":
+"@jupyterlab/audio-extension@^4.6.0-alpha.4, @jupyterlab/audio-extension@workspace:packages/audio-extension, @jupyterlab/audio-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/audio-extension@workspace:packages/audio-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testutils": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testutils": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
@@ -2595,7 +2590,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/builder@^4.6.0-alpha.3, @jupyterlab/builder@workspace:builder":
+"@jupyterlab/builder@^4.6.0-alpha.4, @jupyterlab/builder@workspace:builder":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/builder@workspace:builder"
   dependencies:
@@ -2611,7 +2606,7 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/virtualdom": ^2.0.4
     "@lumino/widgets": ^2.7.5
-    "@rspack/core": ^1.7.7
+    "@rspack/core": ^1.7.8
     "@types/fs-extra": ^9.0.1
     "@types/glob": ^7.1.1
     "@types/node": ^20.14.8
@@ -2639,7 +2634,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/buildutils@^4.6.0-alpha.3, @jupyterlab/buildutils@workspace:buildutils":
+"@jupyterlab/buildutils@^4.6.0-alpha.4, @jupyterlab/buildutils@workspace:buildutils":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/buildutils@workspace:buildutils"
   dependencies:
@@ -2678,33 +2673,33 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/cell-toolbar-extension@^4.6.0-alpha.3, @jupyterlab/cell-toolbar-extension@workspace:packages/cell-toolbar-extension, @jupyterlab/cell-toolbar-extension@~4.6.0-alpha.3":
+"@jupyterlab/cell-toolbar-extension@^4.6.0-alpha.4, @jupyterlab/cell-toolbar-extension@workspace:packages/cell-toolbar-extension, @jupyterlab/cell-toolbar-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/cell-toolbar-extension@workspace:packages/cell-toolbar-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cell-toolbar": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cell-toolbar": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/cell-toolbar@^4.6.0-alpha.3, @jupyterlab/cell-toolbar@workspace:packages/cell-toolbar":
+"@jupyterlab/cell-toolbar@^4.6.0-alpha.4, @jupyterlab/cell-toolbar@workspace:packages/cell-toolbar":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/cell-toolbar@workspace:packages/cell-toolbar"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/disposable": ^2.1.5
@@ -2717,29 +2712,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/cells@^4.6.0-alpha.3, @jupyterlab/cells@workspace:packages/cells":
+"@jupyterlab/cells@^4.6.0-alpha.4, @jupyterlab/cells@workspace:packages/cells":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/cells@workspace:packages/cells"
   dependencies:
     "@codemirror/state": ^6.5.4
     "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/attachments": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/outputarea": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/attachments": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/outputarea": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/domutils": ^2.0.4
@@ -2758,14 +2753,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/celltags-extension@^4.6.0-alpha.3, @jupyterlab/celltags-extension@workspace:packages/celltags-extension, @jupyterlab/celltags-extension@~4.6.0-alpha.3":
+"@jupyterlab/celltags-extension@^4.6.0-alpha.4, @jupyterlab/celltags-extension@workspace:packages/celltags-extension, @jupyterlab/celltags-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/celltags-extension@workspace:packages/celltags-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@rjsf/utils": ^5.13.4
     react: ^18.2.0
@@ -2774,20 +2769,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/codeeditor@^4.6.0-alpha.3, @jupyterlab/codeeditor@workspace:packages/codeeditor":
+"@jupyterlab/codeeditor@^4.6.0-alpha.4, @jupyterlab/codeeditor@workspace:packages/codeeditor":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/codeeditor@workspace:packages/codeeditor"
   dependencies:
     "@codemirror/state": ^6.5.4
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/dragdrop": ^2.1.8
@@ -2802,7 +2797,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/codemirror-extension@^4.6.0-alpha.3, @jupyterlab/codemirror-extension@workspace:packages/codemirror-extension, @jupyterlab/codemirror-extension@~4.6.0-alpha.3":
+"@jupyterlab/codemirror-extension@^4.6.0-alpha.4, @jupyterlab/codemirror-extension@workspace:packages/codemirror-extension, @jupyterlab/codemirror-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/codemirror-extension@workspace:packages/codemirror-extension"
   dependencies:
@@ -2814,15 +2809,15 @@ __metadata:
     "@codemirror/state": ^6.5.4
     "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.5
     "@rjsf/utils": ^5.13.4
@@ -2834,7 +2829,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/codemirror@^4.6.0-alpha.3, @jupyterlab/codemirror@workspace:packages/codemirror":
+"@jupyterlab/codemirror@^4.6.0-alpha.4, @jupyterlab/codemirror@workspace:packages/codemirror":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/codemirror@workspace:packages/codemirror"
   dependencies:
@@ -2859,12 +2854,12 @@ __metadata:
     "@codemirror/state": ^6.5.4
     "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lezer/common": ^1.2.1
     "@lezer/generator": ^1.7.0
     "@lezer/highlight": ^1.2.0
@@ -2881,16 +2876,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/completer-extension@^4.6.0-alpha.3, @jupyterlab/completer-extension@workspace:packages/completer-extension, @jupyterlab/completer-extension@~4.6.0-alpha.3":
+"@jupyterlab/completer-extension@^4.6.0-alpha.4, @jupyterlab/completer-extension@workspace:packages/completer-extension, @jupyterlab/completer-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/completer-extension@workspace:packages/completer-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@rjsf/utils": ^5.13.4
@@ -2900,7 +2895,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/completer@^4.6.0-alpha.3, @jupyterlab/completer@workspace:packages/completer":
+"@jupyterlab/completer@^4.6.0-alpha.4, @jupyterlab/completer@workspace:packages/completer":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/completer@workspace:packages/completer"
   dependencies:
@@ -2908,17 +2903,17 @@ __metadata:
     "@codemirror/state": ^6.5.4
     "@codemirror/view": ^6.39.14
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -2933,22 +2928,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/console-extension@^4.6.0-alpha.3, @jupyterlab/console-extension@workspace:packages/console-extension, @jupyterlab/console-extension@~4.6.0-alpha.3":
+"@jupyterlab/console-extension@^4.6.0-alpha.4, @jupyterlab/console-extension@workspace:packages/console-extension, @jupyterlab/console-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/console-extension@workspace:packages/console-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -2959,23 +2954,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/console@^4.6.0-alpha.3, @jupyterlab/console@workspace:packages/console":
+"@jupyterlab/console@^4.6.0-alpha.4, @jupyterlab/console@workspace:packages/console":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/console@workspace:packages/console"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/dragdrop": ^2.1.8
@@ -2989,7 +2984,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/coreutils@^6.6.0-alpha.3, @jupyterlab/coreutils@workspace:packages/coreutils, @jupyterlab/coreutils@~6.6.0-alpha.3":
+"@jupyterlab/core-meta@^4.6.0-alpha.4, @jupyterlab/core-meta@workspace:packages/core-meta":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/core-meta@workspace:packages/core-meta"
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/coreutils@^6.6.0-alpha.4, @jupyterlab/coreutils@workspace:packages/coreutils, @jupyterlab/coreutils@~6.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/coreutils@workspace:packages/coreutils"
   dependencies:
@@ -3013,19 +3014,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/csvviewer-extension@^4.6.0-alpha.3, @jupyterlab/csvviewer-extension@workspace:packages/csvviewer-extension, @jupyterlab/csvviewer-extension@~4.6.0-alpha.3":
+"@jupyterlab/csvviewer-extension@^4.6.0-alpha.4, @jupyterlab/csvviewer-extension@workspace:packages/csvviewer-extension, @jupyterlab/csvviewer-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/csvviewer-extension@workspace:packages/csvviewer-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/csvviewer": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/csvviewer": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/datagrid": ^2.5.6
     "@lumino/widgets": ^2.7.5
     rimraf: ~5.0.5
@@ -3033,15 +3034,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/csvviewer@^4.6.0-alpha.3, @jupyterlab/csvviewer@workspace:packages/csvviewer":
+"@jupyterlab/csvviewer@^4.6.0-alpha.4, @jupyterlab/csvviewer@workspace:packages/csvviewer":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/csvviewer@workspace:packages/csvviewer"
   dependencies:
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/datagrid": ^2.5.6
     "@lumino/disposable": ^2.1.5
@@ -3057,27 +3058,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/debugger-extension@^4.6.0-alpha.3, @jupyterlab/debugger-extension@workspace:packages/debugger-extension, @jupyterlab/debugger-extension@~4.6.0-alpha.3":
+"@jupyterlab/debugger-extension@^4.6.0-alpha.4, @jupyterlab/debugger-extension@workspace:packages/debugger-extension, @jupyterlab/debugger-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/debugger-extension@workspace:packages/debugger-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/debugger": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/debugger": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@types/jest": ^29.2.0
     "@types/react-dom": ^18.0.9
@@ -3086,7 +3087,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/debugger@^4.6.0-alpha.3, @jupyterlab/debugger@workspace:packages/debugger":
+"@jupyterlab/debugger@^4.6.0-alpha.4, @jupyterlab/debugger@workspace:packages/debugger":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/debugger@workspace:packages/debugger"
   dependencies:
@@ -3094,23 +3095,23 @@ __metadata:
     "@codemirror/view": ^6.39.14
     "@jupyter/react-components": ^0.16.6
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -3130,22 +3131,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/docmanager-extension@^4.6.0-alpha.3, @jupyterlab/docmanager-extension@workspace:packages/docmanager-extension, @jupyterlab/docmanager-extension@~4.6.0-alpha.3":
+"@jupyterlab/docmanager-extension@^4.6.0-alpha.4, @jupyterlab/docmanager-extension@workspace:packages/docmanager-extension, @jupyterlab/docmanager-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docmanager-extension@workspace:packages/docmanager-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -3158,20 +3159,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/docmanager@^4.6.0-alpha.3, @jupyterlab/docmanager@workspace:packages/docmanager":
+"@jupyterlab/docmanager@^4.6.0-alpha.4, @jupyterlab/docmanager@workspace:packages/docmanager":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docmanager@workspace:packages/docmanager"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -3188,21 +3189,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/docregistry@^4.6.0-alpha.3, @jupyterlab/docregistry@workspace:packages/docregistry":
+"@jupyterlab/docregistry@^4.6.0-alpha.4, @jupyterlab/docregistry@workspace:packages/docregistry":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docregistry@workspace:packages/docregistry"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -3218,15 +3219,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/documentsearch-extension@^4.6.0-alpha.3, @jupyterlab/documentsearch-extension@workspace:packages/documentsearch-extension, @jupyterlab/documentsearch-extension@~4.6.0-alpha.3":
+"@jupyterlab/documentsearch-extension@^4.6.0-alpha.4, @jupyterlab/documentsearch-extension@workspace:packages/documentsearch-extension, @jupyterlab/documentsearch-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/documentsearch-extension@workspace:packages/documentsearch-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
     rimraf: ~5.0.5
@@ -3234,14 +3235,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/documentsearch@^4.6.0-alpha.3, @jupyterlab/documentsearch@workspace:packages/documentsearch":
+"@jupyterlab/documentsearch@^4.6.0-alpha.4, @jupyterlab/documentsearch@workspace:packages/documentsearch":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/documentsearch@workspace:packages/documentsearch"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -3261,41 +3262,41 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-app@workspace:examples/app"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/application-extension": ^4.6.0-alpha.3
-    "@jupyterlab/apputils-extension": ^4.6.0-alpha.3
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/celltags-extension": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror-extension": ^4.6.0-alpha.3
-    "@jupyterlab/completer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/console-extension": ^4.6.0-alpha.3
-    "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser-extension": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor-extension": ^4.6.0-alpha.3
-    "@jupyterlab/help-extension": ^4.6.0-alpha.3
-    "@jupyterlab/imageviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/inspector-extension": ^4.6.0-alpha.3
-    "@jupyterlab/launcher-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu-extension": ^4.6.0-alpha.3
-    "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.3
-    "@jupyterlab/metadataform-extension": ^4.6.0-alpha.3
-    "@jupyterlab/notebook-extension": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-extension": ^4.6.0-alpha.3
-    "@jupyterlab/running-extension": ^4.6.0-alpha.3
-    "@jupyterlab/settingeditor-extension": ^4.6.0-alpha.3
-    "@jupyterlab/shortcuts-extension": ^5.4.0-alpha.3
-    "@jupyterlab/statusbar-extension": ^4.6.0-alpha.3
-    "@jupyterlab/theme-dark-extension": ^4.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/toc-extension": ^6.6.0-alpha.3
-    "@jupyterlab/tooltip-extension": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/translation-extension": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components-extension": ^4.6.0-alpha.3
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/application-extension": ^4.6.0-alpha.4
+    "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/celltags-extension": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror-extension": ^4.6.0-alpha.4
+    "@jupyterlab/completer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/console-extension": ^4.6.0-alpha.4
+    "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser-extension": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor-extension": ^4.6.0-alpha.4
+    "@jupyterlab/help-extension": ^4.6.0-alpha.4
+    "@jupyterlab/imageviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/inspector-extension": ^4.6.0-alpha.4
+    "@jupyterlab/launcher-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu-extension": ^4.6.0-alpha.4
+    "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.4
+    "@jupyterlab/metadataform-extension": ^4.6.0-alpha.4
+    "@jupyterlab/notebook-extension": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-extension": ^4.6.0-alpha.4
+    "@jupyterlab/running-extension": ^4.6.0-alpha.4
+    "@jupyterlab/settingeditor-extension": ^4.6.0-alpha.4
+    "@jupyterlab/shortcuts-extension": ^5.4.0-alpha.4
+    "@jupyterlab/statusbar-extension": ^4.6.0-alpha.4
+    "@jupyterlab/theme-dark-extension": ^4.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/toc-extension": ^6.6.0-alpha.4
+    "@jupyterlab/tooltip-extension": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/translation-extension": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components-extension": ^4.6.0-alpha.4
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3313,20 +3314,20 @@ __metadata:
   dependencies:
     "@jupyter/web-components": ^0.16.6
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3341,18 +3342,18 @@ __metadata:
   dependencies:
     "@jupyter/web-components": ^0.16.6
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     rimraf: ~5.0.5
     style-loader: ~3.3.1
@@ -3364,49 +3365,49 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-core@workspace:examples/federated/core_package"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/application-extension": ^4.6.0-alpha.3
-    "@jupyterlab/apputils-extension": ^4.6.0-alpha.3
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/celltags-extension": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror-extension": ^4.6.0-alpha.3
-    "@jupyterlab/completer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/console-extension": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/debugger-extension": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch-extension": ^4.6.0-alpha.3
-    "@jupyterlab/extensionmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser-extension": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor-extension": ^4.6.0-alpha.3
-    "@jupyterlab/help-extension": ^4.6.0-alpha.3
-    "@jupyterlab/htmlviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/hub-extension": ^4.6.0-alpha.3
-    "@jupyterlab/imageviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/inspector-extension": ^4.6.0-alpha.3
-    "@jupyterlab/javascript-extension": ^4.6.0-alpha.3
-    "@jupyterlab/json-extension": ^4.6.0-alpha.3
-    "@jupyterlab/launcher-extension": ^4.6.0-alpha.3
-    "@jupyterlab/logconsole-extension": ^4.6.0-alpha.3
-    "@jupyterlab/lsp-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.3
-    "@jupyterlab/metadataform-extension": ^4.6.0-alpha.3
-    "@jupyterlab/notebook-extension": ^4.6.0-alpha.3
-    "@jupyterlab/pdf-extension": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-extension": ^4.6.0-alpha.3
-    "@jupyterlab/settingeditor-extension": ^4.6.0-alpha.3
-    "@jupyterlab/shortcuts-extension": ^5.4.0-alpha.3
-    "@jupyterlab/statusbar-extension": ^4.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/toc-extension": ^6.6.0-alpha.3
-    "@jupyterlab/tooltip-extension": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/translation-extension": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components-extension": ^4.6.0-alpha.3
-    "@jupyterlab/vega5-extension": ^4.6.0-alpha.3
-    "@rspack/cli": ^1.7.7
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/application-extension": ^4.6.0-alpha.4
+    "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/celltags-extension": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror-extension": ^4.6.0-alpha.4
+    "@jupyterlab/completer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/console-extension": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/debugger-extension": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch-extension": ^4.6.0-alpha.4
+    "@jupyterlab/extensionmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser-extension": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor-extension": ^4.6.0-alpha.4
+    "@jupyterlab/help-extension": ^4.6.0-alpha.4
+    "@jupyterlab/htmlviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/hub-extension": ^4.6.0-alpha.4
+    "@jupyterlab/imageviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/inspector-extension": ^4.6.0-alpha.4
+    "@jupyterlab/javascript-extension": ^4.6.0-alpha.4
+    "@jupyterlab/json-extension": ^4.6.0-alpha.4
+    "@jupyterlab/launcher-extension": ^4.6.0-alpha.4
+    "@jupyterlab/logconsole-extension": ^4.6.0-alpha.4
+    "@jupyterlab/lsp-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.4
+    "@jupyterlab/metadataform-extension": ^4.6.0-alpha.4
+    "@jupyterlab/notebook-extension": ^4.6.0-alpha.4
+    "@jupyterlab/pdf-extension": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-extension": ^4.6.0-alpha.4
+    "@jupyterlab/settingeditor-extension": ^4.6.0-alpha.4
+    "@jupyterlab/shortcuts-extension": ^5.4.0-alpha.4
+    "@jupyterlab/statusbar-extension": ^4.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/toc-extension": ^6.6.0-alpha.4
+    "@jupyterlab/tooltip-extension": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/translation-extension": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components-extension": ^4.6.0-alpha.4
+    "@jupyterlab/vega5-extension": ^4.6.0-alpha.4
+    "@rspack/cli": ^1.7.8
     copy-webpack-plugin: ^11.0.0
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3421,20 +3422,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-md@workspace:examples/federated/md_package"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/example-federated-middle": ^3.5.0-alpha.3
-    "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/example-federated-middle": ^3.5.0-alpha.4
+    "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
     rimraf: ~5.0.5
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/example-federated-middle@^3.5.0-alpha.3, @jupyterlab/example-federated-middle@workspace:examples/federated/middle_package":
+"@jupyterlab/example-federated-middle@^3.5.0-alpha.4, @jupyterlab/example-federated-middle@workspace:examples/federated/middle_package":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-middle@workspace:examples/federated/middle_package"
   dependencies:
-    "@jupyterlab/builder": ^4.6.0-alpha.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     rimraf: ~5.0.5
   languageName: unknown
@@ -3451,22 +3452,22 @@ __metadata:
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3481,27 +3482,27 @@ __metadata:
   dependencies:
     "@jupyter/web-components": ^0.16.6
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/markedparser-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/markedparser-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3514,11 +3515,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-services-browser@workspace:packages/services/examples/browser"
   dependencies:
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
@@ -3528,12 +3529,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-services-outputarea@workspace:packages/services/examples/typescript-browser-with-output"
   dependencies:
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/outputarea": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/outputarea": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
@@ -3543,14 +3544,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-simple-list@workspace:packages/ui-components/examples/simple-windowed-list"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^1.7.7
+    "@rspack/cli": ^1.7.8
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
@@ -3562,14 +3563,14 @@ __metadata:
   resolution: "@jupyterlab/example-terminal@workspace:examples/terminal"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/terminal": ^4.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/terminal": ^4.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3578,30 +3579,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/extensionmanager-extension@^4.6.0-alpha.3, @jupyterlab/extensionmanager-extension@workspace:packages/extensionmanager-extension, @jupyterlab/extensionmanager-extension@~4.6.0-alpha.3":
+"@jupyterlab/extensionmanager-extension@^4.6.0-alpha.4, @jupyterlab/extensionmanager-extension@workspace:packages/extensionmanager-extension, @jupyterlab/extensionmanager-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/extensionmanager-extension@workspace:packages/extensionmanager-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/extensionmanager": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/extensionmanager": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/extensionmanager@^4.6.0-alpha.3, @jupyterlab/extensionmanager@workspace:packages/extensionmanager":
+"@jupyterlab/extensionmanager@^4.6.0-alpha.4, @jupyterlab/extensionmanager@workspace:packages/extensionmanager":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/extensionmanager@workspace:packages/extensionmanager"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/messaging": ^2.0.4
     "@lumino/polling": ^2.1.5
     "@lumino/widgets": ^2.7.5
@@ -3617,22 +3618,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/filebrowser-extension@^4.6.0-alpha.3, @jupyterlab/filebrowser-extension@workspace:packages/filebrowser-extension, @jupyterlab/filebrowser-extension@~4.6.0-alpha.3":
+"@jupyterlab/filebrowser-extension@^4.6.0-alpha.4, @jupyterlab/filebrowser-extension@workspace:packages/filebrowser-extension, @jupyterlab/filebrowser-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/filebrowser-extension@workspace:packages/filebrowser-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/disposable": ^2.1.5
@@ -3642,20 +3643,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/filebrowser@^4.6.0-alpha.3, @jupyterlab/filebrowser@workspace:packages/filebrowser":
+"@jupyterlab/filebrowser@^4.6.0-alpha.4, @jupyterlab/filebrowser@workspace:packages/filebrowser":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/filebrowser@workspace:packages/filebrowser"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -3675,35 +3676,35 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/fileeditor-extension@^4.6.0-alpha.3, @jupyterlab/fileeditor-extension@workspace:packages/fileeditor-extension, @jupyterlab/fileeditor-extension@~4.6.0-alpha.3":
+"@jupyterlab/fileeditor-extension@^4.6.0-alpha.4, @jupyterlab/fileeditor-extension@workspace:packages/fileeditor-extension, @jupyterlab/fileeditor-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor-extension@workspace:packages/fileeditor-extension"
   dependencies:
     "@codemirror/commands": ^6.10.2
     "@codemirror/search": ^6.6.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/lsp": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/lsp": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -3714,24 +3715,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/fileeditor@^4.6.0-alpha.3, @jupyterlab/fileeditor@workspace:packages/fileeditor":
+"@jupyterlab/fileeditor@^4.6.0-alpha.4, @jupyterlab/fileeditor@workspace:packages/fileeditor":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor@workspace:packages/fileeditor"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/lsp": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/lsp": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
@@ -3749,15 +3750,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata-extension@workspace:galata/extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/debugger": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
+    "@fontsource-variable/noto-sans-sc": ^5.2.10
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/debugger": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
@@ -3770,15 +3772,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/galata@workspace:galata"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/debugger": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/debugger": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@playwright/test": ^1.58.0
     "@stdlib/stats": ~0.0.13
@@ -3793,17 +3795,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/help-extension@^4.6.0-alpha.3, @jupyterlab/help-extension@workspace:packages/help-extension, @jupyterlab/help-extension@~4.6.0-alpha.3":
+"@jupyterlab/help-extension@^4.6.0-alpha.4, @jupyterlab/help-extension@workspace:packages/help-extension, @jupyterlab/help-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/help-extension@workspace:packages/help-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
     react: ^18.2.0
     rimraf: ~5.0.5
@@ -3811,32 +3813,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/htmlviewer-extension@^4.6.0-alpha.3, @jupyterlab/htmlviewer-extension@workspace:packages/htmlviewer-extension, @jupyterlab/htmlviewer-extension@~4.6.0-alpha.3":
+"@jupyterlab/htmlviewer-extension@^4.6.0-alpha.4, @jupyterlab/htmlviewer-extension@workspace:packages/htmlviewer-extension, @jupyterlab/htmlviewer-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/htmlviewer-extension@workspace:packages/htmlviewer-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/htmlviewer": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/htmlviewer": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/htmlviewer@^4.6.0-alpha.3, @jupyterlab/htmlviewer@workspace:packages/htmlviewer":
+"@jupyterlab/htmlviewer@^4.6.0-alpha.4, @jupyterlab/htmlviewer@workspace:packages/htmlviewer":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/htmlviewer@workspace:packages/htmlviewer"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.5
@@ -3846,15 +3848,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/hub-extension@^4.6.0-alpha.3, @jupyterlab/hub-extension@workspace:packages/hub-extension, @jupyterlab/hub-extension@~4.6.0-alpha.3":
+"@jupyterlab/hub-extension@^4.6.0-alpha.4, @jupyterlab/hub-extension@workspace:packages/hub-extension, @jupyterlab/hub-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/hub-extension@workspace:packages/hub-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~5.0.5
@@ -3862,28 +3864,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/imageviewer-extension@^4.6.0-alpha.3, @jupyterlab/imageviewer-extension@workspace:packages/imageviewer-extension, @jupyterlab/imageviewer-extension@~4.6.0-alpha.3":
+"@jupyterlab/imageviewer-extension@^4.6.0-alpha.4, @jupyterlab/imageviewer-extension@workspace:packages/imageviewer-extension, @jupyterlab/imageviewer-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/imageviewer-extension@workspace:packages/imageviewer-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/imageviewer": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/imageviewer": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/imageviewer@^4.6.0-alpha.3, @jupyterlab/imageviewer@workspace:packages/imageviewer":
+"@jupyterlab/imageviewer@^4.6.0-alpha.4, @jupyterlab/imageviewer@workspace:packages/imageviewer":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/imageviewer@workspace:packages/imageviewer"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.5
@@ -3894,36 +3896,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/inspector-extension@^4.6.0-alpha.3, @jupyterlab/inspector-extension@workspace:packages/inspector-extension, @jupyterlab/inspector-extension@~4.6.0-alpha.3":
+"@jupyterlab/inspector-extension@^4.6.0-alpha.4, @jupyterlab/inspector-extension@workspace:packages/inspector-extension, @jupyterlab/inspector-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/inspector-extension@workspace:packages/inspector-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/inspector": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/inspector": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/inspector@^4.6.0-alpha.3, @jupyterlab/inspector@workspace:packages/inspector":
+"@jupyterlab/inspector@^4.6.0-alpha.4, @jupyterlab/inspector@workspace:packages/inspector":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/inspector@workspace:packages/inspector"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/polling": ^2.1.5
@@ -3936,26 +3938,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/javascript-extension@^4.6.0-alpha.3, @jupyterlab/javascript-extension@workspace:packages/javascript-extension, @jupyterlab/javascript-extension@~4.6.0-alpha.3":
+"@jupyterlab/javascript-extension@^4.6.0-alpha.4, @jupyterlab/javascript-extension@workspace:packages/javascript-extension, @jupyterlab/javascript-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/javascript-extension@workspace:packages/javascript-extension"
   dependencies:
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/json-extension@^4.6.0-alpha.3, @jupyterlab/json-extension@workspace:packages/json-extension, @jupyterlab/json-extension@~4.6.0-alpha.3":
+"@jupyterlab/json-extension@^4.6.0-alpha.4, @jupyterlab/json-extension@workspace:packages/json-extension, @jupyterlab/json-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/json-extension@workspace:packages/json-extension"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lezer/highlight": ^1.2.0
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
@@ -3973,16 +3975,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/launcher-extension@^4.6.0-alpha.3, @jupyterlab/launcher-extension@workspace:packages/launcher-extension, @jupyterlab/launcher-extension@~4.6.0-alpha.3":
+"@jupyterlab/launcher-extension@^4.6.0-alpha.4, @jupyterlab/launcher-extension@workspace:packages/launcher-extension, @jupyterlab/launcher-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/launcher-extension@workspace:packages/launcher-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.5
@@ -3991,40 +3993,43 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/launcher@^4.6.0-alpha.3, @jupyterlab/launcher@workspace:packages/launcher":
+"@jupyterlab/launcher@^4.6.0-alpha.4, @jupyterlab/launcher@workspace:packages/launcher":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/launcher@workspace:packages/launcher"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/properties": ^2.0.4
     "@lumino/widgets": ^2.7.5
+    "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
+    jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/logconsole-extension@^4.6.0-alpha.3, @jupyterlab/logconsole-extension@workspace:packages/logconsole-extension, @jupyterlab/logconsole-extension@~4.6.0-alpha.3":
+"@jupyterlab/logconsole-extension@^4.6.0-alpha.4, @jupyterlab/logconsole-extension@workspace:packages/logconsole-extension, @jupyterlab/logconsole-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/logconsole-extension@workspace:packages/logconsole-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/logconsole": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/logconsole": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.5
@@ -4034,17 +4039,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/logconsole@^4.6.0-alpha.3, @jupyterlab/logconsole@workspace:packages/logconsole":
+"@jupyterlab/logconsole@^4.6.0-alpha.4, @jupyterlab/logconsole@workspace:packages/logconsole":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/logconsole@workspace:packages/logconsole"
   dependencies:
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/outputarea": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/outputarea": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/messaging": ^2.0.4
@@ -4057,17 +4062,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/lsp-extension@^4.6.0-alpha.3, @jupyterlab/lsp-extension@workspace:packages/lsp-extension, @jupyterlab/lsp-extension@~4.6.0-alpha.3":
+"@jupyterlab/lsp-extension@^4.6.0-alpha.4, @jupyterlab/lsp-extension@workspace:packages/lsp-extension, @jupyterlab/lsp-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/lsp-extension@workspace:packages/lsp-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/lsp": ^4.6.0-alpha.3
-    "@jupyterlab/running": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/lsp": ^4.6.0-alpha.4
+    "@jupyterlab/running": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/polling": ^2.1.5
     "@lumino/signaling": ^2.1.5
@@ -4078,18 +4083,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/lsp@^4.6.0-alpha.3, @jupyterlab/lsp@workspace:packages/lsp":
+"@jupyterlab/lsp@^4.6.0-alpha.4, @jupyterlab/lsp@workspace:packages/lsp":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/lsp@workspace:packages/lsp"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
@@ -4107,20 +4112,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/mainmenu-extension@^4.6.0-alpha.3, @jupyterlab/mainmenu-extension@workspace:packages/mainmenu-extension, @jupyterlab/mainmenu-extension@~4.6.0-alpha.3":
+"@jupyterlab/mainmenu-extension@^4.6.0-alpha.4, @jupyterlab/mainmenu-extension@workspace:packages/mainmenu-extension, @jupyterlab/mainmenu-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mainmenu-extension@workspace:packages/mainmenu-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -4131,14 +4136,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/mainmenu@^4.6.0-alpha.3, @jupyterlab/mainmenu@workspace:packages/mainmenu":
+"@jupyterlab/mainmenu@^4.6.0-alpha.4, @jupyterlab/mainmenu@workspace:packages/mainmenu":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mainmenu@workspace:packages/mainmenu"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -4150,33 +4155,33 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/markdownviewer-extension@^4.6.0-alpha.3, @jupyterlab/markdownviewer-extension@workspace:packages/markdownviewer-extension, @jupyterlab/markdownviewer-extension@~4.6.0-alpha.3":
+"@jupyterlab/markdownviewer-extension@^4.6.0-alpha.4, @jupyterlab/markdownviewer-extension@workspace:packages/markdownviewer-extension, @jupyterlab/markdownviewer-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/markdownviewer-extension@workspace:packages/markdownviewer-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/markdownviewer": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/markdownviewer": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/markdownviewer@^4.6.0-alpha.3, @jupyterlab/markdownviewer@workspace:packages/markdownviewer":
+"@jupyterlab/markdownviewer@^4.6.0-alpha.4, @jupyterlab/markdownviewer@workspace:packages/markdownviewer":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/markdownviewer@workspace:packages/markdownviewer"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
     "@lumino/signaling": ^2.1.5
@@ -4186,19 +4191,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/markedparser-extension@^4.6.0-alpha.3, @jupyterlab/markedparser-extension@workspace:packages/markedparser-extension, @jupyterlab/markedparser-extension@~4.6.0-alpha.3":
+"@jupyterlab/markedparser-extension@^4.6.0-alpha.4, @jupyterlab/markedparser-extension@workspace:packages/markedparser-extension, @jupyterlab/markedparser-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/markedparser-extension@workspace:packages/markedparser-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/mermaid": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/mermaid": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@types/d3": ^7.4.0
-    "@types/dompurify": ^2.4.0
-    marked: ^17.0.2
+    marked: ^17.0.4
     marked-gfm-heading-id: ^4.1.3
     marked-mangle: ^1.1.12
     rimraf: ~5.0.5
@@ -4206,14 +4210,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/mathjax-extension@^4.6.0-alpha.3, @jupyterlab/mathjax-extension@workspace:packages/mathjax-extension, @jupyterlab/mathjax-extension@~4.6.0-alpha.3":
+"@jupyterlab/mathjax-extension@^4.6.0-alpha.4, @jupyterlab/mathjax-extension@workspace:packages/mathjax-extension, @jupyterlab/mathjax-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mathjax-extension@workspace:packages/mathjax-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
     jest: ^29.2.0
@@ -4223,65 +4227,65 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/mermaid-extension@^4.6.0-alpha.3, @jupyterlab/mermaid-extension@workspace:packages/mermaid-extension, @jupyterlab/mermaid-extension@~4.6.0-alpha.3":
+"@jupyterlab/mermaid-extension@^4.6.0-alpha.4, @jupyterlab/mermaid-extension@workspace:packages/mermaid-extension, @jupyterlab/mermaid-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mermaid-extension@workspace:packages/mermaid-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/mermaid": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/mermaid": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/mermaid@^4.6.0-alpha.3, @jupyterlab/mermaid@workspace:packages/mermaid":
+"@jupyterlab/mermaid@^4.6.0-alpha.4, @jupyterlab/mermaid@workspace:packages/mermaid":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mermaid@workspace:packages/mermaid"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.5
-    "@mermaid-js/layout-elk": ^0.2.0
+    "@mermaid-js/layout-elk": ^0.2.1
     "@types/jest": ^29.2.0
     jest: ^29.2.0
-    mermaid: ^11.12.3
+    mermaid: ^11.13.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/metadataform-extension@^4.6.0-alpha.3, @jupyterlab/metadataform-extension@workspace:packages/metadataform-extension, @jupyterlab/metadataform-extension@~4.6.0-alpha.3":
+"@jupyterlab/metadataform-extension@^4.6.0-alpha.4, @jupyterlab/metadataform-extension@workspace:packages/metadataform-extension, @jupyterlab/metadataform-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/metadataform-extension@workspace:packages/metadataform-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/metadataform": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/metadataform": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/metadataform@^4.6.0-alpha.3, @jupyterlab/metadataform@workspace:packages/metadataform":
+"@jupyterlab/metadataform@^4.6.0-alpha.4, @jupyterlab/metadataform@workspace:packages/metadataform":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/metadataform@workspace:packages/metadataform"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.5
@@ -4301,107 +4305,108 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/metapackage@workspace:packages/metapackage"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/application-extension": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/apputils-extension": ^4.6.0-alpha.3
-    "@jupyterlab/attachments": ^4.6.0-alpha.3
-    "@jupyterlab/audio-extension": ^4.6.0-alpha.3
-    "@jupyterlab/cell-toolbar": ^4.6.0-alpha.3
-    "@jupyterlab/cell-toolbar-extension": ^4.6.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/celltags-extension": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror-extension": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/completer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/console-extension": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/csvviewer": ^4.6.0-alpha.3
-    "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/debugger": ^4.6.0-alpha.3
-    "@jupyterlab/debugger-extension": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch-extension": ^4.6.0-alpha.3
-    "@jupyterlab/extensionmanager": ^4.6.0-alpha.3
-    "@jupyterlab/extensionmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser-extension": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.3
-    "@jupyterlab/fileeditor-extension": ^4.6.0-alpha.3
-    "@jupyterlab/help-extension": ^4.6.0-alpha.3
-    "@jupyterlab/htmlviewer": ^4.6.0-alpha.3
-    "@jupyterlab/htmlviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/hub-extension": ^4.6.0-alpha.3
-    "@jupyterlab/imageviewer": ^4.6.0-alpha.3
-    "@jupyterlab/imageviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/inspector": ^4.6.0-alpha.3
-    "@jupyterlab/inspector-extension": ^4.6.0-alpha.3
-    "@jupyterlab/javascript-extension": ^4.6.0-alpha.3
-    "@jupyterlab/json-extension": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/launcher-extension": ^4.6.0-alpha.3
-    "@jupyterlab/logconsole": ^4.6.0-alpha.3
-    "@jupyterlab/logconsole-extension": ^4.6.0-alpha.3
-    "@jupyterlab/lsp": ^4.6.0-alpha.3
-    "@jupyterlab/lsp-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu-extension": ^4.6.0-alpha.3
-    "@jupyterlab/markdownviewer": ^4.6.0-alpha.3
-    "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.3
-    "@jupyterlab/markedparser-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.3
-    "@jupyterlab/mermaid": ^4.6.0-alpha.3
-    "@jupyterlab/mermaid-extension": ^4.6.0-alpha.3
-    "@jupyterlab/metadataform": ^4.6.0-alpha.3
-    "@jupyterlab/metadataform-extension": ^4.6.0-alpha.3
-    "@jupyterlab/nbconvert-css": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/notebook-extension": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/outputarea": ^4.6.0-alpha.3
-    "@jupyterlab/pdf-extension": ^4.6.0-alpha.3
-    "@jupyterlab/pluginmanager": ^4.6.0-alpha.3
-    "@jupyterlab/pluginmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/property-inspector": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-extension": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/running": ^4.6.0-alpha.3
-    "@jupyterlab/running-extension": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/services-extension": ^4.6.0-alpha.3
-    "@jupyterlab/settingeditor": ^4.6.0-alpha.3
-    "@jupyterlab/settingeditor-extension": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/shortcuts-extension": ^5.4.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar-extension": ^4.6.0-alpha.3
-    "@jupyterlab/terminal": ^4.6.0-alpha.3
-    "@jupyterlab/terminal-extension": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/theme-dark-extension": ^4.6.0-alpha.3
-    "@jupyterlab/theme-dark-high-contrast-extension": ^4.6.0-alpha.3
-    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/toc-extension": ^6.6.0-alpha.3
-    "@jupyterlab/tooltip": ^4.6.0-alpha.3
-    "@jupyterlab/tooltip-extension": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/translation-extension": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components-extension": ^4.6.0-alpha.3
-    "@jupyterlab/vega5-extension": ^4.6.0-alpha.3
-    "@jupyterlab/video-extension": ^4.6.0-alpha.3
-    "@jupyterlab/workspaces": ^4.6.0-alpha.3
-    "@jupyterlab/workspaces-extension": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/application-extension": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
+    "@jupyterlab/attachments": ^4.6.0-alpha.4
+    "@jupyterlab/audio-extension": ^4.6.0-alpha.4
+    "@jupyterlab/cell-toolbar": ^4.6.0-alpha.4
+    "@jupyterlab/cell-toolbar-extension": ^4.6.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/celltags-extension": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror-extension": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/completer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/console-extension": ^4.6.0-alpha.4
+    "@jupyterlab/core-meta": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/csvviewer": ^4.6.0-alpha.4
+    "@jupyterlab/csvviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/debugger": ^4.6.0-alpha.4
+    "@jupyterlab/debugger-extension": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch-extension": ^4.6.0-alpha.4
+    "@jupyterlab/extensionmanager": ^4.6.0-alpha.4
+    "@jupyterlab/extensionmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser-extension": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor": ^4.6.0-alpha.4
+    "@jupyterlab/fileeditor-extension": ^4.6.0-alpha.4
+    "@jupyterlab/help-extension": ^4.6.0-alpha.4
+    "@jupyterlab/htmlviewer": ^4.6.0-alpha.4
+    "@jupyterlab/htmlviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/hub-extension": ^4.6.0-alpha.4
+    "@jupyterlab/imageviewer": ^4.6.0-alpha.4
+    "@jupyterlab/imageviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/inspector": ^4.6.0-alpha.4
+    "@jupyterlab/inspector-extension": ^4.6.0-alpha.4
+    "@jupyterlab/javascript-extension": ^4.6.0-alpha.4
+    "@jupyterlab/json-extension": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/launcher-extension": ^4.6.0-alpha.4
+    "@jupyterlab/logconsole": ^4.6.0-alpha.4
+    "@jupyterlab/logconsole-extension": ^4.6.0-alpha.4
+    "@jupyterlab/lsp": ^4.6.0-alpha.4
+    "@jupyterlab/lsp-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu-extension": ^4.6.0-alpha.4
+    "@jupyterlab/markdownviewer": ^4.6.0-alpha.4
+    "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.4
+    "@jupyterlab/markedparser-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mathjax-extension": ^4.6.0-alpha.4
+    "@jupyterlab/mermaid": ^4.6.0-alpha.4
+    "@jupyterlab/mermaid-extension": ^4.6.0-alpha.4
+    "@jupyterlab/metadataform": ^4.6.0-alpha.4
+    "@jupyterlab/metadataform-extension": ^4.6.0-alpha.4
+    "@jupyterlab/nbconvert-css": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/notebook-extension": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/outputarea": ^4.6.0-alpha.4
+    "@jupyterlab/pdf-extension": ^4.6.0-alpha.4
+    "@jupyterlab/pluginmanager": ^4.6.0-alpha.4
+    "@jupyterlab/pluginmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/property-inspector": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-extension": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/running": ^4.6.0-alpha.4
+    "@jupyterlab/running-extension": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/services-extension": ^4.6.0-alpha.4
+    "@jupyterlab/settingeditor": ^4.6.0-alpha.4
+    "@jupyterlab/settingeditor-extension": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/shortcuts-extension": ^5.4.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar-extension": ^4.6.0-alpha.4
+    "@jupyterlab/terminal": ^4.6.0-alpha.4
+    "@jupyterlab/terminal-extension": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/theme-dark-extension": ^4.6.0-alpha.4
+    "@jupyterlab/theme-dark-high-contrast-extension": ^4.6.0-alpha.4
+    "@jupyterlab/theme-light-extension": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/toc-extension": ^6.6.0-alpha.4
+    "@jupyterlab/tooltip": ^4.6.0-alpha.4
+    "@jupyterlab/tooltip-extension": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/translation-extension": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components-extension": ^4.6.0-alpha.4
+    "@jupyterlab/vega5-extension": ^4.6.0-alpha.4
+    "@jupyterlab/video-extension": ^4.6.0-alpha.4
+    "@jupyterlab/workspaces": ^4.6.0-alpha.4
+    "@jupyterlab/workspaces-extension": ^4.6.0-alpha.4
     "@types/jest": ^29.2.0
     fs-extra: ^10.1.0
     jest: ^29.2.0
@@ -4415,8 +4420,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-consumer@workspace:jupyterlab/tests/mock_packages/interop/consumer"
   dependencies:
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/mock-token": ^4.6.0-alpha.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/mock-token": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
 
@@ -4424,8 +4429,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
 
@@ -4433,8 +4438,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-provider@workspace:jupyterlab/tests/mock_packages/interop/provider"
   dependencies:
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/mock-token": ^4.6.0-alpha.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/mock-token": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
 
@@ -4442,12 +4447,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension"
   dependencies:
-    "@jupyterlab/builder": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/mock-token@^4.6.0-alpha.3, @jupyterlab/mock-token@workspace:jupyterlab/tests/mock_packages/interop/token":
+"@jupyterlab/mock-token@^4.6.0-alpha.4, @jupyterlab/mock-token@workspace:jupyterlab/tests/mock_packages/interop/token":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-token@workspace:jupyterlab/tests/mock_packages/interop/token"
   dependencies:
@@ -4455,30 +4460,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/nbconvert-css@^4.6.0-alpha.3, @jupyterlab/nbconvert-css@workspace:packages/nbconvert-css":
+"@jupyterlab/nbconvert-css@^4.6.0-alpha.4, @jupyterlab/nbconvert-css@workspace:packages/nbconvert-css":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/nbconvert-css@workspace:packages/nbconvert-css"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/outputarea": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@rspack/cli": ^1.7.7
-    "@rspack/core": ^1.7.7
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/outputarea": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@rspack/cli": ^1.7.8
+    "@rspack/core": ^1.7.8
     css-loader: ^6.7.1
     null-loader: ^4.0.0
     rimraf: ~5.0.5
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/nbformat@^4.6.0-alpha.3, @jupyterlab/nbformat@workspace:packages/nbformat":
+"@jupyterlab/nbformat@^4.6.0-alpha.4, @jupyterlab/nbformat@workspace:packages/nbformat":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/nbformat@workspace:packages/nbformat"
   dependencies:
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
     jest: ^29.2.0
@@ -4496,41 +4501,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/notebook-extension@^4.6.0-alpha.3, @jupyterlab/notebook-extension@workspace:packages/notebook-extension, @jupyterlab/notebook-extension@~4.6.0-alpha.3":
+"@jupyterlab/notebook-extension@^4.6.0-alpha.4, @jupyterlab/notebook-extension@workspace:packages/notebook-extension, @jupyterlab/notebook-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook-extension@workspace:packages/notebook-extension"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cell-toolbar": ^4.6.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/completer": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/logconsole": ^4.6.0-alpha.3
-    "@jupyterlab/lsp": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/metadataform": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/property-inspector": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cell-toolbar": ^4.6.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/completer": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docmanager-extension": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/logconsole": ^4.6.0-alpha.4
+    "@jupyterlab/lsp": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/metadataform": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/property-inspector": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -4545,30 +4550,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/notebook@^4.6.0-alpha.3, @jupyterlab/notebook@workspace:packages/notebook":
+"@jupyterlab/notebook@^4.6.0-alpha.4, @jupyterlab/notebook@workspace:packages/notebook":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/cells": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/codemirror": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/lsp": ^4.6.0-alpha.3
-    "@jupyterlab/markedparser-extension": ^4.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/cells": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/codemirror": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/lsp": ^4.6.0-alpha.4
+    "@jupyterlab/markedparser-extension": ^4.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -4588,11 +4593,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/observables@^5.6.0-alpha.3, @jupyterlab/observables@workspace:packages/observables":
+"@jupyterlab/observables@^5.6.0-alpha.4, @jupyterlab/observables@workspace:packages/observables":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/observables@workspace:packages/observables"
   dependencies:
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -4605,18 +4610,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/outputarea@^4.6.0-alpha.3, @jupyterlab/outputarea@workspace:packages/outputarea":
+"@jupyterlab/outputarea@^4.6.0-alpha.4, @jupyterlab/outputarea@workspace:packages/outputarea":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/outputarea@workspace:packages/outputarea"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -4631,11 +4636,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/pdf-extension@^4.6.0-alpha.3, @jupyterlab/pdf-extension@workspace:packages/pdf-extension, @jupyterlab/pdf-extension@~4.6.0-alpha.3":
+"@jupyterlab/pdf-extension@^4.6.0-alpha.4, @jupyterlab/pdf-extension@workspace:packages/pdf-extension, @jupyterlab/pdf-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/pdf-extension@workspace:packages/pdf-extension"
   dependencies:
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/widgets": ^2.7.5
@@ -4644,32 +4649,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/pluginmanager-extension@^4.6.0-alpha.3, @jupyterlab/pluginmanager-extension@workspace:packages/pluginmanager-extension, @jupyterlab/pluginmanager-extension@~4.6.0-alpha.3":
+"@jupyterlab/pluginmanager-extension@^4.6.0-alpha.4, @jupyterlab/pluginmanager-extension@workspace:packages/pluginmanager-extension, @jupyterlab/pluginmanager-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/pluginmanager-extension@workspace:packages/pluginmanager-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/pluginmanager": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/pluginmanager": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/pluginmanager@^4.6.0-alpha.3, @jupyterlab/pluginmanager@workspace:packages/pluginmanager":
+"@jupyterlab/pluginmanager@^4.6.0-alpha.4, @jupyterlab/pluginmanager@workspace:packages/pluginmanager":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/pluginmanager@workspace:packages/pluginmanager"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.5
@@ -4681,13 +4686,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/property-inspector@^4.6.0-alpha.3, @jupyterlab/property-inspector@workspace:packages/property-inspector":
+"@jupyterlab/property-inspector@^4.6.0-alpha.4, @jupyterlab/property-inspector@workspace:packages/property-inspector":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/property-inspector@workspace:packages/property-inspector"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
@@ -4699,21 +4704,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/rendermime-extension@^4.6.0-alpha.3, @jupyterlab/rendermime-extension@workspace:packages/rendermime-extension, @jupyterlab/rendermime-extension@~4.6.0-alpha.3":
+"@jupyterlab/rendermime-extension@^4.6.0-alpha.4, @jupyterlab/rendermime-extension@workspace:packages/rendermime-extension, @jupyterlab/rendermime-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/rendermime-extension@workspace:packages/rendermime-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/rendermime-interfaces@^3.14.0-alpha.3, @jupyterlab/rendermime-interfaces@workspace:packages/rendermime-interfaces":
+"@jupyterlab/rendermime-interfaces@^3.14.0-alpha.4, @jupyterlab/rendermime-interfaces@workspace:packages/rendermime-interfaces":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/rendermime-interfaces@workspace:packages/rendermime-interfaces"
   dependencies:
@@ -4724,18 +4729,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/rendermime@^4.6.0-alpha.3, @jupyterlab/rendermime@workspace:packages/rendermime":
+"@jupyterlab/rendermime@^4.6.0-alpha.4, @jupyterlab/rendermime@workspace:packages/rendermime":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/rendermime@workspace:packages/rendermime"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
     "@lumino/signaling": ^2.1.5
@@ -4774,21 +4779,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/running-extension@^4.6.0-alpha.3, @jupyterlab/running-extension@workspace:packages/running-extension, @jupyterlab/running-extension@~4.6.0-alpha.3":
+"@jupyterlab/running-extension@^4.6.0-alpha.4, @jupyterlab/running-extension@workspace:packages/running-extension, @jupyterlab/running-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running-extension@workspace:packages/running-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docmanager": ^4.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/running": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docmanager": ^4.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/running": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/polling": ^2.1.5
     "@lumino/signaling": ^2.1.5
@@ -4799,15 +4804,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/running@^4.6.0-alpha.3, @jupyterlab/running@workspace:packages/running":
+"@jupyterlab/running@^4.6.0-alpha.4, @jupyterlab/running@workspace:packages/running":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
     "@jupyter/react-components": ^0.16.6
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/domutils": ^2.0.4
@@ -4820,12 +4825,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/services-extension@^4.6.0-alpha.3, @jupyterlab/services-extension@workspace:packages/services-extension, @jupyterlab/services-extension@~4.6.0-alpha.3":
+"@jupyterlab/services-extension@^4.6.0-alpha.4, @jupyterlab/services-extension@workspace:packages/services-extension, @jupyterlab/services-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/services-extension@workspace:packages/services-extension"
   dependencies:
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
     rimraf: ~5.0.5
@@ -4833,22 +4838,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/services@^7.6.0-alpha.3, @jupyterlab/services@workspace:packages/services":
+"@jupyterlab/services@^7.6.0-alpha.4, @jupyterlab/services@workspace:packages/services":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/services@workspace:packages/services"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/polling": ^2.1.5
     "@lumino/properties": ^2.0.4
     "@lumino/signaling": ^2.1.5
-    "@rspack/cli": ^1.7.7
+    "@rspack/cli": ^1.7.8
     "@types/jest": ^29.2.0
     "@types/ws": ^8.5.3
     jest: ^29.2.0
@@ -4858,22 +4863,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/settingeditor-extension@^4.6.0-alpha.3, @jupyterlab/settingeditor-extension@workspace:packages/settingeditor-extension, @jupyterlab/settingeditor-extension@~4.6.0-alpha.3":
+"@jupyterlab/settingeditor-extension@^4.6.0-alpha.4, @jupyterlab/settingeditor-extension@workspace:packages/settingeditor-extension, @jupyterlab/settingeditor-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/settingeditor-extension@workspace:packages/settingeditor-extension"
   dependencies:
     "@codemirror/commands": ^6.10.2
     "@codemirror/view": ^6.39.14
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/pluginmanager": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/settingeditor": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/pluginmanager": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/settingeditor": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/disposable": ^2.1.5
     react: ^18.2.0
     rimraf: ~5.0.5
@@ -4881,20 +4886,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/settingeditor@^4.6.0-alpha.3, @jupyterlab/settingeditor@workspace:packages/settingeditor":
+"@jupyterlab/settingeditor@^4.6.0-alpha.4, @jupyterlab/settingeditor@workspace:packages/settingeditor":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/settingeditor@workspace:packages/settingeditor"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/inspector": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/inspector": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -4919,13 +4924,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/settingregistry@^4.6.0-alpha.3, @jupyterlab/settingregistry@workspace:packages/settingregistry":
+"@jupyterlab/settingregistry@^4.6.0-alpha.4, @jupyterlab/settingregistry@workspace:packages/settingregistry":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/settingregistry@workspace:packages/settingregistry"
   dependencies:
-    "@jupyterlab/nbformat": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/nbformat": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -4942,18 +4947,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/shortcuts-extension@^5.4.0-alpha.3, @jupyterlab/shortcuts-extension@workspace:packages/shortcuts-extension, @jupyterlab/shortcuts-extension@~5.4.0-alpha.3":
+"@jupyterlab/shortcuts-extension@^5.4.0-alpha.4, @jupyterlab/shortcuts-extension@workspace:packages/shortcuts-extension, @jupyterlab/shortcuts-extension@~5.4.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/shortcuts-extension@workspace:packages/shortcuts-extension"
   dependencies:
     "@jupyter/react-components": ^0.16.6
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -4970,11 +4975,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/statedb@^4.6.0-alpha.3, @jupyterlab/statedb@workspace:packages/statedb":
+"@jupyterlab/statedb@^4.6.0-alpha.4, @jupyterlab/statedb@workspace:packages/statedb":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/statedb@workspace:packages/statedb"
   dependencies:
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -4987,15 +4992,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/statusbar-extension@^4.6.0-alpha.3, @jupyterlab/statusbar-extension@workspace:packages/statusbar-extension, @jupyterlab/statusbar-extension@~4.6.0-alpha.3":
+"@jupyterlab/statusbar-extension@^4.6.0-alpha.4, @jupyterlab/statusbar-extension@workspace:packages/statusbar-extension, @jupyterlab/statusbar-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/statusbar-extension@workspace:packages/statusbar-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statusbar": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statusbar": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@types/react": ^18.0.26
     "@types/react-dom": ^18.0.9
     rimraf: ~5.0.5
@@ -5003,12 +5008,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/statusbar@^4.6.0-alpha.3, @jupyterlab/statusbar@workspace:packages/statusbar":
+"@jupyterlab/statusbar@^4.6.0-alpha.4, @jupyterlab/statusbar@workspace:packages/statusbar":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/statusbar@workspace:packages/statusbar"
   dependencies:
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
@@ -5027,29 +5032,29 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/template@workspace:buildutils/template"
   dependencies:
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@types/jest": ^29.2.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/terminal-extension@^4.6.0-alpha.3, @jupyterlab/terminal-extension@workspace:packages/terminal-extension, @jupyterlab/terminal-extension@~4.6.0-alpha.3":
+"@jupyterlab/terminal-extension@^4.6.0-alpha.4, @jupyterlab/terminal-extension@workspace:packages/terminal-extension, @jupyterlab/terminal-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/terminal-extension@workspace:packages/terminal-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/documentsearch": ^4.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/launcher": ^4.6.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/running": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/terminal": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/documentsearch": ^4.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/launcher": ^4.6.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/running": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/terminal": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
     "@types/webpack-env": ^1.18.0
     "@xterm/addon-search": ~0.15.0
@@ -5059,14 +5064,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/terminal@^4.6.0-alpha.3, @jupyterlab/terminal@workspace:packages/terminal":
+"@jupyterlab/terminal@^4.6.0-alpha.4, @jupyterlab/terminal@workspace:packages/terminal":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/terminal@workspace:packages/terminal"
   dependencies:
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/domutils": ^2.0.4
     "@lumino/messaging": ^2.0.4
@@ -5087,13 +5092,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/testing@^4.6.0-alpha.3, @jupyterlab/testing@workspace:packages/testing":
+"@jupyterlab/testing@^4.6.0-alpha.4, @jupyterlab/testing@workspace:packages/testing":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/testing@workspace:packages/testing"
   dependencies:
     "@babel/core": ^7.10.2
     "@babel/preset-env": ^7.10.2
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
@@ -5113,84 +5118,84 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/testutils@^4.6.0-alpha.3, @jupyterlab/testutils@workspace:testutils":
+"@jupyterlab/testutils@^4.6.0-alpha.4, @jupyterlab/testutils@workspace:testutils":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/testutils@workspace:testutils"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/theme-dark-extension@^4.6.0-alpha.3, @jupyterlab/theme-dark-extension@workspace:packages/theme-dark-extension, @jupyterlab/theme-dark-extension@~4.6.0-alpha.3":
+"@jupyterlab/theme-dark-extension@^4.6.0-alpha.4, @jupyterlab/theme-dark-extension@workspace:packages/theme-dark-extension, @jupyterlab/theme-dark-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/theme-dark-extension@workspace:packages/theme-dark-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/theme-dark-high-contrast-extension@^4.6.0-alpha.3, @jupyterlab/theme-dark-high-contrast-extension@workspace:packages/theme-dark-high-contrast-extension, @jupyterlab/theme-dark-high-contrast-extension@~4.6.0-alpha.3":
+"@jupyterlab/theme-dark-high-contrast-extension@^4.6.0-alpha.4, @jupyterlab/theme-dark-high-contrast-extension@workspace:packages/theme-dark-high-contrast-extension, @jupyterlab/theme-dark-high-contrast-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/theme-dark-high-contrast-extension@workspace:packages/theme-dark-high-contrast-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/theme-light-extension@^4.6.0-alpha.3, @jupyterlab/theme-light-extension@workspace:packages/theme-light-extension, @jupyterlab/theme-light-extension@~4.6.0-alpha.3":
+"@jupyterlab/theme-light-extension@^4.6.0-alpha.4, @jupyterlab/theme-light-extension@workspace:packages/theme-light-extension, @jupyterlab/theme-light-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/theme-light-extension@workspace:packages/theme-light-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/toc-extension@^6.6.0-alpha.3, @jupyterlab/toc-extension@workspace:packages/toc-extension, @jupyterlab/toc-extension@~6.6.0-alpha.3":
+"@jupyterlab/toc-extension@^6.6.0-alpha.4, @jupyterlab/toc-extension@workspace:packages/toc-extension, @jupyterlab/toc-extension@~6.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/toc-extension@workspace:packages/toc-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/toc": ^6.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/toc": ^6.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/toc@^6.6.0-alpha.3, @jupyterlab/toc@workspace:packages/toc":
+"@jupyterlab/toc@^6.6.0-alpha.4, @jupyterlab/toc@workspace:packages/toc":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/toc@workspace:packages/toc"
   dependencies:
     "@jupyter/react-components": ^0.16.6
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/messaging": ^2.0.4
@@ -5205,20 +5210,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/tooltip-extension@^4.6.0-alpha.3, @jupyterlab/tooltip-extension@workspace:packages/tooltip-extension, @jupyterlab/tooltip-extension@~4.6.0-alpha.3":
+"@jupyterlab/tooltip-extension@^4.6.0-alpha.4, @jupyterlab/tooltip-extension@workspace:packages/tooltip-extension, @jupyterlab/tooltip-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/tooltip-extension@workspace:packages/tooltip-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/console": ^4.6.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.3
-    "@jupyterlab/notebook": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/tooltip": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/console": ^4.6.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/fileeditor": ^4.6.0-alpha.4
+    "@jupyterlab/notebook": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/tooltip": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.5
@@ -5227,14 +5232,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/tooltip@^4.6.0-alpha.3, @jupyterlab/tooltip@workspace:packages/tooltip":
+"@jupyterlab/tooltip@^4.6.0-alpha.4, @jupyterlab/tooltip@workspace:packages/tooltip":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/tooltip@workspace:packages/tooltip"
   dependencies:
-    "@jupyterlab/codeeditor": ^4.6.0-alpha.3
-    "@jupyterlab/rendermime": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/codeeditor": ^4.6.0-alpha.4
+    "@jupyterlab/rendermime": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.5
@@ -5243,29 +5248,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/translation-extension@^4.6.0-alpha.3, @jupyterlab/translation-extension@workspace:packages/translation-extension, @jupyterlab/translation-extension@~4.6.0-alpha.3":
+"@jupyterlab/translation-extension@^4.6.0-alpha.4, @jupyterlab/translation-extension@workspace:packages/translation-extension, @jupyterlab/translation-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/translation-extension@workspace:packages/translation-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/mainmenu": ^4.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/mainmenu": ^4.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/translation@^4.6.0-alpha.3, @jupyterlab/translation@workspace:packages/translation":
+"@jupyterlab/translation@^4.6.0-alpha.4, @jupyterlab/translation@workspace:packages/translation":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/translation@workspace:packages/translation"
   dependencies:
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
     jest: ^29.2.0
@@ -5274,28 +5279,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/ui-components-extension@^4.6.0-alpha.3, @jupyterlab/ui-components-extension@workspace:packages/ui-components-extension, @jupyterlab/ui-components-extension@~4.6.0-alpha.3":
+"@jupyterlab/ui-components-extension@^4.6.0-alpha.4, @jupyterlab/ui-components-extension@workspace:packages/ui-components-extension, @jupyterlab/ui-components-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components-extension@workspace:packages/ui-components-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/ui-components@^4.6.0-alpha.3, @jupyterlab/ui-components@workspace:packages/ui-components":
+"@jupyterlab/ui-components@^4.6.0-alpha.4, @jupyterlab/ui-components@workspace:packages/ui-components":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components@workspace:packages/ui-components"
   dependencies:
     "@jupyter/react-components": ^0.16.6
     "@jupyter/web-components": ^0.16.6
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/observables": ^5.6.0-alpha.3
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/observables": ^5.6.0-alpha.4
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
@@ -5322,12 +5327,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/vega5-extension@^4.6.0-alpha.3, @jupyterlab/vega5-extension@workspace:packages/vega5-extension, @jupyterlab/vega5-extension@~4.6.0-alpha.3":
+"@jupyterlab/vega5-extension@^4.6.0-alpha.4, @jupyterlab/vega5-extension@workspace:packages/vega5-extension, @jupyterlab/vega5-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/vega5-extension@workspace:packages/vega5-extension"
   dependencies:
-    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.3
-    "@jupyterlab/testutils": ^4.6.0-alpha.3
+    "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.4
+    "@jupyterlab/testutils": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.5
     "@types/jest": ^29.2.0
@@ -5342,16 +5347,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/video-extension@^4.6.0-alpha.3, @jupyterlab/video-extension@workspace:packages/video-extension, @jupyterlab/video-extension@~4.6.0-alpha.3":
+"@jupyterlab/video-extension@^4.6.0-alpha.4, @jupyterlab/video-extension@workspace:packages/video-extension, @jupyterlab/video-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/video-extension@workspace:packages/video-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/docregistry": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testutils": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/docregistry": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testutils": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
@@ -5361,21 +5366,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/workspaces-extension@^4.6.0-alpha.3, @jupyterlab/workspaces-extension@workspace:packages/workspaces-extension, @jupyterlab/workspaces-extension@~4.6.0-alpha.3":
+"@jupyterlab/workspaces-extension@^4.6.0-alpha.4, @jupyterlab/workspaces-extension@workspace:packages/workspaces-extension, @jupyterlab/workspaces-extension@~4.6.0-alpha.4":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/workspaces-extension@workspace:packages/workspaces-extension"
   dependencies:
-    "@jupyterlab/application": ^4.6.0-alpha.3
-    "@jupyterlab/apputils": ^4.7.0-alpha.3
-    "@jupyterlab/coreutils": ^6.6.0-alpha.3
-    "@jupyterlab/filebrowser": ^4.6.0-alpha.3
-    "@jupyterlab/running": ^4.6.0-alpha.3
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/settingregistry": ^4.6.0-alpha.3
-    "@jupyterlab/statedb": ^4.6.0-alpha.3
-    "@jupyterlab/translation": ^4.6.0-alpha.3
-    "@jupyterlab/ui-components": ^4.6.0-alpha.3
-    "@jupyterlab/workspaces": ^4.6.0-alpha.3
+    "@jupyterlab/application": ^4.6.0-alpha.4
+    "@jupyterlab/apputils": ^4.7.0-alpha.4
+    "@jupyterlab/coreutils": ^6.6.0-alpha.4
+    "@jupyterlab/filebrowser": ^4.6.0-alpha.4
+    "@jupyterlab/running": ^4.6.0-alpha.4
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.4
+    "@jupyterlab/statedb": ^4.6.0-alpha.4
+    "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
+    "@jupyterlab/workspaces": ^4.6.0-alpha.4
     "@types/jest": ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
@@ -5383,12 +5388,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/workspaces@^4.6.0-alpha.3, @jupyterlab/workspaces@workspace:packages/workspaces":
+"@jupyterlab/workspaces@^4.6.0-alpha.4, @jupyterlab/workspaces@workspace:packages/workspaces":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/workspaces@workspace:packages/workspaces"
   dependencies:
-    "@jupyterlab/services": ^7.6.0-alpha.3
-    "@jupyterlab/testing": ^4.6.0-alpha.3
+    "@jupyterlab/services": ^7.6.0-alpha.4
+    "@jupyterlab/testing": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/polling": ^2.1.5
@@ -5762,24 +5767,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mermaid-js/layout-elk@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@mermaid-js/layout-elk@npm:0.2.0"
+"@mermaid-js/layout-elk@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@mermaid-js/layout-elk@npm:0.2.1"
   dependencies:
     d3: ^7.9.0
     elkjs: ^0.9.3
   peerDependencies:
     mermaid: ^11.0.2
-  checksum: 1a1ca0ebe32367de883341f2f10484086aacff498f57a3366aec8fcea1749bea66ea574021223de69ac065a7c914c6cd56f385c48c0a7d25c11a71571903ee6d
+  checksum: f5caaa1618ad273c1e2090dc5ce952789bc3c12fb2d57146a7997148290884cf22e51b552b4a38e995db43ef175a5d46f1710de2e25d14106812f21dc906b1cb
   languageName: node
   linkType: hard
 
-"@mermaid-js/parser@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@mermaid-js/parser@npm:1.0.0"
+"@mermaid-js/parser@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@mermaid-js/parser@npm:1.0.1"
   dependencies:
     langium: ^4.0.0
-  checksum: 5d12454adf3d38fcb41e08da09d6147d600bf109512294f1448a593402e6c38b0f8ed6040ef49941bbe4d868aaa8ffa0d6d09c41ba76930d737211ce0e553460
+  checksum: 0518b599157b26af74bd6fd2d6fb130c51da2381d6ad70e4972abba5879b5589cde93bc429b07e2cbb941d0b0f3099e9b83c1fc6e41248d4382b4b293c9cf20c
   languageName: node
   linkType: hard
 
@@ -6486,92 +6491,92 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-arm64@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-darwin-arm64@npm:1.7.7"
+"@rspack/binding-darwin-arm64@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-darwin-arm64@npm:1.7.8"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-x64@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-darwin-x64@npm:1.7.7"
+"@rspack/binding-darwin-x64@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-darwin-x64@npm:1.7.8"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-gnu@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-linux-arm64-gnu@npm:1.7.7"
+"@rspack/binding-linux-arm64-gnu@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-linux-arm64-gnu@npm:1.7.8"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-musl@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-linux-arm64-musl@npm:1.7.7"
+"@rspack/binding-linux-arm64-musl@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-linux-arm64-musl@npm:1.7.8"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-gnu@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-linux-x64-gnu@npm:1.7.7"
+"@rspack/binding-linux-x64-gnu@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-linux-x64-gnu@npm:1.7.8"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-musl@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-linux-x64-musl@npm:1.7.7"
+"@rspack/binding-linux-x64-musl@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-linux-x64-musl@npm:1.7.8"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-wasm32-wasi@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-wasm32-wasi@npm:1.7.7"
+"@rspack/binding-wasm32-wasi@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-wasm32-wasi@npm:1.7.8"
   dependencies:
     "@napi-rs/wasm-runtime": 1.0.7
   conditions: cpu=wasm32
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-arm64-msvc@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-win32-arm64-msvc@npm:1.7.7"
+"@rspack/binding-win32-arm64-msvc@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-win32-arm64-msvc@npm:1.7.8"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-ia32-msvc@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-win32-ia32-msvc@npm:1.7.7"
+"@rspack/binding-win32-ia32-msvc@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-win32-ia32-msvc@npm:1.7.8"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-x64-msvc@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding-win32-x64-msvc@npm:1.7.7"
+"@rspack/binding-win32-x64-msvc@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding-win32-x64-msvc@npm:1.7.8"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/binding@npm:1.7.7"
+"@rspack/binding@npm:1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/binding@npm:1.7.8"
   dependencies:
-    "@rspack/binding-darwin-arm64": 1.7.7
-    "@rspack/binding-darwin-x64": 1.7.7
-    "@rspack/binding-linux-arm64-gnu": 1.7.7
-    "@rspack/binding-linux-arm64-musl": 1.7.7
-    "@rspack/binding-linux-x64-gnu": 1.7.7
-    "@rspack/binding-linux-x64-musl": 1.7.7
-    "@rspack/binding-wasm32-wasi": 1.7.7
-    "@rspack/binding-win32-arm64-msvc": 1.7.7
-    "@rspack/binding-win32-ia32-msvc": 1.7.7
-    "@rspack/binding-win32-x64-msvc": 1.7.7
+    "@rspack/binding-darwin-arm64": 1.7.8
+    "@rspack/binding-darwin-x64": 1.7.8
+    "@rspack/binding-linux-arm64-gnu": 1.7.8
+    "@rspack/binding-linux-arm64-musl": 1.7.8
+    "@rspack/binding-linux-x64-gnu": 1.7.8
+    "@rspack/binding-linux-x64-musl": 1.7.8
+    "@rspack/binding-wasm32-wasi": 1.7.8
+    "@rspack/binding-win32-arm64-msvc": 1.7.8
+    "@rspack/binding-win32-ia32-msvc": 1.7.8
+    "@rspack/binding-win32-x64-msvc": 1.7.8
   dependenciesMeta:
     "@rspack/binding-darwin-arm64":
       optional: true
@@ -6593,13 +6598,13 @@ __metadata:
       optional: true
     "@rspack/binding-win32-x64-msvc":
       optional: true
-  checksum: fd8e52b26e628a7aab9f452ca7e00a9b2dff30de05b393cbc119825d1af33639bd7dc894d4548d4513bfb7c87b2b470dfafed27e0bf7cea30f5d2405eaf1e316
+  checksum: fbef499b308ef3fa47329f5a1dc9fc873cc5cc3d4b41cfc2313ffeadf5b5f8574d5596d0d0a5ba48e96bc562911e344ca7f3d3205c13cf4f46f4cae5eec4a04d
   languageName: node
   linkType: hard
 
-"@rspack/cli@npm:^1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/cli@npm:1.7.7"
+"@rspack/cli@npm:^1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/cli@npm:1.7.8"
   dependencies:
     "@discoveryjs/json-ext": ^0.5.7
     "@rspack/dev-server": ~1.1.5
@@ -6609,23 +6614,23 @@ __metadata:
     "@rspack/core": ^1.0.0-alpha || ^1.x
   bin:
     rspack: bin/rspack.js
-  checksum: 9cb74668b64485c4aea18d0d188224431c6cb1c946303f02c7b3bcf1bcd153d99dd87d15737df453337548aafdf7230703ce8e2d065ff2330acea89331a3eeeb
+  checksum: 9028f7062bb5fd6628ad0fccd2756b7ffd098666ddc3bd2e54e5620da5e61bd341fc11603ebfa47616f1084a9f91604fcfc58005622bb0e8cf693b9da1ebdb82
   languageName: node
   linkType: hard
 
-"@rspack/core@npm:^1.7.7":
-  version: 1.7.7
-  resolution: "@rspack/core@npm:1.7.7"
+"@rspack/core@npm:^1.7.8":
+  version: 1.7.8
+  resolution: "@rspack/core@npm:1.7.8"
   dependencies:
     "@module-federation/runtime-tools": 0.22.0
-    "@rspack/binding": 1.7.7
+    "@rspack/binding": 1.7.8
     "@rspack/lite-tapable": 1.1.0
   peerDependencies:
     "@swc/helpers": ">=0.5.1"
   peerDependenciesMeta:
     "@swc/helpers":
       optional: true
-  checksum: 2c6bcf555e1d06fb1acdd1f0798ba025dc360b4fa1fbbebd3179ee7e45b13a7c90bb9eba6838223f27ec580e9583442083f0de76b62ca419be8df7087a71b631
+  checksum: 0fc465aa231f446a79cad8e80162fb97cf095dc752b88890073294eddd88360a8da276bf40dae3223f6bd0b4780a57d43bfa1742f9289bf9cb36b819e17b5514
   languageName: node
   linkType: hard
 
@@ -7155,6 +7160,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trysound/sax@npm:0.2.0":
+  version: 0.2.0
+  resolution: "@trysound/sax@npm:0.2.0"
+  checksum: 11226c39b52b391719a2a92e10183e4260d9651f86edced166da1d95f39a0a1eaa470e44d14ac685ccd6d3df7e2002433782872c0feeb260d61e80f21250e65c
+  languageName: node
+  linkType: hard
+
 "@tufjs/canonical-json@npm:1.0.0":
   version: 1.0.0
   resolution: "@tufjs/canonical-json@npm:1.0.0"
@@ -7571,15 +7583,6 @@ __metadata:
     "@types/d3-transition": "*"
     "@types/d3-zoom": "*"
   checksum: 12234aa093c8661546168becdd8956e892b276f525d96f65a7b32fed886fc6a569fe5a1171bff26fef2a5663960635f460c9504a6f2d242ba281a2b6c8c6465c
-  languageName: node
-  linkType: hard
-
-"@types/dompurify@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@types/dompurify@npm:2.4.0"
-  dependencies:
-    "@types/trusted-types": "*"
-  checksum: b48cd81e997794ebc390c7c5bef1a67ec14a6f2f0521973e07e06af186c7583abe114d94d24868c0632b9573f5bd77131a4b76f3fffdf089ba99a4e53dd46c39
   languageName: node
   linkType: hard
 
@@ -8076,7 +8079,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/trusted-types@npm:*, @types/trusted-types@npm:^2.0.7":
+"@types/trusted-types@npm:^2.0.7":
   version: 2.0.7
   resolution: "@types/trusted-types@npm:2.0.7"
   checksum: 8e4202766a65877efcf5d5a41b7dd458480b36195e580a3b1085ad21e948bc417d55d6f8af1fd2a7ad008015d4117d5fdfe432731157da3c68678487174e4ba3
@@ -8271,6 +8274,21 @@ __metadata:
     "@typescript-eslint/types": 8.56.1
     eslint-visitor-keys: ^5.0.0
   checksum: cd8cb26d855b09103bd8a5d5d3eb9eb9eecb7cf7276fd2bebf3f79deb6cd4d81b400b229fb8485cd7376e3c25bbd07b2d1674f47794ff84ffcc817859cd0cb62
+  languageName: node
+  linkType: hard
+
+"@upsetjs/venn.js@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@upsetjs/venn.js@npm:2.0.0"
+  dependencies:
+    d3-selection: ^3.0.0
+    d3-transition: ^3.0.1
+  dependenciesMeta:
+    d3-selection:
+      optional: true
+    d3-transition:
+      optional: true
+  checksum: 345f6adcdb0761289e41dd3d1aa3f3edf1780a0c55d20ccc4d4461a04b8e34e09b96fd07ab7fb323086bbd4e53505ed660c0a7d139167415c66ff7921b033643
   languageName: node
   linkType: hard
 
@@ -8760,12 +8778,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"acorn@npm:^8.0.4, acorn@npm:^8.1.0, acorn@npm:^8.10.0, acorn@npm:^8.11.0, acorn@npm:^8.14.0, acorn@npm:^8.15.0, acorn@npm:^8.5.0, acorn@npm:^8.8.1":
-  version: 8.15.0
-  resolution: "acorn@npm:8.15.0"
+"acorn@npm:^8.0.4, acorn@npm:^8.1.0, acorn@npm:^8.10.0, acorn@npm:^8.11.0, acorn@npm:^8.15.0, acorn@npm:^8.16.0, acorn@npm:^8.5.0, acorn@npm:^8.8.1":
+  version: 8.16.0
+  resolution: "acorn@npm:8.16.0"
   bin:
     acorn: bin/acorn
-  checksum: 309c6b49aedf1a2e34aaf266de06de04aab6eb097c02375c66fdeb0f64556a6a823540409914fb364d9a11bc30d79d485a2eba29af47992d3490e9886c4391c3
+  checksum: bbfa466cd0dbd18b4460a85e9d0fc2f35db999380892403c573261beda91f23836db2aa71fd3ae65e94424ad14ff8e2b7bd37c7a2624278fd89137cd6e448c41
   languageName: node
   linkType: hard
 
@@ -10413,13 +10431,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"confbox@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "confbox@npm:0.2.2"
-  checksum: 335bc40d58f2785d2f8c5d45f0224e160dd634d42984ecf75b06addb6fe5f9584502ac9845d6f08f8ec066c8a796fd8b3c9ae9e8c7735047aa141d0e83469ab4
-  languageName: node
-  linkType: hard
-
 "connect-history-api-fallback@npm:^2.0.0":
   version: 2.0.0
   resolution: "connect-history-api-fallback@npm:2.0.0"
@@ -10836,10 +10847,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:^3.29.3":
-  version: 3.31.1
-  resolution: "cytoscape@npm:3.31.1"
-  checksum: 88dabf36caa2fdd01ff6f511989a436424f90f95a5a81b7062574f6dcaf5079bbb91f9b70dc0549ba6dadbea3b96b4ad7538948f2ff6ed866db8a10593597ed6
+"cytoscape@npm:^3.33.1":
+  version: 3.33.1
+  resolution: "cytoscape@npm:3.33.1"
+  checksum: 4ebb9551ecb868fc6e831f523933bf96bd107d09b984d6d44db45adfd0a0f82f3383d7d0d5bc2053267ab2e8da47ce5ea280159643e818a4f2534affee248db8
   languageName: node
   linkType: hard
 
@@ -11097,7 +11108,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"d3-selection@npm:2 - 3, d3-selection@npm:3":
+"d3-selection@npm:2 - 3, d3-selection@npm:3, d3-selection@npm:^3.0.0":
   version: 3.0.0
   resolution: "d3-selection@npm:3.0.0"
   checksum: f4e60e133309115b99f5b36a79ae0a19d71ee6e2d5e3c7216ef3e75ebd2cb1e778c2ed2fa4c01bef35e0dcbd96c5428f5bd6ca2184fe2957ed582fde6841cbc5
@@ -11147,7 +11158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"d3-transition@npm:2 - 3, d3-transition@npm:3":
+"d3-transition@npm:2 - 3, d3-transition@npm:3, d3-transition@npm:^3.0.1":
   version: 3.0.1
   resolution: "d3-transition@npm:3.0.1"
   dependencies:
@@ -11223,13 +11234,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dagre-d3-es@npm:7.0.13":
-  version: 7.0.13
-  resolution: "dagre-d3-es@npm:7.0.13"
+"dagre-d3-es@npm:7.0.14":
+  version: 7.0.14
+  resolution: "dagre-d3-es@npm:7.0.14"
   dependencies:
     d3: ^7.9.0
     lodash-es: ^4.17.21
-  checksum: 4a6e5aeb8d4a643c19241b58b8507a7e8aadae8c470ecb9b0133b3af0d6244356cb2cda643fe2f4ef5f872800eb873d7287977b4c5965962396b1757afb0b5de
+  checksum: 02487b979711f4902f5413b6c3e477547e64e670da08e1176ecbcdfb680f42d4fc4e38977b6dcb99ed2682f82713d8cc1b1b2c8e5a5282980d8ca4242d4554b7
   languageName: node
   linkType: hard
 
@@ -11318,10 +11329,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.18":
-  version: 1.11.18
-  resolution: "dayjs@npm:1.11.18"
-  checksum: cc90054bad30ab011417a7a474b2ffa70e7a28ca6f834d7e86fe53a408a40a14c174f26155072628670e9eda4c48c4ed0d847d2edf83d47c0bfb78be15bbf2dd
+"dayjs@npm:^1.11.19":
+  version: 1.11.19
+  resolution: "dayjs@npm:1.11.19"
+  checksum: dfafcca2c67cc6e542fd880d77f1d91667efd323edc28f0487b470b184a11cc97696163ed5be1142ea2a031045b27a0d0555e72f60a63275e0e0401ac24bea5d
   languageName: node
   linkType: hard
 
@@ -11341,7 +11352,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4, debug@npm:4.4.3, debug@npm:^4.1.0, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.3, debug@npm:^4.3.4, debug@npm:^4.4.1, debug@npm:^4.4.3":
+"debug@npm:4, debug@npm:4.4.3, debug@npm:^4.1.0, debug@npm:^4.1.1, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.3, debug@npm:^4.3.4, debug@npm:^4.4.3":
   version: 4.4.3
   resolution: "debug@npm:4.4.3"
   dependencies:
@@ -11724,15 +11735,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.2.5":
-  version: 3.2.6
-  resolution: "dompurify@npm:3.2.6"
+"dompurify@npm:^3.3.1":
+  version: 3.3.3
+  resolution: "dompurify@npm:3.3.3"
   dependencies:
     "@types/trusted-types": ^2.0.7
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 4d002997dbae13f6bdf0e6be014384129c83b1ee8cd3fca9d96f95b9142d1e96256924466a2fc25e7ffb6ede54290e5c4a7d1bd10f9b14cfa07928dd799c3b42
+  checksum: 2ba5b40129259836f1e6c98e99d16608d34c7f4ad6ba457ac8c932f0e2c8e0e7c27561d25fcabf97e695eec57fd5eef1c065b324a542e5125631d4f768af2736
   languageName: node
   linkType: hard
 
@@ -12688,13 +12699,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"exsolve@npm:^1.0.7":
-  version: 1.0.7
-  resolution: "exsolve@npm:1.0.7"
-  checksum: 3adce048e4b1b08580aaabf38c7f92f78e1a662a1776fc02d7e9500d5ce4a30cd3f8e62206768821aa2c3bc2411a699146ebc5710ccc3d46e91199dbfff89f54
-  languageName: node
-  linkType: hard
-
 "ext@npm:^1.1.2":
   version: 1.7.0
   resolution: "ext@npm:1.7.0"
@@ -12993,9 +12997,9 @@ __metadata:
   linkType: hard
 
 "flatted@npm:^3.1.0, flatted@npm:^3.2.9":
-  version: 3.3.3
-  resolution: "flatted@npm:3.3.3"
-  checksum: 8c96c02fbeadcf4e8ffd0fa24983241e27698b0781295622591fc13585e2f226609d95e422bcf2ef044146ffacb6b68b1f20871454eddf75ab3caa6ee5f4a1fe
+  version: 3.4.1
+  resolution: "flatted@npm:3.4.1"
+  checksum: c98e458fac822c3d6f814e38154f9f5c7aa4b10c259467beda05740596cf9a826754a7a77b840b8ca2926a3e22a6f3a27992f0c673a9dbb4f6ea9f132e9a9db4
   languageName: node
   linkType: hard
 
@@ -13526,13 +13530,6 @@ __metadata:
   version: 14.0.0
   resolution: "globals@npm:14.0.0"
   checksum: 534b8216736a5425737f59f6e6a5c7f386254560c9f41d24a9227d60ee3ad4a9e82c5b85def0e212e9d92162f83a92544be4c7fd4c902cb913736c10e08237ac
-  languageName: node
-  linkType: hard
-
-"globals@npm:^15.15.0":
-  version: 15.15.0
-  resolution: "globals@npm:15.15.0"
-  checksum: a2a92199a112db00562a2f85eeef2a7e3943e171f7f7d9b17dfa9231e35fd612588f3c199d1509ab1757273467e413b08c80424cf6e399e96acdaf93deb3ee88
   languageName: node
   linkType: hard
 
@@ -15849,14 +15846,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"katex@npm:^0.16.22":
-  version: 0.16.22
-  resolution: "katex@npm:0.16.22"
+"katex@npm:^0.16.25":
+  version: 0.16.38
+  resolution: "katex@npm:0.16.38"
   dependencies:
     commander: ^8.3.0
   bin:
     katex: cli.js
-  checksum: 66a609b6f3e1a3e8634a03228dcd31cb88b7f39d057cfe5271417bc8eb64b85f256accdbd68f453b5714e4e9546192bad554f75c8b9adb91d6b0a7a93505376b
+  checksum: d2b83a5648a887815673ef4d77724c5c3843b81ef77b874459bc89156d060905c9c1136222fe061da24f7d3effa72f4495e38f5ee249c8e53c4e20a860381136
   languageName: node
   linkType: hard
 
@@ -15894,13 +15891,6 @@ __metadata:
   version: 0.27.0
   resolution: "known-css-properties@npm:0.27.0"
   checksum: 8584fcf0526f984fe5a358af20200dec3b944373dd005dc23a3ce988895e1acd03e7d69c49533dda07d6d9b6d53990ed1119bd9d3e927f17545f8764c434a5cd
-  languageName: node
-  linkType: hard
-
-"kolorist@npm:^1.8.0":
-  version: 1.8.0
-  resolution: "kolorist@npm:1.8.0"
-  checksum: b056de671acc8a17f1e78d6d46c47dae3e06481eabc9fed213dd9079a7454fd3a7ea1226ec718df81c9208877f7475d038ac27a400958fec278d975839e33643
   languageName: node
   linkType: hard
 
@@ -16159,17 +16149,6 @@ __metadata:
     emojis-list: ^3.0.0
     json5: ^2.1.2
   checksum: a5281f5fff1eaa310ad5e1164095689443630f3411e927f95031ab4fb83b4a98f388185bb1fe949e8ab8d4247004336a625e9255c22122b815bb9a4c5d8fc3b7
-  languageName: node
-  linkType: hard
-
-"local-pkg@npm:^1.1.1":
-  version: 1.1.2
-  resolution: "local-pkg@npm:1.1.2"
-  dependencies:
-    mlly: ^1.7.4
-    pkg-types: ^2.3.0
-    quansync: ^0.2.11
-  checksum: 69ee8af3236a5f65e17cdcc1e835167d1ff661be42735a39c5d0a2e91252744835a2cb3184a02cbb4275f299955a7e3c4bf7711e9e7b81dd8e0d39bb46375034
   languageName: node
   linkType: hard
 
@@ -16578,12 +16557,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^17.0.1":
-  version: 17.0.2
-  resolution: "marked@npm:17.0.2"
+"marked@npm:^17.0.4":
+  version: 17.0.4
+  resolution: "marked@npm:17.0.4"
   bin:
     marked: bin/marked.js
-  checksum: f2697542625b3b6aa26f0d935fe6627787d34597ba3bfbe6467286336efee92f6064518a68c5a484e0fe5805eddb5f0a5f57d7db131a9458af034b25a28017f3
+  checksum: d633d9b11f6ab3f3ff24dd2a37e46fe770d2af9fb4bc522711720c1ba2ed3d4d3e99f2d057278bde38e5d8b41d5318288290e88d86d1eea9edf6789fa732b9b9
   languageName: node
   linkType: hard
 
@@ -16738,31 +16717,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mermaid@npm:^11.12.3":
-  version: 11.12.3
-  resolution: "mermaid@npm:11.12.3"
+"mermaid@npm:^11.13.0":
+  version: 11.13.0
+  resolution: "mermaid@npm:11.13.0"
   dependencies:
     "@braintree/sanitize-url": ^7.1.1
-    "@iconify/utils": ^3.0.1
-    "@mermaid-js/parser": ^1.0.0
+    "@iconify/utils": ^3.0.2
+    "@mermaid-js/parser": ^1.0.1
     "@types/d3": ^7.4.3
-    cytoscape: ^3.29.3
+    "@upsetjs/venn.js": ^2.0.0
+    cytoscape: ^3.33.1
     cytoscape-cose-bilkent: ^4.1.0
     cytoscape-fcose: ^2.2.0
     d3: ^7.9.0
     d3-sankey: ^0.12.3
-    dagre-d3-es: 7.0.13
-    dayjs: ^1.11.18
-    dompurify: ^3.2.5
-    katex: ^0.16.22
+    dagre-d3-es: 7.0.14
+    dayjs: ^1.11.19
+    dompurify: ^3.3.1
+    katex: ^0.16.25
     khroma: ^2.1.0
     lodash-es: ^4.17.23
-    marked: ^16.2.1
+    marked: ^16.3.0
     roughjs: ^4.6.6
     stylis: ^4.3.6
     ts-dedent: ^2.2.0
     uuid: ^11.1.0
-  checksum: c49efc4f10b0cca1fe417a3ff59cc1c400093632ff6cfecc12314f1986422c344deb7727be980da60f2e25e8dac9b434f01dadceff7dfed943aed59b5ed5b817
+  checksum: 39ba39ea032f5df9f87e0bdfe9deb4bc2d2cbd5e1556ec4151bc6908ba5feb51c8c0ec3d93ec269d559119560ccd32b7673416bcbafc51b92b616a7b90508965
   languageName: node
   linkType: hard
 
@@ -17101,15 +17081,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mlly@npm:^1.7.4":
-  version: 1.7.4
-  resolution: "mlly@npm:1.7.4"
+"mlly@npm:^1.7.4, mlly@npm:^1.8.0":
+  version: 1.8.1
+  resolution: "mlly@npm:1.8.1"
   dependencies:
-    acorn: ^8.14.0
-    pathe: ^2.0.1
-    pkg-types: ^1.3.0
-    ufo: ^1.5.4
-  checksum: a290da940d208f9d77ceed7ed1db3397e37ff083d28bf75e3c92097a8e58967a2b2e2bea33fdcdc63005e2987854cd081dd0621461d89eee4b61c977b5fa020c
+    acorn: ^8.16.0
+    pathe: ^2.0.3
+    pkg-types: ^1.3.1
+    ufo: ^1.6.3
+  checksum: 31bd5dda2cb3939771da6cfeda08d0033a87e94311b927ef80539a9a9cf269215cef801a896db3204c2e4c1de73ab56501ca2d0509f5f2e9304b859ef7e779d7
   languageName: node
   linkType: hard
 
@@ -17267,7 +17247,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "node-example@workspace:packages/services/examples/node"
   dependencies:
-    "@jupyterlab/services": ^7.6.0-alpha.3
+    "@jupyterlab/services": ^7.6.0-alpha.4
     rimraf: ~5.0.5
     ws: ^8.11.0
   languageName: unknown
@@ -18431,7 +18411,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pkg-types@npm:^1.3.0":
+"pkg-types@npm:^1.3.1":
   version: 1.3.1
   resolution: "pkg-types@npm:1.3.1"
   dependencies:
@@ -18439,17 +18419,6 @@ __metadata:
     mlly: ^1.7.4
     pathe: ^2.0.1
   checksum: 4fa4edb2bb845646cdbd04c5c6bc43cdbc8f02ed4d1c28bfcafb6e65928aece789bcf1335e4cac5f65dfdc376e4bd7435bd509a35e9ec73ef2c076a1b88e289c
-  languageName: node
-  linkType: hard
-
-"pkg-types@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "pkg-types@npm:2.3.0"
-  dependencies:
-    confbox: ^0.2.2
-    exsolve: ^1.0.7
-    pathe: ^2.0.3
-  checksum: 33c30b442662a0f2b62fd16f39ae2beeb4cdf3511699e574765b7451e179937847de6e696bbab50bfbd41d2c2e4a99b61ebc7078abf91ea8573a7f16cc11d26a
   languageName: node
   linkType: hard
 
@@ -18832,13 +18801,6 @@ __metadata:
   dependencies:
     side-channel: ^1.1.0
   checksum: 189b52ad4e9a0da1a16aff4c58b2a554a8dad9bd7e287c7da7446059b49ca2e33a49e570480e8be406b87fccebf134f51c373cbce36c8c83859efa0c9b71d635
-  languageName: node
-  linkType: hard
-
-"quansync@npm:^0.2.11":
-  version: 0.2.11
-  resolution: "quansync@npm:0.2.11"
-  checksum: af484ed433f752c092d278232f68a6643e2cf0193f95ec60c84245e1f3662ef64da90f8fb1bc57dd407362ff181f246a9304ba53725dd7122f45c4a839f85a61
   languageName: node
   linkType: hard
 
@@ -19703,13 +19665,6 @@ __metadata:
     parse-srcset: ^1.0.2
     postcss: ^8.3.11
   checksum: fb96ea7170d51b5af2607f5cfd84464c78fc6f47e339407f55783e781c6a0288a8d40bbf97ea6a8758924ba9b2d33dcc4846bb94caacacd90d7f2de10ed8541a
-  languageName: node
-  linkType: hard
-
-"sax@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "sax@npm:1.5.0"
-  checksum: e143cbeb6ca59345db142d97d1bbb620553beb8b166eda36ffeaba4b01af47dcf0423cd8781d0805b75feea69462cf80d0db7bf0a7e6dd87b711fda51b9153df
   languageName: node
   linkType: hard
 
@@ -20889,19 +20844,19 @@ __metadata:
   linkType: hard
 
 "svgo@npm:^3.3.2":
-  version: 3.3.3
-  resolution: "svgo@npm:3.3.3"
+  version: 3.3.2
+  resolution: "svgo@npm:3.3.2"
   dependencies:
+    "@trysound/sax": 0.2.0
     commander: ^7.2.0
     css-select: ^5.1.0
     css-tree: ^2.3.1
     css-what: ^6.1.0
     csso: ^5.0.5
     picocolors: ^1.0.0
-    sax: ^1.5.0
   bin:
     svgo: ./bin/svgo
-  checksum: ad9c27f19f1f8a6e45bae1b280eb68028da5449359c4daf2c539fc099ab6c76852335d96300a030af4e6866e500159fe80f43a732b8a2905ffa1bd4339da520c
+  checksum: a3f8aad597dec13ab24e679c4c218147048dc1414fe04e99447c5f42a6e077b33d712d306df84674b5253b98c9b84dfbfb41fdd08552443b04946e43d03e054e
   languageName: node
   linkType: hard
 
@@ -21605,10 +21560,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ufo@npm:^1.5.4":
-  version: 1.5.4
-  resolution: "ufo@npm:1.5.4"
-  checksum: f244703b7d4f9f0df4f9af23921241ab73410b591f4e5b39c23e3147f3159b139a4b1fb5903189c306129f7a16b55995dac0008e0fbae88a37c3e58cbc34d833
+"ufo@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "ufo@npm:1.6.3"
+  checksum: a23eff86bbbef0b9cc69c19c653c703b656c2328938576d3a60e05e246ef5a78d88b17c710afa146311c5b855950ccfee60ba8f6c8845e8d1ed6b5a9086ddad1
   languageName: node
   linkType: hard
 
