@@ -44,9 +44,7 @@ export interface IOptions {
   activeElement?: Element;
 }
 
-export function displayShortcuts(
-  options: IOptions
-): Promise<Dialog.IResult<any>> {
+export function displayShortcuts(options: IOptions) {
   const { commands, trans, activeElement } = options;
   const elt = activeElement ?? document.activeElement;
 
