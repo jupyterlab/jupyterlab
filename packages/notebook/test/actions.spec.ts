@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import {
+  type ISessionContext,
+  Notification,
+  type SessionContext
+} from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import type { ICodeCellModel } from '@jupyterlab/cells';
 import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
@@ -31,10 +35,28 @@ import * as utils from './utils';
 import uncoalescedOp from './uncoalesced_op.json';
 
 const ERROR_INPUT = 'a = foo';
+const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
+const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
+const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 const server = new JupyterServer();
+
+function withNotificationError(action: () => void, message: string): void {
+  const notificationError = jest
+    .spyOn(Notification, 'error')
+    .mockImplementation(() => '');
+  try {
+    action();
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(notificationError).toHaveBeenCalledWith(message, {
+      autoClose: READ_ONLY_NOTIFICATION_AUTO_CLOSE
+    });
+  } finally {
+    notificationError.mockRestore();
+  }
+}
 
 beforeAll(async () => {
   await server.start();
@@ -256,6 +278,17 @@ describe('@jupyterlab/notebook', () => {
         expect(prev.model.sharedModel.getSource()).toBe('');
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.splitCell(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_SPLIT_ERROR);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
@@ -380,6 +413,17 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
         widget.activeCellIndex = 1;
         let source = widget.activeCell!.model.sharedModel.getSource();
@@ -395,6 +439,42 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.mergeCells(widget, true);
         expect(widget.widgets.length).toBe(cellNumber);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should be a no-op if any merged cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[1].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op if a selected cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          const cell = widget.widgets[2];
+          cell.model.setMetadata('editable', false);
+          widget.select(cell);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op when mergeAbove is true and previous cell is not editable', () => {
+        widget.activeCellIndex = 1;
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[0].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget, true);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
       });
 
       it('should clear the outputs of a code cell', () => {
