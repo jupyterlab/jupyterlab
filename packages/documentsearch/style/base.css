@@ -73,8 +73,12 @@
   display: flex;
   background-color: var(--jp-layout-color0);
   margin: 2px;
-  column-gap: 2px;
-  padding: 2px;
+}
+
+.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-wrapper {
+  width: calc(var(--jp-private-document-search-button-height) - 4px);
+  height: calc(var(--jp-private-document-search-button-height) - 4px);
+  margin: 2px 2px 0 0;
 }
 
 .jp-DocumentSearch-input-wrapper:focus-within {
