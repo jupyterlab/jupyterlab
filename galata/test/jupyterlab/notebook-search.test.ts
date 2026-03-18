@@ -399,9 +399,7 @@ test.describe('Notebook Search', () => {
 
     // Bring focus to first cell without switching to edit mode
     let cell = await page.notebook.getCellLocator(0);
-
-    // Click on the left side of the cell editor to avoid the search overlay
-    await cell!.locator('.jp-Editor').click({ position: { x: 10, y: 10 } });
+    await cell!.locator('.jp-Editor').click();
 
     // Switch back to command mode
     await page.keyboard.press('Escape');
