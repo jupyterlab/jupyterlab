@@ -190,21 +190,21 @@ export function displayShortcuts(
       id="shortcut-dialog-table"
       tabIndex={0}
       className="jp-Shortcuts-Container"
-      >
-    <table>
-      <caption>{trans.__('Keyboard Shortcuts')}</caption>
-      <thead>
-        <tr>
-          <th scope="col">{trans.__('Command')}</th>
-          <th scope="col">{trans.__('Keybinding')}</th>
-        </tr>
-      </thead>
-      <tbody>{bindingTable}</tbody>
-    </table>
+    >
+      <table>
+        <caption>{trans.__('Keyboard Shortcuts')}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{trans.__('Command')}</th>
+            <th scope="col">{trans.__('Keybinding')}</th>
+          </tr>
+        </thead>
+        <tbody>{bindingTable}</tbody>
+      </table>
     </div>
   );
 
-  const dialogPromise = showDialog({
+  return showDialog({
     title: trans.__('Keyboard Shortcuts'),
     body,
     buttons: [
@@ -212,15 +212,6 @@ export function displayShortcuts(
         label: trans.__('Close')
       })
     ],
-    defaultButton: -1   // prevent close button auto-focus
+    focusNodeSelector: '#shortcut-dialog-table' // Focus the table container instead of the button
   });
-
-   requestAnimationFrame(() => {    // focus to dialog body for arrow key navigation
-    const dialogBody = document.querySelector('.jp-Dialog-body') as HTMLElement | null;
-    if (dialogBody) {
-      dialogBody.focus();
-    }
-  });
-
-  return dialogPromise;
 }
