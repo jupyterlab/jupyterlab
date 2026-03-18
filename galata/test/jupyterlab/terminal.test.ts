@@ -147,7 +147,7 @@ test.describe('Terminal', () => {
   });
 });
 
-test.describe('Terminal with screenReaderMode', () => {
+test.describe.serial('Terminal with screenReaderMode', () => {
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
@@ -157,6 +157,16 @@ test.describe('Terminal with screenReaderMode', () => {
       }
     },
     tmpPath: 'terminal-screen-reader-test'
+  });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.createDirectory(tmpPath);
+  });
+
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
   });
 
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
@@ -332,7 +342,9 @@ test.describe('Open in Terminal from File Browser', () => {
 
       // Ensure the body is visible then run pwd via helper
       await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
-      await activeTerminalContainer.locator(TERMINAL_INPUT_SELECTOR).waitFor();
+      await activeTerminalContainer
+        .locator(TERMINAL_INPUT_SELECTOR)
+        .waitFor({ state: 'visible' });
       await runCommand(page, activeTerminalContainer, 'pwd');
 
       const activeBody = activeTerminalContainer.locator(
