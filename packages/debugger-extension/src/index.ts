@@ -861,9 +861,9 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     IEditorServices,
     IDebuggerSources,
     ITranslator,
-    IDebuggerHandler,
-    ISettingRegistry
+    IDebuggerHandler
   ],
+  optional: [ISettingRegistry],
   provides: IDebuggerSourceViewer,
   autoStart: true,
   activate: async (
@@ -915,7 +915,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
     const openSource = (
-      /* method to open sources in the main area*/
+      /* Method to open sources in the main area */
       source: IDebugger.Source,
       breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
     ): void => {
@@ -956,7 +956,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         previousEditorWidget = null;
       }
 
-      /*Create a new read-only editor */
+      /* Create a new read-only editor */
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
         content,
         mimeType,
@@ -973,7 +973,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       });
       editorWrapper.disposed.connect(() => editorHandler.dispose());
 
-      /*Open a read only editor in the main area */
+      /* Open a read only editor in the main area */
       debuggerSources.open({
         label: PathExt.basename(path),
         caption: path,

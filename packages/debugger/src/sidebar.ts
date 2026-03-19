@@ -152,7 +152,7 @@ export class DebuggerSidebar extends SidePanel {
 
   private _sources?: SourcesPanel;
 
-  private _showSourcesPanel: boolean;
+  private _showSourcesPanel = false;
 
   private _sourcesOptions: SourcesPanel.IOptions;
 }

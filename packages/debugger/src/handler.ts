@@ -191,6 +191,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     const shellMessageHandler = this._shellMessageHandlers[widget.id];
     if (shellMessageHandler) {
       connection.anyMessage.disconnect(shellMessageHandler);
+      delete this._shellMessageHandlers[widget.id];
     }
 
     connection.anyMessage.connect(shellMessage);
