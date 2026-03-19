@@ -906,17 +906,44 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
     }
 
+    function getWidgetFromEvent(event: WheelEvent): Widget | null {
+      const target = event.target as HTMLElement;
+      if (!target) return null;
+
+      // closest lumino widget node
+      const node = target.closest('.lm-Widget') as HTMLElement;
+      if (!node) return null;
+
+      for (const widget of shell.widgets('main')) {
+        if (widget.node.contains(node)) {
+          return widget;
+        }
+      }
+
+      return null;
+    }
+
+    // since event.ctrlKey can be true when ctrl key is not physically held,
+    // we need to track the physical ctrl key state with keydown/keyup events and only trigger zoom when ctrl key is physically held down.
+    let isCtrlKeyPhysicallyHeld = false;
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Control') isCtrlKeyPhysicallyHeld = true;
+    });
+    window.addEventListener('keyup', e => {
+      if (e.key === 'Control') isCtrlKeyPhysicallyHeld = false;
+    });
+    window.addEventListener('blur', () => {
+      isCtrlKeyPhysicallyHeld = false;
+    });
+
     window.addEventListener(
       'wheel',
       event => {
-        if (!event.ctrlKey) {
-          return;
-        }
-
-        const widget = shell.currentWidget;
-        if (!widget) {
-          return;
-        }
+        if (!event.ctrlKey || !isCtrlKeyPhysicallyHeld) return;
+        // zoom in/out the widget under the mouse pointer.
+        const widget = getWidgetFromEvent(event);
+        if (!widget) return;
 
         event.preventDefault();
 

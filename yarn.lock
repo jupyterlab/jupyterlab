@@ -2357,11 +2357,7 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/apputils": ^4.7.0-alpha.4
-    "@jupyterlab/console": ^4.6.0-alpha.0
     "@jupyterlab/coreutils": ^6.6.0-alpha.4
-    "@jupyterlab/docregistry": ^4.6.0-alpha.0
-    "@jupyterlab/fileeditor": ^4.6.0-alpha.0
-    "@jupyterlab/notebook": ^4.6.0-alpha.0
     "@jupyterlab/property-inspector": ^4.6.0-alpha.4
     "@jupyterlab/settingregistry": ^4.6.0-alpha.4
     "@jupyterlab/statedb": ^4.6.0-alpha.4
@@ -2958,7 +2954,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/console@^4.6.0-alpha.0, @jupyterlab/console@^4.6.0-alpha.4, @jupyterlab/console@workspace:packages/console":
+"@jupyterlab/console@^4.6.0-alpha.4, @jupyterlab/console@workspace:packages/console":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/console@workspace:packages/console"
   dependencies:
@@ -3193,7 +3189,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/docregistry@^4.6.0-alpha.0, @jupyterlab/docregistry@^4.6.0-alpha.4, @jupyterlab/docregistry@workspace:packages/docregistry":
+"@jupyterlab/docregistry@^4.6.0-alpha.4, @jupyterlab/docregistry@workspace:packages/docregistry":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docregistry@workspace:packages/docregistry"
   dependencies:
@@ -3719,7 +3715,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/fileeditor@^4.6.0-alpha.0, @jupyterlab/fileeditor@^4.6.0-alpha.4, @jupyterlab/fileeditor@workspace:packages/fileeditor":
+"@jupyterlab/fileeditor@^4.6.0-alpha.4, @jupyterlab/fileeditor@workspace:packages/fileeditor":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor@workspace:packages/fileeditor"
   dependencies:
@@ -4554,7 +4550,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/notebook@^4.6.0-alpha.0, @jupyterlab/notebook@^4.6.0-alpha.4, @jupyterlab/notebook@workspace:packages/notebook":
+"@jupyterlab/notebook@^4.6.0-alpha.4, @jupyterlab/notebook@workspace:packages/notebook":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
