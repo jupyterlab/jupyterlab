@@ -132,11 +132,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:commands',
   description: 'Adds commands related to the shell.',
   autoStart: true,
-  requires: [ITranslator],
+  requires: [ITranslator, ISettingRegistry],
   optional: [ILabShell, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    settingRegistry: ISettingRegistry,
     labShell: ILabShell | null,
     palette: ICommandPalette | null
   ) => {
@@ -923,6 +924,21 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       return null;
     }
 
+    let zoomOnWheel = false;
+
+    settingRegistry
+      .load('@jupyterlab/application-extension:shell')
+      .then(settings => {
+        zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+
+        settings.changed.connect(() => {
+          zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+        });
+      })
+      .catch(reason => {
+        console.error('Failed to load zoomOnWheel setting.', reason);
+      });
+
     // since event.ctrlKey can be true when ctrl key is not physically held,
     // we need to track the physical ctrl key state with keydown/keyup events and only trigger zoom when ctrl key is physically held down.
     let isCtrlKeyPhysicallyHeld = false;
@@ -940,6 +956,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     window.addEventListener(
       'wheel',
       event => {
+        if (!zoomOnWheel) return;
         if (!event.ctrlKey || !isCtrlKeyPhysicallyHeld) return;
         // zoom in/out the widget under the mouse pointer.
         const widget = getWidgetFromEvent(event);
