@@ -185,7 +185,6 @@ export function displayShortcuts(options: IOptions) {
 
   const body = (
     <div
-      id="shortcut-dialog-table"
       tabIndex={0}
       className="jp-Shortcuts-Container"
     >
