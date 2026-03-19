@@ -772,11 +772,11 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
         // Ignore fetch errors and fallback to nbconvert installation guidance.
       }
 
-      const formatLabels: any = Private.getFormatLabels(translator);
+      const formatLabels = Private.getFormatLabels(translator);
 
       // Convert export list to menu and palette items.
       exportFormats = Object.keys(response ?? {})
-        .filter(key => FORMAT_EXCLUDE.indexOf(key) === -1)
+        .filter(key => !FORMAT_EXCLUDE.includes(key))
         .map(key => {
           const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
           const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
