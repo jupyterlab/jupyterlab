@@ -248,7 +248,10 @@ class AudioContentProvider implements IContentProvider {
     localPath: string,
     options: Partial<Contents.IModel> & Contents.IContentProvisionOptions = {}
   ): Promise<Contents.IModel> {
-    return this._drive.save(localPath, options);
+    return this._drive.save(localPath, {
+      ...options,
+      contentProviderId: undefined
+    });
   }
 
   private _drive: Contents.IDrive;
