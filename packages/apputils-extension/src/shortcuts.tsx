@@ -212,6 +212,6 @@ export function displayShortcuts(options: IOptions) {
         label: trans.__('Close')
       })
     ],
-    focusNodeSelector: '#shortcut-dialog-table' // Focus the table container instead of the button
+    focusNodeSelector: '.jp-Shortcuts-Container' // Focus the table container instead of the button
   });
 }
