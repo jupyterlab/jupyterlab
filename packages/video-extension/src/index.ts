@@ -18,8 +18,8 @@ import type {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
-import type { Contents } from '@jupyterlab/services';
-import { IDefaultDrive, IContentProvider } from '@jupyterlab/services';
+import type { Contents, IContentProvider } from '@jupyterlab/services';
+import { IDefaultDrive } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
