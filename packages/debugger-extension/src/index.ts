@@ -980,17 +980,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         editorWrapper
       });
 
-      /* Loop on all widgets to assign to the previousEditorWidget the editor opened by the debugger and fitting the right path*/
-      for (const widget of app.shell.widgets('main')) {
-        if (
-          widget.title.label === PathExt.basename(path) &&
-          widget.title.caption === path
-        ) {
-          previousEditorWidget = widget;
-          break;
+      /* Loop on all main area widgets to assign to the previousEditorWidget the editor opened by the debugger and fitting the right node id */
+      for (const mainAreaWidget of app.shell.widgets('main')) {
+        /* Loop on all the children of the selected main area widget and take the one fitting the editor wrapper id */
+        for (const childWidget of mainAreaWidget.children()) {
+          if (childWidget.node.id === editorWrapper.node.id) {
+            previousEditorWidget = childWidget;
+            break;
+          }
         }
+        if (previousEditorWidget) break;
       }
-
       const frame = service.model.callstack.frame;
       if (frame) {
         requestAnimationFrame(() => {
