@@ -190,7 +190,9 @@ export function displayShortcuts(options: IOptions) {
       className="jp-Shortcuts-Container"
     >
       <table>
-        <caption>{trans.__('Keyboard Shortcuts')}</caption>
+        <caption className="jp-sr-only">
+          {trans.__('Keyboard Shortcuts')}
+        </caption>
         <thead>
           <tr>
             <th scope="col">{trans.__('Command')}</th>
