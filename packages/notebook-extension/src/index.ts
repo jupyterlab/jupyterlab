@@ -179,6 +179,8 @@ namespace CommandIDs {
 
   export const exportToFormat = 'notebook:export-to-format';
 
+  export const installNbconvert = 'notebook:install-nbconvert';
+
   export const run = 'notebook:run-cell';
 
   export const runAndAdvance = 'notebook:run-cell-and-select-next';
@@ -349,6 +351,12 @@ const FACTORY = 'Notebook';
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * Documentation page explaining how to install nbconvert.
+ */
+const NBCONVERT_INSTALL_DOCS_URL =
+  'https://nbconvert.readthedocs.io/en/latest/install.html';
 
 /**
  * Setting Id storing the customized toolbar definition.
@@ -658,21 +666,98 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.installNbconvert, {
+      label: trans.__('Install nbconvert to enable exports'),
+      execute: async () => {
+        const result = await showDialog({
+          title: trans.__('Notebook export requires nbconvert'),
+          body: trans.__(
+            'No notebook export formats are available. Install nbconvert to enable exports (for example HTML and PDF).'
+          ),
+          buttons: [
+            Dialog.cancelButton({ label: trans.__('Close') }),
+            Dialog.okButton({ label: trans.__('Open Documentation') })
+          ]
+        });
+
+        if (result.button.accept) {
+          window.open(
+            NBCONVERT_INSTALL_DOCS_URL,
+            '_blank',
+            'noopener,noreferrer'
+          );
+        }
+      }
+    });
+
     // Add a notebook group to the File menu.
-    let exportTo: Menu | null | undefined;
-    if (mainMenu) {
-      exportTo = mainMenu.fileMenu.items.find(
-        item =>
-          item.type === 'submenu' &&
-          item.submenu?.id === 'jp-mainmenu-file-notebookexport'
-      )?.submenu;
-    }
+    const fileMenu = mainMenu?.fileMenu as Menu | undefined;
+
+    const getExportMenu = (): Menu | undefined => {
+      return (
+        fileMenu?.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-file-notebookexport'
+        )?.submenu ?? undefined
+      );
+    };
 
     let formatsInitialized = false;
+    let paletteInitialized = false;
+    let exportFormats: Array<{ format: string; label: string }> | null = null;
+
+    const updateExportMenu = () => {
+      const exportTo = getExportMenu();
+      if (!exportTo || !exportFormats) {
+        return;
+      }
+
+      exportTo.clearItems();
+
+      if (exportFormats.length === 0) {
+        exportTo.addItem({
+          command: CommandIDs.installNbconvert
+        });
+        return;
+      }
+
+      exportFormats.forEach(({ format, label }) => {
+        exportTo.addItem({
+          command: CommandIDs.exportToFormat,
+          args: {
+            format,
+            label,
+            isPalette: false
+          }
+        });
+      });
+
+      if (palette && !paletteInitialized) {
+        const category = trans.__('Notebook Operations');
+        exportFormats.forEach(({ format, label }) => {
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args: {
+              format,
+              label,
+              isPalette: true
+            }
+          });
+        });
+        paletteInitialized = true;
+      }
+    };
 
     /** Request formats only when a notebook might use them. */
     const maybeInitializeFormats = async () => {
       if (formatsInitialized) {
+        updateExportMenu();
+        return;
+      }
+
+      if (tracker.size === 0) {
         return;
       }
 
@@ -680,49 +765,37 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       formatsInitialized = true;
 
-      const response = await services.nbconvert.getExportFormats(false);
-
-      if (!response) {
-        return;
+      let response: NbConvert.IExportFormats | null = null;
+      try {
+        response = await services.nbconvert.getExportFormats(false);
+      } catch {
+        // Ignore fetch errors and fallback to nbconvert installation guidance.
       }
 
       const formatLabels: any = Private.getFormatLabels(translator);
 
-      // Convert export list to palette and menu items.
-      const formatList = Object.keys(response);
-      formatList.forEach(function (key) {
-        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-        let args = {
-          format: key,
-          label: labelStr,
-          isPalette: false
-        };
-        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-          if (exportTo) {
-            exportTo.addItem({
-              command: CommandIDs.exportToFormat,
-              args: args
-            });
-          }
-          if (palette) {
-            args = {
-              format: key,
-              label: labelStr,
-              isPalette: true
-            };
-            const category = trans.__('Notebook Operations');
-            palette.addItem({
-              command: CommandIDs.exportToFormat,
-              category,
-              args
-            });
-          }
-        }
-      });
+      // Convert export list to menu and palette items.
+      exportFormats = Object.keys(response ?? {})
+        .filter(key => FORMAT_EXCLUDE.indexOf(key) === -1)
+        .map(key => {
+          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+          return {
+            format: key,
+            label: labelStr
+          };
+        });
+
+      updateExportMenu();
     };
 
     tracker.widgetAdded.connect(maybeInitializeFormats);
+    if (tracker.size > 0) {
+      void maybeInitializeFormats();
+    }
+    void app.restored.then(() => {
+      void maybeInitializeFormats();
+    });
   }
 };
 
