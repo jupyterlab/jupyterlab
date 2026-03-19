@@ -184,10 +184,7 @@ export function displayShortcuts(options: IOptions) {
   }
 
   const body = (
-    <div
-      tabIndex={0}
-      className="jp-Shortcuts-Container"
-    >
+    <div tabIndex={0} className="jp-Shortcuts-Container">
       <table>
         <caption className="jp-sr-only">
           {trans.__('Keyboard Shortcuts')}
