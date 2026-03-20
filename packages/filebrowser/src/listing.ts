@@ -1020,7 +1020,12 @@ export class DirListing extends Widget {
   /**
    * Update only the modified dates.
    */
-  protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
+  protected updateModified(
+    items: Contents.IModel[],
+    nodes: HTMLElement[],
+    timestampFormat?: Time.TimestampFormat
+  ) {
+    const format = timestampFormat ?? this._timestampFormat;
     items.forEach((item, i) => {
       const node = nodes[i];
       if (node && item.last_modified) {
@@ -1029,13 +1034,15 @@ export class DirListing extends Widget {
           this.renderer.updateItemModified(
             modified,
             item.last_modified,
-            this._modifiedStyle
+            this._modifiedStyle,
+            format
           );
         } else {
           DirListing.defaultRenderer.updateItemModified(
             modified,
             item.last_modified,
-            this._modifiedStyle
+            this._modifiedStyle,
+            format
           );
         }
       }
@@ -1071,7 +1078,8 @@ export class DirListing extends Widget {
         this._hiddenColumns,
         this.selection[item.path],
         this._modifiedStyle,
-        this._columnSizes
+        this._columnSizes,
+        this._timestampFormat
       );
       if (
         this.selection[item.path] &&
@@ -1416,6 +1424,15 @@ export class DirListing extends Widget {
    */
   setAllowSingleClickNavigation(isEnabled: boolean) {
     this._allowSingleClick = isEnabled;
+  }
+
+  /**
+   * Update the setting for timestamp format.
+   * This refreshes the modified dates with the new format.
+   */
+  setTimestampFormat(format: Time.TimestampFormat) {
+    this._timestampFormat = format;
+    this.updateModified(this._sortedItems, this._items);
   }
 
   /**
@@ -2718,6 +2735,7 @@ export class DirListing extends Widget {
   // Width of the "last modified" column for an individual file
   private _modifiedWidth: number;
   private _modifiedStyle: Time.HumanStyle;
+  private _timestampFormat: Time.TimestampFormat = 'absolute';
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
@@ -2874,11 +2892,14 @@ export namespace DirListing {
      * @param modifiedDate - String representation of the last modified date.
      *
      * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     *
+     * @param timestampFormat - The timestamp format: 'relative' or 'absolute'
      */
     updateItemModified?(
       modified: HTMLElement,
       modifiedDate: string,
-      modifiedStyle: Time.HumanStyle
+      modifiedStyle: Time.HumanStyle,
+      timestampFormat?: Time.TimestampFormat
     ): void;
 
     /**
@@ -2900,7 +2921,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      timestampFormat?: Time.TimestampFormat
     ): void;
 
     /**
@@ -3290,7 +3312,9 @@ export namespace DirListing {
     updateItemModified(
       modified: HTMLElement,
       modifiedDate: string,
-      modifiedStyle: Time.HumanStyle
+      modifiedStyle: Time.HumanStyle,
+      timestampFormat: Time.TimestampFormat = 'absolute'
+
     ): void {
       // Formatting dates is expensive (0.1-0.2ms per call,
       // so over 150 files can easily already choke the renderer),
@@ -3299,21 +3323,31 @@ export namespace DirListing {
       const previousUpdate = this._modifiedColumnLastUpdate.get(modified);
       if (
         previousUpdate?.date === modifiedDate &&
-        previousUpdate?.style === modifiedStyle
+        previousUpdate?.style === modifiedStyle &&
+        previousUpdate?.timestampFormat === timestampFormat
       ) {
         return;
       }
 
       const parsedDate = new Date(modifiedDate);
       // Render the date in one of multiple formats, depending on the container's size
-      const modText = Time.formatHuman(parsedDate, modifiedStyle);
-      const modTitle = Time.format(parsedDate);
+      const modText = Time.formatTimestamp(
+        parsedDate,
+        timestampFormat,
+        modifiedStyle
+      );
+      const modTitle = Time.formatTimestamp(
+        parsedDate,
+        timestampFormat,
+        modifiedStyle
+      );
 
       modified.textContent = modText;
       modified.title = modTitle;
       this._modifiedColumnLastUpdate.set(modified, {
         date: modifiedDate,
-        style: modifiedStyle
+        style: modifiedStyle,
+        timestampFormat
       });
     }
 
@@ -3335,7 +3369,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      timestampFormat: Time.TimestampFormat = 'absolute'
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3442,13 +3477,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.format(new Date(model.created))
+          Time.formatTimestamp(new Date(model.created), timestampFormat)
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.format(new Date(model.last_modified))
+          Time.formatTimestamp(new Date(model.last_modified), timestampFormat)
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -3671,7 +3706,11 @@ export namespace DirListing {
      */
     private _modifiedColumnLastUpdate = new WeakMap<
       HTMLElement,
-      { date: string; style: Time.HumanStyle }
+      {
+        date: string;
+        style: Time.HumanStyle;
+        timestampFormat: Time.TimestampFormat;
+      }
     >();
 
     private _lastRenderedState = new WeakMap<HTMLElement, string>();
