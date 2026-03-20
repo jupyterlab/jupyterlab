@@ -120,6 +120,28 @@ export async function stubGitHubUserIcons(page: Page): Promise<void> {
   });
 }
 
+// Freeze varying cell identifiers in the debugger sidebar panels.
+export async function freezeDebuggerCellInfo(page: Page): Promise<void> {
+  const MOCK_CELL_LABEL = 'Cell [1]';
+  await page.evaluate(mockLabel => {
+    const selectors = [
+      // Call stack frame locations show "Cell [N]" with a varying N
+      '.jp-DebuggerCallstackFrame-location',
+      // Breakpoint source labels
+      '.jp-DebuggerBreakpoint-source',
+      // Source panel header path
+      '.jp-DebuggerSources-header-path'
+    ];
+    for (const selector of selectors) {
+      for (const el of document.querySelectorAll(selector)) {
+        if (/Cell \[/.test(el.textContent ?? '')) {
+          (el as HTMLElement).textContent = mockLabel;
+        }
+      }
+    }
+  }, MOCK_CELL_LABEL);
+}
+
 export async function freeezeKernelIds(
   node: Locator,
   mockMap: Record<string, string>

@@ -3,7 +3,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
-import { positionMouseOver } from './utils';
+import { freezeDebuggerCellInfo, positionMouseOver } from './utils';
 
 test.use({
   autoGoto: false,
@@ -284,12 +284,13 @@ test.describe('Debugger', () => {
       page.locator('[aria-label="side panel content"] >> text=add').first()
     ).toBeVisible();
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 196, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-callstack.png'
-    });
+    await freezeDebuggerCellInfo(page);
+
+    expect(
+      await page.screenshot({
+        clip: { y: 196, x: 998, width: 280, height: 138 }
+      })
+    ).toMatchSnapshot('debugger_callstack.png');
 
     await page.click('jp-button[title^=Continue]');
   });
@@ -314,12 +315,13 @@ test.describe('Debugger', () => {
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/Cell \[\d+\]/);
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 334, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-breakpoints.png'
-    });
+    await freezeDebuggerCellInfo(page);
+
+    expect(
+      await page.screenshot({
+        clip: { y: 334, x: 998, width: 280, height: 138 }
+      })
+    ).toMatchSnapshot('debugger_breakpoints.png');
 
     await page.click('jp-button[title^=Continue]');
   });
@@ -344,12 +346,13 @@ test.describe('Debugger', () => {
       'Cell ['
     );
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 478, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-source.png'
-    });
+    await freezeDebuggerCellInfo(page);
+
+    expect(
+      await page.screenshot({
+        clip: { y: 478, x: 998, width: 280, height: 138 }
+      })
+    ).toMatchSnapshot('debugger_source.png');
 
     await page.click('jp-button[title^=Continue]');
   });
