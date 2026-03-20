@@ -64,10 +64,10 @@ test('All plugins and tokens must have a description', async ({
     return Promise.resolve({ plugins, tokens: sortedTokens });
   }, IGNORED_PLUGINS);
 
-  const pluginsString = JSON.stringify(plugins, null, 2);
+  const pluginsString = JSON.stringify(plugins, null, 2) + '\n';
   expect.soft(pluginsString).toMatchSnapshot('plugins.json');
 
-  const tokensString = JSON.stringify(tokens, null, 2);
+  const tokensString = JSON.stringify(tokens, null, 2) + '\n';
   expect.soft(tokensString).toMatchSnapshot('tokens.json');
 
   // All plugins must define a description

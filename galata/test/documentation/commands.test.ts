@@ -61,7 +61,7 @@ test('All commands must have a default label and describedBy', async ({
     return Promise.resolve(commands);
   });
 
-  const commandsString = JSON.stringify(commands, null, 2);
+  const commandsString = JSON.stringify(commands, null, 2) + '\n';
   expect.soft(commandsString).toMatchSnapshot('commandsList.json');
 
   // All commands must at least define a label
