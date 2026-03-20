@@ -14,6 +14,8 @@
   height: 100%;
   padding: 0;
   display: flex;
+  /* This ensures the focus indicators are visible */
+  border: 4px solid transparent;
 }
 
 .jp-CodeConsole .jp-Cell {
@@ -21,12 +23,10 @@
 }
 
 .jp-CodeConsole:focus-visible {
-  outline-width: 5px;
-  outline-color: red;
+  outline-width: 2px;
+  outline-color: var(--jp-brand-color1);
   outline-style: solid;
-  outline-offset: -5px;
-  /* Add transparent border to ensure outline is visible even with negative offset */
-  border: 2px solid transparent;
+  outline-offset: -4px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -74,8 +74,8 @@
 }
 
 .jp-CodeConsole-content:focus-visible {
-  outline-width: 5px;
-  outline-color: greenyellow;
+  outline-width: 2px;
+  outline-color: var(--jp-brand-color1);
   outline-style: solid;
   outline-offset: -2px;
 }
