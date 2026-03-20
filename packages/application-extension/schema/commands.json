@@ -258,7 +258,8 @@
       "selector": "body",
       "args": {
         "index": 1
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -266,7 +267,8 @@
       "selector": "body",
       "args": {
         "index": 2
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -274,7 +276,8 @@
       "selector": "body",
       "args": {
         "index": 3
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -282,7 +285,8 @@
       "selector": "body",
       "args": {
         "index": 4
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -290,7 +294,8 @@
       "selector": "body",
       "args": {
         "index": 5
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -298,7 +303,8 @@
       "selector": "body",
       "args": {
         "index": 6
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -306,7 +312,8 @@
       "selector": "body",
       "args": {
         "index": 7
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -314,7 +321,8 @@
       "selector": "body",
       "args": {
         "index": 8
-      }
+      },
+      "preventDefault": false
     },
     {
       "command": "application:activate-tab-index",
@@ -322,7 +330,8 @@
       "selector": "body",
       "args": {
         "index": 0
-      }
+      },
+      "preventDefault": false
     }
   ],
   "jupyter.lab.menus": {
