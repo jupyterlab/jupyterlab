@@ -2286,8 +2286,8 @@
       "type": "object",
       "properties": {
         "query": {
-          "description": "Search query to pre-fill in the extension manager",
-          "type": "string"
+          "type": "string",
+          "description": "Search query to pre-fill in the extension manager"
         }
       }
     }
