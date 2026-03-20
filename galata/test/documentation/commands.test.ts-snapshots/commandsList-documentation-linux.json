@@ -4833,6 +4833,42 @@
     }
   },
   {
+    "id": "notebook:show-export-guidance",
+    "label": "Enable notebook exports",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "The menu label shown for export guidance."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the export guidance dialog."
+        },
+        "body": {
+          "type": "string",
+          "description": "The body text of the export guidance dialog."
+        },
+        "url": {
+          "type": "string",
+          "description": "The documentation URL to open when users request more information."
+        },
+        "documentationLabel": {
+          "type": "string",
+          "description": "The label used for the opened documentation tab when supported."
+        },
+        "documentationButtonLabel": {
+          "type": "string",
+          "description": "The label of the button that opens documentation."
+        }
+      },
+      "required": []
+    }
+  },
+  {
     "id": "notebook:shutdown-kernel",
     "label": "Shut Down Kernel",
     "caption": "",

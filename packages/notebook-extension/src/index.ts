@@ -179,7 +179,10 @@ namespace CommandIDs {
 
   export const exportToFormat = 'notebook:export-to-format';
 
-  export const installNbconvert = 'notebook:install-nbconvert';
+  export const showExportGuidance = 'notebook:show-export-guidance';
+
+  export const showExportGuidanceDialog =
+    '_notebook:show-export-guidance-dialog';
 
   export const run = 'notebook:run-cell';
 
@@ -353,10 +356,10 @@ const FACTORY = 'Notebook';
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
 
 /**
- * Documentation page explaining how to install nbconvert.
+ * Documentation page describing notebook export support.
  */
-const NBCONVERT_INSTALL_DOCS_URL =
-  'https://nbconvert.readthedocs.io/en/latest/install.html';
+const NOTEBOOK_EXPORT_DOCS_URL =
+  'https://jupyterlab.readthedocs.io/en/latest/user/export.html';
 
 /**
  * Setting Id storing the customized toolbar definition.
@@ -666,26 +669,67 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(CommandIDs.installNbconvert, {
-      label: trans.__('Install nbconvert to enable exports'),
-      execute: async () => {
-        const result = await showDialog({
-          title: trans.__('Notebook export requires nbconvert'),
-          body: trans.__(
-            'No notebook export formats are available. Install nbconvert to enable exports (for example HTML and PDF).'
-          ),
-          buttons: [
-            Dialog.cancelButton({ label: trans.__('Close') }),
-            Dialog.okButton({ label: trans.__('Open Documentation') })
-          ]
-        });
-
-        if (result.button.accept) {
-          window.open(
-            NBCONVERT_INSTALL_DOCS_URL,
-            '_blank',
-            'noopener,noreferrer'
+    commands.addCommand(CommandIDs.showExportGuidance, {
+      label: args => {
+        const commandArgs = (args ?? {}) as ReadonlyPartialJSONObject;
+        return (
+          (commandArgs['label'] as string | undefined) ??
+          trans.__('Enable notebook exports')
+        );
+      },
+      execute: args => {
+        const commandArgs = (args ?? {}) as ReadonlyPartialJSONObject;
+        if (commands.hasCommand(CommandIDs.showExportGuidanceDialog)) {
+          return commands.execute(
+            CommandIDs.showExportGuidanceDialog,
+            commandArgs
           );
+        }
+
+        const docsUrl =
+          (commandArgs['url'] as string | undefined) ??
+          NOTEBOOK_EXPORT_DOCS_URL;
+        window.open(docsUrl, '_blank', 'noopener,noreferrer');
+        return undefined;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            label: {
+              type: 'string',
+              description: trans.__('The menu label shown for export guidance.')
+            },
+            title: {
+              type: 'string',
+              description: trans.__('The title of the export guidance dialog.')
+            },
+            body: {
+              type: 'string',
+              description: trans.__(
+                'The body text of the export guidance dialog.'
+              )
+            },
+            url: {
+              type: 'string',
+              description: trans.__(
+                'The documentation URL to open when users request more information.'
+              )
+            },
+            documentationLabel: {
+              type: 'string',
+              description: trans.__(
+                'The label used for the opened documentation tab when supported.'
+              )
+            },
+            documentationButtonLabel: {
+              type: 'string',
+              description: trans.__(
+                'The label of the button that opens documentation.'
+              )
+            }
+          },
+          required: []
         }
       }
     });
@@ -717,7 +761,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       if (exportFormats.length === 0) {
         exportTo.addItem({
-          command: CommandIDs.installNbconvert
+          command: CommandIDs.showExportGuidance
         });
         return;
       }
@@ -769,7 +813,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       try {
         response = await services.nbconvert.getExportFormats(false);
       } catch {
-        // Ignore fetch errors and fallback to nbconvert installation guidance.
+        // Ignore fetch errors and fallback to export guidance.
       }
 
       const formatLabels = Private.getFormatLabels(translator);
@@ -795,6 +839,70 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
     }
     void app.restored.then(() => {
       void maybeInitializeFormats();
+    });
+  }
+};
+
+/**
+ * A plugin providing the default notebook export guidance dialog.
+ */
+export const exportGuidanceDialogPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:export-guidance-dialog',
+  description:
+    'Provides the default notebook export guidance dialog shown when no exporters are available.',
+  autoStart: true,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    const trans = translator.load('jupyterlab');
+    const { commands } = app;
+
+    const openExportDocs = (url: string, docsLabel: string) => {
+      if (commands.hasCommand('help:open')) {
+        return commands.execute('help:open', {
+          url,
+          text: docsLabel,
+          newBrowserTab: true
+        });
+      }
+
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return undefined;
+    };
+
+    commands.addCommand(CommandIDs.showExportGuidanceDialog, {
+      execute: async args => {
+        const commandArgs = (args ?? {}) as ReadonlyPartialJSONObject;
+        const title =
+          (commandArgs['title'] as string | undefined) ??
+          trans.__('Notebook exports are unavailable');
+        const body =
+          (commandArgs['body'] as string | undefined) ??
+          trans.__(
+            'No notebook export formats are currently available. To enable exports, install nbconvert in the server environment or use another exporter supported by your deployment.'
+          );
+        const docsUrl =
+          (commandArgs['url'] as string | undefined) ??
+          NOTEBOOK_EXPORT_DOCS_URL;
+        const docsLabel =
+          (commandArgs['documentationLabel'] as string | undefined) ??
+          trans.__('Notebook Export Documentation');
+        const openDocsButtonLabel =
+          (commandArgs['documentationButtonLabel'] as string | undefined) ??
+          trans.__('Open Documentation');
+
+        const result = await showDialog({
+          title,
+          body,
+          buttons: [
+            Dialog.cancelButton({ label: trans.__('Close') }),
+            Dialog.okButton({ label: openDocsButtonLabel })
+          ]
+        });
+
+        if (result.button.accept) {
+          void openExportDocs(docsUrl, docsLabel);
+        }
+      }
     });
   }
 };
@@ -1274,6 +1382,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
   executionIndicator,
+  exportGuidanceDialogPlugin,
   exportPlugin,
   tools,
   commandEditItem,

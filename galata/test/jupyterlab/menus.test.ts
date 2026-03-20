@@ -66,7 +66,7 @@ test.describe('General Tests', () => {
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
 
-  test('Export menu shows nbconvert install guidance when no format is available', async ({
+  test('Export menu shows guidance when no format is available', async ({
     page
   }) => {
     await page.route(/\/api\/nbconvert(\?.*)?$/, (route, request) => {
@@ -90,7 +90,7 @@ test.describe('General Tests', () => {
     expect(
       await exportMenu!
         .getByRole('menuitem', {
-          name: 'Install nbconvert to enable exports'
+          name: 'Enable notebook exports'
         })
         .count()
     ).toBe(1);
