@@ -14,6 +14,7 @@
   height: 100%;
   padding: 0;
   display: flex;
+
   /* This ensures the focus indicators are visible */
   border: 4px solid transparent;
 }
