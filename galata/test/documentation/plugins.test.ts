@@ -67,7 +67,7 @@ test('All plugins and tokens must have a description', async ({
   const pluginsString = JSON.stringify(plugins, null, 2);
   expect.soft(pluginsString).toMatchSnapshot('plugins.json');
 
-  const tokensString = JSON.stringify(plugins, null, 2);
+  const tokensString = JSON.stringify(tokens, null, 2);
   expect.soft(tokensString).toMatchSnapshot('tokens.json');
 
   // All plugins must define a description
