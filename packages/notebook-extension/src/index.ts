@@ -125,7 +125,7 @@ import type {
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { JSONExt, UUID } from '@lumino/coreutils';
+import { JSONExt, Token, UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -180,9 +180,6 @@ namespace CommandIDs {
   export const exportToFormat = 'notebook:export-to-format';
 
   export const showExportGuidance = 'notebook:show-export-guidance';
-
-  export const showExportGuidanceDialog =
-    '_notebook:show-export-guidance-dialog';
 
   export const run = 'notebook:run-cell';
 
@@ -360,6 +357,23 @@ const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
  */
 const NOTEBOOK_EXPORT_DOCS_URL =
   'https://jupyterlab.readthedocs.io/en/latest/user/export.html';
+
+/**
+ * An interface describing how export guidance is presented to users.
+ */
+export interface INotebookExportGuidance {
+  /**
+   * Show guidance for enabling notebook exports.
+   */
+  showExportHelp(): Promise<void>;
+}
+
+/**
+ * A token describing a service for showing notebook export guidance.
+ */
+export const INotebookExportGuidance = new Token<INotebookExportGuidance>(
+  '@jupyterlab/notebook-extension:INotebookExportGuidance'
+);
 
 /**
  * Setting Id storing the customized toolbar definition.
@@ -593,13 +607,14 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds the export notebook commands.',
   autoStart: true,
   requires: [ITranslator, INotebookTracker],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [IMainMenu, ICommandPalette, INotebookExportGuidance],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     tracker: INotebookTracker,
     mainMenu: IMainMenu | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    exportGuidance: INotebookExportGuidance | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -670,66 +685,18 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.showExportGuidance, {
-      label: args => {
-        const commandArgs = (args ?? {}) as ReadonlyPartialJSONObject;
-        return (
-          (commandArgs['label'] as string | undefined) ??
-          trans.__('Enable notebook exports')
-        );
-      },
-      execute: args => {
-        const commandArgs = (args ?? {}) as ReadonlyPartialJSONObject;
-        if (commands.hasCommand(CommandIDs.showExportGuidanceDialog)) {
-          return commands.execute(
-            CommandIDs.showExportGuidanceDialog,
-            commandArgs
-          );
+      label: trans.__('Enable notebook exports'),
+      execute: () => {
+        if (exportGuidance) {
+          return exportGuidance.showExportHelp();
         }
-
-        const docsUrl =
-          (commandArgs['url'] as string | undefined) ??
-          NOTEBOOK_EXPORT_DOCS_URL;
-        window.open(docsUrl, '_blank', 'noopener,noreferrer');
+        window.open(NOTEBOOK_EXPORT_DOCS_URL, '_blank', 'noopener,noreferrer');
         return undefined;
       },
       describedBy: {
         args: {
           type: 'object',
-          properties: {
-            label: {
-              type: 'string',
-              description: trans.__('The menu label shown for export guidance.')
-            },
-            title: {
-              type: 'string',
-              description: trans.__('The title of the export guidance dialog.')
-            },
-            body: {
-              type: 'string',
-              description: trans.__(
-                'The body text of the export guidance dialog.'
-              )
-            },
-            url: {
-              type: 'string',
-              description: trans.__(
-                'The documentation URL to open when users request more information.'
-              )
-            },
-            documentationLabel: {
-              type: 'string',
-              description: trans.__(
-                'The label used for the opened documentation tab when supported.'
-              )
-            },
-            documentationButtonLabel: {
-              type: 'string',
-              description: trans.__(
-                'The label of the button that opens documentation.'
-              )
-            }
-          },
-          required: []
+          properties: {}
         }
       }
     });
@@ -844,68 +811,59 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin providing the default notebook export guidance dialog.
+ * A plugin providing the default notebook export guidance service.
  */
-export const exportGuidanceDialogPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:export-guidance-dialog',
-  description:
-    'Provides the default notebook export guidance dialog shown when no exporters are available.',
-  autoStart: true,
-  requires: [ITranslator],
-  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
-    const trans = translator.load('jupyterlab');
-    const { commands } = app;
+export const exportGuidanceDialogPlugin: JupyterFrontEndPlugin<INotebookExportGuidance> =
+  {
+    id: '@jupyterlab/notebook-extension:export-guidance-dialog',
+    description:
+      'Provides the default notebook export guidance shown when no exporters are available.',
+    provides: INotebookExportGuidance,
+    autoStart: true,
+    requires: [ITranslator],
+    activate: (
+      app: JupyterFrontEnd,
+      translator: ITranslator
+    ): INotebookExportGuidance => {
+      const trans = translator.load('jupyterlab');
+      const { commands } = app;
 
-    const openExportDocs = (url: string, docsLabel: string) => {
-      if (commands.hasCommand('help:open')) {
-        return commands.execute('help:open', {
-          url,
-          text: docsLabel,
-          newBrowserTab: true
-        });
-      }
-
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return undefined;
-    };
-
-    commands.addCommand(CommandIDs.showExportGuidanceDialog, {
-      execute: async args => {
-        const commandArgs = (args ?? {}) as ReadonlyPartialJSONObject;
-        const title =
-          (commandArgs['title'] as string | undefined) ??
-          trans.__('Notebook exports are unavailable');
-        const body =
-          (commandArgs['body'] as string | undefined) ??
-          trans.__(
-            'No notebook export formats are currently available. To enable exports, install nbconvert in the server environment or use another exporter supported by your deployment.'
-          );
-        const docsUrl =
-          (commandArgs['url'] as string | undefined) ??
-          NOTEBOOK_EXPORT_DOCS_URL;
-        const docsLabel =
-          (commandArgs['documentationLabel'] as string | undefined) ??
-          trans.__('Notebook Export Documentation');
-        const openDocsButtonLabel =
-          (commandArgs['documentationButtonLabel'] as string | undefined) ??
-          trans.__('Open Documentation');
-
-        const result = await showDialog({
-          title,
-          body,
-          buttons: [
-            Dialog.cancelButton({ label: trans.__('Close') }),
-            Dialog.okButton({ label: openDocsButtonLabel })
-          ]
-        });
-
-        if (result.button.accept) {
-          void openExportDocs(docsUrl, docsLabel);
+      const openExportDocs = (url: string, docsLabel: string) => {
+        if (commands.hasCommand('help:open')) {
+          return commands.execute('help:open', {
+            url,
+            text: docsLabel,
+            newBrowserTab: true
+          });
         }
-      }
-    });
-  }
-};
+
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return undefined;
+      };
+
+      return {
+        showExportHelp: async () => {
+          const result = await showDialog({
+            title: trans.__('Notebook exports are unavailable'),
+            body: trans.__(
+              'No notebook export formats are currently available. To enable exports, install nbconvert in the server environment or use another exporter supported by your deployment.'
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Close') }),
+              Dialog.okButton({ label: trans.__('Open Documentation') })
+            ]
+          });
+
+          if (result.button.accept) {
+            void openExportDocs(
+              NOTEBOOK_EXPORT_DOCS_URL,
+              trans.__('Notebook Export Documentation')
+            );
+          }
+        }
+      };
+    }
+  };
 
 /**
  * A plugin that adds a notebook trust status item to the status bar.
