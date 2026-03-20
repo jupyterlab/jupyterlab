@@ -455,6 +455,27 @@ describe('completer/inline', () => {
 
         expect(getGhostTextContent()).toBe('line1\n\n');
       });
+
+      it('`minLines` should reserve space when maxLines is 0 (unlimited)', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          minLines: 3,
+          maxLines: 0
+        });
+        model.setCompletions({
+          items: [
+            {
+              ...itemDefaults,
+              insertText: 'short'
+            }
+          ]
+        });
+
+        // maxLines=0 means unlimited; minLines=3 should add 2 placeholder lines
+        expect(getGhostTextContent()).toBe('short\n\n');
+      });
     });
 
     describe('#cycle()', () => {
