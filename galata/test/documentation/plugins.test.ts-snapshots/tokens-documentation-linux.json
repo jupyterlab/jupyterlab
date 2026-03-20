@@ -29,7 +29,6 @@
   "@jupyterlab/console:IConsoleCellExecutor": "The console cell executor",
   "@jupyterlab/console:IConsoleTracker": "A widget tracker for code consoles.\n  Use this if you want to be able to iterate over and interact with code consoles\n  created by the application.",
   "@jupyterlab/console:IContentFactory": "A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.",
-  "@jupyterlab/coreutils:ISettingConnector": "A service to connect to the settings endpoint.",
   "@jupyterlab/coreutils:ISettingRegistry": "A service for the JupyterLab settings system.\n  Use this if you want to store settings for your application.\n  See \"schemaDir\" for more information.",
   "@jupyterlab/coreutils:IStateDB": "A service for the JupyterLab state database.\n  Use this if you want to store data that will persist across page loads.\n  See \"state database\" for more information.",
   "@jupyterlab/debugger:IDebugger": "A debugger user interface.",

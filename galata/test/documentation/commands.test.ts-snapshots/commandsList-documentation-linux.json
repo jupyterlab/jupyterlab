@@ -2284,12 +2284,7 @@
     ],
     "args": {
       "type": "object",
-      "properties": {
-        "query": {
-          "description": "Search query to pre-fill in the extension manager",
-          "type": "string"
-        }
-      }
+      "properties": {}
     }
   },
   {
