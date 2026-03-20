@@ -42,6 +42,9 @@ commander
         utils.run('jlpm run build:all');
       }
 
+      // Update core.package.json before publishing
+      utils.run('node buildutils/lib/update-core-mode.js --skip-assets');
+
       if (!options.dryRun) {
         // Make sure we are logged in.
         if (utils.checkStatus('npm whoami') !== 0) {
