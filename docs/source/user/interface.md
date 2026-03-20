@@ -138,8 +138,6 @@ marked with a colored top border (blue by default).
 
 You can switch to a specific tab in the main area using the keyboard shortcuts with a modifier key and a number from `1` to `8` (where `1` is the first tab and `8` is the eighth tab, if it exists). To jump directly to the last tab, regardless of how many tabs are open or its position, use `9`.
 
-
-
 ## Tabs and Simple Interface Mode
 
 The Tabs panel in the left sidebar lists the open documents or
