@@ -399,14 +399,13 @@ export class BreadCrumbs extends Widget {
     const manager = model.manager;
 
     // Move all of the items.
-    const promises: Promise<any>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
-    for (const oldPath of oldPaths) {
+    const promises = oldPaths.map(oldPath => {
       const name = PathExt.basename(oldPath);
       const newPath = PathExt.join(destinationPath, name);
-      promises.push(renameFile(manager, oldPath, newPath));
-    }
-    void Promise.all(promises).catch(err => {
+      return renameFile(manager, oldPath, newPath);
+    });
+    void model.runFileOperations(promises).catch(err => {
       return showErrorMessage(this._trans.__('Move Error'), err);
     });
   }
