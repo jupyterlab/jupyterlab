@@ -198,7 +198,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
     // Wrap the sections in body and content divs.
     return (
-      <div className="jp-Launcher-body">
+      <div className="jp-Launcher-body jp-zoom-target">
         <div className="jp-Launcher-content">
           <div className="jp-Launcher-cwd">
             <h3>{this.cwd}</h3>

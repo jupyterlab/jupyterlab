@@ -259,21 +259,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     function getZoomTarget(widget: Widget): HTMLElement {
       const node = widget.node;
 
-      // Notebook
-      const notebookViewport = node.querySelector(
-        '.jp-WindowedPanel-viewport'
-      ) as HTMLElement;
-      if (notebookViewport) return notebookViewport;
+      let target = node.querySelector('.jp-zoom-target') as HTMLElement;
+      if (target) return target;
 
-      // CodeMirror editors (file editor, console)
-      const cmScroller = node.querySelector('.cm-scroller') as HTMLElement;
-      if (cmScroller) return cmScroller;
-
-      // Fallback to zooming the entire widget if there is no specific content element
-      const content = node.querySelector('.jp-Document') as HTMLElement;
-      if (content) return content;
-
-      return node as HTMLElement;
+      node.classList.add('jp-zoom-target');
+      return node;
     }
 
     function zoomActiveWidget(widget: Widget, delta: number) {
