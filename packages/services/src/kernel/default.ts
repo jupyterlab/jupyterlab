@@ -1628,6 +1628,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       }
     }
     if (msg.channel === 'iopub') {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.header.msg_type) {
         case 'status': {
           const untrackedMessageTypesRaw = PageConfig.getOption(
@@ -1711,9 +1712,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.warn(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       // Try reconnection with subprotocols if the server had supported them.
       // Otherwise, try reconnection without subprotocols.
@@ -1896,6 +1895,7 @@ namespace Private {
    * Log the current kernel status.
    */
   export function logKernelStatus(kernel: Kernel.IKernelConnection): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (kernel.status) {
       case 'idle':
       case 'busy':

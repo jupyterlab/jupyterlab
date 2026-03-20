@@ -12,8 +12,9 @@ import type { ImageViewer } from './widget';
 /**
  * A class that tracks image widgets.
  */
-export interface IImageTracker
-  extends IWidgetTracker<IDocumentWidget<ImageViewer>> {}
+export interface IImageTracker extends IWidgetTracker<
+  IDocumentWidget<ImageViewer>
+> {}
 
 /**
  * The image tracker token.

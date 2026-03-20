@@ -114,7 +114,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
     }
 
     // Update the match if the score is better.
-    if (match && match.score <= score) {
+    if (match.score <= score) {
       score = match.score;
       indices = match.indices;
     }

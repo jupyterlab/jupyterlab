@@ -831,6 +831,16 @@
     }
   },
   {
+    "id": "cell-toolbar:delete",
+    "label": "Delete Cell",
+    "caption": "Delete the cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "code-viewer:open",
     "label": "Open Code Viewer",
     "caption": "",
@@ -933,7 +943,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable",
     "shortcuts": [
       "Alt A"
     ],
@@ -2274,7 +2284,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "query": {
+          "description": "Search query to pre-fill in the extension manager",
+          "type": "string"
+        }
+      }
     }
   },
   {
@@ -2569,16 +2584,6 @@
     }
   },
   {
-    "id": "filebrowser:search",
-    "label": "Search on File Names",
-    "caption": "",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
     "id": "filebrowser:select-all",
     "label": "Select All",
     "caption": "",
@@ -2603,6 +2608,16 @@
   {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "filebrowser:toggle-date-created",
+    "label": "Show Date Created Column",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3452,6 +3467,16 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -5470,6 +5495,16 @@
       "required": [
         "name"
       ]
+    }
+  },
+  {
+    "id": "terminal:open-folder-in-terminal",
+    "label": "Open in Terminal",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {

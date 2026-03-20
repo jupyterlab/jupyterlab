@@ -45,6 +45,7 @@
   "@jupyterlab/docmanager:IRecentsManager": "A service providing information about recently opened and closed documents",
   "@jupyterlab/documentsearch:ISearchProviderRegistry": "A service for a registry of search\n  providers for the application. Plugins can register their UI elements with this registry\n  to provide find/replace support.",
   "@jupyterlab/filebrowser:IDefaultFileBrowser": "A service for the default file browser.",
+  "@jupyterlab/filebrowser:IDefaultFileBrowserRenderer": "A service for overriding the default file browser directory listing renderer.",
   "@jupyterlab/filebrowser:IFileBrowserCommands": "A token to ensure file browser commands are loaded.",
   "@jupyterlab/filebrowser:IFileBrowserFactory": "A factory object that creates file browsers.\n  Use this if you want to create your own file browser (e.g., for a custom storage backend),\n  or to interact with other file browsers that have been created by extensions.",
   "@jupyterlab/fileeditor:IEditorTracker": "A widget tracker for file editors.\n  Use this if you want to be able to iterate over and interact with file editors\n  created by the application.",

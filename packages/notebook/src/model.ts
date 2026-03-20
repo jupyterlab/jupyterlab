@@ -395,6 +395,7 @@ close the notebook without saving it.`,
     list: CellList,
     change: IObservableList.IChangedArgs<ICellModel>
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (change.type) {
       case 'add':
         change.newValues.forEach(cell => {
@@ -513,8 +514,7 @@ export namespace NotebookModel {
   /**
    * An options object for initializing a notebook model.
    */
-  export interface IOptions
-    extends DocumentRegistry.IModelOptions<ISharedNotebook> {
+  export interface IOptions extends DocumentRegistry.IModelOptions<ISharedNotebook> {
     /**
      * Default cell type.
      */

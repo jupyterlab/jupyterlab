@@ -659,6 +659,12 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
+
+          const isEnabled = !showReplace || filter.supportReplace;
+          // Show an alternate description, if one exists, when a filter is disabled in replace mode.
+          const description = isEnabled
+            ? filter.description
+            : (filter.disabledDescription ?? filter.description);
           return (
             <FilterSelection
               key={name}

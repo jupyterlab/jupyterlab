@@ -501,8 +501,9 @@ export namespace AttachmentsCellModel {
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
-  export interface IOptions<T extends ISharedCell>
-    extends CellModel.IOptions<T> {
+  export interface IOptions<
+    T extends ISharedCell
+  > extends CellModel.IOptions<T> {
     /**
      * The factory for attachment model creation.
      */
@@ -755,6 +756,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     const codeCell = this.sharedModel as YCodeCell;
     globalModelDBMutex(() => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (event.type) {
         case 'add': {
           for (const output of event.newValues) {
@@ -930,8 +932,10 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions
-    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
+  export interface IOptions extends Omit<
+    CellModel.IOptions<ISharedCodeCell>,
+    'cell_type'
+  > {
     /**
      * The factory for output area model creation.
      */
