@@ -106,12 +106,12 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
-    "@types/react": "^18.0.26",
+    "@types/react": "^18.3.1",
     "lodash": "^4.17.23",
     "lodash-es": "^4.17.23",
     "marked": "^17.0.4",
     "prettier": "^3.8.1",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "type-fest": "^4.30.0",
     "yjs": "^13.5.40"
   },
