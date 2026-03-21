@@ -282,3 +282,52 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 ## Paste code cells without output
 
 When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+
+(metadata-editor)=
+
+## Metadata Editor (Advanced Tools)
+
+The Advanced Tools panel provides a metadata editor that allows you to view
+and modify the metadata of both the notebook and individual cells.
+
+### Opening the Metadata Editor
+
+To access the metadata editor, click the gear icon (⚙️) in the right sidebar
+of an open notebook. This opens the **Advanced Tools** panel.
+
+The panel has two sections:
+
+- **Notebook Metadata**: displays the metadata for the entire notebook
+  (e.g., kernel information, language info).
+- **Cell Metadata**: displays the metadata for the currently selected cell
+  (e.g., tags, whether the cell is editable or deletable).
+
+### Editing Metadata
+
+The metadata is displayed as JSON that you can edit directly. After making
+changes:
+
+- Click the **checkmark icon** (✓) to commit your changes.
+- Click the **revert icon** to discard your changes and restore the
+  previous metadata.
+```{note}
+For fields that are part of the reformed metadata schema (such as `editable`
+and `deletable`), you can also use toggle controls in the
+{ref}`Cell Toolbar <cell-toolbar>` for a more convenient editing experience.
+```
+
+### Common Metadata Fields
+
+Some commonly used cell metadata fields include:
+
+- `tags`: a list of string tags for the cell, often used by tools like
+  [nbconvert](https://nbconvert.readthedocs.io/) and
+  [papermill](https://papermill.readthedocs.io/) to control cell behavior
+  during export or parameterized execution.
+- `editable`: controls whether the cell content can be modified.
+- `deletable`: controls whether the cell can be deleted.
+```{tip}
+Be cautious when editing metadata directly, as incorrect values may
+affect notebook behavior. If something goes wrong, use the revert icon
+to undo your changes before committing them.
+```
