@@ -93,6 +93,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       model.sharedModel.source
     );
 
+    const scroller = host.querySelector('.cm-scroller') as HTMLElement | null;
+    if (scroller) {
+      scroller.classList.add('jp-zoom-target');
+    }
+
     this._onMimeTypeChanged();
     this._onCursorActivity();
 
