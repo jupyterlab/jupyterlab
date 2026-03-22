@@ -285,15 +285,15 @@ When **Paste code cells without output** is enabled in **Settings → JupyterLab
 
 (metadata-editor)=
 
-## Metadata Editor (Advanced Tools)
+## Metadata Editor (Property Inspector)
 
-The Advanced Tools panel provides a metadata editor that allows you to view
+The Property Inspector provides a metadata editor that allows you to view
 and modify the metadata of both the notebook and individual cells.
 
 ### Opening the Metadata Editor
 
-To access the metadata editor, click the gear icon (⚙️) in the right sidebar
-of an open notebook. This opens the **Advanced Tools** panel.
+To access the metadata editor, click the gear icon in the right sidebar
+of an open notebook. This opens the **Property Inspector** panel.
 
 The panel has two sections:
 
@@ -307,13 +307,14 @@ The panel has two sections:
 The metadata is displayed as JSON that you can edit directly. After making
 changes:
 
-- Click the **checkmark icon** (✓) to commit your changes.
+- Click the **checkmark icon** to commit your changes.
 - Click the **revert icon** to discard your changes and restore the
   previous metadata.
 ```{note}
-For fields that are part of the reformed metadata schema (such as `editable`
-and `deletable`), you can also use toggle controls in the
-{ref}`Cell Toolbar <cell-toolbar>` for a more convenient editing experience.
+For [notebook format metadata](https://nbformat.readthedocs.io/en/latest/format_description.html#cell-metadata)
+fields such as `editable` and `deletable`, you can also use the toggle
+controls in the "Common tools" section of the Property Inspector for a
+more convenient editing experience.
 ```
 
 ### Common Metadata Fields
