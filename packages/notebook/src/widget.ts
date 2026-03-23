@@ -620,6 +620,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   protected _isMoving = false;
+
   /**
    * Resolve a stable visible insertion index when inserting cells near collapsed sections.
    */
@@ -629,16 +630,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   ): number {
     const widgets = this.widgets;
 
-    console.log(
-      `[resolveIndex] index=${index} total widgets=${widgets.length} isMoving=${this._isMoving}`
-    );
-
-    // During a move, skip to not expand the same section twice
+    // skip to not expand the same section twice
     if (this._isMoving) {
       return Math.max(0, Math.min(index, widgets.length));
     }
 
-    // --- Case 1: inserting below a collapsed section ---
+    //  inserting below a collapsed section ---
     if (index > 0) {
       let aboveCellIndex = index - 1;
       let parentHeader: MarkdownCell | null = null;
@@ -652,14 +649,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           ? (cellAbove as MarkdownCell).numberChildNodes
           : -1;
 
-        console.log(
-          `  scanning aboveCellIndex=${aboveCellIndex}`,
-          `isMarkdown=${isMarkdown}`,
-          `isCollapsed=${isCollapsed}`,
-          `numberChildNodes=${childNodes}`,
-          `condition: ${aboveCellIndex} + ${childNodes} >= ${index - 1} = ${aboveCellIndex + childNodes >= index - 1}`
-        );
-
         if (isCollapsed && aboveCellIndex + childNodes >= index - 1) {
           parentHeader = cellAbove as MarkdownCell;
           break;
@@ -667,26 +656,13 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         aboveCellIndex--;
       }
 
-      console.log(`  parentHeader found: ${parentHeader !== null}`);
-
       if (parentHeader && !expandedSet.has(parentHeader)) {
         parentHeader.headingCollapsed = false;
         expandedSet.add(parentHeader);
         const headerIndex = widgets.indexOf(parentHeader);
         index = headerIndex + parentHeader.numberChildNodes + 1;
-        console.log(`  Case1 expanded, new index=${index}`);
         return Math.max(0, Math.min(index, widgets.length));
       }
-    }
-
-    // --- Case 2: inserting above a collapsed section ---
-    if (index < widgets.length) {
-      const below = widgets[index];
-      const isCollapsedBelow =
-        below instanceof MarkdownCell && below.headingCollapsed;
-      console.log(
-        `  Case2 check: widgets[${index}] isCollapsedBelow=${isCollapsedBelow}`
-      );
     }
 
     return Math.max(0, Math.min(index, widgets.length));
@@ -2069,17 +2045,6 @@ export class Notebook extends StaticNotebook {
     if (expandedSet.size > 0) {
       requestAnimationFrame(() => {
         const adjustedTo = from < resolvedTo ? resolvedTo - 1 : resolvedTo;
-
-        console.log(
-          `[moveCell rAF] resolvedTo=${resolvedTo} adjustedTo=${adjustedTo} from=${from} widgets.length=${this.widgets.length}`
-        );
-        const w = this.widgets[adjustedTo];
-        console.log(
-          `[moveCell rAF] widget at adjustedTo:`,
-          w instanceof MarkdownCell
-            ? `MarkdownCell collapsed=${w.headingCollapsed} text="${w.model.sharedModel.getSource().slice(0, 30)}"`
-            : `CodeCell`
-        );
         doMove(adjustedTo);
       });
     } else {
