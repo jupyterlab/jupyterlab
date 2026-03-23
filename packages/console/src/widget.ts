@@ -813,10 +813,10 @@ export class CodeConsole extends Widget {
     if (!editor) {
       return;
     }
-    if (event.keyCode === 13 && !editor.hasFocus()) {
+    if (event.key === 'Enter' && !editor.hasFocus()) {
       event.preventDefault();
       editor.focus();
-    } else if (event.keyCode === 27 && editor.hasFocus()) {
+    } else if (event.key === 'Escape' && editor.hasFocus()) {
       // Set to command mode
       event.preventDefault();
       event.stopPropagation();
