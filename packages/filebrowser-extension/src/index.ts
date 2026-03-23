@@ -146,6 +146,8 @@ namespace CommandIDs {
 
   export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
 
+  export const toggleDateCreated = 'filebrowser:toggle-date-created';
+
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
   export const toggleSortNotebooksFirst =
@@ -259,6 +261,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           navigateToCurrentDirectory: false,
           singleClickNavigation: false,
           showLastModifiedColumn: true,
+          showDateCreatedColumn: false,
           showFileSizeColumn: false,
           showHiddenFiles: false,
           showFileCheckboxes: false,
@@ -1443,7 +1446,7 @@ function addCommands(
     }
   });
 
-  // Add the openPath command to the command palette
+  // Add commands to the command palette
   if (commandPalette) {
     commandPalette.addItem({
       command: CommandIDs.openPath,
@@ -1771,6 +1774,28 @@ function addCommands(
     execute: () => {
       const value = !browser.sortNotebooksFirst;
       const key = 'sortNotebooksFirst';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleDateCreated, {
+    label: trans.__('Show Date Created Column'),
+    isToggled: () => browser.showDateCreatedColumn,
+    execute: () => {
+      const value = !browser.showDateCreatedColumn;
+      const key = 'showDateCreatedColumn';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)

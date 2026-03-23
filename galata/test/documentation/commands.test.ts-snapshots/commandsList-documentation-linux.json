@@ -100,6 +100,16 @@
     }
   },
   {
+    "id": "application:reset-widget-zoom",
+    "label": "Reset Widget Zoom",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:set-mode",
     "label": "Set the layout `mode`.",
     "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
@@ -275,6 +285,26 @@
         "side",
         "index"
       ]
+    }
+  },
+  {
+    "id": "application:zoom-in-widget",
+    "label": "Zoom In Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:zoom-out-widget",
+    "label": "Zoom Out Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -2284,7 +2314,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "query": {
+          "description": "Search query to pre-fill in the extension manager",
+          "type": "string"
+        }
+      }
     }
   },
   {
@@ -2603,6 +2638,16 @@
   {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "filebrowser:toggle-date-created",
+    "label": "Show Date Created Column",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3452,6 +3497,16 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
     "shortcuts": [],
     "args": {
       "type": "object",
