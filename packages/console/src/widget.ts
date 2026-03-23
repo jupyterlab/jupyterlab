@@ -768,9 +768,6 @@ export class CodeConsole extends Widget {
     promptCell.model.mimeType = this._mimetype;
     promptCell.addClass(PROMPT_CLASS);
 
-    // Make the prompt cell tabbable (input should be accessible via keyboard)
-    promptCell.editor?.setOption('tabFocusable', true);
-
     // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
 
@@ -1190,6 +1187,10 @@ export class CodeConsole extends Widget {
    * Update the layout of the code console.
    */
   private _updateLayout(): void {
+    // Detach from split panel to reset DOM/tab order when re-inserting
+    this._input.parent = null;
+    this._content.parent = null;
+
     const { promptCellPosition = 'bottom' } = this._config;
 
     // Reset manual resize flag when layout changes
