@@ -3970,15 +3970,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        const notebook = current.content;
-        const cell = notebook.activeCell;
-
-        if (notebook.mode === 'edit' && cell) {
+        const cell = current.content.activeCell;
+        if (cell) {
           cell.inputHidden = false;
           return cell.editor?.undo();
         }
-
-        return NotebookActions.undo(notebook);
       }
     },
     describedBy: {
