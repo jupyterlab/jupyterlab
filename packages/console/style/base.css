@@ -74,6 +74,7 @@
   opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
 
+.jp-CodeConsole-input:focus-visible,
 .jp-CodeConsole-content:focus-visible {
   outline-width: 2px;
   outline-color: var(--jp-brand-color1);

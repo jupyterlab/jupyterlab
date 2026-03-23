@@ -143,6 +143,7 @@ export class CodeConsole extends Widget {
     // Make content panel focusable for keyboard scrolling
     this._content.node.tabIndex = 0;
     this._input.addClass(INPUT_CLASS);
+    this._input.node.tabIndex = 0;
 
     layout.addWidget(this._splitPanel);
 
@@ -818,9 +819,10 @@ export class CodeConsole extends Widget {
       editor.focus();
     } else if (event.key === 'Escape' && editor.hasFocus()) {
       // Set to command mode
+      console.log('Escape key pressed');
       event.preventDefault();
       event.stopPropagation();
-      this.node.focus();
+      this._input.node.focus();
     }
   }
 
