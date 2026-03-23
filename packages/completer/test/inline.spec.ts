@@ -476,6 +476,38 @@ describe('completer/inline', () => {
         // maxLines=0 means unlimited; minLines=3 should add 2 placeholder lines
         expect(getGhostTextContent()).toBe('short\n\n');
       });
+
+      it('cycling with `reserveSpaceForLongest` should keep placeholder lines stable', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          reserveSpaceForLongest: true
+        });
+        model.setCompletions({
+          items: [
+            {
+              ...itemDefaults,
+              insertText: 'short'
+            },
+            {
+              ...itemDefaults,
+              insertText: 'line1\nline2\nline3'
+            }
+          ]
+        });
+
+        // First suggestion is short but should reserve space for the longest (3 lines)
+        expect(getGhostTextContent()).toBe('short\n\n');
+
+        // Cycle to the longer suggestion
+        completer.cycle('next');
+        expect(getGhostTextContent()).toBe('line1\nline2\nline3');
+
+        // Cycle back — placeholder lines should remain
+        completer.cycle('next');
+        expect(getGhostTextContent()).toBe('short\n\n');
+      });
     });
 
     describe('#cycle()', () => {
