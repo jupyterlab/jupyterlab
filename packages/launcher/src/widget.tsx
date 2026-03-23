@@ -198,7 +198,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
     // Wrap the sections in body and content divs.
     return (
-      <div className="jp-Launcher-body">
+      <div className="jp-Launcher-body jp-zoom-target">
         <div className="jp-Launcher-content">
           <div className="jp-Launcher-cwd">
             <h3>{this.cwd}</h3>
@@ -273,9 +273,14 @@ function Card(
   };
 
   // With tabindex working, you can now pick a kernel by tabbing around and
-  // pressing Enter.
+  // pressing Enter or Space.
   const onkeypress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
+    if (
+      event.key === 'Enter' ||
+      event.key === ' ' ||
+      event.key === 'Spacebar'
+    ) {
+      event.preventDefault();
       onclick();
     }
   };

@@ -512,9 +512,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       this._widgetPositions.set(name, index);
 
       // Invokes resizing to ensure correct display of items after an addition, only
-      // if the toolbar is rendered.
+      // if the toolbar is rendered. Call the resizer twice (callTwice = true) so that
+      // widgets that have not yet been painted (clientWidth === 0) get a chance to be
+      // rendered before the second pass recalculates the layout.
       if (this.isVisible) {
-        void this._resizer.invoke();
+        void this._resizer.invoke(true);
       }
     }
     return status;
@@ -526,7 +528,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
    * Invokes resizing to ensure correct display of items.
    */
   onAfterShow(msg: Message): void {
-    void this._resizer.invoke(true);
+    void this._resizer.stop().then(() => void this._resizer.invoke(true));
   }
 
   /**
@@ -824,7 +826,7 @@ export function ToolbarButtonComponent(
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
   const handleClick =
-    props.noFocusOnClick ?? false
+    (props.noFocusOnClick ?? false)
       ? undefined
       : (event: React.MouseEvent) => {
           if (event.button === 0) {
@@ -840,7 +842,7 @@ export function ToolbarButtonComponent(
   // Currently this is mostly useful for the notebook panel, to retrieve the focused
   // cell before the click event.
   const handleMouseDown =
-    props.noFocusOnClick ?? false
+    (props.noFocusOnClick ?? false)
       ? (event: React.MouseEvent) => {
           // Fire action only when left button is pressed.
           if (event.button === 0) {
@@ -893,7 +895,7 @@ export function ToolbarButtonComponent(
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.pressed ? props.pressedIcon ?? props.icon : props.icon}
+          icon={props.pressed ? (props.pressedIcon ?? props.icon) : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')

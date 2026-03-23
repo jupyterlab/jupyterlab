@@ -118,6 +118,12 @@ test.describe('Notebook Tests', () => {
     const notSavedIndicator = tabList.locator('.jp-mod-dirty');
     await expect(notSavedIndicator).toHaveCount(1);
 
+    // Wait for the kernel to settle to idle because
+    // kernel initialization modifies metadata and would mark the
+    // notebook dirty again, and if it happens after assertion
+    // below but before snapshot - randomly fail the test.
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
     await page.notebook.save();
     await expect(notSavedIndicator).toHaveCount(0);
 

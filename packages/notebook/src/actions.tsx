@@ -146,10 +146,31 @@ export class NotebookActions {
  * A namespace for `NotebookActions` static methods.
  */
 export namespace NotebookActions {
+  const READ_ONLY_ACTION_AUTO_CLOSE = 5000;
+
+  function notifySplitReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(trans.__('The cell is read-only and cannot be split.'), {
+      autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+    });
+  }
+
+  function notifyMergeReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(
+      trans.__('The cell is read-only and cannot be merged.'),
+      {
+        autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+      }
+    );
+  }
+
   /**
    * Split the active cell into two or more cells.
    *
    * @param notebook The target notebook widget.
+   *
+   * @param translator - Application translator.
    *
    * #### Notes
    * It will preserve the existing mode.
@@ -165,8 +186,15 @@ export namespace NotebookActions {
    * This action can be undone.
    * The original cell is preserved to maintain kernel connections.
    */
-  export function splitCell(notebook: Notebook): void {
+  export function splitCell(
+    notebook: Notebook,
+    translator?: ITranslator
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    if (notebook.activeCell.model.getMetadata('editable') === false) {
+      notifySplitReadOnlyAction(translator);
       return;
     }
 
@@ -305,6 +333,8 @@ export namespace NotebookActions {
    * @param addExtraLine - Whether to add an extra newline between merged cell contents
    *    (true, default) or use only a single newline (false).
    *
+   * @param translator - Application translator.
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -317,7 +347,8 @@ export namespace NotebookActions {
   export function mergeCells(
     notebook: Notebook,
     mergeAbove: boolean = false,
-    addExtraLine: boolean = true
+    addExtraLine: boolean = true,
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -331,10 +362,15 @@ export namespace NotebookActions {
     const primary = notebook.activeCell;
     const active = notebook.activeCellIndex;
     const attachments: nbformat.IAttachments = {};
+    let hasReadOnlyCell = false;
 
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
       if (notebook.isSelectedOrActive(child)) {
+        if (child.model.getMetadata('editable') === false) {
+          hasReadOnlyCell = true;
+          return;
+        }
         toMerge.push(child.model.sharedModel.getSource());
         if (index !== active) {
           toDelete.push(index);
@@ -349,12 +385,23 @@ export namespace NotebookActions {
       }
     });
 
+    if (hasReadOnlyCell) {
+      notifyMergeReadOnlyAction(translator);
+      return;
+    }
+
     // Check for only a single cell selected.
     if (toMerge.length === 1) {
       // Merge with the cell above when mergeAbove is true
       if (mergeAbove === true) {
         // Bail if it is the first cell.
         if (active === 0) {
+          return;
+        }
+        if (
+          notebook.widgets[active - 1].model.getMetadata('editable') === false
+        ) {
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the previous cell.
@@ -365,6 +412,12 @@ export namespace NotebookActions {
       } else if (mergeAbove === false) {
         // Bail if it is the last cell.
         if (active === cells.length - 1) {
+          return;
+        }
+        if (
+          notebook.widgets[active + 1].model.getMetadata('editable') === false
+        ) {
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the next cell.
@@ -1513,7 +1566,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = prevActiveCellIndex + values.length;
     notebook.deselectAll();
     if (cellsFromClipboard) {
-      notebook.lastClipboardInteraction = 'paste';
+      notebook.recordCellClipboardInteraction('paste', values);
     }
     void Private.handleState(notebook, state, true);
   }
@@ -2412,6 +2465,7 @@ namespace Private {
   /**
    * Notebook cell executor
    */
+  // eslint-disable-next-line no-unassigned-vars
   export let executor: INotebookCellExecutor;
 
   /**
@@ -2557,9 +2611,7 @@ namespace Private {
               `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
             ),
             'warning',
-            {
-              autoClose: false
-            }
+            { autoClose: false }
           );
           return Promise.resolve(false);
         }
@@ -2754,9 +2806,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
@@ -2791,9 +2843,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }

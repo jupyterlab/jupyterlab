@@ -844,6 +844,192 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('date created column', () => {
+      const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
+      const CREATED_ID_CLASS = 'jp-id-created';
+
+      beforeEach(async () => {
+        // Assign each file a distinct `created` timestamp so sort tests have
+        // deterministic, unambiguous data to work with.
+        const items = [...dirListing.sortedItems()].filter(
+          i => i.type !== 'directory'
+        );
+        const contents = dirListing.model.manager.services.contents;
+        for (let i = 0; i < items.length; i++) {
+          const created = new Date(2020 + i, 0, 1).toISOString();
+          await contents.save(items[i].path, { created } as any);
+        }
+        await signalToPromise(dirListing.updated);
+      });
+
+      it('should be hidden by default', () => {
+        const headerNode = dirListing.headerNode;
+        const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).toBeNull();
+      });
+
+      it('should show column when visibility is toggled on', async () => {
+        dirListing.setColumnVisibility('date_created', true);
+        // Trigger update to render the column cells
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        const headerNode = dirListing.headerNode;
+        const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).not.toBeNull();
+
+        // Check that items have the created cell
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const createdCell = itemNode.querySelector(`.${ITEM_CREATED_CLASS}`);
+        expect(createdCell).not.toBeNull();
+      });
+
+      it('should hide column when visibility is toggled off', async () => {
+        // First show the column
+        dirListing.setColumnVisibility('date_created', true);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        // Verify it's visible
+        let headerNode = dirListing.headerNode;
+        let createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).not.toBeNull();
+
+        // Now hide it
+        dirListing.setColumnVisibility('date_created', false);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        // Verify it's hidden
+        headerNode = dirListing.headerNode;
+        createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).toBeNull();
+      });
+
+      it('should display created date in item cells', async () => {
+        dirListing.setColumnVisibility('date_created', true);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const createdCell = itemNode.querySelector(
+          `.${ITEM_CREATED_CLASS}`
+        ) as HTMLElement;
+        expect(createdCell).not.toBeNull();
+        // The cell should have text content (formatted date) and a title (full date)
+        expect(createdCell.textContent).not.toBe('');
+        expect(createdCell.title).not.toBe('');
+      });
+
+      it('should sort by date created ascending', async () => {
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+
+        const itemsAsc = [...dirListing.sortedItems()];
+        expect(itemsAsc.length).toBeGreaterThan(0);
+
+        // NOTE: JupyterLab's direction semantics are inverted from typical conventions:
+        // 'ascending' displays larger/newer values first (see GitHub issue #16779).
+        // Verify items are sorted with larger dates first
+        for (let i = 1; i < itemsAsc.length; i++) {
+          const prevCreated = Date.parse(itemsAsc[i - 1].created ?? '');
+          const currCreated = Date.parse(itemsAsc[i].created ?? '');
+          expect(prevCreated).toBeGreaterThanOrEqual(currCreated);
+        }
+      });
+
+      it('should sort by date created descending', async () => {
+        dirListing.sort({
+          direction: 'descending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+
+        const itemsDesc = [...dirListing.sortedItems()];
+        expect(itemsDesc.length).toBeGreaterThan(0);
+
+        // NOTE: JupyterLab's direction semantics are inverted from typical conventions:
+        // 'descending' displays smaller/older values first (see GitHub issue #16779).
+        // Verify items are sorted with smaller dates first
+        for (let i = 1; i < itemsDesc.length; i++) {
+          const prevCreated = Date.parse(itemsDesc[i - 1].created ?? '');
+          const currCreated = Date.parse(itemsDesc[i].created ?? '');
+          expect(prevCreated).toBeLessThanOrEqual(currCreated);
+        }
+      });
+
+      it('should produce opposite order for ascending vs descending', async () => {
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const itemsAsc = [...dirListing.sortedItems()];
+
+        dirListing.sort({
+          direction: 'descending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const itemsDesc = [...dirListing.sortedItems()];
+
+        // Directories are always pinned first; compare only non-directory items.
+        const dirCount = itemsAsc.filter(i => i.type === 'directory').length;
+        const ascNonDirNames = itemsAsc.slice(dirCount).map(i => i.name);
+        const descNonDirNames = itemsDesc.slice(dirCount).map(i => i.name);
+
+        // The beforeEach guarantees distinct created dates, so ascending and
+        // descending must produce strictly reversed orderings.
+        expect(ascNonDirNames.length).toBeGreaterThan(1);
+        expect(ascNonDirNames).toEqual([...descNonDirNames].reverse());
+      });
+
+      it('should produce stable sort order when sorted multiple times', async () => {
+        // This test verifies that sorting is stable and doesn't produce NaN
+        // comparisons which would cause inconsistent ordering
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const firstSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        // Sort again with the same parameters
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const secondSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        // The order should be identical - if NaN comparisons occurred,
+        // the sort would be unstable and produce different results
+        expect(firstSort).toEqual(secondSort);
+      });
+
+      it('should produce stable sort order for last_modified when sorted multiple times', async () => {
+        // Verify last_modified sorting is also stable (no NaN issues)
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'last_modified'
+        });
+        await signalToPromise(dirListing.updated);
+        const firstSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'last_modified'
+        });
+        await signalToPromise(dirListing.updated);
+        const secondSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        expect(firstSort).toEqual(secondSort);
+      });
+    });
+
     describe('should sort correctly', () => {
       beforeEach(async () => {
         const options = createOptionsForConstructor();
@@ -1058,6 +1244,107 @@ describe('filebrowser/listing', () => {
             'file10.txt'
           ]);
         });
+      });
+    });
+
+    describe('singleClickNavigation', () => {
+      let directoryNode: HTMLElement;
+      let fileNode: HTMLElement;
+
+      beforeEach(async () => {
+        await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd('.');
+        await signalToPromise(dirListing.updated);
+
+        directoryNode = dirListing.contentNode.children[0] as HTMLElement;
+        fileNode = dirListing.contentNode.children[1] as HTMLElement;
+      });
+
+      it('should open a file on single click', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(fileNode!, 'click');
+
+        expect(fileOpened).toHaveBeenCalledTimes(1);
+        const openedFile = fileOpened.mock.calls[0][1];
+        expect(openedFile.type).toBe('file');
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should navigate to directory on single click', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
+        simulate(directoryNode, 'click');
+        await signalToPromise(dirListing.updated);
+        expect(directoryOpened).toHaveBeenCalled();
+        expect(getItemTitles(dirListing)).toHaveLength(0);
+      });
+
+      it('should not open file or navigate to directory when single click navigation is disabled', async () => {
+        dirListing.setAllowSingleClickNavigation(false);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(fileNode!, 'click');
+        expect(fileOpened).not.toHaveBeenCalled();
+
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
+        simulate(directoryNode!, 'click');
+        expect(directoryOpened).not.toHaveBeenCalled();
+        expect(getItemTitles(dirListing)).toHaveLength(5);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should still open directory on double click when single click navigation is disabled', async () => {
+        dirListing.setAllowSingleClickNavigation(false);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(fileNode!, 'dblclick');
+        expect(fileOpened).toHaveBeenCalledTimes(1);
+        const openedFile = fileOpened.mock.calls[0][1];
+        expect(openedFile.type).toBe('file');
+
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
+        simulate(directoryNode!, 'dblclick');
+        await signalToPromise(dirListing.updated);
+        expect(directoryOpened).toHaveBeenCalled();
+        expect(getItemTitles(dirListing)).toHaveLength(0);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should check boxes when clicking with single click navigation enabled', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          directoryNode
+        ) as HTMLInputElement;
+        simulate(checkbox, 'click');
+
+        expect(fileOpened).not.toHaveBeenCalled();
+        expect(checkbox.checked).toBe(true);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
       });
     });
   });

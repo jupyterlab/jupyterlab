@@ -38,8 +38,7 @@ import type { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T>
-{
+> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
@@ -471,7 +470,6 @@ export class Context<
 
       if (oldPath !== this._path) {
         newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
 
         // Update client file model from folder change
         changeModel = {

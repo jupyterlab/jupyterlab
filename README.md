@@ -40,7 +40,7 @@ To learn more about extensions, see the [user documentation](https://jupyterlab.
 Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
 
 > [!IMPORTANT]
-> JupyterLab 3 reached its end of maintenance date on May 15, 2024. Fixes for critical issues will still be backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
+> JupyterLab 3 reached its end of maintenance date on May 15, 2024. Fixes for critical issues were backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
 
 ---
 
@@ -131,9 +131,18 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](https://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+JupyterLab is part of [Project Jupyter](https://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole. JupyterLab falls under the [Jupyter Frontends Council](https://jupyterlab-team-compass.readthedocs.io/en/latest/index.html).
 
-JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
+The team of maintainers includes:
+
+- decision-making contributors listed on the [council team members](https://jupyterlab-team-compass.readthedocs.io/en/latest/team.html) page
+- code contributors listed on the [contributors graph](https://github.com/jupyterlab/jupyterlab/graphs/contributors) page
+
+<details>
+
+<summary>Archival list of maintainers</summary>
+
+Prior to transition to the new governance model with the JupyterLab and then Frontends council, these people contributed to and maintained JupyterLab:
 
 - Mehmet Bektas, Netflix (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
@@ -152,10 +161,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Steven Silvester, MongoDB (co-creator, release management, packaging,
   prolific contributions throughout the code base).
-- Jeremy Tuloup, QuantStack (general development, extensions).
-
-Maintainer emeritus:
-
+- Jeremy Tuloup, QuantStack (general development, extensions)
 - Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, PhosphorJS)
 - Jessica Forde, Project Jupyter (demo, documentation)
@@ -166,8 +172,7 @@ Maintainer emeritus:
 - Andrew Schlaepfer, Bloomberg (general development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
 
-This list is provided to give the reader context on who we are and how our team functions.
-To be listed, please submit a pull request with your information.
+</details>
 
 ---
 

@@ -3,13 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Button } from '@jupyter/react-components';
 import type { TranslationBundle } from '@jupyterlab/translation';
+import {
+  checkIcon,
+  editIcon,
+  HTMLSelect,
+  infoIcon
+} from '@jupyterlab/ui-components';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
+import { CustomOptionsDialog } from './ShortcutCustomOptions';
 import type { IConflicts } from './ShortcutInput';
 import { CONFLICT_CONTAINER_CLASS, ShortcutInput } from './ShortcutInput';
+import { ShortcutRegistry } from '../registry';
 import type {
   IKeybinding,
+  ISearchResult,
   IShortcutRegistry,
   IShortcutTarget,
   IShortcutUI
@@ -23,8 +33,14 @@ export interface IShortcutItemProps {
   resetKeybindings: IShortcutUI['resetKeybindings'];
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
+  setCustomOptions: IShortcutUI['setCustomOptions'];
   showSelectors: boolean;
   external: IShortcutUI.IExternalBundle;
+  newShortcutUtils?: {
+    searchQuery: string;
+    updateCommand: (command: string, category: string) => void;
+    saveShortcut: () => Promise<void>;
+  };
 }
 
 /** State for ShortcutItem component */
@@ -119,14 +135,41 @@ export class ShortcutItem extends React.Component<
   }
 
   getLabelCell(): JSX.Element {
-    return (
-      <div className="jp-Shortcuts-Cell">
-        <div className="jp-label">
-          {this.props.shortcut.label ??
-            this._trans.__('(Command label missing)')}
+    if (this.props.newShortcutUtils) {
+      const filteredShortcuts = this._getFilteredCommands();
+      return (
+        <div className="jp-Shortcuts-Cell">
+          <HTMLSelect
+            value={this.props.shortcut.command}
+            options={[
+              { value: '', label: this._trans.__('Select a command') },
+              ...filteredShortcuts.map(shortcut => ({
+                value: shortcut.command,
+                label: `${shortcut.category}: ${shortcut.label}`
+              }))
+            ]}
+            onChange={e => {
+              const shortcut = filteredShortcuts.find(
+                shortcut => shortcut.command === e.target.value
+              );
+              this.props.newShortcutUtils?.updateCommand(
+                shortcut?.command ?? '',
+                shortcut?.category ?? ''
+              );
+            }}
+          />
         </div>
-      </div>
-    );
+      );
+    } else {
+      return (
+        <div className="jp-Shortcuts-Cell">
+          <div className="jp-label">
+            {this.props.shortcut.label ??
+              this._trans.__('(Command label missing)')}
+          </div>
+        </div>
+      );
+    }
   }
 
   getResetShortCutLink(): JSX.Element {
@@ -135,7 +178,9 @@ export class ShortcutItem extends React.Component<
         className="jp-Shortcuts-Reset"
         onClick={() => this.props.resetKeybindings(this.props.shortcut)}
       >
-        {this._trans.__('Reset')}
+        {this.props.shortcut.userDefined
+          ? this._trans.__('Delete')
+          : this._trans.__('Reset')}
       </a>
     );
   }
@@ -144,12 +189,74 @@ export class ShortcutItem extends React.Component<
     const allDefault = this.props.shortcut.keybindings.every(
       binding => binding.isDefault
     );
+    const editable =
+      this.props.shortcut.userDefined || !!this.props.newShortcutUtils;
+    const showOptionsButtonTitle = editable
+      ? this._trans.__('Custom options')
+      : this._trans.__('Show options');
+
     return (
       <div className="jp-Shortcuts-Cell">
-        <div className="jp-Shortcuts-SourceCell">
-          {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
-        </div>
+        {!this.props.newShortcutUtils && (
+          <div className="jp-Shortcuts-SourceCell">
+            {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
+          </div>
+        )}
         {!allDefault ? this.getResetShortCutLink() : ''}
+        {this.props.external.editorFactory && (
+          <Button
+            className="jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions"
+            onClick={async () => {
+              if (!this.props.external.editorFactory) {
+                console.error('Cannot build the custom options form');
+                return;
+              }
+              const dialog = new CustomOptionsDialog({
+                shortcut: this.props.shortcut,
+                translator: this.props.external.translator,
+                editorFactory: this.props.external.editorFactory,
+                readOnly: !editable
+              });
+
+              const result = await dialog.launch();
+              if (result.button.accept && editable && result.value) {
+                await this.props.setCustomOptions(
+                  this.props.shortcut,
+                  result.value
+                );
+              }
+            }}
+            title={showOptionsButtonTitle}
+            aria-label={showOptionsButtonTitle}
+            appearance={'neutral'}
+          >
+            {editable ? (
+              <editIcon.react tag={null} />
+            ) : (
+              <infoIcon.react tag={null} />
+            )}
+          </Button>
+        )}
+        {!!this.props.newShortcutUtils && (
+          <>
+            <Button
+              className="jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew"
+              onClick={this.props.newShortcutUtils?.saveShortcut}
+              title={this._trans.__('Save shortcut')}
+              aria-label={this._trans.__('Save shortcut')}
+              appearance="neutral"
+              disabled={
+                !this.props.shortcut.command ||
+                !this.props.shortcut.keybindings.length ||
+                this.props.shortcut.keybindings.every(
+                  binding => !binding.keys || binding.keys.length === 0
+                )
+              }
+            >
+              <checkIcon.react tag={null} />
+            </Button>
+          </>
+        )}
       </div>
     );
   }
@@ -191,7 +298,7 @@ export class ShortcutItem extends React.Component<
     return this.state.displayReplaceInput[location];
   }
 
-  getOrDiplayIfNeeded(force: boolean): JSX.Element {
+  getOrDisplayIfNeeded(force: boolean): JSX.Element {
     const classes = ['jp-Shortcuts-Or'];
     if (force || this.state.displayNewInput) {
       classes.push('jp-Shortcuts-Or-Forced');
@@ -259,7 +366,7 @@ export class ShortcutItem extends React.Component<
           index === this._nonEmptyBindings.length - 1 &&
           Object.values(this.state.displayReplaceInput).some(Boolean)
         ) &&
-          this.getOrDiplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
+          this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
       </div>
     );
   }
@@ -400,6 +507,33 @@ export class ShortcutItem extends React.Component<
     );
   }
 
+  private _getFilteredCommands(): IShortcutTarget[] {
+    const registry = new ShortcutRegistry({
+      commandRegistry: this.props.external.commandRegistry,
+      allCommands: true
+    });
+    const filteredShortcuts = ShortcutRegistry.matchItems(
+      registry,
+      this.props.newShortcutUtils?.searchQuery ?? ''
+    )
+      .map((item: ISearchResult) => item.item)
+      .filter(target => !target.command.startsWith('__internal:'));
+
+    filteredShortcuts.sort((a: IShortcutTarget, b: IShortcutTarget) => {
+      const compareA: string = a.category;
+      const compareB: string = b.category;
+      const compareResult = compareA.localeCompare(compareB);
+      if (compareResult) {
+        return compareResult;
+      } else {
+        const aLabel = a['label'] ?? '';
+        const bLabel = b['label'] ?? '';
+        return aLabel.localeCompare(bLabel);
+      }
+    });
+    return filteredShortcuts;
+  }
+
   private get _nonEmptyBindings() {
     return this.props.shortcut.keybindings.filter(
       binding => binding.keys.filter(k => k != '').length !== 0
@@ -410,7 +544,9 @@ export class ShortcutItem extends React.Component<
     return (
       <>
         <div
-          className="jp-Shortcuts-Row"
+          className={`jp-Shortcuts-Row${
+            this.props.newShortcutUtils ? ' jp-Shortcuts-Row-newShortcut' : ''
+          }`}
           data-shortcut={this.props.shortcut.id}
         >
           {this.getCategoryCell()}

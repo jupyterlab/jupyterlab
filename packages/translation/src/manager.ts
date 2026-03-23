@@ -71,7 +71,7 @@ export class TranslationManager implements ITranslator {
     }
 
     this._currentLocale = (
-      locale !== 'default' ? locale : serverLocale ?? DEFAULT_LANGUAGE_CODE
+      locale !== 'default' ? locale : (serverLocale ?? DEFAULT_LANGUAGE_CODE)
     ).replace('_', '-');
 
     this._domainData = this._languageData?.data ?? {};
