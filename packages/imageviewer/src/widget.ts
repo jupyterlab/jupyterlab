@@ -34,6 +34,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this.context = context;
     this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
+    this.addClass('jp-zoom-target');
 
     this._img = document.createElement('img');
     this.node.appendChild(this._img);

@@ -97,6 +97,11 @@ const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 const ITEM_FILE_SIZE_CLASS = 'jp-DirListing-itemFileSize';
 
 /**
+ * The class name added to the listing item created cell.
+ */
+const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
+
+/**
  * The class name added to the label element that wraps each item's checkbox and
  * the header's check-all checkbox.
  */
@@ -121,6 +126,11 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
  * The class name added to the file size column header cell.
  */
 const FILE_SIZE_ID_CLASS = 'jp-id-filesize';
+
+/**
+ * The class name added to the created column header cell.
+ */
+const CREATED_ID_CLASS = 'jp-id-created';
 
 /**
  * The mime type for a contents drag object.
@@ -241,10 +251,14 @@ export class DirListing extends Widget {
 
     // Get the width of the "modified" column
     this._updateModifiedSize(this.node);
+    // Get the width of the "created" column
+    this._updateCreatedSize(this.node);
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     // hide the file size column by default
     this._hiddenColumns.add('file_size');
+    // hide the date created column by default
+    this._hiddenColumns.add('date_created');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
@@ -355,6 +369,7 @@ export class DirListing extends Widget {
     );
     this._sortState = state;
     this.update();
+    this._saveState();
   }
 
   /**
@@ -575,18 +590,61 @@ export class DirListing extends Widget {
         | Record<DirListing.IColumn['id'], number | null>
         | undefined;
 
-      if (!sizes) {
-        return;
+      const sortState = (columns as ReadonlyJSONObject)[
+        'sortState'
+      ] as unknown as DirListing.ISortState | undefined;
+
+      // Set sort state before updating column sizes so that any
+      // state save triggered by _updateColumnSizes includes the
+      // correct sort state rather than the default.
+      if (sortState) {
+        this._sortState = sortState;
       }
-      for (const [key, size] of Object.entries(sizes)) {
-        this._columnSizes[key as DirListing.IColumn['id']] = size;
+
+      if (sizes) {
+        for (const [key, size] of Object.entries(sizes)) {
+          this._columnSizes[key as DirListing.IColumn['id']] = size;
+        }
+        this._updateColumnSizes();
       }
-      this._updateColumnSizes();
+
+      // Sort items and rebuild the header to reflect the restored
+      // sort state without calling sort() to avoid a redundant save.
+      if (sortState) {
+        this._sortedItems = Private.sort(
+          this.model.items(),
+          sortState,
+          this._sortNotebooksFirst,
+          this._sortFileNamesNaturally,
+          this.translator
+        );
+        this.headerNode.innerHTML = '';
+        this._renderer.populateHeaderNode(
+          this.headerNode,
+          this.translator,
+          this._hiddenColumns,
+          this._columnSizes,
+          sortState
+        );
+        this.update();
+      }
     } catch (error) {
       await state.remove(key);
     }
   }
   private _stateColumnsKey: string;
+
+  /**
+   * Save the current column sizes and sort state to the state database.
+   */
+  private _saveState(): void {
+    if (this._state && this._stateColumnsKey) {
+      void this._state.save(this._stateColumnsKey, {
+        sizes: this._columnSizes,
+        sortState: { ...this._sortState }
+      });
+    }
+  }
 
   /**
    * Shut down kernels on the applicable currently selected items.
@@ -944,21 +1002,42 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Update the modified column's size
+   * Update the 'modified' column's size
    */
   private _updateModifiedSize(node: HTMLElement) {
-    // Look for the modified column's header
-    const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
-    this._modifiedWidth =
-      this._columnSizes['last_modified'] ??
-      modified?.getBoundingClientRect().width ??
+    this._modifiedStyle = this._computeDateColumnStyle(
+      node,
+      MODIFIED_ID_CLASS,
+      'last_modified'
+    );
+  }
+
+  /**
+   * Update the 'date created' column's size
+   */
+  private _updateCreatedSize(node: HTMLElement) {
+    this._createdStyle = this._computeDateColumnStyle(
+      node,
+      CREATED_ID_CLASS,
+      'date_created'
+    );
+  }
+
+  /**
+   * Compute the Intl.RelativeTimeFormat style for a date column based on
+   * its pixel width: < 100px → 'narrow', 100–120px → 'short', > 120px → 'long'.
+   */
+  private _computeDateColumnStyle(
+    node: HTMLElement,
+    columnClassName: string,
+    columnName: 'last_modified' | 'date_created'
+  ): Time.HumanStyle {
+    const columnElement = DOMUtils.findElement(node, columnClassName);
+    const width =
+      this._columnSizes[columnName] ??
+      columnElement?.getBoundingClientRect().width ??
       83;
-    this._modifiedStyle =
-      this._modifiedWidth < 100
-        ? 'narrow'
-        : this._modifiedWidth > 120
-          ? 'long'
-          : 'short';
+    return width < 100 ? 'narrow' : width > 120 ? 'long' : 'short';
   }
 
   /**
@@ -966,10 +1045,20 @@ export class DirListing extends Widget {
    */
   private _updateModifiedStyleAndSize() {
     const oldModifiedStyle = this._modifiedStyle;
-    // Update both size and style
     this._updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
       this.updateModified(this._sortedItems, this._items);
+    }
+  }
+
+  /**
+   * Rerender item nodes' created dates, if the created style has changed.
+   */
+  private _updateCreatedStyleAndSize() {
+    const oldCreatedStyle = this._createdStyle;
+    this._updateCreatedSize(this.node);
+    if (oldCreatedStyle !== this._createdStyle) {
+      this.updateCreated(this._sortedItems, this._items);
     }
   }
 
@@ -981,6 +1070,9 @@ export class DirListing extends Widget {
       const node = nodes[i];
       if (node && item.last_modified) {
         const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+        if (!modified) {
+          return;
+        }
         if (this.renderer.updateItemModified !== undefined) {
           this.renderer.updateItemModified(
             modified,
@@ -992,6 +1084,34 @@ export class DirListing extends Widget {
             modified,
             item.last_modified,
             this._modifiedStyle
+          );
+        }
+      }
+    });
+  }
+
+  /**
+   * Update only the created dates.
+   */
+  protected updateCreated(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      if (node && item.created) {
+        const created = DOMUtils.findElement(node, ITEM_CREATED_CLASS);
+        if (!created) {
+          return;
+        }
+        if (this.renderer.updateItemCreated !== undefined) {
+          this.renderer.updateItemCreated(
+            created,
+            item.created,
+            this._createdStyle
+          );
+        } else {
+          DirListing.defaultRenderer.updateItemCreated(
+            created,
+            item.created,
+            this._createdStyle
           );
         }
       }
@@ -1015,7 +1135,8 @@ export class DirListing extends Widget {
           node,
           item,
           this._modifiedStyle,
-          this._columnSizes
+          this._columnSizes,
+          this._createdStyle
         );
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
@@ -1027,7 +1148,8 @@ export class DirListing extends Widget {
         this._hiddenColumns,
         this.selection[item.path],
         this._modifiedStyle,
-        this._columnSizes
+        this._columnSizes,
+        this._createdStyle
       );
       if (
         this.selection[item.path] &&
@@ -1195,7 +1317,8 @@ export class DirListing extends Widget {
       this.headerNode,
       this.translator,
       this._hiddenColumns,
-      this._columnSizes
+      this._columnSizes,
+      this._sortState
     );
 
     this._updateColumnSizes();
@@ -1286,6 +1409,7 @@ export class DirListing extends Widget {
       column.element.style.width = size === null ? '' : size + 'px';
     }
     this._updateModifiedStyleAndSize();
+    this._updateCreatedStyleAndSize();
 
     // Refresh sizes on the per item widths
     if (this.isVisible) {
@@ -1295,11 +1419,7 @@ export class DirListing extends Widget {
       }
     }
 
-    if (this._state && this._stateColumnsKey) {
-      void this._state.save(this._stateColumnsKey, {
-        sizes: this._columnSizes
-      });
-    }
+    this._saveState();
   }
 
   private get _visibleColumns() {
@@ -1727,6 +1847,10 @@ export class DirListing extends Widget {
   async goUp() {
     const model = this.model;
     if (model.path === model.rootPath) {
+      return;
+    }
+    // Check if we're at the navigation root boundary
+    if (model.root && model.path === model.root) {
       return;
     }
     try {
@@ -2662,7 +2786,8 @@ export class DirListing extends Widget {
     name: null,
     file_size: null,
     is_selected: null,
-    last_modified: null
+    last_modified: null,
+    date_created: null
   };
   private _sortNotebooksFirst = false;
   private _sortFileNamesNaturally = true;
@@ -2670,9 +2795,8 @@ export class DirListing extends Widget {
   private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
-  // Width of the "last modified" column for an individual file
-  private _modifiedWidth: number;
-  private _modifiedStyle: Time.HumanStyle;
+  private _modifiedStyle: Time.HumanStyle = 'short';
+  private _createdStyle: Time.HumanStyle = 'short';
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
@@ -2747,17 +2871,29 @@ export namespace DirListing {
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
+  export type ToggleableColumn =
+    | 'last_modified'
+    | 'is_selected'
+    | 'file_size'
+    | 'date_created';
 
   /**
    * Resizable columns.
    */
-  export type ResizableColumn = 'name' | 'last_modified' | 'file_size';
+  export type ResizableColumn =
+    | 'name'
+    | 'last_modified'
+    | 'file_size'
+    | 'date_created';
 
   /**
    * Sortable columns.
    */
-  export type SortableColumn = 'name' | 'last_modified' | 'file_size';
+  export type SortableColumn =
+    | 'name'
+    | 'last_modified'
+    | 'file_size'
+    | 'date_created';
 
   /**
    * A file contents model thunk.
@@ -2796,7 +2932,8 @@ export namespace DirListing {
       node: HTMLElement,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      sortState?: ISortState
     ): void;
 
     /**
@@ -2836,6 +2973,21 @@ export namespace DirListing {
     ): void;
 
     /**
+     * Update an item's created date.
+     *
+     * @param created - Element containing the file's created date.
+     *
+     * @param createdDate - String representation of the created date.
+     *
+     * @param createdStyle - The date style for the created column: narrow, short, or long
+     */
+    updateItemCreated?(
+      created: HTMLElement,
+      createdDate: string,
+      createdStyle: Time.HumanStyle
+    ): void;
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
@@ -2854,7 +3006,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      createdStyle?: Time.HumanStyle
     ): void;
 
     /**
@@ -2864,7 +3017,8 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      createdStyle?: Time.HumanStyle
     ): void;
 
     /**
@@ -2993,6 +3147,16 @@ export namespace DirListing {
       grow: 1
     },
     {
+      id: 'date_created' as const,
+      className: CREATED_ID_CLASS,
+      itemClassName: ITEM_CREATED_CLASS,
+      minWidth: 60,
+      resizable: true,
+      sortable: true,
+      caretSide: 'left',
+      grow: 1
+    },
+    {
       id: 'file_size' as const,
       className: FILE_SIZE_ID_CLASS,
       itemClassName: ITEM_FILE_SIZE_CLASS,
@@ -3035,7 +3199,8 @@ export namespace DirListing {
       node: HTMLElement,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      sortState?: DirListing.ISortState
     ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
@@ -3051,6 +3216,11 @@ export namespace DirListing {
           this._createHeaderItemNodeWithSizes({
             small: trans.__('Size'),
             large: trans.__('File Size')
+          }),
+        date_created: () =>
+          this._createHeaderItemNodeWithSizes({
+            small: trans.__('Created'),
+            large: trans.__('Date Created')
           }),
         is_selected: () =>
           this.createCheckboxWrapperNode({
@@ -3086,14 +3256,9 @@ export namespace DirListing {
         }
       }
 
-      const name = DOMUtils.findElement(node, NAME_ID_CLASS);
-      name.classList.add(SELECTED_CLASS);
-
-      // set the initial caret icon
-      Private.updateCaret(
-        DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS),
-        'right',
-        'up'
+      this._updateSortIndicator(
+        node,
+        sortState ?? { direction: 'ascending', key: 'name' }
       );
     }
 
@@ -3107,58 +3272,59 @@ export namespace DirListing {
      * @returns The sort state of the header after the click event.
      */
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
-      const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-
       const sortableColumns = DirListing.columns.filter(Private.isSortable);
 
       for (const column of sortableColumns) {
         const header = node.querySelector(`.${column.className}`);
         if (!header) {
-          // skip if the column is hidden
           continue;
         }
         if (header.contains(target)) {
-          state.key = column.id;
-          const headerIcon = DOMUtils.findElement(
-            header as HTMLElement,
-            HEADER_ITEM_ICON_CLASS
-          );
-          if (header.classList.contains(SELECTED_CLASS)) {
-            if (!header.classList.contains(DESCENDING_CLASS)) {
-              state.direction = 'descending';
-              header.classList.add(DESCENDING_CLASS);
-              Private.updateCaret(headerIcon, column.caretSide, 'down');
-            } else {
-              header.classList.remove(DESCENDING_CLASS);
-              Private.updateCaret(headerIcon, column.caretSide, 'up');
-            }
+          const isSelected = header.classList.contains(SELECTED_CLASS);
+          const isDescending = header.classList.contains(DESCENDING_CLASS);
+          let direction: 'ascending' | 'descending' = 'ascending';
+          if (isSelected && !isDescending) {
+            direction = 'descending';
+          }
+          const state: ISortState = { direction, key: column.id };
+          this._updateSortIndicator(node, state);
+          return state;
+        }
+      }
+      return { direction: 'ascending', key: 'name' };
+    }
+
+    private _updateSortIndicator(
+      node: HTMLElement,
+      sortState: DirListing.ISortState
+    ): void {
+      const sortableColumns = DirListing.columns.filter(Private.isSortable);
+
+      for (const column of sortableColumns) {
+        const header = node.querySelector(`.${column.className}`);
+        if (!header) {
+          continue;
+        }
+        const headerIcon = DOMUtils.findElement(
+          header as HTMLElement,
+          HEADER_ITEM_ICON_CLASS
+        );
+        if (column.id === sortState.key) {
+          header.classList.add(SELECTED_CLASS);
+          if (sortState.direction === 'descending') {
+            header.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(headerIcon, column.caretSide, 'down');
           } else {
             header.classList.remove(DESCENDING_CLASS);
             Private.updateCaret(headerIcon, column.caretSide, 'up');
           }
-          header.classList.add(SELECTED_CLASS);
-          for (const otherColumn of sortableColumns) {
-            if (otherColumn.id === column.id) {
-              continue;
-            }
-            const otherHeader = node.querySelector(`.${otherColumn.className}`);
-            if (!otherHeader) {
-              // skip if hidden
-              continue;
-            }
-            otherHeader.classList.remove(SELECTED_CLASS);
-            otherHeader.classList.remove(DESCENDING_CLASS);
-            const otherHeaderIcon = DOMUtils.findElement(
-              otherHeader as HTMLElement,
-              HEADER_ITEM_ICON_CLASS
-            );
-            Private.updateCaret(otherHeaderIcon, otherColumn.caretSide);
-          }
-          return state;
+        } else {
+          header.classList.remove(SELECTED_CLASS);
+          header.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(headerIcon, column.caretSide);
         }
       }
-      return state;
     }
 
     /**
@@ -3249,29 +3415,71 @@ export namespace DirListing {
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle
     ): void {
-      // Formatting dates is expensive (0.1-0.2ms per call,
-      // so over 150 files can easily already choke the renderer),
-      // let's do the bare minimum check of comparing if an update
-      // is needed using a last update cache:
-      const previousUpdate = this._modifiedColumnLastUpdate.get(modified);
+      this._updateItemDate(
+        modified,
+        modifiedDate,
+        modifiedStyle,
+        this._modifiedColumnLastUpdate
+      );
+    }
+
+    /**
+     * Update an item's created date.
+     *
+     * @param created - Element containing the file's created date.
+     *
+     * @param createdDate - String representation of the created date.
+     *
+     * @param createdStyle - The date style for the created column: narrow, short, or long
+     */
+    updateItemCreated(
+      created: HTMLElement,
+      createdDate: string,
+      createdStyle: Time.HumanStyle
+    ): void {
+      this._updateItemDate(
+        created,
+        createdDate,
+        createdStyle,
+        this._createdColumnLastUpdate
+      );
+    }
+
+    /**
+     * Shared implementation for updating a date column element.
+     *
+     * Formatting dates is expensive (0.1-0.2ms per call, so over 150 files
+     * can easily already choke the renderer), so we do the bare minimum check
+     * of comparing if an update is needed using a last update cache.
+     *
+     * @param element - The date column element to update.
+     *
+     * @param dateString - String representation of the date.
+     *
+     * @param style - The date style: narrow, short, or long.
+     *
+     * @param cache - The WeakMap cache tracking the last rendered state for
+     *   this column.
+     */
+    private _updateItemDate(
+      element: HTMLElement,
+      dateString: string,
+      style: Time.HumanStyle,
+      cache: WeakMap<HTMLElement, { date: string; style: Time.HumanStyle }>
+    ): void {
+      const previousUpdate = cache.get(element);
       if (
-        previousUpdate?.date === modifiedDate &&
-        previousUpdate?.style === modifiedStyle
+        previousUpdate?.date === dateString &&
+        previousUpdate?.style === style
       ) {
         return;
       }
 
-      const parsedDate = new Date(modifiedDate);
+      const parsedDate = new Date(dateString);
       // Render the date in one of multiple formats, depending on the container's size
-      const modText = Time.formatHuman(parsedDate, modifiedStyle);
-      const modTitle = Time.format(parsedDate);
-
-      modified.textContent = modText;
-      modified.title = modTitle;
-      this._modifiedColumnLastUpdate.set(modified, {
-        date: modifiedDate,
-        style: modifiedStyle
-      });
+      element.textContent = Time.formatHuman(parsedDate, style);
+      element.title = Time.format(parsedDate);
+      cache.set(element, { date: dateString, style });
     }
 
     /**
@@ -3292,7 +3500,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      createdStyle?: Time.HumanStyle
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3308,8 +3517,10 @@ export namespace DirListing {
         name: model.name,
         selected,
         lastModified: model.last_modified,
+        created: model.created,
         modifiedStyle,
-        hiddenColumns,
+        createdStyle,
+        hiddenColumns: Array.from(hiddenColumns ?? []).sort(),
         columnsSizes,
         fileSize: model.size
       });
@@ -3336,6 +3547,9 @@ export namespace DirListing {
       let fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS) as
         | HTMLElement
         | undefined;
+      let created = DOMUtils.findElement(node, ITEM_CREATED_CLASS) as
+        | HTMLElement
+        | undefined;
 
       const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
@@ -3348,9 +3562,19 @@ export namespace DirListing {
       const showModified = !hiddenColumns?.has('last_modified');
       if (modified && !showModified) {
         node.removeChild(modified);
+        modified = undefined;
       } else if (showModified && !modified) {
         modified = this.itemFactories.last_modified();
         nameColumn.insertAdjacentElement('afterend', modified);
+      }
+
+      const showCreated = !hiddenColumns?.has('date_created');
+      if (created && !showCreated) {
+        node.removeChild(created);
+        created = undefined;
+      } else if (showCreated && !created) {
+        created = this.itemFactories.date_created();
+        (modified ?? nameColumn).insertAdjacentElement('afterend', created);
       }
 
       const showFileSize = !hiddenColumns?.has('file_size');
@@ -3358,7 +3582,10 @@ export namespace DirListing {
         node.removeChild(fileSize);
       } else if (showFileSize && !fileSize) {
         fileSize = this.itemFactories.file_size();
-        (modified ?? nameColumn).insertAdjacentElement('afterend', fileSize);
+        const insertAfter = created ?? modified ?? nameColumn;
+        if (insertAfter) {
+          insertAfter.insertAdjacentElement('afterend', fileSize);
+        }
       }
 
       // render the file item's icon
@@ -3441,7 +3668,13 @@ export namespace DirListing {
         checkbox.checked = selected ?? false;
       }
 
-      this.updateItemSize(node, model, modifiedStyle, columnsSizes);
+      this.updateItemSize(
+        node,
+        model,
+        modifiedStyle,
+        columnsSizes,
+        createdStyle
+      );
     }
 
     /**
@@ -3451,7 +3684,8 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      createdStyle?: Time.HumanStyle
     ): void {
       if (columnsSizes) {
         for (const column of columns) {
@@ -3476,6 +3710,14 @@ export namespace DirListing {
           model.last_modified,
           modifiedStyle ?? 'short'
         );
+      }
+
+      let created = DOMUtils.findElement(node, ITEM_CREATED_CLASS) as
+        | HTMLElement
+        | undefined;
+
+      if (model.created && created) {
+        this.updateItemCreated(created, model.created, createdStyle ?? 'short');
       }
     }
 
@@ -3581,6 +3823,11 @@ export namespace DirListing {
         fileSize.className = ITEM_FILE_SIZE_CLASS;
         return fileSize;
       },
+      date_created: () => {
+        const created = document.createElement('span');
+        created.className = ITEM_CREATED_CLASS;
+        return created;
+      },
       is_selected: () => this.createCheckboxWrapperNode()
     };
 
@@ -3627,6 +3874,14 @@ export namespace DirListing {
      * Register of most recent arguments for last modified column update.
      */
     private _modifiedColumnLastUpdate = new WeakMap<
+      HTMLElement,
+      { date: string; style: Time.HumanStyle }
+    >();
+
+    /**
+     * Register of most recent arguments for date created column update.
+     */
+    private _createdColumnLastUpdate = new WeakMap<
       HTMLElement,
       { date: string; style: Time.HumanStyle }
     >();
@@ -3790,6 +4045,16 @@ namespace Private {
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
           return (b.size ?? 0) - (a.size ?? 0);
+        })
+      );
+    } else if (state.key === 'date_created') {
+      // Sort by date created
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (
+            new Date(a.created ?? '').getTime() -
+            new Date(b.created ?? '').getTime()
+          );
         })
       );
     } else {
