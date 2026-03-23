@@ -295,12 +295,6 @@ and modify the metadata of both the notebook and individual cells.
 To access the metadata editor, click the gear icon in the right sidebar
 of an open notebook. This opens the **Property Inspector** panel.
 
-```{image} ../images/metadata-editor.png
-:align: center
-:alt: The Property Inspector panel showing the metadata editor with cell metadata and notebook metadata sections
-:class: jp-screenshot
-```
-
 The panel has two sections:
 
 - **Notebook Metadata**: displays the metadata for the entire notebook
@@ -312,6 +306,12 @@ The panel has two sections:
 
 The metadata is displayed as JSON that you can edit directly. After making
 changes:
+
+```{image} ../images/metadata-editor.png
+:align: center
+:alt: The Property Inspector showing the commit and revert icons for editing cell metadata
+:class: jp-screenshot
+```
 
 - Click the **checkmark icon** to commit your changes.
 - Click the **revert icon** to discard your changes and restore the
