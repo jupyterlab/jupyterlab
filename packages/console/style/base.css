@@ -20,13 +20,6 @@
   padding: var(--jp-cell-padding);
 }
 
-.jp-CodeConsole:focus-visible {
-  outline-width: 2px;
-  outline-color: var(--jp-brand-color1);
-  outline-style: solid;
-  outline-offset: -4px;
-}
-
 /*-----------------------------------------------------------------------------
 | Content (already run cells)
 |----------------------------------------------------------------------------*/
@@ -73,10 +66,10 @@
 
 .jp-CodeConsole-input:focus-visible,
 .jp-CodeConsole-content:focus-visible {
-  outline-width: 2px;
+  outline-width: 3px;
   outline-color: var(--jp-brand-color1);
   outline-style: solid;
-  outline-offset: -2px;
+  outline-offset: -3px;
 }
 
 /*-----------------------------------------------------------------------------
