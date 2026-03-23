@@ -31,7 +31,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 /**
  * A namespace for command IDs of table of contents plugin.

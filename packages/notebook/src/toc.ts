@@ -20,9 +20,8 @@ import {
   redoIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-
-import { ToolbarRegistry } from '@jupyterlab/apputils';
-import { CommandRegistry } from '@lumino/commands';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import type { CommandRegistry } from '@lumino/commands';
 
 /**
  * Cell running status
