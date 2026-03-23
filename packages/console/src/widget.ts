@@ -819,9 +819,9 @@ export class CodeConsole extends Widget {
       editor.focus();
     } else if (event.key === 'Escape' && editor.hasFocus()) {
       // Set to command mode
-      console.log('Escape key pressed');
       event.preventDefault();
       event.stopPropagation();
+      editor.setOption('tabFocusable', false);
       this._input.node.focus();
     }
   }
