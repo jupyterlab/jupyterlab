@@ -123,6 +123,7 @@ test('File Browser has no unused rules', async ({ page }) => {
   };
   await clickMenuItem('Show File Checkboxes');
   await clickMenuItem('Show File Size Column');
+  await clickMenuItem('Show Date Created Column');
 
   await page.notebook.createNew('notebook.ipynb');
 
