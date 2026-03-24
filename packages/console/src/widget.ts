@@ -1220,6 +1220,8 @@ export class CodeConsole extends Widget {
       // adjust the sizes if the prompt cell is moved with code in it
       this._adjustSplitPanelForInputGrowth();
     });
+
+    this.promptCell?.editor?.focus();
   }
 
   private _banner: RawCell | null = null;
