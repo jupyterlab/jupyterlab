@@ -2019,7 +2019,7 @@ export class Notebook extends StaticNotebook {
     ) {
       for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
         if (this.widgets[i]) {
-          Private.selectedProperty.set(this.widgets[i], true);
+          this.select(this.widgets[i]);
         }
       }
     }
@@ -2112,6 +2112,15 @@ export class Notebook extends StaticNotebook {
     const expandedSet = new Set<MarkdownCell>();
     const resolvedTo = this._resolveInsertionIndex(to, expandedSet);
 
+    // clamp to valid range and bail if no-op
+    const boundedTo = Math.min(
+      this.widgets.length - 1,
+      Math.max(0, resolvedTo)
+    );
+    if (boundedTo === from) {
+      return;
+    }
+
     const doMove = (targetIndex: number) => {
       const originallySelected = this.widgets
         .slice(from, from + n)
@@ -2141,7 +2150,9 @@ export class Notebook extends StaticNotebook {
         if (selected) {
           const newIndex =
             targetIndex > from ? targetIndex - n + i + 1 : targetIndex + i;
-          this.select(this.widgets[newIndex]);
+          if (newIndex >= 0 && newIndex < this.widgets.length) {
+            this.select(this.widgets[newIndex]);
+          }
         }
       });
     };
@@ -2149,10 +2160,14 @@ export class Notebook extends StaticNotebook {
     if (expandedSet.size > 0) {
       requestAnimationFrame(() => {
         const adjustedTo = from < resolvedTo ? resolvedTo - 1 : resolvedTo;
-        doMove(adjustedTo);
+        const clampedAdjusted = Math.min(
+          this.widgets.length - 1,
+          Math.max(0, adjustedTo)
+        );
+        doMove(clampedAdjusted);
       });
     } else {
-      doMove(resolvedTo);
+      doMove(boundedTo);
     }
   }
 
