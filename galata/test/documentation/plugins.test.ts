@@ -4,7 +4,6 @@
 import { test } from '@jupyterlab/galata';
 import type { Token } from '@lumino/coreutils';
 import { expect } from '@playwright/test';
-import * as fs from 'fs-extra';
 
 // As the test is run in the documentation environment, some plugins and tokens are not from core.
 const IGNORED_PLUGINS = [
@@ -65,39 +64,11 @@ test('All plugins and tokens must have a description', async ({
     return Promise.resolve({ plugins, tokens: sortedTokens });
   }, IGNORED_PLUGINS);
 
-  if (!(await fs.pathExists(testInfo.snapshotDir))) {
-    await fs.mkdir(testInfo.snapshotDir);
-  }
+  const pluginsString = JSON.stringify(plugins, null, 2) + '\n';
+  expect.soft(pluginsString).toMatchSnapshot('plugins.json');
 
-  const pluginsSnapshotPath = testInfo.snapshotPath('plugins.json');
-  const tokensSnapshotPath = testInfo.snapshotPath('tokens.json');
-
-  const existingPlugins: Record<string, string> =
-    await fs.readJSON(pluginsSnapshotPath);
-  const existingTokens: Record<string, string | undefined> =
-    await fs.readJSON(tokensSnapshotPath);
-
-  // Update snapshots only when explicitly requested with --update-snapshots
-  if (testInfo.config.updateSnapshots === 'all') {
-    await fs.writeJSON(pluginsSnapshotPath, plugins, {
-      encoding: 'utf-8',
-      spaces: 2
-    });
-
-    await fs.writeJSON(tokensSnapshotPath, tokens, {
-      encoding: 'utf-8',
-      spaces: 2
-    });
-  }
-
-  expect(
-    plugins,
-    'Plugins list has changed. Run with --update-snapshots to update.'
-  ).toEqual(existingPlugins);
-  expect(
-    tokens,
-    'Tokens list has changed. Run with --update-snapshots to update.'
-  ).toEqual(existingTokens);
+  const tokensString = JSON.stringify(tokens, null, 2) + '\n';
+  expect.soft(tokensString).toMatchSnapshot('tokens.json');
 
   // All plugins must define a description
   const missingPluginDescriptions = Object.entries(plugins).filter(
