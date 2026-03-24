@@ -25,6 +25,13 @@ import type {
   IShortcutUI
 } from '../types';
 
+const MAC_SYMBOLS: Record<string, string> = {
+  Ctrl: '⌃',
+  Alt: '⌥',
+  Shift: '⇧',
+  Accel: '⌘'
+};
+
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
   shortcut: IShortcutTarget;
@@ -111,26 +118,16 @@ export class ShortcutItem extends React.Component<
 
   /** Transform special key names into unicode characters for Mac */
   toSymbols = (value: string): string => {
-    if (Platform.IS_MAC) {
-      return value.split(' ').reduce((result, key) => {
-        if (key === 'Ctrl') {
-          return (result + ' ⌃').trim();
-        } else if (key === 'Alt') {
-          return (result + ' ⌥').trim();
-        } else if (key === 'Shift') {
-          return (result + ' ⇧').trim();
-        } else if (key === 'Accel') {
-          return (result + ' ⌘').trim();
-        } else {
-          return (result + ' ' + key).trim();
-        }
-      }, '');
-    } else {
+    if (!Platform.IS_MAC) {
       return value
         .split(' ')
         .map(key => (key === 'Accel' ? 'Ctrl' : key))
         .join(' ');
     }
+    return value
+      .split(' ')
+      .map(key => MAC_SYMBOLS[key] ?? key)
+      .join(' ');
   };
 
   getCategoryCell(): JSX.Element {
