@@ -316,6 +316,7 @@ changes:
 - Click the **checkmark icon** to commit your changes.
 - Click the **revert icon** to discard your changes and restore the
   previous metadata.
+
 ```{note}
 For [notebook format metadata](https://nbformat.readthedocs.io/en/latest/format_description.html#cell-metadata)
 fields such as `editable` and `deletable`, you can also use the toggle
@@ -333,6 +334,7 @@ Some commonly used cell metadata fields include:
   during export or parameterized execution.
 - `editable`: controls whether the cell content can be modified.
 - `deletable`: controls whether the cell can be deleted.
+
 ```{tip}
 Be cautious when editing metadata directly, as incorrect values may
 affect notebook behavior. If something goes wrong, use the revert icon
