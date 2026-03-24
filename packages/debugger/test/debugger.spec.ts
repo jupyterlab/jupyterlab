@@ -303,7 +303,6 @@ describe('Debugger', () => {
           toolbarList = sidebar.content.node.querySelectorAll(
             '.jp-AccordionPanel-title'
           );
-          toolbarList.length;
           toolbar = toolbarList.item(3);
         });
 

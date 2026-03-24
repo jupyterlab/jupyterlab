@@ -122,6 +122,7 @@ export class DebuggerSidebar extends SidePanel {
       // ShowSourcesPanel is false => remove widget if present
       if (this._sources && !this._sources.isDisposed) {
         this._sources.dispose();
+        this._sources = undefined;
       }
     }
   }

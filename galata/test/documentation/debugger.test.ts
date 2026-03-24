@@ -419,10 +419,6 @@ test.describe('Debugger', () => {
       test('sources in main area', async ({ page, request, tmpPath }) => {
         await page.goto(`tree/${tmpPath}`);
         const localFile = path.resolve(__dirname, 'add.py');
-        await fs.promises.writeFile(
-          localFile,
-          `def add(x, y):\n    return x + y\n`
-        );
 
         const contents = galata.newContentsHelper(request, page);
         await contents.uploadFile(localFile, `${tmpPath}/add.py`);
@@ -460,6 +456,7 @@ test.describe('Debugger', () => {
     });
   });
 });
+
 async function createNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.createNew();
 
