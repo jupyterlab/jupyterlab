@@ -3,7 +3,6 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
-import fs from 'fs';
 import path from 'path';
 import { positionMouseOver } from './utils';
 

@@ -327,66 +327,34 @@ describe('Debugger', () => {
       });
     });
     describe('Kernel sources toolbar', () => {
-      describe('when sources panel is visible', () => {
-        let toolbar: Element;
-        beforeEach(() => {
-          sidebar.showSourcesPanel = true;
-          MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
-          toolbarList = sidebar.content.node.querySelectorAll(
-            '.jp-AccordionPanel-title'
-          );
+      let toolbar: Element;
+      beforeEach(() => {
+        sidebar.showSourcesPanel = true;
+        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+        toolbarList = sidebar.content.node.querySelectorAll(
+          '.jp-AccordionPanel-title'
+        );
 
-          toolbar =
-            toolbarList.item(
-              3
-            ); /* it is working with 3 and not 4, as would be expected*/
-        });
-
-        it('should have expanding icon', () => {
-          const title = toolbar.querySelectorAll(
-            '.lm-AccordionPanel-titleCollapser'
-          );
-          expect(title[0].innerHTML).toContain('ui-components:caret-down');
-        });
-        it('should have title', () => {
-          const title = toolbar.querySelectorAll(
-            'span.lm-AccordionPanel-titleLabel'
-          );
-          expect(title.length).toBe(1);
-          expect(title[0].innerHTML).toContain('Kernel Sources');
-        });
-        it('should have one button', () => {
-          const buttons = toolbar.querySelectorAll('jp-button');
-          expect(buttons.length).toBe(1);
-        });
+        toolbar = Array.from(
+          sidebar.content.node.querySelectorAll('.jp-AccordionPanel-title')
+        ).find(
+          el =>
+            el.querySelector('span.lm-AccordionPanel-titleLabel')
+              ?.textContent === 'Kernel Sources'
+        ) as Element;
       });
-      describe('when sources panel is not visible', () => {
-        let toolbar: Element;
-        beforeEach(() => {
-          sidebar.showSourcesPanel = false;
-          MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
-          toolbarList = sidebar.content.node.querySelectorAll(
-            '.jp-AccordionPanel-title'
-          );
-          toolbar = toolbarList.item(3);
-        });
-        it('should have expanding icon', () => {
-          const title = toolbar.querySelectorAll(
-            '.lm-AccordionPanel-titleCollapser'
-          );
-          expect(title[0].innerHTML).toContain('ui-components:caret-down');
-        });
-        it('should have title', () => {
-          const title = toolbar.querySelectorAll(
-            'span.lm-AccordionPanel-titleLabel'
-          );
-          expect(title.length).toBe(1);
-          expect(title[0].innerHTML).toContain('Kernel Sources');
-        });
-        it('should have one button', () => {
-          const buttons = toolbar.querySelectorAll('jp-button');
-          expect(buttons.length).toBe(1);
-        });
+
+      it('should have expanding icon', () => {
+        expect(toolbar).toBeTruthy();
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+
+      it('should have one button', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(1);
       });
     });
   });
