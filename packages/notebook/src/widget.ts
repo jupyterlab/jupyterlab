@@ -699,15 +699,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           args.oldIndex,
           -1 * args.oldValues.length
         );
+        // Add default cell if there are no cells remaining.
         if (!sender.length) {
           const model = this.model;
+          // Add the cell in a new context to avoid triggering another
+          // cell changed event during the handling of this signal.
           requestAnimationFrame(() => {
             if (model && !model.isDisposed && !model.sharedModel.cells.length) {
               model.sharedModel.insertCell(0, {
                 cell_type: this.notebookConfig.defaultCell,
                 metadata:
                   this.notebookConfig.defaultCell === 'code'
-                    ? { trusted: true }
+                    ? {
+                        // This is an empty cell created in empty notebook, thus is trusted
+                        trusted: true
+                      }
                     : {}
               });
             }
