@@ -125,7 +125,12 @@ export class ShortcutItem extends React.Component<
           return (result + ' ' + key).trim();
         }
       }, '');
-    } else return value;
+    } else {
+      return value
+        .split(' ')
+        .map(key => (key === 'Accel' ? 'Ctrl' : key))
+        .join(' ');
+    }
   };
 
   getCategoryCell(): JSX.Element {
