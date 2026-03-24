@@ -106,7 +106,7 @@ export namespace TableOfContents {
     ) => IModel<H>;
 
     /**
-     * Get the toolbar items for the widget
+     * Get additional toolbar items for the widget
      *
      * @param widget - widget
      * @returns List of toolbar items
