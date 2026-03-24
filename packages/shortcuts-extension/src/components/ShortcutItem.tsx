@@ -109,23 +109,23 @@ export class ShortcutItem extends React.Component<
     });
   };
 
-  /** Transform special key names into unicode characters */
+  /** Transform special key names into unicode characters for Mac */
   toSymbols = (value: string): string => {
-    return value.split(' ').reduce((result, key) => {
-      if (key === 'Ctrl') {
-        return (result + ' ⌃').trim();
-      } else if (key === 'Alt') {
-        return (result + ' ⌥').trim();
-      } else if (key === 'Shift') {
-        return (result + ' ⇧').trim();
-      } else if (key === 'Accel' && Platform.IS_MAC) {
-        return (result + ' ⌘').trim();
-      } else if (key === 'Accel') {
-        return (result + ' ⌃').trim();
-      } else {
-        return (result + ' ' + key).trim();
-      }
-    }, '');
+    if (Platform.IS_MAC) {
+      return value.split(' ').reduce((result, key) => {
+        if (key === 'Ctrl') {
+          return (result + ' ⌃').trim();
+        } else if (key === 'Alt') {
+          return (result + ' ⌥').trim();
+        } else if (key === 'Shift') {
+          return (result + ' ⇧').trim();
+        } else if (key === 'Accel') {
+          return (result + ' ⌘').trim();
+        } else {
+          return (result + ' ' + key).trim();
+        }
+      }, '');
+    } else return value;
   };
 
   getCategoryCell(): JSX.Element {
@@ -333,7 +333,14 @@ export class ShortcutItem extends React.Component<
     return binding.keys.map((keyboardKey: string, index: number) => (
       <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
         <div className="jp-Shortcuts-ShortcutKeys">
-          {this.toSymbols(keyboardKey)}
+          {this.toSymbols(keyboardKey)
+            .split(' ')
+            .map((keyPart, keyPartIndex, keyParts) => (
+              <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
+                <span className="jp-ContextualShortcut-Key">{keyPart}</span>
+                {keyPartIndex + 1 < keyParts.length ? ' + ' : null}
+              </React.Fragment>
+            ))}
         </div>
         {index + 1 < binding.keys.length ? (
           <div className="jp-Shortcuts-Comma">,</div>
