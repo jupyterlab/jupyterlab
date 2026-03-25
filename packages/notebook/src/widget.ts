@@ -3513,6 +3513,40 @@ export class Notebook extends StaticNotebook {
     return null;
   }
 
+  /**
+   * Check if there is a navigable cell in the back stack.
+   */
+  hasNavigableModifiedCellBack(): boolean {
+    const activeId = this.activeCell?.model.id;
+    for (let i = this._lastModifiedCellBackStack.length - 1; i >= 0; i--) {
+      const id = this._lastModifiedCellBackStack[i];
+      if (id !== activeId) {
+        const cell = this.widgets.find(c => c.model.id === id);
+        if (cell && !cell.isDisposed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check if there is a navigable cell in the forward stack.
+   */
+  hasNavigableModifiedCellForward(): boolean {
+    const activeId = this.activeCell?.model.id;
+    for (let i = this._lastModifiedCellForwardStack.length - 1; i >= 0; i--) {
+      const id = this._lastModifiedCellForwardStack[i];
+      if (id !== activeId) {
+        const cell = this.widgets.find(c => c.model.id === id);
+        if (cell && !cell.isDisposed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private _lastModifiedCellBackStack: string[] = [];
   private _lastModifiedCellForwardStack: string[] = [];
   private static readonly MAX_MODIFIED_STACK = 50;

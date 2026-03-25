@@ -4447,7 +4447,7 @@ function addCommands(
     },
     isEnabled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
-      return !!current && current.content.lastModifiedCellBackStack.length > 0;
+      return !!current && current.content.hasNavigableModifiedCellBack();
     }
   });
   commands.addCommand(CommandIDs.selectNextModifiedCell, {
@@ -4460,9 +4460,7 @@ function addCommands(
     },
     isEnabled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
-      return (
-        !!current && current.content.lastModifiedCellForwardStack.length > 0
-      );
+      return !!current && current.content.hasNavigableModifiedCellForward();
     }
   });
   commands.addCommand(CommandIDs.replaceSelection, {
