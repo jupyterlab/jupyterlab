@@ -566,12 +566,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
    * @param tracker Widget tracker
    * @param parser Markdown parser
    * @param sanitizer Sanitizer
+   * @param commands A registry of commands
    */
   constructor(
     tracker: INotebookTracker,
     protected parser: IMarkdownParser | null,
     protected sanitizer: IRenderMime.ISanitizer,
-    protected commands: CommandRegistry
+    protected commands: CommandRegistry | undefined
   ) {
     super(tracker);
   }
@@ -805,6 +806,9 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
    * @returns List of toolbar items
    */
   getToolbarItems(widget: NotebookPanel): ToolbarRegistry.IToolbarItem[] {
+    if (!this.commands) {
+      return [];
+    }
     return [
       {
         name: 'select-last-modified-back',

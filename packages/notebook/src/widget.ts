@@ -1895,11 +1895,21 @@ export class Notebook extends StaticNotebook {
     return this._activeCell;
   }
 
-  get lastModifiedCellBackStack(): string[] {
+  /**
+   * The back stack of recently modified cell IDs.
+   *
+   * @returns Readonly array of cell IDs
+   */
+  get lastModifiedCellBackStack(): readonly string[] {
     return this._lastModifiedCellBackStack;
   }
 
-  get lastModifiedCellForwardStack(): string[] {
+  /**
+   * The forward stack of recently modified cell IDs.
+   *
+   * @returns Readonly array of cell IDs
+   */
+  get lastModifiedCellForwardStack(): readonly string[] {
     return this._lastModifiedCellForwardStack;
   }
 
