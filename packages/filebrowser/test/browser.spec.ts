@@ -177,8 +177,7 @@ describe('filebrowser/browser', () => {
           'keydown',
           {
             ctrlKey: true,
-            key: ' ',
-            keyCode: 32
+            key: 'Space'
           }
         );
 
@@ -206,7 +205,6 @@ describe('filebrowser/browser', () => {
           throw new Error('Item node not found');
         }
         simulate(editNode, 'keydown', {
-          keyCode: 13,
           key: 'Enter'
         });
         await created;
@@ -231,7 +229,6 @@ describe('filebrowser/browser', () => {
           throw new Error('Item node not found');
         }
         simulate(editNode, 'keydown', {
-          keyCode: 13,
           key: 'Enter'
         });
         await created;
@@ -296,7 +293,6 @@ describe('FileBrowser with Drives', () => {
         throw new Error('Item node not found');
       }
       simulate(editNode, 'keydown', {
-        keyCode: 13,
         key: 'Enter'
       });
       const fileModel = await created;
