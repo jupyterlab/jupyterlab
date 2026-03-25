@@ -1888,7 +1888,8 @@ export class DirListing extends Widget {
       case 'ArrowDown':
         this._handleArrowY(event, 1);
         return;
-      case 'Space': {
+      case ' ':
+      case 'Spacebar': {
         if (event.ctrlKey) {
           // Follow the Windows and Ubuntu convention: you must press `ctrl` +
           // `space` in order to toggle whether an item is selected.
@@ -1943,7 +1944,7 @@ export class DirListing extends Widget {
       // Don't gobble up the space key on the check-all checkbox (which the
       // browser treats as a click event).
       !(
-        (event.key === ' ' || event.key === 'Space') &&
+        (event.key === ' ' || event.key === 'Spacebar') &&
         (event.target as HTMLInputElement).type === 'checkbox'
       )
     ) {

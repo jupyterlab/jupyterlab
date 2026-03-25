@@ -177,7 +177,7 @@ describe('filebrowser/browser', () => {
           'keydown',
           {
             ctrlKey: true,
-            key: 'Space'
+            key: ' '
           }
         );
 
