@@ -1718,9 +1718,12 @@ export class Notebook extends StaticNotebook {
         });
         break;
       case 'remove':
+      case 'clear':
         args.oldValues.forEach(model => {
           model.contentChanged.disconnect(this._onCellContentChanged, this);
         });
+        break;
+      case 'move':
         break;
       default:
         break;
