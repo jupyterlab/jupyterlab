@@ -188,7 +188,7 @@ describe('completer/widget', () => {
         options.model!.resolveItem = jest.fn();
         const widget = new Completer(options);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        widget['_cycle']('down');
+        widget['_cycle']('ArrowDown');
         expect(options.model!.resolveItem).toHaveBeenCalledTimes(2);
       });
     });
@@ -1355,7 +1355,7 @@ describe('completer/widget', () => {
         expect(args).toEqual('candx 13');
 
         // Cycle to the second item
-        widget['_cycle']('down');
+        widget['_cycle']('ArrowDown');
         await new Promise(process.nextTick);
         expect(spy).toHaveBeenCalledTimes(2);
         expect(args).toEqual('candidate 13');
