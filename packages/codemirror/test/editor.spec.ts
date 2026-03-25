@@ -16,7 +16,6 @@ import {
 import { sleep } from '@jupyterlab/testutils';
 import { generate, simulate } from 'simulate-event';
 
-
 class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
 
