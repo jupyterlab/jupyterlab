@@ -36,7 +36,7 @@ export interface ITableOfContentsRegistry {
    * @param widget - widget
    * @returns List of toolbar items
    */
-  getToolbarItems(widget: Widget): ToolbarRegistry.IToolbarItem[] | undefined;
+  getToolbarItems?(widget: Widget): ToolbarRegistry.IToolbarItem[] | undefined;
 
   /**
    * Adds a table of contents factory to the registry.

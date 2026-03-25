@@ -46,10 +46,6 @@ namespace CommandIDs {
   export const showPanel = 'toc:show-panel';
 
   export const toggleCollapse = 'toc:toggle-collapse';
-
-  export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
-
-  export const selectNextModifiedCell = 'notebook:select-next-modified-cell';
 }
 
 /**
@@ -354,7 +350,7 @@ async function activateTOC(
     });
     factoryToolbarItems = [];
 
-    const toolbarItems = tocRegistry.getToolbarItems(widget);
+    const toolbarItems = tocRegistry.getToolbarItems?.(widget);
 
     if (toolbarItems) {
       toolbarItems.forEach(item => {
