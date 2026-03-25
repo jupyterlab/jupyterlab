@@ -554,19 +554,19 @@ export class Completer extends Widget {
     active.classList.remove(ACTIVE_CLASS);
 
     switch (direction) {
-      case 'up':
+      case 'ArrowUp':
         this._activeIndex = index === 0 ? last : index - 1;
         break;
-      case 'down':
+      case 'ArrowDown':
         this._activeIndex = index < last ? index + 1 : 0;
         break;
-      case 'pageUp':
-      case 'pageDown': {
+      case 'PageUp':
+      case 'PageDown': {
         // Measure the number of items on a page and clamp to the list length.
         const container = this.node.getBoundingClientRect();
         const current = active.getBoundingClientRect();
         const page = Math.floor(container.height / current.height);
-        const sign = direction === 'pageUp' ? -1 : 1;
+        const sign = direction === 'PageUp' ? -1 : 1;
         this._activeIndex = Math.min(Math.max(0, index + sign * page), last);
         break;
       }
@@ -598,9 +598,8 @@ export class Completer extends Widget {
       this.reset();
       return;
     }
-    switch (event.keyCode) {
-      case 9: {
-        // Tab key
+    switch (event.key) {
+      case 'Tab': {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -634,25 +633,23 @@ export class Completer extends Widget {
           this.update();
         }
 
-        this._cycle(event.shiftKey ? 'up' : 'down');
+        this._cycle(event.shiftKey ? 'ArrowUp' : 'ArrowDown');
         return;
       }
-      case 27: // Esc key
+      case 'Escape':
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
         this.reset();
         return;
-      case 33: // PageUp
-      case 34: // PageDown
-      case 38: // Up arrow key
-      case 40: {
-        // Down arrow key
+      case 'PageUp':
+      case 'PageDown':
+      case 'ArrowUp':
+      case 'ArrowDown': {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        const cycle = Private.keyCodeMap[event.keyCode];
-        this._cycle(cycle);
+        this._cycle(event.key);
         return;
       }
       default:
@@ -1389,17 +1386,7 @@ namespace Private {
   /**
    * Types of scrolling through the completer.
    */
-  export type scrollType = 'up' | 'down' | 'pageUp' | 'pageDown';
-
-  /**
-   * Mapping from keyCodes to scrollTypes.
-   */
-  export const keyCodeMap: { [n: number]: scrollType } = {
-    38: 'up',
-    40: 'down',
-    33: 'pageUp',
-    34: 'pageDown'
-  };
+  export type scrollType = 'ArrowUp' | 'ArrowDown' | 'PageUp' | 'PageDown';
 
   /**
    * Returns the common subset string that a list of strings shares.

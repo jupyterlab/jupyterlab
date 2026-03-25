@@ -1869,9 +1869,8 @@ export class DirListing extends Widget {
       return;
     }
 
-    switch (event.keyCode) {
-      case 13: {
-        // Enter
+    switch (event.key) {
+      case 'Enter': {
         // Do nothing if any modifier keys are pressed.
         if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
           return;
@@ -1883,16 +1882,13 @@ export class DirListing extends Widget {
         }
         return;
       }
-      case 38:
-        // Up arrow
+      case 'ArrowUp':
         this._handleArrowY(event, -1);
         return;
-      case 40:
-        // Down arrow
+      case 'ArrowDown':
         this._handleArrowY(event, 1);
         return;
-      case 32: {
-        // Space
+      case 'Space': {
         if (event.ctrlKey) {
           // Follow the Windows and Ubuntu convention: you must press `ctrl` +
           // `space` in order to toggle whether an item is selected.
@@ -1947,7 +1943,7 @@ export class DirListing extends Widget {
       // Don't gobble up the space key on the check-all checkbox (which the
       // browser treats as a click event).
       !(
-        (event.key === ' ' || event.keyCode === 32) &&
+        (event.key === ' ' || event.key === 'Space') &&
         (event.target as HTMLInputElement).type === 'checkbox'
       )
     ) {
@@ -3925,13 +3921,13 @@ namespace Private {
         resolve(edit.value);
       };
       edit.onkeydown = (event: KeyboardEvent) => {
-        switch (event.keyCode) {
-          case 13: // Enter
+        switch (event.key) {
+          case 'Enter':
             event.stopPropagation();
             event.preventDefault();
             edit.blur();
             break;
-          case 27: // Escape
+          case 'Escape':
             event.stopPropagation();
             event.preventDefault();
             edit.value = original;
