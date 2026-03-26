@@ -913,8 +913,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
 
       if (!service.isStarted || !frame?.source?.path) {
-        // Close at the end of debugging too (when no more frames to walk through)
-        closeAutoOpenedSourcePreview();
         return;
       }
       try {
@@ -927,6 +925,12 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
+    model.callstack.framesChanged.connect(() => {
+      if (model.callstack.frames.length === 0) {
+        // Close at the end of debugging too (when no more frames to walk through)
+        closeAutoOpenedSourcePreview();
+      }
+    });
 
     const openSource = (
       /* Method to open sources in the main area */
