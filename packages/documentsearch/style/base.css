@@ -62,10 +62,15 @@
   height: 100%;
 }
 
-.jp-DocumentSearch-button-content svg,
-.jp-DocumentSearch-search-filter-button svg {
-  width: 80%;
-  height: 80%;
+.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-wrapper {
+  height: calc(var(--jp-private-document-search-button-height) - 6px);
+  width: calc(var(--jp-private-document-search-button-height) - 6px);
+  margin:3px 3px 3px 0;
+}
+
+.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-content svg {
+  height: 90%;
+  width: 90%;
 }
 
 .jp-DocumentSearch-input-wrapper {
@@ -73,12 +78,6 @@
   display: flex;
   background-color: var(--jp-layout-color0);
   margin: 2px;
-}
-
-.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-wrapper {
-  width: calc(var(--jp-private-document-search-button-height) - 4px);
-  height: calc(var(--jp-private-document-search-button-height) - 4px);
-  margin: 2px 2px 0 0;
 }
 
 .jp-DocumentSearch-input-wrapper:focus-within {
@@ -122,6 +121,10 @@
   outline-offset: -2px;
 }
 
+.jp-DocumentSearch-overlay .jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-wrapper:focus-visible {
+  outline-offset: 1px;
+}
+
 .jp-DocumentSearch-toggle-wrapper,
 .jp-DocumentSearch-button-wrapper,
 .jp-DocumentSearch-button-content:focus {
@@ -138,19 +141,19 @@
 }
 
 .jp-DocumentSearch-input-button-off {
-  background-color: var(--jp-toolbar-background);
-}
-
-.jp-DocumentSearch-input-button-off .jp-icon-accent2[fill] {
-  fill: var(--jp-inverse-layout-color3);
-}
-
-.jp-DocumentSearch-input-button-on {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-input-button-on .jp-icon-accent2[fill] {
+.jp-DocumentSearch-input-button-off .jp-icon-accent2[fill] {
   fill: var(--jp-ui-font-color2);
+}
+
+.jp-DocumentSearch-input-button-on {
+  background-color: var(--jp-brand-color1);
+}
+
+.jp-DocumentSearch-input-button-on .jp-icon-accent2[fill] {
+  fill: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-DocumentSearch-input-button-off:hover,
