@@ -505,10 +505,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Whether to sync the collapse state to the cell model.
    */
-  get syncCollapse(): boolean {
+  get syncCollapse(): boolean | undefined {
     return this._syncCollapse;
   }
-  set syncCollapse(value: boolean) {
+  set syncCollapse(value: boolean | undefined) {
     if (this._syncCollapse === value) {
       return;
     }
@@ -521,10 +521,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Whether to sync the editable state to the cell model.
    */
-  get syncEditable(): boolean {
+  get syncEditable(): boolean | undefined {
     return this._syncEditable;
   }
-  set syncEditable(value: boolean) {
+  set syncEditable(value: boolean | undefined) {
     if (this._syncEditable === value) {
       return;
     }
@@ -770,8 +770,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
   }, 0);
-  private _syncCollapse = false;
-  private _syncEditable = false;
+  private _syncCollapse: boolean | undefined = undefined;
+  private _syncEditable: boolean | undefined = undefined;
 }
 
 /**
@@ -1528,10 +1528,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Whether to sync the scrolled state to the cell model.
    */
-  get syncScrolled(): boolean {
+  get syncScrolled(): boolean | undefined {
     return this._syncScrolled;
   }
-  set syncScrolled(value: boolean) {
+  set syncScrolled(value: boolean | undefined) {
     if (this._syncScrolled === value) {
       return;
     }
@@ -1713,7 +1713,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputWrapper: Widget | null = null;
   private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
-  private _syncScrolled = false;
+  private _syncScrolled: boolean | undefined = undefined;
   private _lastOnCaretMovedHandler: () => void;
   private _lastTarget: HTMLElement | null = null;
   private _lastOutputHeight = '';
