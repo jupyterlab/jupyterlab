@@ -246,19 +246,18 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 .jp-Stdin-input {
   font-family: var(--jp-code-font-family);
-  font-size: inherit;
-  color: inherit;
-  background-color: inherit;
-  width: 42%;
+  font-size: var(--jp-code-font-size);
+  color: var(--jp-content-font-color0);
+  background-color: var(--jp-input-background);
   min-width: 200px;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-radius: 0;
+  padding: 4px 8px;
+  margin: 0 0.25em;
+  flex: 1 1 auto;
 
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
-
-  /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0 0.25em;
-  margin: 0 0.25em;
-  flex: 0 0 70%;
 }
 
 .jp-Stdin-input::placeholder {
@@ -266,7 +265,10 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 }
 
 .jp-Stdin-input:focus {
-  box-shadow: none;
+  border-color: var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-input-active-background);
+  outline: none;
 }
 
 .jp-Stdin-input:focus::placeholder {
