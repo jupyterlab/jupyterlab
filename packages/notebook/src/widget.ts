@@ -725,9 +725,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       translator: this.translator
     };
     const cell = this.contentFactory.createCodeCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
-    cell.syncScrolled = true;
     cell.outputArea.inputRequested.connect((_, stdin) => {
       this._onInputRequested(cell).catch(reason => {
         console.error('Failed to scroll to cell requesting input.', reason);
@@ -759,8 +756,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
     // Connect collapsed signal for each markdown cell widget
     cell.headingCollapsedChanged.connect(this._onCellCollapsed, this);
     return cell;
@@ -779,8 +774,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       placeholder: this._notebookConfig.windowingMode !== 'none'
     };
     const cell = this.contentFactory.createRawCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
     return cell;
   }
 
@@ -1389,7 +1382,11 @@ export namespace StaticNotebook {
      * notebook content factory is used.
      */
     createCodeCell(options: CodeCell.IOptions): CodeCell {
-      return new CodeCell(options).initializeState();
+      const cell = new CodeCell(options).initializeState();
+      cell.syncCollapse = true;
+      cell.syncEditable = true;
+      cell.syncScrolled = true;
+      return cell;
     }
 
     /**
@@ -1400,7 +1397,10 @@ export namespace StaticNotebook {
      * notebook content factory is used.
      */
     createMarkdownCell(options: MarkdownCell.IOptions): MarkdownCell {
-      return new MarkdownCell(options).initializeState();
+      const cell = new MarkdownCell(options).initializeState();
+      cell.syncCollapse = true;
+      cell.syncEditable = true;
+      return cell;
     }
 
     /**
@@ -1411,7 +1411,10 @@ export namespace StaticNotebook {
      * notebook content factory is used.
      */
     createRawCell(options: RawCell.IOptions): RawCell {
-      return new RawCell(options).initializeState();
+      const cell = new RawCell(options).initializeState();
+      cell.syncCollapse = true;
+      cell.syncEditable = true;
+      return cell;
     }
   }
 
