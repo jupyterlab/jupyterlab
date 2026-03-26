@@ -873,6 +873,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       editorServices
     });
     const { model } = service;
+
     let showSourcesInMainArea: boolean = true;
     if (settingRegistry) {
       const settings = await settingRegistry.load(main.id);
@@ -884,12 +885,20 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       settings.changed.connect(updateShowSourcesSetting);
     }
 
+    const closeAutoOpenedSourcePreview = () => {
+      if (
+        previousAutoOpenedSourcePreview &&
+        !previousAutoOpenedSourcePreview.isDisposed
+      ) {
+        previousAutoOpenedSourcePreview.close();
+        previousAutoOpenedSourcePreview.dispose();
+        previousAutoOpenedSourcePreview = null;
+      }
+    };
+
     // When debugger session ends, close the auto-opened source preview.
     // This signal is emitted when user stops, toggles, or restarts debuggger and when they restart the kernel.
-    service.stopped.connect(() => {
-      if (previousAutoOpenedSourcePreview)
-        previousAutoOpenedSourcePreview.close();
-    });
+    service.stopped.connect(closeAutoOpenedSourcePreview);
 
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
@@ -901,6 +910,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
 
       if (!service.isStarted || !frame?.source?.path) {
+        // Close at the end of debugging too (when no more frames to walk through )
+        closeAutoOpenedSourcePreview();
         return;
       }
       try {
@@ -951,14 +962,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         }
       }
       // Auto-close previously auto-opened read-only editor
-      if (
-        breakpointOrFrame &&
-        previousAutoOpenedSourcePreview &&
-        !previousAutoOpenedSourcePreview.isDisposed
-      ) {
-        previousAutoOpenedSourcePreview.close();
-        previousAutoOpenedSourcePreview.dispose();
-        previousAutoOpenedSourcePreview = null;
+      if (breakpointOrFrame) {
+        closeAutoOpenedSourcePreview();
       }
 
       /* Create a new read-only editor */
