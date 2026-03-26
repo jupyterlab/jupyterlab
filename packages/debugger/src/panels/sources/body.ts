@@ -16,7 +16,6 @@ import { EditorHandler } from '../../handlers/editor';
 
 import type { IDebugger } from '../../tokens';
 
-import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 /**
  * The body for a Sources Panel.
  */
