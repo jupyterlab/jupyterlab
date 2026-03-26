@@ -956,6 +956,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         previousAutoOpenedSourcePreview &&
         !previousAutoOpenedSourcePreview.isDisposed
       ) {
+        previousAutoOpenedSourcePreview.close();
         previousAutoOpenedSourcePreview.dispose();
         previousAutoOpenedSourcePreview = null;
       }
