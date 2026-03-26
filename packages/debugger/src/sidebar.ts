@@ -100,6 +100,9 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.kernelSources);
   }
 
+  /**
+   * Whether to show the sources panel in the sidebar.
+   */
   get showSourcesPanel(): boolean {
     return this._showSourcesPanel;
   }
