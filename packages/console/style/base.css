@@ -67,7 +67,7 @@
 .jp-CodeConsole-input:focus-visible,
 .jp-CodeConsole-content:focus-visible {
   outline-width: 3px;
-  outline-color: var(--jp-brand-color1);
+  outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
   outline-offset: -3px;
 }
