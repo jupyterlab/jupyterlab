@@ -918,7 +918,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         // Close at the end of debugging too (when no more frames to walk through);
         // we delay this action because the current frame can be intemitently empty
         // while switching between frames.
-        delayedCleanupId = setTimeout(closeAutoOpenedSourcePreview, 1000);
+        delayedCleanupId = setTimeout(() => {
+          if (model.callstack.frames.length === 0) {
+            closeAutoOpenedSourcePreview();
+          }
+        }, 1000);
         return;
       }
       try {
@@ -926,6 +930,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           clearTimeout(delayedCleanupId);
           delayedCleanupId = null;
         }
+
         const source = await service.getSource({ path: frame.source.path });
         if (source) {
           openSource(source, frame);
