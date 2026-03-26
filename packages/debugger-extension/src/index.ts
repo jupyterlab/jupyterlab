@@ -903,6 +903,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     // This signal is emitted when user stops, toggles, or restarts debuggger and when they restart the kernel.
     service.stopped.connect(closeAutoOpenedSourcePreview);
 
+    let delayedCleanupId: ReturnType<typeof setTimeout> | null = null;
+
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
@@ -913,9 +915,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
 
       if (!service.isStarted || !frame?.source?.path) {
+        // Close at the end of debugging too (when no more frames to walk through);
+        // we delay this action because the current frame can be intemitently empty
+        // while switching between frames.
+        delayedCleanupId = setTimeout(closeAutoOpenedSourcePreview, 1000);
         return;
       }
       try {
+        if (delayedCleanupId) {
+          clearTimeout(delayedCleanupId);
+          delayedCleanupId = null;
+        }
         const source = await service.getSource({ path: frame.source.path });
         if (source) {
           openSource(source, frame);
@@ -925,12 +935,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
-    model.callstack.framesChanged.connect(() => {
-      if (model.callstack.frames.length === 0) {
-        // Close at the end of debugging too (when no more frames to walk through)
-        closeAutoOpenedSourcePreview();
-      }
-    });
 
     const openSource = (
       /* Method to open sources in the main area */
