@@ -18,10 +18,8 @@ import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
 import type { IDebugger } from './tokens';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Signal } from '@lumino/signaling';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
-type IAnyMessageArgs = Kernel.IAnyMessageArgs;
 
 /**
  * Add a bug icon to the widget toolbar to enable and disable debugging.
