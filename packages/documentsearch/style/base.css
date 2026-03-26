@@ -144,28 +144,18 @@
 
 .jp-DocumentSearch-input-button-off {
   background-color: var(--jp-layout-color2);
-}
-
-.jp-DocumentSearch-input-button-off .jp-icon-accent2[fill] {
-  fill: var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color2);
 }
 
 .jp-DocumentSearch-input-button-on {
   background-color: var(--jp-brand-color1);
-}
-
-.jp-DocumentSearch-input-button-on .jp-icon-accent2[fill] {
-  fill: var(--jp-ui-inverse-font-color1);
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-DocumentSearch-input-button-off:hover,
 .jp-DocumentSearch-input-button-on:hover {
   background-color: var(--jp-layout-color3);
-}
-
-.jp-DocumentSearch-input-button-off:hover .jp-icon-accent2[fill],
-.jp-DocumentSearch-input-button-on:hover .jp-icon-accent2[fill] {
-  fill: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color3);
 }
 
 .jp-DocumentSearch-index-counter {

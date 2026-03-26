@@ -1,5 +1,5 @@
 <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-  <g fill="#616161" class="jp-icon-accent2">
+  <g fill="currentColor">
     <circle cx="2.7" cy="13" r="1.7"/>
     <path d="m10 1.1v3.6l-3.1-1.8-0.57 1 3.1 1.8-3.1 1.8 0.57 1 3.1-1.8v3.6h1.2v-3.6l3.1 1.8 0.58-1-3.1-1.8 3.1-1.8-0.57-1-3.1 1.8v-3.6z"/>
   </g>
