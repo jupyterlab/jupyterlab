@@ -868,7 +868,10 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     translator: ITranslator,
     settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISourceViewer> => {
-    let previousAutoOpenedSourcePreview: Widget | null = null;
+    let previousAutoOpenedSourcePreview: {
+      widget: Widget;
+      path: string;
+    } | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
@@ -888,10 +891,10 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     const closeAutoOpenedSourcePreview = () => {
       if (
         previousAutoOpenedSourcePreview &&
-        !previousAutoOpenedSourcePreview.isDisposed
+        !previousAutoOpenedSourcePreview.widget.isDisposed
       ) {
-        previousAutoOpenedSourcePreview.close();
-        previousAutoOpenedSourcePreview.dispose();
+        previousAutoOpenedSourcePreview.widget.close();
+        previousAutoOpenedSourcePreview.widget.dispose();
         previousAutoOpenedSourcePreview = null;
       }
     };
@@ -910,7 +913,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
 
       if (!service.isStarted || !frame?.source?.path) {
-        // Close at the end of debugging too (when no more frames to walk through )
+        // Close at the end of debugging too (when no more frames to walk through)
         closeAutoOpenedSourcePreview();
         return;
       }
@@ -963,7 +966,13 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
       // Auto-close previously auto-opened read-only editor
       if (breakpointOrFrame) {
-        closeAutoOpenedSourcePreview();
+        if (
+          previousAutoOpenedSourcePreview &&
+          !previousAutoOpenedSourcePreview.widget.isDisposed &&
+          previousAutoOpenedSourcePreview.path !== path
+        ) {
+          closeAutoOpenedSourcePreview();
+        }
       }
 
       /* Create a new read-only editor */
@@ -995,7 +1004,10 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         for (const mainAreaWidget of app.shell.widgets('main')) {
           for (const childWidget of mainAreaWidget.children()) {
             if (childWidget.node.id === editorWrapper.node.id) {
-              previousAutoOpenedSourcePreview = mainAreaWidget;
+              previousAutoOpenedSourcePreview = {
+                widget: mainAreaWidget,
+                path
+              };
               break;
             }
           }
