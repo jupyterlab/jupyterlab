@@ -856,13 +856,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
   id: '@jupyterlab/debugger-extension:source-viewer',
   description: 'Initialize the debugger sources viewer.',
-  requires: [
-    IDebugger,
-    IEditorServices,
-    IDebuggerSources,
-    ITranslator,
-    IDebuggerHandler
-  ],
+  requires: [IDebugger, IEditorServices, IDebuggerSources, ITranslator],
   optional: [ISettingRegistry],
   provides: IDebuggerSourceViewer,
   autoStart: true,
@@ -872,10 +866,9 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     editorServices: IEditorServices,
     debuggerSources: IDebugger.ISources,
     translator: ITranslator,
-    handler: Debugger.Handler,
     settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISourceViewer> => {
-    let previousEditorWidget: Widget | null = null;
+    let previousAutoOpenedSourcePreview: Widget | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
@@ -890,6 +883,13 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       updateShowSourcesSetting();
       settings.changed.connect(updateShowSourcesSetting);
     }
+
+    // When debugger session ends, close the auto-opened source preview.
+    // This signal is emitted when user stops, toggles, or restarts debuggger and when they restart the kernel.
+    service.stopped.connect(() => {
+      if (previousAutoOpenedSourcePreview)
+        previousAutoOpenedSourcePreview.close();
+    });
 
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
@@ -950,10 +950,14 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           return;
         }
       }
-      /* Check on the previous widget editor */
-      if (previousEditorWidget && !previousEditorWidget.isDisposed) {
-        previousEditorWidget.dispose();
-        previousEditorWidget = null;
+      // Auto-close previously auto-opened  read-only editor
+      if (
+        breakpointOrFrame &&
+        previousAutoOpenedSourcePreview &&
+        !previousAutoOpenedSourcePreview.isDisposed
+      ) {
+        previousAutoOpenedSourcePreview.dispose();
+        previousAutoOpenedSourcePreview = null;
       }
 
       /* Create a new read-only editor */
@@ -980,16 +984,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         editorWrapper
       });
 
-      /* Loop on all main area widgets to assign to the previousEditorWidget the editor opened by the debugger and fitting the right node id */
-      for (const mainAreaWidget of app.shell.widgets('main')) {
-        /* Loop on all the children of the selected main area widget and take the one fitting the editor wrapper id */
-        for (const childWidget of mainAreaWidget.children()) {
-          if (childWidget.node.id === editorWrapper.node.id) {
-            previousEditorWidget = mainAreaWidget;
-            break;
+      // Store the widget reference to auto-close as it was auto-opened on breakpoints/frame
+      if (breakpointOrFrame) {
+        for (const mainAreaWidget of app.shell.widgets('main')) {
+          for (const childWidget of mainAreaWidget.children()) {
+            if (childWidget.node.id === editorWrapper.node.id) {
+              previousAutoOpenedSourcePreview = mainAreaWidget;
+              break;
+            }
           }
+          if (previousAutoOpenedSourcePreview) break;
         }
-        if (previousEditorWidget) break;
       }
 
       const frame = service.model.callstack.frame;
@@ -1003,11 +1008,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         });
       }
     };
-
-    /* When receiving the execute_reply message, close the last read-only editor opened if it exists */
-    handler.executionDone.connect(() => {
-      if (previousEditorWidget) previousEditorWidget.close();
-    });
 
     const trans = translator.load('jupyterlab');
 
