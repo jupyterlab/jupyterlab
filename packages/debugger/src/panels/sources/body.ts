@@ -108,14 +108,6 @@ export class SourcesBody extends Widget {
         return;
       }
 
-      const doc = (editor as CodeMirrorEditor).doc;
-      const lineCount = doc.lines;
-
-      if (frame.line < 1 || frame.line > lineCount) {
-        // Line is not in the document
-        return;
-      }
-
       EditorHandler.showCurrentLine(editor, frame.line, 'start');
     });
 
