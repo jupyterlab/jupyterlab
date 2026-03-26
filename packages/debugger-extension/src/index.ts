@@ -950,7 +950,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           return;
         }
       }
-      // Auto-close previously auto-opened  read-only editor
+      // Auto-close previously auto-opened read-only editor
       if (
         breakpointOrFrame &&
         previousAutoOpenedSourcePreview &&
