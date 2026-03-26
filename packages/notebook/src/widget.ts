@@ -1720,7 +1720,9 @@ export class Notebook extends StaticNotebook {
       case 'remove':
       case 'clear':
         args.oldValues.forEach(model => {
-          model.contentChanged.disconnect(this._onCellContentChanged, this);
+          if (model) {
+            model.contentChanged.disconnect(this._onCellContentChanged, this);
+          }
         });
         break;
       case 'move':

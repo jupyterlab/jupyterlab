@@ -1993,6 +1993,7 @@ export namespace NotebookActions {
   ): Promise<void> {
     const cell = notebook.popLastModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.indexOf(cell);
       await notebook.scrollToCell(cell);
     }
   }
@@ -2007,6 +2008,7 @@ export namespace NotebookActions {
   ): Promise<void> {
     const cell = notebook.popNextModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.indexOf(cell);
       await notebook.scrollToCell(cell);
     }
   }
