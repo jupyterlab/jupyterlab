@@ -4813,8 +4813,28 @@
     }
   },
   {
+    "id": "notebook:select-last-modified-cell",
+    "label": "Select Last Modified Cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:select-last-run-cell",
     "label": "Select current running or last run cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "notebook:select-next-modified-cell",
+    "label": "Select Next Modified Cell",
     "caption": "",
     "shortcuts": [],
     "args": {
