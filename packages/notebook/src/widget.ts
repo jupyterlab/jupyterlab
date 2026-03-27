@@ -3467,6 +3467,11 @@ export class Notebook extends StaticNotebook {
 
     // Clear forward stack when a new cell is modified
     this._lastModifiedCellForwardStack = [];
+    this._stateChanged.emit({
+      name: 'lastModifiedCellStack',
+      oldValue: null,
+      newValue: null
+    });
   }
 
   /**

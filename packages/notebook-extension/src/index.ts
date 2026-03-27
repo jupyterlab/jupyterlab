@@ -2533,6 +2533,14 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
   });
+  tracker.widgetAdded.connect((_, panel) => {
+    panel.content.stateChanged.connect((_, args) => {
+      if (args.name === 'lastModifiedCellStack') {
+        commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+        commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+      }
+    });
+  });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: args => {
