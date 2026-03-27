@@ -285,12 +285,11 @@ test.describe('Debugger', () => {
       page.locator('[aria-label="side panel content"] >> text=add').first()
     ).toBeVisible();
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 196, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-callstack.png'
-    });
+    expect(
+      await page.screenshot({
+        clip: { y: 196, x: 998, width: 280, height: 138 }
+      })
+    ).toMatchSnapshot('debugger_callstack.png');
 
     await page.click('jp-button[title^=Continue]');
   });
@@ -315,12 +314,11 @@ test.describe('Debugger', () => {
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/Cell \[\d+\]/);
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 334, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-breakpoints.png'
-    });
+    expect(
+      await page.screenshot({
+        clip: { y: 334, x: 998, width: 280, height: 138 }
+      })
+    ).toMatchSnapshot('debugger_breakpoints.png');
 
     await page.click('jp-button[title^=Continue]');
   });
@@ -360,11 +358,11 @@ test.describe('Debugger', () => {
           page.locator('.jp-DebuggerSources-header-path')
         ).toContainText('Cell [');
 
-        // Don't compare screenshot as the kernel id varies
-        await page.screenshot({
-          clip: { y: 478, x: 998, width: 280, height: 138 },
-          path: 'test/documentation/screenshots/debugger-source.png'
-        });
+        expect(
+          await page.screenshot({
+            clip: { y: 478, x: 998, width: 280, height: 138 }
+          })
+        ).toMatchSnapshot('debugger_source.png');
       });
     });
   });
@@ -396,10 +394,11 @@ test.describe('Debugger', () => {
         // Wait to be stopped on the breakpoint
         await page.debugger.waitForCallStack();
 
-        await page.screenshot({
-          clip: { y: 334, x: 998, width: 280, height: 400 },
-          path: 'test/documentation/screenshots/debugger-with-source-panel.png'
-        });
+        expect(
+          await page.screenshot({
+            clip: { y: 334, x: 998, width: 280, height: 400 }
+          })
+        ).toMatchSnapshot('debugger_with_source_panel.png');
         await page.click('jp-button[title^=Continue]');
         await expect(page.locator('.jp-DebuggerSources')).toBeVisible();
       });
@@ -445,10 +444,11 @@ test.describe('Debugger', () => {
 
         await expect(page.locator('.cm-editor.jp-mod-readOnly')).toBeVisible();
 
-        await page.screenshot({
-          clip: { y: 0, x: 0, width: 1400, height: 1000 },
-          path: 'test/documentation/screenshots/debugger-open-module.png'
-        });
+        expect(
+          await page.screenshot({
+            clip: { y: 0, x: 0, width: 1400, height: 1000 }
+          })
+        ).toMatchSnapshot('debugger_open_module.png');
 
         await page.click('jp-button[title^=Continue]');
       });
