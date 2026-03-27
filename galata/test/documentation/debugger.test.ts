@@ -403,7 +403,7 @@ test.describe('Debugger', () => {
         await page.notebook.clickCellGutter(0, 2);
 
         // Don't wait as it will be blocked
-        await page.notebook.runCell(1, { wait: false });
+        await page.notebook.runCell(0, { wait: false });
 
         // Wait to be stopped on the breakpoint
         await page.debugger.waitForCallStack();
