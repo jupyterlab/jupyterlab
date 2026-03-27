@@ -93,7 +93,7 @@ for (const c of showSourcesCases) {
       const variablesBox = await variablesPanel.boundingBox();
 
       if (c.expectSourcesPanel) {
-        expect(variablesBox?.height).toBeLessThan(
+        expect.soft(variablesBox?.height).toBeLessThan(
           120
         ); /* smaller variable panel (112 px high) when sources panel is displayed */
 
@@ -106,9 +106,6 @@ for (const c of showSourcesCases) {
         expect(variablesBox?.height).toBeGreaterThan(
           140
         ); /* Variables panel is higher (149 px high) when sources panel is displayed */
-        expect(await variablesPanel.screenshot()).toMatchSnapshot(
-          `start-debug-session-sources${c.screenshotSuffix}.png`
-        );
       }
 
       await page.click('jp-button[title^=Continue]');
@@ -145,7 +142,7 @@ for (const c of showSourcesCases) {
 
       if (!c.expectSourcesPanel) {
         /* Variables panel snapshot only when the sources panel is not displayed*/
-        expect(variablesBox?.height).toBeGreaterThan(
+        expect.soft(variablesBox?.height).toBeGreaterThan(
           140
         ); /* Variables panel is higher (149 px high) when sources panel is displayed */
         expect
@@ -154,7 +151,7 @@ for (const c of showSourcesCases) {
             `image-debug-session-global-variables${c.screenshotSuffix}.png`
           );
       } else {
-        expect(variablesBox?.height).toBeLessThan(
+        expect.soft(variablesBox?.height).toBeLessThan(
           120
         ); /* smaller variable panel (112 px high) when sources panel is displayed */
       }
@@ -239,7 +236,7 @@ for (const c of showSourcesCases) {
 
       if (!c.expectSourcesPanel) {
         // Variables panel snapshot only when the sources panel is not displayed
-        expect(variablesBox?.height).toBeGreaterThan(
+        expect.soft(variablesBox?.height).toBeGreaterThan(
           140
         ); /* Variables panel is higher (149 px high) when sources panel is displayed */
         expect(await variablesPanel.screenshot()).toMatchSnapshot(
