@@ -136,7 +136,6 @@ main area in a read-only editor view. The auto-opened source view widget
 will auto-close when the debugger steps into another file,
 or when the debugging session ends.
 
-
 ```{image} ../images/debugger-open-module.png
 
 ```
