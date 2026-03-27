@@ -407,9 +407,8 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         return;
       }
       const target = event.target as Element;
-      switch (event.keyCode) {
-        case 9: {
-          // Tab key
+      switch (event.key) {
+        case 'Tab': {
           const potentialTabBindings = [
             // Note: `accept` should come ahead of `invoke` due to specificity
             keyBindings[CommandIDs.acceptInline],
