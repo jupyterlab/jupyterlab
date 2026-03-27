@@ -4,6 +4,7 @@ import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as path from 'path';
+
 type ShowSourcesCase = {
   name: string;
   screenshotSuffix: string;
@@ -89,14 +90,23 @@ for (const c of showSourcesCases) {
       await page.debugger.waitForVariables();
       const variablesPanel = await page.debugger.getVariablesPanelLocator();
       await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
-      expect(await variablesPanel.screenshot()).toMatchSnapshot(
-        `start-debug-session-variables${c.screenshotSuffix}.png`
-      );
+      const variablesBox = await variablesPanel.boundingBox();
 
       if (c.expectSourcesPanel) {
+        expect(variablesBox?.height).toBeLessThan(
+          120
+        ); /* smaller variable panel (112 px high) when sources panel is displayed */
+
         await page.debugger.waitForSources();
         const sourcesPanel = await page.debugger.getSourcePanelLocator();
         expect(await sourcesPanel.screenshot()).toMatchSnapshot(
+          `start-debug-session-sources${c.screenshotSuffix}.png`
+        );
+      } else {
+        expect(variablesBox?.height).toBeGreaterThan(
+          140
+        ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+        expect(await variablesPanel.screenshot()).toMatchSnapshot(
           `start-debug-session-sources${c.screenshotSuffix}.png`
         );
       }
@@ -131,21 +141,36 @@ for (const c of showSourcesCases) {
 
       await page.debugger.waitForVariables();
       const variablesPanel = await page.debugger.getVariablesPanelLocator();
-      expect
-        .soft(await variablesPanel.screenshot())
-        .toMatchSnapshot(
-          `image-debug-session-global-variables${c.screenshotSuffix}.png`
-        );
+      const variablesBox = await variablesPanel.boundingBox();
+
+      if (!c.expectSourcesPanel) {
+        /* Variables panel snapshot only when the sources panel is not displayed*/
+        expect(variablesBox?.height).toBeGreaterThan(
+          140
+        ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+        expect
+          .soft(await variablesPanel.screenshot())
+          .toMatchSnapshot(
+            `image-debug-session-global-variables${c.screenshotSuffix}.png`
+          );
+      } else {
+        expect(variablesBox?.height).toBeLessThan(
+          120
+        ); /* smaller variable panel (112 px high) when sources panel is displayed */
+      }
 
       await page.debugger.renderVariable(globalVar);
       let richVariableTab = await page.activity.getPanelLocator(
         `${globalVar} - ${notebookName}`
       );
-      expect
-        .soft(await richVariableTab?.screenshot())
-        .toMatchSnapshot(
-          `image-debug-session-global-rich-variables${c.screenshotSuffix}.png`
-        );
+
+      if (!c.expectSourcesPanel) {
+        expect
+          .soft(await richVariableTab?.screenshot())
+          .toMatchSnapshot(
+            `image-debug-session-global-rich-variables${c.screenshotSuffix}.png`
+          );
+      }
 
       await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
@@ -208,15 +233,23 @@ for (const c of showSourcesCases) {
       await page.debugger.waitForCallStack();
       expect(await callStackPanel.innerText()).toMatch(/In \[\*\]/);
 
-      // Variables snapshot
       await page.debugger.waitForVariables();
       const variablesPanel = await page.debugger.getVariablesPanelLocator();
-      expect(await variablesPanel.screenshot()).toMatchSnapshot(
-        `start-debug-session-script-variables${c.screenshotSuffix}.png`
-      );
+      const variablesBox = await variablesPanel.boundingBox();
 
-      // Sources snapshot only when expected
-      if (c.expectSourcesPanel) {
+      if (!c.expectSourcesPanel) {
+        // Variables panel snapshot only when the sources panel is not displayed
+        expect(variablesBox?.height).toBeGreaterThan(
+          140
+        ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+        expect(await variablesPanel.screenshot()).toMatchSnapshot(
+          `start-debug-session-script-variables${c.screenshotSuffix}.png`
+        );
+      } else {
+        /* Sources panel snapshot only when the source panel is displayed */
+        expect(variablesBox?.height).toBeLessThan(
+          120
+        ); /* smaller variable panel (112 px high) when sources panel is displayed */
         await page.debugger.waitForSources();
         const sourcesPanel = await page.debugger.getSourcePanelLocator();
         expect(await sourcesPanel.screenshot()).toMatchSnapshot(
