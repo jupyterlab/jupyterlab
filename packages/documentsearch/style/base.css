@@ -105,14 +105,6 @@
   height: var(--jp-private-document-search-button-height);
 }
 
-.jp-DocumentSearch-toggle-wrapper:focus,
-.jp-DocumentSearch-button-wrapper:focus {
-  outline-width: var(--jp-focus-outline-width);
-  outline-color: var(--jp-focus-outline-color);
-  outline-style: solid;
-  outline-offset: -2px;
-}
-
 /* Higher specificity is needed to override .jp-ThemedContainer button:focus-visible */
 .jp-DocumentSearch-overlay .jp-DocumentSearch-button-wrapper:focus-visible {
   outline-width: var(--jp-focus-outline-width);
@@ -152,10 +144,14 @@
   color: var(--jp-ui-inverse-font-color1);
 }
 
-.jp-DocumentSearch-input-button-off:hover,
-.jp-DocumentSearch-input-button-on:hover {
+.jp-DocumentSearch-input-button-off:hover {
   background-color: var(--jp-layout-color3);
   color: var(--jp-ui-font-color3);
+}
+
+.jp-DocumentSearch-input-button-on:hover {
+  background-color: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
 }
 
 .jp-DocumentSearch-index-counter {
