@@ -856,13 +856,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
   id: '@jupyterlab/debugger-extension:source-viewer',
   description: 'Initialize the debugger sources viewer.',
-  requires: [
-    IDebugger,
-    IEditorServices,
-    IDebuggerSources,
-    ITranslator,
-    IDebuggerHandler
-  ],
+  requires: [IDebugger, IEditorServices, IDebuggerSources, ITranslator],
   optional: [ISettingRegistry],
   provides: IDebuggerSourceViewer,
   autoStart: true,
@@ -872,14 +866,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     editorServices: IEditorServices,
     debuggerSources: IDebugger.ISources,
     translator: ITranslator,
-    handler: Debugger.Handler,
     settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISourceViewer> => {
-    let previousEditorWidget: Widget | null = null;
+    let previousAutoOpenedSourcePreview: {
+      widget: Widget;
+      path: string;
+    } | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
     const { model } = service;
+
     let showSourcesInMainArea: boolean = true;
     if (settingRegistry) {
       const settings = await settingRegistry.load(main.id);
@@ -891,6 +888,23 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       settings.changed.connect(updateShowSourcesSetting);
     }
 
+    const closeAutoOpenedSourcePreview = () => {
+      if (
+        previousAutoOpenedSourcePreview &&
+        !previousAutoOpenedSourcePreview.widget.isDisposed
+      ) {
+        previousAutoOpenedSourcePreview.widget.close();
+        previousAutoOpenedSourcePreview.widget.dispose();
+        previousAutoOpenedSourcePreview = null;
+      }
+    };
+
+    // When debugger session ends, close the auto-opened source preview.
+    // This signal is emitted when user stops, toggles, or restarts debuggger and when they restart the kernel.
+    service.stopped.connect(closeAutoOpenedSourcePreview);
+
+    let delayedCleanupId: ReturnType<typeof setTimeout> | null = null;
+
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
@@ -901,9 +915,22 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
 
       if (!service.isStarted || !frame?.source?.path) {
+        // Close at the end of debugging too (when no more frames to walk through);
+        // we delay this action because the current frame can be intemitently empty
+        // while switching between frames.
+        delayedCleanupId = setTimeout(() => {
+          if (model.callstack.frames.length === 0) {
+            closeAutoOpenedSourcePreview();
+          }
+        }, 1000);
         return;
       }
       try {
+        if (delayedCleanupId) {
+          clearTimeout(delayedCleanupId);
+          delayedCleanupId = null;
+        }
+
         const source = await service.getSource({ path: frame.source.path });
         if (source) {
           openSource(source, frame);
@@ -950,10 +977,15 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           return;
         }
       }
-      /* Check on the previous widget editor */
-      if (previousEditorWidget && !previousEditorWidget.isDisposed) {
-        previousEditorWidget.dispose();
-        previousEditorWidget = null;
+      // Auto-close previously auto-opened read-only editor
+      if (breakpointOrFrame) {
+        if (
+          previousAutoOpenedSourcePreview &&
+          !previousAutoOpenedSourcePreview.widget.isDisposed &&
+          previousAutoOpenedSourcePreview.path !== path
+        ) {
+          closeAutoOpenedSourcePreview();
+        }
       }
 
       /* Create a new read-only editor */
@@ -980,16 +1012,20 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         editorWrapper
       });
 
-      /* Loop on all main area widgets to assign to the previousEditorWidget the editor opened by the debugger and fitting the right node id */
-      for (const mainAreaWidget of app.shell.widgets('main')) {
-        /* Loop on all the children of the selected main area widget and take the one fitting the editor wrapper id */
-        for (const childWidget of mainAreaWidget.children()) {
-          if (childWidget.node.id === editorWrapper.node.id) {
-            previousEditorWidget = mainAreaWidget;
-            break;
+      // Store the widget reference to auto-close as it was auto-opened on breakpoints/frame
+      if (breakpointOrFrame) {
+        for (const mainAreaWidget of app.shell.widgets('main')) {
+          for (const childWidget of mainAreaWidget.children()) {
+            if (childWidget.node.id === editorWrapper.node.id) {
+              previousAutoOpenedSourcePreview = {
+                widget: mainAreaWidget,
+                path
+              };
+              break;
+            }
           }
+          if (previousAutoOpenedSourcePreview) break;
         }
-        if (previousEditorWidget) break;
       }
 
       const frame = service.model.callstack.frame;
@@ -1003,11 +1039,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         });
       }
     };
-
-    /* When receiving the execute_reply message, close the last read-only editor opened if it exists */
-    handler.executionDone.connect(() => {
-      if (previousEditorWidget) previousEditorWidget.close();
-    });
 
     const trans = translator.load('jupyterlab');
 
