@@ -244,7 +244,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
+    await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
 
