@@ -4456,6 +4456,12 @@ function addCommands(
     isEnabled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       return !!current && current.content.hasNavigableModifiedCellBack();
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
   commands.addCommand(CommandIDs.selectNextModifiedCell, {
@@ -4469,6 +4475,12 @@ function addCommands(
     isEnabled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       return !!current && current.content.hasNavigableModifiedCellForward();
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
   commands.addCommand(CommandIDs.replaceSelection, {
