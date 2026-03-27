@@ -542,9 +542,9 @@ export class Completer extends Widget {
    * Cycle through the available completer items.
    *
    * #### Notes
-   * When the user cycles all the way `down` to the last index, subsequent
-   * `down` cycles will cycle to the first index. When the user cycles `up` to
-   * the first item, subsequent `up` cycles will cycle to the last index.
+   * When the user cycles all the way down to the last index, subsequent
+   * `ArrowDown` cycles will cycle to the first index. When the user cycles up
+   * to the first item, subsequent `ArrowUp` cycles will cycle to the last index.
    */
   private _cycle(direction: Private.scrollType): void {
     const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
