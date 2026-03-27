@@ -21,37 +21,6 @@ export interface IAdvancedOptionsProps {
 
 export interface ISymbolsProps {}
 
-function Symbols(props: ISymbolsProps): JSX.Element {
-  return (
-    <div className="jp-Shortcuts-Symbols">
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <kbd>Cmd</kbd>
-            </td>
-            <td>⌘</td>
-            <td>
-              <kbd>Ctrl</kbd>
-            </td>
-            <td>⌃</td>
-          </tr>
-          <tr>
-            <td>
-              <kbd>Alt</kbd>
-            </td>
-            <td>⌥</td>
-            <td>
-              <kbd>Shift</kbd>
-            </td>
-            <td>⇧</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
   const trans = props.translator.load('jupyterlab');
   return (
@@ -123,7 +92,6 @@ export class TopNav extends React.Component<ITopNavProps> {
     return (
       <div className="jp-Shortcuts-Top">
         <div className="jp-Shortcuts-TopNav">
-          <Symbols />
           <FilterBox
             aria-label={trans.__('Search shortcuts')}
             updateFilter={(_, query) =>
