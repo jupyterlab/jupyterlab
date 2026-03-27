@@ -299,8 +299,7 @@ export class EditorHandler implements IDisposable {
     let clickedLine = editor.state.doc.lineAt(position);
     let clickedLineNumber = clickedLine.number;
     let targetLine: Line | undefined = undefined;
-    let isLineEmpty: boolean =
-      false; /* is true is the clicked line of code is empty */
+    let isLineEmpty: boolean = false; /* is true is the clicked line of code is empty */
     if (clickedLine.text.trim() === '') {
       isLineEmpty = true;
       while (clickedLineNumber > 1) {
@@ -525,6 +524,15 @@ export namespace EditorHandler {
     line: number,
     scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
+    const lineCount = editor.lineCount;
+
+    if (line < 1 || line > lineCount) {
+      console.warn(
+        `Line ${line} is not in the document which contains ${lineCount} lines`
+      );
+      return;
+    }
+
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;

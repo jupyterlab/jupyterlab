@@ -12,6 +12,7 @@ import {
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
+import { Throttler } from '@lumino/polling';
 import type { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -41,6 +42,11 @@ const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
  * The class name for the breadcrumbs ellipsis node
  */
 const BREADCRUMB_ELLIPSIS_CLASS = 'jp-BreadCrumbs-ellipsis';
+
+/**
+ * The class name for the breadcrumbs separator node
+ */
+const BREADCRUMB_SEPARATOR_CLASS = 'jp-BreadCrumbs-separator';
 
 /**
  * The mime type for a contents drag object.
@@ -78,6 +84,19 @@ export class BreadCrumbs extends Widget {
     }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
+    this._resizeThrottler = new Throttler(() => this._onResize(), 50);
+    this._resizeObserver = new ResizeObserver(entries => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      const newWidth = entry.contentRect.width;
+      if (this._lastRenderedWidth > 0 && newWidth < this._lastRenderedWidth) {
+        this._onResize();
+      } else {
+        void this._resizeThrottler.invoke();
+      }
+    });
   }
 
   /**
@@ -146,6 +165,18 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._resizeObserver.disconnect();
+    this._resizeThrottler.dispose();
+    super.dispose();
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -156,6 +187,7 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragenter', this);
     node.addEventListener('lm-dragleave', this);
     node.addEventListener('lm-dragover', this);
+    this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
   }
 
@@ -170,6 +202,7 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
+    this._resizeObserver.unobserve(node);
   }
 
   /**
@@ -179,12 +212,22 @@ export class BreadCrumbs extends Widget {
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
-    const state = {
+
+    // Invalidate cached widths if the path changed
+    if (this._previousState && this._previousState.path !== localPath) {
+      this._cachedWidths = null;
+    }
+
+    // Calculate adaptive items based on available width
+    const adaptiveItems = this._calculateAdaptiveItems(localPath);
+
+    const state: Private.ICrumbsState = {
       path: localPath,
+      root: this._model.root,
       hasPreferred: this._hasPreferred,
       fullPath: this._fullPath,
-      minimumLeftItems: this._minimumLeftItems,
-      minimumRightItems: this._minimumRightItems
+      minimumLeftItems: adaptiveItems.left,
+      minimumRightItems: adaptiveItems.right
     };
     if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
       return;
@@ -388,6 +431,176 @@ export class BreadCrumbs extends Widget {
     return elements;
   }
 
+  /**
+   * Handle resize events with throttling.
+   */
+  private _onResize(): void {
+    if (this.isDisposed || !this.isAttached) {
+      return;
+    }
+    // Force recalculation by clearing previous state
+    this._previousState = null;
+    this.update();
+  }
+
+  /**
+   * Measure ALL breadcrumb item widths by rendering them off-screen.
+   * This ensures we have accurate widths for every path segment,
+   * including those currently hidden behind the ellipsis.
+   */
+  private _measureAllItemWidths(parts: string[]): void {
+    const node = this.node;
+
+    // Measure fixed elements that are already in the DOM
+    const home = this._crumbs[Private.Crumb.Home];
+    const ellipsis = this._crumbs[Private.Crumb.Ellipsis];
+    const preferred = this._crumbs[Private.Crumb.Preferred];
+    const separators = node.getElementsByClassName(BREADCRUMB_SEPARATOR_CLASS);
+    const separator = separators.length > 0 ? separators[0] : null;
+
+    // Create an off-screen container to measure all items
+    const measurer = document.createElement('div');
+    measurer.style.position = 'absolute';
+    measurer.style.visibility = 'hidden';
+    measurer.style.height = '0';
+    measurer.style.overflow = 'hidden';
+    measurer.style.whiteSpace = 'nowrap';
+    // Inherit font styles from the breadcrumb node
+    measurer.className = BREADCRUMB_CLASS;
+    node.appendChild(measurer);
+
+    // Create and measure each breadcrumb item for every path segment
+    const itemWidths: number[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      const elem = document.createElement('span');
+      elem.className = BREADCRUMB_ITEM_CLASS;
+      elem.textContent = parts[i];
+      measurer.appendChild(elem);
+      const measured = elem.getBoundingClientRect().width;
+      // Fall back to a character-based estimate if layout is not available.
+      itemWidths.push(
+        (measured > 0 ? measured : Math.max(parts[i].length * 8, 20)) + 4
+      );
+    }
+
+    // Clean up
+    node.removeChild(measurer);
+
+    this._cachedWidths = {
+      home: (home.getBoundingClientRect().width || 22) + 4,
+      ellipsis: (ellipsis.getBoundingClientRect().width || 28) + 4,
+      separator: separator?.getBoundingClientRect().width || 4,
+      preferred: this._hasPreferred
+        ? (preferred.getBoundingClientRect().width || 22) + 4
+        : 0,
+      itemWidths: itemWidths
+    };
+  }
+
+  /**
+   * Calculate adaptive left/right items based on available width.
+   */
+  private _calculateAdaptiveItems(path: string): {
+    left: number;
+    right: number;
+  } {
+    // Reset last rendered width to avoid stale data on early returns
+    this._lastRenderedWidth = 0;
+
+    const parts = path.split('/').filter(part => part !== '');
+    const totalParts = parts.length;
+
+    // If fullPath is enabled or there are no parts, use minimum settings
+    if (this._fullPath || totalParts === 0) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    // If total parts fit within minimums, no adaptation needed
+    const minTotal = this._minimumLeftItems + this._minimumRightItems;
+    if (totalParts <= minTotal) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    const containerWidth = this.node.clientWidth;
+    if (containerWidth === 0) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    // Ensure we have accurate measurements for ALL items
+    if (
+      !this._cachedWidths ||
+      this._cachedWidths.itemWidths.length !== totalParts
+    ) {
+      this._measureAllItemWidths(parts);
+    }
+
+    const homeWidth = this._cachedWidths!.home;
+    const separatorWidth = this._cachedWidths!.separator;
+    const ellipsisWidth = this._cachedWidths!.ellipsis;
+    const preferredWidth = this._cachedWidths!.preferred;
+    const itemWidths = this._cachedWidths!.itemWidths;
+
+    // Calculate available space for items
+    let fixedOverhead = homeWidth + separatorWidth;
+    if (this._hasPreferred) {
+      fixedOverhead += preferredWidth + separatorWidth;
+    }
+    const availableForItems = containerWidth - fixedOverhead;
+
+    // Check if all parts can fit without ellipsis
+    let totalWidth = 0;
+    for (let i = 0; i < totalParts; i++) {
+      totalWidth += itemWidths[i] + separatorWidth;
+    }
+    if (totalWidth <= availableForItems) {
+      this._lastRenderedWidth = fixedOverhead + totalWidth;
+      return { left: totalParts, right: 0 };
+    }
+
+    // calculate how many right items fit
+    const ellipsisOverhead = ellipsisWidth + separatorWidth;
+    const availableWithEllipsis = availableForItems - ellipsisOverhead;
+
+    // Account for left items first
+    let leftUsed = 0;
+    for (let i = 0; i < this._minimumLeftItems && i < totalParts; i++) {
+      leftUsed += itemWidths[i] + separatorWidth;
+    }
+
+    const availableForRight = availableWithEllipsis - leftUsed;
+
+    // Fill right items from the end
+    let rightItems = 0;
+    let usedWidth = 0;
+    for (let i = totalParts - 1; i >= this._minimumLeftItems; i--) {
+      const w = itemWidths[i] + separatorWidth;
+      if (usedWidth + w <= availableForRight) {
+        usedWidth += w;
+        rightItems++;
+      } else {
+        break;
+      }
+    }
+
+    // Ensure minimums are respected
+    const finalRight = Math.max(rightItems, this._minimumRightItems);
+    // Track the total rendered width for the immediate-collapse check.
+    // If minimums forced extra items, recalculate; otherwise reuse usedWidth.
+    let rightUsed = usedWidth;
+    if (finalRight > rightItems) {
+      rightUsed = 0;
+      for (let i = totalParts - finalRight; i < totalParts; i++) {
+        rightUsed += itemWidths[i] + separatorWidth;
+      }
+    }
+    this._lastRenderedWidth =
+      fixedOverhead + ellipsisOverhead + leftUsed + rightUsed;
+    return {
+      left: this._minimumLeftItems,
+      right: finalRight
+    };
+  }
+
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: FileBrowserModel;
@@ -397,6 +610,16 @@ export class BreadCrumbs extends Widget {
   private _previousState: Private.ICrumbsState | null = null;
   private _minimumLeftItems: number;
   private _minimumRightItems: number;
+  private _resizeObserver: ResizeObserver;
+  private _resizeThrottler: Throttler;
+  private _cachedWidths: {
+    home: number;
+    separator: number;
+    ellipsis: number;
+    preferred: number;
+    itemWidths: number[];
+  } | null = null;
+  private _lastRenderedWidth = 0;
 }
 
 /**
@@ -453,6 +676,7 @@ namespace Private {
   export interface ICrumbsState {
     [key: string]: string | boolean | number;
     path: string;
+    root: string;
     hasPreferred: boolean;
     fullPath: boolean;
     minimumLeftItems: number;
@@ -474,24 +698,41 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    if (state.hasPreferred) {
-      node.appendChild(breadcrumbs[Crumb.Home]);
-      node.appendChild(createCrumbSeparator());
+    // Calculate the starting index for breadcrumbs based on root restriction
+    const rootParts = state.root
+      ? state.root.split('/').filter(part => part !== '')
+      : [];
+    const rootDepth = rootParts.length;
+
+    // Only show home/preferred if there's no root restriction
+    if (!state.root) {
+      if (state.hasPreferred) {
+        node.appendChild(breadcrumbs[Crumb.Home]);
+        node.appendChild(createCrumbSeparator());
+      } else {
+        node.appendChild(createCrumbSeparator());
+      }
     } else {
+      // With root restriction, just add an initial separator
       node.appendChild(createCrumbSeparator());
     }
 
     const parts = state.path.split('/').filter(part => part !== '');
-    if (!state.fullPath && parts.length > 0) {
+    // Filter parts to only show those at or below the root
+    const visibleParts = state.root ? parts.slice(rootDepth) : parts;
+    const visibleStartIndex = rootDepth;
+
+    if (!state.fullPath && visibleParts.length > 0) {
       const minimumLeftItems = state.minimumLeftItems;
       const minimumRightItems = state.minimumRightItems;
 
-      // Check if we need ellipsis
-      if (parts.length > minimumLeftItems + minimumRightItems) {
+      // Check if we need ellipsis (based on visible parts)
+      if (visibleParts.length > minimumLeftItems + minimumRightItems) {
         // Add left items
         for (let i = 0; i < minimumLeftItems; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          const elem = createBreadcrumbElement(visibleParts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(createCrumbSeparator());
         }
@@ -499,41 +740,45 @@ namespace Private {
         // Add ellipsis
         node.appendChild(breadcrumbs[Crumb.Ellipsis]);
         const hiddenStartIndex = minimumLeftItems;
-        const hiddenEndIndex = parts.length - minimumRightItems;
-        const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
-        const hiddenFolders = hiddenParts.join('/');
+        const hiddenEndIndex = visibleParts.length - minimumRightItems;
+        const hiddenVisibleParts = visibleParts.slice(
+          hiddenStartIndex,
+          hiddenEndIndex
+        );
+        const hiddenFolders = hiddenVisibleParts.join('/');
         const hiddenPath =
-          hiddenParts.length > 0
-            ? parts.slice(0, hiddenEndIndex).join('/')
-            : parts.slice(0, minimumLeftItems).join('/');
+          hiddenVisibleParts.length > 0
+            ? parts.slice(0, visibleStartIndex + hiddenEndIndex).join('/')
+            : parts.slice(0, visibleStartIndex + minimumLeftItems).join('/');
         breadcrumbs[Crumb.Ellipsis].title = hiddenFolders;
         breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
         node.appendChild(createCrumbSeparator());
 
         // Add right items
-        const rightStartIndex = parts.length - minimumRightItems;
-        for (let i = rightStartIndex; i < parts.length; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
+        const rightStartIndex = visibleParts.length - minimumRightItems;
+        for (let i = rightStartIndex; i < visibleParts.length; i++) {
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          const elem = createBreadcrumbElement(visibleParts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(createCrumbSeparator());
         }
       } else {
-        for (let i = 0; i < parts.length; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
+        for (let i = 0; i < visibleParts.length; i++) {
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          const elem = createBreadcrumbElement(visibleParts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(createCrumbSeparator());
         }
       }
-    } else if (state.fullPath && parts.length > 0) {
-      for (let i = 0; i < parts.length; i++) {
-        const elemPath = parts.slice(0, i + 1).join('/');
-        const elem = createBreadcrumbElement(parts[i], elemPath);
+    } else if (state.fullPath && visibleParts.length > 0) {
+      for (let i = 0; i < visibleParts.length; i++) {
+        const fullIndex = visibleStartIndex + i;
+        const elemPath = parts.slice(0, fullIndex + 1).join('/');
+        const elem = createBreadcrumbElement(visibleParts[i], elemPath);
         node.appendChild(elem);
-        const separator = document.createElement('span');
-        separator.textContent = '/';
-        node.appendChild(separator);
+        node.appendChild(createCrumbSeparator());
       }
     }
   }
@@ -589,6 +834,7 @@ namespace Private {
    */
   export function createCrumbSeparator(): HTMLElement {
     const item = document.createElement('span');
+    item.className = BREADCRUMB_SEPARATOR_CLASS;
     item.textContent = '/';
     return item;
   }

@@ -537,9 +537,7 @@ function activate(
   );
 
   const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
-    {
-      namespace: 'codeviewer'
-    }
+    { namespace: 'codeviewer' }
   );
 
   // Handle state restoration for code viewers

@@ -155,7 +155,8 @@ export function createDefaultFactory(
 
         // If there is an icon, undefined label will results in no label
         // otherwise the label will be set using the setting or the command label
-        const label = icon ?? commands.icon(id, args) ? tLabel ?? '' : tLabel;
+        const label =
+          (icon ?? commands.icon(id, args)) ? (tLabel ?? '') : tLabel;
         return new CommandToolbarButton({
           commands,
           id,

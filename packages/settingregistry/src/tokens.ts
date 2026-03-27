@@ -38,8 +38,10 @@ export const ISettingRegistry = new Token<ISettingRegistry>(
 /**
  * The settings connector interface.
  */
-export interface ISettingConnector
-  extends IDataConnector<ISettingRegistry.IPlugin, string> {}
+export interface ISettingConnector extends IDataConnector<
+  ISettingRegistry.IPlugin,
+  string
+> {}
 
 /**
  * The settings registry interface.

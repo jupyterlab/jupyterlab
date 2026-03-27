@@ -297,6 +297,5 @@ export namespace TableOfContents {
   /**
    * Interface describing a toolbar item list
    */
-  export interface IToolbarItems
-    extends IObservableList<ToolbarRegistry.IToolbarItem> {}
+  export interface IToolbarItems extends IObservableList<ToolbarRegistry.IToolbarItem> {}
 }

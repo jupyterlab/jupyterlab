@@ -216,6 +216,22 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show the date created column
+   */
+  get showDateCreatedColumn(): boolean {
+    return this._showDateCreatedColumn;
+  }
+
+  set showDateCreatedColumn(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('date_created', value);
+      this._showDateCreatedColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Whether to show the file size column
    */
   get showFileSizeColumn(): boolean {
@@ -303,6 +319,23 @@ export class FileBrowser extends SidePanel {
       this._sortNotebooksFirst = value;
     } else {
       console.warn('Listing does not support sorting notebooks first');
+    }
+  }
+
+  /**
+   * Whether to sort file names naturally.
+   * Default is true; set to false for lexicographic order.
+   */
+  get sortFileNamesNaturally(): boolean {
+    return this._sortFileNamesNaturally;
+  }
+
+  set sortFileNamesNaturally(value: boolean) {
+    if (this.listing.setSortFileNamesNaturally) {
+      this.listing.setSortFileNamesNaturally(value);
+      this._sortFileNamesNaturally = value;
+    } else {
+      console.warn('Listing does not support natural file name sorting');
     }
   }
 
@@ -596,10 +629,12 @@ export class FileBrowser extends SidePanel {
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
+  private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
 }

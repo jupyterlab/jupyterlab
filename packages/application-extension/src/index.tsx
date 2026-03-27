@@ -55,7 +55,6 @@ import type { DockLayout, DockPanel } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
-
 /**
  * Default context menu item rank
  */
@@ -115,7 +114,16 @@ namespace CommandIDs {
   export const switchSidebar = 'sidebar:switch';
 
   export const splitTab = 'application:split-tab';
+
+  export const zoomInWidget = 'application:zoom-in-widget';
+
+  export const zoomOutWidget = 'application:zoom-out-widget';
+
+  export const resetWidgetZoom = 'application:reset-widget-zoom';
 }
+
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
 
 /**
  * A plugin to register the commands for the main application.
@@ -124,11 +132,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:commands',
   description: 'Adds commands related to the shell.',
   autoStart: true,
-  requires: [ITranslator],
+  requires: [ITranslator, ISettingRegistry],
   optional: [ILabShell, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    settingRegistry: ISettingRegistry,
     labShell: ILabShell | null,
     palette: ICommandPalette | null
   ) => {
@@ -236,6 +245,41 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     };
 
+    const getCurrentWidget = (): Widget | null => {
+      return shell.currentWidget ?? null;
+    };
+
+    function resetWidgetZoom(widget: Widget) {
+      const target = getZoomTarget(widget);
+      if (!target) return;
+
+      target.style.removeProperty('zoom');
+    }
+
+    function getZoomTarget(widget: Widget): HTMLElement {
+      const node = widget.node;
+
+      let target = node.querySelector('.jp-zoom-target') as HTMLElement;
+      if (target) return target;
+
+      node.classList.add('jp-zoom-target');
+      return node;
+    }
+
+    function zoomActiveWidget(widget: Widget, delta: number) {
+      const target = getZoomTarget(widget);
+      if (!target) return;
+
+      const current = Number(
+        (target.style as CSSStyleDeclaration & { zoom?: string }).zoom || 1
+      );
+
+      const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, current + delta));
+
+      (target.style as CSSStyleDeclaration & { zoom?: string }).zoom =
+        String(next);
+    }
+
     // Sets tab focus on the element
     function setTabFocus(focusElement: HTMLElement | null) {
       if (focusElement) {
@@ -306,6 +350,54 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return;
         }
         closeWidgets(widgetsRightOf(widget));
+      }
+    });
+
+    commands.addCommand(CommandIDs.zoomInWidget, {
+      label: trans.__('Zoom In Active Widget'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          zoomActiveWidget(widget, 0.1);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.zoomOutWidget, {
+      label: trans.__('Zoom Out Active Widget'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          zoomActiveWidget(widget, -0.1);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.resetWidgetZoom, {
+      label: trans.__('Reset Widget Zoom'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          resetWidgetZoom(widget);
+        }
       }
     });
 
@@ -451,14 +543,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.index === undefined
             ? trans.__('Toggle Sidebar Element')
             : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+              ? trans.__(
+                  'Toggle Element %1 in Right Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                )
+              : trans.__(
+                  'Toggle Element %1 in Left Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                ),
         describedBy: {
           args: {
             type: 'object',
@@ -790,7 +882,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
-        CommandIDs.resetLayout
+        CommandIDs.resetLayout,
+        CommandIDs.zoomInWidget,
+        CommandIDs.zoomOutWidget,
+        CommandIDs.resetWidgetZoom
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
@@ -801,6 +896,69 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         });
       });
     }
+
+    function getWidgetFromEvent(event: WheelEvent): Widget | null {
+      const target = event.target as HTMLElement;
+      if (!target) return null;
+
+      // closest lumino widget node
+      const node = target.closest('.lm-Widget') as HTMLElement;
+      if (!node) return null;
+
+      for (const widget of shell.widgets('main')) {
+        if (widget.node.contains(node)) {
+          return widget;
+        }
+      }
+
+      return null;
+    }
+
+    let zoomOnWheel = false;
+
+    settingRegistry
+      .load('@jupyterlab/application-extension:shell')
+      .then(settings => {
+        zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+
+        settings.changed.connect(() => {
+          zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+        });
+      })
+      .catch(reason => {
+        console.error('Failed to load zoomOnWheel setting.', reason);
+      });
+
+    // since event.ctrlKey can be true when ctrl key is not physically held,
+    // we need to track the physical ctrl key state with keydown/keyup events and only trigger zoom when ctrl key is physically held down.
+    let isCtrlKeyPhysicallyHeld = false;
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Control') isCtrlKeyPhysicallyHeld = true;
+    });
+    window.addEventListener('keyup', e => {
+      if (e.key === 'Control') isCtrlKeyPhysicallyHeld = false;
+    });
+    window.addEventListener('blur', () => {
+      isCtrlKeyPhysicallyHeld = false;
+    });
+
+    window.addEventListener(
+      'wheel',
+      event => {
+        if (!zoomOnWheel) return;
+        if (!event.ctrlKey || !isCtrlKeyPhysicallyHeld) return;
+        // zoom in/out the widget under the mouse pointer.
+        const widget = getWidgetFromEvent(event);
+        if (!widget) return;
+
+        event.preventDefault();
+
+        const delta = event.deltaY < 0 ? 0.1 : -0.1;
+        zoomActiveWidget(widget, delta);
+      },
+      { passive: false, capture: true }
+    );
   }
 };
 

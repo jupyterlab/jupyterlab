@@ -25,11 +25,6 @@ test.describe('Output Scrolling', () => {
     await page.notebook.activate(fileName);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Scrolling mode', async ({ page }) => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute(
