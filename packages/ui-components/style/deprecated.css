@@ -75,6 +75,8 @@
   --jp-icon-inspector: url('icons/filetype/inspector.svg');
   --jp-icon-json: url('icons/filetype/json.svg');
   --jp-icon-julia: url('icons/filetype/julia.svg');
+  --jp-icon-jump-back: url('icons/toolbar/jump-back.svg');
+  --jp-icon-jump-forward: url('icons/toolbar/jump-forward.svg');
   --jp-icon-jupyter-favicon: url('icons/jupyter/jupyter-favicon.svg');
   --jp-icon-jupyter: url('icons/jupyter/jupyter.svg');
   --jp-icon-jupyterlab-wordmark: url('icons/jupyter/jupyterlab-wordmark.svg');
@@ -389,6 +391,14 @@
 
 .jp-JuliaIcon {
   background-image: var(--jp-icon-julia);
+}
+
+.jp-JumpBackIcon {
+  background-image: var(--jp-icon-jump-back);
+}
+
+.jp-JumpForwardIcon {
+  background-image: var(--jp-icon-jump-forward);
 }
 
 .jp-JupyterFaviconIcon {

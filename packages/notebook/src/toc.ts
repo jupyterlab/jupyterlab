@@ -17,8 +17,8 @@ import type { INotebookTracker } from './tokens';
 import type { Notebook } from './widget';
 import {
   CommandToolbarButton,
-  redoIcon,
-  undoIcon
+  jumpBackIcon,
+  jumpForwardIcon
 } from '@jupyterlab/ui-components';
 import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import type { CommandRegistry } from '@lumino/commands';
@@ -818,7 +818,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           args: {
             toolbar: true
           },
-          icon: undoIcon,
+          icon: jumpBackIcon,
           label: ''
         })
       },
@@ -830,7 +830,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           args: {
             toolbar: true
           },
-          icon: redoIcon,
+          icon: jumpForwardIcon,
           label: ''
         })
       }
