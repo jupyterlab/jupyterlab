@@ -5,7 +5,7 @@ import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import type { PartialJSONObject } from '@lumino/coreutils';
+import { type PartialJSONObject, UUID } from '@lumino/coreutils';
 
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -439,10 +439,22 @@ export namespace Contents {
      *
      * @param newPath - The new file path.
      *
-     * @returns A promise which resolves with the new file content model when the
-     *   file is renamed.
+     * @returns A promise containing the new file contents model.  The promise
+     * will reject if the newPath already exists.  Use [[overwrite]] to overwrite
+     * a file.
      */
     rename(path: string, newPath: string): Promise<IModel>;
+
+    /**
+     * Overwrite a file.
+     *
+     * @param oldPath - The full path to the original file.
+     *
+     * @param newPath - The full path to the new file.
+     *
+     * @returns A promise containing the new file contents model.
+     */
+    overwrite(oldPath: string, newPath: string): Promise<Contents.IModel>;
 
     /**
      * Save a file.
@@ -942,6 +954,27 @@ export class ContentsManager implements Contents.IManager {
         serverPath: contentsModel.path
       } as Contents.IModel;
     });
+  }
+
+  /**
+   * Overwrite a file.
+   *
+   * @param oldPath - The full path to the original file.
+   *
+   * @param newPath - The full path to the new file.
+   *
+   * @returns A promise containing the new file contents model.
+   */
+  overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
+    // Cleanly overwrite the file by moving it, making sure the original does
+    // not exist, and then renaming to the new path.
+    const tempPath = `${newPath}.${UUID.uuid4()}`;
+    const cb = () => this.rename(tempPath, newPath);
+    return this.rename(oldPath, tempPath)
+      .then(() => {
+        return this.delete(newPath);
+      })
+      .then(cb, cb);
   }
 
   /**
