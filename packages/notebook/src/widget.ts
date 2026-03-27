@@ -1713,6 +1713,9 @@ export class Notebook extends StaticNotebook {
     switch (args.type) {
       case 'add':
       case 'set':
+        args.oldValues.forEach(model => {
+          model.contentChanged.disconnect(this._onCellContentChanged, this);
+        });
         args.newValues.forEach(model => {
           model.contentChanged.connect(this._onCellContentChanged, this);
         });
