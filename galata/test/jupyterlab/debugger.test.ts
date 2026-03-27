@@ -93,9 +93,11 @@ for (const c of showSourcesCases) {
       const variablesBox = await variablesPanel.boundingBox();
 
       if (c.expectSourcesPanel) {
-        expect.soft(variablesBox?.height).toBeLessThan(
-          120
-        ); /* smaller variable panel (112 px high) when sources panel is displayed */
+        expect
+          .soft(variablesBox?.height)
+          .toBeLessThan(
+            120
+          ); /* smaller variable panel (112 px high) when sources panel is displayed */
 
         await page.debugger.waitForSources();
         const sourcesPanel = await page.debugger.getSourcePanelLocator();
@@ -142,18 +144,22 @@ for (const c of showSourcesCases) {
 
       if (!c.expectSourcesPanel) {
         /* Variables panel snapshot only when the sources panel is not displayed*/
-        expect.soft(variablesBox?.height).toBeGreaterThan(
-          140
-        ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+        expect
+          .soft(variablesBox?.height)
+          .toBeGreaterThan(
+            140
+          ); /* Variables panel is higher (149 px high) when sources panel is displayed */
         expect
           .soft(await variablesPanel.screenshot())
           .toMatchSnapshot(
             `image-debug-session-global-variables${c.screenshotSuffix}.png`
           );
       } else {
-        expect.soft(variablesBox?.height).toBeLessThan(
-          120
-        ); /* smaller variable panel (112 px high) when sources panel is displayed */
+        expect
+          .soft(variablesBox?.height)
+          .toBeLessThan(
+            120
+          ); /* smaller variable panel (112 px high) when sources panel is displayed */
       }
 
       await page.debugger.renderVariable(globalVar);
@@ -236,9 +242,11 @@ for (const c of showSourcesCases) {
 
       if (!c.expectSourcesPanel) {
         // Variables panel snapshot only when the sources panel is not displayed
-        expect.soft(variablesBox?.height).toBeGreaterThan(
-          140
-        ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+        expect
+          .soft(variablesBox?.height)
+          .toBeGreaterThan(
+            140
+          ); /* Variables panel is higher (149 px high) when sources panel is displayed */
         expect(await variablesPanel.screenshot()).toMatchSnapshot(
           `start-debug-session-script-variables${c.screenshotSuffix}.png`
         );
