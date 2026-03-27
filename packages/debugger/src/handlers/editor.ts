@@ -524,6 +524,15 @@ export namespace EditorHandler {
     line: number,
     scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
+    const lineCount = editor.lineCount;
+
+    if (line < 1 || line > lineCount) {
+      console.warn(
+        `Line ${line} is not in the document which contains ${lineCount} lines`
+      );
+      return;
+    }
+
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
