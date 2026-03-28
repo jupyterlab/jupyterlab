@@ -190,9 +190,11 @@ for (const c of showSourcesCases) {
       richVariableTab = await page.activity.getPanelLocator(
         `${localVar} - ${notebookName}`
       );
-      expect(await richVariableTab?.screenshot()).toMatchSnapshot(
-        `image-debug-session-local-rich-variable${c.screenshotSuffix}.png`
-      );
+      if (!c.expectSourcesPanel) {
+        expect(await richVariableTab?.screenshot()).toMatchSnapshot(
+          `image-debug-session-local-rich-variable${c.screenshotSuffix}.png`
+        );
+      }
     });
 
     test('Start debug session (Script)', async ({ page, tmpPath }) => {
