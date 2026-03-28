@@ -15,6 +15,7 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
    * Construct a new notebook model factory.
    */
   constructor(options: NotebookModelFactory.IOptions = {}) {
+    this._allowEmptyNotebook = options.allowEmptyNotebook ?? false;
     this._disableDocumentWideUndoRedo =
       options.disableDocumentWideUndoRedo ?? true;
     this._collaborative = options.collaborative ?? true;
@@ -31,6 +32,13 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
   }
   set disableDocumentWideUndoRedo(disableDocumentWideUndoRedo: boolean) {
     this._disableDocumentWideUndoRedo = disableDocumentWideUndoRedo;
+  }
+
+  get allowEmptyNotebook(): boolean {
+    return this._allowEmptyNotebook;
+  }
+  set allowEmptyNotebook(allowEmptyNotebook: boolean) {
+    this._allowEmptyNotebook = allowEmptyNotebook;
   }
 
   /**
@@ -89,7 +97,8 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
       languagePreference: options.languagePreference,
       sharedModel: options.sharedModel,
       collaborationEnabled: options.collaborationEnabled && this.collaborative,
-      disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
+      disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo,
+      allowEmptyNotebook: this._allowEmptyNotebook
     });
   }
 
@@ -104,6 +113,7 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
    * Defines if the document can be undo/redo.
    */
   private _disableDocumentWideUndoRedo: boolean;
+  private _allowEmptyNotebook: boolean;
   private _disposed = false;
   private _collaborative: boolean;
 }
@@ -120,6 +130,11 @@ export namespace NotebookModelFactory {
      * Whether the model is collaborative or not.
      */
     collaborative?: boolean;
+
+    /**
+     * Whether not to show a cell when the notebook is empty.
+     */
+    allowEmptyNotebook?: boolean;
 
     /**
      * Defines if the document can be undo/redo.
