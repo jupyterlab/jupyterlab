@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import { type Locator, type Page } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
@@ -13,20 +13,25 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
 /**
  * Run a shell command in the visible terminal panel.
- * Requires screenReaderMode to be enabled in mockSettings.
  *
- * @param page - Playwright page
- * @param terminalLocator - Locator for the terminal container
- * @param command - Shell command to run
+ * @param page Playwright page (provided by galata fixture)
+ * @param terminalLocator Locator that matches the terminal container
+ * @param command Shell command to run
  */
 async function runCommand(
   page: Page,
   terminalLocator: Locator,
-  command: string
+  command: string,
+  verify = false
 ): Promise<void> {
   await terminalLocator.locator(TERMINAL_INPUT_SELECTOR).waitFor();
   await terminalLocator.click();
   await page.keyboard.type(command);
+  if (verify) {
+    await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
+      command
+    );
+  }
   await page.keyboard.press('Enter');
 }
 
@@ -124,9 +129,7 @@ test.describe('Terminal', () => {
       await terminal.waitFor();
 
       // Display some content in terminal.
-      await page.locator('div.xterm-screen').click();
-      await page.keyboard.type('seq 1006 2 1024');
-      await page.keyboard.press('Enter');
+      await runCommand(page, terminal, 'seq 1006 2 1024');
 
       // Perform search.
       const searchText = '101';
@@ -144,7 +147,7 @@ test.describe('Terminal', () => {
   });
 });
 
-test.describe('Terminal with screenReaderMode', () => {
+test.describe.serial('Terminal with screenReaderMode', () => {
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
@@ -152,7 +155,8 @@ test.describe('Terminal with screenReaderMode', () => {
         ...galata.DEFAULT_SETTINGS['@jupyterlab/terminal-extension:plugin'],
         screenReaderMode: true
       }
-    }
+    },
+    tmpPath: 'terminal-screen-reader-test'
   });
 
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
@@ -165,11 +169,12 @@ test.describe('Terminal with screenReaderMode', () => {
     const terminal = page.locator(TERMINAL_SELECTOR);
     await terminal.waitFor();
 
-    await runCommand(page, terminal, 'basename $PWD');
+    // use the local helper to run basename
+    await runCommand(page, terminal, 'basename $PWD', true);
 
-    // Wait for the command output instead of using a fixed timeout
+    // Wait for the basename to appear in the terminal output
     const basename = path.basename(tmpPath);
-    const terminalBody = terminal.locator('.jp-Terminal-body');
+    const terminalBody = terminal.locator('.jp-Terminal-body:visible');
     await expect(terminalBody).toContainText(basename, { timeout: 5000 });
 
     expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
@@ -187,14 +192,16 @@ test.describe('Terminal with screenReaderMode', () => {
     const terminal = page.locator(TERMINAL_SELECTOR);
     await terminal.waitFor();
 
-    await runCommand(page, terminal, 'echo https://jupyter.org/');
+    await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
+    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
 
     // Wait for the URL to appear in the terminal output
-    const terminalBody = terminal.locator('.jp-Terminal-body');
+    const terminalBody = terminal.locator('.jp-Terminal-body:visible');
     await expect(terminalBody).toContainText('https://jupyter.org/', {
       timeout: 5000
     });
 
+    // Hover over the link layer to trigger link highlighting
     await Promise.all([
       terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
       terminal.locator('canvas.xterm-link-layer').hover({
@@ -204,6 +211,7 @@ test.describe('Terminal with screenReaderMode', () => {
         }
       })
     ]);
+
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
   });
 });
@@ -252,14 +260,17 @@ test.describe('Open in Terminal from File Browser', () => {
     );
     await expect(terminalTabLocator).toHaveCount(1);
 
-    // Get visible terminal panel
+    // Get visible terminal panel (container)
     const terminalPanelLocator = page.locator(
       '.lm-DockPanel .jp-Terminal:visible'
     );
     await expect(terminalPanelLocator).toHaveCount(1);
 
-    // Wait for terminal to be ready and run pwd
+    // Wait for terminal to be ready
     await terminalPanelLocator.locator('.jp-Terminal-body').waitFor();
+    await terminalPanelLocator.click();
+
+    // Use helper to execute pwd in the visible terminal container
     await runCommand(page, terminalPanelLocator, 'pwd');
 
     await expect(terminalPanelLocator).toContainText(folderName, {
@@ -313,18 +324,27 @@ test.describe('Open in Terminal from File Browser', () => {
       await tabs.nth(i).click();
 
       // Find the currently visible terminal container
-      const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
-      await activeTerminal.waitFor({ state: 'visible' });
-      await expect(activeTerminal).toHaveCount(1);
+      const activeTerminalContainer = page.locator(
+        '.lm-DockPanel .jp-Terminal:visible'
+      );
+      await expect(activeTerminalContainer).toHaveCount(1);
+      await activeTerminalContainer.waitFor({ state: 'visible' });
 
-      // Wait for terminal body and run pwd
-      await activeTerminal.locator('.jp-Terminal-body').waitFor();
-      await runCommand(page, activeTerminal, 'pwd');
+      // Ensure the body is visible then run pwd via helper
+      await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
+      await activeTerminalContainer
+        .locator(TERMINAL_INPUT_SELECTOR)
+        .waitFor({ state: 'visible' });
+      await runCommand(page, activeTerminalContainer, 'pwd');
 
-      const activeBody = activeTerminal.locator('.jp-Terminal-body');
+      const activeBody = activeTerminalContainer.locator(
+        '.jp-Terminal-body:visible'
+      );
       await expect(activeBody).toContainText(
         new RegExp(`${folderA}|${folderB}`),
-        { timeout: 10000 }
+        {
+          timeout: 10000
+        }
       );
 
       const text = await activeBody.textContent();
@@ -389,7 +409,7 @@ test.describe('Open in Terminal from File Browser', () => {
 
     await runCommand(page, activeTerminal, 'pwd');
 
-    const activeBody = activeTerminal.locator('.jp-Terminal-body');
+    const activeBody = activeTerminal.locator('.jp-Terminal-body:visible');
     await expect(activeBody).toContainText(folderName, { timeout: 5000 });
   });
 
