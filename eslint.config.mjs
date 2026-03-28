@@ -449,6 +449,21 @@ export default defineConfig([
       'no-restricted-syntax': 'off'
     }
   },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.property.name='screenshot'] > ObjectExpression > Property[key.name='path']",
+          message:
+            "Do not pass 'path' to screenshot(). Save the result of toMatchSnapshot() or use expect() assertions instead."
+        }
+      ]
+    }
+  },
   prettierPluginRecommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
