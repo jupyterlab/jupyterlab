@@ -691,6 +691,11 @@ export namespace IKernelConnection {
      * The subshell ID.
      */
     subshellId?: string;
+
+    /**
+     * Timeout awaiting Websocket responds Kernel's information.
+     */
+    kernelInfoTimeout?: number;
   }
 }
 

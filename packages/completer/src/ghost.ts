@@ -246,17 +246,15 @@ class GhostTextWidget extends WidgetType {
       content = content.substring(0, content.length - addition.length);
     }
 
-    if (this.options.maxLines) {
+    const maxLines = this.options.maxLines || Infinity;
+    if (maxLines !== Infinity) {
       // Split into content to show immediately and the hidden part
       const lines = content.split('\n');
-      content = lines.slice(0, this.options.maxLines).join('\n');
-      hiddenContent = lines.slice(this.options.maxLines).join('\n');
+      content = lines.slice(0, maxLines).join('\n');
+      hiddenContent = lines.slice(maxLines).join('\n');
     }
 
-    const minLines = Math.min(
-      this.options.minLines ?? 0,
-      this.options.maxLines ?? Infinity
-    );
+    const minLines = Math.min(this.options.minLines ?? 0, maxLines);
     const linesToAdd = Math.max(0, minLines - content.split('\n').length + 1);
     const placeHolderLines = new Array(linesToAdd).fill('').join('\n');
     dom.innerHTML = '';
