@@ -624,7 +624,7 @@ export namespace NotebookActions {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    
+
     translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
