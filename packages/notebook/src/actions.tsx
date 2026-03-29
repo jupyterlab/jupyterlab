@@ -2539,14 +2539,6 @@ namespace Private {
     scrollIfNeeded = false
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
-    if (state.activeCellId) {
-      const index = notebook.widgets.findIndex(
-        w => w.model.id === state.activeCellId
-      );
-      if (index !== -1) {
-        notebook.activeCellIndex = index;
-      }
-    }
     if (scrollIfNeeded && activeCell) {
       await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
         // no-op
