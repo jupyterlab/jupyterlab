@@ -107,6 +107,40 @@ describe('@jupyterlab/notebook', () => {
       widget.activeCellIndex = 0;
     });
 
+    function createDOMRect(height: number): DOMRect {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height,
+        top: 0,
+        right: 0,
+        bottom: height,
+        left: 0,
+        toJSON: () => ''
+      } as DOMRect;
+    }
+
+    function setViewportHeight(height: number) {
+      return jest
+        .spyOn(widget, 'outerNode', 'get')
+        .mockReturnValue({ clientHeight: height } as HTMLElement);
+    }
+
+    function mockCellHeights(cell: Cell, ...heights: number[]) {
+      const remainingHeights = [...heights];
+
+      return jest
+        .spyOn(cell.node, 'getBoundingClientRect')
+        .mockImplementation(() =>
+          createDOMRect(
+            remainingHeights.length > 1
+              ? remainingHeights.shift()!
+              : (remainingHeights[0] ?? 0)
+          )
+        );
+    }
+
     afterEach(() => {
       widget.model?.dispose();
       widget.dispose();
@@ -622,8 +656,10 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it('should prefer scrolling to the start of the next active cell', () => {
+      it('should prefer scrolling to the start when the next active cell is taller than the viewport', () => {
         widget.activeCellIndex = 1;
+        const outerNodeSpy = setViewportHeight(200);
+        const nextCellRectSpy = mockCellHeights(widget.widgets[2], 400);
         const scrollSpy = jest
           .spyOn(widget, 'scrollToItem')
           .mockResolvedValue(undefined);
@@ -631,6 +667,8 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.deleteCells(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        outerNodeSpy.mockRestore();
+        nextCellRectSpy.mockRestore();
         scrollSpy.mockRestore();
       });
 
@@ -1429,8 +1467,10 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should prefer scrolling to the start of the selected cell', () => {
+      it('should prefer scrolling to the start for a selected cell taller than the viewport', () => {
         widget.activeCellIndex = 2;
+        const outerNodeSpy = setViewportHeight(200);
+        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 400);
         const scrollSpy = jest
           .spyOn(widget, 'scrollToItem')
           .mockResolvedValue(undefined);
@@ -1438,6 +1478,8 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectAbove(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        outerNodeSpy.mockRestore();
+        selectedCellRectSpy.mockRestore();
         scrollSpy.mockRestore();
       });
 
@@ -1478,7 +1520,24 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(1);
       });
 
-      it('should prefer scrolling to the start of the selected cell', () => {
+      it('should preserve auto alignment for a selected cell smaller than the viewport', () => {
+        const outerNodeSpy = setViewportHeight(400);
+        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 200);
+        const scrollSpy = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue(undefined);
+
+        NotebookActions.selectBelow(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0);
+        outerNodeSpy.mockRestore();
+        selectedCellRectSpy.mockRestore();
+        scrollSpy.mockRestore();
+      });
+
+      it('should prefer scrolling to the start for a selected cell taller than the viewport', () => {
+        const outerNodeSpy = setViewportHeight(200);
+        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 400);
         const scrollSpy = jest
           .spyOn(widget, 'scrollToItem')
           .mockResolvedValue(undefined);
@@ -1486,6 +1545,8 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectBelow(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        outerNodeSpy.mockRestore();
+        selectedCellRectSpy.mockRestore();
         scrollSpy.mockRestore();
       });
 
@@ -2258,8 +2319,10 @@ describe('@jupyterlab/notebook', () => {
         expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
       });
 
-      it('should prefer scrolling to the start of the selected cell when hiding output', () => {
+      it('should prefer scrolling to the start when hiding output for a cell that was taller than the viewport', () => {
         widget.activeCellIndex = 1;
+        const outerNodeSpy = setViewportHeight(200);
+        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 400, 120);
         const scrollSpy = jest
           .spyOn(widget, 'scrollToItem')
           .mockResolvedValue(undefined);
@@ -2267,6 +2330,8 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.hideOutput(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+        outerNodeSpy.mockRestore();
+        selectedCellRectSpy.mockRestore();
         scrollSpy.mockRestore();
       });
 

@@ -2512,6 +2512,11 @@ namespace Private {
      * discarded by action such as move.
      */
     activeCellId: string | null;
+
+    /**
+     * The active cell height before the action.
+     */
+    activeCellHeight: number;
   }
 
   /**
@@ -2520,7 +2525,9 @@ namespace Private {
   export function getState(notebook: Notebook): IState {
     return {
       wasFocused: notebook.node.contains(document.activeElement),
-      activeCellId: notebook.activeCell?.model.id ?? null
+      activeCellId: notebook.activeCell?.model.id ?? null,
+      activeCellHeight:
+        notebook.activeCell?.node.getBoundingClientRect().height ?? 0
     };
   }
 
@@ -2534,16 +2541,51 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      // Cell-to-cell navigation should keep the start of the target cell in view,
-      // especially for cells with long outputs.
-      await notebook
-        .scrollToItem(activeCellIndex, 'auto', 0, 'start')
-        .catch(reason => {
-          // no-op
-        });
+      const alignPreference = getActiveCellAlignmentPreference(
+        notebook,
+        state
+      );
+      const scrollPromise =
+        alignPreference === undefined
+          ? notebook.scrollToItem(activeCellIndex, 'auto', 0)
+          : notebook.scrollToItem(
+              activeCellIndex,
+              'auto',
+              0,
+              alignPreference
+            );
+
+      await scrollPromise.catch(reason => {
+        // no-op
+      });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
+    }
+  }
+
+  function getActiveCellAlignmentPreference(
+    notebook: Notebook,
+    state: IState
+  ): 'start' | undefined {
+    const { activeCell } = notebook;
+    if (!activeCell) {
+      return;
+    }
+
+    const viewportHeight = notebook.outerNode.clientHeight;
+    if (viewportHeight <= 0) {
+      return;
+    }
+
+    const activeCellHeight = activeCell.node.getBoundingClientRect().height;
+    const sameActiveCell =
+      state.activeCellId !== null && state.activeCellId === activeCell.model.id;
+    const activeCellWasOversized =
+      sameActiveCell && state.activeCellHeight > viewportHeight;
+
+    if (activeCellHeight > viewportHeight || activeCellWasOversized) {
+      return 'start';
     }
   }
 
