@@ -2263,6 +2263,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
       });
 
+      it('should be undoable', () => {
+        widget.activeCell!.model.sharedModel.setSource('# foo');
+        NotebookActions.setMarkdownHeader(widget, 3);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('### foo');
+        NotebookActions.undo(widget);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('# foo');
+      });
+
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
         expect(

@@ -624,7 +624,7 @@ export namespace NotebookActions {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    // we keep translator for backward compatibility
+    
     translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -1586,11 +1586,8 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const activeCellIndex = notebook.activeCellIndex;
-
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
-    notebook.activeCellIndex = activeCellIndex;             //used because using undo can sometimes shift the user’s focus to a different cell unexpectedly
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2542,6 +2539,14 @@ namespace Private {
     scrollIfNeeded = false
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
+    if (state.activeCellId) {
+      const index = notebook.widgets.findIndex(
+        w => w.model.id === state.activeCellId
+      );
+      if (index !== -1) {
+        notebook.activeCellIndex = index;
+      }
+    }
     if (scrollIfNeeded && activeCell) {
       await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
         // no-op
@@ -2866,7 +2871,6 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    // we keep translator for backward compatibility
     options?: {
       translator?: ITranslator;
       headingLevel?: number;
