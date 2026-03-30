@@ -28,11 +28,22 @@ function updateCoreMode(skipAssets: boolean = false): void {
   // Get the dev mode package.json file.
   const data = utils.readJSONFile('./dev_mode/package.json');
 
-  // Update the values that need to change and write to staging.
+  // Update the values that need to change.
   data['jupyterlab']['buildDir'] = './build';
   data['jupyterlab']['outputDir'] = '..';
   data['jupyterlab']['staticDir'] = '../static';
   data['jupyterlab']['linkedPackages'] = {};
+
+  if (skipAssets) {
+    // Write directly to core.package.json without touching staging.
+    const coreMeta = path.join('packages', 'core-meta', 'core.package.json');
+    fs.ensureFileSync(coreMeta);
+    utils.writePackageData(coreMeta, data);
+    console.log(
+      'Skipping staging asset build (--skip-assets specified). Core metadata updated.'
+    );
+    return;
+  }
 
   const staging = './jupyterlab/staging';
 
@@ -52,13 +63,6 @@ function updateCoreMode(skipAssets: boolean = false): void {
     path.join(staging, 'package.json'),
     path.join('packages', 'core-meta', 'core.package.json')
   );
-
-  if (skipAssets) {
-    console.log(
-      'Skipping staging asset build (--skip-assets specified). Core metadata updated.'
-    );
-    return;
-  }
 
   // Update our staging files.
   const notice =
