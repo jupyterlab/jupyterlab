@@ -228,9 +228,9 @@ export default defineConfig([
     },
 
     rules: {
-      'jupyter/command-described-by': 'warn',
+      'jupyter/command-described-by': 'error',
       'jupyter/plugin-activation-args': 'error',
-      'jupyter/plugin-description': 'warn',
+      'jupyter/plugin-description': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
