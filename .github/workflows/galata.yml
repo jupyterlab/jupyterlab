@@ -47,6 +47,8 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Find out Playwright version
         id: pw-version
@@ -222,6 +224,8 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Find out Playwright version
         id: pw-version
