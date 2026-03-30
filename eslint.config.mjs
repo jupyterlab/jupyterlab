@@ -116,6 +116,7 @@ export default defineConfig([
             'cursor_end',
             'cursor_pos',
             'cursor_start',
+            'date_created',
             'detail_level',
             'display_data',
             'display_id',
@@ -311,6 +312,7 @@ export default defineConfig([
             'cursor_end',
             'cursor_pos',
             'cursor_start',
+            'date_created',
             'detail_level',
             'display_data',
             'display_id',
@@ -450,6 +452,21 @@ export default defineConfig([
 
     rules: {
       'no-restricted-syntax': 'off'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.property.name='screenshot'] > ObjectExpression > Property[key.name='path']",
+          message:
+            "Do not pass 'path' to screenshot(). Save the result of toMatchSnapshot() or use expect() assertions instead."
+        }
+      ]
     }
   },
   prettierPluginRecommended,

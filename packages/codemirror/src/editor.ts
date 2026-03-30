@@ -30,16 +30,6 @@ import type {
 const EDITOR_CLASS = 'jp-CodeMirrorEditor';
 
 /**
- * The key code for the up arrow key.
- */
-const UP_ARROW = 38;
-
-/**
- * The key code for the down arrow key.
- */
-const DOWN_ARROW = 40;
-
-/**
  * CodeMirror editor.
  */
 export class CodeMirrorEditor implements CodeEditor.IEditor {
@@ -92,6 +82,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
+
+    const scroller = host.querySelector('.cm-scroller') as HTMLElement | null;
+    if (scroller) {
+      scroller.classList.add('jp-zoom-target');
+    }
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -621,7 +616,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   protected onKeydown(event: KeyboardEvent): boolean {
     const position = this.state.selection.main.head;
 
-    if (position === 0 && event.keyCode === UP_ARROW) {
+    if (position === 0 && event.key === 'ArrowUp') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
       }
@@ -629,7 +624,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     const line = this.doc.lineAt(position).number;
-    if (line === 1 && event.keyCode === UP_ARROW) {
+    if (line === 1 && event.key === 'ArrowUp') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('topLine');
       }
@@ -637,7 +632,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     const length = this.doc.length;
-    if (position === length && event.keyCode === DOWN_ARROW) {
+    if (position === length && event.key === 'ArrowDown') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
       }

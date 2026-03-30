@@ -2518,6 +2518,7 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
   tracker.activeCellChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
   });
@@ -3358,7 +3359,18 @@ function addCommands(
         return NotebookActions.deleteCells(current.content);
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      // The 'deletable' metadata is optional, null and undefined values should be made truthy
+      const deletable =
+        (current.content.activeCell?.model.getMetadata(
+          'deletable'
+        ) as unknown as boolean) !== false;
+      return deletable;
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -4940,12 +4952,15 @@ namespace Private {
     // If the container is not available, append the newly created container
     // to the current notebook panel and set related properties
     if (hiddenAlertContainer.getAttribute('id') !== hiddenAlertContainerId) {
-      hiddenAlertContainer.classList.add('sr-only');
       hiddenAlertContainer.setAttribute('id', hiddenAlertContainerId);
-      hiddenAlertContainer.setAttribute('role', 'alert');
-      hiddenAlertContainer.hidden = true;
       notebookNode.appendChild(hiddenAlertContainer);
     }
+
+    hiddenAlertContainer.classList.add('jp-sr-only');
+    hiddenAlertContainer.setAttribute('role', 'alert');
+    hiddenAlertContainer.setAttribute('aria-live', 'assertive');
+    hiddenAlertContainer.setAttribute('aria-atomic', 'true');
+    hiddenAlertContainer.hidden = false;
 
     // Insert/Update alert container with the notification message
     hiddenAlertContainer.innerText = message;

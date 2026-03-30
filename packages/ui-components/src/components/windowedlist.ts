@@ -911,6 +911,7 @@ export class WindowedList<
 
     const viewport = innerElement.appendChild(renderer.createViewport());
     viewport.classList.add('jp-WindowedPanel-viewport');
+    viewport.classList.add('jp-zoom-target');
 
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
