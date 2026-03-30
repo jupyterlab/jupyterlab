@@ -454,3 +454,27 @@
   min-height: 120px;
   outline: none;
 }
+
+/*-----------------------------------------------------------------------------
+| FileBrowser split panel (for moved running sessions sections)
+|----------------------------------------------------------------------------*/
+
+.jp-FileBrowser-splitPanel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-FileBrowser-bottomPanel {
+  min-height: 100px;
+  overflow: auto;
+}
+
+.jp-FileBrowser-splitPanel > .lm-SplitPanel-handle {
+  background: var(--jp-border-color1);
+  min-height: 2px;
+}
+
+.jp-FileBrowser-splitPanel > .lm-SplitPanel-handle:hover {
+  background: var(--jp-brand-color1);
+}
