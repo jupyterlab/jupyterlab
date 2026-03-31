@@ -451,7 +451,8 @@ export default defineConfig([
     ],
 
     rules: {
-      'no-restricted-syntax': 'off'
+      'no-restricted-syntax': 'off',
+      'jupyter/command-described-by': 'off'
     }
   },
   {
