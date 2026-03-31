@@ -461,12 +461,17 @@ describe('contents', () => {
     it('should overwrite a file', async () => {
       handleRequest(contents, 200, DEFAULT_FILE);
 
-      const save = contents.save('/foo', { type: 'file', name: 'test' });
+      let save = contents.save('/foo', { type: 'file', name: 'test1' });
 
       let model = await save;
       expect(model.created).toBe(DEFAULT_FILE.created);
 
-      const overwrite = contents.overwrite('/foo/bar.txt', '/foo/test');
+      save = contents.save('/foo', { type: 'file', name: 'test2' });
+
+      model = await save;
+      expect(model.created).toBe(DEFAULT_FILE.created);
+
+      const overwrite = contents.overwrite('/foo/test1', '/foo/test2');
       model = await overwrite;
 
       expect(model.created).toBe(DEFAULT_FILE.created);
