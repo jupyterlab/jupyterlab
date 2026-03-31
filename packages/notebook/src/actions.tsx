@@ -2904,13 +2904,7 @@ namespace Private {
         const raw = child.model.toJSON();
         let newSource = raw.source as string;
         if (headingLevel !== undefined) {
-          const regex = /^(#+\s*)/;
-          const newHeader = Array(headingLevel + 1).join('#') + ' ';
-          const matches = regex.exec(newSource);
-          if (matches) {
-            newSource = newSource.slice(matches[0].length);
-          }
-          newSource = newHeader + newSource;
+          newSource = Private.setMarkdownHeader(source, headingLevel);
         }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
@@ -3011,9 +3005,9 @@ namespace Private {
   }
 
   /**
-   * Set the markdown header level of a cell.
+   * Set the markdown header level of a cell source.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number): void {
+  export function setMarkdownHeader(source: string, level: number): string {
     // Remove existing header or leading white space.
     let source = cell.sharedModel.getSource();
     const regex = /^(#+\s*)|^(\s*)/;
@@ -3023,7 +3017,7 @@ namespace Private {
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.sharedModel.setSource(newHeader + source);
+    return newHeader + source;
   }
 
   /** Functionality related to collapsible headings */
