@@ -16,10 +16,10 @@ import {
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { MessageLoop } from '@lumino/messaging';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { AccordionPanel, Panel, SplitPanel, Widget } from '@lumino/widgets';
+import { AccordionPanel, Panel, SplitPanel } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
@@ -632,9 +632,6 @@ export class FileBrowser extends SidePanel {
       });
       this._bottomPanel.addClass('jp-FileBrowser-bottomPanel');
 
-      // Add the widget to the accordion BEFORE parenting,
-      // so the accordion has content when it first attaches to the DOM.
-
       // Reparent mainPanel into the SplitPanel
       this._splitPanel.addWidget(this.mainPanel);
       this._splitPanel.addWidget(this._bottomPanel);
@@ -643,26 +640,9 @@ export class FileBrowser extends SidePanel {
       this.content.addWidget(this._splitPanel);
 
       this._splitPanel.setRelativeSizes([0.7, 0.3]);
-
-      // Force the outer SplitPanel to lay out synchronously so the
-      // bottomPanel gets its correct dimensions before we add widgets.
-      // Without this, the accordion title gets width=0 because the
-      // bottomPanel hasn't been sized yet by the SplitPanel.
-      MessageLoop.sendMessage(this._splitPanel, Widget.Msg.FitRequest);
-      MessageLoop.sendMessage(this._splitPanel, Widget.Msg.UpdateRequest);
     }
 
-    // Add the widget only after the bottomPanel is in the DOM and
-    // properly sized, so the accordion title gets correct dimensions.
     this._bottomPanel!.addWidget(widget);
-
-    // Force the accordion's own layout to run synchronously so the
-    // title element gets its width/height set immediately.  Without
-    // this the title has contain:strict with no explicit dimensions
-    // and stays invisible until the next layout cycle (which is only
-    // triggered when a second widget is added).
-    MessageLoop.sendMessage(this._bottomPanel!, Widget.Msg.FitRequest);
-    MessageLoop.sendMessage(this._bottomPanel!, Widget.Msg.UpdateRequest);
   }
 
   /**

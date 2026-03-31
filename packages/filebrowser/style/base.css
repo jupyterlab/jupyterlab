@@ -104,10 +104,6 @@
   margin-top: 12px;
 }
 
-.jp-FileBrowser .lm-AccordionPanel > h3:first-child {
-  display: none;
-}
-
 .jp-FileBrowser-filterToolbar > .jp-FileBrowser-filterBox {
   width: 100%;
 }
