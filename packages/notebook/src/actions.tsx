@@ -2901,7 +2901,7 @@ namespace Private {
         const raw = child.model.toJSON();
         let newSource = raw.source as string;
         if (headingLevel !== undefined) {
-          newSource = Private.setMarkdownHeader(source, headingLevel);
+          newSource = Private.setMarkdownHeader(newSource, headingLevel);
         }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
