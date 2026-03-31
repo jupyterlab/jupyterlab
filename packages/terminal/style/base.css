@@ -6,10 +6,21 @@
 .jp-Terminal {
   min-width: 240px;
   min-height: 120px;
+  border: 2px solid transparent;
 }
 
 .jp-Terminal-body {
   padding: 8px;
+}
+
+.jp-Terminal:focus-visible {
+  outline: 2px solid red;
+  outline-offset: -2px;
+}
+
+.xterm-viewport:focus-visible {
+  outline: 2px solid blueviolet;
+  outline-offset: -2px;
 }
 
 [data-term-theme='inherit'] .xterm .xterm-screen canvas {

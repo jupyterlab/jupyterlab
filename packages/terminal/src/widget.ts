@@ -309,7 +309,15 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('keydown', this, true);
     this.update();
+  }
+
+  /**
+   * Remove event listeners when the widget is detached.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('keydown', this, true);
   }
 
   /**
@@ -495,6 +503,47 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     );
   }
 
+  /**
+   * Handle the `keydown` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    const xtermViewport = this._term.element?.querySelector(
+      '.xterm-viewport'
+    ) as HTMLElement | null;
+    const xtermTextarea = this._term.textarea;
+    const activeElement = document.activeElement as HTMLElement | null;
+    const viewportFocused =
+      !!activeElement &&
+      !!xtermViewport &&
+      (activeElement === xtermViewport ||
+        xtermViewport.contains(activeElement));
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (xtermTextarea) {
+        xtermTextarea.tabIndex = -1;
+      }
+      xtermViewport?.setAttribute('tabindex', '0');
+      xtermViewport?.focus();
+      return;
+    }
+
+    if (viewportFocused && event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (xtermTextarea) {
+        xtermTextarea.tabIndex = 0;
+        xtermTextarea.focus();
+      }
+      return;
+    }
+
+    if (viewportFocused && event.key === 'Tab' && xtermTextarea) {
+      xtermTextarea.tabIndex = -1;
+    }
+  }
+
   private _fitAddon: FitAddon;
   private _searchAddon: SearchAddon;
   private _needsResize = true;
@@ -507,6 +556,26 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _termOpened = false;
   private _trans: TranslationBundle;
   private _themeChanged = new Signal<this, void>(this);
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event -The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 /**
