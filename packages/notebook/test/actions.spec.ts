@@ -2267,7 +2267,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell!.model.sharedModel.setSource('# foo');
         NotebookActions.setMarkdownHeader(widget, 3);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe('### foo');
-        cont index = widget.activeCellIndex;
+        const index = widget.activeCellIndex;
         NotebookActions.undo(widget);
         // TODO: find a way to avoid index drift on undo
         widget.activeCellIndex = index;
