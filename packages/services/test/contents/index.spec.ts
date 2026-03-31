@@ -461,20 +461,23 @@ describe('contents', () => {
     it('should overwrite a file', async () => {
       handleRequest(contents, 200, DEFAULT_FILE);
 
-      let save = contents.save('/foo', { type: 'file', name: 'test1' });
-
-      let model = await save;
-      expect(model.created).toBe(DEFAULT_FILE.created);
-
-      save = contents.save('/foo', { type: 'file', name: 'test2' });
-
-      model = await save;
-      expect(model.created).toBe(DEFAULT_FILE.created);
+      await contents.save('/foo', {
+        type: 'file',
+        name: 'test1',
+        content: 'Hello there 1',
+        format: 'text'
+      });
+      await contents.save('/foo', {
+        type: 'file',
+        name: 'test2',
+        content: 'Hello there 2',
+        format: 'text'
+      });
 
       const overwrite = contents.overwrite('/foo/test1', '/foo/test2');
-      model = await overwrite;
+      const model = await overwrite;
 
-      expect(model.created).toBe(DEFAULT_FILE.created);
+      expect(model.content).toBe('Hello there 1');
     });
 
     it('should rename a file on an additional drive', async () => {
