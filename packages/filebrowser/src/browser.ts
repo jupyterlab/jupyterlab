@@ -602,15 +602,6 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
-   * Given a drive name and a local path, return the full
-   * drive path which includes the drive name and the local path.
-   *
-   * @param driveName the name of the drive
-   * @param localPath the local path on the drive.
-   *
-   * @returns the full drive path
-   */
-  /**
    * Add a widget to the bottom area of the file browser.
    *
    * On first call, this wraps the file browser content in a vertical
@@ -689,6 +680,15 @@ export class FileBrowser extends SidePanel {
     return this._bottomPanel;
   }
 
+  /**
+   * Given a drive name and a local path, return the full
+   * drive path which includes the drive name and the local path.
+   *
+   * @param driveName the name of the drive
+   * @param localPath the local path on the drive.
+   *
+   * @returns the full drive path
+   */
   private _toDrivePath(driveName: string, localPath: string): string {
     if (driveName === '') {
       return localPath;

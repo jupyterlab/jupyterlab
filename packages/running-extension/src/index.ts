@@ -255,16 +255,12 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     const running = sidebar as RunningSessions;
 
-    // Track which manager name was right-clicked on
     let lastClickedManagerName: string | null = null;
-    // Track which widget was right-clicked in the bottom panel
     let lastClickedBottomWidget: PanelWithToolbar | null = null;
-    // Track moved section names for state persistence
+    // For state persistence
     const movedSections = new Set<string>();
-    // Map from widget to the "move back" toolbar button for cleanup
     const moveBackButtons = new Map<PanelWithToolbar, ToolbarButton>();
 
-    // --- Helper: save state ---
     const saveState = async () => {
       if (!stateDB) {
         return;
@@ -281,7 +277,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       );
     };
 
-    // --- Helper: move a section to the file browser ---
     const moveToFileBrowser = (managerName: string) => {
       const widget = running.removeSection(managerName);
       if (!widget) {
@@ -292,7 +287,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       // Remember collapsed state before re-parenting clears it
       const wasHidden = widget.isHidden;
 
-      // Add a "move back" toolbar button if the widget has a toolbar
+      // Add a "move back" toolbar button
       if (widget instanceof PanelWithToolbar) {
         const moveBackButton = new ToolbarButton({
           icon: undoIcon,
@@ -309,9 +304,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
       fileBrowser.addBottomWidget(widget);
 
-      // The new accordion title is always created with lm-mod-expanded.
-      // AccordionPanel.collapse() guards with isVisible, so it is a no-op
-      // when the widget is already hidden.  Directly sync the title CSS.
       if (wasHidden && fileBrowser.bottomPanel) {
         const idx = Array.from(fileBrowser.bottomWidgets).indexOf(widget);
         if (idx >= 0) {
@@ -329,9 +321,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       void saveState();
     };
 
-    // --- Helper: move a section back to running sessions ---
     const moveBackToRunning = (managerName: string) => {
-      // Find the widget in the bottom panel
       const widgets = fileBrowser.bottomWidgets;
       const widget = widgets.find(w => w.title.label === managerName);
       if (!widget) {
@@ -353,7 +343,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       void saveState();
     };
 
-    // --- Identify right-clicked section in Running Sessions ---
+    // Identify right-clicked section in Running Sessions
     running.node.addEventListener('contextmenu', (event: MouseEvent) => {
       const titleEl = (event.target as HTMLElement).closest(
         '.jp-AccordionPanel-title'
@@ -372,7 +362,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    // --- Identify right-clicked section in FileBrowser bottom panel ---
+    // Identify right-clicked section in FileBrowser bottom panel
     fileBrowser.node.addEventListener('contextmenu', (event: MouseEvent) => {
       const titleEl = (event.target as HTMLElement).closest(
         '.jp-FileBrowser-bottomPanel .jp-AccordionPanel-title'
@@ -407,7 +397,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    // --- Register commands ---
     app.commands.addCommand(CommandIDs.moveSectionToFileBrowser, {
       label: trans.__('Move to File Browser'),
       isVisible: () => lastClickedManagerName !== null,
@@ -432,7 +421,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    // --- Register context menu items ---
     app.contextMenu.addItem({
       command: CommandIDs.moveSectionToFileBrowser,
       selector: '#jp-running-sessions .jp-AccordionPanel-title',
@@ -445,7 +433,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       rank: 10
     });
 
-    // --- Restore state on startup ---
+    // Restore state on startup
     if (stateDB) {
       const pendingMoves = new Set<string>();
 
