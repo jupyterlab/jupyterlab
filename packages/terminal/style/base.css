@@ -13,13 +13,10 @@
   padding: 8px;
 }
 
-.jp-Terminal:focus-visible {
-  outline: 2px solid red;
-  outline-offset: -2px;
-}
-
-.xterm-viewport:focus-visible {
-  outline: 2px solid blueviolet;
+.jp-Terminal-body .xterm-viewport:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--jp-brand-color1);
   outline-offset: -2px;
 }
 

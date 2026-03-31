@@ -522,6 +522,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       event.preventDefault();
       event.stopPropagation();
       if (xtermTextarea) {
+        // This ensures pressing Tab does not return to the textarea and avoids
+        // becoming a tab trap.
         xtermTextarea.tabIndex = -1;
       }
       xtermViewport?.setAttribute('tabindex', '0');
