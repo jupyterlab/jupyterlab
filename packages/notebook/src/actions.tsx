@@ -11,11 +11,7 @@ import {
   showDialog,
   SystemClipboard
 } from '@jupyterlab/apputils';
-import type {
-  Cell,
-  CodeCell,
-  ICodeCellModel
-} from '@jupyterlab/cells';
+import type { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 import {
   CodeCellModel,
   isMarkdownCellModel,
