@@ -6,7 +6,6 @@
 .jp-Terminal {
   min-width: 240px;
   min-height: 120px;
-  border: 2px solid transparent;
 }
 
 .jp-Terminal-body {
