@@ -2920,6 +2920,15 @@ namespace Private {
               raw.attachments as nbformat.IAttachments;
           }
         });
+      } else if (value === 'markdown' && headingLevel !== undefined) {
+        notebookSharedModel.transact(() => {
+          child.model.sharedModel.setSource(
+            Private.setMarkdownHeader(
+              child.model.sharedModel.getSource(),
+              headingLevel
+            )
+          );
+        });
       }
       if (value === 'markdown') {
         // Fetch the new widget and unrender it.
