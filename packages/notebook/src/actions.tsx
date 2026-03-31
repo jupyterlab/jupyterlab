@@ -624,7 +624,6 @@ export namespace NotebookActions {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-
     translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -2891,7 +2890,6 @@ namespace Private {
       }
       if (child.model.getMetadata('editable') == false) {
         const trans = (translator ?? nullTranslator).load('jupyterlab');
-        // Do not permit changing cell type when the cell is readonly
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
           title: trans.__('Cell is read-only'),
