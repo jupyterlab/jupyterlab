@@ -1812,7 +1812,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       return;
     }
 
-    if (evt instanceof CloseEvent && (evt.code === 1000 || evt.code === 1001)) {
+    if ('code' in evt && (evt.code === 1000 || evt.code === 1001)) {
       this._updateConnectionStatus('disconnected');
       return;
     }
