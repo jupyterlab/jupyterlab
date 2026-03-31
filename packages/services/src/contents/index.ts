@@ -454,7 +454,7 @@ export namespace Contents {
      *
      * @returns A promise containing the new file contents model.
      */
-    overwrite(oldPath: string, newPath: string): Promise<Contents.IModel>;
+    overwrite?(oldPath: string, newPath: string): Promise<Contents.IModel>;
 
     /**
      * Save a file.
