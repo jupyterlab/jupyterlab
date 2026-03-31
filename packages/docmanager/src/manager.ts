@@ -520,7 +520,7 @@ export class DocumentManager implements IDocumentManager {
     try {
       await this.deleteFile(newPath);
     } finally {
-      //
+      // no-op
     }
 
     return await this.rename(tempPath, newPath);
