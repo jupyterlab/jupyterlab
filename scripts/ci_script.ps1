@@ -22,19 +22,6 @@ if ($Env:GROUP -eq "python") {
 }
 
 if ($Env:GROUP -eq "integrity") {
-    # Setup path to enable discovery of hatchling, which is invoked in integrity scripts
-    # when installed with `uv pip` (this would not be needed with normal `pip`).
-    if ($Env:VIRTUAL_ENV) {
-        $pythonScripts = "$Env:VIRTUAL_ENV\Scripts"
-    } else {
-        $pythonScripts = python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
-        if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
-    }
-    $Env:Path = "$pythonScripts;$Env:Path"
-    if ($Env:GITHUB_PATH) {
-        Add-Content -Path $Env:GITHUB_PATH -Value $pythonScripts
-    }
-
     # Run the integrity script first
     jlpm run integrity --force
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
