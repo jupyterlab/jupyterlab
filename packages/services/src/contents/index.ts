@@ -965,16 +965,20 @@ export class ContentsManager implements Contents.IManager {
    *
    * @returns A promise containing the new file contents model.
    */
-  overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
+  async overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
     // Cleanly overwrite the file by moving it, making sure the original does
     // not exist, and then renaming to the new path.
     const tempPath = `${newPath}.${UUID.uuid4()}`;
-    const cb = () => this.rename(tempPath, newPath);
-    return this.rename(oldPath, tempPath)
-      .then(() => {
-        return this.delete(newPath);
-      })
-      .then(cb, cb);
+
+    await this.rename(oldPath, tempPath);
+
+    try {
+      await this.delete(newPath);
+    } finally {
+      //
+    }
+
+    return await this.rename(tempPath, newPath);
   }
 
   /**
