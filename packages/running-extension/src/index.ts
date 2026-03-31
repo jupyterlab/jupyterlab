@@ -289,6 +289,9 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
       movedSections.add(managerName);
 
+      // Remember collapsed state before re-parenting clears it
+      const wasHidden = widget.isHidden;
+
       // Add a "move back" toolbar button if the widget has a toolbar
       if (widget instanceof PanelWithToolbar) {
         const moveBackButton = new ToolbarButton({
@@ -305,6 +308,18 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
 
       fileBrowser.addBottomWidget(widget);
+
+      // The new accordion title is always created with lm-mod-expanded.
+      // AccordionPanel.collapse() guards with isVisible, so it is a no-op
+      // when the widget is already hidden.  Directly sync the title CSS.
+      if (wasHidden && fileBrowser.bottomPanel) {
+        const idx = Array.from(fileBrowser.bottomWidgets).indexOf(widget);
+        if (idx >= 0) {
+          const titleEl = fileBrowser.bottomPanel.titles[idx];
+          titleEl.classList.remove('lm-mod-expanded');
+          titleEl.setAttribute('aria-expanded', 'false');
+        }
+      }
 
       // Listen to split panel handle moves for state persistence
       if (fileBrowser.splitPanel) {
