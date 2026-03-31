@@ -975,7 +975,7 @@ export class ContentsManager implements Contents.IManager {
     try {
       await this.delete(newPath);
     } finally {
-      //
+      // no-op
     }
 
     return await this.rename(tempPath, newPath);
