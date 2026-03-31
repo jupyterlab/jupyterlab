@@ -3014,10 +3014,9 @@ namespace Private {
    * Set the markdown header level of a cell.
    */
   export function setMarkdownHeader(cell: ICellModel, level: number): void {
-    level = Math.max(1, Math.min(6, level));
     // Remove existing header or leading white space.
     let source = cell.sharedModel.getSource();
-    const regex = /^\s*#+\s*|^\s+/;
+    const regex = /^(#+\s*)|^(\s*)/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
 
