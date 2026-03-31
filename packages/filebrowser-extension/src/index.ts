@@ -36,6 +36,7 @@ import {
   FilterFileBrowserModel,
   formatFileSize,
   IDefaultFileBrowser,
+  IDefaultFileBrowserRenderer,
   IFileBrowserCommands,
   IFileBrowserFactory,
   Uploader
@@ -144,6 +145,8 @@ namespace CommandIDs {
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
   export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
+
+  export const toggleDateCreated = 'filebrowser:toggle-date-created';
 
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
@@ -258,6 +261,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           navigateToCurrentDirectory: false,
           singleClickNavigation: false,
           showLastModifiedColumn: true,
+          showDateCreatedColumn: false,
           showFileSizeColumn: false,
           showHiddenFiles: false,
           showFileCheckboxes: false,
@@ -335,7 +339,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
         allowFileUploads: options.allowFileUploads ?? true
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator, state });
+      const widget = new FileBrowser({
+        id,
+        model,
+        restore,
+        translator,
+        state,
+        renderer: options.renderer
+      });
 
       // Track the newly created file browser.
       void tracker.add(widget);
@@ -355,14 +366,21 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
-  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell, ITranslator],
+  optional: [
+    IRouter,
+    JupyterFrontEnd.ITreeResolver,
+    ILabShell,
+    ITranslator,
+    IDefaultFileBrowserRenderer
+  ],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    renderer: IDefaultFileBrowserRenderer | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -370,7 +388,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
-      restore: false
+      restore: false,
+      renderer: renderer ?? undefined
     });
 
     // Set attributes when adding the browser to the UI
@@ -1427,7 +1446,7 @@ function addCommands(
     }
   });
 
-  // Add the openPath command to the command palette
+  // Add commands to the command palette
   if (commandPalette) {
     commandPalette.addItem({
       command: CommandIDs.openPath,
@@ -1755,6 +1774,28 @@ function addCommands(
     execute: () => {
       const value = !browser.sortNotebooksFirst;
       const key = 'sortNotebooksFirst';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleDateCreated, {
+    label: trans.__('Show Date Created Column'),
+    isToggled: () => browser.showDateCreatedColumn,
+    execute: () => {
+      const value = !browser.showDateCreatedColumn;
+      const key = 'showDateCreatedColumn';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
