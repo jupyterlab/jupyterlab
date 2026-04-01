@@ -39,6 +39,7 @@ export class SourcesBody extends Widget {
       mimeType: '',
       path: ''
     });
+
     this._editor.hide();
 
     void this._showSource();
@@ -99,13 +100,14 @@ export class SourcesBody extends Widget {
     });
 
     requestAnimationFrame(() => {
-      if (this._model.currentFrame) {
-        EditorHandler.showCurrentLine(
-          this._editor.editor,
-          this._model.currentFrame.line,
-          'start'
-        );
+      const frame = this._model.currentFrame;
+      const editor = this._editor.editor;
+
+      if (!frame || !editor) {
+        return;
       }
+
+      EditorHandler.showCurrentLine(editor, frame.line, 'start');
     });
 
     this._editor.show();

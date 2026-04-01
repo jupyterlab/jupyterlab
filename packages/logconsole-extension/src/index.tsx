@@ -412,7 +412,7 @@ export class LogLevelSwitcher extends ReactWidget {
    * Handle `keydown` events for the HTMLSelect component.
    */
   handleKeyDown = (event: React.KeyboardEvent): void => {
-    if (event.keyCode === 13) {
+    if (event.key === 'Enter') {
       this._logConsole.activate();
     }
   };

@@ -159,8 +159,8 @@ export class ModalCommandPalette extends Panel {
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    switch (event.keyCode) {
-      case 27: // Escape.
+    switch (event.key) {
+      case 'Escape':
         event.stopPropagation();
         event.preventDefault();
         this.hideAndReset();

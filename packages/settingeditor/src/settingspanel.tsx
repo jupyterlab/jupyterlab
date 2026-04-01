@@ -168,7 +168,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         }
         return (
           <div
-            className="jp-SettingsForm"
+            className="jp-SettingsForm jp-zoom-target"
             key={`${pluginSettings.id}SettingsEditor`}
           >
             <SettingsFormEditor
