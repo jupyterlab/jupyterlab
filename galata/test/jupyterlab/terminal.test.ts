@@ -147,7 +147,7 @@ test.describe('Terminal', () => {
   });
 });
 
-test.describe.serial('Terminal with screenReaderMode', () => {
+test.describe('Terminal', () => {
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
@@ -156,7 +156,12 @@ test.describe.serial('Terminal with screenReaderMode', () => {
         screenReaderMode: true
       }
     },
-    tmpPath: 'terminal-screen-reader-test'
+    tmpPath: 'terminal-test'
+  });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.createDirectory(tmpPath);
   });
 
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
@@ -225,6 +230,11 @@ test.describe('Open in Terminal from File Browser', () => {
         screenReaderMode: true
       }
     }
+  });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.createDirectory(tmpPath);
   });
 
   // Ensure a clean state before each test
