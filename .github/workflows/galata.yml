@@ -74,9 +74,10 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: krassowski/maintainer-tools/.github/actions/base-setup@05fe383af4d10d5d3f19bbc7722e9fa7837cfd04
         with:
           python_package_manager: "uv pip"
+          cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
 
       - name: Find out Playwright version
         id: pw-version
