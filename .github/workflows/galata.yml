@@ -107,7 +107,7 @@ jobs:
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
         if: ${{ matrix.project != 'documentation' }}
         run: |
-          pip install --upgrade --pre "ipykernel<=7.0.0a1"
+          uv pip install --upgrade --pre "ipykernel<=7.0.0a1"
         working-directory: core
 
       - name: Launch JupyterLab
