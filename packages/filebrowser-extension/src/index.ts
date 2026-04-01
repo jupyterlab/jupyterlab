@@ -575,7 +575,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     labShell: ILabShell,
     // Wait until file browser commands are ready before activating file browser widget
-    fileBrowserCommands: IFileBrowserCommands,
+    _: IFileBrowserCommands,
     commandPalette: ICommandPalette | null
   ): void => {
     const { commands } = app;
