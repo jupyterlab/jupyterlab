@@ -1005,11 +1005,19 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       });
       editorWrapper.disposed.connect(() => editorHandler.dispose());
 
-      /* Open a read only editor in the main area */
-      debuggerSources.open({
-        label: PathExt.basename(path),
-        caption: path,
-        editorWrapper
+      // Define a sourceWidget as a main area widget with the editorWrapper as content
+      const sourceWidget = new MainAreaWidget({ content: editorWrapper });
+      sourceWidget.title.label = PathExt.basename(path);
+      sourceWidget.title.caption = path;
+      sourceWidget.title.closable = true;
+
+      // Define notebook widget as reference
+      const notebookWidget = app.shell.currentWidget;
+
+      // Add the sourceWidget with split
+      app.shell.add(sourceWidget, 'main', {
+        mode: 'split-right',
+        ref: notebookWidget?.node.id ?? undefined
       });
 
       // Store the widget reference to auto-close as it was auto-opened on breakpoints/frame
