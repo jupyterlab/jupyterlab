@@ -24,7 +24,9 @@ async function runCommand(
   command: string,
   verify = false
 ): Promise<void> {
-  await terminalLocator.locator(TERMINAL_INPUT_SELECTOR).waitFor();
+  await terminalLocator
+    .locator(TERMINAL_INPUT_SELECTOR)
+    .waitFor({ state: 'visible' });
   await terminalLocator.click();
   await page.keyboard.type(command);
   if (verify) {
@@ -197,7 +199,6 @@ test.describe('Terminal', () => {
     const terminal = page.locator(TERMINAL_SELECTOR);
     await terminal.waitFor();
 
-    await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
     await runCommand(page, terminal, 'echo https://jupyter.org/', true);
 
     // Wait for the URL to appear in the terminal output
@@ -342,9 +343,6 @@ test.describe('Open in Terminal from File Browser', () => {
 
       // Ensure the body is visible then run pwd via helper
       await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
-      await activeTerminalContainer
-        .locator(TERMINAL_INPUT_SELECTOR)
-        .waitFor({ state: 'visible' });
       await runCommand(page, activeTerminalContainer, 'pwd');
 
       const activeBody = activeTerminalContainer.locator(
