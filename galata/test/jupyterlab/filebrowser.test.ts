@@ -57,9 +57,9 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
 });
 
 test('Bulk rename files', async ({ page, tmpPath }) => {
-  const file1 = 'test1.txt';
-  const file2 = 'test2.py';
-  const file3 = 'test3.md';
+  const file1 = 'test.txt';
+  const file2 = 'test.py';
+  const file3 = 'test.md';
   const newBaseName = 'renamed';
 
   // Create test files
@@ -88,7 +88,7 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
       '.jp-DirListing-item.jp-mod-selected'
     );
 
-    return selected.length >= 3;
+    return selected.length === 3;
   });
 
   // Open context menu
@@ -147,6 +147,59 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
     await page.filebrowser.isFileListedInBrowser(`${newBaseName}.md`)
   ).toBeTruthy();
   await page.unrouteAll({ behavior: 'ignoreErrors' });
+});
+
+test('Bulk rename should be blocked for different base names', async ({
+  page,
+  tmpPath
+}) => {
+  const file1 = 'test1.txt';
+  const file2 = 'test2.py';
+
+  await page.contents.uploadContent('test1', 'text', `${tmpPath}/${file1}`);
+  await page.contents.uploadContent('test2', 'text', `${tmpPath}/${file2}`);
+
+  const file1Item = page.locator(`.jp-DirListing-item:has-text("${file1}")`);
+  const file2Item = page.locator(`.jp-DirListing-item:has-text("${file2}")`);
+
+  await file1Item.waitFor();
+  await file2Item.waitFor();
+
+  // Multi-select
+  await file1Item.click();
+  await page.keyboard.down('Shift');
+  await file2Item.click();
+  await page.keyboard.up('Shift');
+
+  // Open context menu
+  await file1Item.click({ button: 'right' });
+
+  const menu = await page.menu.getOpenMenuLocator();
+  const rename = menu!.locator('[data-command="filebrowser:rename"]');
+
+  await rename.click();
+
+  // Dialog should appear
+  const dialog = page.locator('.jp-Dialog');
+  await expect(dialog).toBeVisible();
+
+  await dialog.locator('input').fill('renamed');
+  await dialog.locator('.jp-Dialog-button.jp-mod-accept').click();
+
+  // Wait for dialog to close
+  await dialog.waitFor({ state: 'hidden' });
+
+  // Files should remain unchanged
+  const afterFile1 = await page.filebrowser.isFileListedInBrowser(file1);
+  const afterFile2 = await page.filebrowser.isFileListedInBrowser(file2);
+
+  expect(afterFile1).toBeTruthy();
+  expect(afterFile2).toBeTruthy();
+
+  // Ensure renamed files were NOT created
+  expect(
+    await page.filebrowser.isFileListedInBrowser('renamed.txt')
+  ).toBeFalsy();
 });
 
 test('File rename input respects UI font size', async ({ page }) => {
