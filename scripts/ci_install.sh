@@ -53,12 +53,12 @@ if [[ $GROUP != js-services ]]; then
     # Tests run much faster in ipykernel 6, so use that except for
     # ikernel.spec.ts in js-services, which tests subshell compatibility in
     # ipykernel 7.
-    uv pip install "ipykernel<7"
+    uv pip install --system "ipykernel<7"
 fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
-    uv pip install build
+    uv pip install --system build
     python -m build .
 
     # Remove NodeJS, twice to take care of system and locally installed node versions.
