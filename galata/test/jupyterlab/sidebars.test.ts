@@ -346,3 +346,78 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     });
   });
 });
+
+test.describe('Running Sessions - Move Sections to File Browser', () => {
+  const RUNNING_SECTION_TITLE_SELECTOR =
+    '#jp-running-sessions .jp-AccordionPanel-title';
+  const BOTTOM_SECTION_TITLE_SELECTOR =
+    '.jp-FileBrowser-bottomPanel .jp-AccordionPanel-title';
+  const MOVE_TO_FB_COMMAND_SELECTOR =
+    '.lm-Menu-content .lm-Menu-item[data-command="running:move-section-to-filebrowser"]';
+
+  test.use({
+    tmpPath: 'running-sessions-filebrowser-test'
+  });
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadContent('hello', 'text', `${tmpPath}/test.txt`);
+    await page.filebrowser.openDirectory(tmpPath);
+  });
+
+  test('should move sections to file browser, take screenshot, and move back via toolbar button', async ({
+    page
+  }) => {
+    // Open a .txt file and a terminal so Open Tabs has entries
+    await page.filebrowser.open('test.txt');
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    // Move "Open Tabs" to the file browser
+    await page.sidebar.openTab('jp-running-sessions');
+    const openTabsRunningTitle = page
+      .locator(RUNNING_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Open Tabs' });
+    await openTabsRunningTitle.click({ button: 'right' });
+    await page.locator(MOVE_TO_FB_COMMAND_SELECTOR).click();
+
+    // Move "Terminals" to the file browser
+    const terminalsRunningTitle = page
+      .locator(RUNNING_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Terminals' });
+    await terminalsRunningTitle.click({ button: 'right' });
+    await page.locator(MOVE_TO_FB_COMMAND_SELECTOR).click();
+
+    // Switch to the file browser and verify both sections are in the bottom panel
+    await page.sidebar.openTab('filebrowser');
+    const openTabsBottomTitle = page
+      .locator(BOTTOM_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Open Tabs' });
+    const terminalsBottomTitle = page
+      .locator(BOTTOM_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Terminals' });
+    await expect(openTabsBottomTitle).toBeVisible();
+    await expect(terminalsBottomTitle).toBeVisible();
+
+    // Screenshot with both sections visible in the bottom panel
+    const leftPanel = page.sidebar.getContentPanelLocator('left');
+    expect(await leftPanel.screenshot()).toMatchSnapshot(
+      'filebrowser-with-moved-sections.png'
+    );
+
+    // Click the "Move back" toolbar button on "Open Tabs"
+    await openTabsBottomTitle
+      .locator('jp-button[title="Move back to Running Sessions"]')
+      .click();
+    await expect(openTabsBottomTitle).not.toBeVisible();
+
+    // Click the "Move back" toolbar button on "Terminals"
+    await terminalsBottomTitle
+      .locator('jp-button[title="Move back to Running Sessions"]')
+      .click();
+    await expect(terminalsBottomTitle).not.toBeVisible();
+
+    // Both sections should be back in running sessions
+    await page.sidebar.openTab('jp-running-sessions');
+    await expect(openTabsRunningTitle).toBeVisible();
+    await expect(terminalsRunningTitle).toBeVisible();
+  });
+});
