@@ -1900,24 +1900,6 @@ export class Notebook extends StaticNotebook {
     return this._activeCell;
   }
 
-  /**
-   * The back stack of recently modified cell IDs.
-   *
-   * @returns Readonly array of cell IDs
-   */
-  get lastModifiedCellBackStack(): readonly string[] {
-    return this._lastModifiedCellBackStack;
-  }
-
-  /**
-   * The forward stack of recently modified cell IDs.
-   *
-   * @returns Readonly array of cell IDs
-   */
-  get lastModifiedCellForwardStack(): readonly string[] {
-    return this._lastModifiedCellForwardStack;
-  }
-
   get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {
     return this._lastClipboardInteraction;
   }
