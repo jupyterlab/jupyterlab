@@ -213,7 +213,10 @@ export function checkStatus(cmd: string): number | null {
  * Get the current version of JupyterLab
  */
 export function getPythonVersion(): string {
-  const cmd = 'python -m hatchling version';
+  const cmd =
+    process.env.PYTHON_PACKAGE_MANAGER === 'uv pip'
+      ? 'uv run --active python -m hatchling version'
+      : 'python -m hatchling version';
   const lines = run(cmd, { stdio: 'pipe' }, true).split('\n');
   return lines[lines.length - 1];
 }
