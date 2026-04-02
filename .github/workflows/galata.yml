@@ -74,7 +74,7 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: krassowski/maintainer-tools/.github/actions/base-setup@05fe383af4d10d5d3f19bbc7722e9fa7837cfd04
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
           python_package_manager: "uv pip"
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
