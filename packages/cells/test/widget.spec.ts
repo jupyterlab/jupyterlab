@@ -298,7 +298,7 @@ describe('cells/widget', () => {
           model,
           placeholder: false
         }).initializeState();
-        expect(widget.syncEditable).toEqual(false);
+        expect(widget.syncEditable).toEqual(undefined);
         expect(widget.readOnly).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -383,7 +383,7 @@ describe('cells/widget', () => {
           model,
           placeholder: false
         }).initializeState();
-        expect(widget.syncCollapse).toEqual(false);
+        expect(widget.syncCollapse).toEqual(undefined);
         expect(widget.inputHidden).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -717,7 +717,7 @@ describe('cells/widget', () => {
           rendermime
         });
         widget.initializeState();
-        expect(widget.syncScrolled).toEqual(false);
+        expect(widget.syncScrolled).toEqual(undefined);
         expect(widget.outputsScrolled).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -804,7 +804,7 @@ describe('cells/widget', () => {
           rendermime
         });
         widget.initializeState();
-        expect(widget.syncCollapse).toEqual(false);
+        expect(widget.syncCollapse).toEqual(undefined);
         expect(widget.outputHidden).toEqual(false);
 
         // Not synced if setting widget attribute
