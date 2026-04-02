@@ -11,6 +11,7 @@ import type {
 } from '@jupyterlab/application';
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
+import type { IRunningSessions } from '@jupyterlab/running';
 import {
   IRunningSessionManagers,
   IRunningSessionSidebar,
@@ -30,7 +31,10 @@ import {
   ToolbarButton,
   undoIcon
 } from '@jupyterlab/ui-components';
-import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import type { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
@@ -261,6 +265,17 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     const movedSections = new Set<string>();
     const moveBackButtons = new Map<PanelWithToolbar, ToolbarButton>();
 
+    const createMoveBackButton = (managerName: string): ToolbarButton =>
+      new ToolbarButton({
+        icon: undoIcon,
+        tooltip: trans.__('Move back to Running Sessions'),
+        onClick: () => {
+          app.commands.execute(CommandIDs.moveSectionBackFromFileBrowser, {
+            managerName
+          });
+        }
+      });
+
     const saveState = async () => {
       if (!stateDB) {
         return;
@@ -289,15 +304,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
       // Add a "move back" toolbar button
       if (widget instanceof PanelWithToolbar) {
-        const moveBackButton = new ToolbarButton({
-          icon: undoIcon,
-          tooltip: trans.__('Move back to Running Sessions'),
-          onClick: () => {
-            app.commands.execute(CommandIDs.moveSectionBackFromFileBrowser, {
-              managerName
-            });
-          }
-        });
+        const moveBackButton = createMoveBackButton(managerName);
         widget.toolbar.addItem('move-back', moveBackButton);
         moveBackButtons.set(widget, moveBackButton);
       }
@@ -399,6 +406,12 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.moveSectionToFileBrowser, {
       label: trans.__('Move to File Browser'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isVisible: () => lastClickedManagerName !== null,
       execute: () => {
         if (lastClickedManagerName) {
@@ -410,8 +423,14 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.moveSectionBackFromFileBrowser, {
       label: trans.__('Move back to Running Sessions'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isVisible: () => lastClickedBottomWidget !== null,
-      execute: (args: any) => {
+      execute: (args: ReadonlyPartialJSONObject) => {
         const managerName =
           (args?.managerName as string) ?? lastClickedBottomWidget?.title.label;
         if (managerName) {
@@ -451,16 +470,7 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           if (widget) {
             movedSections.add(name);
             if (widget instanceof PanelWithToolbar) {
-              const moveBackButton = new ToolbarButton({
-                icon: undoIcon,
-                tooltip: trans.__('Move back to Running Sessions'),
-                onClick: () => {
-                  app.commands.execute(
-                    CommandIDs.moveSectionBackFromFileBrowser,
-                    { managerName: name }
-                  );
-                }
-              });
+              const moveBackButton = createMoveBackButton(name);
               widget.toolbar.addItem('move-back', moveBackButton);
               moveBackButtons.set(widget, moveBackButton);
             }
@@ -479,7 +489,10 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
         // Watch for late-arriving managers
         if (pendingMoves.size > 0) {
-          const onManagerAdded = (_sender: unknown, manager: any) => {
+          const onManagerAdded = (
+            _sender: unknown,
+            manager: IRunningSessions.IManager
+          ) => {
             if (pendingMoves.has(manager.name)) {
               pendingMoves.delete(manager.name);
               // Delay slightly to let addSection complete
