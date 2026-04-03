@@ -2511,45 +2511,14 @@ export class DirListing extends Widget {
   /**
    * Rename multiple items at once.
    */
+  /**
+   * Rename multiple items at once.
+   */
   private async _doBulkRename(items: Contents.IModel[]): Promise<string> {
     const trans = this._trans;
 
-    // STEP 1: Validate selection
-
-    // Extract base names (without extension)
-    const baseNames = new Set(
-      items.map(item => PathExt.basename(item.name, PathExt.extname(item.name)))
-    );
-
-    //  Case: Different base names → BLOCK
-    if (baseNames.size !== 1) {
-      void showErrorMessage(
-        trans.__('Bulk Rename Error'),
-        trans.__(
-          'Cannot bulk rename: selected files must have the same base name.'
-        )
-      );
-      this._inRename = false;
-      return '';
-    }
-
-    // Extract extensions
-    const extensions = items.map(item => PathExt.extname(item.name));
-
-    //  Case: Duplicate extensions → collision
-    const extSet = new Set(extensions);
-    if (extSet.size !== extensions.length) {
-      void showErrorMessage(
-        trans.__('Bulk Rename Error'),
-        trans.__('Cannot rename: multiple files would result in the same name.')
-      );
-      this._inRename = false;
-      return '';
-    }
-
-    // STEP 2: Get user input
-
-    let defaultName = PathExt.basename(
+    // STEP 1: Get user input
+    const defaultName = PathExt.basename(
       items[0].name,
       PathExt.extname(items[0].name)
     );
@@ -2561,18 +2530,57 @@ export class DirListing extends Widget {
       text: defaultName
     });
 
-    if (!result.button.accept) {
+    if (!result.button.accept || !result.value) {
       this._inRename = false;
       return '';
     }
 
-    const newBaseName = result.value;
+    return this._bulkRenameCore(items, result.value);
+  }
 
-    if (!newBaseName) {
+  /**
+   * Core logic for bulk renaming multiple items.
+   *
+   * @param items - The items to rename.
+   * @param newBaseName - The new base name for the items.
+   * @returns A promise that resolves with the new base name if successful, or an empty string.
+   */
+  private async _bulkRenameCore(
+    items: Contents.IModel[],
+    newBaseName: string
+  ): Promise<string> {
+    const trans = this._trans;
+    const manager = this._manager;
+
+    // STEP 1: Validate selection (must have same base name)
+    const baseNames = new Set(
+      items.map(item => PathExt.basename(item.name, PathExt.extname(item.name)))
+    );
+
+    if (baseNames.size !== 1) {
+      void showErrorMessage(
+        trans.__('Bulk Rename Error'),
+        trans.__(
+          'Cannot bulk rename: selected files must have the same base name.'
+        )
+      );
       this._inRename = false;
       return '';
     }
 
+    // STEP 2: Validate extensions (must be unique)
+    const extensions = items.map(item => PathExt.extname(item.name));
+    const extSet = new Set(extensions);
+    if (extSet.size !== extensions.length) {
+      void showErrorMessage(
+        trans.__('Bulk Rename Error'),
+        trans.__('Cannot rename: multiple files would result in the same name.')
+      );
+      this._inRename = false;
+      return '';
+    }
+
+    // STEP 3: Validate new name
     if (!isValidFileName(newBaseName)) {
       void showErrorMessage(
         trans.__('Rename Error'),
@@ -2588,16 +2596,12 @@ export class DirListing extends Widget {
       return '';
     }
 
-    // STEP 3: Check existing conflicts
-
-    const manager = this._manager;
-
+    // STEP 4: Check for existing conflicts
     for (const item of items) {
       const ext = PathExt.extname(item.name);
       const newName = newBaseName + ext;
       const newPath = PathExt.join(PathExt.dirname(item.path), newName);
 
-      // If target already exists AND it's not the same file → BLOCK
       const exists = this._sortedItems.some(
         i => i.path === newPath && i.path !== item.path
       );
@@ -2612,22 +2616,17 @@ export class DirListing extends Widget {
       }
     }
 
-    // STEP 4: Perform rename (SAFE)-
-
+    // STEP 5: Perform rename
     try {
       for (const item of items) {
         const ext = PathExt.extname(item.name);
         const newName = newBaseName + ext;
-
         const oldPath = item.path;
         const newPath = PathExt.join(PathExt.dirname(oldPath), newName);
 
-        // Skip no-op
-        if (oldPath === newPath) {
-          continue;
+        if (oldPath !== newPath) {
+          await renameFile(manager, oldPath, newPath);
         }
-
-        await renameFile(manager, oldPath, newPath);
       }
     } catch (error) {
       if (error !== 'File not renamed') {

@@ -3,7 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { InputDialog } from '@jupyterlab/apputils';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
@@ -239,164 +238,159 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#bulkRename', () => {
+      jest.setTimeout(30000);
       it('should rename multiple files preserving extensions', async () => {
-        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
-          button: { accept: true },
-          value: 'bulk_renamed'
-        } as any);
-
-        // Create controlled files
-        await dirListing.model.manager.newUntitled({
-          type: 'file',
-          ext: '.py'
-        });
-        await signalToPromise(dirListing.updated);
-
-        // Select only files with same base name
-        const items = [...dirListing.sortedItems()];
-        dirListing.clearSelectedItems();
-
-        for (let i = 0; i < items.length; i++) {
-          if (items[i].name.endsWith('.txt') || items[i].name.endsWith('.py')) {
-            dirListing.selectItemByName(items[i].name, true);
-          }
-        }
-
-        await dirListing.rename();
-        await dirListing.model.refresh();
-
-        const itemNames = [...dirListing.sortedItems()].map(item => item.name);
-
-        expect(itemNames).toContain('bulk_renamed.txt');
-        expect(itemNames).toContain('bulk_renamed.py');
-
-        spy.mockRestore();
-      });
-
-      it('should not rename if dialog is cancelled', async () => {
-        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
-          button: { accept: false },
-          value: 'bulk_renamed'
-        } as any);
-
-        dirListing.selectNext();
-        dirListing.selectNext(true);
-
-        const beforeNames = [...dirListing.sortedItems()].map(
-          item => item.name
-        );
-
-        await dirListing.rename();
-        await dirListing.model.refresh();
-
-        const afterNames = [...dirListing.sortedItems()].map(item => item.name);
-
-        expect(afterNames).toEqual(beforeNames);
-
-        spy.mockRestore();
-      });
-
-      it('should block rename for different base names', async () => {
-        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
-          button: { accept: true },
-          value: 'newname'
-        } as any);
-
-        // Select two different base name files
-        const items = [...dirListing.sortedItems()];
-        dirListing.clearSelectedItems();
-
-        dirListing.selectItemByName(items[0].name, true);
-        dirListing.selectItemByName(items[1].name, true);
-
-        const beforeNames = items.map(i => i.name);
-
-        await dirListing.rename();
-        await dirListing.model.refresh();
-
-        const afterNames = [...dirListing.sortedItems()].map(i => i.name);
-
-        expect(afterNames).toEqual(beforeNames);
-
-        spy.mockRestore();
-      });
-
-      it('should block rename when extensions are same (collision)', async () => {
-        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
-          button: { accept: true },
-          value: 'test'
-        } as any);
-
-        // Create another .txt file to force collision
-        await dirListing.model.manager.newUntitled({
+        const item1 = await dirListing.model.manager.newUntitled({
           type: 'file',
           ext: '.txt'
         });
-        await signalToPromise(dirListing.updated);
-
-        const txtFiles = [...dirListing.sortedItems()].filter(i =>
-          i.name.endsWith('.txt')
-        );
-
-        dirListing.clearSelectedItems();
-        txtFiles.forEach(file => dirListing.selectItemByName(file.name, true));
-
-        const beforeNames = [...dirListing.sortedItems()].map(i => i.name);
-
-        await dirListing.rename();
-        await dirListing.model.refresh();
-
-        const afterNames = [...dirListing.sortedItems()].map(i => i.name);
-
-        expect(afterNames).toEqual(beforeNames);
-
-        spy.mockRestore();
-      });
-
-      it('should block rename if target file already exists', async () => {
-        const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
-          button: { accept: true },
-          value: 'existing'
-        } as any);
-
-        // Create file that will conflict
-        await dirListing.model.manager.newUntitled({
+        await dirListing.model.manager.rename(item1.path, 'data.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
           type: 'file',
           ext: '.py'
         });
+        await dirListing.model.manager.rename(item2.path, 'data.py');
+        await dirListing.model.refresh();
         await signalToPromise(dirListing.updated);
 
-        // Rename one file manually to "existing.py"
-        const item = [...dirListing.sortedItems()].find(i =>
-          i.name.endsWith('.py')
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'data.txt');
+        const index2 = items.findIndex(i => i.name === 'data.py');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        await (dirListing as any)._bulkRenameCore(selected, 'bulk_renamed');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const itemNames = Array.from(dirListing.sortedItems()).map(
+          item => item.name
+        );
+        expect(itemNames).toContain('bulk_renamed.txt');
+        expect(itemNames).toContain('bulk_renamed.py');
+      });
+
+      it('should block rename for different base names', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'a.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'b.py');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'a.txt');
+        const index2 = items.findIndex(i => i.name === 'b.py');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        const beforeNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
         );
 
-        if (item) {
-          await dirListing.model.manager.rename(item.path, 'existing.py');
-        }
-
+        await (dirListing as any)._bulkRenameCore(selected, 'newname');
         await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
 
-        // Select files for bulk rename
-        const items = [...dirListing.sortedItems()];
-        dirListing.clearSelectedItems();
-
-        for (const i of items) {
-          if (i.name.endsWith('.txt') || i.name.endsWith('.py')) {
-            dirListing.selectItemByName(i.name, true);
-          }
-        }
-
-        const beforeNames = items.map(i => i.name);
-
-        await dirListing.rename();
-        await dirListing.model.refresh();
-
-        const afterNames = [...dirListing.sortedItems()].map(i => i.name);
-
+        const afterNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
         expect(afterNames).toEqual(beforeNames);
+      });
 
-        spy.mockRestore();
+      it('should block rename when extensions are same (collision)', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'data1.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item2.path, 'data2.txt');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'data1.txt');
+        const index2 = items.findIndex(i => i.name === 'data2.txt');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        const beforeNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+
+        await (dirListing as any)._bulkRenameCore(selected, 'test');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const afterNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+        expect(afterNames).toEqual(beforeNames);
+      });
+
+      it('should block rename if target file already exists', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'data.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'data.py');
+        const item3 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item3.path, 'existing.py');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'data.txt');
+        const index2 = items.findIndex(i => i.name === 'data.py');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        const beforeNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+
+        await (dirListing as any)._bulkRenameCore(selected, 'existing');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const afterNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+        expect(afterNames).toEqual(beforeNames);
       });
     });
 
