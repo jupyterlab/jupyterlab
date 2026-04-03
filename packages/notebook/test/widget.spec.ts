@@ -11,7 +11,12 @@ import {
   RawCellModel
 } from '@jupyterlab/cells';
 import type { INotebookModel } from '@jupyterlab/notebook';
-import { Notebook, NotebookModel, StaticNotebook } from '@jupyterlab/notebook';
+import {
+  Notebook,
+  NotebookModel,
+  NotebookPanel,
+  StaticNotebook
+} from '@jupyterlab/notebook';
 import {
   framePromise,
   JupyterServer,
@@ -129,6 +134,15 @@ class LogNotebook extends Notebook {
   protected onCellRemoved(index: number, cell: Cell): void {
     super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
+  }
+}
+
+class ViewOnlyNotebookFactory extends NotebookPanel.ContentFactory {
+  override createCodeCell(options: CodeCell.IOptions): CodeCell {
+    const cell = super.createCodeCell(options);
+    cell.syncEditable = false;
+    cell.readOnly = true;
+    return cell;
   }
 }
 
@@ -289,6 +303,21 @@ describe('@jupyter/notebook', () => {
         widget.model = model;
         const child = widget.widgets[0];
         expect(child.model.mimeType).toBe('text/x-python');
+      });
+
+      it('should preserve custom read-only code cell settings from content factory', () => {
+        const viewOnlyFactory = new ViewOnlyNotebookFactory({
+          editorFactory: utils.editorFactory
+        });
+        const widget = new Notebook({
+          ...options,
+          contentFactory: viewOnlyFactory
+        });
+        widget.model = new NotebookModel();
+
+        const child = widget.widgets[0] as CodeCell;
+        expect(child.syncEditable).toBe(false);
+        expect(child.readOnly).toBe(true);
       });
 
       describe('`cells.changed` signal', () => {
