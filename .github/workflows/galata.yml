@@ -183,6 +183,20 @@ jobs:
     needs: test
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout lockfile
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: yarn.lock
+          sparse-checkout-cone-mode: false
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 '^"playwright@npm:' yarn.lock | sed -E 's/^"playwright@npm:([^"]+)":/\1/')
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+
       - name: Download artifacts
         uses: actions/download-artifact@v7
         with:
@@ -192,7 +206,7 @@ jobs:
 
       - name: Merge Playwright reports
         run: |
-          npx playwright merge-reports --reporter html,github ./artifacts/
+          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,github ./artifacts/
 
       - name: Upload merged reports
         uses: actions/upload-artifact@v6

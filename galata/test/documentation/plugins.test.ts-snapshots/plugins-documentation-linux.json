@@ -154,7 +154,7 @@
   "@jupyterlab/notebook-extension:cursor-position": "Adds the notebook cursor position status.",
   "@jupyterlab/notebook-extension:execution-indicator": "Adds a notebook execution status widget.",
   "@jupyterlab/notebook-extension:export": "Adds the export notebook commands.",
-  "@jupyterlab/notebook-extension:factory": "Provides the notebook cell factory.",
+  "@jupyterlab/notebook-extension:factory": "Provides the notebook and cell factory.",
   "@jupyterlab/notebook-extension:kernel-status": "Adds the notebook kernel status.",
   "@jupyterlab/notebook-extension:language-server": "Adds language server capability to the notebooks.",
   "@jupyterlab/notebook-extension:log-output": "Adds cell outputs log to the application logger.",
