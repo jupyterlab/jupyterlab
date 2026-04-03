@@ -41,7 +41,7 @@ export class TableOfContentsItem extends React.PureComponent<
    *
    * @returns rendered entry
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     const { children, isActive, heading, onCollapse, onMouseDown } = this.props;
 
     // Handling toggle of collapse and expand

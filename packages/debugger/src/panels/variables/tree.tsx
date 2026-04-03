@@ -52,7 +52,7 @@ export class VariablesBodyTree extends ReactWidget {
   /**
    * Render the VariablesBodyTree.
    */
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const scope =
       this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
 
@@ -149,7 +149,7 @@ interface IVariablesBranchProps {
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
+const VariablesBranch = (props: IVariablesBranchProps): React.JSX.Element => {
   const { commands, data, service, filter, translator, handleSelectVariable } =
     props;
   const [variables, setVariables] = useState(data);
@@ -236,7 +236,9 @@ function _prepareDetail(variable: IDebugger.IVariable) {
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
+const VariableComponent = (
+  props: IVariableComponentProps
+): React.JSX.Element => {
   const { commands, data, service, filter, translator, onSelect } = props;
   const [variable] = useState(data);
   const [showDetailsButton, setShowDetailsButton] = useState<boolean>(false);

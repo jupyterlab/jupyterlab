@@ -350,7 +350,7 @@ namespace Private {
    */
   export function TrustButtonComponent(
     props: TrustButtonComponent.IProps
-  ): JSX.Element {
+  ): React.JSX.Element {
     const translator = props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     return (

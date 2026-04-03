@@ -13,7 +13,7 @@ const AVAILABLE_PROVIDERS = 'availableProviders';
 /**
  * Custom setting renderer for provider rank.
  */
-export function renderAvailableProviders(props: FieldProps): JSX.Element {
+export function renderAvailableProviders(props: FieldProps): React.JSX.Element {
   const { schema } = props;
   const title = schema.title;
   const desc = schema.description;

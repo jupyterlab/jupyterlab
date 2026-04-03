@@ -568,7 +568,7 @@ export namespace Licenses {
       this.addClass('jp-RenderedHTMLCommon');
     }
 
-    protected render(): JSX.Element {
+    protected render(): React.JSX.Element {
       const { trans } = this.model;
       return (
         <div>
@@ -603,7 +603,7 @@ export namespace Licenses {
     /**
      * Render a filter input
      */
-    protected renderFilter = (key: TFilterKey): JSX.Element => {
+    protected renderFilter = (key: TFilterKey): React.JSX.Element => {
       const value = this.model.packageFilter[key] || '';
       return (
         <input
@@ -687,7 +687,7 @@ export namespace Licenses {
     /**
      * Render a grid of package license information
      */
-    protected render(): JSX.Element {
+    protected render(): React.JSX.Element {
       const { bundles, currentBundleName, trans } = this.model;
       const filteredPackages = this.model.getFilteredPackages(
         bundles && currentBundleName
@@ -724,7 +724,7 @@ export namespace Licenses {
     protected renderRow = (
       row: Licenses.IPackageLicenseInfo,
       index: number
-    ): JSX.Element => {
+    ): React.JSX.Element => {
       const selected = index === this.model.currentPackageIndex;
       const onCheck = () => (this.model.currentPackageIndex = index);
       return (

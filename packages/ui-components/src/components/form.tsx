@@ -111,9 +111,9 @@ export namespace FormComponent {
  */
 export const MoveButton = (
   props: FormComponent.IMoveButtonProps
-): JSX.Element => {
+): React.JSX.Element => {
   const trans = (props.translator ?? nullTranslator).load('jupyterlab');
-  let buttonContent: JSX.Element | string;
+  let buttonContent: React.JSX.Element | string;
 
   /**
    * Whether the button is disabled or not.
@@ -172,9 +172,9 @@ export const MoveButton = (
  */
 export const DropButton = (
   props: FormComponent.IDropButtonProps
-): JSX.Element => {
+): React.JSX.Element => {
   const trans = (props.translator ?? nullTranslator).load('jupyterlab');
-  let buttonContent: JSX.Element | string;
+  let buttonContent: React.JSX.Element | string;
 
   if (props.buttonStyle === 'icons') {
     buttonContent = <deleteIcon.react tag="span" elementPosition="center" />;
@@ -207,7 +207,7 @@ export const DropButton = (
  */
 export const AddButton = (
   props: FormComponent.IAddButtonProps
-): JSX.Element => {
+): React.JSX.Element => {
   const trans = (props.translator ?? nullTranslator).load('jupyterlab');
   let buttonContent: JSX.Element | string;
 

@@ -368,7 +368,7 @@ export class CellTypeSwitcher extends ReactWidget {
     }
   };
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     let value = '-';
     if (this._notebook.activeCell) {
       value = this._notebook.activeCell.model.type;

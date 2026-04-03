@@ -111,7 +111,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
   /**
    * Render the log console status item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (this.model === null || this.model.version === 0) {
       return null;
     }

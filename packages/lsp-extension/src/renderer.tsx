@@ -67,7 +67,7 @@ interface ISettingFormProps {
 /**
  * The React component of the setting field
  */
-function BuildSettingForm(props: ISettingFormProps): JSX.Element {
+function BuildSettingForm(props: ISettingFormProps): React.JSX.Element {
   const { [SERVER_SETTINGS]: serverSettingsSchema, ...otherSettingsSchema } =
     props.schema;
   const {
@@ -319,7 +319,7 @@ function PropertyFrom(props: {
   property: ISettingProperty;
   removeProperty: (hash: string) => void;
   setProperty: Debouncer<void, any, [hash: string, property: ISettingProperty]>;
-}): JSX.Element {
+}): React.JSX.Element {
   const [state, setState] = useState<{
     property: string;
     type: 'boolean' | 'string' | 'number';
@@ -551,7 +551,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
     });
     this._setting.set(SETTING_NAME, settings).catch(console.error);
   };
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <div>
         <fieldset>
@@ -619,6 +619,6 @@ class SettingRenderer extends React.Component<IProps, IState> {
 export function renderServerSetting(
   props: FieldProps,
   translator: ITranslator
-): JSX.Element {
+): React.JSX.Element {
   return <SettingRenderer {...props} translator={translator} />;
 }

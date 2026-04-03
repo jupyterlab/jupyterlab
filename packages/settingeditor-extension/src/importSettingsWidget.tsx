@@ -29,7 +29,7 @@ namespace ImportSettings {
   }
 }
 
-const SettingsImport = (props: ImportSettings.IOptions): JSX.Element => {
+const SettingsImport = (props: ImportSettings.IOptions): React.JSX.Element => {
   const trans = props.translator.load('jupyterlab');
   const [checkedStates, setCheckedStates] = useState<Record<string, boolean>>(
     props.importedSettings.reduce(
