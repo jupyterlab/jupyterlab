@@ -2322,7 +2322,11 @@ describe('@jupyterlab/notebook', () => {
       it('should prefer scrolling to the start when hiding output for a cell that was taller than the viewport', () => {
         widget.activeCellIndex = 1;
         const outerNodeSpy = setViewportHeight(200);
-        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 400, 120);
+        const selectedCellRectSpy = mockCellHeights(
+          widget.widgets[1],
+          400,
+          120
+        );
         const scrollSpy = jest
           .spyOn(widget, 'scrollToItem')
           .mockResolvedValue(undefined);

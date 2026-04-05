@@ -2541,19 +2541,11 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      const alignPreference = getActiveCellAlignmentPreference(
-        notebook,
-        state
-      );
+      const alignPreference = getActiveCellAlignmentPreference(notebook, state);
       const scrollPromise =
         alignPreference === undefined
           ? notebook.scrollToItem(activeCellIndex, 'auto', 0)
-          : notebook.scrollToItem(
-              activeCellIndex,
-              'auto',
-              0,
-              alignPreference
-            );
+          : notebook.scrollToItem(activeCellIndex, 'auto', 0, alignPreference);
 
       await scrollPromise.catch(reason => {
         // no-op
