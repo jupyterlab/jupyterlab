@@ -34,7 +34,7 @@ rm -rf ./mock_packages/extension/node_modules
 
 export YARN_NPM_REGISTRY_SERVER="http://0.0.0.0:4873"
 jupyter labextension install ./mock_packages/mimeextension --no-build --debug
-jupyter labextension develop ./mock_packages/extension --debug
+jupyter-builder develop ./mock_packages/extension --debug
 jupyter-builder build ./mock_packages/extension --debug
 
 conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets matplotlib-base jupyterlab_widgets

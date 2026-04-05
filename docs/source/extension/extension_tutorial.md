@@ -186,7 +186,7 @@ source directory. This means our changes are automatically available in
 JupyterLab:
 
 ```bash
-jupyter labextension develop --overwrite .
+jupyter-builder develop --overwrite .
 ```
 
 (important-for-windows-users)=

@@ -454,9 +454,6 @@ _EXAMPLES = """
 jupyter labextension list                        # list all configured labextensions
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
-jupyter labextension develop                     # (developer) develop a prebuilt labextension
-jupyter labextension build                       # (developer) build a prebuilt labextension
-jupyter labextension watch                       # (developer) watch a prebuilt labextension
 """
 
 
