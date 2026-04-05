@@ -354,6 +354,8 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
     '.jp-FileBrowser-bottomPanel .jp-AccordionPanel-title';
   const MOVE_TO_FB_COMMAND_SELECTOR =
     '.lm-Menu-content .lm-Menu-item[data-command="running:move-section-to-filebrowser"]';
+  const MOVE_BACK_TO_RUNNING_SESSIONS_OPTION_SELECTOR =
+    '.lm-Menu-content .lm-Menu-item[data-command="running:move-section-back-from-filebrowser"]';
 
   test.use({
     tmpPath: 'running-sessions-filebrowser-test'
@@ -364,7 +366,7 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test('should move sections to file browser, take screenshot, and move back via toolbar button', async ({
+  test('should move sections to file browser, take screenshot, and move back via context menu', async ({
     page
   }) => {
     // Open a .txt file and a terminal so Open Tabs has entries
@@ -403,16 +405,14 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
       'filebrowser-with-moved-sections.png'
     );
 
-    // Click the "Move back" toolbar button on "Open Tabs"
-    await openTabsBottomTitle
-      .locator('jp-button[title="Move back to Running Sessions"]')
-      .click();
+    // Move "Open Tabs" back via context menu
+    await openTabsBottomTitle.click({ button: 'right' });
+    await page.locator(MOVE_BACK_TO_RUNNING_SESSIONS_OPTION_SELECTOR).click();
     await expect(openTabsBottomTitle).not.toBeVisible();
 
-    // Click the "Move back" toolbar button on "Terminals"
-    await terminalsBottomTitle
-      .locator('jp-button[title="Move back to Running Sessions"]')
-      .click();
+    // Move "Terminals" back via context menu
+    await terminalsBottomTitle.click({ button: 'right' });
+    await page.locator(MOVE_BACK_TO_RUNNING_SESSIONS_OPTION_SELECTOR).click();
     await expect(terminalsBottomTitle).not.toBeVisible();
 
     // Both sections should be back in running sessions

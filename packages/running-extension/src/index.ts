@@ -27,9 +27,7 @@ import {
   CommandToolbarButton,
   launcherIcon,
   PanelWithToolbar,
-  runningIcon,
-  ToolbarButton,
-  undoIcon
+  runningIcon
 } from '@jupyterlab/ui-components';
 import type {
   ReadonlyPartialJSONObject,
@@ -263,18 +261,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     let lastClickedBottomWidget: PanelWithToolbar | null = null;
     // For state persistence
     const movedSections = new Set<string>();
-    const moveBackButtons = new Map<PanelWithToolbar, ToolbarButton>();
-
-    const createMoveBackButton = (managerName: string): ToolbarButton =>
-      new ToolbarButton({
-        icon: undoIcon,
-        tooltip: trans.__('Move back to Running Sessions'),
-        onClick: () => {
-          app.commands.execute(CommandIDs.moveSectionBackFromFileBrowser, {
-            managerName
-          });
-        }
-      });
 
     const saveState = async () => {
       if (!stateDB) {
@@ -302,13 +288,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       // Remember collapsed state before re-parenting clears it
       const wasHidden = widget.isHidden;
 
-      // Add a "move back" toolbar button
-      if (widget instanceof PanelWithToolbar) {
-        const moveBackButton = createMoveBackButton(managerName);
-        widget.toolbar.addItem('move-back', moveBackButton);
-        moveBackButtons.set(widget, moveBackButton);
-      }
-
       fileBrowser.addBottomWidget(widget);
 
       if (wasHidden && fileBrowser.bottomPanel) {
@@ -333,15 +312,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       const widget = widgets.find(w => w.title.label === managerName);
       if (!widget) {
         return;
-      }
-
-      // Remove the "move back" toolbar button
-      if (widget instanceof PanelWithToolbar) {
-        const button = moveBackButtons.get(widget);
-        if (button) {
-          button.dispose();
-          moveBackButtons.delete(widget);
-        }
       }
 
       fileBrowser.removeBottomWidget(widget);
@@ -469,11 +439,6 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           const widget = running.removeSection(name);
           if (widget) {
             movedSections.add(name);
-            if (widget instanceof PanelWithToolbar) {
-              const moveBackButton = createMoveBackButton(name);
-              widget.toolbar.addItem('move-back', moveBackButton);
-              moveBackButtons.set(widget, moveBackButton);
-            }
             fileBrowser.addBottomWidget(widget);
           } else {
             // Manager not yet registered; wait for it
