@@ -35,6 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
+    "jupyter_builder>=0.0.3",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -114,7 +115,6 @@ test = [
 ]
 # Check ruff version is aligned with the one in .pre-commit-config.yaml
 dev = [
-    "jupyter_builder>=0.0.3",
     "build",
     "pre-commit",
     "pytest-cov",
