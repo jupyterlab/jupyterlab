@@ -5232,6 +5232,26 @@
     }
   },
   {
+    "id": "running:move-section-back-from-filebrowser",
+    "label": "Move back to Running Sessions",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "running:move-section-to-filebrowser",
+    "label": "Move to File Browser",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "running:show-modal",
     "label": "Search Tabs and Running Sessions",
     "caption": "",
