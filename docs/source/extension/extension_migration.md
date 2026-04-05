@@ -1024,7 +1024,7 @@ index 6f1562f..3fcdf37 100644
 +    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
 +    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
 +    "build:lib": "tsc",
-+    "build:labextension": "jupyter labextension build .",
++    "build:labextension": "jupyter-builder build .",
 +    "build:labextension:dev": "jupyter labextension build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
 +    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",

@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build:labextension": "jupyter labextension build .",
+    "build:labextension": "jupyter-builder build .",
     "clean": "rimraf ./test_no_hyphens/labextension"
   },
   "dependencies": {

@@ -427,7 +427,7 @@ if [[ $GROUP == interop ]]; then
     jupyter labextension link . --no-build
     popd
     pushd provider
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     pushd consumer
@@ -451,7 +451,7 @@ if [[ $GROUP == interop ]]; then
     jupyter labextension install .
     popd
     pushd consumer
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
@@ -475,7 +475,7 @@ if [[ $GROUP == interop ]]; then
     # Need to install source first because it would get ignored
     # if installed after
     jupyter labextension install .
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
