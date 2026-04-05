@@ -30,7 +30,6 @@ from .commands import (
     unlock_extension,
     update_extension,
 )
-from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
 from .labapp import LabApp
 
 flags = dict(base_flags)
@@ -233,102 +232,6 @@ class InstallLabExtensionApp(BaseExtensionApp):
                 ),
             )
             for i, arg in enumerate(self.extra_args)
-        )
-
-
-class DevelopLabExtensionApp(BaseExtensionApp):
-    description = "(developer) Develop labextension"
-    flags = develop_flags
-
-    user = Bool(False, config=True, help="Whether to do a user install")
-    sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
-    overwrite = Bool(False, config=True, help="Whether to overwrite files")
-    symlink = Bool(True, config=False, help="Whether to use a symlink")
-
-    labextensions_dir = Unicode(
-        "",
-        config=True,
-        help="Full path to labextensions dir (probably use prefix or user)",
-    )
-
-    def run_task(self):
-        """Add config for this labextension"""
-        self.extra_args = self.extra_args or [os.getcwd()]
-        for arg in self.extra_args:
-            develop_labextension_py(
-                arg,
-                user=self.user,
-                sys_prefix=self.sys_prefix,
-                labextensions_dir=self.labextensions_dir,
-                logger=self.log,
-                overwrite=self.overwrite,
-                symlink=self.symlink,
-            )
-
-
-class BuildLabExtensionApp(BaseExtensionApp):
-    description = "(developer) Build labextension"
-
-    static_url = Unicode("", config=True, help="Sets the url for static assets when building")
-
-    development = Bool(False, config=True, help="Build in development mode")
-
-    source_map = Bool(False, config=True, help="Generate source maps")
-
-    core_path = Unicode(
-        os.path.join(HERE, "staging"),
-        config=True,
-        help="Directory containing core application package.json file",
-    )
-
-    aliases = {
-        "static-url": "BuildLabExtensionApp.static_url",
-        "development": "BuildLabExtensionApp.development",
-        "source-map": "BuildLabExtensionApp.source_map",
-        "core-path": "BuildLabExtensionApp.core_path",
-    }
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(
-            self.extra_args[0],
-            logger=self.log,
-            development=self.development,
-            static_url=self.static_url or None,
-            source_map=self.source_map,
-            core_path=self.core_path or None,
-        )
-
-
-class WatchLabExtensionApp(BaseExtensionApp):
-    description = "(developer) Watch labextension"
-
-    development = Bool(True, config=True, help="Build in development mode")
-
-    source_map = Bool(False, config=True, help="Generate source maps")
-
-    core_path = Unicode(
-        os.path.join(HERE, "staging"),
-        config=True,
-        help="Directory containing core application package.json file",
-    )
-
-    aliases = {
-        "core-path": "WatchLabExtensionApp.core_path",
-        "development": "WatchLabExtensionApp.development",
-        "source-map": "WatchLabExtensionApp.source_map",
-    }
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        labextensions_path = self.labextensions_path
-        watch_labextension(
-            self.extra_args[0],
-            labextensions_path,
-            logger=self.log,
-            development=self.development,
-            source_map=self.source_map,
-            core_path=self.core_path or None,
         )
 
 
@@ -577,9 +480,6 @@ class LabExtensionApp(JupyterApp):
         "lock": (LockLabExtensionsApp, "Lock labextension(s)"),
         "unlock": (UnlockLabExtensionsApp, "Unlock labextension(s)"),
         "check": (CheckLabExtensionsApp, "Check labextension(s)"),
-        "develop": (DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
-        "build": (BuildLabExtensionApp, "(developer) Build labextension"),
-        "watch": (WatchLabExtensionApp, "(developer) Watch labextension"),
     }
 
     def start(self):

@@ -26,6 +26,7 @@ from threading import Event
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
+from jupyter_builder.jlpm import HERE, YARN_PATH
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
@@ -42,7 +43,6 @@ from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.jlpmapp import HERE, YARN_PATH
 from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
 # The regex for expecting the rspack output.
@@ -1475,8 +1475,8 @@ class _AppHandler:
 
             # splice the builder as well
             local_path = osp.abspath(pjoin(REPO_ROOT, "builder"))
-            data["devDependencies"]["@jupyterlab/builder"] = local_path
-            target = osp.join(staging, "node_modules", "@jupyterlab", "builder")
+            data["devDependencies"]["@jupyter/builder"] = local_path
+            target = osp.join(staging, "node_modules", "@jupyter", "builder")
 
             # Remove node_modules so it gets re-populated
             node_modules = pjoin(staging, "node_modules")

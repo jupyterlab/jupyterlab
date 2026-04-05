@@ -633,6 +633,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jupyter/builder@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@jupyter/builder@npm:0.0.3"
+  dependencies:
+    "@jupyterlab/core-meta": 4.6.0-alpha.4
+    "@rspack/core": ^1.7.7
+    ajv: ^8.12.0
+    commander: ^9.4.1
+    css-loader: ^6.7.1
+    duplicate-package-checker-webpack-plugin: ^3.0.0
+    fs-extra: ^10.1.0
+    glob: ~7.1.6
+    license-webpack-plugin: ^4.0.2
+    mini-svg-data-uri: ^1.4.4
+    path-browserify: ^1.0.0
+    process: ^0.11.10
+    source-map-loader: ~1.0.2
+    style-loader: ~3.3.1
+    supports-color: ^7.2.0
+    webpack-merge: ^5.8.0
+    worker-loader: ^3.0.2
+  checksum: b7d4d8a741f27e112d219dfb2b7b903d54dea83033b6caf6ef52b03851ef3248be7ec520cd936bdc6f9f9a1dd800afb9ca342f0fd11d593d2e9b750c0905d984
+  languageName: node
+  linkType: hard
+
 "@jupyter/react-components@npm:^0.16.6":
   version: 0.16.6
   resolution: "@jupyter/react-components@npm:0.16.6"
@@ -696,11 +721,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-top@workspace:."
   dependencies:
+    "@jupyter/builder": ^0.0.3
     "@jupyterlab/application": ~4.6.0-alpha.4
     "@jupyterlab/application-extension": ~4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ~4.6.0-alpha.4
     "@jupyterlab/audio-extension": ~4.6.0-alpha.4
-    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/buildutils": ^4.6.0-alpha.4
     "@jupyterlab/cell-toolbar-extension": ~4.6.0-alpha.4
     "@jupyterlab/celltags-extension": ~4.6.0-alpha.4
@@ -885,44 +910,6 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
   checksum: bd56cccbbef8399e56ef4941ad42f2e748cbf810c5f1c4cc3d607517ae4ffd42fcf9e8312f8136a88585af581c0f46e44f021464552e1bac044c9764df4339db
-  languageName: node
-  linkType: hard
-
-"@jupyterlab/builder@npm:^4.6.0-alpha.4":
-  version: 4.6.0-alpha.4
-  resolution: "@jupyterlab/builder@npm:4.6.0-alpha.4"
-  dependencies:
-    "@lumino/algorithm": ^2.0.4
-    "@lumino/application": ^2.4.8
-    "@lumino/commands": ^2.3.3
-    "@lumino/coreutils": ^2.2.2
-    "@lumino/disposable": ^2.1.5
-    "@lumino/domutils": ^2.0.4
-    "@lumino/dragdrop": ^2.1.8
-    "@lumino/messaging": ^2.0.4
-    "@lumino/properties": ^2.0.4
-    "@lumino/signaling": ^2.1.5
-    "@lumino/virtualdom": ^2.0.4
-    "@lumino/widgets": ^2.7.5
-    "@rspack/core": ^1.7.7
-    ajv: ^8.12.0
-    commander: ^9.4.1
-    css-loader: ^6.7.1
-    duplicate-package-checker-webpack-plugin: ^3.0.0
-    fs-extra: ^10.1.0
-    glob: ~7.1.6
-    license-webpack-plugin: ^4.0.2
-    mini-svg-data-uri: ^1.4.4
-    path-browserify: ^1.0.0
-    process: ^0.11.10
-    source-map-loader: ~1.0.2
-    style-loader: ~3.3.1
-    supports-color: ^7.2.0
-    webpack-merge: ^5.8.0
-    worker-loader: ^3.0.2
-  bin:
-    build-labextension: lib/build-labextension.js
-  checksum: 2bb29bef010dc05bf34f311162e64bb1ef9e7e54f3592671fe4061a08b44376b07adb64813f6dd83acb93d0fccf6dbdba2ed22327e8699cd7743d081504bee2c
   languageName: node
   linkType: hard
 
@@ -1235,6 +1222,13 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.5
   checksum: 8f3e23f8e4c312aff9dabc1104f9197b732c3e43115cf143322fc371cb025e5958d9ae1a1717d57add357a5cff8b6349a489b7b4b16cf7ce44a8bd71bbcaa5f8
+  languageName: node
+  linkType: hard
+
+"@jupyterlab/core-meta@npm:~4.6.0-alpha.4":
+  version: 4.6.0-alpha.4
+  resolution: "@jupyterlab/core-meta@npm:4.6.0-alpha.4"
+  checksum: 9ee7870b1a5f41a15d20bddd716bb916bc65888bb08b6d8fe6f51d71b9d7110e701b37dd0ae3fc83342839c74555da6d7b49006c638fd32808269e3558324c06
   languageName: node
   linkType: hard
 

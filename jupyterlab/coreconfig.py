@@ -5,7 +5,7 @@ import json
 import os.path as osp
 from itertools import filterfalse
 
-from .jlpmapp import HERE
+from jupyter_builder.jlpm import HERE
 
 
 def pjoin(*args):
