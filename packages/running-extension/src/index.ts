@@ -33,7 +33,7 @@ import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import type { AccordionLayout, AccordionPanel } from '@lumino/widgets';
+import type { AccordionLayout, AccordionPanel, Widget } from '@lumino/widgets';
 import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
 import { addRecentlyClosedSessionManager } from './recents';
@@ -267,7 +267,9 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         return;
       }
       const state: IMovedSectionsState = {
-        movedManagerNames: [...movedSections]
+        movedManagerNames: Array.from(fileBrowser.bottomWidgets).map(
+          w => w.title.label
+        )
       };
       if (fileBrowser.splitPanel) {
         state.splitSizes = fileBrowser.splitPanel.relativeSizes();
@@ -276,6 +278,121 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         MOVE_STATE_KEY,
         state as unknown as ReadonlyPartialJSONValue
       );
+    };
+
+    const addDragHandle = (widget: Widget): void => {
+      const panel = fileBrowser.bottomPanel;
+      if (!panel) {
+        return;
+      }
+      const idx = Array.from(fileBrowser.bottomWidgets).indexOf(widget);
+      if (idx < 0) {
+        return;
+      }
+      const titleEl = panel.titles[idx];
+      if (!titleEl.querySelector('.jp-FileBrowser-dragHandle')) {
+        const handle = document.createElement('span');
+        handle.className = 'jp-FileBrowser-dragHandle';
+        titleEl.prepend(handle);
+      }
+    };
+
+    let dragSetupDone = false;
+
+    const setupBottomPanelDrag = (): void => {
+      const panel = fileBrowser.bottomPanel!;
+
+      let draggedWidget: Widget | null = null;
+      let startY = 0;
+      let isDragging = false;
+
+      const indicator = document.createElement('div');
+      indicator.className = 'jp-FileBrowser-dropIndicator';
+      indicator.style.display = 'none';
+      panel.node.appendChild(indicator);
+
+      const getTargetSlot = (clientY: number): number => {
+        const layout = panel.layout as AccordionLayout;
+        const titles = Array.from(layout.titles);
+        for (let i = 0; i < titles.length; i++) {
+          const rect = titles[i].getBoundingClientRect();
+          if (clientY < rect.top + rect.height / 2) {
+            return i;
+          }
+        }
+        return titles.length;
+      };
+
+      const showIndicator = (targetSlot: number): void => {
+        const layout = panel.layout as AccordionLayout;
+        const titles = Array.from(layout.titles);
+        const panelRect = panel.node.getBoundingClientRect();
+        let top: number;
+        if (targetSlot < titles.length) {
+          top = titles[targetSlot].getBoundingClientRect().top - panelRect.top;
+        } else {
+          const last = titles[titles.length - 1].getBoundingClientRect();
+          top = last.bottom - panelRect.top;
+        }
+        indicator.style.top = `${top}px`;
+        indicator.style.display = 'block';
+      };
+
+      const endDrag = (clientY?: number): void => {
+        indicator.style.display = 'none';
+        panel.node.classList.remove('jp-mod-dragging');
+        if (isDragging && draggedWidget && clientY !== undefined) {
+          const currentIdx = Array.from(panel.widgets).indexOf(draggedWidget);
+          const targetSlot = getTargetSlot(clientY);
+          const insertIdx =
+            targetSlot > currentIdx ? targetSlot - 1 : targetSlot;
+          if (insertIdx !== currentIdx) {
+            panel.insertWidget(insertIdx, draggedWidget);
+            void saveState();
+          }
+        }
+        draggedWidget = null;
+        isDragging = false;
+      };
+
+      panel.node.addEventListener('pointerdown', (event: PointerEvent) => {
+        const target = event.target as HTMLElement;
+        const titleEl = target.closest(
+          '.jp-AccordionPanel-title'
+        ) as HTMLElement | null;
+        if (!titleEl || !target.closest('.jp-FileBrowser-dragHandle')) {
+          return;
+        }
+        const layout = panel.layout as AccordionLayout;
+        const idx = Array.from(layout.titles).indexOf(titleEl);
+        if (idx < 0) {
+          return;
+        }
+        draggedWidget = panel.widgets[idx];
+        startY = event.clientY;
+        panel.node.setPointerCapture(event.pointerId);
+      });
+
+      panel.node.addEventListener('pointermove', (event: PointerEvent) => {
+        if (!draggedWidget) {
+          return;
+        }
+        if (!isDragging && Math.abs(event.clientY - startY) > 5) {
+          isDragging = true;
+          panel.node.classList.add('jp-mod-dragging');
+        }
+        if (isDragging) {
+          showIndicator(getTargetSlot(event.clientY));
+        }
+      });
+
+      panel.node.addEventListener('pointerup', (event: PointerEvent) => {
+        endDrag(event.clientY);
+      });
+
+      panel.node.addEventListener('pointercancel', () => {
+        endDrag();
+      });
     };
 
     const moveToFileBrowser = (managerName: string) => {
@@ -289,6 +406,12 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       const wasHidden = widget.isHidden;
 
       fileBrowser.addBottomWidget(widget);
+
+      if (!dragSetupDone && fileBrowser.bottomPanel) {
+        setupBottomPanelDrag();
+        dragSetupDone = true;
+      }
+      addDragHandle(widget);
 
       if (wasHidden && fileBrowser.bottomPanel) {
         const idx = Array.from(fileBrowser.bottomWidgets).indexOf(widget);
@@ -440,6 +563,11 @@ const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           if (widget) {
             movedSections.add(name);
             fileBrowser.addBottomWidget(widget);
+            if (!dragSetupDone && fileBrowser.bottomPanel) {
+              setupBottomPanelDrag();
+              dragSetupDone = true;
+            }
+            addDragHandle(widget);
           } else {
             // Manager not yet registered; wait for it
             pendingMoves.add(name);
