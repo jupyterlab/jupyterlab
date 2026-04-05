@@ -186,8 +186,16 @@ test('Bulk rename should be blocked for different base names', async ({
   await dialog.locator('input').fill('renamed');
   await dialog.locator('.jp-Dialog-button.jp-mod-accept').click();
 
-  // Wait for dialog to close
-  await dialog.waitFor({ state: 'hidden' });
+  // ERROR dialog should appear
+  const errorDialog = page.locator('.jp-Dialog:has-text("Bulk Rename Error")');
+  await expect(errorDialog).toBeVisible();
+  await expect(errorDialog).toContainText(
+    'Cannot bulk rename: selected files must have the same base name.'
+  );
+
+  // Close the error dialog
+  await errorDialog.locator('.jp-Dialog-button').click();
+  await errorDialog.waitFor({ state: 'hidden' });
 
   // Files should remain unchanged
   const afterFile1 = await page.filebrowser.isFileListedInBrowser(file1);
