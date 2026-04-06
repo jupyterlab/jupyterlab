@@ -151,7 +151,7 @@ Try this section in a lightweight browser playground:
 1. Click **Load Interactive Example**.
 2. In the playground command palette, run `Load Current File As Extension`.
 3. Run `Extension Points Demo Command` from category `Common Extension Points`.
-:::
+   :::
 
 ```{raw} html
 <div class="jp-plugin-playground-embed">
