@@ -496,6 +496,12 @@ const resources: JupyterFrontEndPlugin<void> = {
             spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           commands.addCommand(bannerCommand, {
             label: trans.__('About the %1 Kernel', kernelName),
+            describedBy: {
+              args: {
+                type: 'object',
+                properties: {}
+              }
+            },
             isVisible: isEnabled,
             isEnabled,
             execute: () => {
@@ -530,6 +536,12 @@ const resources: JupyterFrontEndPlugin<void> = {
           (kernelInfo.help_links || []).forEach(link => {
             const commandId = `help-menu-${name}:${link.text}`;
             commands.addCommand(commandId, {
+              describedBy: {
+                args: {
+                  type: 'object',
+                  properties: {}
+                }
+              },
               label: commands.label(CommandIDs.open, link),
               isVisible: isEnabled,
               isEnabled,

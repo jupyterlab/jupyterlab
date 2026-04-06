@@ -540,7 +540,7 @@ const variables: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
-    handler: Debugger.Handler,
+    handler: IDebugger.IHandler,
     translator: ITranslator,
     themeManager: IThemeManager | null,
     rendermime: IRenderMimeRegistry | null

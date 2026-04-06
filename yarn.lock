@@ -2337,6 +2337,14 @@ __metadata:
     webpack-merge: ^5.8.0
     worker-loader: ^3.0.2
   checksum: b7d4d8a741f27e112d219dfb2b7b903d54dea83033b6caf6ef52b03851ef3248be7ec520cd936bdc6f9f9a1dd800afb9ca342f0fd11d593d2e9b750c0905d984
+"@jupyter/eslint-plugin@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@jupyter/eslint-plugin@npm:0.0.3"
+  dependencies:
+    "@typescript-eslint/utils": ^8.54.0
+  peerDependencies:
+    eslint: ">=9.0.0"
+  checksum: dcb427d1b5127fd59e3d8c72662fd4b0ba226f16fac163839bbe7739d33e93beda2c4b8d2d2040552c2512a276e27ac119ce24467818c923f42da6081da9e37b
   languageName: node
   linkType: hard
 
@@ -4796,6 +4804,7 @@ __metadata:
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
     "@eslint/js": ^10.0.1
+    "@jupyter/eslint-plugin": 0.0.3
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
@@ -8288,7 +8297,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.56.1, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0":
+"@typescript-eslint/utils@npm:8.56.1, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0, @typescript-eslint/utils@npm:^8.54.0":
   version: 8.56.1
   resolution: "@typescript-eslint/utils@npm:8.56.1"
   dependencies:
