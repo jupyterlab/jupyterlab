@@ -3,7 +3,7 @@
   "version": "3.5.0-alpha.4",
   "private": true,
   "scripts": {
-    "build": "npm run clean && build-labextension --core-package-file ../core_package/package.json .",
+    "build": "npm run clean && jupyter-builder build --core-package-file ../core_package/package.json .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-middle"
   },
   "dependencies": {
