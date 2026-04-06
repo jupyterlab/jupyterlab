@@ -4,7 +4,7 @@
   "private": true,
   "main": "./index.js",
   "scripts": {
-    "build": "npm run clean && jupyter-builder build --development --core-package-file ../core_package/package.json .",
+    "build": "npm run clean && jupyter-builder build --development=True --core-package-file ../core_package/package.json .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
