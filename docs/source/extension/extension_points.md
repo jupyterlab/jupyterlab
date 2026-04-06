@@ -145,6 +145,42 @@ Your command `label` function can then check the `args` it is provided for `isPa
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+:::{note}
+Try this section in a lightweight browser playground:
+
+1. Click **Load Interactive Example**.
+2. In the playground command palette, run `Load Current File As Extension`.
+3. Run `Extension Points Demo Command` from category `Common Extension Points`.
+:::
+
+```{raw} html
+<div class="jp-plugin-playground-embed">
+  <p class="jp-plugin-playground-description">
+    Interactive command registry + command palette example.
+  </p>
+  <div class="jp-plugin-playground-actions">
+    <button type="button" class="jp-plugin-playground-load">
+      Load Interactive Example
+    </button>
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?plugin=1.g.H4sIAGS002kC_4WT3WrcMBCFX2VqCt6Ad5sWeqP8tCVJYXsRAu1dtxDFGm9VZMmVxovD4nfvWPJ6zTalvhIanTmfzsj7bIc-aGcz8bbIKm3wXtaYiUxbhd2KQlZkwbW-jHt14zzBHr60zTOh_-ydpTuritONB9NutYUeKu9qyD_-SmUjn97IpjG6lMSW-cXGbuzUdH3j6lqyWBokwgLuHelqPPuvXi1pE1Kj0tlA0ERr8TLR5c5pdQ1XsN9YAK0E5NgR2iGAZeO0pbAsE8VSYe1E6pYXw3HZkvtK0pMA8i3GPY-_W-0xCPh-gv8jaUrSO0koYMGw4u_gmnRanN7-DK6uEyVAutjItb5l_P9Qk9tuDQ6pDHLuB2lHsbSSJmDMa6gx1GqUhpVUaoRYTGbFAYL7yCc0nNjdwRseojfcsieMyhRVpJbNMDgWfFKKreP46CcCa9DHYBCUKwNgJ-uGeSepDt8SL8cWgxjxpwPYYdnGVOc5Dd_xoq_G5cWxOH9QK20rt3gcsQ86Aa_3hxYfIOc3CnwBV1V5v3os5kbpPdwYFxjj3fvz82OpP5s8-7SIO2k5DnwIe01YL6aWY-TiOOhZlIRb558ZZeDl5E9nkM98omsfDbGL_5bCSrbm8G9wJev_AAd16pH4AwAA" target="_blank" rel="noopener noreferrer">
+      Open full JupyterLab view
+    </a>
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html?plugin=1.g.H4sIAGS002kC_4WT3WrcMBCFX2VqCt6Ad5sWeqP8tCVJYXsRAu1dtxDFGm9VZMmVxovD4nfvWPJ6zTalvhIanTmfzsj7bIc-aGcz8bbIKm3wXtaYiUxbhd2KQlZkwbW-jHt14zzBHr60zTOh_-ydpTuritONB9NutYUeKu9qyD_-SmUjn97IpjG6lMSW-cXGbuzUdH3j6lqyWBokwgLuHelqPPuvXi1pE1Kj0tlA0ERr8TLR5c5pdQ1XsN9YAK0E5NgR2iGAZeO0pbAsE8VSYe1E6pYXw3HZkvtK0pMA8i3GPY-_W-0xCPh-gv8jaUrSO0koYMGw4u_gmnRanN7-DK6uEyVAutjItb5l_P9Qk9tuDQ6pDHLuB2lHsbSSJmDMa6gx1GqUhpVUaoRYTGbFAYL7yCc0nNjdwRseojfcsieMyhRVpJbNMDgWfFKKreP46CcCa9DHYBCUKwNgJ-uGeSepDt8SL8cWgxjxpwPYYdnGVOc5Dd_xoq_G5cWxOH9QK20rt3gcsQ86Aa_3hxYfIOc3CnwBV1V5v3os5kbpPdwYFxjj3fvz82OpP5s8-7SIO2k5DnwIe01YL6aWY-TiOOhZlIRb558ZZeDl5E9nkM98omsfDbGL_5bCSrbm8G9wJev_AAd16pH4AwAA" target="_blank" rel="noopener noreferrer">
+      Open lightweight Notebook v7 view
+    </a>
+  </div>
+  <div class="jp-plugin-playground-frame" hidden>
+    <iframe
+      class="jp-plugin-playground-iframe"
+      title="Common extension points interactive example"
+      loading="lazy"
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+    ></iframe>
+  </div>
+</div>
+```
+
 (context-menu)=
 
 ## Context Menu
