@@ -2409,6 +2409,7 @@ __metadata:
     "@jupyterlab/application-extension": ~4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ~4.6.0-alpha.4
     "@jupyterlab/audio-extension": ~4.6.0-alpha.4
+    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/buildutils": ^4.6.0-alpha.4
     "@jupyterlab/cell-toolbar-extension": ~4.6.0-alpha.4
     "@jupyterlab/celltags-extension": ~4.6.0-alpha.4
@@ -4447,6 +4448,7 @@ __metadata:
   resolution: "@jupyterlab/mock-consumer@workspace:jupyterlab/tests/mock_packages/interop/consumer"
   dependencies:
     "@jupyter/builder": ^0.0.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/mock-token": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
@@ -4456,6 +4458,7 @@ __metadata:
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
     "@jupyter/builder": ^0.0.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/launcher": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
@@ -4465,6 +4468,7 @@ __metadata:
   resolution: "@jupyterlab/mock-provider@workspace:jupyterlab/tests/mock_packages/interop/provider"
   dependencies:
     "@jupyter/builder": ^0.0.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/mock-token": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
@@ -4474,6 +4478,7 @@ __metadata:
   resolution: "@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension"
   dependencies:
     "@jupyter/builder": ^0.0.3
+    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/services": ^7.6.0-alpha.4
   languageName: unknown
   linkType: soft
