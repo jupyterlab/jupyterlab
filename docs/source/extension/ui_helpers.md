@@ -122,6 +122,42 @@ InputDialog.getPassword({ title: 'Input password' }).then(value => {
 });
 ```
 
+:::{note}
+Try these helpers in a lightweight browser playground:
+
+1. Click **Load Interactive Example**.
+2. In the playground command palette, run `Load Current File As Extension`.
+3. Run commands from category `User Interface Helpers`.
+:::
+
+```{raw} html
+<div class="jp-plugin-playground-embed">
+  <p class="jp-plugin-playground-description">
+    Interactive dialogs + notifications example.
+  </p>
+  <div class="jp-plugin-playground-actions">
+    <button type="button" class="jp-plugin-playground-load">
+      Load Interactive Example
+    </button>
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?plugin=1.g.H4sIAGS002kC_62VTW_bMAyG_wrhQ-MAqddhN3ftPtoV6w7FgLbYYelBtZlEqyx5FpUmKPLfR0tOYztZkAEzfLApiR8PX9ov0RwrK42O0rejaCIV3ogCozSSOsdFQjYaRda4KvO2ojQVwQt8c-WSsLqqjKYvOh_1Dd-Vm0oNK5hUpoDBx19hWYnHN6IslcwEccjB6ViP9drpWANcSqHMdFQ_Xl-YohDsSigkwmDTpaPWnhtDctI48wY7M89hfaz_EtyRVDZEzoy2BKXPNd1dwvu5kfk5nIX0ZJ7CwMnjGaqSqR3nWJg0nB_4-MKRuSVRUQpUuZB0hb-drNCm8LNX00M4k5GcC8IUYk4v3WZbht1pH8kQzs5DXgChlNyX3uzipLdyDRvq6jeHZA11zxm_3j2iW9z3nGxvC8RrF1xkkoVDNhF53jiIO8mP1oUBcN9QMff7a_gavMNl7R1uudmNYgL9-sIFZq6GJexSZxC3Ifnoz0JSSydxaw2AJCncjrVxX1-PJl_ynruZtA1x4KfapQ6SE5qhcgt9ZxFyk7kCNXkOnKAoSoVJz6cjYrSskZBWkgmdofrszfFw1NSZmKfG9PLK5dY4JglTY_IBrIYPG7er4en6ZRUevGV_G9pyOKQLn-wTXJkK7nBBh7ch6Iinwili6YSutMY7mSLVHne358dM-B46lQPNsKNHsGL5YdCDsHmVE4hD2CQwT0SWYUlwdNSkk8yFcjxcncjtL00i9cTE7c3MyY_-hTKW83t3cnLShv-K_1_6sGPGDmmHT3S5oxFbLeiUZB1TsDYOquZbQGPqwvX6rpGzqFn9HJKF3EXVA3GgHJuPXE3gmrBgfTdQUuh9GDgTnJqqHsF7ixWrhkdtIjJckxhsIu3x2tX5f3K6s2mH-2YsK08EF_6fmONE1AMSfjG8Eq3-ABRkVG2wBwAA" target="_blank" rel="noopener noreferrer">
+      Open full JupyterLab view
+    </a>
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html?plugin=1.g.H4sIAGS002kC_62VTW_bMAyG_wrhQ-MAqddhN3ftPtoV6w7FgLbYYelBtZlEqyx5FpUmKPLfR0tOYztZkAEzfLApiR8PX9ov0RwrK42O0rejaCIV3ogCozSSOsdFQjYaRda4KvO2ojQVwQt8c-WSsLqqjKYvOh_1Dd-Vm0oNK5hUpoDBx19hWYnHN6IslcwEccjB6ViP9drpWANcSqHMdFQ_Xl-YohDsSigkwmDTpaPWnhtDctI48wY7M89hfaz_EtyRVDZEzoy2BKXPNd1dwvu5kfk5nIX0ZJ7CwMnjGaqSqR3nWJg0nB_4-MKRuSVRUQpUuZB0hb-drNCm8LNX00M4k5GcC8IUYk4v3WZbht1pH8kQzs5DXgChlNyX3uzipLdyDRvq6jeHZA11zxm_3j2iW9z3nGxvC8RrF1xkkoVDNhF53jiIO8mP1oUBcN9QMff7a_gavMNl7R1uudmNYgL9-sIFZq6GJexSZxC3Ifnoz0JSSydxaw2AJCncjrVxX1-PJl_ynruZtA1x4KfapQ6SE5qhcgt9ZxFyk7kCNXkOnKAoSoVJz6cjYrSskZBWkgmdofrszfFw1NSZmKfG9PLK5dY4JglTY_IBrIYPG7er4en6ZRUevGV_G9pyOKQLn-wTXJkK7nBBh7ch6Iinwili6YSutMY7mSLVHne358dM-B46lQPNsKNHsGL5YdCDsHmVE4hD2CQwT0SWYUlwdNSkk8yFcjxcncjtL00i9cTE7c3MyY_-hTKW83t3cnLShv-K_1_6sGPGDmmHT3S5oxFbLeiUZB1TsDYOquZbQGPqwvX6rpGzqFn9HJKF3EXVA3GgHJuPXE3gmrBgfTdQUuh9GDgTnJqqHsF7ixWrhkdtIjJckxhsIu3x2tX5f3K6s2mH-2YsK08EF_6fmONE1AMSfjG8Eq3-ABRkVG2wBwAA" target="_blank" rel="noopener noreferrer">
+      Open lightweight Notebook v7 view
+    </a>
+  </div>
+  <div class="jp-plugin-playground-frame" hidden>
+    <iframe
+      class="jp-plugin-playground-iframe"
+      title="User interface helpers interactive example"
+      loading="lazy"
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+    ></iframe>
+  </div>
+</div>
+```
+
 ### File Dialogs
 
 Two helper functions to ask a user to open a file or a folder are

@@ -541,6 +541,7 @@ def setup(app):
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
+    app.add_js_file("js/plugin_playground_embed.js")
     # Skip we are dealing with internationalization
     outdir = Path(app.outdir)
     if outdir.name != "gettext":

@@ -40,6 +40,7 @@ Before we get started, here are some resources for hands-on practice or more in-
 Learn how to write JupyterLab extensions with these guides:
 
 - {ref}`extension-tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
+- [JupyterLab Plugin Playground (JupyterLite)](https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/): Prototype and test extension ideas directly in the browser.
 - {ref}`Making Extensions Compatible with Multiple Applications Tutorial <multiple-ui-extensions>`
   A tutorial for making extensions that work in both JupyterLab, Jupyter Notebook 7+ and more
 - The [JupyterLab Extension Examples Repository](https://github.com/jupyterlab/extension-examples): A short tutorial series to learn how to develop extensions for JupyterLab by example.
