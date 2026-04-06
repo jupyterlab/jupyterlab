@@ -3289,6 +3289,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-app@workspace:examples/app"
   dependencies:
+    "@jupyter/builder": ^0.0.3
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/application-extension": ^4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
@@ -3392,6 +3393,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-core@workspace:examples/federated/core_package"
   dependencies:
+    "@jupyter/builder": ^0.0.3
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/application-extension": ^4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
@@ -3449,6 +3451,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-md@workspace:examples/federated/md_package"
   dependencies:
+    "@jupyter/builder": ^0.0.3
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/example-federated-middle": ^3.5.0-alpha.4
@@ -3462,6 +3465,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-middle@workspace:examples/federated/middle_package"
   dependencies:
+    "@jupyter/builder": ^0.0.3
     "@jupyterlab/builder": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
     rimraf: ~5.0.5
@@ -3778,6 +3782,7 @@ __metadata:
   resolution: "@jupyterlab/galata-extension@workspace:galata/extension"
   dependencies:
     "@fontsource-variable/noto-sans-sc": ^5.2.10
+    "@jupyter/builder": ^0.0.3
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/apputils": ^4.7.0-alpha.4
     "@jupyterlab/builder": ^4.6.0-alpha.4
