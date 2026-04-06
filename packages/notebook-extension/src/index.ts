@@ -390,11 +390,11 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
 };
 
 /**
- * The notebook cell factory provider.
+ * The notebook and cell factory provider.
  */
 const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
-  description: 'Provides the notebook cell factory.',
+  description: 'Provides the notebook and cell factory.',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -2518,6 +2518,7 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
   tracker.activeCellChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
   });
@@ -3358,7 +3359,18 @@ function addCommands(
         return NotebookActions.deleteCells(current.content);
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      // The 'deletable' metadata is optional, null and undefined values should be made truthy
+      const deletable =
+        (current.content.activeCell?.model.getMetadata(
+          'deletable'
+        ) as unknown as boolean) !== false;
+      return deletable;
+    },
     describedBy: {
       args: {
         type: 'object',

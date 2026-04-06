@@ -11,6 +11,7 @@ import {
   homeIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
+import { PathNavigator } from './pathnavigator';
 import { JSONExt } from '@lumino/coreutils';
 import { Throttler } from '@lumino/polling';
 import type { Drag } from '@lumino/dragdrop';
@@ -59,6 +60,21 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
 /**
+ * The class name for the container span that holds all breadcrumb items.
+ */
+const BREADCRUMB_CONTAINER_CLASS = 'jp-BreadCrumbs-container';
+
+/**
+ * The class name for the inner wrapper that hugs breadcrumb content.
+ */
+const BREADCRUMB_CONTENT_CLASS = 'jp-BreadCrumbs-content';
+
+/**
+ * The class name added to the breadcrumb node when in edit mode.
+ */
+const BREADCRUMB_EDIT_MODE_CLASS = 'jp-mod-editMode';
+
+/**
  * A class which hosts folder breadcrumbs.
  */
 export class BreadCrumbs extends Widget {
@@ -79,11 +95,15 @@ export class BreadCrumbs extends Widget {
     this._crumbs = Private.createCrumbs();
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
-    if (this._hasPreferred) {
-      this.node.appendChild(this._crumbs[Private.Crumb.Preferred]);
-    }
-    this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    this._model.refreshed.connect(this.update, this);
+    this._crumbContainer = document.createElement('span');
+    this._crumbContainer.className = BREADCRUMB_CONTAINER_CLASS;
+    this._crumbContent = document.createElement('span');
+    this._crumbContent.className = BREADCRUMB_CONTENT_CLASS;
+    this._crumbContainer.appendChild(this._crumbContent);
+
+    this.node.appendChild(this._crumbContainer);
+
+    this._model.refreshed.connect(this._onModelRefreshed, this);
     this._resizeThrottler = new Throttler(() => this._onResize(), 50);
     this._resizeObserver = new ResizeObserver(entries => {
       const entry = entries[0];
@@ -97,6 +117,12 @@ export class BreadCrumbs extends Widget {
         void this._resizeThrottler.invoke();
       }
     });
+
+    this._pathNavigator = new PathNavigator({
+      model: this._model,
+      translator: options.translator
+    });
+    this._pathNavigator.closed.connect(this._exitEditMode, this);
   }
 
   /**
@@ -171,6 +197,9 @@ export class BreadCrumbs extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._model.refreshed.disconnect(this._onModelRefreshed, this);
+    this._pathNavigator.closed.disconnect(this._exitEditMode, this);
+    this._pathNavigator.dispose();
     this._resizeObserver.disconnect();
     this._resizeThrottler.dispose();
     super.dispose();
@@ -189,12 +218,14 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragover', this);
     this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
+    Widget.attach(this._pathNavigator, this.node);
   }
 
   /**
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
+    Widget.detach(this._pathNavigator);
     super.onBeforeDetach(msg);
     const node = this.node;
     node.removeEventListener('click', this);
@@ -209,9 +240,20 @@ export class BreadCrumbs extends Widget {
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
+    if (this._isEditMode) {
+      // In edit mode the CSS class hides breadcrumb content,
+      // we do not need to refresh, as only the pathnavigator is visible.
+      return;
+    }
+
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
+
+    // We track the path on which we are;
+    // this is to make sure we don't exit edit mode on model refresh if
+    // the path has not changed.
+    this._lastPath = localPath;
 
     // Invalidate cached widths if the path changed
     if (this._previousState && this._previousState.path !== localPath) {
@@ -221,8 +263,9 @@ export class BreadCrumbs extends Widget {
     // Calculate adaptive items based on available width
     const adaptiveItems = this._calculateAdaptiveItems(localPath);
 
-    const state = {
+    const state: Private.ICrumbsState = {
       path: localPath,
+      root: this._model.root,
       hasPreferred: this._hasPreferred,
       fullPath: this._fullPath,
       minimumLeftItems: adaptiveItems.left,
@@ -232,7 +275,8 @@ export class BreadCrumbs extends Widget {
       return;
     }
     this._previousState = state;
-    Private.updateCrumbs(this._crumbs, state);
+
+    Private.updateCrumbs(this._crumbContent, this._crumbs, state);
   }
 
   /**
@@ -241,6 +285,11 @@ export class BreadCrumbs extends Widget {
   private _evtClick(event: MouseEvent): void {
     // Do nothing if it's not a left mouse press.
     if (event.button !== 0) {
+      return;
+    }
+
+    // In edit mode the PathNavigator owns all interaction.
+    if (this._isEditMode) {
       return;
     }
 
@@ -286,6 +335,11 @@ export class BreadCrumbs extends Widget {
       }
       node = node.parentElement as HTMLElement;
     }
+
+    // Click landed on the breadcrumb background (including separators
+    // between crumb items) — enter edit mode.  This is intentional: the
+    // entire breadcrumb bar acts as a click target for the path editor.
+    this._enterEditMode();
   }
 
   /**
@@ -415,7 +469,7 @@ export class BreadCrumbs extends Widget {
    */
   private _getBreadcrumbElements(): HTMLElement[] {
     const elements: HTMLElement[] = [];
-    const children = this.node.children;
+    const children = this._crumbContent.children;
     for (let i = 0; i < children.length; i++) {
       const child = children[i] as HTMLElement;
       if (
@@ -448,7 +502,7 @@ export class BreadCrumbs extends Widget {
    * including those currently hidden behind the ellipsis.
    */
   private _measureAllItemWidths(parts: string[]): void {
-    const node = this.node;
+    const node = this._crumbContent;
 
     // Measure fixed elements that are already in the DOM
     const home = this._crumbs[Private.Crumb.Home];
@@ -600,6 +654,54 @@ export class BreadCrumbs extends Widget {
     };
   }
 
+  /**
+   * Enter edit mode: show the path input and hide the breadcrumb content.
+   */
+  private _enterEditMode(): void {
+    this._isEditMode = true;
+    // Snapshot the current path so _onModelRefreshed can reliably detect
+    // whether the path actually changed while in edit mode.
+    const contents = this._model.manager.services.contents;
+    this._lastPath = contents.localPath(this._model.path);
+    this.node.classList.add(BREADCRUMB_EDIT_MODE_CLASS);
+    // Clear cached state so that when we exit edit mode, onUpdateRequest
+    // will unconditionally re-render the breadcrumbs (the path may have
+    // changed while we were editing).  _exitEditMode also clears this for
+    // the same reason — the double-null is intentional even if technically
+    // unnecessary.
+    this._previousState = null;
+    this._pathNavigator.open();
+  }
+
+  /**
+   * Exit edit mode and restore the breadcrumb display.
+   */
+  private _exitEditMode(): void {
+    if (!this._isEditMode) {
+      return;
+    }
+    this._isEditMode = false;
+    this.node.classList.remove(BREADCRUMB_EDIT_MODE_CLASS);
+    this._previousState = null;
+    this.update();
+  }
+
+  /**
+   * Handle the model's `refreshed` signal.
+   * If we are in edit mode, dismiss it (the model path may have changed).
+   */
+  private _onModelRefreshed(): void {
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
+    if (this._isEditMode) {
+      if (localPath !== this._lastPath) {
+        this._exitEditMode();
+      }
+      return;
+    }
+    this.update();
+  }
+
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: FileBrowserModel;
@@ -619,6 +721,11 @@ export class BreadCrumbs extends Widget {
     itemWidths: number[];
   } | null = null;
   private _lastRenderedWidth = 0;
+  private _isEditMode = false;
+  private _lastPath = '';
+  private _crumbContainer: HTMLElement;
+  private _crumbContent: HTMLElement;
+  private _pathNavigator: PathNavigator;
 }
 
 /**
@@ -675,6 +782,7 @@ namespace Private {
   export interface ICrumbsState {
     [key: string]: string | boolean | number;
     path: string;
+    root: string;
     hasPreferred: boolean;
     fullPath: boolean;
     minimumLeftItems: number;
@@ -682,80 +790,96 @@ namespace Private {
   }
 
   /**
-   * Populate the breadcrumb node.
+   * Populate the breadcrumb container node.
+   *
+   * @param container - The container element that holds breadcrumb items.
+   * @param breadcrumbs - The reusable breadcrumb elements (Home, Ellipsis, Preferred).
+   * @param state - The current breadcrumb state.
    */
   export function updateCrumbs(
+    container: HTMLElement,
     breadcrumbs: ReadonlyArray<HTMLElement>,
     state: ICrumbsState
   ): void {
-    const node = breadcrumbs[0].parentNode as HTMLElement;
+    const nodes: Node[] = [];
 
-    // Remove all but the home or preferred node.
-    const firstChild = node.firstChild as HTMLElement;
-    while (firstChild && firstChild.nextSibling) {
-      node.removeChild(firstChild.nextSibling);
-    }
+    // Calculate the starting index for breadcrumbs based on root restriction
+    const rootParts = state.root
+      ? state.root.split('/').filter(part => part !== '')
+      : [];
+    const rootDepth = rootParts.length;
 
-    if (state.hasPreferred) {
-      node.appendChild(breadcrumbs[Crumb.Home]);
-      node.appendChild(createCrumbSeparator());
+    // Only show home/preferred if there's no root restriction
+    if (!state.root) {
+      if (state.hasPreferred) {
+        nodes.push(breadcrumbs[Private.Crumb.Preferred]);
+      }
+      nodes.push(breadcrumbs[Crumb.Home], createCrumbSeparator());
     } else {
-      node.appendChild(createCrumbSeparator());
+      // With root restriction, just add an initial separator
+      nodes.push(createCrumbSeparator());
     }
 
     const parts = state.path.split('/').filter(part => part !== '');
-    if (!state.fullPath && parts.length > 0) {
+    // Filter parts to only show those at or below the root
+    const visibleParts = state.root ? parts.slice(rootDepth) : parts;
+    const visibleStartIndex = rootDepth;
+
+    if (!state.fullPath && visibleParts.length > 0) {
       const minimumLeftItems = state.minimumLeftItems;
       const minimumRightItems = state.minimumRightItems;
 
-      // Check if we need ellipsis
-      if (parts.length > minimumLeftItems + minimumRightItems) {
+      // Check if we need ellipsis (based on visible parts)
+      if (visibleParts.length > minimumLeftItems + minimumRightItems) {
         // Add left items
         for (let i = 0; i < minimumLeftItems; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
-          node.appendChild(elem);
-          node.appendChild(createCrumbSeparator());
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          nodes.push(createBreadcrumbElement(visibleParts[i], elemPath));
+          nodes.push(createCrumbSeparator());
         }
 
         // Add ellipsis
-        node.appendChild(breadcrumbs[Crumb.Ellipsis]);
         const hiddenStartIndex = minimumLeftItems;
-        const hiddenEndIndex = parts.length - minimumRightItems;
-        const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
-        const hiddenFolders = hiddenParts.join('/');
-        const hiddenPath =
-          hiddenParts.length > 0
-            ? parts.slice(0, hiddenEndIndex).join('/')
-            : parts.slice(0, minimumLeftItems).join('/');
-        breadcrumbs[Crumb.Ellipsis].title = hiddenFolders;
-        breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
-        node.appendChild(createCrumbSeparator());
+        const hiddenEndIndex = visibleParts.length - minimumRightItems;
+        const hiddenVisibleParts = visibleParts.slice(
+          hiddenStartIndex,
+          hiddenEndIndex
+        );
+        const ellipsis = breadcrumbs[Crumb.Ellipsis];
+        ellipsis.title = hiddenVisibleParts.join('/');
+        ellipsis.dataset.path =
+          hiddenVisibleParts.length > 0
+            ? parts.slice(0, visibleStartIndex + hiddenEndIndex).join('/')
+            : parts.slice(0, visibleStartIndex + minimumLeftItems).join('/');
+        nodes.push(ellipsis, createCrumbSeparator());
 
         // Add right items
-        const rightStartIndex = parts.length - minimumRightItems;
-        for (let i = rightStartIndex; i < parts.length; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
-          node.appendChild(elem);
-          node.appendChild(createCrumbSeparator());
+        const rightStartIndex = visibleParts.length - minimumRightItems;
+        for (let i = rightStartIndex; i < visibleParts.length; i++) {
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          nodes.push(createBreadcrumbElement(visibleParts[i], elemPath));
+          nodes.push(createCrumbSeparator());
         }
       } else {
-        for (let i = 0; i < parts.length; i++) {
-          const elemPath = parts.slice(0, i + 1).join('/');
-          const elem = createBreadcrumbElement(parts[i], elemPath);
-          node.appendChild(elem);
-          node.appendChild(createCrumbSeparator());
+        for (let i = 0; i < visibleParts.length; i++) {
+          const fullIndex = visibleStartIndex + i;
+          const elemPath = parts.slice(0, fullIndex + 1).join('/');
+          nodes.push(createBreadcrumbElement(visibleParts[i], elemPath));
+          nodes.push(createCrumbSeparator());
         }
       }
-    } else if (state.fullPath && parts.length > 0) {
-      for (let i = 0; i < parts.length; i++) {
-        const elemPath = parts.slice(0, i + 1).join('/');
-        const elem = createBreadcrumbElement(parts[i], elemPath);
-        node.appendChild(elem);
-        node.appendChild(createCrumbSeparator());
+    } else if (state.fullPath && visibleParts.length > 0) {
+      for (let i = 0; i < visibleParts.length; i++) {
+        const fullIndex = visibleStartIndex + i;
+        const elemPath = parts.slice(0, fullIndex + 1).join('/');
+        nodes.push(createBreadcrumbElement(visibleParts[i], elemPath));
+        nodes.push(createCrumbSeparator());
       }
     }
+
+    container.replaceChildren(...nodes);
   }
 
   /**

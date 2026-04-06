@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('./pathnavigator.css');
+
 /*-----------------------------------------------------------------------------
 | Variables
 |----------------------------------------------------------------------------*/
@@ -54,6 +56,20 @@
 .jp-BreadCrumbs {
   flex: 0 0 auto;
   margin: 8px 12px;
+  cursor: text;
+}
+
+.jp-BreadCrumbs:hover:not(:has(.jp-BreadCrumbs-content:hover)) {
+  background: var(--jp-layout-color2);
+}
+
+/* The container holds breadcrumb icons, separators, and items */
+.jp-BreadCrumbs-container {
+  min-width: 0;
+}
+
+.jp-BreadCrumbs.jp-mod-editMode > .jp-BreadCrumbs-container {
+  display: none;
 }
 
 .jp-BreadCrumbs-item {
@@ -61,6 +77,7 @@
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
+  word-break: break-word;
 }
 
 .jp-BreadCrumbs-item:hover {
@@ -180,12 +197,18 @@
   flex: 1 0 70px;
 }
 
+.jp-DirListing-headerItem.jp-id-created:not([style*='width']) {
+  /* default width before user resizes this column */
+  flex: 1 0 70px;
+}
+
 .jp-DirListing-headerItem.jp-id-filesize:not([style*='width']) {
   /* default width before user resizes this column */
   flex: 0 0 75px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified,
+.jp-DirListing-headerItem.jp-id-created,
 .jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
   /* stylelint-disable */
@@ -195,14 +218,16 @@
 
 /**
  * Use container queries (not yet supported by our version of stylelint)
- * to display either a small or large header for the last-modified column.
+ * to display either a small or large header for the date and file size columns.
  */
 /* stylelint-disable */
-@container (max-width: 300px) {
+@container (max-width: 100px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-small {
     display: inline;
   }
@@ -210,34 +235,8 @@
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-large,
   .jp-DirListing-headerItem.jp-id-filesize
-    > .jp-DirListing-headerItemText-large {
-    display: none;
-  }
-}
-
-/* stylelint-disable */
-@container (min-width: 300px) {
-  /* stylelint-enable */
-  .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText-small {
-    display: none;
-  }
-
-  .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText-large {
-    display: inline;
-  }
-}
-
-/* stylelint-disable */
-@container (max-width: 100px) {
-  /* stylelint-enable */
-  .jp-DirListing-headerItem.jp-id-filesize
-    > .jp-DirListing-headerItemText-small {
-    display: inline;
-  }
-
-  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-large {
     display: none;
   }
@@ -246,12 +245,20 @@
 /* stylelint-disable */
 @container (min-width: 100px) {
   /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-small {
     display: none;
   }
 
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-large,
   .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-created
     > .jp-DirListing-headerItemText-large {
     display: inline;
   }
@@ -382,7 +389,8 @@
 
 .jp-DirListing-itemText,
 .jp-DirListing-itemModified,
-.jp-DirListing-itemFileSize {
+.jp-DirListing-itemFileSize,
+.jp-DirListing-itemCreated {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -414,6 +422,10 @@
 }
 
 .jp-DirListing-itemFileSize {
+  text-align: right;
+}
+
+.jp-DirListing-itemCreated {
   text-align: right;
 }
 

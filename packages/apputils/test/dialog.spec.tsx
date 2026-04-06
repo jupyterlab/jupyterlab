@@ -166,7 +166,7 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
-          simulate(dialog.node, 'keydown', { keyCode: 27 });
+          simulate(dialog.node, 'keydown', { key: 'Escape' });
           expect((await prompt).button.accept).toBe(false);
         });
 
@@ -174,7 +174,7 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
-          simulate(dialog.node, 'keydown', { keyCode: 13 });
+          simulate(dialog.node, 'keydown', { key: 'Enter' });
           expect((await prompt).button.accept).toBe(true);
         });
 
@@ -214,7 +214,7 @@ describe('@jupyterlab/apputils', () => {
 
           if (textarea) {
             (textarea as HTMLTextAreaElement).focus();
-            simulate(textarea, 'keydown', { key: 'Enter', keyCode: 13 });
+            simulate(textarea, 'keydown', { key: 'Enter' });
           }
 
           expect(dialog.isVisible).toBe(true);
@@ -238,11 +238,11 @@ describe('@jupyterlab/apputils', () => {
           await waitForDialog();
 
           // press right arrow twice (focusing on "third")
-          simulate(dialog.node, 'keydown', { keyCode: 39 });
-          simulate(dialog.node, 'keydown', { keyCode: 39 });
+          simulate(dialog.node, 'keydown', { key: 'ArrowRight' });
+          simulate(dialog.node, 'keydown', { key: 'ArrowRight' });
 
           // press enter
-          simulate(dialog.node, 'keydown', { keyCode: 13 });
+          simulate(dialog.node, 'keydown', { key: 'Enter' });
           const promptResult = await prompt;
           expect(promptResult.button.label).toBe('third');
           dialog.dispose();
@@ -253,7 +253,7 @@ describe('@jupyterlab/apputils', () => {
 
           await waitForDialog();
           expect(document.activeElement!.className).toContain('jp-mod-accept');
-          simulate(dialog.node, 'keydown', { keyCode: 9 });
+          simulate(dialog.node, 'keydown', { key: 'Tab' });
           expect(document.activeElement!.className).toContain('jp-mod-reject');
           simulate(document.activeElement!, 'click');
           expect((await prompt).button.accept).toBe(false);
@@ -269,7 +269,7 @@ describe('@jupyterlab/apputils', () => {
           const canceled = !dialog.node.dispatchEvent(generate('contextmenu'));
 
           expect(canceled).toBe(true);
-          simulate(dialog.node, 'keydown', { keyCode: 27 });
+          simulate(dialog.node, 'keydown', { key: 'Escape' });
           expect((await prompt).button.accept).toBe(false);
         });
       });
