@@ -2315,6 +2315,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jupyter/eslint-plugin@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@jupyter/eslint-plugin@npm:0.0.3"
+  dependencies:
+    "@typescript-eslint/utils": ^8.54.0
+  peerDependencies:
+    eslint: ">=9.0.0"
+  checksum: dcb427d1b5127fd59e3d8c72662fd4b0ba226f16fac163839bbe7739d33e93beda2c4b8d2d2040552c2512a276e27ac119ce24467818c923f42da6081da9e37b
+  languageName: node
+  linkType: hard
+
 "@jupyter/react-components@npm:^0.16.6":
   version: 0.16.6
   resolution: "@jupyter/react-components@npm:0.16.6"
@@ -3783,7 +3794,7 @@ __metadata:
     "@jupyterlab/services": ^7.6.0-alpha.4
     "@jupyterlab/settingregistry": ^4.6.0-alpha.4
     "@lumino/coreutils": ^2.2.2
-    "@playwright/test": ^1.58.0
+    "@playwright/test": ^1.59.0
     "@stdlib/stats": ~0.0.13
     fs-extra: ^10.1.0
     json5: ^2.2.3
@@ -4761,6 +4772,7 @@ __metadata:
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
     "@eslint/js": ^10.0.1
+    "@jupyter/eslint-plugin": 0.0.3
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
@@ -6295,14 +6307,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.58.0":
-  version: 1.58.0
-  resolution: "@playwright/test@npm:1.58.0"
+"@playwright/test@npm:^1.59.0":
+  version: 1.59.0
+  resolution: "@playwright/test@npm:1.59.0"
   dependencies:
-    playwright: 1.58.0
+    playwright: 1.59.0
   bin:
     playwright: cli.js
-  checksum: 5f9bb3a32f99c176b525d4535afc6c4aacb7faa7c97c4c04cd75c39e59991789c9bf63cb788163747b2934fc7c987969c3ded278e93984a9596846ac6ac3afd3
+  checksum: 8087b6350f82cfdf298d79000d592b8e78c1408ad60647b21b1d067f4aa22789aa260db52447bf34eb092ddbaf8e74bb82106e9a6c1ea1b5e536e962130d2753
   languageName: node
   linkType: hard
 
@@ -8253,7 +8265,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.56.1, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0":
+"@typescript-eslint/utils@npm:8.56.1, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0, @typescript-eslint/utils@npm:^8.54.0":
   version: 8.56.1
   resolution: "@typescript-eslint/utils@npm:8.56.1"
   dependencies:
@@ -18243,9 +18255,9 @@ __metadata:
   linkType: hard
 
 "path-to-regexp@npm:~0.1.12":
-  version: 0.1.12
-  resolution: "path-to-regexp@npm:0.1.12"
-  checksum: ab237858bee7b25ecd885189f175ab5b5161e7b712b360d44f5c4516b8d271da3e4bf7bf0a7b9153ecb04c7d90ce8ff5158614e1208819cf62bac2b08452722e
+  version: 0.1.13
+  resolution: "path-to-regexp@npm:0.1.13"
+  checksum: 0bf61c6068a0d92dbd3c2f4b24a9b8f153be2d8ec13c99bb7a45f31e5f7e153b91811e63b895ac9e0942ae16890ee15526e842f6f1b4920aa01335f94f6ce58e
   languageName: node
   linkType: hard
 
@@ -18423,27 +18435,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.58.0":
-  version: 1.58.0
-  resolution: "playwright-core@npm:1.58.0"
+"playwright-core@npm:1.59.0":
+  version: 1.59.0
+  resolution: "playwright-core@npm:1.59.0"
   bin:
     playwright-core: cli.js
-  checksum: b7382011a9de8be947eefb93e75848bbe0653edd451697a89f4124ea9129197160644a9ff3073af30ce86e79693424dd38a91ca71236b137197854536610f291
+  checksum: 1266bf7e5fd53601afdc1b0b5f5d6c7f6ef9f968fe5e21e6d1af7bc9c6888f483bba034d4ebf3b5e96b1eed1fa462a064cd29fbe480db7161ab5741f9e1cac16
   languageName: node
   linkType: hard
 
-"playwright@npm:1.58.0":
-  version: 1.58.0
-  resolution: "playwright@npm:1.58.0"
+"playwright@npm:1.59.0":
+  version: 1.59.0
+  resolution: "playwright@npm:1.59.0"
   dependencies:
     fsevents: 2.3.2
-    playwright-core: 1.58.0
+    playwright-core: 1.59.0
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 8f67b7dd946901867785f24c3a6fe4d4f284f4fe54d82193d515d8a45a6402725d06f43b8ed885d96f67671c1334e2f8a2131fe993e0f2c2ab29a56a32157489
+  checksum: 142298cdb76a68b712021211017278b0a977a066aad9bc0e1fa585d50a3272bc1a1099d83892ad68d5125a765501cc8187ab7bd0cc133cb738500b62e3608d1e
   languageName: node
   linkType: hard
 
