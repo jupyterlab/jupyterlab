@@ -128,7 +128,7 @@ Try these helpers in a lightweight browser playground:
 1. Click **Load Interactive Example**.
 2. In the playground command palette, run `Load Current File As Extension`.
 3. Run commands from category `User Interface Helpers`.
-:::
+   :::
 
 ```{raw} html
 <div class="jp-plugin-playground-embed">
