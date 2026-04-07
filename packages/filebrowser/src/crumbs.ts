@@ -596,7 +596,7 @@ export class BreadCrumbs extends Widget {
     // Calculate available space for items
     let fixedOverhead = homeWidth + separatorWidth;
     if (this._hasPreferred) {
-      fixedOverhead += preferredWidth + separatorWidth;
+      fixedOverhead += preferredWidth;
     }
     const availableForItems = containerWidth - fixedOverhead;
 
