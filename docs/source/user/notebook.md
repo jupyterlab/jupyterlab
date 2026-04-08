@@ -277,6 +277,24 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 
 - [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
 
+## Mermaid Diagrams
+
+JupyterLab supports rendering **Mermaid diagrams** in Markdown cells and
+Markdown documents.
+
+Mermaid is a text-based diagram language that lets you create flowcharts,
+sequence diagrams, and more.
+
+To create a Mermaid diagram, use a fenced code block with the `mermaid`
+language specifier:
+
+```{code-block} mermaid
+graph TD;
+  A[Start] --> B{Decision};
+  B -->|Yes| C[Result 1];
+  B -->|No| D[Result 2];
+```
+
 (paste-code-cells-without-output)=
 
 ## Paste code cells without output
