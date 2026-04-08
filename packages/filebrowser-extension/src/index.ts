@@ -158,6 +158,8 @@ namespace CommandIDs {
   export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
+
+  export const editPath = 'filebrowser:edit-path';
 }
 
 /**
@@ -1908,6 +1910,35 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.editPath, {
+    execute: async () => {
+      if (typeof browser.editPath !== 'function') {
+        console.error(
+          '`editPath` is not available on the current file browser'
+        );
+        return;
+      }
+      await commands.execute(CommandIDs.showBrowser);
+      const targetBrowser = tracker.currentWidget ?? browser;
+      targetBrowser.editPath();
+    },
+    label: trans.__('Edit File Browser Path'),
+    isVisible: () => typeof browser.editPath === 'function',
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.editPath,
+      category: trans.__('File Operations')
+    });
+  }
 }
 
 /**
