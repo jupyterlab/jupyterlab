@@ -241,6 +241,7 @@ before-bump-version = [
 before-build-npm = [
     "jlpm",
     "jlpm run build:all",
+    "node buildutils/lib/update-core-mode.js --skip-assets",
 ]
 before-build-python = [
     "node buildutils/lib/local-repository start",

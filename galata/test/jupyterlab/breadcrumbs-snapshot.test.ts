@@ -67,4 +67,45 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
     await expect(crumbs).toHaveScreenshot('breadcrumbs.png');
   });
+
+  test('should show editable breadcrumbs with completion menu', async ({
+    page,
+    tmpPath
+  }) => {
+    // Create a few sibling directories so the completion menu has entries
+    await page.contents.createDirectory(`${tmpPath}/alpha`);
+    await page.contents.createDirectory(`${tmpPath}/beta`);
+    await page.contents.createDirectory(`${tmpPath}/gamma`);
+
+    // Navigate into one of them so the breadcrumb path is non-empty
+    await page.evaluate(async p => {
+      await window.jupyterapp.commands.execute('filebrowser:open-path', {
+        path: p
+      });
+    }, `${tmpPath}/alpha`);
+    await page.locator(`${BREADCRUMB_SELECTOR} >> text=alpha`).waitFor();
+
+    // Click on the empty space of the breadcrumb bar to enter edit mode
+    const crumbs = page.locator(BREADCRUMB_SELECTOR);
+    const box = (await crumbs.boundingBox())!;
+    await crumbs.click({ position: { x: box.width - 10, y: box.height / 2 } });
+
+    // Wait for the path input and suggestions to appear
+    const input = page.locator('.jp-PathNavigator > input');
+    await input.waitFor({ state: 'visible' });
+
+    // Clear and type the parent path to show all sibling directories
+    await input.fill(`${tmpPath}/`);
+
+    const suggestions = page.locator('.jp-PathNavigator-suggestions');
+    await suggestions.waitFor({ state: 'visible' });
+    await suggestions.locator('li').first().waitFor();
+
+    // Capture the whole file browser so the absolutely-positioned
+    // suggestions dropdown is included in the screenshot.
+    const fileBrowser = page.locator('.jp-FileBrowser');
+    await expect(fileBrowser).toHaveScreenshot(
+      'breadcrumbs-editable-with-completion.png'
+    );
+  });
 });
