@@ -78,16 +78,14 @@ export class FileBrowserHelper {
    */
   async getCurrentDirectory(): Promise<string> {
     return await this.page.evaluate(() => {
-      let directory = '';
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      const items = document.querySelectorAll(
+        '.jp-FileBrowser .jp-BreadCrumbs-container .jp-BreadCrumbs-item'
       );
-      const numSpans = spans.length;
-      if (numSpans > 1) {
-        directory = spans[numSpans - 2].getAttribute('title') ?? '';
+      if (items.length > 0) {
+        const lastItem = items[items.length - 1];
+        return lastItem.getAttribute('data-path') ?? '';
       }
-
-      return directory;
+      return '';
     });
   }
 
@@ -144,22 +142,19 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = this.page
-      .locator('.jp-FileBrowser .jp-FileBrowser-crumbs span')
-      .first();
+    const homeButton = this.page.locator(
+      '.jp-FileBrowser .jp-BreadCrumbs-home'
+    );
     if (!(await homeButton.count())) {
       return false;
     }
     await homeButton.click();
 
     await this.page.waitForFunction(() => {
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      const items = document.querySelectorAll(
+        '.jp-FileBrowser .jp-BreadCrumbs-item'
       );
-      return (
-        // The home is the root if no preferred dir is defined.
-        spans.length === 2 && spans[0].classList.contains('jp-BreadCrumbs-home')
-      );
+      return items.length === 0;
     });
 
     // wait for DOM rerender

@@ -394,11 +394,11 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
 };
 
 /**
- * The notebook cell factory provider.
+ * The notebook and cell factory provider.
  */
 const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
-  description: 'Provides the notebook cell factory.',
+  description: 'Provides the notebook and cell factory.',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,

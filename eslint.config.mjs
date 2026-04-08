@@ -10,6 +10,7 @@ import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
+import jupyterPlugin from '@jupyter/eslint-plugin';
 
 // Filter globals to remove any with leading/trailing whitespace
 const cleanGlobals = globalsObj => {
@@ -199,7 +200,8 @@ export default defineConfig([
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       jest: jestPlugin,
-      react: reactPlugin
+      react: reactPlugin,
+      jupyter: jupyterPlugin
     },
 
     languageOptions: {
@@ -226,6 +228,9 @@ export default defineConfig([
     },
 
     rules: {
+      'jupyter/command-described-by': 'error',
+      'jupyter/plugin-activation-args': 'error',
+      'jupyter/plugin-description': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -446,7 +451,8 @@ export default defineConfig([
     ],
 
     rules: {
-      'no-restricted-syntax': 'off'
+      'no-restricted-syntax': 'off',
+      'jupyter/command-described-by': 'off'
     }
   },
   {
