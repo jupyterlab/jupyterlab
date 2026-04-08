@@ -82,7 +82,7 @@ export class PathNavigator extends Widget {
     const prefill = currentPath ? currentPath + '/' : '';
     this._inputNode.value = prefill;
     // Defer focus so that callers (e.g. command palette) can finish their
-    // own focus cleanup before we grab focus.  Without this, the palette's
+    // own focus cleanup before we grab focus. Without this, the palette's
     // closing logic can steal focus back, triggering the blur→close handler
     // and immediately exiting edit mode.
     requestAnimationFrame(() => {

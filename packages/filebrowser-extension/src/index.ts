@@ -1907,7 +1907,8 @@ function addCommands(
   commands.addCommand(CommandIDs.editPath, {
     execute: async () => {
       await commands.execute(CommandIDs.showBrowser);
-      browser.editPath();
+      const targetBrowser = tracker.currentWidget ?? browser;
+      targetBrowser.editPath();
     },
     label: trans.__('Edit File Browser Path'),
     describedBy: {
