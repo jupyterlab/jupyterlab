@@ -81,8 +81,17 @@ export class PathNavigator extends Widget {
     const currentPath = contents.localPath(this._model.path);
     const prefill = currentPath ? currentPath + '/' : '';
     this._inputNode.value = prefill;
-    this._inputNode.focus();
-    this._inputNode.setSelectionRange(prefill.length, prefill.length);
+    // Defer focus so that callers (e.g. command palette) can finish their
+    // own focus cleanup before we grab focus.  Without this, the palette's
+    // closing logic can steal focus back, triggering the blur→close handler
+    // and immediately exiting edit mode.
+    requestAnimationFrame(() => {
+      if (!this._isOpen || this.isDisposed) {
+        return;
+      }
+      this._inputNode.focus();
+      this._inputNode.setSelectionRange(prefill.length, prefill.length);
+    });
     void this._updateSuggestions(prefill);
   }
 

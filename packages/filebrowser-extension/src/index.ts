@@ -158,6 +158,8 @@ namespace CommandIDs {
   export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
+
+  export const editPath = 'filebrowser:edit-path';
 }
 
 /**
@@ -1901,6 +1903,27 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.editPath, {
+    execute: async () => {
+      await commands.execute(CommandIDs.showBrowser);
+      browser.editPath();
+    },
+    label: trans.__('Edit File Browser Path'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.editPath,
+      category: trans.__('File Operations')
+    });
+  }
 }
 
 /**
