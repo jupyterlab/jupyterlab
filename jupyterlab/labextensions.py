@@ -4,7 +4,9 @@
 # Distributed under the terms of the Modified BSD License.
 
 import os
+import subprocess
 import sys
+import warnings
 from copy import copy
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
@@ -450,6 +452,58 @@ class CheckLabExtensionsApp(BaseExtensionApp):
             self.exit(1)
 
 
+class BuildLabExtensionAlias(JupyterApp):
+    """Compatibility alias: delegates to 'jupyter-builder build'."""
+
+    description = "(deprecated) Build labextension - use 'jupyter-builder build' instead"
+
+    def parse_command_line(self, argv=None):
+        # Capture raw args before traitlets can consume them
+        self._builder_args = list(argv or [])
+
+    def start(self):
+        warnings.warn(
+            "'jupyter labextension build' is deprecated, use 'jupyter-builder build' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        sys.exit(subprocess.call(["jupyter-builder", "build"] + self._builder_args))  # noqa S603 S607
+
+
+class DevelopLabExtensionAlias(JupyterApp):
+    """Compatibility alias: delegates to 'jupyter-builder develop'."""
+
+    description = "(deprecated) Develop labextension - use 'jupyter-builder develop' instead"
+
+    def parse_command_line(self, argv=None):
+        self._builder_args = list(argv or [])
+
+    def start(self):
+        warnings.warn(
+            "'jupyter labextension develop' is deprecated, use 'jupyter-builder develop' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        sys.exit(subprocess.call(["jupyter-builder", "develop"] + self._builder_args))  # noqa S603 S607
+
+
+class WatchLabExtensionAlias(JupyterApp):
+    """Compatibility alias: delegates to 'jupyter-builder watch'."""
+
+    description = "(deprecated) Watch labextension - use 'jupyter-builder watch' instead"
+
+    def parse_command_line(self, argv=None):
+        self._builder_args = list(argv or [])
+
+    def start(self):
+        warnings.warn(
+            "'jupyter labextension watch' is deprecated, use 'jupyter-builder watch' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        sys.exit(subprocess.call(["jupyter-builder", "watch"] + self._builder_args))  # noqa S603 S607
+
+
 _EXAMPLES = """
 jupyter labextension list                        # list all configured labextensions
 jupyter labextension install <extension name>    # install a labextension
@@ -477,6 +531,9 @@ class LabExtensionApp(JupyterApp):
         "lock": (LockLabExtensionsApp, "Lock labextension(s)"),
         "unlock": (UnlockLabExtensionsApp, "Unlock labextension(s)"),
         "check": (CheckLabExtensionsApp, "Check labextension(s)"),
+        "build": (BuildLabExtensionAlias, "(deprecated) Build labextension"),
+        "develop": (DevelopLabExtensionAlias, "(deprecated) Develop labextension"),
+        "watch": (WatchLabExtensionAlias, "(deprecated) Watch labextension"),
     }
 
     def start(self):
