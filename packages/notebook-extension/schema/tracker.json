@@ -374,37 +374,37 @@
     {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-1",
       "keys": ["1"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-2",
       "keys": ["2"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-3",
       "keys": ["3"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-4",
       "keys": ["4"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-5",
       "keys": ["5"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-6",
       "keys": ["6"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-markdown",
