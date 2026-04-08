@@ -1475,11 +1475,6 @@ class _AppHandler:
                 if name in data["resolutions"]:
                     data["resolutions"][name] = local_path
 
-            # splice the builder as well
-            local_path = osp.abspath(pjoin(REPO_ROOT, "builder"))
-            data["devDependencies"]["@jupyter/builder"] = local_path
-            target = osp.join(staging, "node_modules", "@jupyter", "builder")
-
             # Remove node_modules so it gets re-populated
             node_modules = pjoin(staging, "node_modules")
             if osp.exists(node_modules):

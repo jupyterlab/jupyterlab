@@ -595,7 +595,7 @@ when building the prebuilt extension.
 
 Build a prebuilt extension using the `jupyter-builder build` command. This command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point `remoteEntry.<hash>.js`, dependencies bundled into JavaScript files, `package.json` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
 
-While authoring a prebuilt extension, you can use the `labextension develop` command to create a link to your prebuilt output directory, similar to `pip install -e`:
+While authoring a prebuilt extension, you can use the `jupyter-builder develop` command to create a link to your prebuilt output directory, similar to `pip install -e`:
 
 ```
 jupyter-builder develop . --overwrite

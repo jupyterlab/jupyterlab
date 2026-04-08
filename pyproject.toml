@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter_builder>=0.0.3",
+    "jupyter-builder>=0.0.3",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
