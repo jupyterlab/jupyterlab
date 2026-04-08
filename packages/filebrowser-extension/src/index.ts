@@ -1880,6 +1880,13 @@ function addCommands(
     }
   });
 
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.toggleHiddenFiles,
+      category: trans.__('File Operations')
+    });
+  }
+
   commands.addCommand(CommandIDs.toggleFileCheckboxes, {
     label: trans.__('Show File Checkboxes'),
     isToggled: () => browser.showFileCheckboxes,
