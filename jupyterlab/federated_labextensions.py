@@ -1,0 +1,29 @@
+from jupyter_builder.federated_extensions import (
+    build_labextension as _build_labextension,
+)
+from jupyter_builder.federated_extensions import (
+    develop_labextension as _develop_labextension,
+)
+from jupyter_builder.federated_extensions import (
+    watch_labextension as _watch_labextension,
+)
+
+from jupyterlab.utils import deprecated
+
+
+@deprecated("jupyter_builder.federated_extensions.build_labextension")
+def build_labextension(*args, **kwargs):
+    return _build_labextension(*args, **kwargs)
+
+
+@deprecated("jupyter_builder.federated_extensions.watch_labextension")
+def watch_labextension(*args, **kwargs):
+    return _watch_labextension(*args, **kwargs)
+
+
+@deprecated("jupyter_builder.federated_extensions.develop_labextension")
+def develop_labextension(*args, **kwargs):
+    return _develop_labextension(*args, **kwargs)
+
+
+__all__ = ["build_labextension", "develop_labextension", "watch_labextension"]
