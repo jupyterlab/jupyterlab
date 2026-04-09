@@ -6,7 +6,6 @@
 import os
 import subprocess
 import sys
-import warnings
 from copy import copy
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
@@ -452,7 +451,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
             self.exit(1)
 
 
-class BuildLabExtensionAlias(JupyterApp):
+class BuildLabExtensionAlias(BaseExtensionApp):
     """Compatibility alias: delegates to 'jupyter-builder build'."""
 
     description = "(deprecated) Build labextension - use 'jupyter-builder build' instead"
@@ -462,15 +461,13 @@ class BuildLabExtensionAlias(JupyterApp):
         self._builder_args = list(argv or [])
 
     def start(self):
-        warnings.warn(
-            "'jupyter labextension build' is deprecated, use 'jupyter-builder build' instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        self.log.warning(
+            "\033[33m(Deprecated) 'jupyter labextension build' is deprecated, use 'jupyter-builder build' instead.\n \033[0m"
         )
         sys.exit(subprocess.call(["jupyter-builder", "build"] + self._builder_args))  # noqa S603 S607
 
 
-class DevelopLabExtensionAlias(JupyterApp):
+class DevelopLabExtensionAlias(BaseExtensionApp):
     """Compatibility alias: delegates to 'jupyter-builder develop'."""
 
     description = "(deprecated) Develop labextension - use 'jupyter-builder develop' instead"
@@ -479,15 +476,13 @@ class DevelopLabExtensionAlias(JupyterApp):
         self._builder_args = list(argv or [])
 
     def start(self):
-        warnings.warn(
-            "'jupyter labextension develop' is deprecated, use 'jupyter-builder develop' instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        self.log.warning(
+            "\033[33m(Deprecated) 'jupyter labextension develop' is deprecated, use 'jupyter-builder develop' instead.\n \033[0m"
         )
         sys.exit(subprocess.call(["jupyter-builder", "develop"] + self._builder_args))  # noqa S603 S607
 
 
-class WatchLabExtensionAlias(JupyterApp):
+class WatchLabExtensionAlias(BaseExtensionApp):
     """Compatibility alias: delegates to 'jupyter-builder watch'."""
 
     description = "(deprecated) Watch labextension - use 'jupyter-builder watch' instead"
@@ -496,10 +491,8 @@ class WatchLabExtensionAlias(JupyterApp):
         self._builder_args = list(argv or [])
 
     def start(self):
-        warnings.warn(
-            "'jupyter labextension watch' is deprecated, use 'jupyter-builder watch' instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        self.log.warning(
+            "\033[33m(Deprecated) 'jupyter labextension watch' is deprecated, use 'jupyter-builder watch' instead.\n \033[0m"
         )
         sys.exit(subprocess.call(["jupyter-builder", "watch"] + self._builder_args))  # noqa S603 S607
 
