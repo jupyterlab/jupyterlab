@@ -1821,7 +1821,7 @@ export class RestContentProvider implements IContentProvider {
       if (options.type === 'notebook') {
         delete options['format'];
       }
-      const content = options.content ? '1' : '0';
+      const content = options?.content !== undefined ? (options.content ? '1' : '0') : '1';
       const hash = options.hash ? '1' : '0';
       const params: PartialJSONObject = { ...options, content, hash };
       url += URLExt.objectToQueryString(params);
