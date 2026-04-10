@@ -14,7 +14,7 @@
     "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
-    "@jupyter/builder": "^0.0.4",
+    "@jupyter/builder": "^0.0.5",
     "@jupyterlab/builder": "^4.6.0-alpha.4",
     "rimraf": "~5.0.5"
   },
