@@ -85,6 +85,11 @@ export interface IHighlightAdjacentMatchOptions extends IHighlightMatchOptions {
    * Defaults to `'auto'`.
    */
   from?: SearchStartAnchor;
+
+  /**
+   * Skips highlighting readOnly cells
+   */
+  skipReadOnly?: boolean;
 }
 
 /**
