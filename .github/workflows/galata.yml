@@ -197,16 +197,51 @@ jobs:
           echo "Playwright version: $PW_VERSION"
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Download artifacts
+      - name: Download aggregate blob artifact
+        continue-on-error: true
         uses: actions/download-artifact@v7
         with:
-          path: artifacts
-          pattern: galata-blobs-*
+          name: galata-blobs-merged
+          path: artifacts/base
+
+      - name: Download individual blob artifacts
+        continue-on-error: true
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts/overlay
+          pattern: galata-blobs-*-*-*
           merge-multiple: true
+
+      - name: Reconcile aggregate with individual shards
+        # This is a workaround for https://github.com/actions/download-artifact/issues/298
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/final
+
+          # Start from aggregate chunks when available.
+          if [[ -d artifacts/base ]]; then
+            find artifacts/base -type f -name '*.zip' -exec cp -f {} artifacts/final/ \;
+          fi
+
+          # Replace chunks with individual shard outputs when available.
+          if [[ -d artifacts/overlay ]]; then
+            find artifacts/overlay -type f -name '*.zip' | while read -r ZIP_PATH; do
+              ZIP_NAME=$(basename "$ZIP_PATH")
+              rm -f "artifacts/final/${ZIP_NAME}"
+              cp -f "$ZIP_PATH" "artifacts/final/${ZIP_NAME}"
+            done
+          fi
+
+          COUNT=$(find artifacts/final -type f -name '*.zip' | wc -l)
+          if [[ "$COUNT" -eq 0 ]]; then
+            echo "No blob report chunks found to merge."
+            exit 1
+          fi
+          echo "Prepared $COUNT blob report chunks for Playwright merge."
 
       - name: Merge Playwright reports
         run: |
-          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,github ./artifacts/
+          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,github ./artifacts/final/
 
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
@@ -231,20 +266,9 @@ jobs:
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
 
-      - name: Check for test assets
-        id: check-assets
-        run: |
-          COUNT=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
-            --paginate \
-            -q '.artifacts[] | select(.name | startswith("galata-test-assets-")) | .name' \
-            | wc -l)
-          echo "count=$COUNT" >> $GITHUB_OUTPUT
-          echo "Found $COUNT test asset artifacts"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
       - name: Merge and upload test results
-        if: ${{ !cancelled() && steps.check-assets.outputs.count > 0 }}
+        if: ${{ !cancelled() }}
+        continue-on-error: true
         uses: actions/upload-artifact/merge@v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
