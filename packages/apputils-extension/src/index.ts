@@ -57,6 +57,12 @@ import { IKernelManager } from '@jupyterlab/services';
 const SPLASH_RECOVER_TIMEOUT = 12000;
 
 /**
+ * Pattern matching the `reset` query parameter in a URL.
+ * Matches bare `?reset`, `?reset=<value>`, and `&reset` variants.
+ */
+export const RESET_QUERY_PATTERN = /(\?reset|\&reset)(=[^&]*)?($|&)/;
+
+/**
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
@@ -651,7 +657,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     router.register({
       command: CommandIDs.resetOnLoad,
-      pattern: /(\?reset|\&reset)($|&)/,
+      pattern: RESET_QUERY_PATTERN,
       rank: 20 // High priority: 20:100.
     });
 
