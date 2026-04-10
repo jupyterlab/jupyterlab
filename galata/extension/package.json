@@ -46,7 +46,7 @@
     "@lumino/signaling": "^2.1.5"
   },
   "devDependencies": {
-    "@jupyter/builder": "^0.0.5",
+    "@jupyter/builder": "^0.0.6",
     "@jupyterlab/builder": "^4.6.0-alpha.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
