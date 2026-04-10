@@ -713,7 +713,6 @@ export class Context<
         }
 
         this._updateContentsModel(contents);
-        model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }

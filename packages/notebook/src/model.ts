@@ -385,7 +385,6 @@ close the notebook without saving it.`,
     this.sharedModel.fromJSON(copy);
 
     this._ensureMetadata();
-    this.dirty = true;
   }
 
   /**
@@ -474,7 +473,6 @@ close the notebook without saving it.`,
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
   /**

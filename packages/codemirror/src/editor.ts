@@ -261,14 +261,24 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
-    this.model.sharedModel.undo();
+    this.model.sharedModel.transact(() => {
+      // FIXME: this only works for a notebook cell.
+      // We should be able to access setState from ISharedText?
+      (this.model.sharedModel as any).notebook?.setState('dirty', true);
+      this.model.sharedModel.undo();
+    });
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
-    this.model.sharedModel.redo();
+    this.model.sharedModel.transact(() => {
+      // FIXME: this only works for a notebook cell.
+      // We should be able to access setState from ISharedText?
+      (this.model.sharedModel as any).notebook?.setState('dirty', true);
+      this.model.sharedModel.redo();
+    });
   }
 
   /**
