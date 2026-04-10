@@ -215,7 +215,7 @@ export function checkStatus(cmd: string): number | null {
 export function getPythonVersion(): string {
   const cmd =
     process.env.PYTHON_PACKAGE_MANAGER === 'uv pip'
-      ? 'uv run --system python -m hatchling version'
+      ? 'uv run --active python -m hatchling version'
       : 'python -m hatchling version';
   const lines = run(cmd, { stdio: 'pipe' }, true).split('\n');
   return lines[lines.length - 1];
