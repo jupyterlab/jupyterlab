@@ -431,7 +431,8 @@ export class DirListing extends Widget {
     this._clipboard.length = 0;
     this._isCut = false;
     this.removeClass(CLIPBOARD_CLASS);
-    return Promise.all(promises)
+    return this._model
+      .runFileOperations(promises)
       .then(() => {
         return undefined;
       })
@@ -525,7 +526,8 @@ export class DirListing extends Widget {
         promises.push(this._model.manager.copy(item.path, basePath));
       }
     }
-    return Promise.all(promises)
+    return this._model
+      .runFileOperations(promises)
       .then(() => {
         return undefined;
       })
@@ -2184,7 +2186,7 @@ export class DirListing extends Widget {
         promises.push(renameFile(manager, path, newPath));
       }
     }
-    Promise.all(promises).catch(error => {
+    void this._model.runFileOperations(promises).catch(error => {
       void showErrorMessage(
         this._trans._p('showErrorMessage', 'Error while copying/moving files'),
         error

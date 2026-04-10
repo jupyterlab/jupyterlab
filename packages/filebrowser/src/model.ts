@@ -13,7 +13,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
-import { PromiseDelegate } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import type { ISignal } from '@lumino/signaling';
@@ -605,6 +605,73 @@ export class FileBrowserModel implements IDisposable {
       return Promise.reject('Filemanager disposed. File upload canceled');
     }
     return Promise.resolve();
+  }
+
+  /**
+   * Execute copy/move operations while emitting progress updates.
+   */
+  async runFileOperations(
+    promises: Array<Promise<Contents.IModel | null>>
+  ): Promise<Array<Contents.IModel | null>> {
+    if (promises.length === 0) {
+      return [];
+    }
+
+    let completed = 0;
+    let progress: IUploadModel = {
+      path: UUID.uuid4(),
+      progress: 0
+    };
+    this._uploadChanged.emit({
+      name: 'start',
+      oldValue: null,
+      newValue: progress
+    });
+
+    const trackedOperations = promises.map(async promise => {
+      try {
+        return await promise;
+      } finally {
+        completed += 1;
+        const updatedProgress: IUploadModel = {
+          path: progress.path,
+          progress: completed / promises.length
+        };
+        this._uploadChanged.emit({
+          name: 'update',
+          oldValue: progress,
+          newValue: updatedProgress
+        });
+        progress = updatedProgress;
+      }
+    });
+
+    const results = await Promise.allSettled(trackedOperations);
+    const rejection = results.find(
+      (result): result is PromiseRejectedResult => result.status === 'rejected'
+    );
+
+    if (rejection) {
+      this._uploadChanged.emit({
+        name: 'failure',
+        oldValue: null,
+        newValue: progress
+      });
+      throw rejection.reason;
+    }
+    this._uploadChanged.emit({
+      name: 'finish',
+      oldValue: progress,
+      newValue: null
+    });
+
+    const fulfilled: Array<Contents.IModel | null> = [];
+    results.forEach(result => {
+      if (result.status === 'fulfilled') {
+        fulfilled.push(result.value);
+      }
+    });
+    return fulfilled;
   }
 
   /**
