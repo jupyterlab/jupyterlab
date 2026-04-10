@@ -25,8 +25,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
-          # `uv run` struggels to finding hatching on Windows
-          python_package_manager: "pip"
+          python_package_manager: "uv pip"
 
       - name: Install dependencies
         env:
