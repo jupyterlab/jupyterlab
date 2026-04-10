@@ -35,6 +35,11 @@ const TERMINAL_CLASS = 'jp-Terminal';
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
 /**
+ * The delay in milliseconds to reset the escape key press.
+ */
+const ESCAPE_FOCUS_DELAY_MS = 350;
+
+/**
  * A widget which manages a terminal session.
  */
 export class Terminal extends Widget implements ITerminal.ITerminal {
@@ -318,6 +323,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('keydown', this, true);
+    this._clearEscapeResetTimer();
+    this._escapePressedOnce = false;
   }
 
   /**
@@ -521,6 +528,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     if (event.key === 'Escape') {
       event.preventDefault();
       event.stopPropagation();
+      if (!this._escapePressedOnce) {
+        this._escapePressedOnce = true;
+        this._scheduleEscapeReset();
+        return;
+      }
+      this._clearEscapeResetTimer();
+      this._escapePressedOnce = false;
       if (xtermTextarea) {
         // This ensures pressing Tab does not return to the textarea and avoids
         // becoming a tab trap.
@@ -530,6 +544,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       xtermViewport?.focus();
       return;
     }
+
+    this._clearEscapeResetTimer();
+    this._escapePressedOnce = false;
 
     if (viewportFocused && event.key === 'Enter') {
       event.preventDefault();
@@ -546,6 +563,21 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
   }
 
+  private _scheduleEscapeReset(): void {
+    this._clearEscapeResetTimer();
+    this._escapeResetTimer = window.setTimeout(() => {
+      this._escapePressedOnce = false;
+      this._escapeResetTimer = null;
+    }, ESCAPE_FOCUS_DELAY_MS);
+  }
+
+  private _clearEscapeResetTimer(): void {
+    if (this._escapeResetTimer !== null) {
+      window.clearTimeout(this._escapeResetTimer);
+      this._escapeResetTimer = null;
+    }
+  }
+
   private _fitAddon: FitAddon;
   private _searchAddon: SearchAddon;
   private _needsResize = true;
@@ -558,6 +590,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _termOpened = false;
   private _trans: TranslationBundle;
   private _themeChanged = new Signal<this, void>(this);
+  private _escapePressedOnce = false;
+  private _escapeResetTimer: number | null = null;
 
   /**
    * Handle the DOM events for the widget.
