@@ -166,7 +166,8 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path;
 
         // Reset the workspace on load.
-        query['reset'] = '';
+        // Use a non-empty value so that auth proxies do not strip the parameter.
+        query['reset'] = '1';
 
         const url = path + URLExt.objectToQueryString(query) + (hash || '');
         router.navigate(url, { hard: true });
