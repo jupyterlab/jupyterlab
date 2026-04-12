@@ -2263,6 +2263,22 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
       });
 
+      it('should be undoable', () => {
+        widget.activeCell!.model.sharedModel.setSource('# foo');
+        expect(widget.activeCell!.model.type).toBe('code');
+        NotebookActions.setMarkdownHeader(widget, 3);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          '### foo'
+        );
+        expect(widget.activeCell!.model.type).toBe('markdown');
+        const index = widget.activeCellIndex;
+        NotebookActions.undo(widget);
+        // TODO: find a way to avoid index drift on undo
+        widget.activeCellIndex = index;
+        expect(widget.activeCell!.model.type).toBe('code');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('# foo');
+      });
+
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
         expect(
