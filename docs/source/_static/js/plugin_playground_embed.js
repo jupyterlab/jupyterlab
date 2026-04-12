@@ -4,6 +4,31 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const LOADED_LABEL = 'Unload Interactive Example';
+
+  const getIframeSource = (embed, defaultSource) => {
+    let source = embed.dataset.playgroundSrc || defaultSource;
+    const mode = embed.dataset.playgroundMode;
+    if (mode === 'simple') {
+      source = source.replace('/lite/lab/', '/lite/tree/');
+    } else if (mode === 'lab') {
+      source = source.replace('/lite/tree/', '/lite/lab/');
+    }
+    const query = embed.dataset.playgroundQuery;
+    if (query) {
+      const url = new URL(source);
+      const params = new URLSearchParams(query);
+      for (const [key, value] of params.entries()) {
+        url.searchParams.set(key, value);
+      }
+      source = url.toString();
+    }
+    const url = new URL(source);
+    url.searchParams.set('embed', '1');
+    source = url.toString();
+    return source;
+  };
+
   const embeds = document.querySelectorAll('.jp-plugin-playground-embed');
 
   for (const embed of embeds) {
@@ -25,13 +50,28 @@ document.addEventListener('DOMContentLoaded', () => {
       continue;
     }
 
+    const defaultLabel =
+      embed.dataset.playgroundLoadLabel ||
+      loadButton.textContent?.trim() ||
+      'Load Interactive Example';
+
+    loadButton.textContent = defaultLabel;
+    loadButton.setAttribute('aria-pressed', 'false');
+
     loadButton.addEventListener('click', () => {
-      if (!iframe.src) {
-        iframe.src = openLink.href;
+      const isLoaded = frame.hidden === false;
+
+      if (!isLoaded) {
+        iframe.src = getIframeSource(embed, openLink.href);
+        frame.hidden = false;
+        loadButton.textContent = LOADED_LABEL;
+        loadButton.setAttribute('aria-pressed', 'true');
+      } else {
+        iframe.removeAttribute('src');
+        frame.hidden = true;
+        loadButton.textContent = defaultLabel;
+        loadButton.setAttribute('aria-pressed', 'false');
       }
-      frame.hidden = false;
-      loadButton.disabled = true;
-      loadButton.textContent = 'Interactive Example Loaded';
     });
   }
 });
