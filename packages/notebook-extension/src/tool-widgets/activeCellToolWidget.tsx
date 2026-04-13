@@ -8,7 +8,6 @@ import type { FieldProps } from '@rjsf/utils';
 import type { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import type { INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
-import type { ISharedText } from '@jupyter/ydoc';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import type { CodeCellModel, ICellModel } from '@jupyterlab/cells';
 import { InputPrompt } from '@jupyterlab/cells';
@@ -98,7 +97,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
   render(props: FieldProps): JSX.Element {
     const activeCell = this._tracker.activeCell;
     if (activeCell) this._cellModel = activeCell?.model || null;
-    (this._cellModel?.sharedModel as ISharedText).changed.connect(
+    this._cellModel?.sharedModel.changed.connect(
       this.refresh,
       this
     );
