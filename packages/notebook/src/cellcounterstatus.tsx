@@ -339,6 +339,7 @@ export class CellCounterStatus extends VDomRenderer<CellCounterStatus.Model> {
 
     const cellIndex = value - 1;
     notebook.activeCellIndex = cellIndex;
+    notebook.deselectAll();
     void notebook.scrollToItem(cellIndex).catch(reason => {
       console.error('Go to cell', reason);
     });
