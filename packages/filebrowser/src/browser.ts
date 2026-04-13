@@ -409,6 +409,20 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Move focus to the directory listing for keyboard navigation.
+   */
+  focusListing(): void {
+    this.listing.node.focus();
+  }
+
+  /**
+   * Move focus to the first listing row (or listing root if the directory is empty).
+   */
+  focusFirstListingItem(): void {
+    this.listing.focusFirstItem();
+  }
+
+  /**
    * Rename the first currently selected item.
    *
    * @returns A promise that resolves with the new name of the item.

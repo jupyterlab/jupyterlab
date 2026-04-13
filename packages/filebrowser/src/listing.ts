@@ -798,6 +798,18 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Move focus to the first row's name cell, or to the listing root if empty.
+   */
+  focusFirstItem(): void {
+    const items = this._sortedItems;
+    if (items.length === 0) {
+      this._focusItem(0);
+      return;
+    }
+    this._selectItem(0, false, true);
+  }
+
+  /**
    * Select an item by name.
    *
    * @param name - The name of the item to select.

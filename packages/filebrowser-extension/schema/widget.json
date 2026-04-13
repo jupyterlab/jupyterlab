@@ -23,7 +23,7 @@
         "id": "jp-mainmenu-view",
         "items": [
           {
-            "command": "filebrowser:toggle-main",
+            "command": "filebrowser:activate-browser",
             "rank": 1
           }
         ]
@@ -49,7 +49,7 @@
   },
   "jupyter.lab.shortcuts": [
     {
-      "command": "filebrowser:toggle-main",
+      "command": "filebrowser:activate-browser",
       "keys": ["Accel Shift F"],
       "selector": "body"
     }
