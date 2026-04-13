@@ -17,6 +17,7 @@
   "@jupyterlab/application-extension:status": "Provides the application status.",
   "@jupyterlab/application-extension:top-bar": "Adds a toolbar to the top area (next to the main menu bar).",
   "@jupyterlab/application-extension:tree-resolver": "Provides the tree route resolver",
+  "@jupyterlab/application-extension:widget-mover": "Adds commands and context menu items to move widgets between areas.",
   "@jupyterlab/apputils-extension:announcements": "Add the announcement feature. It will fetch news on the internet and check for application updates.",
   "@jupyterlab/apputils-extension:kernel-status": "Provides the kernel status indicator model.",
   "@jupyterlab/apputils-extension:kernels-settings": "Reserves the name for kernel settings.",
