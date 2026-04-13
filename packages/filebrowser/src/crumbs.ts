@@ -330,29 +330,78 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Handle the `'keydown'` event for the widget.
+   * Walk from an event target to the nearest breadcrumb segment host, if any.
    */
-  private _evtKeyDown(event: KeyboardEvent): void {
-    if (this._isEditMode) {
-      return;
-    }
-    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
-      return;
-    }
-
-    let node = event.target as HTMLElement | null;
-    let crumb: HTMLElement | null = null;
+  private _resolveCrumbFromEventTarget(
+    target: EventTarget | null
+  ): HTMLElement | null {
+    let node = target as HTMLElement | null;
     while (node && node !== this.node) {
       if (
         node.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS) ||
         node.classList.contains(BREADCRUMB_ITEM_CLASS)
       ) {
-        crumb = node;
-        break;
+        return node;
       }
       node = node.parentElement;
     }
+    return null;
+  }
+
+  /**
+   * Navigate to the directory represented by a breadcrumb segment (same as click).
+   */
+  private _activateCrumbSegment(crumb: HTMLElement): void {
+    this._focusCrumb(crumb);
+    if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+      const preferredPath = PageConfig.getOption('preferredPath');
+      const path = preferredPath ? '/' + preferredPath : preferredPath;
+      this._model
+        .cd(path)
+        .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
+      return;
+    }
+    if (
+      crumb.classList.contains(BREADCRUMB_ITEM_CLASS) ||
+      crumb.classList.contains(BREADCRUMB_ROOT_CLASS)
+    ) {
+      let destination: string | undefined;
+      if (crumb.classList.contains(BREADCRUMB_ROOT_CLASS)) {
+        destination = '/';
+      } else {
+        destination = `/${crumb.dataset.path}`;
+      }
+      if (destination) {
+        this._model
+          .cd(destination)
+          .catch(error =>
+            showErrorMessage(this._trans.__('Open Error'), error)
+          );
+      }
+    }
+  }
+
+  /**
+   * Handle the `'keydown'` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    if (this._isEditMode) {
+      return;
+    }
+
+    const crumb = this._resolveCrumbFromEventTarget(event.target);
+    if (event.key === 'Enter' && crumb && this._crumbContent.contains(crumb)) {
+      this._activateCrumbSegment(crumb);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+      return;
+    }
+
     if (!crumb || !this._crumbContent.contains(crumb)) {
       return;
     }
@@ -391,39 +440,12 @@ export class BreadCrumbs extends Widget {
     // Find a valid click target.
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
-      if (node.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
-        this._focusCrumb(node);
-        const preferredPath = PageConfig.getOption('preferredPath');
-        const path = preferredPath ? '/' + preferredPath : preferredPath;
-        this._model
-          .cd(path)
-          .catch(error =>
-            showErrorMessage(this._trans.__('Open Error'), error)
-          );
-
-        // Stop the event propagation.
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       if (
+        node.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
-        this._focusCrumb(node);
-        let destination: string | undefined;
-        if (node.classList.contains(BREADCRUMB_ROOT_CLASS)) {
-          destination = '/';
-        } else {
-          destination = `/${node.dataset.path}`;
-        }
-        if (destination) {
-          this._model
-            .cd(destination)
-            .catch(error =>
-              showErrorMessage(this._trans.__('Open Error'), error)
-            );
-        }
+        this._activateCrumbSegment(node);
 
         // Stop the event propagation.
         event.preventDefault();
