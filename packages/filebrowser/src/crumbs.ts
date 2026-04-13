@@ -137,6 +137,9 @@ export class BreadCrumbs extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
@@ -212,6 +215,7 @@ export class BreadCrumbs extends Widget {
     super.onAfterAttach(msg);
     this.update();
     const node = this.node;
+    node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('lm-dragenter', this);
     node.addEventListener('lm-dragleave', this);
@@ -228,6 +232,7 @@ export class BreadCrumbs extends Widget {
     Widget.detach(this._pathNavigator);
     super.onBeforeDetach(msg);
     const node = this.node;
+    node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('lm-dragenter', this);
     node.removeEventListener('lm-dragleave', this);
@@ -277,6 +282,96 @@ export class BreadCrumbs extends Widget {
     this._previousState = state;
 
     Private.updateCrumbs(this._crumbContent, this._crumbs, state);
+    this._syncCrumbTabIndices();
+  }
+
+  /**
+   * Return breadcrumb segments in DOM order that participate in arrow-key focus.
+   */
+  private _getFocusableCrumbElements(): HTMLElement[] {
+    const result: HTMLElement[] = [];
+    const children = this._crumbContent.children;
+    for (let i = 0; i < children.length; i++) {
+      const el = children[i] as HTMLElement;
+      if (
+        el.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
+        el.classList.contains(BREADCRUMB_ROOT_CLASS) ||
+        el.classList.contains(BREADCRUMB_ITEM_CLASS)
+      ) {
+        result.push(el);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Roving tabindex: one segment is in tab order (`tabIndex` 0), the rest -1.
+   */
+  private _syncCrumbTabIndices(): void {
+    const items = this._getFocusableCrumbElements();
+    for (let i = 0; i < items.length; i++) {
+      items[i].tabIndex = i === 0 ? 0 : -1;
+    }
+  }
+
+  /**
+   * Focus a crumb segment and make it the sole tab stop within the trail.
+   */
+  private _focusCrumb(crumb: HTMLElement): void {
+    const items = this._getFocusableCrumbElements();
+    const idx = items.indexOf(crumb);
+    if (idx === -1) {
+      return;
+    }
+    for (let i = 0; i < items.length; i++) {
+      items[i].tabIndex = i === idx ? 0 : -1;
+    }
+    crumb.focus();
+  }
+
+  /**
+   * Handle the `'keydown'` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    if (this._isEditMode) {
+      return;
+    }
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+      return;
+    }
+
+    let node = event.target as HTMLElement | null;
+    let crumb: HTMLElement | null = null;
+    while (node && node !== this.node) {
+      if (
+        node.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
+        node.classList.contains(BREADCRUMB_ROOT_CLASS) ||
+        node.classList.contains(BREADCRUMB_ITEM_CLASS)
+      ) {
+        crumb = node;
+        break;
+      }
+      node = node.parentElement;
+    }
+    if (!crumb || !this._crumbContent.contains(crumb)) {
+      return;
+    }
+
+    const items = this._getFocusableCrumbElements();
+    const idx = items.indexOf(crumb);
+    if (idx === -1) {
+      return;
+    }
+
+    const delta = event.key === 'ArrowLeft' ? -1 : 1;
+    const nextIdx = idx + delta;
+    if (nextIdx < 0 || nextIdx >= items.length) {
+      return;
+    }
+
+    this._focusCrumb(items[nextIdx]);
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   /**
@@ -297,6 +392,7 @@ export class BreadCrumbs extends Widget {
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
       if (node.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+        this._focusCrumb(node);
         const preferredPath = PageConfig.getOption('preferredPath');
         const path = preferredPath ? '/' + preferredPath : preferredPath;
         this._model
@@ -314,6 +410,7 @@ export class BreadCrumbs extends Widget {
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
+        this._focusCrumb(node);
         let destination: string | undefined;
         if (node.classList.contains(BREADCRUMB_ROOT_CLASS)) {
           destination = '/';
@@ -894,6 +991,7 @@ namespace Private {
     elem.textContent = pathPart;
     elem.title = fullPath;
     elem.dataset.path = fullPath;
+    elem.tabIndex = -1;
     return elem;
   }
 
@@ -908,12 +1006,14 @@ namespace Private {
       stylesheet: 'breadCrumb'
     });
     home.dataset.path = '/';
+    home.tabIndex = -1;
 
     const ellipsis = ellipsesIcon.element({
       className: `${BREADCRUMB_ITEM_CLASS} ${BREADCRUMB_ELLIPSIS_CLASS}`,
       tag: 'span',
       stylesheet: 'breadCrumb'
     });
+    ellipsis.tabIndex = -1;
 
     const preferredPath = PageConfig.getOption('preferredPath');
     const path = preferredPath ? '/' + preferredPath : preferredPath;
@@ -924,6 +1024,7 @@ namespace Private {
       stylesheet: 'breadCrumb'
     });
     preferred.dataset.path = path || '/';
+    preferred.tabIndex = -1;
 
     return [home, ellipsis, preferred];
   }

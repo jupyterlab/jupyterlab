@@ -88,6 +88,12 @@
   margin-left: 0;
 }
 
+.jp-BreadCrumbs-home:focus-visible,
+.jp-BreadCrumbs-preferred:focus-visible,
+.jp-BreadCrumbs-item:focus-visible {
+  outline: 2px solid var(--jp-brand-color1);
+}
+
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
   background-color: var(--jp-brand-color2);
   opacity: 0.7;
