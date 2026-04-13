@@ -443,6 +443,49 @@ describe('LabShell', () => {
       await shell.restoreLayout(mode, restorer);
       expect(shell.mode).toBe('multiple-document');
     });
+
+    it('should restore widgets moved to the right sidebar', async () => {
+      const restorer = new LayoutRestorer({
+        connector: new StateDB(),
+        first: Promise.resolve<void>(void 0),
+        registry: new CommandRegistry()
+      });
+      const mode: DockPanel.Mode = 'multiple-document';
+      const widget = new Widget();
+      widget.id = 'foo';
+
+      restorer.add(widget, 'test-one');
+      shell.add(widget, 'main');
+
+      await restorer.restored;
+      await restorer.save({
+        mainArea: { currentWidget: null, dock: null },
+        downArea: { currentWidget: null, widgets: null, size: null },
+        leftArea: {
+          collapsed: true,
+          currentWidget: null,
+          widgets: [],
+          visible: true,
+          widgetStates: {}
+        },
+        rightArea: {
+          collapsed: false,
+          currentWidget: widget,
+          widgets: [widget],
+          visible: true,
+          widgetStates: {}
+        },
+        relativeSizes: null,
+        topArea: { simpleVisibility: true }
+      });
+
+      await shell.restoreLayout(mode, restorer);
+
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual([]);
+      expect(Array.from(shell.widgets('right')).map(v => v.id)).toEqual([
+        'foo'
+      ]);
+    });
   });
 
   describe('#widgets', () => {

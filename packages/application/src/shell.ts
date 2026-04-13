@@ -1004,7 +1004,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    *
    * #### Notes
    * If `mode` is undefined, both mode are updated.
-   * The new layout is now persisted.
+   * The new layout is stored in the shell user layout. Callers are
+   * responsible for persisting it when needed.
    *
    * @param widget Widget to move
    * @param area New area
@@ -1380,7 +1381,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IterableIterator<Widget> {
-    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
@@ -1416,7 +1416,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
     const inputElement = this._titleHandler.inputElement;
-    inputElement.value = current ? current.title.label : '';
+    inputElement.value = current ? Private.titleLabel(current.title) : '';
     inputElement.title = current ? current.title.caption : '';
   }
 
@@ -1876,6 +1876,10 @@ namespace Private {
     return first.rank - second.rank;
   }
 
+  export function titleLabel(title: Title<Widget>): string {
+    return title.label || title.dataset['jpTabLabel'] || title.caption;
+  }
+
   /**
    * Removes widgets that have been disposed from an area config, mutates area.
    */
@@ -2143,15 +2147,47 @@ namespace Private {
      * Rehydrate the side bar.
      */
     rehydrate(data: ILabShell.ISideArea): void {
+      if (Array.isArray(data.widgets)) {
+        const widgetIds = data.widgets.map(widget => widget.id);
+
+        // Synchronize sidebar membership with the restored layout.
+        Array.from(this._stackedPanel.widgets)
+          .filter(widget => !widgetIds.includes(widget.id))
+          .forEach(widget => {
+            widget.parent = null;
+          });
+
+        const currentIds = this._stackedPanel.widgets.map(widget => widget.id);
+        data.widgets
+          .filter(widget => !currentIds.includes(widget.id))
+          .forEach(widget => {
+            this.addWidget(widget, DEFAULT_RANK);
+          });
+
+        while (
+          !ArrayExt.shallowEqual(
+            widgetIds,
+            this._stackedPanel.widgets.map(widget => widget.id)
+          )
+        ) {
+          this._stackedPanel.widgets.forEach((widget, index) => {
+            const position = widgetIds.findIndex(id => widget.id === id);
+            if (position >= 0 && position !== index) {
+              ArrayExt.move(this._items, index, position);
+              this._stackedPanel.insertWidget(position, widget);
+              this._sideBar.insertTab(position, widget.title);
+            }
+          });
+        }
+      }
+
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       }
       if (data.collapsed) {
         this.collapse();
       }
-      if (!data.visible) {
-        this.hide();
-      }
+      data.visible ? this.show() : this.hide();
       if (data.widgetStates) {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {
           if (w.id && w.content instanceof SplitPanel) {
@@ -2392,7 +2428,7 @@ namespace Private {
         if (widget == null) {
           return;
         }
-        const oldName = widget.title.label;
+        const oldName = Private.titleLabel(widget.title);
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();

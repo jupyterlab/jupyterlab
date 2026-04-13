@@ -401,6 +401,10 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       trans.__('File Browser Section')
     );
     defaultBrowser.title.icon = folderIcon;
+    defaultBrowser.title.dataset = {
+      ...defaultBrowser.title.dataset,
+      jpTabLabel: trans.__('File Browser')
+    };
 
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {

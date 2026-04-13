@@ -4,7 +4,7 @@
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { VirtualElement } from '@lumino/virtualdom';
-import { hpass } from '@lumino/virtualdom';
+import { h, hpass } from '@lumino/virtualdom';
 import type { Widget } from '@lumino/widgets';
 import { DockPanel, TabBar, TabPanel } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
@@ -42,6 +42,17 @@ export namespace TabBarSvg {
    */
   export class Renderer extends TabBar.Renderer {
     /**
+     * Render the label element for a tab.
+     *
+     * @param data - The data to use for rendering the tab.
+     *
+     * @returns A virtual element representing the tab label.
+     */
+    renderLabel(data: TabBar.IRenderData<any>): VirtualElement {
+      return h.div({ className: 'lm-TabBar-tabLabel' }, this._titleLabel(data));
+    }
+
+    /**
      * Render the close icon element for a tab.
      *
      * @param data - The data to use for rendering the tab.
@@ -50,9 +61,8 @@ export namespace TabBarSvg {
      */
     renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
       const trans = (TabBarSvg.translator ?? nullTranslator).load('jupyterlab');
-      const title = data.title.label
-        ? trans.__('Close %1', data.title.label)
-        : trans.__('Close tab');
+      const label = this._titleLabel(data);
+      const title = label ? trans.__('Close %1', label) : trans.__('Close tab');
       const className = classes(
         'jp-icon-hover lm-TabBar-tabCloseIcon',
         LabIconStyle.styleClass({
@@ -67,6 +77,14 @@ export namespace TabBarSvg {
         { className, title },
         closeIcon
       ) as unknown as VirtualElement;
+    }
+
+    private _titleLabel(data: TabBar.IRenderData<any>): string {
+      return (
+        data.title.label ||
+        data.title.dataset['jpTabLabel'] ||
+        data.title.caption
+      );
     }
   }
 
