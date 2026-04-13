@@ -1,4 +1,3 @@
-```markdown
 # JupyterLab Repository Map
 
 ## 🏗️ High-Level Architecture
@@ -123,4 +122,3 @@ This separation allows the model to be used independently while the extension in
 - **Backend**: Python, Jupyter Server, Tornado, Traitlets
 - **Build**: Rspack, TypeScript, Lerna (independent versioning)
 - **Package Manager**: Yarn (via `jlpm` wrapper)
-```
