@@ -2091,7 +2091,7 @@ namespace Private {
       const title = this._sideBar.insertTab(index, widget.title);
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
-      title.dataset = { id: widget.id };
+      title.dataset = { ...title.dataset, id: widget.id };
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({

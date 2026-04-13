@@ -419,6 +419,38 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#move()', () => {
+    it('should preserve title dataset entries when moving widgets between areas', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      widget.title.label = '';
+      widget.title.caption = 'Tooltip';
+      widget.title.dataset = {
+        type: 'document-title',
+        jpTabLabel: 'Fallback Label'
+      };
+
+      shell.add(widget, 'main');
+      shell.move(widget, 'left');
+
+      expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual(['foo']);
+      expect(widget.title.dataset).toEqual({
+        type: 'document-title',
+        jpTabLabel: 'Fallback Label',
+        id: 'foo'
+      });
+
+      shell.move(widget, 'main');
+
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual(['foo']);
+      expect(widget.title.dataset).toEqual({
+        type: 'document-title',
+        jpTabLabel: 'Fallback Label',
+        id: 'foo'
+      });
+    });
+  });
+
   describe('#saveLayout', () => {
     it('should save the layout of the shell', () => {
       const foo = new Widget();
