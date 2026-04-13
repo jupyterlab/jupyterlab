@@ -75,6 +75,9 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
+          python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
 
       - name: Find out Playwright version
         id: pw-version
@@ -104,7 +107,7 @@ jobs:
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
         if: ${{ matrix.project != 'documentation' }}
         run: |
-          pip install --upgrade --pre "ipykernel<=7.0.0a1"
+          uv pip install --system --upgrade --pre "ipykernel<=7.0.0a1"
         working-directory: core
 
       - name: Launch JupyterLab
