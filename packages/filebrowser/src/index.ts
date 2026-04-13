@@ -6,6 +6,8 @@
  */
 
 export * from './browser';
+export * from './pathautocomplete';
+export * from './pathnavigator';
 export * from './crumbs';
 export * from './listing';
 export * from './model';
