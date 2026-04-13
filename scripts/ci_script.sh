@@ -243,22 +243,22 @@ if [[ $GROUP == usage ]]; then
     cat $USER_PAGE_CONFIG | grep "\"@jupyterlab/notebook-extension\": false"
 
     # Test with a prebuilt install
-    jupyter labextension develop extension --debug
-    jupyter labextension build extension
+    jupyter-builder develop extension --debug
+    jupyter-builder build extension
 
     # Test develop script with hyphens and underscores in the module name
     python -m pip install -e test-hyphens
-    jupyter labextension develop test-hyphens --overwrite --debug
+    jupyter-builder develop test-hyphens --overwrite --debug
     python -m pip install -e test_no_hyphens
-    jupyter labextension develop test_no_hyphens --overwrite --debug
+    jupyter-builder develop test_no_hyphens --overwrite --debug
     python -m pip install -e test-hyphens-underscore
-    jupyter labextension develop test-hyphens-underscore --overwrite --debug
+    jupyter-builder develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
-    jupyter labextension build extension --static-url /foo/
-    jupyter labextension build extension --core-path ../../../examples/federated/core_package
+    jupyter-builder build extension --static-url /foo/
+    jupyter-builder build extension --core-package-file ../../../examples/federated/core_package/package.json
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
@@ -266,11 +266,11 @@ if [[ $GROUP == usage ]]; then
     # check the federated extension is still listed after jupyter labextension uninstall
     cat labextensions | grep -q "mock-extension"
     # build it again without a static-url to avoid causing errors
-    jupyter labextension build extension
+    jupyter-builder build extension
 
     # Test with a service manager extension
     python -m pip install -e service-manager-extension
-    jupyter labextension develop service-manager-extension --overwrite --debug
+    jupyter-builder develop service-manager-extension --overwrite --debug
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-service-manager-extension.*enabled.*OK"
     python -m jupyterlab.browser_check
@@ -429,7 +429,7 @@ if [[ $GROUP == interop ]]; then
     jupyter labextension link . --no-build
     popd
     pushd provider
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     pushd consumer
@@ -453,7 +453,7 @@ if [[ $GROUP == interop ]]; then
     jupyter labextension install .
     popd
     pushd consumer
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
@@ -477,7 +477,7 @@ if [[ $GROUP == interop ]]; then
     # Need to install source first because it would get ignored
     # if installed after
     jupyter labextension install .
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1

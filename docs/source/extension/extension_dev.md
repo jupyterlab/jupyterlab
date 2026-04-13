@@ -593,12 +593,12 @@ when building the prebuilt extension.
 
 ### Developing a prebuilt extension
 
-Build a prebuilt extension using the `jupyter labextension build` command. This command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point `remoteEntry.<hash>.js`, dependencies bundled into JavaScript files, `package.json` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
+Build a prebuilt extension using the `jupyter-builder build` command. This command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point `remoteEntry.<hash>.js`, dependencies bundled into JavaScript files, `package.json` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
 
-While authoring a prebuilt extension, you can use the `labextension develop` command to create a link to your prebuilt output directory, similar to `pip install -e`:
+While authoring a prebuilt extension, you can use the `jupyter-builder develop` command to create a link to your prebuilt output directory, similar to `pip install -e`:
 
 ```
-jupyter labextension develop . --overwrite
+jupyter-builder develop . --overwrite
 ```
 
 Then rebuilding your extension and refreshing JupyterLab in the browser should pick up changes in your prebuilt extension source code.
@@ -763,7 +763,7 @@ jupyter lab --watch --splice-source
 ```
 
 This command will splice the local `packages` directory into the application directory, allowing you to build source extension(s)
-against the current development sources. To statically build spliced sources, use `jupyter lab build --splice-source`. Once a spliced build is created, any subsequent calls to `jupyter labextension build` will be in splice mode by default. A spliced build can be forced by calling `jupyter labextension build --splice-source`. Note that {ref}`developing a prebuilt extension <prebuilt-dev-workflow>` against a development version of JupyterLab is generally much easier than source package building.
+against the current development sources. To statically build spliced sources, use `jupyter lab build --splice-source`. Once a spliced build is created, any subsequent calls to `jupyter-builder build` will be in splice mode by default. A spliced build can be forced by calling `jupyter-builder build --splice-source`. Note that {ref}`developing a prebuilt extension <prebuilt-dev-workflow>` against a development version of JupyterLab is generally much easier than source package building.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax `require('foo.css')`. The CSS files can
