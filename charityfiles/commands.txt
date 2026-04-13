@@ -1,0 +1,3 @@
+$env:SKIP_INTEGRITY_CHECK='true'
+$env:Path='C:\Program Files\nodejs;' + $env:Path
+.\.venv\Scripts\python.exe -m jupyter lab --dev-mode --watch

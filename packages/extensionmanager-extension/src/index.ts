@@ -15,9 +15,18 @@ import { ExtensionsPanel, ListModel } from '@jupyterlab/extensionmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { extensionIcon } from '@jupyterlab/ui-components';
+import { extensionIcon, LabIcon } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
 
 const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';
+
+const summarizeSparkleIcon = new LabIcon({
+  name: 'extensionmanager-extension:summarize-sparkle',
+  svgstr:
+    '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">' +
+    '<path fill="currentColor" d="M8 1l1.4 3.6L13 6l-3.6 1.4L8 11 6.6 7.4 3 6l3.6-1.4L8 1zm5 7l.7 1.8L15.5 10l-1.8.7L13 12.5l-.7-1.8L10.5 10l1.8-.2L13 8zm-8.2 3l.9 2.2L8 14l-2.3.8L4.8 17l-.9-2.2L1.6 14l2.3-.8.9-2.2z"/>' +
+    '</svg>'
+});
 
 /**
  * IDs of the commands added by this extension.
@@ -48,6 +57,23 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
 
     const model = new ListModel(serviceManager, translator);
+
+    const summaryView = new Private.SummaryPanel(() => {
+      void showDialog({
+        title: trans.__('Summary'),
+        body: trans.__('Summary coming soon!'),
+        buttons: [Dialog.okButton({ label: trans.__('OK') })]
+      });
+    });
+    summaryView.id = 'extensionmanager.summary-view';
+    summaryView.title.icon = summarizeSparkleIcon;
+    summaryView.title.caption = trans.__('Notebook Summary');
+    summaryView.node.setAttribute('role', 'region');
+    summaryView.node.setAttribute('aria-label', trans.__('Notebook Summary section'));
+    if (restorer) {
+      restorer.add(summaryView, summaryView.id);
+    }
+    shell.add(summaryView, 'left', { rank: 1010 });
 
     const createView = () => {
       const v = new ExtensionsPanel({ model, translator: translator! });
@@ -184,6 +210,23 @@ export default plugin;
  * A namespace for module-private functions.
  */
 namespace Private {
+  export class SummaryPanel extends Widget {
+    constructor(onClick: () => void) {
+      super();
+      this.addClass('jp-extensionmanager-SummaryPanel');
+
+      const button = document.createElement('button');
+      button.className = 'jp-mod-styled jp-mod-accept';
+      button.textContent = 'Notebook Summary';
+      button.addEventListener('click', onClick);
+
+      this.node.appendChild(button);
+      this.disposed.connect(() => {
+        button.removeEventListener('click', onClick);
+      });
+    }
+  }
+
   /**
    * Show a warning dialog about extension security.
    *
