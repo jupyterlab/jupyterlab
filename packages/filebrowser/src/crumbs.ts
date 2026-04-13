@@ -390,8 +390,10 @@ export class BreadCrumbs extends Widget {
       return;
     }
 
+    const isActivateKey = event.key === 'Enter' || event.key === ' ';
     const crumb = this._resolveCrumbFromEventTarget(event.target);
-    if (event.key === 'Enter' && crumb && this._crumbContent.contains(crumb)) {
+
+    if (isActivateKey && crumb && this._crumbContent.contains(crumb)) {
       this._activateCrumbSegment(crumb);
       event.preventDefault();
       event.stopPropagation();
