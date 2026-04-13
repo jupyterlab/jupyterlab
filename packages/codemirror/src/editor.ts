@@ -262,28 +262,28 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Undo one edit (if any undo events are stored).
    */
   undo(): void {
+    this.model.sharedModel.undo();
     this.model.sharedModel.transact(() => {
       if ('setState' in this.model.sharedModel) {
         (this.model.sharedModel as ISharedFile).setState('dirty', true);
       } else if ('notebook' in this.model.sharedModel) {
         (this.model.sharedModel as any).notebook.setState('dirty', true);
       }
-      this.model.sharedModel.undo();
-    });
+    }, false);
   }
 
   /**
    * Redo one undone edit.
    */
   redo(): void {
+    this.model.sharedModel.redo();
     this.model.sharedModel.transact(() => {
       if ('setState' in this.model.sharedModel) {
         (this.model.sharedModel as ISharedFile).setState('dirty', true);
       } else if ('notebook' in this.model.sharedModel) {
         (this.model.sharedModel as any).notebook.setState('dirty', true);
       }
-      this.model.sharedModel.redo();
-    });
+    }, false);
   }
 
   /**
