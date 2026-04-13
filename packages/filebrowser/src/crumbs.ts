@@ -283,6 +283,16 @@ export class BreadCrumbs extends Widget {
 
     Private.updateCrumbs(this._crumbContent, this._crumbs, state);
     this._syncCrumbTabIndices();
+
+    if (this._restoreBreadcrumbFocusAfterUpdate) {
+      this._restoreBreadcrumbFocusAfterUpdate = false;
+      requestAnimationFrame(() => {
+        if (this.isDisposed || this._isEditMode) {
+          return;
+        }
+        this._focusTrailingCrumb();
+      });
+    }
   }
 
   /**
@@ -330,6 +340,17 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Focus the last segment in the trail (the current directory), for keyboard UX after navigation.
+   */
+  private _focusTrailingCrumb(): void {
+    const items = this._getFocusableCrumbElements();
+    if (items.length === 0) {
+      return;
+    }
+    this._focusCrumb(items[items.length - 1]);
+  }
+
+  /**
    * Walk from an event target to the nearest breadcrumb segment host, if any.
    */
   private _resolveCrumbFromEventTarget(
@@ -355,11 +376,13 @@ export class BreadCrumbs extends Widget {
   private _activateCrumbSegment(crumb: HTMLElement): void {
     this._focusCrumb(crumb);
     if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+      this._restoreBreadcrumbFocusAfterUpdate = true;
       const preferredPath = PageConfig.getOption('preferredPath');
       const path = preferredPath ? '/' + preferredPath : preferredPath;
-      this._model
-        .cd(path)
-        .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
+      this._model.cd(path).catch(error => {
+        this._restoreBreadcrumbFocusAfterUpdate = false;
+        showErrorMessage(this._trans.__('Open Error'), error);
+      });
       return;
     }
     if (
@@ -373,11 +396,11 @@ export class BreadCrumbs extends Widget {
         destination = `/${crumb.dataset.path}`;
       }
       if (destination) {
-        this._model
-          .cd(destination)
-          .catch(error =>
-            showErrorMessage(this._trans.__('Open Error'), error)
-          );
+        this._restoreBreadcrumbFocusAfterUpdate = true;
+        this._model.cd(destination).catch(error => {
+          this._restoreBreadcrumbFocusAfterUpdate = false;
+          showErrorMessage(this._trans.__('Open Error'), error);
+        });
       }
     }
   }
@@ -847,6 +870,11 @@ export class BreadCrumbs extends Widget {
   private _crumbContainer: HTMLElement;
   private _crumbContent: HTMLElement;
   private _pathNavigator: PathNavigator;
+
+  /**
+   * After `cd()` rebuilds the trail, restore focus to the current-directory segment.
+   */
+  private _restoreBreadcrumbFocusAfterUpdate = false;
 }
 
 /**
