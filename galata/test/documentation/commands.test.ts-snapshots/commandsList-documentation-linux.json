@@ -3823,9 +3823,7 @@
     "id": "notebook:change-cell-to-heading-1",
     "label": "Change to Heading 1",
     "caption": "",
-    "shortcuts": [
-      "1"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3835,9 +3833,7 @@
     "id": "notebook:change-cell-to-heading-2",
     "label": "Change to Heading 2",
     "caption": "",
-    "shortcuts": [
-      "2"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3847,9 +3843,7 @@
     "id": "notebook:change-cell-to-heading-3",
     "label": "Change to Heading 3",
     "caption": "",
-    "shortcuts": [
-      "3"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3859,9 +3853,7 @@
     "id": "notebook:change-cell-to-heading-4",
     "label": "Change to Heading 4",
     "caption": "",
-    "shortcuts": [
-      "4"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3871,9 +3863,7 @@
     "id": "notebook:change-cell-to-heading-5",
     "label": "Change to Heading 5",
     "caption": "",
-    "shortcuts": [
-      "5"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3883,9 +3873,7 @@
     "id": "notebook:change-cell-to-heading-6",
     "label": "Change to Heading 6",
     "caption": "",
-    "shortcuts": [
-      "6"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
