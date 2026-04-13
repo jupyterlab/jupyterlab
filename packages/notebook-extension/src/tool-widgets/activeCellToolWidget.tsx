@@ -97,10 +97,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
   render(props: FieldProps): JSX.Element {
     const activeCell = this._tracker.activeCell;
     if (activeCell) this._cellModel = activeCell?.model || null;
-    this._cellModel?.sharedModel.changed.connect(
-      this.refresh,
-      this
-    );
+    this._cellModel?.sharedModel.changed.connect(this.refresh, this);
     this._cellModel?.mimeTypeChanged.connect(this.refresh, this);
     this.refresh()
       .then(() => undefined)

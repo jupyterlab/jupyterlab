@@ -361,6 +361,7 @@ describe('docregistry/default', () => {
 
       it('should not be emitted if the state does not change', () => {
         const model = new DocumentModel();
+        model.dirty = false;
         let called = false;
         model.stateChanged.connect(() => {
           called = true;
@@ -373,7 +374,7 @@ describe('docregistry/default', () => {
     describe('#dirty', () => {
       it('should get the dirty state of the document', () => {
         const model = new DocumentModel();
-        expect(model.dirty).toBe(false);
+        expect(model.dirty).toBe(undefined);
       });
 
       it('should emit `stateChanged` when changed', () => {
@@ -382,7 +383,7 @@ describe('docregistry/default', () => {
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
           expect(args.name).toBe('dirty');
-          expect(args.oldValue).toBe(false);
+          expect(args.oldValue).toBe(undefined);
           expect(args.newValue).toBe(true);
           called = true;
         });
@@ -392,6 +393,7 @@ describe('docregistry/default', () => {
 
       it('should not emit `stateChanged` when not changed', () => {
         const model = new DocumentModel();
+        model.dirty = false;
         let called = false;
         model.stateChanged.connect(() => {
           called = true;
@@ -604,7 +606,7 @@ describe('docregistry/default', () => {
       });
 
       it('should add the dirty class when the model is dirty', async () => {
-        context.model.fromString('bar');
+        context.model.sharedModel.setState('dirty', true);
         expect(widget.title.className).toContain('jp-mod-dirty');
       });
 

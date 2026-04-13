@@ -632,7 +632,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     sender: CellList,
     args: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    console.log('_onCellsChanged');
     this.removeHeader();
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
