@@ -42,7 +42,10 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { ContextMenuSvg } from '@jupyterlab/ui-components';
 import { buildIcon, jupyterIcon, RankedMenu } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
-import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type {
+  PartialJSONValue,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import type { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
@@ -1689,6 +1692,10 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
       translator
     });
     widget.title.icon = buildIcon;
+    widget.title.dataset = {
+      ...widget.title.dataset,
+      jpTabLabel: trans.__('Property Inspector')
+    };
     widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'right', { rank: 100, type: 'Property Inspector' });
@@ -1741,14 +1748,17 @@ const widgetMover: JupyterFrontEndPlugin<void> = {
     'Adds commands and context menu items to move widgets between areas.',
   autoStart: true,
   requires: [ILabShell, ITranslator],
+  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     labShell: ILabShell,
-    translator: ITranslator
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
   ) => {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
     const areas = ['main', 'left', 'right', 'down'] as const;
+    const settings = settingRegistry?.load(shell.id) ?? null;
 
     const contextMenuWidget = (): Widget | null => {
       const test = (node: HTMLElement) => !!node.dataset.id;
@@ -1798,6 +1808,16 @@ const widgetMover: JupyterFrontEndPlugin<void> = {
       }
 
       labShell.move(widget, targetArea);
+      if (settings) {
+        void settings
+          .then(settings => {
+            return Private.saveUserLayout(settings, labShell.userLayout);
+          })
+          .catch(reason => {
+            console.error('Failed to persist widget layout customization.');
+            console.error(reason);
+          });
+      }
       labShell.activateById(widget.id);
     };
 
@@ -1876,6 +1896,25 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
 export default plugins;
 
 namespace Private {
+  export function saveUserLayout(
+    settings: ISettingRegistry.ISettings,
+    userLayout: {
+      'single-document': ILabShell.IUserLayout;
+      'multiple-document': ILabShell.IUserLayout;
+    }
+  ): Promise<void> {
+    const layout = {
+      single: JSONExt.deepCopy(
+        userLayout['single-document'] as unknown as PartialJSONValue
+      ),
+      multiple: JSONExt.deepCopy(
+        userLayout['multiple-document'] as unknown as PartialJSONValue
+      )
+    };
+
+    return settings.set('layout', layout as PartialJSONValue);
+  }
+
   async function displayInformation(trans: TranslationBundle): Promise<void> {
     const result = await showDialog({
       title: trans.__('Information'),
@@ -2130,17 +2169,9 @@ namespace Private {
         }
 
         if (newLayout) {
-          settings
-            .set('layout', {
-              single: newLayout['single-document'],
-              multiple: newLayout['multiple-document']
-            } as any)
-            .catch(reason => {
-              console.error(
-                'Failed to save user layout customization.',
-                reason
-              );
-            });
+          saveUserLayout(settings, newLayout).catch(reason => {
+            console.error('Failed to save user layout customization.', reason);
+          });
         }
       }
     });

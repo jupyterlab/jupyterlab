@@ -38,6 +38,10 @@ export class Palette implements ICommandPalette {
     const trans = this.translator.load('jupyterlab');
     this._palette = palette;
     this._palette.title.label = '';
+    this._palette.title.dataset = {
+      ...this._palette.title.dataset,
+      jpTabLabel: trans.__('Commands')
+    };
     this._palette.title.caption = trans.__('Command Palette');
   }
 
@@ -219,7 +223,11 @@ namespace Private {
       palette.id = 'command-palette';
       palette.title.icon = paletteIcon;
       const trans = translator.load('jupyterlab');
-      palette.title.label = trans.__('Commands');
+      palette.title.label = '';
+      palette.title.dataset = {
+        ...palette.title.dataset,
+        jpTabLabel: trans.__('Commands')
+      };
     }
 
     return palette;
