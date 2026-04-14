@@ -2,12 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  DOMUtils,
-  extractStyleSheet,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
+import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
 import type {
   CodeEditorWrapper,
   IEditorServices
@@ -17,6 +12,7 @@ import type { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { INotebookTracker } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import type { IDebugger } from './tokens';
+import debuggerCssDeps from '../style/cssDeps.json';
 
 /**
  * The source and editor manager for a debugger instance.
@@ -69,10 +65,7 @@ export class DebuggerSources implements IDebugger.ISources {
     widget.title.closable = true;
     widget.title.caption = caption;
     widget.title.icon = textEditorIcon;
-    const debuggerSheet = extractStyleSheet('.jp-left-truncated');
-    if (debuggerSheet) {
-      widget.adoptStyleSheet(debuggerSheet);
-    }
+    widget.adoptPackageStyles(debuggerCssDeps);
     this._shell.add(widget, 'main', { type: 'Debugger Sources' });
     void this._readOnlyEditorTracker.add(widget);
   }

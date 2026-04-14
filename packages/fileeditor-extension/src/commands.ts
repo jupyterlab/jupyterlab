@@ -8,11 +8,7 @@ import type {
   ISessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import {
-  Clipboard,
-  extractStyleSheet,
-  MainAreaWidget
-} from '@jupyterlab/apputils';
+import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
 import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CodeViewerWidget,
@@ -51,6 +47,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import type { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
+import fileeditorCssDeps from '@jupyterlab/fileeditor/style/cssDeps.json';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -1729,10 +1726,7 @@ export namespace Commands {
         widget.id = args.widgetId;
       }
       const main = new MainAreaWidget({ content: widget });
-      const fileeditorSheet = extractStyleSheet('.jp-FileEditor');
-      if (fileeditorSheet) {
-        main.adoptStyleSheet(fileeditorSheet);
-      }
+      main.adoptPackageStyles(fileeditorCssDeps);
       await tracker.add(main);
       app.shell.add(main, 'main');
       return widget;

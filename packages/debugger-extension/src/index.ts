@@ -13,7 +13,6 @@ import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   Dialog,
-  extractStyleSheet,
   ICommandPalette,
   InputDialog,
   ISanitizer,
@@ -59,6 +58,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
+import debuggerCssDeps from '@jupyterlab/debugger/style/cssDeps.json';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
 
@@ -622,10 +622,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           })
         });
         widget.addClass('jp-DebuggerVariables');
-        const debuggerSheet = extractStyleSheet('.jp-left-truncated');
-        if (debuggerSheet) {
-          widget.adoptStyleSheet(debuggerSheet);
-        }
+        widget.adoptPackageStyles(debuggerCssDeps);
         widget.id = id;
         widget.title.icon = Debugger.Icons.variableIcon;
         widget.title.label = `${service.session?.connection?.name} - ${name}`;

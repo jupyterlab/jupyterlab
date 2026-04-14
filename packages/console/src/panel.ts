@@ -3,7 +3,6 @@
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
-  extractStyleSheet,
   MainAreaWidget,
   SessionContext,
   SessionContextDialogs
@@ -22,6 +21,7 @@ import type { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
 import { CodeConsole } from './widget';
 import type { IConsoleCellExecutor } from './tokens';
+import consoleCssDeps from '../style/cssDeps.json';
 
 /**
  * The class name added to console panels.
@@ -38,10 +38,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
   constructor(options: ConsolePanel.IOptions) {
     super({ content: new Panel() });
     this.addClass(PANEL_CLASS);
-    const consoleSheet = extractStyleSheet('.jp-ConsolePanel');
-    if (consoleSheet) {
-      this.adoptStyleSheet(consoleSheet);
-    }
+    this.adoptPackageStyles(consoleCssDeps);
     let {
       executor,
       rendermime,

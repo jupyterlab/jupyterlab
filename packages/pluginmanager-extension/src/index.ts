@@ -12,7 +12,6 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
 import {
-  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
@@ -29,6 +28,7 @@ import {
   PluginListModel,
   Plugins
 } from '@jupyterlab/pluginmanager';
+import pluginmanagerCssDeps from '@jupyterlab/pluginmanager/style/cssDeps.json';
 
 /**
  * The command IDs used by the pluginmanager plugin.
@@ -103,10 +103,7 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       content.title.icon = extensionIcon;
       content.title.caption = trans.__('Plugin Manager');
       const main = new MainAreaWidget({ content, reveal: model.ready });
-      const pluginmanagerSheet = extractStyleSheet('.jp-pluginmanager');
-      if (pluginmanagerSheet) {
-        main.adoptStyleSheet(pluginmanagerSheet);
-      }
+      main.adoptPackageStyles(pluginmanagerCssDeps);
 
       main.toolbar.addItem(
         'refresh-plugins',

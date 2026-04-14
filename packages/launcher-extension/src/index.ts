@@ -10,11 +10,7 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILabShell } from '@jupyterlab/application';
-import {
-  extractStyleSheet,
-  ICommandPalette,
-  MainAreaWidget
-} from '@jupyterlab/apputils';
+import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import type { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
@@ -23,6 +19,7 @@ import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import type { JSONObject } from '@lumino/coreutils';
 import type { DockPanel, TabBar, Widget } from '@lumino/widgets';
+import launcherCssDeps from '@jupyterlab/launcher/style/cssDeps.json';
 
 /**
  * The command IDs used by the launcher plugin.
@@ -114,11 +111,7 @@ function activate(
       launcher.title.label = trans.__('Launcher');
 
       const main = new MainAreaWidget({ content: launcher });
-      const launcherSheet = extractStyleSheet('.jp-LauncherCard')!;
-      main.adoptStyleSheet(launcherSheet);
-
-      const luminoWidget = extractStyleSheet('.lm-Widget', false)!;
-      main.adoptStyleSheet(luminoWidget);
+      main.adoptPackageStyles(launcherCssDeps);
 
       // If there are any other widgets open, remove the launcher close icon.
       main.title.closable = !!Array.from(shell.widgets('main')).length;

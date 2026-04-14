@@ -14,7 +14,6 @@ import type {
 import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
-  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   showDialog,
@@ -38,6 +37,7 @@ import type {
   JsonSettingEditor,
   SettingsEditor
 } from '@jupyterlab/settingeditor';
+import settingeditorCssDeps from '@jupyterlab/settingeditor/style/cssDeps.json';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -175,10 +175,7 @@ function activate(
         query: args.query as string
       })
     });
-    const settingsSheet = extractStyleSheet('.jp-SettingsPanel');
-    if (settingsSheet) {
-      editor.adoptStyleSheet(settingsSheet);
-    }
+    editor.adoptPackageStyles(settingeditorCssDeps);
 
     editor.toolbar.addItem(
       'export-settings',
@@ -413,10 +410,7 @@ function activateJSON(
       const container = new MainAreaWidget<JsonSettingEditor>({
         content: editor
       });
-      const settingsSheet = extractStyleSheet('.jp-SettingsPanel');
-      if (settingsSheet) {
-        container.adoptStyleSheet(settingsSheet);
-      }
+      container.adoptPackageStyles(settingeditorCssDeps);
 
       container.id = namespace;
       container.title.icon = settingsIcon;
@@ -575,10 +569,7 @@ function activateJSON(
             translator: translator
           });
           const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
-          const settingsSheet = extractStyleSheet('.jp-SettingsPanel');
-          if (settingsSheet) {
-            widget.adoptStyleSheet(settingsSheet);
-          }
+          widget.adoptPackageStyles(settingeditorCssDeps);
           widget.title.label = trans.__('Import Settings');
           widget.title.icon = fileUploadIcon;
           app.shell.add(widget, 'main');

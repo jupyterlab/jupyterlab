@@ -4,43 +4,40 @@
 import { Widget } from '@lumino/widgets';
 
 /**
- * Cache of stylesheets extracted from the document.
+ * Cache of constructable CSSStyleSheet copies, keyed by package name.
+ * Shared across all shadow roots so each sheet is created only once.
  */
-const _extractedSheets = new Map<string, CSSStyleSheet>();
+const _packageSheets = new Map<string, CSSStyleSheet[]>();
 
 /**
- * Extract a stylesheet from the document's `<style>` elements.
+ * Get constructable CSSStyleSheets for a given package name.
  *
- * Finds a `<style>` element whose text content contains the given
- * marker string (typically a unique CSS class like `.jp-Terminal`),
- * creates a constructable `CSSStyleSheet` from its content, caches it,
- * and removes the `<style>` element from the document.
- *
- * Subsequent calls with the same marker return the cached sheet.
+ * Looks for all `<style data-package="NAME">` elements in the
+ * document (injected by style-loader with css-package-loader tagging),
+ * creates constructable CSSStyleSheets from their text content,
+ * and caches them for reuse across shadow roots.
  */
-export function extractStyleSheet(
-  marker: string,
-  remove: boolean = true
-): CSSStyleSheet | null {
-  const cached = _extractedSheets.get(marker);
+function getPackageStyleSheets(packageName: string): CSSStyleSheet[] {
+  const cached = _packageSheets.get(packageName);
   if (cached) {
     return cached;
   }
 
-  for (const style of document.querySelectorAll('style')) {
-    const text = style.textContent;
-    if (text && text.includes(marker)) {
+  const styles = document.querySelectorAll(
+    `style[data-package="${CSS.escape(packageName)}"]`
+  );
+  const sheets: CSSStyleSheet[] = [];
+  for (const style of styles) {
+    if (style.textContent) {
       const sheet = new CSSStyleSheet();
-      sheet.replaceSync(text);
-      if (remove) {
-        style.remove();
-      }
-      _extractedSheets.set(marker, sheet);
-      return sheet;
+      sheet.replaceSync(style.textContent);
+      sheets.push(sheet);
     }
   }
-
-  return null;
+  if (sheets.length > 0) {
+    _packageSheets.set(packageName, sheets);
+  }
+  return sheets;
 }
 
 /**
@@ -75,6 +72,22 @@ export class ShadowDOMWidget extends Widget {
     }
     this._root.adoptedStyleSheets = [...this._root.adoptedStyleSheets, sheet];
     return true;
+  }
+
+  /**
+   * Adopt stylesheets for the given packages into this shadow root.
+   *
+   * @param packages - Array of package names (e.g. from a generated
+   *   `cssDeps.js`). For each package, a `<style data-package="NAME">`
+   *   element is looked up in the document, converted to a constructable
+   *   CSSStyleSheet (cached), and adopted into this widget's shadow root.
+   */
+  adoptPackageStyles(packages: string[]): void {
+    for (const pkg of packages) {
+      for (const sheet of getPackageStyleSheets(pkg)) {
+        this.adoptStyleSheet(sheet);
+      }
+    }
   }
 
   /**

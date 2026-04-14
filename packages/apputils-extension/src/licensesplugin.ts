@@ -9,7 +9,6 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
 import {
-  extractStyleSheet,
   ICommandPalette,
   ILicensesClient,
   Licenses,
@@ -26,6 +25,7 @@ import {
   Toolbar
 } from '@jupyterlab/ui-components';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import apputilsCssDeps from '@jupyterlab/apputils/style/cssDeps.json';
 
 /**
  * The command IDs used by the licenses plugin.
@@ -105,10 +105,7 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
         content,
         reveal: licensesModel.licensesReady
       });
-      const licensesSheet = extractStyleSheet('.jp-Licenses');
-      if (licensesSheet) {
-        main.adoptStyleSheet(licensesSheet);
-      }
+      main.adoptPackageStyles(apputilsCssDeps);
 
       main.toolbar.addItem(
         'refresh-licenses',

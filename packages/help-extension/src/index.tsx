@@ -12,7 +12,6 @@ import type {
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
-  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   showDialog,
@@ -29,6 +28,7 @@ import {
 } from '@jupyterlab/ui-components';
 import type { Menu } from '@lumino/widgets';
 import * as React from 'react';
+import helpCssDeps from '../style/cssDeps.json';
 
 /**
  * The command IDs used by the help plugin.
@@ -310,10 +310,7 @@ const open: JupyterFrontEndPlugin<void> = {
       content.id = `${namespace}-${++counter}`;
       const widget = new MainAreaWidget({ content });
       widget.addClass('jp-Help');
-      const helpSheet = extractStyleSheet('.jp-Help');
-      if (helpSheet) {
-        widget.adoptStyleSheet(helpSheet);
-      }
+      widget.adoptPackageStyles(helpCssDeps);
       return widget;
     }
 

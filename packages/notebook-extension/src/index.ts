@@ -16,7 +16,6 @@ import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
-  extractStyleSheet,
   ICommandPalette,
   IKernelStatusModel,
   InputDialog,
@@ -136,6 +135,7 @@ import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
+import notebookCssDeps from '@jupyterlab/notebook/style/cssDeps.json';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
@@ -1437,10 +1437,7 @@ function activateClonedOutputs(
         translator
       });
       const widget = new MainAreaWidget({ content });
-      const notebookSheet = extractStyleSheet('.jp-NotebookPanel');
-      if (notebookSheet) {
-        widget.adoptStyleSheet(notebookSheet);
-      }
+      widget.adoptPackageStyles(notebookCssDeps);
       current.context.addSibling(widget, {
         ref: current.id,
         mode: 'split-bottom',

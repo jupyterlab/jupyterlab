@@ -12,7 +12,6 @@ import type {
 import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
-  extractStyleSheet,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
@@ -40,6 +39,7 @@ import {
 import type { Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
+import terminalCssDeps from '@jupyterlab/terminal/style/cssDeps.json';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -463,10 +463,7 @@ function addCommands(
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
-      const terminalSheet = extractStyleSheet('.jp-Terminal');
-      if (terminalSheet) {
-        main.adoptStyleSheet(terminalSheet);
-      }
+      main.adoptPackageStyles(terminalCssDeps);
       app.shell.add(main, 'main', { type: 'Terminal' });
       void tracker.add(main);
       app.shell.activateById(main.id);

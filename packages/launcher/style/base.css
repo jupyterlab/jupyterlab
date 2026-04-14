@@ -6,6 +6,7 @@
 /* Launcher */
 
 .jp-Launcher {
+  /* Private CSS variables */
   --jp-private-launcher-top-padding: 1.231em;
   --jp-private-launcher-side-padding: 2.462em;
   --jp-private-launcher-card-size: 7.692em;
