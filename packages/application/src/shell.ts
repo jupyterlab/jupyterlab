@@ -2163,13 +2163,8 @@ namespace Private {
       if (Array.isArray(data.widgets)) {
         const widgetIds = data.widgets.map(widget => widget.id);
 
-        // Synchronize sidebar membership with the restored layout.
-        Array.from(this._stackedPanel.widgets)
-          .filter(widget => !widgetIds.includes(widget.id))
-          .forEach(widget => {
-            widget.parent = null;
-          });
-
+        // Add widgets that are in the saved layout but not currently
+        // in the sidebar.
         const currentIds = this._stackedPanel.widgets.map(widget => widget.id);
         data.widgets
           .filter(widget => !currentIds.includes(widget.id))
@@ -2177,14 +2172,24 @@ namespace Private {
             this.addWidget(widget, DEFAULT_RANK);
           });
 
+        // Build target order: saved widgets first, then any widgets
+        // not mentioned in the saved layout (preserving their existing
+        // relative order).
+        const targetIds = [
+          ...widgetIds,
+          ...this._stackedPanel.widgets
+            .filter(widget => !widgetIds.includes(widget.id))
+            .map(widget => widget.id)
+        ];
+
         while (
           !ArrayExt.shallowEqual(
-            widgetIds,
+            targetIds,
             this._stackedPanel.widgets.map(widget => widget.id)
           )
         ) {
           this._stackedPanel.widgets.forEach((widget, index) => {
-            const position = widgetIds.findIndex(id => widget.id === id);
+            const position = targetIds.findIndex(id => widget.id === id);
             if (position >= 0 && position !== index) {
               ArrayExt.move(this._items, index, position);
               this._stackedPanel.insertWidget(position, widget);
