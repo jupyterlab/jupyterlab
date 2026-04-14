@@ -2162,6 +2162,7 @@ namespace Private {
     rehydrate(data: ILabShell.ISideArea): void {
       if (Array.isArray(data.widgets)) {
         const widgetIds = data.widgets.map(widget => widget.id);
+        const widgetIdSet = new Set(widgetIds);
 
         // Add widgets that are in the saved layout but not currently
         // in the sidebar.
@@ -2172,15 +2173,12 @@ namespace Private {
             this.addWidget(widget, DEFAULT_RANK);
           });
 
-        // Build target order: saved widgets first, then any widgets
-        // not mentioned in the saved layout (preserving their existing
-        // relative order).
-        const targetIds = [
-          ...widgetIds,
-          ...this._stackedPanel.widgets
-            .filter(widget => !widgetIds.includes(widget.id))
-            .map(widget => widget.id)
-        ];
+        // Merge the saved order into the current sidebar slots so widgets
+        // absent from the saved layout keep their rank-relative positions.
+        let savedIndex = 0;
+        const targetIds = this._stackedPanel.widgets.map(widget =>
+          widgetIdSet.has(widget.id) ? widgetIds[savedIndex++] : widget.id
+        );
 
         while (
           !ArrayExt.shallowEqual(
