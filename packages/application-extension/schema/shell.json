@@ -50,6 +50,12 @@
       },
       "additionalProperties": false
     },
+    "dockPanelPadding": {
+      "type": "boolean",
+      "title": "Dock panel padding",
+      "description": "Whether to show padding around the main dock panel area. Disable for a more compact layout.",
+      "default": true
+    },
     "zoomOnWheel": {
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",

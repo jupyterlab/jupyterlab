@@ -128,6 +128,13 @@ export namespace ILabShell {
      * `contentVisibility` is only available in Chromium-based browsers.
      */
     hiddenMode: 'display' | 'scale' | 'contentVisibility';
+
+    /**
+     * Whether to show padding around the main dock panel area.
+     *
+     * Set to `false` for a more compact layout.
+     */
+    dockPanelPadding: boolean;
   }
 
   /**
@@ -1373,6 +1380,18 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           this._dockPanel.hiddenMode = Widget.HiddenMode.ContentVisibility;
           break;
       }
+    }
+
+    if ('dockPanelPadding' in config) {
+      if (config.dockPanelPadding === false) {
+        this._dockPanel.node.style.setProperty(
+          '--jp-dock-panel-padding',
+          '0px'
+        );
+      } else {
+        this._dockPanel.node.style.removeProperty('--jp-dock-panel-padding');
+      }
+      this._dockPanel.fit();
     }
   }
 
