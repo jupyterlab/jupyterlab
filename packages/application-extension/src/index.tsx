@@ -1749,18 +1749,15 @@ const widgetMover: JupyterFrontEndPlugin<void> = {
     'Adds commands and context menu items to move widgets between areas.',
   autoStart: true,
   requires: [ILabShell, ITranslator],
-  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     labShell: ILabShell,
-    translator: ITranslator,
-    settingRegistry: ISettingRegistry | null
+    translator: ITranslator
   ) => {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
     const areas = ['main', 'left', 'right', 'down'] as const;
     type MovableWidgetArea = (typeof areas)[number];
-    const settings = settingRegistry?.load(shell.id) ?? null;
     const isMovableWidgetArea = (area: unknown): area is MovableWidgetArea => {
       return (
         typeof area === 'string' && areas.some(candidate => candidate === area)
@@ -1817,17 +1814,9 @@ const widgetMover: JupyterFrontEndPlugin<void> = {
         return;
       }
 
-      const newLayout = labShell.move(widget, targetArea);
-      if (settings) {
-        void settings
-          .then(resolved => {
-            return Private.saveUserLayout(resolved, newLayout);
-          })
-          .catch(reason => {
-            console.error('Failed to persist widget layout customization.');
-            console.error(reason);
-          });
-      }
+      // Move only the current widget. This should not update the saved
+      // type-based layout preference used for future widgets.
+      labShell.add(widget, targetArea);
       labShell.activateById(widget.id);
     };
 
