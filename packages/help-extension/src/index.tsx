@@ -12,6 +12,7 @@ import type {
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
+  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   showDialog,
@@ -309,6 +310,10 @@ const open: JupyterFrontEndPlugin<void> = {
       content.id = `${namespace}-${++counter}`;
       const widget = new MainAreaWidget({ content });
       widget.addClass('jp-Help');
+      const helpSheet = extractStyleSheet('.jp-Help');
+      if (helpSheet) {
+        widget.adoptStyleSheet(helpSheet);
+      }
       return widget;
     }
 

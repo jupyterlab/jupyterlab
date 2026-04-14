@@ -8,7 +8,11 @@ import type {
   ISessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
+import {
+  Clipboard,
+  extractStyleSheet,
+  MainAreaWidget
+} from '@jupyterlab/apputils';
 import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CodeViewerWidget,
@@ -1725,6 +1729,10 @@ export namespace Commands {
         widget.id = args.widgetId;
       }
       const main = new MainAreaWidget({ content: widget });
+      const fileeditorSheet = extractStyleSheet('.jp-FileEditor');
+      if (fileeditorSheet) {
+        main.adoptStyleSheet(fileeditorSheet);
+      }
       await tracker.add(main);
       app.shell.add(main, 'main');
       return widget;

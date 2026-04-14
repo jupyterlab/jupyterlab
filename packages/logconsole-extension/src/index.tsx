@@ -12,6 +12,7 @@ import type {
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
+  extractStyleSheet,
   ICommandPalette,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -168,6 +169,10 @@ function activateLogConsole(
     logConsolePanel.source = options.source ?? getCurrentWidgetPath() ?? null;
 
     logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
+    const logconsoleSheet = extractStyleSheet('.jp-LogConsolePanel');
+    if (logconsoleSheet) {
+      logConsoleWidget.adoptStyleSheet(logconsoleSheet);
+    }
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.icon = listIcon;

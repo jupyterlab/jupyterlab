@@ -16,6 +16,7 @@ import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
+  extractStyleSheet,
   ICommandPalette,
   IKernelStatusModel,
   InputDialog,
@@ -1436,6 +1437,10 @@ function activateClonedOutputs(
         translator
       });
       const widget = new MainAreaWidget({ content });
+      const notebookSheet = extractStyleSheet('.jp-NotebookPanel');
+      if (notebookSheet) {
+        widget.adoptStyleSheet(notebookSheet);
+      }
       current.context.addSibling(widget, {
         ref: current.id,
         mode: 'split-bottom',

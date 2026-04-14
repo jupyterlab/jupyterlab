@@ -14,6 +14,7 @@ import type {
 import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
+  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   showDialog,
@@ -174,6 +175,10 @@ function activate(
         query: args.query as string
       })
     });
+    const settingsSheet = extractStyleSheet('.jp-SettingsPanel');
+    if (settingsSheet) {
+      editor.adoptStyleSheet(settingsSheet);
+    }
 
     editor.toolbar.addItem(
       'export-settings',
@@ -408,6 +413,10 @@ function activateJSON(
       const container = new MainAreaWidget<JsonSettingEditor>({
         content: editor
       });
+      const settingsSheet = extractStyleSheet('.jp-SettingsPanel');
+      if (settingsSheet) {
+        container.adoptStyleSheet(settingsSheet);
+      }
 
       container.id = namespace;
       container.title.icon = settingsIcon;
@@ -566,6 +575,10 @@ function activateJSON(
             translator: translator
           });
           const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
+          const settingsSheet = extractStyleSheet('.jp-SettingsPanel');
+          if (settingsSheet) {
+            widget.adoptStyleSheet(settingsSheet);
+          }
           widget.title.label = trans.__('Import Settings');
           widget.title.icon = fileUploadIcon;
           app.shell.add(widget, 'main');

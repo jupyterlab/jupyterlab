@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Private CSS variables */
+/* Launcher */
 
-:root {
+.jp-Launcher {
   --jp-private-launcher-top-padding: 1.231em;
   --jp-private-launcher-side-padding: 2.462em;
   --jp-private-launcher-card-size: 7.692em;
@@ -13,11 +13,7 @@
   --jp-private-launcher-card-icon-height: 5.231em;
   --jp-private-launcher-large-icon-size: 4em;
   --jp-private-launcher-small-icon-size: 2.462em;
-}
 
-/* Launcher */
-
-.jp-Launcher {
   margin: 0;
   padding: 0;
   outline: none;

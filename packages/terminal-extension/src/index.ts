@@ -12,6 +12,7 @@ import type {
 import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
+  extractStyleSheet,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
@@ -462,6 +463,10 @@ function addCommands(
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
+      const terminalSheet = extractStyleSheet('.jp-Terminal');
+      if (terminalSheet) {
+        main.adoptStyleSheet(terminalSheet);
+      }
       app.shell.add(main, 'main', { type: 'Terminal' });
       void tracker.add(main);
       app.shell.activateById(main.id);

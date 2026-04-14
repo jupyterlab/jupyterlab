@@ -9,6 +9,7 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
 import {
+  extractStyleSheet,
   ICommandPalette,
   ILicensesClient,
   Licenses,
@@ -104,6 +105,10 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
         content,
         reveal: licensesModel.licensesReady
       });
+      const licensesSheet = extractStyleSheet('.jp-Licenses');
+      if (licensesSheet) {
+        main.adoptStyleSheet(licensesSheet);
+      }
 
       main.toolbar.addItem(
         'refresh-licenses',

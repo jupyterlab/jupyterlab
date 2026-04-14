@@ -12,6 +12,7 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
 import {
+  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
@@ -102,6 +103,10 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       content.title.icon = extensionIcon;
       content.title.caption = trans.__('Plugin Manager');
       const main = new MainAreaWidget({ content, reveal: model.ready });
+      const pluginmanagerSheet = extractStyleSheet('.jp-pluginmanager');
+      if (pluginmanagerSheet) {
+        main.adoptStyleSheet(pluginmanagerSheet);
+      }
 
       main.toolbar.addItem(
         'refresh-plugins',

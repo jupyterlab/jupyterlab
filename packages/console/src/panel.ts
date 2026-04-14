@@ -3,6 +3,7 @@
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
+  extractStyleSheet,
   MainAreaWidget,
   SessionContext,
   SessionContextDialogs
@@ -37,6 +38,10 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
   constructor(options: ConsolePanel.IOptions) {
     super({ content: new Panel() });
     this.addClass(PANEL_CLASS);
+    const consoleSheet = extractStyleSheet('.jp-ConsolePanel');
+    if (consoleSheet) {
+      this.adoptStyleSheet(consoleSheet);
+    }
     let {
       executor,
       rendermime,

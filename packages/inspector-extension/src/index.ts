@@ -11,6 +11,7 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
 import {
+  extractStyleSheet,
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
@@ -77,6 +78,10 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector = new MainAreaWidget({
           content: new InspectorPanel({ translator })
         });
+        const inspectorSheet = extractStyleSheet('.jp-Inspector');
+        if (inspectorSheet) {
+          inspector.adoptStyleSheet(inspectorSheet);
+        }
         inspector.id = 'jp-inspector';
         inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;

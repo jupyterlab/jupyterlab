@@ -10,6 +10,7 @@ import { MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';
 import { Printing } from './printing';
+import { ShadowDOMWidget } from './shadowdomwidget';
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -26,7 +27,7 @@ const USE_CAPTURE = true;
  * This widget ensures its own focus when activated.
  */
 export class MainAreaWidget<T extends Widget = Widget>
-  extends Widget
+  extends ShadowDOMWidget
   implements Printing.IPrintable
 {
   /**
