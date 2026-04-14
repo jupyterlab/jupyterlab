@@ -339,7 +339,7 @@ export class BreadCrumbs extends Widget {
     // Click landed on the breadcrumb background (including separators
     // between crumb items) — enter edit mode.  This is intentional: the
     // entire breadcrumb bar acts as a click target for the path editor.
-    this._enterEditMode();
+    this.enterEditMode();
   }
 
   /**
@@ -596,7 +596,7 @@ export class BreadCrumbs extends Widget {
     // Calculate available space for items
     let fixedOverhead = homeWidth + separatorWidth;
     if (this._hasPreferred) {
-      fixedOverhead += preferredWidth + separatorWidth;
+      fixedOverhead += preferredWidth;
     }
     const availableForItems = containerWidth - fixedOverhead;
 
@@ -657,7 +657,7 @@ export class BreadCrumbs extends Widget {
   /**
    * Enter edit mode: show the path input and hide the breadcrumb content.
    */
-  private _enterEditMode(): void {
+  enterEditMode(): void {
     this._isEditMode = true;
     // Snapshot the current path so _onModelRefreshed can reliably detect
     // whether the path actually changed while in edit mode.
