@@ -270,7 +270,7 @@ export namespace NotebookActions {
       .replace(/\n+$/, '');
 
     nbModel.sharedModel.transact(() => {
-      nbModel.dirty = true;
+      nbModel.sharedModel.setState('dirty', true);
 
       // Insert new cells above the current cell (if any)
       if (newCells.length > 0) {
@@ -446,7 +446,7 @@ export namespace NotebookActions {
 
     // Make the changes while preserving history.
     model.sharedModel.transact(() => {
-      model.dirty = true;
+      model.sharedModel.setState('dirty', true);
       model.sharedModel.deleteCell(active);
       model.sharedModel.insertCell(active, newModel);
       toDelete
@@ -506,7 +506,7 @@ export namespace NotebookActions {
 
     const newIndex = notebook.activeCell ? notebook.activeCellIndex : 0;
     model.sharedModel.transact(() => {
-      model.dirty = true;
+      model.sharedModel.setState('dirty', true);
       model.sharedModel.insertCell(newIndex, {
         cell_type: notebook.notebookConfig.defaultCell,
         metadata:
@@ -546,7 +546,7 @@ export namespace NotebookActions {
 
     const newIndex = notebook.activeCell ? notebook.activeCellIndex + 1 : 0;
     model.sharedModel.transact(() => {
-      model.dirty = true;
+      model.sharedModel.setState('dirty', true);
       model.sharedModel.insertCell(newIndex, {
         cell_type: notebook.notebookConfig.defaultCell,
         metadata:
@@ -754,7 +754,7 @@ export namespace NotebookActions {
       // Do not use push here, as we want an widget insertion
       // to make sure no placeholder widget is rendered.
       model.sharedModel.transact(() => {
-        model.dirty = true;
+        model.sharedModel.setState('dirty', true);
         model.sharedModel.insertCell(notebook.widgets.length, {
           cell_type: notebook.notebookConfig.defaultCell,
           metadata:
@@ -824,7 +824,7 @@ export namespace NotebookActions {
     );
     const model = notebook.model;
     model.sharedModel.transact(() => {
-      model.dirty = true;
+      model.sharedModel.setState('dirty', true);
       model.sharedModel.insertCell(notebook.activeCellIndex + 1, {
         cell_type: notebook.notebookConfig.defaultCell,
         metadata:
@@ -1514,7 +1514,7 @@ export namespace NotebookActions {
     const prevActiveCellIndex = notebook.activeCellIndex;
 
     model.sharedModel.transact(() => {
-      model.dirty = true;
+      model.sharedModel.setState('dirty', true);
       // Set the starting index of the paste operation depending upon the mode.
       switch (mode) {
         case 'below':
@@ -1599,7 +1599,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     if (notebook.model!.sharedModel.undo()) {
       notebook.model!.sharedModel.transact(() => {
-        notebook.model!.dirty = true;
+        notebook.model!.sharedModel.setState('dirty', true);
       }, false);
     }
     notebook.deselectAll();
@@ -1624,7 +1624,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     if (notebook.model!.sharedModel.redo()) {
       notebook.model!.sharedModel.transact(() => {
-        notebook.model!.dirty = true;
+        notebook.model!.sharedModel.setState('dirty', true);
       }, false);
     }
     notebook.deselectAll();
@@ -2928,7 +2928,7 @@ namespace Private {
           newSource = Private.setMarkdownHeader(newSource, headingLevel);
         }
         notebookSharedModel.transact(() => {
-          notebook.model!.dirty = true;
+          notebook.model!.sharedModel.setState('dirty', true);
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
             // After change of type outputs are deleted so cell can be trusted.
@@ -2951,7 +2951,7 @@ namespace Private {
         });
       } else if (value === 'markdown' && headingLevel !== undefined) {
         notebookSharedModel.transact(() => {
-          notebook.model!.dirty = true;
+          notebook.model!.sharedModel.setState('dirty', true);
           child.model.sharedModel.setSource(
             Private.setMarkdownHeader(
               child.model.sharedModel.getSource(),
@@ -3001,7 +3001,7 @@ namespace Private {
     if (toDelete.length > 0) {
       // Delete the cells as one undo event.
       sharedModel.transact(() => {
-        model.dirty = true;
+        sharedModel.setState('dirty', true);
         // Delete cells in reverse order to maintain the correct indices.
         toDelete.reverse().forEach(index => {
           sharedModel.deleteCell(index);
@@ -3232,7 +3232,7 @@ namespace Private {
       const model = notebook.model!;
       const sharedModel = model!.sharedModel;
       sharedModel.transact(() => {
-        model.dirty = true;
+        sharedModel.setState('dirty', true);
         sharedModel.insertCell(cellIndex, {
           cell_type: 'markdown',
           source: '#'.repeat(headingLevel) + ' '
