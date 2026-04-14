@@ -94,7 +94,7 @@ export namespace Palette {
   ): ICommandPalette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
-    const palette = Private.createPalette(app, translator);
+    const palette = Private.createPalette(app);
     const modalPalette = new ModalCommandPalette({
       commandPalette: palette,
       restore: () => {
@@ -187,10 +187,9 @@ export namespace Palette {
    */
   export function restore(
     app: JupyterFrontEnd,
-    restorer: ILayoutRestorer,
-    translator: ITranslator
+    restorer: ILayoutRestorer
   ): void {
-    const palette = Private.createPalette(app, translator);
+    const palette = Private.createPalette(app);
     // Let the application restorer track the command palette for restoration of
     // application state (e.g. setting the command palette as the current side bar
     // widget).
@@ -210,10 +209,7 @@ namespace Private {
   /**
    * Create the application-wide command palette.
    */
-  export function createPalette(
-    app: JupyterFrontEnd,
-    translator: ITranslator
-  ): CommandPalette {
+  export function createPalette(app: JupyterFrontEnd): CommandPalette {
     if (!palette) {
       // use a renderer tweaked to use inline svg icons
       palette = new CommandPalette({
