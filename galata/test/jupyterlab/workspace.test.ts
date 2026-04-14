@@ -390,7 +390,7 @@ test.describe('Workspace in doc mode', () => {
         );
       }),
       page.url() === `${baseURL}/lab`,
-      page.click('button.jp-switch[role="switch"]')
+      page.menu.clickMenuItem('View>Appearance>Simple Interface')
     ]);
 
     // Ensure that the document opened by URL is closed, and that the one from workspace file is restored.
