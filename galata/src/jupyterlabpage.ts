@@ -602,9 +602,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   async setSimpleMode(simple: boolean): Promise<boolean> {
     const current = await this.isInSimpleMode();
     if (current !== simple) {
-      await this.page.evaluate(async () => {
-        await window.jupyterapp.commands.execute('application:toggle-mode');
-      });
+      await this.menu.clickMenuItem('View>Appearance>Simple Interface');
       await Utils.waitForCondition(async () => {
         return (await this.isInSimpleMode()) === simple;
       });
