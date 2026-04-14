@@ -84,9 +84,3 @@
   background: var(--jp-layout-color1);
   display: flex;
 }
-
-#jp-single-document-mode {
-  margin: 0 8px;
-  display: flex;
-  align-items: center;
-}

@@ -600,26 +600,16 @@ export class JupyterLabPage implements IJupyterLabPage {
    * @returns Whether this operation succeeds or not
    */
   async setSimpleMode(simple: boolean): Promise<boolean> {
-    const toggle = this.page.locator(
-      '#jp-single-document-mode button.jp-switch'
-    );
-    if (toggle) {
-      const checked = (await toggle.getAttribute('aria-checked')) === 'true';
-
-      if ((checked && !simple) || (!checked && simple)) {
-        await Promise.all([
-          Utils.waitForTransition(this.page, toggle),
-          toggle.click()
-        ]);
-      }
-
+    const current = await this.isInSimpleMode();
+    if (current !== simple) {
+      await this.page.evaluate(async () => {
+        await window.jupyterapp.commands.execute('application:toggle-mode');
+      });
       await Utils.waitForCondition(async () => {
         return (await this.isInSimpleMode()) === simple;
       });
-
-      return true;
     }
-    return false;
+    return true;
   }
 
   /**
