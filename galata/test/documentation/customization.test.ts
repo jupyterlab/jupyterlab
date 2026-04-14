@@ -316,7 +316,13 @@ test.describe('Customized', () => {
         .filter({ hasText: 'custom-markdown.css' })
     ).toBeVisible();
 
-    await moveWidgetToArea(page, 'filebrowser', 'Move to Main Area');
+    await openMoveWidgetMenu(page, 'filebrowser');
+
+    expect(
+      await page.screenshot({ clip: await getVisibleMenusClip(page) })
+    ).toMatchSnapshot('move-widget-submenu.png');
+
+    await selectMoveWidgetMenuItem(page, 'Move to Main Area');
 
     const fileBrowserMainTab = page.locator(
       '#jp-main-dock-panel .lm-TabBar-tab[data-id="filebrowser"]'
@@ -331,7 +337,7 @@ test.describe('Customized', () => {
       await page.locator('#jp-main-content-panel').screenshot()
     ).toMatchSnapshot('move-file-browser-main-area.png');
 
-    await moveWidgetToArea(page, 'jp-running-sessions', 'Move to Down Area');
+    await moveWidgetToArea(page, 'jp-running-sessions', 'Move to Bottom Panel');
 
     const runningDownTab = page.locator(
       '#jp-down-stack .lm-TabBar-tab[data-id="jp-running-sessions"]'
@@ -351,6 +357,12 @@ async function moveWidgetToArea(
   widgetId: string,
   targetAreaLabel: string
 ) {
+  await openMoveWidgetMenu(page, widgetId);
+
+  await selectMoveWidgetMenuItem(page, targetAreaLabel);
+}
+
+async function openMoveWidgetMenu(page: Page, widgetId: string) {
   const widgetTab = page
     .locator(`.lm-TabBar-tab[data-id="${widgetId}"]`)
     .first();
@@ -364,6 +376,26 @@ async function moveWidgetToArea(
   await moveWidgetMenuItem.waitFor();
   await moveWidgetMenuItem.hover();
 
+  // Wait for the submenu to appear (2 visible menus: context menu + submenu)
+  await expect(page.locator('.lm-Menu:visible')).toHaveCount(2);
+}
+
+async function getVisibleMenusClip(page: Page) {
+  return page.locator('.lm-Menu:visible').evaluateAll(nodes => {
+    if (!nodes.length) {
+      throw new Error('Unable to find visible menus to capture.');
+    }
+    const padding = 8;
+    const rects = nodes.map(n => n.getBoundingClientRect());
+    const x = Math.max(0, Math.min(...rects.map(r => r.x)) - padding);
+    const y = Math.max(0, Math.min(...rects.map(r => r.y)) - padding);
+    const right = Math.max(...rects.map(r => r.right)) + padding;
+    const bottom = Math.max(...rects.map(r => r.bottom)) + padding;
+    return { x, y, width: right - x, height: bottom - y };
+  });
+}
+
+async function selectMoveWidgetMenuItem(page: Page, targetAreaLabel: string) {
   const targetAreaMenuItem = page
     .locator('.lm-Menu-content .lm-Menu-item')
     .filter({ hasText: targetAreaLabel });
