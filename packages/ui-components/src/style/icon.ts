@@ -150,7 +150,6 @@ export namespace LabIconStyle {
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
           '&:first-child svg': {
-            bottom: '1px',
             marginLeft: '0px',
             position: 'relative'
           },
