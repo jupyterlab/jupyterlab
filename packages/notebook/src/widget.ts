@@ -613,7 +613,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
                 }
               : {}
         });
-        newValue.dirty = true;
       });
     }
     let index = -1;
