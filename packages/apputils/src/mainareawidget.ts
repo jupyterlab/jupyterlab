@@ -309,7 +309,8 @@ export namespace MainAreaWidget {
   /**
    * An options object for creating a main area widget.
    */
-  export interface IOptions<T extends Widget = Widget> extends Widget.IOptions {
+  export interface IOptions<T extends Widget = Widget>
+    extends ShadowDOMWidget.IOptions {
     /**
      * The child widget to wrap.
      */
@@ -348,7 +349,7 @@ export namespace MainAreaWidget {
    * https://stackoverflow.com/a/46941824
    */
   export interface IOptionsOptionalContent<T extends Widget = Widget>
-    extends Widget.IOptions {
+    extends ShadowDOMWidget.IOptions {
     /**
      * The child widget to wrap.
      */

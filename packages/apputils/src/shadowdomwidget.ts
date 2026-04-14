@@ -54,6 +54,9 @@ export class ShadowDOMWidget extends Widget {
     this._root = attachmentNode.attachShadow({ mode: 'open' });
     this._root.appendChild(this.node);
     this.attachmentNode = attachmentNode;
+    if (options.cssDeps) {
+      this.adoptPackageStyles(options.cssDeps);
+    }
   }
 
   /**
@@ -82,7 +85,7 @@ export class ShadowDOMWidget extends Widget {
    *   element is looked up in the document, converted to a constructable
    *   CSSStyleSheet (cached), and adopted into this widget's shadow root.
    */
-  adoptPackageStyles(packages: string[]): void {
+  adoptPackageStyles(packages: readonly string[]): void {
     for (const pkg of packages) {
       for (const sheet of getPackageStyleSheets(pkg)) {
         this.adoptStyleSheet(sheet);
@@ -109,5 +112,12 @@ export class ShadowDOMWidget extends Widget {
 }
 
 export namespace ShadowDOMWidget {
-  export interface IOptions extends Widget.IOptions {}
+  export interface IOptions extends Widget.IOptions {
+    /**
+     * Package names whose stylesheets should be adopted into the
+     * shadow root at construction time (e.g. from a generated
+     * `cssDeps.json`).
+     */
+    cssDeps?: readonly string[];
+  }
 }

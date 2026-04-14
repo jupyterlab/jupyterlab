@@ -5,6 +5,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import cssDeps from '../style/cssDeps.json';
 import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { MimeModel } from '@jupyterlab/rendermime';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -326,7 +327,7 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     content.title.iconClass = this._fileType?.iconClass ?? '';
     content.title.iconLabel = this._fileType?.iconLabel ?? '';
     content.title.caption = this.label;
-    const widget = new MarkdownDocument({ content, context });
+    const widget = new MarkdownDocument({ content, context, cssDeps });
 
     return widget;
   }

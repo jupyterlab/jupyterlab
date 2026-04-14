@@ -36,9 +36,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Construct a console panel.
    */
   constructor(options: ConsolePanel.IOptions) {
-    super({ content: new Panel() });
+    super({ content: new Panel(), cssDeps: consoleCssDeps });
     this.addClass(PANEL_CLASS);
-    this.adoptPackageStyles(consoleCssDeps);
     let {
       executor,
       rendermime,

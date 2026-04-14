@@ -7,6 +7,7 @@ import type {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import cssDeps from '../style/cssDeps.json';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type * as DataGridModule from '@lumino/datagrid';
 import type { Message } from '@lumino/messaging';
@@ -449,7 +450,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     let { content, context, delimiter, reveal, ...other } = options;
     content = content || Private.createContent(context);
     reveal = Promise.all([reveal, content.revealed]);
-    super({ content, context, reveal, ...other });
+    super({ content, context, reveal, cssDeps, ...other });
 
     if (delimiter) {
       content.delimiter = delimiter;

@@ -15,6 +15,7 @@ import { MessageLoop } from '@lumino/messaging';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { ABCWidgetFactory, DocumentWidget } from './default';
 import type { DocumentRegistry } from './registry';
+import cssDeps from '../style/cssDeps.json';
 
 /**
  * A content widget for a rendered mimetype document.
@@ -314,7 +315,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     content.title.iconClass = ft?.iconClass ?? '';
     content.title.iconLabel = ft?.iconLabel ?? '';
 
-    const widget = new MimeDocument({ content, context });
+    const widget = new MimeDocument({ content, context, cssDeps });
 
     return widget;
   }
