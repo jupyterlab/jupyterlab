@@ -121,6 +121,8 @@ export class MenuSvg extends Menu {
    * The index will be clamped to the bounds of the items.
    */
   insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
+    options.args = { isMenu: true, ...options.args };
+
     if (options.submenu) {
       MenuSvg.overrideDefaultRenderer(options.submenu);
     }
@@ -140,6 +142,8 @@ export namespace MenuSvg {
     // ensure correct renderer on any submenus that get added in the future
     const originalInsertItem = menu.insertItem.bind(menu);
     menu.insertItem = (index: number, options: Menu.IItemOptions) => {
+      options.args = { isMenu: true, ...options.args };
+
       if (options.submenu) {
         MenuSvg.overrideDefaultRenderer(options.submenu);
       }
