@@ -606,7 +606,7 @@ describe('docregistry/default', () => {
       });
 
       it('should add the dirty class when the model is dirty', async () => {
-        context.model.sharedModel.setState('dirty', true);
+        context.model.dirty = true;
         expect(widget.title.className).toContain('jp-mod-dirty');
       });
 

@@ -435,7 +435,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     this.model!.sharedModel.transact(() => {
       this.model!.sharedModel.moveCells(from, boundedTo, n);
-      this.model!.sharedModel.setState('dirty', true);
+      this.model!.dirty = true;
     });
 
     for (let i = 0; i < n; i++) {
@@ -613,7 +613,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
                 }
               : {}
         });
-        newValue.sharedModel.setState('dirty', true);
+        newValue.dirty = true;
       });
     }
     let index = -1;
@@ -660,7 +660,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           requestAnimationFrame(() => {
             if (model && !model.isDisposed && !model.sharedModel.cells.length) {
               model.sharedModel.transact(() => {
-                model.sharedModel.setState('dirty', true);
+                model.dirty = true;
                 model.sharedModel.insertCell(0, {
                   cell_type: this.notebookConfig.defaultCell,
                   metadata:
@@ -3198,7 +3198,7 @@ export class Notebook extends StaticNotebook {
       // We preserve trust status of pasted cells by not modifying metadata.
       model.sharedModel.transact(() => {
         model.sharedModel.insertCells(index, values);
-        model.sharedModel.setState('dirty', true);
+        model.dirty = true;
       });
       // Select the inserted cells.
       this.deselectAll();
