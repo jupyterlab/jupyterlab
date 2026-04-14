@@ -134,7 +134,7 @@ export namespace ILabShell {
      *
      * Set to `false` for a more compact layout.
      */
-    dockPanelPadding: boolean;
+    dockPanelPadding?: boolean;
   }
 
   /**
@@ -1382,7 +1382,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
     }
 
-    if ('dockPanelPadding' in config) {
+    if (config.dockPanelPadding !== undefined) {
       if (config.dockPanelPadding === false) {
         this._dockPanel.node.style.setProperty(
           '--jp-dock-panel-padding',
