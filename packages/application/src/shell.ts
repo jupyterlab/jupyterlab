@@ -1491,7 +1491,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
     const inputElement = this._titleHandler.inputElement;
-    inputElement.value = current ? Private.titleLabel(current.title) : '';
+    inputElement.value = current ? TabBarSvg.titleLabel(current.title) : '';
     inputElement.title = current ? current.title.caption : '';
   }
 
@@ -1949,10 +1949,6 @@ namespace Private {
    */
   export function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
-  }
-
-  export function titleLabel(title: Title<Widget>): string {
-    return title.label || title.dataset['jpTabLabel'] || title.caption;
   }
 
   /**
@@ -2654,7 +2650,7 @@ namespace Private {
         if (widget == null) {
           return;
         }
-        const oldName = Private.titleLabel(widget.title);
+        const oldName = TabBarSvg.titleLabel(widget.title);
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();

@@ -222,12 +222,6 @@ namespace Private {
       });
       palette.id = 'command-palette';
       palette.title.icon = paletteIcon;
-      const trans = translator.load('jupyterlab');
-      palette.title.label = '';
-      palette.title.dataset = {
-        ...palette.title.dataset,
-        jpTabLabel: trans.__('Commands')
-      };
     }
 
     return palette;

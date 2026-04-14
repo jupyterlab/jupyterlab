@@ -91,6 +91,12 @@ You can also move an open widget directly from its tab context menu. Right-click
 the widget tab in a sidebar, the main work area, or the down area, select
 **Move Widget To**, and choose the destination area.
 
+:::{figure} ../images/move-widget-submenu.png
+:alt: The Move Widget To submenu showing the available destination areas.
+
+The Move Widget To submenu lists the available destination areas.
+:::
+
 :::{figure} ../images/move-file-browser-main-area.png
 :alt: The file browser moved from the left sidebar to the main work area.
 
