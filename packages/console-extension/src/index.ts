@@ -5,19 +5,18 @@
  * @module console-extension
  */
 
-import {
-  ILabStatus,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
   ISanitizer,
-  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   Sanitizer,
@@ -28,11 +27,8 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import {
-  CodeEditor,
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import {
   CodeConsole,
@@ -43,7 +39,8 @@ import {
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -62,15 +59,15 @@ import {
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import {
-  JSONExt,
+import type {
   JSONObject,
   ReadonlyJSONValue,
-  ReadonlyPartialJSONObject,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt, UUID } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout, Menu, Widget } from '@lumino/widgets';
+import type { DockLayout, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 
@@ -565,10 +562,18 @@ async function activateConsole(
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
-      // Update future promptCells
-      widget.console.editorConfig = promptCellConfig;
-      // Update promptCell already on screen
-      widget.console.promptCell?.editor?.setOptions(promptCellConfig);
+      // Update future promptCells - merge with defaults to preserve tabFocusable: false for output cells
+      // But prompt cells will have tabFocusable: true set explicitly in newPromptCell()
+      widget.console.editorConfig = {
+        ...CodeConsole.defaultEditorConfig,
+        ...promptCellConfig
+      };
+      // Update promptCell already on screen - ensure it's tabbable (input should be accessible)
+      widget.console.promptCell?.editor?.setOptions({
+        ...CodeConsole.defaultEditorConfig,
+        ...promptCellConfig,
+        tabFocusable: true
+      });
       // Set other config options
       widget.console.setConfig({
         clearCellsOnExecute,
@@ -638,7 +643,8 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      (tracker.currentWidget === shell.currentWidget ||
+        tracker.currentWidget.node.contains(document.activeElement))
     );
   }
 
@@ -729,7 +735,53 @@ async function activateConsole(
           },
           kernelPreference: {
             type: 'object',
-            description: trans.__('The kernel preference for the console')
+            description: trans.__(
+              'The kernel preference for the console. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.'
+            ),
+            properties: {
+              id: {
+                type: 'string',
+                description: trans.__('The id of an existing kernel')
+              },
+              name: {
+                type: 'string',
+                description: trans.__('The name of the kernel')
+              },
+              language: {
+                type: 'string',
+                description: trans.__('The preferred kernel language')
+              },
+              shouldStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel should be started automatically (default `true`)'
+                )
+              },
+              canStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel can be started (default `true`)'
+                )
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description: trans.__(
+                  'Shut down the session when session context is disposed (default `false`)'
+                )
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description: trans.__(
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+                )
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description: trans.__(
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+                )
+              }
+            }
           },
           basePath: {
             type: 'string',
@@ -769,7 +821,8 @@ async function activateConsole(
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
     const widget = args[SemanticCommand.WIDGET]
-      ? tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null
+      ? (tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ??
+        null)
       : tracker.currentWidget;
     const activate = args['activate'] !== false;
     if (activate && widget) {
@@ -797,7 +850,8 @@ async function activateConsole(
         }
         current.console.setConfig({ promptCellPosition: position });
       },
-      isEnabled: isEnabled,
+      isEnabled: () =>
+        !!tracker.currentWidget && tracker.currentWidget.isVisible,
       label: trans.__(`Prompt to ${position}`),
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {

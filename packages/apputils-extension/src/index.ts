@@ -7,11 +7,11 @@
  * @module apputils-extension
  */
 
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ILayoutRestorer,
   IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEnd
 } from '@jupyterlab/application';
 import {
   Dialog,
@@ -35,7 +35,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
@@ -46,8 +46,10 @@ import { subshellsSettings } from './subshell-settings';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
+import type { Kernel } from '@jupyterlab/services';
+import { IKernelManager } from '@jupyterlab/services';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -872,8 +874,27 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
   description: 'Reserves the name for kernel settings.',
   autoStart: true,
   requires: [ISettingRegistry],
-  activate: (_app: JupyterFrontEnd, settingRegistry: ISettingRegistry) => {
+  optional: [IKernelManager],
+  activate: async (
+    _app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    kernelManager: Kernel.IManager | null
+  ) => {
     void settingRegistry.load(kernelSettings.id);
+    // override Kernel Info's timeout setting
+    if (kernelManager === null || !('kernelInfoTimeout' in kernelManager)) {
+      console.warn(
+        `The kernel manager does not support the kernelInfoTimeout property.`
+      );
+    } else {
+      const settings = await settingRegistry.load(kernelSettings.id);
+      const patchKernelInfoTimeout = () => {
+        kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
+          .composite as number;
+      };
+      patchKernelInfoTimeout();
+      settings.changed.connect(patchKernelInfoTimeout);
+    }
   }
 };
 

@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { Menu, MenuBar } from '@lumino/widgets';
+import type { CommandRegistry } from '@lumino/commands';
+import type { Menu } from '@lumino/widgets';
+import { MenuBar } from '@lumino/widgets';
 import { EditMenu } from './edit';
 import { FileMenu } from './file';
 import { HelpMenu } from './help';
@@ -13,7 +14,7 @@ import { KernelMenu } from './kernel';
 import { RunMenu } from './run';
 import { SettingsMenu } from './settings';
 import { TabsMenu } from './tabs';
-import { IMainMenu } from './tokens';
+import type { IMainMenu } from './tokens';
 import { ViewMenu } from './view';
 
 /**
@@ -160,8 +161,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
       'rank' in options
         ? options.rank
         : 'rank' in menu
-        ? (menu as any).rank
-        : IRankedMenu.DEFAULT_RANK;
+          ? (menu as any).rank
+          : IRankedMenu.DEFAULT_RANK;
     const rankItem = { menu, rank };
     const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 

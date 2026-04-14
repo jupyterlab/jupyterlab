@@ -379,32 +379,32 @@
     {
       "command": "notebook:change-cell-to-heading-1",
       "keys": ["1"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-2",
       "keys": ["2"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-3",
       "keys": ["3"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-4",
       "keys": ["4"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-5",
       "keys": ["5"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-6",
       "keys": ["6"],
-      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) .jp-MarkdownCell:focus"
     },
     {
       "command": "notebook:change-cell-to-markdown",
@@ -858,6 +858,18 @@
     "showMinimap": {
       "title": "Show minimap",
       "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
+      "type": "boolean",
+      "default": false
+    },
+    "useSystemClipboardForCells": {
+      "title": "Use system clipboard for copy/cut/paste of cells",
+      "description": "Whether to use the system clipboard for copy/cut/paste of cells. When enabled, cell contents are copied to the system clipboard, allowing copy/cut/paste between different notebook tabs or browser windows.",
+      "type": "boolean",
+      "default": false
+    },
+    "pasteCodeCellsWithoutOutput": {
+      "title": "Paste code cells without output",
+      "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
       "type": "boolean",
       "default": false
     }

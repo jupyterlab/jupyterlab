@@ -1,20 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  ISessionContext,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Clipboard,
   Dialog,
-  ISessionContext,
-  ISessionContextDialogs,
   showDialog,
   SystemClipboard
 } from '@jupyterlab/apputils';
+import type { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 import {
-  Cell,
-  CodeCell,
   CodeCellModel,
-  ICellModel,
-  ICodeCellModel,
   isMarkdownCellModel,
   isRawCellModel,
   MarkdownCell
@@ -22,17 +21,20 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { KernelMessage } from '@jupyterlab/services';
-import { ISharedAttachmentsCell } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { JSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { runCell as defaultRunCell } from './cellexecutor';
-import { Notebook, StaticNotebook } from './widget';
-import { NotebookWindowedLayout } from './windowing';
-import { INotebookCellExecutor } from './tokens';
+import type { Notebook, StaticNotebook } from './widget';
+import type { NotebookWindowedLayout } from './windowing';
+import type { INotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -139,10 +141,31 @@ export class NotebookActions {
  * A namespace for `NotebookActions` static methods.
  */
 export namespace NotebookActions {
+  const READ_ONLY_ACTION_AUTO_CLOSE = 5000;
+
+  function notifySplitReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(trans.__('The cell is read-only and cannot be split.'), {
+      autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+    });
+  }
+
+  function notifyMergeReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(
+      trans.__('The cell is read-only and cannot be merged.'),
+      {
+        autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+      }
+    );
+  }
+
   /**
    * Split the active cell into two or more cells.
    *
    * @param notebook The target notebook widget.
+   *
+   * @param translator - Application translator.
    *
    * #### Notes
    * It will preserve the existing mode.
@@ -158,8 +181,15 @@ export namespace NotebookActions {
    * This action can be undone.
    * The original cell is preserved to maintain kernel connections.
    */
-  export function splitCell(notebook: Notebook): void {
+  export function splitCell(
+    notebook: Notebook,
+    translator?: ITranslator
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    if (notebook.activeCell.model.getMetadata('editable') === false) {
+      notifySplitReadOnlyAction(translator);
       return;
     }
 
@@ -298,6 +328,8 @@ export namespace NotebookActions {
    * @param addExtraLine - Whether to add an extra newline between merged cell contents
    *    (true, default) or use only a single newline (false).
    *
+   * @param translator - Application translator.
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -310,7 +342,8 @@ export namespace NotebookActions {
   export function mergeCells(
     notebook: Notebook,
     mergeAbove: boolean = false,
-    addExtraLine: boolean = true
+    addExtraLine: boolean = true,
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -324,10 +357,15 @@ export namespace NotebookActions {
     const primary = notebook.activeCell;
     const active = notebook.activeCellIndex;
     const attachments: nbformat.IAttachments = {};
+    let hasReadOnlyCell = false;
 
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
       if (notebook.isSelectedOrActive(child)) {
+        if (child.model.getMetadata('editable') === false) {
+          hasReadOnlyCell = true;
+          return;
+        }
         toMerge.push(child.model.sharedModel.getSource());
         if (index !== active) {
           toDelete.push(index);
@@ -342,12 +380,23 @@ export namespace NotebookActions {
       }
     });
 
+    if (hasReadOnlyCell) {
+      notifyMergeReadOnlyAction(translator);
+      return;
+    }
+
     // Check for only a single cell selected.
     if (toMerge.length === 1) {
       // Merge with the cell above when mergeAbove is true
       if (mergeAbove === true) {
         // Bail if it is the first cell.
         if (active === 0) {
+          return;
+        }
+        if (
+          notebook.widgets[active - 1].model.getMetadata('editable') === false
+        ) {
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the previous cell.
@@ -358,6 +407,12 @@ export namespace NotebookActions {
       } else if (mergeAbove === false) {
         // Bail if it is the last cell.
         if (active === cells.length - 1) {
+          return;
+        }
+        if (
+          notebook.widgets[active + 1].model.getMetadata('editable') === false
+        ) {
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the next cell.
@@ -572,7 +627,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value, translator);
+    Private.changeCellType(notebook, value, { translator });
     void Private.handleState(notebook, state);
   }
 
@@ -1254,8 +1309,6 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
-   *
-   * @deprecated will be removed in a future release. Use `copyToSystemClipboard` instead.
    */
   export function copy(notebook: Notebook): void {
     Private.copyOrCut(notebook, false);
@@ -1280,8 +1333,6 @@ export namespace NotebookActions {
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
-   *
-   * @deprecated will be removed in a future release. Use `cutToSystemClipboard` instead.
    */
   export function cut(notebook: Notebook): void {
     Private.copyOrCut(notebook, true);
@@ -1313,16 +1364,17 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param options - Optional. Set `stripOutputs: true` to paste code cells without their outputs.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
-   *
-   * @deprecated will be removed in a future release. Use `pasteFromSystemClipboard` instead.
    */
   export function paste(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { stripOutputs?: boolean }
   ): void {
     const clipboard = Clipboard.getInstance();
 
@@ -1330,7 +1382,10 @@ export namespace NotebookActions {
       return;
     }
 
-    const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    if (options?.stripOutputs) {
+      values = Private.stripCodeCellOutputs(values);
+    }
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -1347,6 +1402,8 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param options - Optional. Set `stripOutputs: true` to paste code cells without their outputs.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
@@ -1354,7 +1411,8 @@ export namespace NotebookActions {
    */
   export async function pasteFromSystemClipboard(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { stripOutputs?: boolean }
   ): Promise<void> {
     const clipboard = SystemClipboard.getInstance();
 
@@ -1363,7 +1421,10 @@ export namespace NotebookActions {
       return;
     }
 
-    const values = stored as nbformat.IBaseCell[];
+    let values = stored as nbformat.IBaseCell[];
+    if (options?.stripOutputs) {
+      values = Private.stripCodeCellOutputs(values);
+    }
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -1500,7 +1561,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = prevActiveCellIndex + values.length;
     notebook.deselectAll();
     if (cellsFromClipboard) {
-      notebook.lastClipboardInteraction = 'paste';
+      notebook.recordCellClipboardInteraction('paste', values);
     }
     void Private.handleState(notebook, state, true);
   }
@@ -1519,7 +1580,6 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
     notebook.deselectAll();
@@ -1941,15 +2001,12 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
 
     level = Math.min(Math.max(level, 1), 6);
-    notebook.widgets.forEach((child, index) => {
-      if (notebook.isSelectedOrActive(child)) {
-        Private.setMarkdownHeader(cells.get(index), level);
-      }
+    Private.changeCellType(notebook, 'markdown', {
+      translator,
+      headingLevel: level
     });
-    Private.changeCellType(notebook, 'markdown', translator);
     void Private.handleState(notebook, state);
   }
 
@@ -2399,6 +2456,7 @@ namespace Private {
   /**
    * Notebook cell executor
    */
+  // eslint-disable-next-line no-unassigned-vars
   export let executor: INotebookCellExecutor;
 
   /**
@@ -2544,9 +2602,7 @@ namespace Private {
               `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
             ),
             'warning',
-            {
-              autoClose: false
-            }
+            { autoClose: false }
           );
           return Promise.resolve(false);
         }
@@ -2677,6 +2733,25 @@ namespace Private {
   }
 
   /**
+   * Return a deep copy of cells with code cell outputs and execution_count cleared.
+   *
+   * @param cells - The cells to process.
+   * @returns New cell objects.
+   */
+  export function stripCodeCellOutputs(
+    cells: nbformat.IBaseCell[]
+  ): nbformat.IBaseCell[] {
+    return cells.map(cell => {
+      const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
+      if (copy && nbformat.isCode(copy)) {
+        copy.outputs = [];
+        copy.execution_count = null;
+      }
+      return copy;
+    });
+  }
+
+  /**
    * Get the selected cell(s) without affecting the clipboard.
    *
    * @param notebook - The target notebook widget.
@@ -2701,8 +2776,6 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
-   *
-   * @deprecated will be removed in a future release. Use `copyOrCutToSystemClipboard` instead.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -2724,9 +2797,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
@@ -2761,9 +2834,9 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
@@ -2784,8 +2857,12 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    options?: {
+      translator?: ITranslator;
+      headingLevel?: number;
+    }
   ): void {
+    const { translator, headingLevel } = options ?? {};
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
@@ -2795,8 +2872,7 @@ namespace Private {
         child.model.type === 'code' &&
         (child as CodeCell).outputArea.pendingInput
       ) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when input is pending
         void showDialog({
           title: trans.__('Cell type not changed due to pending input'),
@@ -2808,8 +2884,7 @@ namespace Private {
         return;
       }
       if (child.model.getMetadata('editable') == false) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
           title: trans.__('Cell is read-only'),
@@ -2820,6 +2895,10 @@ namespace Private {
       }
       if (child.model.type !== value) {
         const raw = child.model.toJSON();
+        let newSource = raw.source as string;
+        if (headingLevel !== undefined) {
+          newSource = Private.setMarkdownHeader(newSource, headingLevel);
+        }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
@@ -2833,13 +2912,22 @@ namespace Private {
           const newCell = notebookSharedModel.insertCell(index, {
             id: raw.id,
             cell_type: value,
-            source: raw.source,
+            source: newSource,
             metadata: raw.metadata
           });
           if (raw.attachments && ['markdown', 'raw'].includes(value)) {
             (newCell as ISharedAttachmentsCell).attachments =
               raw.attachments as nbformat.IAttachments;
           }
+        });
+      } else if (value === 'markdown' && headingLevel !== undefined) {
+        notebookSharedModel.transact(() => {
+          child.model.sharedModel.setSource(
+            Private.setMarkdownHeader(
+              child.model.sharedModel.getSource(),
+              headingLevel
+            )
+          );
         });
       }
       if (value === 'markdown') {
@@ -2919,11 +3007,10 @@ namespace Private {
   }
 
   /**
-   * Set the markdown header level of a cell.
+   * Set the markdown header level of a cell source.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number): void {
+  export function setMarkdownHeader(source: string, level: number): string {
     // Remove existing header or leading white space.
-    let source = cell.sharedModel.getSource();
     const regex = /^(#+\s*)|^(\s*)/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
@@ -2931,7 +3018,7 @@ namespace Private {
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.sharedModel.setSource(newHeader + source);
+    return newHeader + source;
   }
 
   /** Functionality related to collapsible headings */

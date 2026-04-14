@@ -2,19 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser,
+  IRenderMime
+} from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
-  IMarkdownParser,
-  IRenderMime,
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
   svgRendererFactory,
   textRendererFactory
 } from '@jupyterlab/rendermime';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 function createModel(
@@ -293,7 +296,11 @@ describe('rendermime/factories', () => {
 
       beforeAll(() => {
         markdownParser = {
-          render: (content: string): Promise<string> => Promise.resolve(content)
+          render: (content: string): Promise<string> =>
+            Promise.resolve(content),
+          getHeadingTokens: (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 
@@ -406,6 +413,38 @@ describe('rendermime/factories', () => {
         expect(anchor.target).toBe('_self');
         expect(anchor.className).toContain('jp-InternalAnchorLink');
         expect(anchor.textContent).toBe('¶');
+        Widget.detach(w);
+      });
+
+      it('should scroll to data-jupyter-id element on anchor click', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = '<a href="#my-heading">link</a>';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser: { render: content => content },
+          resolver: {
+            resolveUrl: async (url: string) => url,
+            getDownloadUrl: async (url: string) => url,
+            isLocal: () => true
+          }
+        });
+        await w.renderModel(model);
+        Widget.attach(w, document.body);
+
+        const target = document.createElement('h2');
+        target.setAttribute('data-jupyter-id', 'my-heading');
+        w.node.appendChild(target);
+
+        const anchor = w.node.querySelector('a') as HTMLAnchorElement;
+        const scrollMock = jest.fn();
+        target.scrollIntoView = scrollMock;
+
+        anchor.click();
+
+        expect(scrollMock).toHaveBeenCalled();
         Widget.detach(w);
       });
 

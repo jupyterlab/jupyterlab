@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 from collections.abc import Awaitable
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Optional, Union
 
 from jupyter_server.base.handlers import APIHandler
 from jupyterlab_server.translation_utils import translator
@@ -64,7 +63,7 @@ class CheckForUpdateABC(abc.ABC):
         self.version = version
 
     @abc.abstractmethod
-    async def __call__(self) -> Awaitable[Union[None, str, tuple[str, tuple[str, str]]]]:
+    async def __call__(self) -> Awaitable[None | str | tuple[str, tuple[str, str]]]:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -110,8 +109,8 @@ class CheckForUpdate(CheckForUpdateABC):
             if parse(self.version) < parse(last_version):
                 trans = translator.load("jupyterlab")
                 return (
-                    trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    trans.gettext(f"A newer version ({last_version}) of JupyterLab is available."),
+                    (trans.gettext("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None
@@ -151,7 +150,7 @@ class CheckForUpdateHandler(APIHandler):
 
     def initialize(
         self,
-        update_checker: Optional[CheckForUpdate] = None,
+        update_checker: CheckForUpdate | None = None,
     ) -> None:
         super().initialize()
         self.update_checker = (
@@ -197,7 +196,7 @@ class NewsHandler(APIHandler):
 
     def initialize(
         self,
-        news_url: Optional[str] = None,
+        news_url: str | None = None,
     ) -> None:
         super().initialize()
         self.news_url = news_url
@@ -231,7 +230,7 @@ class NewsHandler(APIHandler):
                 tree = ET.fromstring(response.body)  # noqa S314
 
                 def build_entry(node):
-                    def get_xml_text(attr: str, default: Optional[str] = None) -> str:
+                    def get_xml_text(attr: str, default: str | None = None) -> str:
                         node_item = node.find(f"atom:{attr}", xml_namespaces)
                         if node_item is not None:
                             return node_item.text

@@ -49,6 +49,12 @@
         "multiple": {}
       },
       "additionalProperties": false
+    },
+    "zoomOnWheel": {
+      "type": "boolean",
+      "title": "Enable Ctrl+ Scroll Zoom",
+      "description": "Zoom the widget under the mouse when using Ctrl+ mouse wheel.",
+      "default": false
     }
   },
   "additionalProperties": false,

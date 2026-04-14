@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   IContentChange,
   ILogger,
   ILoggerRegistry
 } from '@jupyterlab/logconsole';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { listIcon, VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import React from 'react';

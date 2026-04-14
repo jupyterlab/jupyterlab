@@ -6,13 +6,13 @@
  */
 
 import { DisposableSet } from '@lumino/disposable';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ILabShell,
   ILayoutRestorer,
   IRouter,
   ITreePathUpdater,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
   JupyterLab
 } from '@jupyterlab/application';
 import {
@@ -28,25 +28,28 @@ import {
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import {
-  DocumentRegistry,
-  getAvailableKernelFileTypes
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
   FilterFileBrowserModel,
   formatFileSize,
   IDefaultFileBrowser,
+  IDefaultFileBrowserRenderer,
   IFileBrowserCommands,
   IFileBrowserFactory,
   Uploader
 } from '@jupyterlab/filebrowser';
-import { Contents } from '@jupyterlab/services';
+import type { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type {
+  IDisposableMenuItem,
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   addIcon,
   closeIcon,
@@ -57,20 +60,18 @@ import {
   fileIcon,
   filterIcon,
   folderIcon,
-  IDisposableMenuItem,
   LabIcon,
   linkIcon,
   markdownIcon,
   newFolderIcon,
   pasteIcon,
-  RankedMenu,
   refreshIcon,
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ContextMenu } from '@lumino/widgets';
+import type { ContextMenu } from '@lumino/widgets';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -145,18 +146,20 @@ namespace CommandIDs {
 
   export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
 
+  export const toggleDateCreated = 'filebrowser:toggle-date-created';
+
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
   export const toggleSortNotebooksFirst =
     'filebrowser:toggle-sort-notebooks-first';
-
-  export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
   export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
+
+  export const editPath = 'filebrowser:edit-path';
 }
 
 /**
@@ -260,10 +263,12 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           navigateToCurrentDirectory: false,
           singleClickNavigation: false,
           showLastModifiedColumn: true,
+          showDateCreatedColumn: false,
           showFileSizeColumn: false,
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
+          sortFileNamesNaturally: true,
           showFullPath: false,
           allowFileUploads: true
         };
@@ -336,7 +341,14 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
         allowFileUploads: options.allowFileUploads ?? true
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator, state });
+      const widget = new FileBrowser({
+        id,
+        model,
+        restore,
+        translator,
+        state,
+        renderer: options.renderer
+      });
 
       // Track the newly created file browser.
       void tracker.add(widget);
@@ -356,14 +368,21 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
-  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell, ITranslator],
+  optional: [
+    IRouter,
+    JupyterFrontEnd.ITreeResolver,
+    ILabShell,
+    ITranslator,
+    IDefaultFileBrowserRenderer
+  ],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    renderer: IDefaultFileBrowserRenderer | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -371,7 +390,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
-      restore: false
+      restore: false,
+      renderer: renderer ?? undefined
     });
 
     // Set attributes when adding the browser to the UI
@@ -512,7 +532,7 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
         filebrowsermenuDisposables.add(
           app.contextMenu.addItem({
             command: CommandIDs.createNewFile,
-            selector: '.jp-DirListing',
+            selector: '.jp-DirListing-content',
             args: {
               ext: filetype.extensions[0],
               label: trans.__('New %1 File', filetype.displayName),
@@ -557,7 +577,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     labShell: ILabShell,
     // Wait until file browser commands are ready before activating file browser widget
-    fileBrowserCommands: null,
+    _: IFileBrowserCommands,
     commandPalette: ICommandPalette | null
   ): void => {
     const { commands } = app;
@@ -1428,7 +1448,7 @@ function addCommands(
     }
   });
 
-  // Add the openPath command to the command palette
+  // Add commands to the command palette
   if (commandPalette) {
     commandPalette.addItem({
       command: CommandIDs.openPath,
@@ -1772,6 +1792,28 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleDateCreated, {
+    label: trans.__('Show Date Created Column'),
+    isToggled: () => browser.showDateCreatedColumn,
+    execute: () => {
+      const value = !browser.showDateCreatedColumn;
+      const key = 'showDateCreatedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.toggleFileSize, {
     label: trans.__('Show File Size Column'),
     isToggled: () => browser.showFileSizeColumn,
@@ -1840,6 +1882,13 @@ function addCommands(
     }
   });
 
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.toggleHiddenFiles,
+      category: trans.__('File Operations')
+    });
+  }
+
   commands.addCommand(CommandIDs.toggleFileCheckboxes, {
     label: trans.__('Show File Checkboxes'),
     isToggled: () => browser.showFileCheckboxes,
@@ -1862,9 +1911,20 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.search, {
-    label: trans.__('Search on File Names'),
-    execute: () => alert('search'),
+  commands.addCommand(CommandIDs.editPath, {
+    execute: async () => {
+      if (typeof browser.editPath !== 'function') {
+        console.error(
+          '`editPath` is not available on the current file browser'
+        );
+        return;
+      }
+      await commands.execute(CommandIDs.showBrowser);
+      const targetBrowser = tracker.currentWidget ?? browser;
+      targetBrowser.editPath();
+    },
+    label: trans.__('Edit File Browser Path'),
+    isVisible: () => typeof browser.editPath === 'function',
     describedBy: {
       args: {
         type: 'object',
@@ -1872,6 +1932,13 @@ function addCommands(
       }
     }
   });
+
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.editPath,
+      category: trans.__('File Operations')
+    });
+  }
 }
 
 /**

@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { Dialog, Notification } from '@jupyterlab/apputils';
 import { GalataInpage } from './global';
-import { IGalataHelpers, PLUGIN_ID_GALATA_HELPERS } from './tokens';
+import type { IGalataHelpers } from './tokens';
+import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
+import './fonts';
 
 export type {
   IGalataInpage,
@@ -30,6 +32,7 @@ window.galataip = window.galata;
 
 const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
   id: PLUGIN_ID_GALATA_HELPERS,
+  description: 'Galata in-page extension helpers.',
   autoStart: true,
   activate: (app: JupyterFrontEnd): IGalataHelpers => {
     return Object.freeze({

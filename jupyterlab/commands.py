@@ -23,7 +23,6 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
@@ -46,9 +45,10 @@ from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.jlpmapp import HERE, YARN_PATH
 from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
-# The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
-
+# The regex for expecting the rspack output.
+# TODO: check if we can just keep the theme.css regex like is commented below
+# RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
 
 # The repo root directory
 REPO_ROOT = osp.abspath(osp.join(HERE, ".."))
@@ -328,12 +328,12 @@ def watch_dev(logger=None):
 
     package_procs = watch_packages(logger)
 
-    # Run webpack watch and wait for compilation.
+    # Run rspack watch and wait for compilation.
     wp_proc = WatchHelper(
         ["node", YARN_PATH, "run", "watch"],
         cwd=DEV_DIR,
         logger=logger,
-        startup_regex=WEBPACK_EXPECT,
+        startup_regex=RSPACK_EXPECT,
     )
 
     return [*package_procs, wp_proc]
@@ -782,7 +782,7 @@ class _AppHandler:
         proc = WatchHelper(
             ["node", YARN_PATH, "run", "watch"],
             cwd=pjoin(self.app_dir, "staging"),
-            startup_regex=WEBPACK_EXPECT,
+            startup_regex=RSPACK_EXPECT,
             logger=self.logger,
         )
         return [proc]
@@ -920,7 +920,7 @@ class _AppHandler:
             if pkg in local or pkg in linked:
                 continue
             if old_deps[pkg] != dep:
-                msg = f"{pkg} changed from {old_deps[pkg]} to {new_deps[pkg]}"
+                msg = f"{pkg} changed from {old_deps[pkg]} to {dep}"
                 messages.append(msg)
 
         # Look for updated local extensions.
@@ -1453,6 +1453,15 @@ class _AppHandler:
 
         # Handle splicing of packages
         if splice_source:
+            # Get devDependencies from the source_dir package.json
+            source_pkg_path = pjoin(source_dir, "package.json")
+            with open(source_pkg_path) as fid:
+                source_data = json.load(fid)
+            data["devDependencies"] = source_data["devDependencies"]
+
+            # Handle potential changes in the scripts sections
+            data["scripts"] = source_data["scripts"]
+
             # Splice workspace tree as linked dependencies
             for path in glob(pjoin(REPO_ROOT, "packages", "*", "package.json")):
                 local_path = osp.dirname(osp.abspath(path))
@@ -2417,7 +2426,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[frozenset[str]] = None
+    locked_plugins: frozenset[str] | None = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:

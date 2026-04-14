@@ -12,7 +12,7 @@ import {
   MERMAID_MIME_TYPE,
   rendererFactory
 } from '@jupyterlab/mermaid';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/mermaid-extension:factory',

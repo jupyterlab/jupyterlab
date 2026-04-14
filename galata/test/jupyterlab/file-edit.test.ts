@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { test } from '@jupyterlab/galata';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 const DEFAULT_NAME = 'untitled.py';
@@ -32,6 +32,9 @@ test.describe('File Edit Operations', () => {
   });
   test('Should toggle a block comment on Alt + A', async ({ page }) => {
     const currentDir = await page.filebrowser.getCurrentDirectory();
+    // Wait a short while as the file initializes before renaming, see
+    // https://github.com/jupyterlab/jupyterlab/issues/18455
+    await page.waitForTimeout(100);
     await page.contents.renameFile(
       `${currentDir}/${DEFAULT_NAME}`,
       `${currentDir}/untitled.js`
@@ -42,6 +45,18 @@ test.describe('File Edit Operations', () => {
     // Toggle block comment
     await page.keyboard.press('Alt+A');
     expect(await getEditorText(page)).toBe('first\n/* second\nthird */');
+  });
+  test('Should fall back to line comment on Alt + A for Python', async ({
+    page
+  }) => {
+    // Python has no block comment syntax, so Alt+A should fall back to
+    // line comments (via toggleBlockCommentWithFallback)
+    // Select "second" and "third"
+    await page.getByRole('textbox').getByText('second').last().dblclick();
+    await page.keyboard.press('Shift+ArrowDown');
+    // Toggle block comment (falls back to line comment for Python)
+    await page.keyboard.press('Alt+A');
+    expect(await getEditorText(page)).toBe('first\n# second\n# third');
   });
 });
 
@@ -76,7 +91,7 @@ async function getEditorText(page: Page): Promise<string> {
   try {
     await page.context().grantPermissions(['clipboard-read']);
   } catch {
-    // Firefox does not support clipboard-read but does not it it either
+    // Firefox does not support clipboard-read but does not need it either
   }
   const handle = await page.evaluateHandle(() =>
     navigator.clipboard.readText()

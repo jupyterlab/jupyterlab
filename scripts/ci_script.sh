@@ -40,7 +40,7 @@ if [[ $GROUP == python ]]; then
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
 
     # Run the python tests
-    python -m pytest
+    python -m pytest -n 3
 fi
 
 
@@ -78,6 +78,7 @@ if [[ $GROUP == integrity ]]; then
     # output of `yarn-berry-deduplicate`
     jlpm install
     if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
+        git status
         git diff
         exit 1
     fi
@@ -129,6 +130,7 @@ if [[ $GROUP == integrity3 ]]; then
     # with the other checks
     git config --global user.email "you@example.com"
     git config --global user.name "CI"
+    git config --global core.hooksPath /dev/null
     git stash
     git checkout -b commit_${BUILD_SOURCEVERSION}
     git clean -df
@@ -159,6 +161,7 @@ fi
 if [[ $GROUP == release_test ]]; then
     # bump the version
     git checkout -b test HEAD
+    git config --global core.hooksPath /dev/null
     jlpm bumpversion next --force
 
     # Use verdaccio during publish

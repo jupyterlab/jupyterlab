@@ -1,16 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Terminal as TerminalNS } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Terminal as TerminalNS } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Platform } from '@lumino/domutils';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import type {
   ITerminalInitOnlyOptions,
@@ -78,6 +77,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       sender: TerminalNS.ITerminalConnection,
       msg: TerminalNS.IMessage
     ): void => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.type) {
         case 'stdout':
           if (msg.content) {
@@ -166,7 +166,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
 
     this._options[option] = value;
-
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (option) {
       case 'fontFamily':
         this._term.options.fontFamily = value as string | undefined;
@@ -437,6 +437,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     sender: TerminalNS.ITerminalConnection,
     msg: TerminalNS.IMessage
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msg.type) {
       case 'stdout':
         if (msg.content) {

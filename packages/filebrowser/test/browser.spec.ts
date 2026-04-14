@@ -6,15 +6,16 @@
 import expect from 'expect';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { signalToPromise } from '@jupyterlab/testing';
 import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { simulate } from 'simulate-event';
-import { FileBrowser, FilterFileBrowserModel } from '../src';
+import { DirListing, FileBrowser, FilterFileBrowserModel } from '../src';
 
 const ITEM_CLASS = 'jp-DirListing-item';
 const EDITOR_CLASS = 'jp-DirListing-editor';
@@ -79,6 +80,13 @@ describe('filebrowser/browser', () => {
         expect(toolbar.getAttribute('aria-label')).toEqual('file browser');
         expect(toolbar.getAttribute('role')).toEqual('toolbar');
       });
+
+      it('should use a custom renderer when provided', () => {
+        const renderer = new DirListing.Renderer();
+        const browser = new TestFileBrowser({ model, id: '', renderer });
+        expect(browser['listing'].renderer).toBe(renderer);
+        browser.dispose();
+      });
     });
 
     describe('#selectionChanged', () => {
@@ -120,9 +128,7 @@ describe('filebrowser/browser', () => {
         simulate(
           fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
           'mousedown',
-          {
-            shiftKey: true
-          }
+          { shiftKey: true }
         );
         await selectionChanged;
 
@@ -171,8 +177,7 @@ describe('filebrowser/browser', () => {
           'keydown',
           {
             ctrlKey: true,
-            key: ' ',
-            keyCode: 32
+            key: ' '
           }
         );
 
@@ -200,7 +205,6 @@ describe('filebrowser/browser', () => {
           throw new Error('Item node not found');
         }
         simulate(editNode, 'keydown', {
-          keyCode: 13,
           key: 'Enter'
         });
         await created;
@@ -225,7 +229,6 @@ describe('filebrowser/browser', () => {
           throw new Error('Item node not found');
         }
         simulate(editNode, 'keydown', {
-          keyCode: 13,
           key: 'Enter'
         });
         await created;
@@ -290,7 +293,6 @@ describe('FileBrowser with Drives', () => {
         throw new Error('Item node not found');
       }
       simulate(editNode, 'keydown', {
-        keyCode: 13,
         key: 'Enter'
       });
       const fileModel = await created;

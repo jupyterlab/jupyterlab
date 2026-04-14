@@ -1,25 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import {
-  Context,
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { SessionContextDialogs } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { IUrlResolverFactory } from '@jupyterlab/rendermime';
+import { Context } from '@jupyterlab/docregistry';
+import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 
-import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
-import {
+import type {
   IDocumentManager,
   IDocumentManagerDialogs,
   IDocumentWidgetOpener,
@@ -506,16 +510,20 @@ export class DocumentManager implements IDocumentManager {
    *
    * @returns A promise containing the new file contents model.
    */
-  overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
+  async overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
     // Cleanly overwrite the file by moving it, making sure the original does
     // not exist, and then renaming to the new path.
     const tempPath = `${newPath}.${UUID.uuid4()}`;
-    const cb = () => this.rename(tempPath, newPath);
-    return this.rename(oldPath, tempPath)
-      .then(() => {
-        return this.deleteFile(newPath);
-      })
-      .then(cb, cb);
+
+    await this.rename(oldPath, tempPath);
+
+    try {
+      await this.deleteFile(newPath);
+    } finally {
+      // no-op
+    }
+
+    return await this.rename(tempPath, newPath);
   }
 
   /**

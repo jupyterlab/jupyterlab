@@ -1,18 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import {
-  Completer,
-  CompleterModel,
-  CompletionHandler
-} from '@jupyterlab/completer';
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CompletionHandler } from '@jupyterlab/completer';
+import { Completer, CompleterModel } from '@jupyterlab/completer';
 import {
   createEditorWidget,
   getBoundingClientRectMock
 } from '@jupyterlab/completer/lib/testutils';
 import { framePromise, simulate, sleep } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 
 const TEST_ITEM_CLASS = 'jp-TestItem';
@@ -190,7 +188,7 @@ describe('completer/widget', () => {
         options.model!.resolveItem = jest.fn();
         const widget = new Completer(options);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        widget['_cycle']('down');
+        widget['_cycle']('ArrowDown');
         expect(options.model!.resolveItem).toHaveBeenCalledTimes(2);
       });
     });
@@ -431,7 +429,7 @@ describe('completer/widget', () => {
             { label: 'foo' },
             { label: 'bar' }
           ]);
-          simulate(document.body, 'keydown', { keyCode: 70 }); // F
+          simulate(document.body, 'keydown', { key: 'f' });
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(widget.isHidden).toBe(true);
           expect(model.completionItems()).toEqual([]);
@@ -470,7 +468,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(target, 'keydown', { keyCode: 40 }); // Down
+          simulate(target, 'keydown', { key: 'ArrowDown' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -480,7 +478,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(target, 'keydown', { keyCode: 40 }); // Down
+          simulate(target, 'keydown', { key: 'ArrowDown' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -490,7 +488,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(target, 'keydown', { keyCode: 40 }); // Down
+          simulate(target, 'keydown', { key: 'ArrowDown' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
@@ -535,7 +533,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          simulate(target, 'keydown', { key: 'Tab' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -545,7 +543,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          simulate(target, 'keydown', { key: 'Tab' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -555,7 +553,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(target, 'keydown', { keyCode: 9 }); // Tab
+          simulate(target, 'keydown', { key: 'Tab' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
@@ -599,7 +597,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 40 }); // Down
+          simulate(anchor.node, 'keydown', { key: 'ArrowDown' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -609,7 +607,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 40 }); // Down
+          simulate(anchor.node, 'keydown', { key: 'ArrowDown' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -619,7 +617,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(anchor.node, 'keydown', { key: 'ArrowUp' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -629,7 +627,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(anchor.node, 'keydown', { key: 'ArrowUp' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
@@ -639,7 +637,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          simulate(anchor.node, 'keydown', { key: 'ArrowUp' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -683,7 +681,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+          simulate(anchor.node, 'keydown', { key: 'Tab' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -693,7 +691,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+          simulate(anchor.node, 'keydown', { key: 'Tab' });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -703,7 +701,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          simulate(anchor.node, 'keydown', { key: 'Tab', shiftKey: true });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -713,7 +711,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          simulate(anchor.node, 'keydown', { key: 'Tab', shiftKey: true });
           expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
@@ -723,7 +721,7 @@ describe('completer/widget', () => {
           expect(Array.from(items[2].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
-          simulate(anchor.node, 'keydown', { keyCode: 9, shiftKey: true }); // Shift + Tab
+          simulate(anchor.node, 'keydown', { key: 'Tab', shiftKey: true });
           expect(Array.from(items[0].classList)).toEqual(
             expect.not.arrayContaining([ACTIVE_CLASS])
           );
@@ -769,7 +767,7 @@ describe('completer/widget', () => {
           expect(marked[1].textContent).toBe('fo');
           expect(marked[2].textContent).toBe('fo');
           expect(marked[3].textContent).toBe('fo');
-          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+          simulate(anchor.node, 'keydown', { key: 'Tab' });
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(value).toBe('fo');
           widget.dispose();
@@ -796,7 +794,7 @@ describe('completer/widget', () => {
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+        simulate(anchor.node, 'keydown', { key: 'Tab' });
         expect(value).toBe('foo');
         widget.dispose();
         anchor.dispose();
@@ -821,7 +819,7 @@ describe('completer/widget', () => {
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+        simulate(anchor.node, 'keydown', { key: 'Tab' });
         expect(value).toBe('bar');
         widget.dispose();
         anchor.dispose();
@@ -855,7 +853,7 @@ describe('completer/widget', () => {
 
           let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
-          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+          simulate(anchor.node, 'keydown', { key: 'Tab' });
           expect(model.query).toBe('ba');
           simulate(item, 'pointerdown');
           expect(value).toBe('baz');
@@ -1357,7 +1355,7 @@ describe('completer/widget', () => {
         expect(args).toEqual('candx 13');
 
         // Cycle to the second item
-        widget['_cycle']('down');
+        widget['_cycle']('ArrowDown');
         await new Promise(process.nextTick);
         expect(spy).toHaveBeenCalledTimes(2);
         expect(args).toEqual('candidate 13');

@@ -7,23 +7,19 @@
  * @module video-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { WidgetTracker } from '@jupyterlab/apputils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  Contents,
-  IDefaultDrive,
-  RestContentProvider
-} from '@jupyterlab/services';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { Contents, IContentProvider } from '@jupyterlab/services';
+import { IDefaultDrive } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
@@ -213,16 +209,16 @@ export namespace VideoViewerFactory {
  *
  * This overrides the default behavior of the RestContentProvider to not include the file content.
  */
-class VideoContentProvider extends RestContentProvider {
-  constructor(options: RestContentProvider.IOptions) {
-    super(options);
+class VideoContentProvider implements IContentProvider {
+  constructor(options: { drive: Contents.IDrive }) {
+    this._drive = options.drive;
   }
 
   /**
    * Get a file or directory.
    *
    * @param localPath - The path to the file.
-   * @param options - The options used to fetch the file.
+   * @param options - The options used to get the file.
    *
    * @returns A promise which resolves with the file content.
    */
@@ -230,8 +226,32 @@ class VideoContentProvider extends RestContentProvider {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    return super.get(localPath, { ...options, content: false });
+    return this._drive.get(localPath, {
+      ...options,
+      contentProviderId: undefined,
+      content: false
+    });
   }
+
+  /**
+   * Save a file.
+   *
+   * @param localPath - The path to the file.
+   * @param options - The options used to save the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  async save(
+    localPath: string,
+    options: Partial<Contents.IModel> & Contents.IContentProvisionOptions = {}
+  ): Promise<Contents.IModel> {
+    return this._drive.save(localPath, {
+      ...options,
+      contentProviderId: undefined
+    });
+  }
+
+  private _drive: Contents.IDrive;
 }
 
 /**
@@ -250,7 +270,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
-    const { contents, serverSettings } = app.serviceManager;
+    const { contents } = app.serviceManager;
 
     // Get video file types from the document registry
     const videoFileTypes = getVideoFileTypes(app.docRegistry);
@@ -259,8 +279,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const registry = defaultDrive.contentProviderRegistry;
     if (registry) {
       const videoContentProvider = new VideoContentProvider({
-        apiEndpoint: '/api/contents',
-        serverSettings
+        drive: defaultDrive
       });
       registry.register(VIDEO_CONTENT_PROVIDER_ID, videoContentProvider);
     }

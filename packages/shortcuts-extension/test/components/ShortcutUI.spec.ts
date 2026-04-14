@@ -3,19 +3,17 @@
  * Distributed under the terms of the Modified BSD License.
  */
 import { ShortcutUI } from '@jupyterlab/shortcuts-extension/lib/components';
-import {
+import type {
   IKeybinding,
   IShortcutTarget
 } from '@jupyterlab/shortcuts-extension/lib/types';
 import { CommandRegistry } from '@lumino/commands';
-import { JSONValue, PromiseDelegate } from '@lumino/coreutils';
+import type { JSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import {
-  ISettingRegistry,
-  SettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { nullTranslator } from '@jupyterlab/translation';
 import { createRoot } from 'react-dom/client';
 import React from 'react';

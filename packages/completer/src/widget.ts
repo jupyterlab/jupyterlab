@@ -2,17 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMime, renderText } from '@jupyterlab/rendermime';
-import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
-import { JSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { renderText } from '@jupyterlab/rendermime';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import { HoverBox } from '@jupyterlab/ui-components';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-import { CompletionHandler } from './handler';
+import type { CompletionHandler } from './handler';
 
 /**
  * The class name added to completer menu items.
@@ -539,9 +542,9 @@ export class Completer extends Widget {
    * Cycle through the available completer items.
    *
    * #### Notes
-   * When the user cycles all the way `down` to the last index, subsequent
-   * `down` cycles will cycle to the first index. When the user cycles `up` to
-   * the first item, subsequent `up` cycles will cycle to the last index.
+   * When the user cycles all the way down to the last index, subsequent
+   * `ArrowDown` cycles will cycle to the first index. When the user cycles up
+   * to the first item, subsequent `ArrowUp` cycles will cycle to the last index.
    */
   private _cycle(direction: Private.scrollType): void {
     const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
@@ -551,19 +554,19 @@ export class Completer extends Widget {
     active.classList.remove(ACTIVE_CLASS);
 
     switch (direction) {
-      case 'up':
+      case 'ArrowUp':
         this._activeIndex = index === 0 ? last : index - 1;
         break;
-      case 'down':
+      case 'ArrowDown':
         this._activeIndex = index < last ? index + 1 : 0;
         break;
-      case 'pageUp':
-      case 'pageDown': {
+      case 'PageUp':
+      case 'PageDown': {
         // Measure the number of items on a page and clamp to the list length.
         const container = this.node.getBoundingClientRect();
         const current = active.getBoundingClientRect();
         const page = Math.floor(container.height / current.height);
-        const sign = direction === 'pageUp' ? -1 : 1;
+        const sign = direction === 'PageUp' ? -1 : 1;
         this._activeIndex = Math.min(Math.max(0, index + sign * page), last);
         break;
       }
@@ -595,9 +598,8 @@ export class Completer extends Widget {
       this.reset();
       return;
     }
-    switch (event.keyCode) {
-      case 9: {
-        // Tab key
+    switch (event.key) {
+      case 'Tab': {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -631,25 +633,23 @@ export class Completer extends Widget {
           this.update();
         }
 
-        this._cycle(event.shiftKey ? 'up' : 'down');
+        this._cycle(event.shiftKey ? 'ArrowUp' : 'ArrowDown');
         return;
       }
-      case 27: // Esc key
+      case 'Escape':
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
         this.reset();
         return;
-      case 33: // PageUp
-      case 34: // PageDown
-      case 38: // Up arrow key
-      case 40: {
-        // Down arrow key
+      case 'PageUp':
+      case 'PageDown':
+      case 'ArrowUp':
+      case 'ArrowDown': {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        const cycle = Private.keyCodeMap[event.keyCode];
-        this._cycle(cycle);
+        this._cycle(event.key);
         return;
       }
       default:
@@ -1144,8 +1144,8 @@ export namespace Completer {
    * A renderer for completer widget nodes.
    */
   export interface IRenderer<
-    T extends
-      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends CompletionHandler.ICompletionItem =
+      CompletionHandler.ICompletionItem
   > {
     /**
      * Create an item node (an `li` element) from a ICompletionItem
@@ -1386,17 +1386,7 @@ namespace Private {
   /**
    * Types of scrolling through the completer.
    */
-  export type scrollType = 'up' | 'down' | 'pageUp' | 'pageDown';
-
-  /**
-   * Mapping from keyCodes to scrollTypes.
-   */
-  export const keyCodeMap: { [n: number]: scrollType } = {
-    38: 'up',
-    40: 'down',
-    33: 'pageUp',
-    34: 'pageDown'
-  };
+  export type scrollType = 'ArrowUp' | 'ArrowDown' | 'PageUp' | 'PageDown';
 
   /**
    * Returns the common subset string that a list of strings shares.

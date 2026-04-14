@@ -100,6 +100,16 @@
     }
   },
   {
+    "id": "application:reset-widget-zoom",
+    "label": "Reset Widget Zoom",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:set-mode",
     "label": "Set the layout `mode`.",
     "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
@@ -118,6 +128,30 @@
       },
       "required": [
         "mode"
+      ]
+    }
+  },
+  {
+    "id": "application:split-tab",
+    "label": "Split Tab",
+    "caption": "Split the current tab",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ],
+          "description": "The direction to split the tab"
+        }
+      },
+      "required": [
+        "direction"
       ]
     }
   },
@@ -251,6 +285,26 @@
         "side",
         "index"
       ]
+    }
+  },
+  {
+    "id": "application:zoom-in-widget",
+    "label": "Zoom In Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:zoom-out-widget",
+    "label": "Zoom Out Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -807,6 +861,16 @@
     }
   },
   {
+    "id": "cell-toolbar:delete",
+    "label": "Delete Cell",
+    "caption": "Delete the cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "code-viewer:open",
     "label": "Open Code Viewer",
     "caption": "",
@@ -883,6 +947,18 @@
     }
   },
   {
+    "id": "codemirror:markdown-toggle-bold",
+    "label": "Toggle Bold",
+    "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
+    "shortcuts": [
+      "Ctrl B"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "codemirror:select-next-occurrence",
     "label": "Select Next Occurrence",
     "caption": "",
@@ -897,7 +973,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable",
     "shortcuts": [
       "Alt A"
     ],
@@ -1107,7 +1183,41 @@
         },
         "kernelPreference": {
           "type": "object",
-          "description": "The kernel preference for the console"
+          "description": "The kernel preference for the console. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The id of an existing kernel"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the kernel"
+            },
+            "language": {
+              "type": "string",
+              "description": "The preferred kernel language"
+            },
+            "shouldStart": {
+              "type": "boolean",
+              "description": "A kernel should be started automatically (default `true`)"
+            },
+            "canStart": {
+              "type": "boolean",
+              "description": "A kernel can be started (default `true`)"
+            },
+            "shutdownOnDispose": {
+              "type": "boolean",
+              "description": "Shut down the session when session context is disposed (default `false`)"
+            },
+            "autoStartDefault": {
+              "type": "boolean",
+              "description": "Automatically start the default kernel if no other matching kernel is found (default `false`)"
+            },
+            "skipKernelRestartDialog": {
+              "type": "boolean",
+              "description": "Skip showing the kernel restart dialog if checked (default `false`)"
+            }
+          }
         },
         "basePath": {
           "type": "string",
@@ -1595,6 +1705,7 @@
   {
     "id": "debugger:pause-on-exceptions",
     "label": "Breakpoints on exception",
+    "caption": "",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -1838,15 +1949,81 @@
         },
         "kernel": {
           "type": "object",
-          "description": "The kernel model to use"
+          "description": "The kernel model to use. See the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) for more information.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier of the kernel on the server"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the kernel"
+            }
+          }
         },
         "kernelPreference": {
           "type": "object",
-          "description": "Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values"
+          "description": "Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The id of an existing kernel"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the kernel"
+            },
+            "language": {
+              "type": "string",
+              "description": "The preferred kernel language"
+            },
+            "shouldStart": {
+              "type": "boolean",
+              "description": "A kernel should be started automatically (default `true`)"
+            },
+            "canStart": {
+              "type": "boolean",
+              "description": "A kernel can be started (default `true`)"
+            },
+            "shutdownOnDispose": {
+              "type": "boolean",
+              "description": "Shut down the session when session context is disposed (default `false`)"
+            },
+            "autoStartDefault": {
+              "type": "boolean",
+              "description": "Automatically start the default kernel if no other matching kernel is found (default `false`)"
+            },
+            "skipKernelRestartDialog": {
+              "type": "boolean",
+              "description": "Skip showing the kernel restart dialog if checked (default `false`)"
+            }
+          }
         },
         "options": {
           "type": "object",
-          "description": "Additional options for opening"
+          "description": "Additional options for opening the widget",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "description": "The reference widget id for the insert location (default `null`)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "The insertion mode relative to a reference widget (\"split-top\", \"split-bottom\", \"split-left\", \"split-right\", \"tab-before\", \"tab-after\")"
+            },
+            "activate": {
+              "type": "boolean",
+              "description": "Whether to activate the widget (default `true`)"
+            },
+            "rank": {
+              "type": "number",
+              "description": "The rank order of the widget among its siblings"
+            },
+            "type": {
+              "type": "string",
+              "description": "Type of widget to open, used to load user customization (typically a factory name or widget id)"
+            }
+          }
         },
         "icon": {
           "type": "string",
@@ -2035,7 +2212,9 @@
     "id": "documentsearch:startWithReplace",
     "label": "Find and Replace…",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl H"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -2135,7 +2314,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query to pre-fill in the extension manager"
+        }
+      }
     }
   },
   {
@@ -2287,6 +2471,16 @@
     }
   },
   {
+    "id": "filebrowser:edit-path",
+    "label": "Edit File Browser Path",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
@@ -2430,16 +2624,6 @@
     }
   },
   {
-    "id": "filebrowser:search",
-    "label": "Search on File Names",
-    "caption": "",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
     "id": "filebrowser:select-all",
     "label": "Select All",
     "caption": "",
@@ -2464,6 +2648,16 @@
   {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "filebrowser:toggle-date-created",
+    "label": "Show Date Created Column",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -2575,7 +2769,7 @@
   },
   {
     "id": "fileeditor:change-font-size",
-    "label": "Decrease Font Size",
+    "label": "Change Font Size",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3313,6 +3507,16 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -5331,6 +5535,16 @@
       "required": [
         "name"
       ]
+    }
+  },
+  {
+    "id": "terminal:open-folder-in-terminal",
+    "label": "Open in Terminal",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {

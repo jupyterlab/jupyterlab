@@ -2,16 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { test } from '@jupyterlab/galata';
-import { Token } from '@lumino/coreutils';
+import type { Token } from '@lumino/coreutils';
 import { expect } from '@playwright/test';
-import * as fs from 'fs-extra';
 
 // As the test is run in the documentation environment, some plugins and tokens are not from core.
 const IGNORED_PLUGINS = [
   /^@jupyterlab\/geojson-extension:factory$/,
   /^@jupyterlab\/galata-extension:helpers$/,
   /^@jupyter-widgets\//,
-  /^jupyterlab_pygments/
+  /^jupyterlab_pygments/,
+  // Deprecated plugins
+  /^@jupyterlab\/services-extension:default-content-provider$/,
+  /^@jupyterlab\/services-extension:content-provider-warning$/
 ];
 
 test('All plugins and tokens must have a description', async ({
@@ -62,19 +64,11 @@ test('All plugins and tokens must have a description', async ({
     return Promise.resolve({ plugins, tokens: sortedTokens });
   }, IGNORED_PLUGINS);
 
-  if (!(await fs.pathExists(testInfo.snapshotDir))) {
-    await fs.mkdir(testInfo.snapshotDir);
-  }
+  const pluginsString = JSON.stringify(plugins, null, 2) + '\n';
+  expect.soft(pluginsString).toMatchSnapshot('plugins.json');
 
-  await fs.writeJSON(testInfo.snapshotPath('plugins.json'), plugins, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
-
-  await fs.writeJSON(testInfo.snapshotPath('tokens.json'), tokens, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
+  const tokensString = JSON.stringify(tokens, null, 2) + '\n';
+  expect.soft(tokensString).toMatchSnapshot('tokens.json');
 
   // All plugins must define a description
   const missingPluginDescriptions = Object.entries(plugins).filter(

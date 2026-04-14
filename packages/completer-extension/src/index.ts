@@ -5,29 +5,31 @@
  * @module completer-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { COMPLETER_ACTIVE_CLASS } from '@jupyterlab/codeeditor';
 import { CommandToolbarButton } from '@jupyterlab/ui-components';
+import type {
+  IInlineCompleterSettings,
+  IInlineCompletionProviderInfo
+} from '@jupyterlab/completer';
 import {
   CompletionProviderManager,
   ContextCompleterProvider,
   HistoryInlineCompletionProvider,
   ICompletionProviderManager,
   IInlineCompleterFactory,
-  IInlineCompleterSettings,
-  IInlineCompletionProviderInfo,
   InlineCompleter,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IFormRenderer } from '@jupyterlab/ui-components';
 import {
   caretLeftIcon,
   caretRightIcon,
   checkIcon,
-  IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -405,9 +407,8 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         return;
       }
       const target = event.target as Element;
-      switch (event.keyCode) {
-        case 9: {
-          // Tab key
+      switch (event.key) {
+        case 'Tab': {
           const potentialTabBindings = [
             // Note: `accept` should come ahead of `invoke` due to specificity
             keyBindings[CommandIDs.acceptInline],

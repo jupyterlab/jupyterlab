@@ -5,12 +5,11 @@
  * @module help-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
   ICommandPalette,
@@ -20,14 +19,14 @@ import {
 } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
   jupyterIcon,
   jupyterlabWordmarkIcon
 } from '@jupyterlab/ui-components';
-import { Menu } from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -497,6 +496,12 @@ const resources: JupyterFrontEndPlugin<void> = {
             spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           commands.addCommand(bannerCommand, {
             label: trans.__('About the %1 Kernel', kernelName),
+            describedBy: {
+              args: {
+                type: 'object',
+                properties: {}
+              }
+            },
             isVisible: isEnabled,
             isEnabled,
             execute: () => {
@@ -531,6 +536,12 @@ const resources: JupyterFrontEndPlugin<void> = {
           (kernelInfo.help_links || []).forEach(link => {
             const commandId = `help-menu-${name}:${link.text}`;
             commands.addCommand(commandId, {
+              describedBy: {
+                args: {
+                  type: 'object',
+                  properties: {}
+                }
+              },
               label: commands.label(CommandIDs.open, link),
               isVisible: isEnabled,
               isEnabled,
