@@ -209,6 +209,11 @@ export namespace FileUploadStatus {
           this._items,
           val => val.path === uploads.newValue.path
         );
+      } else if (uploads.name === 'cancelled') {
+        const path = uploads.newValue?.path || uploads.oldValue?.path;
+        if (path) {
+          ArrayExt.removeFirstWhere(this._items, val => val.path === path);
+        }
       } else return;
 
       this.stateChanged.emit(void 0);
