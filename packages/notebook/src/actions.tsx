@@ -1597,12 +1597,11 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     notebook.mode = 'command';
-    // FIXME: undo should return true if changes were done.
-    // for now, always set dirty to true.
-    notebook.model!.sharedModel.undo();
-    notebook.model!.sharedModel.transact(() => {
-      notebook.model!.dirty = true;
-    }, false);
+    if (notebook.model!.sharedModel.undo()) {
+      notebook.model!.sharedModel.transact(() => {
+        notebook.model!.dirty = true;
+      }, false);
+    }
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -1623,12 +1622,11 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    // FIXME: redo should return true if changes were done.
-    // for now, always set dirty to true.
-    notebook.model!.sharedModel.redo();
-    notebook.model!.sharedModel.transact(() => {
-      notebook.model!.dirty = true;
-    }, false);
+    if (notebook.model!.sharedModel.redo()) {
+      notebook.model!.sharedModel.transact(() => {
+        notebook.model!.dirty = true;
+      }, false);
+    }
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }

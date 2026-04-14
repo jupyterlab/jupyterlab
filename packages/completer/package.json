@@ -48,7 +48,7 @@
     "@codemirror/language": "^6.12.1",
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.14",
-    "@jupyter/ydoc": "^3.1.0",
+    "@jupyter/ydoc": "^3.4.1",
     "@jupyterlab/apputils": "^4.7.0-alpha.4",
     "@jupyterlab/codeeditor": "^4.6.0-alpha.4",
     "@jupyterlab/codemirror": "^4.6.0-alpha.4",
