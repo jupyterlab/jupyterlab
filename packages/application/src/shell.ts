@@ -975,6 +975,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           }
         : undefined;
 
+    if (options?.rank !== undefined) {
+      this._sideOptionsCache.set(widget, {
+        ...this._sideOptionsCache.get(widget),
+        rank: options.rank
+      });
+    }
+
     switch (area || 'main') {
       case 'bottom':
         return this._addToBottomArea(widget, options);
@@ -1021,12 +1028,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'multiple-document': ILabShell.IUserLayout;
   } {
     const type = this._idTypeMap.get(widget.id) ?? widget.id;
+    const rank = this._sideOptionsCache.get(widget)?.rank;
     for (const m of ['single-document', 'multiple-document'].filter(
       c => !mode || c === mode
     )) {
+      const position = this._userLayout[m as DockPanel.Mode][type];
       this._userLayout[m as DockPanel.Mode][type] = {
-        ...this._userLayout[m as DockPanel.Mode][type],
-        area
+        ...position,
+        area,
+        ...(rank !== undefined
+          ? {
+              options: {
+                ...position?.options,
+                rank
+              }
+            }
+          : {})
       };
     }
 
@@ -2183,7 +2200,11 @@ namespace Private {
       if (data.collapsed) {
         this.collapse();
       }
-      data.visible ? this.show() : this.hide();
+      if (data.visible) {
+        this.show();
+      } else {
+        this.hide();
+      }
       if (data.widgetStates) {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {
           if (w.id && w.content instanceof SplitPanel) {
@@ -2194,7 +2215,11 @@ namespace Private {
                 typeof expansion === 'boolean' &&
                 w.content instanceof AccordionPanel
               ) {
-                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+                if (expansion) {
+                  w.content.expand(widx);
+                } else {
+                  w.content.collapse(widx);
+                }
               }
             });
             if (state.sizes) {

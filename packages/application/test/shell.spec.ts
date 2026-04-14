@@ -449,6 +449,64 @@ describe('LabShell', () => {
         id: 'foo'
       });
     });
+
+    it('should preserve sidebar rank when moving a widget back from the main area', async () => {
+      const restoredShell = new LabShell();
+      Widget.attach(restoredShell, document.body);
+      try {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve<void>(void 0),
+          registry: new CommandRegistry()
+        });
+
+        const fileBrowser = new Widget();
+        fileBrowser.id = 'filebrowser';
+        const running = new Widget();
+        running.id = 'jp-running-sessions';
+        const toc = new Widget();
+        toc.id = 'table-of-contents';
+
+        restoredShell.add(fileBrowser, 'left', {
+          rank: 100,
+          type: 'File Browser'
+        });
+        restoredShell.add(running, 'left', {
+          rank: 200,
+          type: 'Sessions and Tabs'
+        });
+        restoredShell.add(toc, 'left', {
+          rank: 400,
+          type: 'Table of Contents'
+        });
+
+        await restoredShell.restoreLayout('multiple-document', restorer, {
+          'single-document': {},
+          'multiple-document': {
+            'Sessions and Tabs': { area: 'main' }
+          }
+        });
+
+        expect(
+          Array.from(restoredShell.widgets('left')).map(v => v.id)
+        ).toEqual(['filebrowser', 'table-of-contents']);
+        expect(
+          Array.from(restoredShell.widgets('main')).map(v => v.id)
+        ).toEqual(['jp-running-sessions']);
+
+        const newLayout = restoredShell.move(running, 'left');
+
+        expect(newLayout['multiple-document']['Sessions and Tabs']).toEqual({
+          area: 'left',
+          options: { rank: 200 }
+        });
+        expect(
+          Array.from(restoredShell.widgets('left')).map(v => v.id)
+        ).toEqual(['filebrowser', 'jp-running-sessions', 'table-of-contents']);
+      } finally {
+        restoredShell.dispose();
+      }
+    });
   });
 
   describe('#saveLayout', () => {
