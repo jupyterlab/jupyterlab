@@ -1,0 +1,11 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/statusbar",
+  "@jupyterlab/apputils",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/logconsole",
+  "@jupyterlab/logconsole-extension"
+]

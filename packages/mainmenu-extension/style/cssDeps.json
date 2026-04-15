@@ -1,0 +1,10 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/docmanager",
+  "@jupyterlab/filebrowser",
+  "@jupyterlab/mainmenu",
+  "@jupyterlab/mainmenu-extension"
+]

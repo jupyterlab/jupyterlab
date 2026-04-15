@@ -27,6 +27,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
 import type { Widget } from '@lumino/widgets';
+import inspectorCssDeps from '@jupyterlab/inspector/style/cssDeps.json';
 
 /**
  * The command IDs used by the inspector plugin.
@@ -75,7 +76,8 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     function openInspector(args: string): MainAreaWidget<InspectorPanel> {
       if (!isInspectorOpen()) {
         inspector = new MainAreaWidget({
-          content: new InspectorPanel({ translator })
+          content: new InspectorPanel({ translator }),
+          cssDeps: inspectorCssDeps
         });
         inspector.id = 'jp-inspector';
         inspector.title.label = openedLabel;

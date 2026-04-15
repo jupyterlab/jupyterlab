@@ -1,0 +1,7 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/apputils",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/video-extension"
+]

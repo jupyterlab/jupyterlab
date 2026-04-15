@@ -1,0 +1,15 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/cells",
+  "@jupyterlab/console",
+  "@jupyterlab/fileeditor",
+  "@jupyterlab/notebook",
+  "@jupyterlab/debugger"
+]

@@ -12,6 +12,7 @@ import type { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { INotebookTracker } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import type { IDebugger } from './tokens';
+import debuggerCssDeps from '../style/cssDeps.json';
 
 /**
  * The source and editor manager for a debugger instance.
@@ -57,7 +58,8 @@ export class DebuggerSources implements IDebugger.ISources {
   open(params: IDebugger.ISources.OpenParams): void {
     const { editorWrapper, label, caption } = params;
     const widget = new MainAreaWidget<CodeEditorWrapper>({
-      content: editorWrapper
+      content: editorWrapper,
+      cssDeps: debuggerCssDeps
     });
     widget.id = DOMUtils.createDomID();
     widget.title.label = label;

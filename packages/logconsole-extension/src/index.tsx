@@ -42,6 +42,7 @@ import { UUID } from '@lumino/coreutils';
 import type { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
 import { LogConsoleStatus } from './status';
+import logconsoleCssDeps from '@jupyterlab/logconsole/style/cssDeps.json';
 
 const LOG_CONSOLE_FACTORY = 'LogConsole';
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
@@ -167,7 +168,10 @@ function activateLogConsole(
 
     logConsolePanel.source = options.source ?? getCurrentWidgetPath() ?? null;
 
-    logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
+    logConsoleWidget = new MainAreaWidget({
+      content: logConsolePanel,
+      cssDeps: logconsoleCssDeps
+    });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.icon = listIcon;

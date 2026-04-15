@@ -58,6 +58,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
+import debuggerCssDeps from '@jupyterlab/debugger/style/cssDeps.json';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
 
@@ -618,7 +619,8 @@ const variables: JupyterFrontEndPlugin<void> = {
             commands,
             scopes: [{ name, variables }],
             themeManager
-          })
+          }),
+          cssDeps: debuggerCssDeps
         });
         widget.addClass('jp-DebuggerVariables');
         widget.id = id;

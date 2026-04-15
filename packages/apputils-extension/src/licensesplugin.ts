@@ -25,6 +25,7 @@ import {
   Toolbar
 } from '@jupyterlab/ui-components';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import apputilsCssDeps from '@jupyterlab/apputils/style/cssDeps.json';
 
 /**
  * The command IDs used by the licenses plugin.
@@ -102,7 +103,8 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
       content.title.icon = copyrightIcon;
       const main = new MainAreaWidget({
         content,
-        reveal: licensesModel.licensesReady
+        reveal: licensesModel.licensesReady,
+        cssDeps: apputilsCssDeps
       });
 
       main.toolbar.addItem(

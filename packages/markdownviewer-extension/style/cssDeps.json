@@ -1,0 +1,8 @@
+[
+  "@jupyterlab/apputils",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/application",
+  "@jupyterlab/toc",
+  "@jupyterlab/markdownviewer",
+  "@jupyterlab/markdownviewer-extension"
+]

@@ -47,6 +47,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import type { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
+import fileeditorCssDeps from '@jupyterlab/fileeditor/style/cssDeps.json';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -1724,7 +1725,10 @@ export namespace Commands {
       if (args.widgetId) {
         widget.id = args.widgetId;
       }
-      const main = new MainAreaWidget({ content: widget });
+      const main = new MainAreaWidget({
+        content: widget,
+        cssDeps: fileeditorCssDeps
+      });
       await tracker.add(main);
       app.shell.add(main, 'main');
       return widget;

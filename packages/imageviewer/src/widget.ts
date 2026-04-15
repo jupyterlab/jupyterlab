@@ -10,6 +10,7 @@ import type {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import cssDeps from '../style/cssDeps.json';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
@@ -233,7 +234,7 @@ export class ImageViewerFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>
   ): IDocumentWidget<ImageViewer> {
     const content = new ImageViewer(context);
-    const widget = new DocumentWidget({ content, context });
+    const widget = new DocumentWidget({ content, context, cssDeps });
     return widget;
   }
 }

@@ -9,6 +9,7 @@ import type {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import cssDeps from '../style/cssDeps.json';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
@@ -233,7 +234,7 @@ export class HTMLViewerFactory extends ABCWidgetFactory<HTMLViewer> {
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): HTMLViewer {
-    return new HTMLViewer({ context });
+    return new HTMLViewer({ context, cssDeps });
   }
 
   /**

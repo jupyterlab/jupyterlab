@@ -1,12 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import * as path from 'path';
 import * as rspack from '@rspack/core';
 import miniSVGDataURI from 'mini-svg-data-uri';
 
 const rules = [
   {
     test: /(?<!\.raw)\.css$/,
-    use: [require.resolve('style-loader'), require.resolve('css-loader')]
+    use: [
+      {
+        loader: require.resolve('style-loader'),
+        options: {
+          styleTagTransform: path.resolve(__dirname, 'styleTagTransform.js')
+        }
+      },
+      {
+        loader: require.resolve('css-loader'),
+        options: {
+          importLoaders: 1
+        }
+      },
+      path.resolve(__dirname, 'css-package-loader.js')
+    ]
   },
   { test: /\.raw\.css$/, type: 'asset/source' },
   { test: /\.txt$/, type: 'asset/source' },

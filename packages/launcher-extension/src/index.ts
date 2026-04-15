@@ -19,6 +19,7 @@ import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import type { JSONObject } from '@lumino/coreutils';
 import type { DockPanel, TabBar, Widget } from '@lumino/widgets';
+import launcherCssDeps from '@jupyterlab/launcher/style/cssDeps.json';
 
 /**
  * The command IDs used by the launcher plugin.
@@ -109,7 +110,10 @@ function activate(
       launcher.title.icon = launcherIcon;
       launcher.title.label = trans.__('Launcher');
 
-      const main = new MainAreaWidget({ content: launcher });
+      const main = new MainAreaWidget({
+        content: launcher,
+        cssDeps: launcherCssDeps
+      });
 
       // If there are any other widgets open, remove the launcher close icon.
       main.title.closable = !!Array.from(shell.widgets('main')).length;

@@ -1,0 +1,13 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/documentsearch",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/lsp",
+  "@jupyterlab/toc",
+  "@jupyterlab/fileeditor"
+]

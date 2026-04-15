@@ -1,0 +1,5 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/application",
+  "@jupyterlab/ui-components-extension"
+]

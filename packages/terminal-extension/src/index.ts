@@ -39,6 +39,7 @@ import {
 import type { Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
+import terminalCssDeps from '@jupyterlab/terminal/style/cssDeps.json';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -461,7 +462,11 @@ function addCommands(
       term.title.icon = terminalIcon;
       term.title.label = '...';
 
-      const main = new MainAreaWidget({ content: term, reveal: term.ready });
+      const main = new MainAreaWidget({
+        content: term,
+        reveal: term.ready,
+        cssDeps: terminalCssDeps
+      });
       app.shell.add(main, 'main', { type: 'Terminal' });
       void tracker.add(main);
       app.shell.activateById(main.id);

@@ -1,0 +1,6 @@
+[
+  "@jupyterlab/statusbar",
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/statusbar-extension"
+]

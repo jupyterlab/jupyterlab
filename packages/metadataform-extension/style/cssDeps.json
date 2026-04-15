@@ -1,0 +1,7 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/application",
+  "@jupyterlab/notebook",
+  "@jupyterlab/metadataform",
+  "@jupyterlab/metadataform-extension"
+]
