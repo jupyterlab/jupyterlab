@@ -149,9 +149,6 @@ export namespace LabIconStyle {
       container: {
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
-          '&:first-child svg': {
-            position: 'relative'
-          },
           '&:hover': {
             backgroundColor: 'var(--jp-layout-color2)'
           },
@@ -164,6 +161,7 @@ export namespace LabIconStyle {
       element: {
         borderRadius: 'var(--jp-border-radius)',
         cursor: 'pointer',
+        padding: '2px',
         height: '16px',
         width: '16px',
         verticalAlign: 'middle'
