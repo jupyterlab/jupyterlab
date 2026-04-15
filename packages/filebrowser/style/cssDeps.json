@@ -1,0 +1,9 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@lumino/dragdrop",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/docmanager",
+  "@jupyterlab/filebrowser"
+]

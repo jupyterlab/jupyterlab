@@ -1,0 +1,11 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/application",
+  "@jupyterlab/console",
+  "@jupyterlab/fileeditor",
+  "@jupyterlab/notebook",
+  "@jupyterlab/tooltip",
+  "@jupyterlab/tooltip-extension"
+]

@@ -1,0 +1,11 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/console",
+  "@jupyterlab/inspector",
+  "@jupyterlab/launcher",
+  "@jupyterlab/notebook",
+  "@jupyterlab/inspector-extension"
+]

@@ -1,0 +1,7 @@
+[
+  "@jupyterlab/rendermime",
+  "@jupyterlab/application",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/mermaid",
+  "@jupyterlab/markedparser-extension"
+]

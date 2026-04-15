@@ -1,0 +1,11 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/statusbar",
+  "@jupyterlab/apputils",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/application",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/notebook",
+  "@jupyterlab/codemirror-extension"
+]

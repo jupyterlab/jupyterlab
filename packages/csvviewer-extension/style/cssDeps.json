@@ -1,0 +1,10 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/apputils",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/csvviewer",
+  "@jupyterlab/documentsearch",
+  "@jupyterlab/mainmenu",
+  "@jupyterlab/csvviewer-extension"
+]
