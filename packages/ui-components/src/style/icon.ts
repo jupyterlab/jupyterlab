@@ -147,8 +147,14 @@ export namespace LabIconStyle {
   const builtinSheets: { [k in IBuiltin]: ISheet } = {
     breadCrumb: {
       container: {
+        borderRadius: 'var(--jp-border-radius)',
+        alignItems: 'center',
+        justifyContent: 'center',
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
+          '&:focus-visible': {
+            outline: '2px solid var(--jp-brand-color1)'
+          },
           '&:hover': {
             backgroundColor: 'var(--jp-layout-color2)'
           },
