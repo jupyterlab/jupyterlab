@@ -69,9 +69,7 @@
 }
 
 .jp-BreadCrumbs-content {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
+  display: inline;
 }
 
 .jp-BreadCrumbs.jp-mod-editMode > .jp-BreadCrumbs-container {
@@ -83,7 +81,7 @@
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
-  word-break: break-word;
+  word-break: normal;
 }
 
 .jp-BreadCrumbs-ellipsis {
@@ -96,7 +94,8 @@
 
 .jp-BreadCrumbs-home,
 .jp-BreadCrumbs-preferred,
-.jp-BreadCrumbs-ellipsis {
+.jp-BreadCrumbs-ellipsis,
+.jp-BreadCrumbs-edit {
   border-radius: var(--jp-border-radius);
   display: inline-flex;
   align-items: center;
@@ -107,6 +106,7 @@
 
 .jp-BreadCrumbs-home:focus-visible,
 .jp-BreadCrumbs-preferred:focus-visible,
+.jp-BreadCrumbs-edit:focus-visible,
 .jp-BreadCrumbs-item:focus-visible {
   outline: 2px solid var(--jp-brand-color1);
 }
