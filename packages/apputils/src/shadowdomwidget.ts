@@ -119,7 +119,10 @@ export class ShadowDOMWidget extends Widget {
    *
    * No-op when shadow DOM is not enabled.
    */
-  adoptPackageStyles(packages: readonly string[], ownPackage?: string): void {
+  adoptPackageStyles(
+    packages: readonly string[],
+    ownPackage?: string | null
+  ): void {
     if (!this._root) {
       if (!this._shadowAllowed) {
         return;
@@ -128,9 +131,12 @@ export class ShadowDOMWidget extends Widget {
     }
     // Default to the last entry in packages, which is always the
     // widget's own package (by cssDeps.json generation convention).
-    const own = ownPackage ?? packages[packages.length - 1];
+    // Pass `null` to skip style removal entirely (useful for
+    // extensions adopting extra CSS into an existing shadow root).
+    const own =
+      ownPackage === undefined ? packages[packages.length - 1] : ownPackage;
     for (const pkg of packages) {
-      const removeFromDocument = pkg === own;
+      const removeFromDocument = own !== null && pkg === own;
       for (const sheet of getPackageStyleSheets(pkg, removeFromDocument)) {
         this.adoptStyleSheet(sheet);
       }
