@@ -2314,6 +2314,78 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#selectLastModifiedCell() and #selectNextModifiedCell()', () => {
+      beforeEach(async () => {
+        const model = new NotebookModel();
+        widget.model = model;
+        for (let i = 0; i < 3; i++) {
+          model.sharedModel.insertCell(i, {
+            cell_type: 'code',
+            source: ''
+          });
+        }
+      });
+
+      function editCell(index: number, source: string) {
+        widget.activeCellIndex = index;
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource(source);
+      }
+
+      it('should push on edit and select last modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(1);
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should allow forward navigation to next modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // select 1
+        await NotebookActions.selectLastModifiedCell(widget); // then 0
+
+        await NotebookActions.selectNextModifiedCell(widget); // back to 1
+        expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should clear forward stack on new edit', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // selects 1
+        await NotebookActions.selectLastModifiedCell(widget); // selects 0
+
+        // Make an edit while at index 0 to clear the forward stack
+        editCell(0, 'edit 3');
+        await NotebookActions.selectNextModifiedCell(widget);
+        // Should stay at 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should skip active cell and disposed cells', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+
+        // Remove cell 1
+        widget.activeCellIndex = 1;
+        NotebookActions.deleteCells(widget);
+
+        widget.activeCellIndex = 1; // Now index 1 is the cell 2
+        await NotebookActions.selectLastModifiedCell(widget);
+        // Should skip deleted cell 1 and select cell 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+    });
+
     describe('#trust()', () => {
       it('should trust the notebook cells if the user accepts', async () => {
         const model = widget.model!;

@@ -44,7 +44,8 @@
     "@jupyterlab/settingregistry": "^4.6.0-alpha.4",
     "@jupyterlab/toc": "^6.6.0-alpha.4",
     "@jupyterlab/translation": "^4.6.0-alpha.4",
-    "@jupyterlab/ui-components": "^4.6.0-alpha.4"
+    "@jupyterlab/ui-components": "^4.6.0-alpha.4",
+    "@lumino/disposable": "^2.1.5"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

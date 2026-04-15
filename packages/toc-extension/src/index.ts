@@ -31,6 +31,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -295,6 +296,9 @@ async function activateTOC(
   // Add the ToC to the left area:
   app.shell.add(toc, 'left', { rank: 400, type: 'Table of Contents' });
 
+  // Keep track of factory items to dispose them
+  let factoryToolbarItems: IDisposable[] = [];
+
   // Update the ToC when the active widget changes:
   if (labShell) {
     labShell.currentChanged.connect(onConnect);
@@ -339,6 +343,26 @@ async function activateTOC(
       toc.model.headingsChanged.connect(onCollapseChange);
       toc.model.collapseChanged.connect(onCollapseChange);
     }
+
+    // Clean up previous factory items
+    factoryToolbarItems.forEach(item => {
+      item.dispose();
+    });
+    factoryToolbarItems = [];
+
+    const toolbarItems = tocRegistry.getToolbarItems?.(widget);
+
+    if (toolbarItems) {
+      toolbarItems.forEach(item => {
+        toc.toolbar.insertBefore(
+          'collapse-all',
+          `toc-item-${item.name}`,
+          item.widget
+        );
+        factoryToolbarItems.push(item.widget);
+      });
+    }
+
     setToolbarButtonsState();
   }
 
