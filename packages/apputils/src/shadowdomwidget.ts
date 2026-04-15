@@ -47,7 +47,8 @@ export class ShadowDOMWidget extends Widget {
   /**
    * Global default for shadow DOM isolation.
    * Can be set by application configuration before widgets are created.
-   * Individual widgets can override via the `shadowEnabled` constructor option.
+   * Shadow DOM is only activated for widgets that explicitly opt in by
+   * providing `cssDeps` in their constructor options.
    */
   static shadowEnabled = false;
 
@@ -56,8 +57,12 @@ export class ShadowDOMWidget extends Widget {
    */
   constructor(options: ShadowDOMWidget.IOptions = {}) {
     super(options);
+    // Shadow DOM requires both the global toggle (or per-instance override)
+    // AND explicit opt-in via cssDeps (third-party widgets without cssDeps
+    // will not get shadow DOM even if the global toggle is on).
     this._shadowEnabled =
-      options.shadowEnabled ?? ShadowDOMWidget.shadowEnabled;
+      (options.shadowEnabled ?? ShadowDOMWidget.shadowEnabled) &&
+      !!options.cssDeps;
     if (this._shadowEnabled) {
       const attachmentNode = document.createElement('div');
       attachmentNode.classList.add('lm-attachmentNode');
