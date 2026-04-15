@@ -97,10 +97,8 @@
 .jp-BreadCrumbs-ellipsis,
 .jp-BreadCrumbs-edit {
   border-radius: var(--jp-border-radius);
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
   margin-right: 2px;
 }
 
