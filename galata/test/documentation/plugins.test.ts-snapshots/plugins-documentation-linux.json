@@ -8,7 +8,6 @@
   "@jupyterlab/application-extension:logo": "Sets the application logo.",
   "@jupyterlab/application-extension:main": "Initializes the application and provides the URL tree path handler.",
   "@jupyterlab/application-extension:mimedocument": "Provides a mime document widget tracker.",
-  "@jupyterlab/application-extension:mode-switch": "Adds the interface mode switch",
   "@jupyterlab/application-extension:notfound": "Defines the behavior for not found URL (aka route).",
   "@jupyterlab/application-extension:paths": "Provides the application paths.",
   "@jupyterlab/application-extension:property-inspector": "Provides the property inspector.",
