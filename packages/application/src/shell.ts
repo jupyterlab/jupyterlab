@@ -3,6 +3,7 @@
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
+import { ShadowDOMWidget } from '@jupyterlab/apputils';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { SidePanel } from '@jupyterlab/ui-components';
@@ -133,6 +134,12 @@ export namespace ILabShell {
      * `contentVisibility` is only available in Chromium-based browsers.
      */
     hiddenMode: 'display' | 'scale' | 'contentVisibility';
+
+    /**
+     * Whether shadow DOM isolation is enabled for main area widgets
+     * (experimental). Requires page reload.
+     */
+    shadowEnabled: boolean;
   }
 
   /**
@@ -1372,6 +1379,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * @param config Shell configuration
    */
   updateConfig(config: Partial<ILabShell.IConfig>): void {
+    if (config.shadowEnabled !== undefined) {
+      ShadowDOMWidget.shadowEnabled = config.shadowEnabled;
+    }
     if (config.hiddenMode) {
       switch (config.hiddenMode) {
         case 'display':
