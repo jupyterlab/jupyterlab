@@ -111,10 +111,11 @@
 }
 
 .jp-LauncherCard:focus:not(:active) {
-  border: 1px solid var(--jp-brand-color1);
+  outline-width: 3px;
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -1px;
   box-shadow: var(--jp-elevation-z6);
-  outline: unset; /* if outline is not unset, then depending on which browser you use, the
-    border change is either hidden behind the outline or visually combined with it */
 }
 
 .jp-LauncherCard:hover {

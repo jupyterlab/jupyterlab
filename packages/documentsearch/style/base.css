@@ -35,7 +35,6 @@
 }
 
 .jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content {
-  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -54,16 +53,24 @@
 }
 
 .jp-DocumentSearch-button-content {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
 }
 
-.jp-DocumentSearch-button-content svg {
-  width: 100%;
-  height: 100%;
+.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-wrapper {
+  height: calc(var(--jp-private-document-search-button-height) - 6px);
+  width: calc(var(--jp-private-document-search-button-height) - 6px);
+  margin: 3px 3px 3px 1px;
+}
+
+.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-content svg {
+  height: 90%;
+  width: 90%;
 }
 
 .jp-DocumentSearch-input-wrapper {
@@ -74,7 +81,7 @@
 }
 
 .jp-DocumentSearch-input-wrapper:focus-within {
-  border-color: var(--jp-cell-editor-active-border-color);
+  border-color: var(--jp-focus-outline-color);
 }
 
 .jp-DocumentSearch-toggle-wrapper,
@@ -98,11 +105,18 @@
   height: var(--jp-private-document-search-button-height);
 }
 
-.jp-DocumentSearch-toggle-wrapper:focus,
-.jp-DocumentSearch-button-wrapper:focus {
-  outline: var(--jp-border-width) solid
-    var(--jp-cell-editor-active-border-color);
-  outline-offset: -1px;
+/* Higher specificity is needed to override .jp-ThemedContainer button:focus-visible */
+.jp-DocumentSearch-overlay .jp-DocumentSearch-button-wrapper:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -2px;
+}
+
+.jp-DocumentSearch-overlay
+  .jp-DocumentSearch-input-wrapper
+  .jp-DocumentSearch-button-wrapper:focus-visible {
+  outline-offset: 1px;
 }
 
 .jp-DocumentSearch-toggle-wrapper,
@@ -121,15 +135,23 @@
 }
 
 .jp-DocumentSearch-input-button-off {
-  opacity: var(--jp-search-toggle-off-opacity);
-}
-
-.jp-DocumentSearch-input-button-off:hover {
-  opacity: var(--jp-search-toggle-hover-opacity);
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color2);
 }
 
 .jp-DocumentSearch-input-button-on {
-  opacity: var(--jp-search-toggle-on-opacity);
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-DocumentSearch-input-button-off:hover {
+  background-color: var(--jp-layout-color3);
+  color: var(--jp-ui-font-color3);
+}
+
+.jp-DocumentSearch-input-button-on:hover {
+  background-color: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
 }
 
 .jp-DocumentSearch-index-counter {
@@ -202,6 +224,7 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
 .jp-DocumentSearch-search-filter {
   display: flex;
   align-items: center;
+  justify-content: center;
   user-select: none;
 }
 
@@ -221,7 +244,9 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
 }
 
 .jp-DocumentSearch-replace-button-wrapper:focus {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
 }
 
 .jp-DocumentSearch-replace-button {
