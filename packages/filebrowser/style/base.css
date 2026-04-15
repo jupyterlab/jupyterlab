@@ -93,15 +93,6 @@
 }
 
 .jp-BreadCrumbs-home,
-.jp-BreadCrumbs-preferred,
-.jp-BreadCrumbs-ellipsis,
-.jp-BreadCrumbs-edit {
-  border-radius: var(--jp-border-radius);
-  align-items: center;
-  justify-content: center;
-}
-
-.jp-BreadCrumbs-home,
 .jp-BreadCrumbs-preferred {
   margin-right: 2px;
 }
@@ -110,9 +101,6 @@
   margin-left: 2px;
 }
 
-.jp-BreadCrumbs-home:focus-visible,
-.jp-BreadCrumbs-preferred:focus-visible,
-.jp-BreadCrumbs-edit:focus-visible,
 .jp-BreadCrumbs-item:focus-visible {
   outline: 2px solid var(--jp-brand-color1);
 }
