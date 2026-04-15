@@ -57,6 +57,7 @@
   flex: 0 0 auto;
   margin: 8px 12px;
   cursor: text;
+  border: 1px solid red;
 }
 
 .jp-BreadCrumbs:hover:not(:has(.jp-BreadCrumbs-content:hover)) {
@@ -66,6 +67,14 @@
 /* The container holds breadcrumb icons, separators, and items */
 .jp-BreadCrumbs-container {
   min-width: 0;
+}
+
+.jp-BreadCrumbs-content {
+  border: 1px solid cyan;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  line-height: 1;
 }
 
 .jp-BreadCrumbs.jp-mod-editMode > .jp-BreadCrumbs-container {
@@ -78,14 +87,41 @@
   border-radius: var(--jp-border-radius);
   cursor: pointer;
   word-break: break-word;
+  border: 1px solid blue;
+}
+
+.jp-BreadCrumbs-ellipsis {
+  padding: 0;
 }
 
 .jp-BreadCrumbs-item:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-BreadCrumbs-item:first-child {
+/* .jp-BreadCrumbs-item:first-child {
   margin-left: 0;
+} */
+
+.jp-BreadCrumbs-home,
+.jp-BreadCrumbs-preferred {
+  border: 1px solid yellow;
+  border-radius: var(--jp-border-radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-right: 2px;
+}
+
+.jp-BreadCrumbs-separator {
+  border: 1px solid purple;
+}
+
+
+.jp-BreadCrumbs-home svg,
+.jp-BreadCrumbs-preferred svg,
+.jp-BreadCrumbs-ellipsis svg {
+  border: 1px solid rgb(10, 226, 78);
 }
 
 .jp-BreadCrumbs-home:focus-visible,
