@@ -47,7 +47,11 @@ import {
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
-import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type {
+  PartialJSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
@@ -81,6 +85,8 @@ namespace CommandIDs {
   export const closeRightTabs = 'application:close-right-tabs';
 
   export const closeAll: string = 'application:close-all';
+
+  export const moveWidget = 'application:move-widget';
 
   export const setMode: string = 'application:set-mode';
 
@@ -1596,6 +1602,10 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
       translator
     });
     widget.title.icon = buildIcon;
+    widget.title.dataset = {
+      ...widget.title.dataset,
+      jpTabLabel: trans.__('Property Inspector')
+    };
     widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'right', { rank: 100, type: 'Property Inspector' });
@@ -1718,6 +1728,150 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The widget mover plugin to allow moving widgets between different areas.
+ */
+const widgetMover: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:widget-mover',
+  description:
+    'Adds commands and context menu items to move widgets between areas.',
+  autoStart: true,
+  requires: [ILabShell, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    translator: ITranslator
+  ) => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const areas = ['main', 'left', 'right', 'down'] as const;
+    type MovableWidgetArea = (typeof areas)[number];
+    const isMovableWidgetArea = (area: unknown): area is MovableWidgetArea => {
+      return (
+        typeof area === 'string' && areas.some(candidate => candidate === area)
+      );
+    };
+
+    const findWidget = (id: string): Widget | null => {
+      for (const area of areas) {
+        const widget = find(labShell.widgets(area), w => w.id === id);
+        if (widget) {
+          return widget;
+        }
+      }
+      return null;
+    };
+
+    const contextMenuWidget = (): Widget | null => {
+      const test = (node: HTMLElement) => !!node.dataset.id;
+      const node = app.contextMenuHitTest(test);
+      if (!node) {
+        return null;
+      }
+      return findWidget(node.dataset.id!);
+    };
+
+    const resolveWidget = (args?: ReadonlyPartialJSONObject): Widget | null => {
+      const id = args?.id;
+      if (typeof id === 'string') {
+        return findWidget(id);
+      }
+      return contextMenuWidget();
+    };
+
+    const getWidgetArea = (widget: Widget): MovableWidgetArea | null => {
+      for (const area of areas) {
+        const widgetInArea = find(
+          labShell.widgets(area),
+          w => w.id === widget.id
+        );
+        if (widgetInArea) {
+          return area;
+        }
+      }
+      return null;
+    };
+
+    const moveWidgetToArea = (
+      widget: Widget,
+      targetArea: MovableWidgetArea
+    ) => {
+      // Don't move if already in target area
+      const currentArea = getWidgetArea(widget);
+      if (currentArea === targetArea) {
+        return;
+      }
+
+      // Move only the current widget. This should not update the saved
+      // type-based layout preference used for future widgets.
+      labShell.add(widget, targetArea);
+      labShell.activateById(widget.id);
+    };
+
+    // Add command for moving widgets to different areas
+    commands.addCommand(CommandIDs.moveWidget, {
+      label: args => {
+        const area = args?.area;
+        if (!isMovableWidgetArea(area)) {
+          return trans.__('Move Widget');
+        }
+        switch (area) {
+          case 'main':
+            return trans.__('Move to Main Area');
+          case 'left':
+            return trans.__('Move to Left Sidebar');
+          case 'right':
+            return trans.__('Move to Right Sidebar');
+          case 'down':
+            return trans.__('Move to Bottom Panel');
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            area: {
+              type: 'string',
+              enum: ['main', 'left', 'right', 'down'],
+              description: trans.__('The target area to move the widget to')
+            },
+            id: {
+              type: 'string',
+              description: trans.__(
+                'The widget ID to move. Defaults to the context menu target.'
+              )
+            }
+          },
+          required: ['area']
+        }
+      },
+      isVisible: args => {
+        return isMovableWidgetArea(args?.area);
+      },
+      isEnabled: args => {
+        const area = args?.area;
+        const widget = resolveWidget(
+          args as ReadonlyPartialJSONObject | undefined
+        );
+        return (
+          widget !== null &&
+          isMovableWidgetArea(area) &&
+          getWidgetArea(widget) !== area
+        );
+      },
+      execute: args => {
+        const area = args?.area;
+        const widget = resolveWidget(
+          args as ReadonlyPartialJSONObject | undefined
+        );
+        if (widget && isMovableWidgetArea(area)) {
+          moveWidgetToArea(widget, area);
+        }
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1737,12 +1891,32 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paths,
   propertyInspector,
   jupyterLogo,
-  topbar
+  topbar,
+  widgetMover
 ];
 
 export default plugins;
 
 namespace Private {
+  export function saveUserLayout(
+    settings: ISettingRegistry.ISettings,
+    userLayout: {
+      'single-document': ILabShell.IUserLayout;
+      'multiple-document': ILabShell.IUserLayout;
+    }
+  ): Promise<void> {
+    const layout = {
+      single: JSONExt.deepCopy(
+        userLayout['single-document'] as unknown as PartialJSONValue
+      ),
+      multiple: JSONExt.deepCopy(
+        userLayout['multiple-document'] as unknown as PartialJSONValue
+      )
+    };
+
+    return settings.set('layout', layout as PartialJSONValue);
+  }
+
   async function displayInformation(trans: TranslationBundle): Promise<void> {
     const result = await showDialog({
       title: trans.__('Information'),
@@ -1997,17 +2171,9 @@ namespace Private {
         }
 
         if (newLayout) {
-          settings
-            .set('layout', {
-              single: newLayout['single-document'],
-              multiple: newLayout['multiple-document']
-            } as any)
-            .catch(reason => {
-              console.error(
-                'Failed to save user layout customization.',
-                reason
-              );
-            });
+          saveUserLayout(settings, newLayout).catch(reason => {
+            console.error('Failed to save user layout customization.', reason);
+          });
         }
       }
     });

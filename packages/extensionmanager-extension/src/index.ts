@@ -53,6 +53,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
       const v = new ExtensionsPanel({ model, translator: translator! });
       v.id = 'extensionmanager.main-view';
       v.title.icon = extensionIcon;
+      v.title.dataset = {
+        ...v.title.dataset,
+        jpTabLabel: trans.__('Extension Manager')
+      };
       v.title.caption = trans.__('Extension Manager');
       v.node.setAttribute('role', 'region');
       v.node.setAttribute('aria-label', trans.__('Extension Manager section'));

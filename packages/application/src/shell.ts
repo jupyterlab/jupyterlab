@@ -975,6 +975,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           }
         : undefined;
 
+    if (options?.rank !== undefined) {
+      this._sideOptionsCache.set(widget, {
+        ...this._sideOptionsCache.get(widget),
+        rank: options.rank
+      });
+    }
+
     switch (area || 'main') {
       case 'bottom':
         return this._addToBottomArea(widget, options);
@@ -1004,7 +1011,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    *
    * #### Notes
    * If `mode` is undefined, both mode are updated.
-   * The new layout is now persisted.
+   * The new layout is stored in the shell user layout. Callers are
+   * responsible for persisting it when needed.
    *
    * @param widget Widget to move
    * @param area New area
@@ -1020,12 +1028,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'multiple-document': ILabShell.IUserLayout;
   } {
     const type = this._idTypeMap.get(widget.id) ?? widget.id;
+    const rank = this._sideOptionsCache.get(widget)?.rank;
     for (const m of ['single-document', 'multiple-document'].filter(
       c => !mode || c === mode
     )) {
+      const position = this._userLayout[m as DockPanel.Mode][type];
       this._userLayout[m as DockPanel.Mode][type] = {
-        ...this._userLayout[m as DockPanel.Mode][type],
-        area
+        ...position,
+        area,
+        ...(rank !== undefined
+          ? {
+              options: {
+                ...position?.options,
+                rank
+              }
+            }
+          : {})
       };
     }
 
@@ -1380,7 +1398,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IterableIterator<Widget> {
-    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
@@ -1396,6 +1413,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._menuHandler.panel.children();
       case 'bottom':
         return this._bottomPanel.children();
+      case 'down':
+        return this._downPanel.stackedPanel.children();
       default:
         throw new Error(`Invalid area: ${area}`);
     }
@@ -1414,7 +1433,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
     const inputElement = this._titleHandler.inputElement;
-    inputElement.value = current ? current.title.label : '';
+    inputElement.value = current ? TabBarSvg.titleLabel(current.title) : '';
     inputElement.title = current ? current.title.caption : '';
   }
 
@@ -2085,7 +2104,7 @@ namespace Private {
       const title = this._sideBar.insertTab(index, widget.title);
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
-      title.dataset = { id: widget.id };
+      title.dataset = { ...title.dataset, id: widget.id };
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
@@ -2141,13 +2160,52 @@ namespace Private {
      * Rehydrate the side bar.
      */
     rehydrate(data: ILabShell.ISideArea): void {
+      if (Array.isArray(data.widgets)) {
+        const widgetIds = data.widgets.map(widget => widget.id);
+        const widgetIdSet = new Set(widgetIds);
+
+        // Add widgets that are in the saved layout but not currently
+        // in the sidebar.
+        const currentIds = this._stackedPanel.widgets.map(widget => widget.id);
+        data.widgets
+          .filter(widget => !currentIds.includes(widget.id))
+          .forEach(widget => {
+            this.addWidget(widget, DEFAULT_RANK);
+          });
+
+        // Merge the saved order into the current sidebar slots so widgets
+        // absent from the saved layout keep their rank-relative positions.
+        let savedIndex = 0;
+        const targetIds = this._stackedPanel.widgets.map(widget =>
+          widgetIdSet.has(widget.id) ? widgetIds[savedIndex++] : widget.id
+        );
+
+        while (
+          !ArrayExt.shallowEqual(
+            targetIds,
+            this._stackedPanel.widgets.map(widget => widget.id)
+          )
+        ) {
+          this._stackedPanel.widgets.forEach((widget, index) => {
+            const position = targetIds.findIndex(id => widget.id === id);
+            if (position >= 0 && position !== index) {
+              ArrayExt.move(this._items, index, position);
+              this._stackedPanel.insertWidget(position, widget);
+              this._sideBar.insertTab(position, widget.title);
+            }
+          });
+        }
+      }
+
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       }
       if (data.collapsed) {
         this.collapse();
       }
-      if (!data.visible) {
+      if (data.visible) {
+        this.show();
+      } else {
         this.hide();
       }
       if (data.widgetStates) {
@@ -2160,7 +2218,11 @@ namespace Private {
                 typeof expansion === 'boolean' &&
                 w.content instanceof AccordionPanel
               ) {
-                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+                if (expansion) {
+                  w.content.expand(widx);
+                } else {
+                  w.content.collapse(widx);
+                }
               }
             });
             if (state.sizes) {
@@ -2390,7 +2452,7 @@ namespace Private {
         if (widget == null) {
           return;
         }
-        const oldName = widget.title.label;
+        const oldName = TabBarSvg.titleLabel(widget.title);
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();

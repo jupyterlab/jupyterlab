@@ -90,6 +90,34 @@
     }
   },
   {
+    "id": "application:move-widget",
+    "label": "Move Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "area": {
+          "type": "string",
+          "enum": [
+            "main",
+            "left",
+            "right",
+            "down"
+          ],
+          "description": "The target area to move the widget to"
+        },
+        "id": {
+          "type": "string",
+          "description": "The widget ID to move. Defaults to the context menu target."
+        }
+      },
+      "required": [
+        "area"
+      ]
+    }
+  },
+  {
     "id": "application:reset-layout",
     "label": "Reset Default Layout",
     "caption": "",
