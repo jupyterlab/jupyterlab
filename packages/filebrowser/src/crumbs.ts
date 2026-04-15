@@ -7,6 +7,7 @@ import { renameFile } from '@jupyterlab/docmanager';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
+  editIcon,
   ellipsesIcon,
   homeIcon as preferredIcon,
   folderIcon as rootIcon
@@ -38,6 +39,11 @@ const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
  * The class name added to the breadcrumb node.
  */
 const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
+
+/**
+ * The class name for the breadcrumbs edit node
+ */
+const BREADCRUMB_EDIT_CLASS = 'jp-BreadCrumbs-edit';
 
 /**
  * The class name for the breadcrumbs ellipsis node
@@ -306,7 +312,8 @@ export class BreadCrumbs extends Widget {
       if (
         el.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
         el.classList.contains(BREADCRUMB_ROOT_CLASS) ||
-        el.classList.contains(BREADCRUMB_ITEM_CLASS)
+        el.classList.contains(BREADCRUMB_ITEM_CLASS) ||
+        el.classList.contains(BREADCRUMB_EDIT_CLASS)
       ) {
         result.push(el);
       }
@@ -361,7 +368,8 @@ export class BreadCrumbs extends Widget {
       if (
         node.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS) ||
-        node.classList.contains(BREADCRUMB_ITEM_CLASS)
+        node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
+        node.classList.contains(BREADCRUMB_EDIT_CLASS)
       ) {
         return node;
       }
@@ -375,6 +383,10 @@ export class BreadCrumbs extends Widget {
    */
   private _activateCrumbSegment(crumb: HTMLElement): void {
     this._focusCrumb(crumb);
+    if (crumb.classList.contains(BREADCRUMB_EDIT_CLASS)) {
+      this.enterEditMode();
+      return;
+    }
     if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
       this._restoreBreadcrumbFocusAfterUpdate = true;
       const preferredPath = PageConfig.getOption('preferredPath');
@@ -468,7 +480,8 @@ export class BreadCrumbs extends Widget {
       if (
         node.classList.contains(BREADCRUMB_PREFERRED_CLASS) ||
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
-        node.classList.contains(BREADCRUMB_ROOT_CLASS)
+        node.classList.contains(BREADCRUMB_ROOT_CLASS) ||
+        node.classList.contains(BREADCRUMB_EDIT_CLASS)
       ) {
         this._activateCrumbSegment(node);
 
@@ -922,7 +935,8 @@ namespace Private {
   export enum Crumb {
     Home,
     Ellipsis,
-    Preferred
+    Preferred,
+    Edit
   }
 
   /**
@@ -1028,6 +1042,7 @@ namespace Private {
       }
     }
 
+    nodes.push(breadcrumbs[Crumb.Edit]);
     container.replaceChildren(...nodes);
   }
 
@@ -1078,7 +1093,15 @@ namespace Private {
     preferred.dataset.path = path || '/';
     preferred.tabIndex = -1;
 
-    return [home, ellipsis, preferred];
+    const edit = editIcon.element({
+      className: BREADCRUMB_EDIT_CLASS,
+      tag: 'span',
+      title: 'Edit path',
+      stylesheet: 'breadCrumb'
+    });
+    edit.tabIndex = -1;
+
+    return [home, ellipsis, preferred, edit];
   }
 
   /**
