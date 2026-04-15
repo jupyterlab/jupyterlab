@@ -130,6 +130,7 @@ if [[ $GROUP == integrity3 ]]; then
     # with the other checks
     git config --global user.email "you@example.com"
     git config --global user.name "CI"
+    git config --global core.hooksPath /dev/null
     git stash
     git checkout -b commit_${BUILD_SOURCEVERSION}
     git clean -df
@@ -160,6 +161,7 @@ fi
 if [[ $GROUP == release_test ]]; then
     # bump the version
     git checkout -b test HEAD
+    git config --global core.hooksPath /dev/null
     jlpm bumpversion next --force
 
     # Use verdaccio during publish
