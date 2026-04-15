@@ -107,7 +107,7 @@
   },
   "resolutions": {
     "@types/react": "^18.0.26",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "lodash-es": "^4.17.23",
     "marked": "^17.0.4",
     "prettier": "^3.8.1",
