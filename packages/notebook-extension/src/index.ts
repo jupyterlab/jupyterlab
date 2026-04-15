@@ -617,11 +617,25 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         const { context } = current;
 
+        let sanitizeHtml = false;
+        if (args['format'] === 'html') {
+          const result = await InputDialog.getBoolean({
+            title: trans.__('Export as HTML'),
+            label: trans.__('Sanitize HTML output'),
+            value: true
+          });
+          if (!result.button.accept) {
+            return;
+          }
+          sanitizeHtml = result.value ?? false;
+        }
+
         const exportOptions: NbConvert.IExportOptions = {
           format: args['format'] as string,
           path: current.context.path,
           exporterOptions: {
-            download: true
+            download: true,
+            sanitizeHtml
           }
         };
 
