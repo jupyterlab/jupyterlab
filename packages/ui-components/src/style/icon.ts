@@ -150,7 +150,6 @@ export namespace LabIconStyle {
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
           '&:first-child svg': {
-            marginLeft: '0px',
             position: 'relative'
           },
           '&:hover': {
@@ -165,8 +164,6 @@ export namespace LabIconStyle {
       element: {
         borderRadius: 'var(--jp-border-radius)',
         cursor: 'pointer',
-        margin: '0px 2px',
-        padding: '0px 2px',
         height: '16px',
         width: '16px',
         verticalAlign: 'middle'
