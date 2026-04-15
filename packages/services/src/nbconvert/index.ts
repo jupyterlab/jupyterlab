@@ -88,16 +88,27 @@ export class NbConvertManager implements NbConvert.IManager {
    * @param options.format - The export format (e.g., 'html', 'pdf').
    * @param options.path - The path to the notebook to export.
    * @param options.exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
+   * @param options.exporterOptions.sanitizeHtml - Whether to sanitize HTML in the output. Defaults to false.
    */
   async exportAs(options: NbConvert.IExportOptions): Promise<void> {
     const { format, path } = options;
-    const { download = false } = options.exporterOptions || {};
+    const { download = false, sanitizeHtml = false } =
+      options.exporterOptions || {};
 
     const baseUrl = this.serverSettings.baseUrl;
     const notebookPath = URLExt.encodeParts(path);
     let url = URLExt.join(baseUrl, NBCONVERT_EXPORT_URL, format, notebookPath);
+
+    const params = new URLSearchParams();
     if (download) {
-      url += '?download=true';
+      params.set('download', 'true');
+    }
+    if (sanitizeHtml) {
+      params.set('sanitize_html', 'true');
+    }
+    const query = params.toString();
+    if (query) {
+      url += `?${query}`;
     }
 
     // Open the URL in a new tab if in a browser environment.
@@ -187,7 +198,8 @@ export namespace NbConvert {
      * @param options - The export options.
      * @param options.format - The export format (e.g., 'html', 'pdf').
      * @param options.path - The path to the notebook to export.
-     * @param exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
+     * @param options.exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
+     * @param options.exporterOptions.sanitizeHtml - Whether to sanitize HTML in the output. Defaults to false.
      */
     exportAs?(options: NbConvert.IExportOptions): Promise<void>;
   }
