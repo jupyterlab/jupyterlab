@@ -17,7 +17,10 @@ const _packageSheets = new Map<string, CSSStyleSheet[]>();
  * creates constructable CSSStyleSheets from their text content,
  * and caches them for reuse across shadow roots.
  */
-function getPackageStyleSheets(packageName: string): CSSStyleSheet[] {
+function getPackageStyleSheets(
+  packageName: string,
+  removeFromDocument = false
+): CSSStyleSheet[] {
   const cached = _packageSheets.get(packageName);
   if (cached) {
     return cached;
@@ -36,6 +39,11 @@ function getPackageStyleSheets(packageName: string): CSSStyleSheet[] {
   }
   if (sheets.length > 0) {
     _packageSheets.set(packageName, sheets);
+  }
+  if (removeFromDocument) {
+    for (const style of styles) {
+      style.remove();
+    }
   }
   return sheets;
 }
@@ -70,7 +78,7 @@ export class ShadowDOMWidget extends Widget {
       this._root.appendChild(this.node);
       this.attachmentNode = attachmentNode;
       if (options.cssDeps) {
-        this.adoptPackageStyles(options.cssDeps);
+        this.adoptPackageStyles(options.cssDeps, options.ownPackage);
       }
     } else {
       this.attachmentNode = this.node;
@@ -119,12 +127,16 @@ export class ShadowDOMWidget extends Widget {
    *
    * No-op when shadow DOM is not enabled.
    */
-  adoptPackageStyles(packages: readonly string[]): void {
+  adoptPackageStyles(packages: readonly string[], ownPackage?: string): void {
     if (!this._root) {
       return;
     }
+    // Default to the last entry in packages, which is always the
+    // widget's own package (by cssDeps.json generation convention).
+    const own = ownPackage ?? packages[packages.length - 1];
     for (const pkg of packages) {
-      for (const sheet of getPackageStyleSheets(pkg)) {
+      const removeFromDocument = pkg === own;
+      for (const sheet of getPackageStyleSheets(pkg, removeFromDocument)) {
         this.adoptStyleSheet(sheet);
       }
     }
@@ -167,5 +179,13 @@ export namespace ShadowDOMWidget {
      * `cssDeps.json`). Only used when `shadowEnabled` is `true`.
      */
     cssDeps?: readonly string[];
+
+    /**
+     * The package name of the widget itself, e.g. `"@jupyterlab/launcher"`.
+     * When provided alongside `cssDeps`, the `<style>` elements for this
+     * package will be removed from the document after being cached,
+     * preventing style leaking into non-shadow-DOM areas.
+     */
+    ownPackage?: string;
   }
 }
