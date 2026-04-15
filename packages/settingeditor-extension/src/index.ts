@@ -173,9 +173,9 @@ function activate(
         translator,
         status,
         query: args.query as string
-      })
+      }),
+      cssDeps: settingeditorCssDeps
     });
-    editor.adoptPackageStyles(settingeditorCssDeps);
 
     editor.toolbar.addItem(
       'export-settings',
@@ -408,9 +408,9 @@ function activateJSON(
       });
 
       const container = new MainAreaWidget<JsonSettingEditor>({
-        content: editor
+        content: editor,
+        cssDeps: settingeditorCssDeps
       });
-      container.adoptPackageStyles(settingeditorCssDeps);
 
       container.id = namespace;
       container.title.icon = settingsIcon;
@@ -568,8 +568,10 @@ function activateJSON(
             handleImport: applySettings,
             translator: translator
           });
-          const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
-          widget.adoptPackageStyles(settingeditorCssDeps);
+          const widget = new MainAreaWidget<ImportSettingsWidget>({
+            content,
+            cssDeps: settingeditorCssDeps
+          });
           widget.title.label = trans.__('Import Settings');
           widget.title.icon = fileUploadIcon;
           app.shell.add(widget, 'main');

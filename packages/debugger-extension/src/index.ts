@@ -619,10 +619,10 @@ const variables: JupyterFrontEndPlugin<void> = {
             commands,
             scopes: [{ name, variables }],
             themeManager
-          })
+          }),
+          cssDeps: debuggerCssDeps
         });
         widget.addClass('jp-DebuggerVariables');
-        widget.adoptPackageStyles(debuggerCssDeps);
         widget.id = id;
         widget.title.icon = Debugger.Icons.variableIcon;
         widget.title.label = `${service.session?.connection?.name} - ${name}`;

@@ -308,9 +308,11 @@ const open: JupyterFrontEndPlugin<void> = {
       content.addClass(HELP_CLASS);
       content.title.label = text;
       content.id = `${namespace}-${++counter}`;
-      const widget = new MainAreaWidget({ content });
+      const widget = new MainAreaWidget({
+        content,
+        cssDeps: helpCssDeps
+      });
       widget.addClass('jp-Help');
-      widget.adoptPackageStyles(helpCssDeps);
       return widget;
     }
 

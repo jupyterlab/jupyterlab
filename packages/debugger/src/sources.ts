@@ -58,14 +58,14 @@ export class DebuggerSources implements IDebugger.ISources {
   open(params: IDebugger.ISources.OpenParams): void {
     const { editorWrapper, label, caption } = params;
     const widget = new MainAreaWidget<CodeEditorWrapper>({
-      content: editorWrapper
+      content: editorWrapper,
+      cssDeps: debuggerCssDeps
     });
     widget.id = DOMUtils.createDomID();
     widget.title.label = label;
     widget.title.closable = true;
     widget.title.caption = caption;
     widget.title.icon = textEditorIcon;
-    widget.adoptPackageStyles(debuggerCssDeps);
     this._shell.add(widget, 'main', { type: 'Debugger Sources' });
     void this._readOnlyEditorTracker.add(widget);
   }

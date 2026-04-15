@@ -462,8 +462,11 @@ function addCommands(
       term.title.icon = terminalIcon;
       term.title.label = '...';
 
-      const main = new MainAreaWidget({ content: term, reveal: term.ready });
-      main.adoptPackageStyles(terminalCssDeps);
+      const main = new MainAreaWidget({
+        content: term,
+        reveal: term.ready,
+        cssDeps: terminalCssDeps
+      });
       app.shell.add(main, 'main', { type: 'Terminal' });
       void tracker.add(main);
       app.shell.activateById(main.id);

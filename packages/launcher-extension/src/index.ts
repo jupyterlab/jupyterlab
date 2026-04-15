@@ -110,8 +110,10 @@ function activate(
       launcher.title.icon = launcherIcon;
       launcher.title.label = trans.__('Launcher');
 
-      const main = new MainAreaWidget({ content: launcher });
-      main.adoptPackageStyles(launcherCssDeps);
+      const main = new MainAreaWidget({
+        content: launcher,
+        cssDeps: launcherCssDeps
+      });
 
       // If there are any other widgets open, remove the launcher close icon.
       main.title.closable = !!Array.from(shell.widgets('main')).length;

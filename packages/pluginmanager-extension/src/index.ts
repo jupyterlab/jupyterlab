@@ -102,8 +102,11 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       content.title.label = widgetLabel;
       content.title.icon = extensionIcon;
       content.title.caption = trans.__('Plugin Manager');
-      const main = new MainAreaWidget({ content, reveal: model.ready });
-      main.adoptPackageStyles(pluginmanagerCssDeps);
+      const main = new MainAreaWidget({
+        content,
+        reveal: model.ready,
+        cssDeps: pluginmanagerCssDeps
+      });
 
       main.toolbar.addItem(
         'refresh-plugins',

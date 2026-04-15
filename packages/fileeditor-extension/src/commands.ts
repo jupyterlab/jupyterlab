@@ -1725,8 +1725,10 @@ export namespace Commands {
       if (args.widgetId) {
         widget.id = args.widgetId;
       }
-      const main = new MainAreaWidget({ content: widget });
-      main.adoptPackageStyles(fileeditorCssDeps);
+      const main = new MainAreaWidget({
+        content: widget,
+        cssDeps: fileeditorCssDeps
+      });
       await tracker.add(main);
       app.shell.add(main, 'main');
       return widget;

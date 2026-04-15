@@ -1436,8 +1436,10 @@ function activateClonedOutputs(
         index,
         translator
       });
-      const widget = new MainAreaWidget({ content });
-      widget.adoptPackageStyles(notebookCssDeps);
+      const widget = new MainAreaWidget({
+        content,
+        cssDeps: notebookCssDeps
+      });
       current.context.addSibling(widget, {
         ref: current.id,
         mode: 'split-bottom',

@@ -65,23 +65,13 @@ export class ShadowDOMWidget extends Widget {
    */
   constructor(options: ShadowDOMWidget.IOptions = {}) {
     super(options);
-    // Shadow DOM requires both the global toggle (or per-instance override)
-    // AND explicit opt-in via cssDeps (third-party widgets without cssDeps
-    // will not get shadow DOM even if the global toggle is on).
-    this._shadowEnabled =
-      (options.shadowEnabled ?? ShadowDOMWidget.shadowEnabled) &&
-      !!options.cssDeps;
-    if (this._shadowEnabled) {
-      const attachmentNode = document.createElement('div');
-      attachmentNode.classList.add('lm-attachmentNode');
-      this._root = attachmentNode.attachShadow({ mode: 'open' });
-      this._root.appendChild(this.node);
-      this.attachmentNode = attachmentNode;
-      if (options.cssDeps) {
-        this.adoptPackageStyles(options.cssDeps, options.ownPackage);
-      }
+    this._shadowAllowed =
+      options.shadowEnabled ?? ShadowDOMWidget.shadowEnabled;
+    if (this._shadowAllowed && options.cssDeps) {
+      this._enableShadow();
+      this.adoptPackageStyles(options.cssDeps, options.ownPackage);
     } else {
-      this.attachmentNode = this.node;
+      this._attachmentNode = this.node;
     }
   }
 
@@ -89,7 +79,7 @@ export class ShadowDOMWidget extends Widget {
    * Whether shadow DOM isolation is enabled for this widget.
    */
   get shadowEnabled(): boolean {
-    return this._shadowEnabled;
+    return this._root !== null;
   }
 
   /**
@@ -98,7 +88,9 @@ export class ShadowDOMWidget extends Widget {
    * When shadow DOM is enabled, this is a wrapper element whose shadow root
    * contains the real widget node. Otherwise, it is the widget node itself.
    */
-  readonly attachmentNode: HTMLElement;
+  get attachmentNode(): HTMLElement {
+    return this._attachmentNode;
+  }
 
   /**
    * Adopt a stylesheet in the shadow root.
@@ -129,7 +121,10 @@ export class ShadowDOMWidget extends Widget {
    */
   adoptPackageStyles(packages: readonly string[], ownPackage?: string): void {
     if (!this._root) {
-      return;
+      if (!this._shadowAllowed) {
+        return;
+      }
+      this._enableShadow();
     }
     // Default to the last entry in packages, which is always the
     // widget's own package (by cssDeps.json generation convention).
@@ -140,6 +135,17 @@ export class ShadowDOMWidget extends Widget {
         this.adoptStyleSheet(sheet);
       }
     }
+  }
+
+  /**
+   * Create the shadow root and attachment node.
+   */
+  private _enableShadow(): void {
+    const attachmentNode = document.createElement('div');
+    attachmentNode.classList.add('lm-attachmentNode');
+    this._root = attachmentNode.attachShadow({ mode: 'open' });
+    this._root.appendChild(this.node);
+    this._attachmentNode = attachmentNode;
   }
 
   /**
@@ -161,7 +167,8 @@ export class ShadowDOMWidget extends Widget {
     return true;
   }
 
-  private _shadowEnabled: boolean;
+  private _shadowAllowed: boolean;
+  private _attachmentNode: HTMLElement;
   private _root: ShadowRoot | null = null;
 }
 

@@ -76,9 +76,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     function openInspector(args: string): MainAreaWidget<InspectorPanel> {
       if (!isInspectorOpen()) {
         inspector = new MainAreaWidget({
-          content: new InspectorPanel({ translator })
+          content: new InspectorPanel({ translator }),
+          cssDeps: inspectorCssDeps
         });
-        inspector.adoptPackageStyles(inspectorCssDeps);
         inspector.id = 'jp-inspector';
         inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;

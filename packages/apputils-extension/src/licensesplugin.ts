@@ -103,9 +103,9 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
       content.title.icon = copyrightIcon;
       const main = new MainAreaWidget({
         content,
-        reveal: licensesModel.licensesReady
+        reveal: licensesModel.licensesReady,
+        cssDeps: apputilsCssDeps
       });
-      main.adoptPackageStyles(apputilsCssDeps);
 
       main.toolbar.addItem(
         'refresh-licenses',

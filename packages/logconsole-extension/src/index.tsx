@@ -168,8 +168,10 @@ function activateLogConsole(
 
     logConsolePanel.source = options.source ?? getCurrentWidgetPath() ?? null;
 
-    logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
-    logConsoleWidget.adoptPackageStyles(logconsoleCssDeps);
+    logConsoleWidget = new MainAreaWidget({
+      content: logConsolePanel,
+      cssDeps: logconsoleCssDeps
+    });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.icon = listIcon;
