@@ -3,7 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-:root {
+:root,
+:host {
   --jp-private-settingeditor-debug-height: 28px;
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-legend-height: 16px;
