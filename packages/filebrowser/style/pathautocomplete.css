@@ -1,0 +1,53 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Fix the dialog size so filtering suggestions does not resize it */
+.jp-Dialog-content:has(.jp-PathAutocompleteInput) {
+  width: 500px;
+  height: 350px;
+}
+
+/* Dialog body widget for path input with autocomplete */
+.jp-PathAutocompleteInput {
+  min-height: 220px;
+}
+
+.jp-PathAutocompleteInput > label {
+  line-height: 1.4;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-PathAutocompleteInput-inputWrapper > input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Suggestion dropdown — normal flow, appears right after the input */
+.jp-PathAutocompleteSuggestions {
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  max-height: 160px;
+  overflow-y: auto;
+  box-shadow: var(--jp-elevation-z4);
+}
+
+.jp-PathAutocompleteSuggestions > li {
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-PathAutocompleteSuggestions > li:hover,
+.jp-PathAutocompleteSuggestions > li.jp-mod-active {
+  background: var(--jp-layout-color2);
+}
+
+.jp-PathAutocompleteSuggestions > li[data-is-dot] {
+  opacity: 75%;
+}
