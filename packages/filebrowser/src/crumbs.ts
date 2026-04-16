@@ -396,7 +396,7 @@ export class BreadCrumbs extends Widget {
       const path = preferredPath ? '/' + preferredPath : preferredPath;
       this._model.cd(path).catch(error => {
         this._restoreBreadcrumbFocusAfterUpdate = false;
-        showErrorMessage(this._trans.__('Open Error'), error);
+        void showErrorMessage(this._trans.__('Open Error'), error);
       });
       return;
     }
@@ -414,7 +414,7 @@ export class BreadCrumbs extends Widget {
         this._restoreBreadcrumbFocusAfterUpdate = true;
         this._model.cd(destination).catch(error => {
           this._restoreBreadcrumbFocusAfterUpdate = false;
-          showErrorMessage(this._trans.__('Open Error'), error);
+          void showErrorMessage(this._trans.__('Open Error'), error);
         });
       }
     }
