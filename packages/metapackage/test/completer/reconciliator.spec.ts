@@ -319,6 +319,28 @@ describe('completer/reconciliator', () => {
         spy1.mockRestore();
         spy2.mockRestore();
       });
+
+      it('should handle provider isApplicable rejection gracefully', async () => {
+        const fooProvider1 = new FooCompletionProvider();
+        const fooProvider2 = new FooCompletionProvider();
+        // Make provider1's isApplicable reject
+        jest
+          .spyOn(fooProvider1, 'isApplicable')
+          .mockRejectedValue(new Error('provider error'));
+        const spy2 = jest.spyOn(fooProvider2, 'isApplicable');
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [fooProvider1, fooProvider2]
+        });
+        const applicableProviders =
+          await reconciliator['applicableProviders']();
+        // Provider1 rejected, so only provider2 should be returned
+        expect(applicableProviders).toEqual([fooProvider2]);
+        expect(spy2).toHaveBeenCalledTimes(1);
+        expect(warnSpy).toHaveBeenCalled();
+        warnSpy.mockRestore();
+      });
     });
   });
 });
