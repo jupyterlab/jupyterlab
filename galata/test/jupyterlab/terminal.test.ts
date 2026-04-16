@@ -121,6 +121,33 @@ test.describe('Terminal', () => {
       expect(await terminal.screenshot()).toMatchSnapshot('search.png');
     });
   });
+
+  test.describe('Focus', () => {
+    test('should move focus away from terminal input on second Escape', async ({
+      page
+    }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
+
+      await terminal.waitFor();
+      await terminalInput.waitFor();
+
+      // Focus terminal input.
+      await page.locator('div.xterm-screen').click();
+      await expect(terminalInput).toBeFocused();
+
+      // First Escape keeps focus on input.
+      await page.keyboard.press('Escape');
+      await expect(terminalInput).toBeFocused();
+
+      // Second Escape moves focus to terminal viewport.
+      await page.keyboard.press('Escape');
+      await expect(terminal.locator('.xterm-viewport')).toBeFocused();
+
+      await page.waitForTimeout(100);
+      expect(await terminal.screenshot()).toMatchSnapshot('focus.png');
+    });
+  });
 });
 
 test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {

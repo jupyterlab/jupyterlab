@@ -35,6 +35,11 @@ const TERMINAL_CLASS = 'jp-Terminal';
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
 /**
+ * The delay in milliseconds to reset the escape key press.
+ */
+const ESCAPE_FOCUS_DELAY_MS = 350;
+
+/**
  * A widget which manages a terminal session.
  */
 export class Terminal extends Widget implements ITerminal.ITerminal {
@@ -309,7 +314,17 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('keydown', this, true);
     this.update();
+  }
+
+  /**
+   * Remove event listeners when the widget is detached.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('keydown', this, true);
+    this._clearEscapeResetTimer();
+    this._escapePressedOnce = false;
   }
 
   /**
@@ -495,6 +510,74 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     );
   }
 
+  /**
+   * Handle the `keydown` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    const xtermViewport = this._term.element?.querySelector(
+      '.xterm-viewport'
+    ) as HTMLElement | null;
+    const xtermTextarea = this._term.textarea;
+    const activeElement = document.activeElement as HTMLElement | null;
+    const viewportFocused =
+      !!activeElement &&
+      !!xtermViewport &&
+      (activeElement === xtermViewport ||
+        xtermViewport.contains(activeElement));
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!this._escapePressedOnce) {
+        this._escapePressedOnce = true;
+        this._scheduleEscapeReset();
+        return;
+      }
+      this._clearEscapeResetTimer();
+      this._escapePressedOnce = false;
+      if (xtermTextarea) {
+        // This ensures pressing Tab does not return to the textarea and avoids
+        // becoming a tab trap.
+        xtermTextarea.tabIndex = -1;
+      }
+      xtermViewport?.setAttribute('tabindex', '0');
+      xtermViewport?.focus();
+      return;
+    }
+
+    this._clearEscapeResetTimer();
+    this._escapePressedOnce = false;
+
+    if (viewportFocused && event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (xtermTextarea) {
+        xtermTextarea.tabIndex = 0;
+        xtermTextarea.focus();
+      }
+      return;
+    }
+
+    if (viewportFocused && event.key === 'Tab' && xtermTextarea) {
+      xtermTextarea.tabIndex = -1;
+    }
+  }
+
+  private _scheduleEscapeReset(): void {
+    this._clearEscapeResetTimer();
+    this._escapeResetTimer = window.setTimeout(() => {
+      this._escapePressedOnce = false;
+      this._escapeResetTimer = null;
+    }, ESCAPE_FOCUS_DELAY_MS);
+  }
+
+  private _clearEscapeResetTimer(): void {
+    if (this._escapeResetTimer !== null) {
+      window.clearTimeout(this._escapeResetTimer);
+      this._escapeResetTimer = null;
+    }
+  }
+
   private _fitAddon: FitAddon;
   private _searchAddon: SearchAddon;
   private _needsResize = true;
@@ -507,6 +590,28 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _termOpened = false;
   private _trans: TranslationBundle;
   private _themeChanged = new Signal<this, void>(this);
+  private _escapePressedOnce = false;
+  private _escapeResetTimer: number | null = null;
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event -The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 /**
