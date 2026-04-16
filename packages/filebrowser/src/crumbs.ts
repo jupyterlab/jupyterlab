@@ -371,6 +371,21 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Whether a crumb corresponds to the current directory segment.
+   */
+  private _isCurrentDirectoryCrumb(crumb: HTMLElement): boolean {
+    if (
+      !crumb.classList.contains(BREADCRUMB_ITEM_CLASS) ||
+      crumb.classList.contains(BREADCRUMB_ELLIPSIS_CLASS)
+    ) {
+      return false;
+    }
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
+    return crumb.dataset.path === localPath;
+  }
+
+  /**
    * Navigate to the directory represented by a breadcrumb segment (same as click).
    */
   private _activateCrumbSegment(crumb: HTMLElement): void {
@@ -417,7 +432,11 @@ export class BreadCrumbs extends Widget {
     const crumb = this._resolveCrumbFromEventTarget(event.target);
 
     if (isActivateKey && crumb && this._crumbContent.contains(crumb)) {
-      this._activateCrumbSegment(crumb);
+      if (this._isCurrentDirectoryCrumb(crumb)) {
+        this.enterEditMode();
+      } else {
+        this._activateCrumbSegment(crumb);
+      }
       event.preventDefault();
       event.stopPropagation();
       return;
