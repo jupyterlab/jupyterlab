@@ -150,6 +150,11 @@ export namespace LabIconStyle {
         borderRadius: 'var(--jp-border-radius)',
         alignItems: 'center',
         justifyContent: 'center',
+        display: 'inline-flex',
+        verticalAlign: 'middle',
+        height: '20px',
+        width: '20px',
+        lineHeight: 1,
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
           '&:focus-visible': {
@@ -167,7 +172,7 @@ export namespace LabIconStyle {
       element: {
         borderRadius: 'var(--jp-border-radius)',
         cursor: 'pointer',
-        padding: '2px',
+        display: 'block',
         height: '16px',
         width: '16px',
         verticalAlign: 'middle'

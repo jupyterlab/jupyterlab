@@ -78,10 +78,9 @@
 
 .jp-BreadCrumbs-item {
   margin: 0 2px;
-  padding: 0 2px;
+  padding: 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
-  word-break: normal;
 }
 
 .jp-BreadCrumbs-ellipsis {
@@ -97,10 +96,6 @@
   margin-right: 2px;
 }
 
-.jp-BreadCrumbs-edit {
-  margin-left: 2px;
-}
-
 .jp-BreadCrumbs-item:focus-visible {
   outline: 2px solid var(--jp-brand-color1);
 }
@@ -108,6 +103,11 @@
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
   background-color: var(--jp-brand-color2);
   opacity: 0.7;
+}
+
+.jp-BreadCrumbs-item,
+.jp-BreadCrumbs-separator {
+  vertical-align: middle;
 }
 
 /*-----------------------------------------------------------------------------
