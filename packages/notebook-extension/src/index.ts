@@ -126,7 +126,7 @@ import type {
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { JSONExt, UUID } from '@lumino/coreutils';
+import { JSONExt, Token, UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -179,6 +179,8 @@ namespace CommandIDs {
   export const trust = 'notebook:trust';
 
   export const exportToFormat = 'notebook:export-to-format';
+
+  export const showExportGuidance = 'notebook:show-export-guidance';
 
   export const run = 'notebook:run-cell';
 
@@ -350,6 +352,29 @@ const FACTORY = 'Notebook';
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * Documentation page describing notebook export support.
+ */
+const NOTEBOOK_EXPORT_DOCS_URL =
+  'https://jupyterlab.readthedocs.io/en/latest/user/export.html';
+
+/**
+ * An interface describing how export guidance is presented to users.
+ */
+export interface INotebookExportGuidance {
+  /**
+   * Show guidance for enabling notebook exports.
+   */
+  showExportHelp(): Promise<void>;
+}
+
+/**
+ * A token describing a service for showing notebook export guidance.
+ */
+export const INotebookExportGuidance = new Token<INotebookExportGuidance>(
+  '@jupyterlab/notebook-extension:INotebookExportGuidance'
+);
 
 /**
  * Setting Id storing the customized toolbar definition.
@@ -627,13 +652,14 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds the export notebook commands.',
   autoStart: true,
   requires: [ITranslator, INotebookTracker],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [IMainMenu, ICommandPalette, INotebookExportGuidance],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     tracker: INotebookTracker,
     mainMenu: IMainMenu | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    exportGuidance: INotebookExportGuidance | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -703,21 +729,91 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.showExportGuidance, {
+      label: trans.__('Enable notebook exports'),
+      execute: () => {
+        if (exportGuidance) {
+          return exportGuidance.showExportHelp();
+        }
+        window.open(NOTEBOOK_EXPORT_DOCS_URL, '_blank', 'noopener,noreferrer');
+        return undefined;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     // Add a notebook group to the File menu.
-    let exportTo: Menu | null | undefined;
-    if (mainMenu) {
-      exportTo = mainMenu.fileMenu.items.find(
-        item =>
-          item.type === 'submenu' &&
-          item.submenu?.id === 'jp-mainmenu-file-notebookexport'
-      )?.submenu;
-    }
+    const fileMenu = mainMenu?.fileMenu as Menu | undefined;
+
+    const getExportMenu = (): Menu | undefined => {
+      return (
+        fileMenu?.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-file-notebookexport'
+        )?.submenu ?? undefined
+      );
+    };
 
     let formatsInitialized = false;
+    let paletteInitialized = false;
+    let exportFormats: Array<{ format: string; label: string }> | null = null;
+
+    const updateExportMenu = () => {
+      const exportTo = getExportMenu();
+      if (!exportTo || !exportFormats) {
+        return;
+      }
+
+      exportTo.clearItems();
+
+      if (exportFormats.length === 0) {
+        exportTo.addItem({
+          command: CommandIDs.showExportGuidance
+        });
+        return;
+      }
+
+      exportFormats.forEach(({ format, label }) => {
+        exportTo.addItem({
+          command: CommandIDs.exportToFormat,
+          args: {
+            format,
+            label,
+            isPalette: false
+          }
+        });
+      });
+
+      if (palette && !paletteInitialized) {
+        const category = trans.__('Notebook Operations');
+        exportFormats.forEach(({ format, label }) => {
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args: {
+              format,
+              label,
+              isPalette: true
+            }
+          });
+        });
+        paletteInitialized = true;
+      }
+    };
 
     /** Request formats only when a notebook might use them. */
     const maybeInitializeFormats = async () => {
       if (formatsInitialized) {
+        updateExportMenu();
+        return;
+      }
+
+      if (tracker.size === 0) {
         return;
       }
 
@@ -725,51 +821,94 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       formatsInitialized = true;
 
-      const response = await services.nbconvert.getExportFormats(false);
-
-      if (!response) {
-        return;
+      let response: NbConvert.IExportFormats | null = null;
+      try {
+        response = await services.nbconvert.getExportFormats(false);
+      } catch {
+        // Ignore fetch errors and fallback to export guidance.
       }
 
-      const formatLabels: any = Private.getFormatLabels(translator);
+      const formatLabels = Private.getFormatLabels(translator);
 
-      // Convert export list to palette and menu items.
-      const formatList = Object.keys(response);
-      formatList.forEach(function (key) {
-        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-        let args = {
-          format: key,
-          label: labelStr,
-          isPalette: false
-        };
-        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-          if (exportTo) {
-            exportTo.addItem({
-              command: CommandIDs.exportToFormat,
-              args: args
-            });
-          }
-          if (palette) {
-            args = {
-              format: key,
-              label: labelStr,
-              isPalette: true
-            };
-            const category = trans.__('Notebook Operations');
-            palette.addItem({
-              command: CommandIDs.exportToFormat,
-              category,
-              args
-            });
-          }
-        }
-      });
+      // Convert export list to menu and palette items.
+      exportFormats = Object.keys(response ?? {})
+        .filter(key => !FORMAT_EXCLUDE.includes(key))
+        .map(key => {
+          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+          return {
+            format: key,
+            label: labelStr
+          };
+        });
+
+      updateExportMenu();
     };
 
     tracker.widgetAdded.connect(maybeInitializeFormats);
+    if (tracker.size > 0) {
+      void maybeInitializeFormats();
+    }
+    void app.restored.then(() => {
+      void maybeInitializeFormats();
+    });
   }
 };
+
+/**
+ * A plugin providing the default notebook export guidance service.
+ */
+export const exportGuidanceDialogPlugin: JupyterFrontEndPlugin<INotebookExportGuidance> =
+  {
+    id: '@jupyterlab/notebook-extension:export-guidance-dialog',
+    description:
+      'Provides the default notebook export guidance shown when no exporters are available.',
+    provides: INotebookExportGuidance,
+    autoStart: true,
+    requires: [ITranslator],
+    activate: (
+      app: JupyterFrontEnd,
+      translator: ITranslator
+    ): INotebookExportGuidance => {
+      const trans = translator.load('jupyterlab');
+      const { commands } = app;
+
+      const openExportDocs = (url: string, docsLabel: string) => {
+        if (commands.hasCommand('help:open')) {
+          return commands.execute('help:open', {
+            url,
+            text: docsLabel,
+            newBrowserTab: true
+          });
+        }
+
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return undefined;
+      };
+
+      return {
+        showExportHelp: async () => {
+          const result = await showDialog({
+            title: trans.__('Notebook exports are unavailable'),
+            body: trans.__(
+              'No notebook export formats are currently available. To enable exports, install nbconvert in the server environment or use another exporter supported by your deployment.'
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Close') }),
+              Dialog.okButton({ label: trans.__('Open Documentation') })
+            ]
+          });
+
+          if (result.button.accept) {
+            void openExportDocs(
+              NOTEBOOK_EXPORT_DOCS_URL,
+              trans.__('Notebook Export Documentation')
+            );
+          }
+        }
+      };
+    }
+  };
 
 /**
  * A plugin that adds a notebook trust status item to the status bar.
@@ -1246,6 +1385,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
   executionIndicator,
+  exportGuidanceDialogPlugin,
   exportPlugin,
   tools,
   cellCounterItem,

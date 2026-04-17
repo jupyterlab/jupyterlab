@@ -4883,6 +4883,16 @@
     }
   },
   {
+    "id": "notebook:show-export-guidance",
+    "label": "Enable notebook exports",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:shutdown-kernel",
     "label": "Shut Down Kernel",
     "caption": "",
