@@ -4435,7 +4435,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          isMenu: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from a menu')
+          }
+        }
       }
     }
   });

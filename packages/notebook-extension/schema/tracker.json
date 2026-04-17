@@ -317,6 +317,9 @@
       },
       {
         "command": "notebook:toggle-output-scrolling",
+        "args": {
+          "isMenu": true
+        },
         "selector": ".jp-Notebook",
         "rank": 21
       },
