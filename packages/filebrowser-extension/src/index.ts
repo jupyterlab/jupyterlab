@@ -130,12 +130,12 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  export const showBrowser = 'filebrowser:activate';
+  export const showBrowser = 'filebrowser:show-browser';
 
   export const shutdown = 'filebrowser:shutdown';
 
   // For main browser only.
-  export const toggleBrowser = 'filebrowser:toggle-main';
+  export const activateBrowser = 'filebrowser:activate-browser';
 
   export const toggleFileFilter = 'filebrowser:toggle-file-filter';
 
@@ -405,7 +405,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
       const binding = app.commands.keyBindings.find(
-        b => b.command === CommandIDs.toggleBrowser
+        b => b.command === CommandIDs.activateBrowser
       );
       if (binding) {
         const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
@@ -605,8 +605,8 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
-    commands.addCommand(CommandIDs.toggleBrowser, {
-      label: trans.__('File Browser'),
+    commands.addCommand(CommandIDs.activateBrowser, {
+      label: trans.__('Activate and focus the file browser.'),
       describedBy: {
         args: {
           type: 'object',
@@ -614,11 +614,11 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: () => {
-        if (browser.isHidden) {
-          return commands.execute(CommandIDs.showBrowser, void 0);
-        }
-
-        return commands.execute(CommandIDs.hideBrowser, void 0);
+        labShell.activateById(browser.id);
+        // Defer so the shell can attach/show the widget before focusing.
+        requestAnimationFrame(() => {
+          browser.focusFirstListingItem();
+        });
       }
     });
 

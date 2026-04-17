@@ -1511,8 +1511,10 @@ function addLabCommands(
         return;
       }
 
-      // 'activate' is needed if this command is selected in the "open tabs" sidebar
-      await commands.execute('filebrowser:activate', { path: context.path });
+      // 'show-browser' is needed if this command is selected in the "open tabs" sidebar
+      await commands.execute('filebrowser:show-browser', {
+        path: context.path
+      });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     },
     describedBy: {
