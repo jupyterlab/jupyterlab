@@ -8,7 +8,7 @@ import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   ellipsesIcon,
-  homeIcon as preferredIcon,
+  folderFavoriteIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import { PathNavigator } from './pathnavigator';
