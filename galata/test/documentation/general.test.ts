@@ -476,11 +476,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
+    // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
+    // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
+    await page.getByText('Cell 1/6').waitFor();
+
     const trustIndictor = page.locator('.jp-StatusItem-trust');
 
-    expect(await trustIndictor.screenshot()).toMatchSnapshot(
-      'notebook_not_trusted.png'
-    );
+    expect
+      .soft(await trustIndictor.screenshot())
+      .toMatchSnapshot('notebook_not_trusted.png');
 
     // Open trust dialog
     // Note: we do not `await` here as it only resolves once dialog is closed

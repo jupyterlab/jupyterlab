@@ -66,6 +66,7 @@ import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { Notebook } from '@jupyterlab/notebook';
 import {
+  CellCounterStatus,
   CommandEditStatus,
   ExecutionIndicator,
   INotebookCellExecutor,
@@ -456,6 +457,50 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
       item,
       align: 'right',
       rank: 4,
+      isActive: () =>
+        !!shell.currentWidget &&
+        !!tracker.currentWidget &&
+        shell.currentWidget === tracker.currentWidget
+    });
+  }
+};
+
+/**
+ * A plugin providing a current cell/total cells status item.
+ */
+export const cellCounterItem: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-counter-status',
+  description: 'Adds a notebook cell counter status widget.',
+  autoStart: true,
+  requires: [INotebookTracker, ITranslator],
+  optional: [IStatusBar],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    translator: ITranslator,
+    statusBar: IStatusBar | null
+  ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
+
+    const { shell } = app;
+    const item = new CellCounterStatus({ translator });
+
+    const updateNotebook = () => {
+      const current = tracker.currentWidget;
+      item.model.notebook = current && current.content;
+    };
+
+    tracker.currentChanged.connect(updateNotebook);
+    updateNotebook();
+
+    statusBar.registerStatusItem(cellCounterItem.id, {
+      priority: 1,
+      item,
+      align: 'right',
+      rank: 2.5,
       isActive: () =>
         !!shell.currentWidget &&
         !!tracker.currentWidget &&
@@ -1203,6 +1248,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   executionIndicator,
   exportPlugin,
   tools,
+  cellCounterItem,
   commandEditItem,
   notebookTrustItem,
   widgetFactoryPlugin,
