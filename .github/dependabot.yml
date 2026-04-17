@@ -28,3 +28,8 @@ updates:
       # in some of the Galata snapshots
       - dependency-name: "ipython"
         update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+  - package-ecosystem: "npm"
+    directory: "/staging"
+    ignore:
+      # Ignore updates to staging directory as that is updated on release
+      - dependency-name: "*"
