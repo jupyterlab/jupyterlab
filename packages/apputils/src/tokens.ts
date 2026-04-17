@@ -419,3 +419,94 @@ export const IToolbarWidgetRegistry = new Token<IToolbarWidgetRegistry>(
   `A registry for toolbar widgets. Require this
   if you want to build the toolbar dynamically from a data definition (stored in settings for example).`
 );
+
+/**
+ * Sidebar panel that exposes moveable sections.
+ */
+export interface ISidebarWithSections {
+  /**
+   * Remove a section by its ID and return the widget.
+   *
+   * @param sectionId - The identifier of the section to remove.
+   * @returns The removed section widget, or null if not found.
+   */
+  removeSection(sectionId: string): Widget | null;
+
+  /**
+   * Re-insert a previously removed section back into this sidebar.
+   *
+   * @param widget - The section widget to re-insert.
+   */
+  reinsertSection(widget: Widget): void;
+}
+
+/**
+ * Panel that can receive sections from other sidebars.
+ */
+export interface ISectionPanelTarget {
+  /**
+   * Add a section widget to this panel.
+   */
+  addSection(widget: Widget): void;
+
+  /**
+   * Remove a section widget from this panel.
+   */
+  removeSection(widget: Widget): void;
+
+  /**
+   * The sections currently hosted in this panel.
+   */
+  readonly sections: ReadonlyArray<Widget>;
+}
+
+/**
+ * Registry where source and target panels register themselves
+ */
+export interface ISectionMoverRegistry {
+  /**
+   * Register a sidebar as a source of moveable sections.
+   *
+   * @param id - A unique identifier for the source.
+   * @param label - A human-readable label shown in menus.
+   * @param sidebar - The sidebar implementing ISidebarWithSections.
+   */
+  registerSource(
+    id: string,
+    label: string,
+    sidebar: ISidebarWithSections
+  ): void;
+
+  /**
+   * Register a panel as a target that can receive sections.
+   *
+   * @param id - A unique identifier for the target.
+   * @param label - A human-readable label shown in menus.
+   * @param panel - The panel implementing ISectionPanelTarget.
+   */
+  registerTarget(id: string, label: string, panel: ISectionPanelTarget): void;
+
+  /**
+   * Get all registered source sidebars.
+   */
+  getSources(): ReadonlyMap<
+    string,
+    { label: string; sidebar: ISidebarWithSections }
+  >;
+
+  /**
+   * Get all registered target panels.
+   */
+  getTargets(): ReadonlyMap<
+    string,
+    { label: string; panel: ISectionPanelTarget }
+  >;
+}
+
+/**
+ * The section mover registry token.
+ */
+export const ISectionMoverRegistry = new Token<ISectionMoverRegistry>(
+  '@jupyterlab/apputils:ISectionMoverRegistry',
+  'A registry for panels that can exchange moveable sections.'
+);
