@@ -542,6 +542,15 @@ test.describe('Jump to execution button', () => {
     // this test to randomly fail) we await for run but create
     // a promise to await for result manually.
     await page.notebook.runCell(3, { wait: false });
+
+    // Wait for the execution to actually start before proceeding with UI operations
+    // that change selection. This ensures the kernel has received and is processing
+    // the execution command, preventing a race condition where the jump button click
+    // interrupts the cell execution before it starts.
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="busy"]')
+      .waitFor({ timeout: 5000 });
+
     const runPromise = page.notebook.waitForRun(3);
 
     // Hover and verify button exists
