@@ -130,6 +130,14 @@ export namespace ILauncher {
     rank?: number;
 
     /**
+     * The rank for the launcher category/section.
+     *
+     * Lower values appear earlier in the launcher.
+     * If omitted, default category ordering is preserved.
+     */
+    categoryRank?: number;
+
+    /**
      * For items that have a kernel associated with them, the URL of the kernel
      * icon.
      *
