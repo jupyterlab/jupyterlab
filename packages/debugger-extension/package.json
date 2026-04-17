@@ -65,7 +65,7 @@
   "devDependencies": {
     "@jupyterlab/testing": "^4.6.0-alpha.4",
     "@types/jest": "^29.2.0",
-    "@types/react-dom": "^18.0.9",
+    "@types/react-dom": "^18.3.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

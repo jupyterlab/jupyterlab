@@ -198,7 +198,7 @@ export class SettingsFormEditor extends React.Component<
     }));
   };
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
 
     return (

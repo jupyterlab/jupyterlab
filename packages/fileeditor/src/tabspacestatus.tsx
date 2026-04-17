@@ -87,7 +87,7 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
   /**
    * Render the TabSpace status item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (!this.model?.indentUnit) {
       return null;
     } else {

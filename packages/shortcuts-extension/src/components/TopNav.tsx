@@ -21,7 +21,7 @@ export interface IAdvancedOptionsProps {
 
 export interface ISymbolsProps {}
 
-function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
+function AdvancedOptions(props: IAdvancedOptionsProps): React.JSX.Element {
   const trans = props.translator.load('jupyterlab');
   return (
     <div className="jp-Shortcuts-AdvancedOptions">

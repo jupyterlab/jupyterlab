@@ -27,7 +27,7 @@ export interface IInputGroupProps extends React.InputHTMLAttributes<HTMLInputEle
  * @param props Component properties
  * @returns Component
  */
-export function InputGroup(props: IInputGroupProps): JSX.Element {
+export function InputGroup(props: IInputGroupProps): React.JSX.Element {
   const { className, inputRef, rightIcon, ...others } = props;
   return (
     <div className={classes('jp-InputGroup', className)}>

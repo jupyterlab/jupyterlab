@@ -84,7 +84,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
   /**
    * Render the FileUpload status.
    */
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const uploadPaths = this.model!.items;
     if (uploadPaths.length > 0) {
       const item = this.model!.items[0];

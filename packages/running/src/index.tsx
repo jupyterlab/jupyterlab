@@ -355,7 +355,7 @@ class FilterWidget extends ReactWidget implements IFilterProvider {
     return this._filterChanged;
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <FilterBox
         placeholder={this._trans.__('Search')}
@@ -452,7 +452,7 @@ class ListWidget extends ReactWidget {
     this._update.emit();
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const options = this._options;
     let cached = true;
     return (

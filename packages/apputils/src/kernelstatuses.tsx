@@ -127,7 +127,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
   /**
    * Render the kernel status item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (this.model === null) {
       return null;
     } else {

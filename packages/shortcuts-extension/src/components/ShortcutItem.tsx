@@ -130,13 +130,13 @@ export class ShortcutItem extends React.Component<
       .join(' ');
   };
 
-  getCategoryCell(): JSX.Element {
+  getCategoryCell(): React.JSX.Element {
     return (
       <div className="jp-Shortcuts-Cell">{this.props.shortcut.category}</div>
     );
   }
 
-  getLabelCell(): JSX.Element {
+  getLabelCell(): React.JSX.Element {
     if (this.props.newShortcutUtils) {
       const filteredShortcuts = this._getFilteredCommands();
       return (
@@ -174,7 +174,7 @@ export class ShortcutItem extends React.Component<
     }
   }
 
-  getResetShortCutLink(): JSX.Element {
+  getResetShortCutLink(): React.JSX.Element {
     return (
       <a
         className="jp-Shortcuts-Reset"
@@ -187,7 +187,7 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getSourceCell(): JSX.Element {
+  getSourceCell(): React.JSX.Element {
     const allDefault = this.props.shortcut.keybindings.every(
       binding => binding.isDefault
     );
@@ -263,7 +263,7 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getOptionalSelectorCell(): JSX.Element | null {
+  getOptionalSelectorCell(): React.JSX.Element | null {
     return this.props.showSelectors ? (
       <div className="jp-Shortcuts-Cell">
         <div className="jp-selector">{this.props.shortcut.selector}</div>

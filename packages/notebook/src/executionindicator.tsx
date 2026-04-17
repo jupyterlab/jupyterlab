@@ -33,7 +33,7 @@ import { NotebookActions } from './actions';
  */
 export function ExecutionIndicatorComponent(
   props: ExecutionIndicatorComponent.IProps
-): JSX.Element {
+): React.JSX.Element {
   const translator = props.translator || nullTranslator;
   const kernelStatuses = translateKernelStatuses(translator);
   const trans = translator.load('jupyterlab');
@@ -100,9 +100,9 @@ export function ExecutionIndicatorComponent(
 
   const reactElement = (
     status: ISessionContext.KernelDisplayStatus,
-    circle: JSX.Element,
-    popup: JSX.Element[]
-  ): JSX.Element => (
+    circle: React.JSX.Element,
+    popup: React.JSX.Element[]
+  ): React.JSX.Element => (
     <div
       className={'jp-Notebook-ExecutionIndicator'}
       title={showProgress ? '' : titleFactory(kernelStatuses[status])}
@@ -233,7 +233,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
   /**
    * Render the execution status item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (this.model === null || !this.model.renderFlag) {
       return <div></div>;
     } else {

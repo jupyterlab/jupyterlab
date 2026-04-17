@@ -156,7 +156,7 @@ export class CellTagField {
     props.formContext.updateMetadata({ [props.name]: data }, true);
   }
 
-  render(props: FieldProps): JSX.Element {
+  render(props: FieldProps): React.JSX.Element {
     const allTags: string[] = this.pullTags();
 
     return (

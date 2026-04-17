@@ -151,7 +151,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     iconClass,
     fallback,
     ...props
-  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps): JSX.Element {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps): React.JSX.Element {
     if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined/resolvable, use fallback

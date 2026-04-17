@@ -32,7 +32,7 @@ export class FormWidget extends ReactWidget {
    * Render the form.
    * @returns - The rendered form
    */
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const formContext = {
       defaultFormData: this._props.settings.default(),
       updateMetadata: this._props.metadataFormWidget.updateMetadata

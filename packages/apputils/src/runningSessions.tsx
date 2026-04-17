@@ -137,7 +137,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   /**
    * Render the running sessions widget.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (!this.model) {
       return null;
     }

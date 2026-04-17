@@ -31,7 +31,7 @@ export class BreakpointsBody extends ReactWidget {
     this.addClass('jp-DebuggerBreakpoints-body');
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <BreakpointsComponent model={this._model} translator={this._translator} />
     );
@@ -54,7 +54,7 @@ const BreakpointsComponent = ({
 }: {
   model: IDebugger.Model.IBreakpoints;
   translator: ITranslator;
-}): JSX.Element => {
+}): React.JSX.Element => {
   const trans = translator.load('jupyterlab');
   const [breakpoints, setBreakpoints] = useState(
     Array.from(model.breakpoints.entries())
@@ -131,7 +131,7 @@ const BreakpointCellComponent = ({
   model: IDebugger.Model.IBreakpoints;
   selectedBreakpoint: IDebugger.IBreakpoint | null;
   trans: TranslationBundle;
-}): JSX.Element => {
+}): React.JSX.Element => {
   return (
     <>
       {breakpoints
@@ -172,7 +172,7 @@ const BreakpointComponent = ({
   model: IDebugger.Model.IBreakpoints;
   isSelected: boolean;
   trans: TranslationBundle;
-}): JSX.Element => {
+}): React.JSX.Element => {
   const display = model.getDisplayName(breakpoint);
 
   return (

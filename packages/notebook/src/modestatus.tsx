@@ -73,7 +73,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
   /**
    * Render the CommandEdit status item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (!this.model) {
       return null;
     }

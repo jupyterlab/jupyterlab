@@ -350,7 +350,7 @@ class Header extends ReactWidget {
     this.addClass('jp-extensionmanager-header');
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <>
         <div className="jp-extensionmanager-title">
