@@ -240,6 +240,14 @@ class SocketTester implements IService {
   }
 
   /**
+   * Close the socket with a specific close code and reason.
+   */
+  async closeWithCode(code: number, reason?: string): Promise<void> {
+    this._ready = new PromiseDelegate<void>();
+    this._ws!.close(code, reason);
+  }
+
+  /**
    * Register the handler for connections.
    */
   onConnect(cb: (ws: WebSocket) => void): void {
