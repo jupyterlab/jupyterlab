@@ -7,6 +7,7 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import type { ISidebarWithSections } from '@jupyterlab/apputils';
 import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -768,19 +769,19 @@ namespace Section {
 /**
  * The interface exposing the running sessions sidebar widget properties.
  */
-export interface IRunningSessionSidebar {
+export interface IRunningSessionSidebar extends ISidebarWithSections {
   /**
    * The toolbar of the running sidebar.
    */
   readonly toolbar: Toolbar;
 
   /**
-   * Remove a section by manager name and return the widget.
+   * Remove a section by its ID and return the widget.
    *
-   * @param managerName - The name of the manager whose section to remove.
+   * @param sectionId - The identifier (manager name) of the section to remove.
    * @returns The removed section widget, or null if not found.
    */
-  removeSection(managerName: string): Widget | null;
+  removeSection(sectionId: string): Widget | null;
 
   /**
    * Re-insert a previously removed section back into the sidebar.
