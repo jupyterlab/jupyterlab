@@ -18,6 +18,16 @@
   padding: 0.6em;
 }
 
+/* Global alignment fixes for navbar elements */
+.navbar-item {
+  display: flex;
+  align-items: center;
+}
+
+.pst-navbar-icon {
+  margin-right: 0 !important;
+}
+
 /* Save some space by making this just long enough for the text */
 nav.navbar form.bd-search {
   width: 14em;
@@ -77,4 +87,55 @@ main div.jp-youtube-video iframe {
   top: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Simplified responsive styles based on feedback */
+
+/* Mobile and tablet responsive styles */
+@media (width <= 768px) {
+  /* Fix logo scaling - main responsive issue */
+  .logo__image {
+    max-height: 2rem;
+    width: auto;
+    object-fit: contain;
+  }
+
+  /* Generalized gap for header inner elements */
+  .bd-header__inner {
+    gap: 0.5rem;
+  }
+
+  /* Fix button alignment */
+  .version-switcher__button,
+  .search-button-field,
+  .theme-switch-button {
+    margin-bottom: 0 !important;
+  }
+
+  /* Hide search button text on smaller screens */
+  .search-button__default-text,
+  .search-button__kbd-shortcut {
+    display: none;
+  }
+}
+
+/* Small mobile specific adjustments */
+@media (width <= 576px) {
+  .logo__image {
+    max-height: 1.5rem;
+  }
+
+  .bd-header__inner {
+    gap: 0.25rem;
+  }
+
+  /* Fix scroll issues with large headings on mobile */
+  h1,
+  h2,
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
 }
