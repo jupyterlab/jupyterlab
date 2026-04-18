@@ -32,7 +32,7 @@
 }
 
 #jp-main-dock-panel {
-  padding: 5px;
+  padding: var(--jp-dock-panel-padding, 5px);
 }
 
 #jp-main-dock-panel[data-mode='single-document'] {
