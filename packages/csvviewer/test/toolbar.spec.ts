@@ -4,20 +4,24 @@
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 import type { CSVViewer } from '../src';
-import { CSVDelimiter } from '../src';
+import { CSVComment, CSVDelimiter } from '../src';
 
 const DELIMITERS = [',', ';', '\t'];
+const COMMENTS = ['', '#'];
 
 describe('csvviewer/toolbar', () => {
   let delimiter = DELIMITERS[0];
+  let comment = COMMENTS[0];
   const mockViewer: jest.Mock<CSVViewer> = jest.fn().mockImplementation(() => {
     return {
-      delimiter
+      delimiter,
+      comment: comment || null
     };
   });
 
   beforeEach(() => {
     delimiter = DELIMITERS[0];
+    comment = COMMENTS[0];
   });
 
   describe('CSVDelimiter', () => {
@@ -87,6 +91,48 @@ describe('csvviewer/toolbar', () => {
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).toBe(true);
+      });
+    });
+  });
+
+  describe('CSVComment', () => {
+    describe('#constructor()', () => {
+      it('should instantiate a `CSVComment` toolbar widget', () => {
+        const widget = new CSVComment({ widget: mockViewer() });
+        expect(widget).toBeInstanceOf(CSVComment);
+        expect(Array.from(widget.node.classList)).toEqual(
+          expect.arrayContaining(['jp-CSVComment'])
+        );
+        widget.dispose();
+      });
+
+      it('should allow pre-selecting the comment character', () => {
+        comment = COMMENTS[COMMENTS.length - 1];
+        const widget = new CSVComment({ widget: mockViewer() });
+        expect(widget.selectNode.value).toBe(comment);
+        widget.dispose();
+      });
+    });
+
+    describe('#handleEvent', () => {
+      it('should change the comment character', () => {
+        const viewer = mockViewer();
+        const widget = new CSVComment({ widget: viewer });
+        const wanted = COMMENTS[1];
+        widget.selectNode.value = wanted;
+        widget.handleEvent({ type: 'change' } as any);
+        expect(viewer.comment).toBe(wanted);
+        widget.dispose();
+      });
+
+      it('should clear the comment character', () => {
+        comment = COMMENTS[1];
+        const viewer = mockViewer();
+        const widget = new CSVComment({ widget: viewer });
+        widget.selectNode.value = COMMENTS[0];
+        widget.handleEvent({ type: 'change' } as any);
+        expect(viewer.comment).toBeNull();
+        widget.dispose();
       });
     });
   });

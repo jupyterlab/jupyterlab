@@ -20,6 +20,12 @@ const CSV_DELIMITER_LABEL_CLASS = 'jp-CSVDelimiter-label';
  */
 const CSV_DELIMITER_DROPDOWN_CLASS = 'jp-CSVDelimiter-dropdown';
 
+const CSV_COMMENT_CLASS = 'jp-CSVComment';
+
+const CSV_COMMENT_LABEL_CLASS = 'jp-CSVComment-label';
+
+const CSV_COMMENT_DROPDOWN_CLASS = 'jp-CSVComment-dropdown';
+
 /**
  * A widget for selecting a delimiter.
  */
@@ -29,7 +35,20 @@ export class CSVDelimiter extends Widget {
    */
   constructor(options: CSVToolbar.IOptions) {
     super({
-      node: Private.createNode(options.widget.delimiter, options.translator)
+      node: Private.createNode({
+        selected: options.widget.delimiter,
+        label: 'Delimiter: ',
+        labelClassName: CSV_DELIMITER_LABEL_CLASS,
+        dropdownClassName: CSV_DELIMITER_DROPDOWN_CLASS,
+        translator: options.translator,
+        values: [
+          [',', ','],
+          [';', ';'],
+          ['\t', 'tab'],
+          ['|', 'pipe'],
+          ['#', 'hash']
+        ]
+      })
     });
     this._widget = options.widget;
     this.addClass(CSV_DELIMITER_CLASS);
@@ -80,6 +99,68 @@ export class CSVDelimiter extends Widget {
 }
 
 /**
+ * A widget for selecting a comment character.
+ */
+export class CSVComment extends Widget {
+  /**
+   * Construct a new csv comment widget.
+   */
+  constructor(options: CSVToolbar.IOptions) {
+    super({
+      node: Private.createNode({
+        selected: options.widget.comment ?? '',
+        label: 'Comment: ',
+        labelClassName: CSV_COMMENT_LABEL_CLASS,
+        dropdownClassName: CSV_COMMENT_DROPDOWN_CLASS,
+        translator: options.translator,
+        values: [
+          ['', 'none'],
+          ['#', 'hash']
+        ]
+      })
+    });
+    this._widget = options.widget;
+    this.addClass(CSV_COMMENT_CLASS);
+  }
+
+  /**
+   * The comment dropdown menu.
+   */
+  get selectNode(): HTMLSelectElement {
+    return this.node.getElementsByTagName('select')![0];
+  }
+
+  /**
+   * Handle DOM events for the widget.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'change':
+        this._widget.comment = this.selectNode.value || null;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.selectNode.addEventListener('change', this);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.selectNode.removeEventListener('change', this);
+  }
+
+  protected _widget: CSVViewer;
+}
+
+/**
  * A namespace for `CSVToolbar` statics.
  */
 export namespace CSVToolbar {
@@ -103,42 +184,46 @@ export namespace CSVToolbar {
  * A namespace for private toolbar methods.
  */
 namespace Private {
-  /**
-   * Create the node for the delimiter switcher.
-   */
-  export function createNode(
-    selected: string,
-    translator?: ITranslator
-  ): HTMLElement {
-    translator = translator || nullTranslator;
-    const trans = translator?.load('jupyterlab');
+  interface ICreateNodeOptions {
+    selected: string;
+    label: string;
+    labelClassName: string;
+    dropdownClassName: string;
+    translator?: ITranslator;
+    values: Array<[string, string]>;
+  }
 
-    // The supported parsing delimiters and labels.
-    const delimiters = [
-      [',', ','],
-      [';', ';'],
-      ['\t', trans.__('tab')],
-      ['|', trans.__('pipe')],
-      ['#', trans.__('hash')]
-    ];
+  /**
+   * Create the node for a CSV toolbar select.
+   */
+  export function createNode(options: ICreateNodeOptions): HTMLElement {
+    const {
+      selected,
+      label,
+      labelClassName,
+      dropdownClassName,
+      translator,
+      values
+    } = options;
+    const trans = (translator || nullTranslator).load('jupyterlab');
 
     const div = document.createElement('div');
-    const label = document.createElement('span');
+    const labelNode = document.createElement('span');
     const select = document.createElement('select');
-    label.textContent = trans.__('Delimiter: ');
-    label.className = CSV_DELIMITER_LABEL_CLASS;
-    for (const [delimiter, label] of delimiters) {
+    labelNode.textContent = trans.__(label);
+    labelNode.className = labelClassName;
+    for (const [value, optionLabel] of values) {
       const option = document.createElement('option');
-      option.value = delimiter;
-      option.textContent = label;
-      if (delimiter === selected) {
+      option.value = value;
+      option.textContent = trans.__(optionLabel);
+      if (value === selected) {
         option.selected = true;
       }
       select.appendChild(option);
     }
-    div.appendChild(label);
+    div.appendChild(labelNode);
     const node = Styling.wrapSelect(select);
-    node.classList.add(CSV_DELIMITER_DROPDOWN_CLASS);
+    node.classList.add(dropdownClassName);
     div.appendChild(node);
     return div;
   }

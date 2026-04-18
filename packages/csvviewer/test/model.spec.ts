@@ -297,6 +297,40 @@ describe('csvviewer/model', () => {
       expect([0, 1, 2].map(i => d.data('body', 1, i))).toEqual(['g', 'h', '']);
     });
 
+    it('ignores leading comment rows when determining headers and columns', () => {
+      const d = new DSVModel({
+        data: `# metadata\n# units,date,lon,lat,value\ndate,lon,lat,value\n2020-01-01,-97.0,40,5.00\n`,
+        delimiter: ',',
+        comment: '#'
+      });
+      expect(d.rowCount('body')).toBe(3);
+      expect(d.columnCount('body')).toBe(4);
+      expect([0, 1, 2, 3].map(i => d.data('column-header', 0, i))).toEqual([
+        'date',
+        'lon',
+        'lat',
+        'value'
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 0, i))).toEqual([
+        '# metadata',
+        '',
+        '',
+        ''
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 1, i))).toEqual([
+        '# units',
+        'date',
+        'lon',
+        'lat,value'
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 2, i))).toEqual([
+        '2020-01-01',
+        '-97.0',
+        '40',
+        '5.00'
+      ]);
+    });
+
     it('handles delayed parsing of rows past the initial rows', async () => {
       const d = new DSVModel({
         data: `a,b,c\nc,d,e\nf,g,h\ni,j,k`,
