@@ -145,6 +145,42 @@ Your command `label` function can then check the `args` it is provided for `isPa
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+:::{note}
+Try this section in a browser playground:
+
+1. Click **Load Interactive Example**.
+2. In the playground editor toolbar (or command palette), run `Load Current File As Extension`.
+3. The command palette opens automatically; run `Extension Points Demo Command` from category `Common Extension Points`.
+   :::
+
+```{raw} html
+<div class="jp-plugin-playground-embed" data-playground-mode="simple">
+  <p class="jp-plugin-playground-description">
+    Interactive command registry + command palette example.
+  </p>
+  <div class="jp-plugin-playground-actions">
+    <button type="button" class="jp-plugin-playground-load">
+      Load Interactive Example
+    </button>
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?plugin=1.g.H4sIAAb822kC_7VWbW_bNhD-K1djgKTCdtoB-6Is7bqmw1IERdBu-9IUKC2dbK4UqZFUEsPQf9-RIiX5JejWYV_8wuM999w7d7M71IYrOcufz2cVF_iO1TjLZ1yW-LC0ZjafGdXqwp_VjdIWdvC2bbYW9S9aSftGlvPDgxvRrrmEDiqtakh--rMXC7Y6Y00jeMEsmUzOb-WtHECvXqu6ZqTMBFqLc3inLK_C3cewWsuF6YEKJY0Fh799U6-wvGZb1Vq4AGa2soD0VoKT5kfsnUA1zorJYef-AWx4ib8iK1G_zGGllEAmz0fRNVb2pOA9X29OSz5YZlvzMzsE7IjhrruVWQ435CE3-OOd4uULuHjRk-n9OuJFala3ON8ndXzqGR0fD3SCKFIJgfARjbZ1K_fD6AQ-VzkYq7lcB2Cm14bc28HHL7iNsk85tPKLVPeURHftUUcBeAXpE8rRMsCb5YaZUBZpOMuyeBtAo211DHLXf1m9HS84QEdqokMs7xn3hTKawQcsWovRxtx7kp1HnQ5QGPx3GBPtwA-olIvNiHL2NIYRarYFqSysENgd41TcAoE6iAkBG0UpMBsUwsDTs4mvXUhSz4WSlCaT7soN2kWtSkzmlBD3I4fEUD4ELkpVtDVKm0CX7WW6UEKwxuBV9Qc33JEY8n6Q8f85iz5xUwhuflNr4n4SYYzAQfD34uQwY58Myr3qkd_7obTe9EKQ4oJpZEmP301RfZ99E6x2mo_i9t3-TcAbr3oKdOj-r-Maf3XFdEAd4brJ2G38xM9PL4JYIb0tTjWU4INF6fbOolFcWrMIiVuUWKu8R0v8VGGtVURX23wcYRr_arlGGtcfD7bGp16nsPyOWar49OTEh6a_nR8unWxSxrEjvPzqkuh_hXWITyg9woP-pCTVitEACXUI-3ODleVBc1xdzsfaplmAgiL2JtqGG28bLskmBM1kHq8XzA9wUnhVlmTab027cdOEIuADg0D9bwAfWN0Q30F1aDEKmw9EoD9cCBMuiifjcHT0Sfh5Pgqne3zJZaXSz4F21Mvhu12EeAkJPQ2AHFBVlXTLz_Opob4eXgtliMb3Pzx7Noq644mbDREPCXfBvrJYpwPkMNbG2I-htLhWmhZZ4vhS5A9zkBzZOTuDV-4FAswBNhRv6jlNTypotHLPK_Bub1DSpqWPuAACP6iUhpKbQtGzjK244Ha7nJYjN_5tQ5m9dDm8iFwl3sPv768_INPF5oaRRZPe0xtO3S-FCqE3Xpgt12jTBB1MQnm8oLp-ngwOuFb19UntZZXGMlpYOtJpWAaH-XdzZZ9adpC1uC_3HmeuO7NJpXT_aMEm8d2Xxz4f-jCEMZmUQjY44NdvesT9P6zhoeiGaYgP_jVbYsVaEcciSWbd3z2Jd9JqCwAA" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
+      JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html?plugin=1.g.H4sIAAb822kC_7VWbW_bNhD-K1djgKTCdtoB-6Is7bqmw1IERdBu-9IUKC2dbK4UqZFUEsPQf9-RIiX5JejWYV_8wuM999w7d7M71IYrOcufz2cVF_iO1TjLZ1yW-LC0ZjafGdXqwp_VjdIWdvC2bbYW9S9aSftGlvPDgxvRrrmEDiqtakh--rMXC7Y6Y00jeMEsmUzOb-WtHECvXqu6ZqTMBFqLc3inLK_C3cewWsuF6YEKJY0Fh799U6-wvGZb1Vq4AGa2soD0VoKT5kfsnUA1zorJYef-AWx4ib8iK1G_zGGllEAmz0fRNVb2pOA9X29OSz5YZlvzMzsE7IjhrruVWQ435CE3-OOd4uULuHjRk-n9OuJFala3ON8ndXzqGR0fD3SCKFIJgfARjbZ1K_fD6AQ-VzkYq7lcB2Cm14bc28HHL7iNsk85tPKLVPeURHftUUcBeAXpE8rRMsCb5YaZUBZpOMuyeBtAo211DHLXf1m9HS84QEdqokMs7xn3hTKawQcsWovRxtx7kp1HnQ5QGPx3GBPtwA-olIvNiHL2NIYRarYFqSysENgd41TcAoE6iAkBG0UpMBsUwsDTs4mvXUhSz4WSlCaT7soN2kWtSkzmlBD3I4fEUD4ELkpVtDVKm0CX7WW6UEKwxuBV9Qc33JEY8n6Q8f85iz5xUwhuflNr4n4SYYzAQfD34uQwY58Myr3qkd_7obTe9EKQ4oJpZEmP301RfZ99E6x2mo_i9t3-TcAbr3oKdOj-r-Maf3XFdEAd4brJ2G38xM9PL4JYIb0tTjWU4INF6fbOolFcWrMIiVuUWKu8R0v8VGGtVURX23wcYRr_arlGGtcfD7bGp16nsPyOWar49OTEh6a_nR8unWxSxrEjvPzqkuh_hXWITyg9woP-pCTVitEACXUI-3ODleVBc1xdzsfaplmAgiL2JtqGG28bLskmBM1kHq8XzA9wUnhVlmTab027cdOEIuADg0D9bwAfWN0Q30F1aDEKmw9EoD9cCBMuiifjcHT0Sfh5Pgqne3zJZaXSz4F21Mvhu12EeAkJPQ2AHFBVlXTLz_Opob4eXgtliMb3Pzx7Noq644mbDREPCXfBvrJYpwPkMNbG2I-htLhWmhZZ4vhS5A9zkBzZOTuDV-4FAswBNhRv6jlNTypotHLPK_Bub1DSpqWPuAACP6iUhpKbQtGzjK244Ha7nJYjN_5tQ5m9dDm8iFwl3sPv768_INPF5oaRRZPe0xtO3S-FCqE3Xpgt12jTBB1MQnm8oLp-ngwOuFb19UntZZXGMlpYOtJpWAaH-XdzZZ9adpC1uC_3HmeuO7NJpXT_aMEm8d2Xxz4f-jCEMZmUQjY44NdvesT9P6zhoeiGaYgP_jVbYsVaEcciSWbd3z2Jd9JqCwAA" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
+      Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="jp-plugin-playground-frame" hidden>
+    <iframe
+      class="jp-plugin-playground-iframe"
+      title="Common extension points interactive example"
+      loading="lazy"
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+    ></iframe>
+  </div>
+</div>
+```
+
 (context-menu)=
 
 ## Context Menu
