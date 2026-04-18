@@ -2838,7 +2838,9 @@ export class Notebook extends StaticNotebook {
     if (widget && widget.editorWidget?.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
-      event.preventDefault();
+      if (!target.closest('[data-jp-suppress-context-menu]')) {
+        event.preventDefault();
+      }
     }
   }
 
