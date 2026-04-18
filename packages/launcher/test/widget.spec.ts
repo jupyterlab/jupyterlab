@@ -62,7 +62,6 @@ describe('@jupyterlab/launcher', () => {
 
     it('should prevent default browser behavior for Space', () => {
       const card = getCard();
-
       const event = new KeyboardEvent('keydown', {
         key: ' ',
         bubbles: true,
