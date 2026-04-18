@@ -1921,29 +1921,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Whether all selected code cells have output scrolling enabled.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function areOutputsScrolled(notebook: Notebook): boolean {
-    if (!notebook.model || !notebook.activeCell) {
-      return false;
-    }
-
-    let hasCodeCell = false;
-    for (const cell of notebook.widgets) {
-      if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
-        hasCodeCell = true;
-        if (!(cell as CodeCell).outputsScrolled) {
-          return false;
-        }
-      }
-    }
-
-    return hasCodeCell;
-  }
-
-  /**
    * Disable output scrolling for all selected cells.
    *
    * @param notebook - The target notebook widget.

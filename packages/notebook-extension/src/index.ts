@@ -2428,6 +2428,25 @@ function getCurrent(
   return widget;
 }
 
+// Whether all selected code cells have output scrolling enabled.
+function isOutputScrollingEnabled(notebook: Notebook): boolean {
+  if (!notebook.model || !notebook.activeCell) {
+    return false;
+  }
+
+  let hasCodeCell = false;
+  for (const cell of notebook.widgets) {
+    if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
+      hasCodeCell = true;
+      if (!(cell as CodeCell).outputsScrolled) {
+        return false;
+      }
+    }
+  }
+
+  return hasCodeCell;
+}
+
 /**
  * Add the notebook commands to the application's command registry.
  */
@@ -4420,7 +4439,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        if (NotebookActions.areOutputsScrolled(current.content)) {
+        if (isOutputScrollingEnabled(current.content)) {
           return NotebookActions.disableOutputScrolling(current.content);
         }
 
@@ -4431,7 +4450,7 @@ function addCommands(
     isToggled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
-        return NotebookActions.areOutputsScrolled(current.content);
+        return isOutputScrollingEnabled(current.content);
       } else {
         return false;
       }
