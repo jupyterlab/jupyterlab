@@ -4420,7 +4420,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.toggleOutputScrolling(current.content);
+        if (NotebookActions.areOutputsScrolled(notebook)) {
+          return NotebookActions.disableOutputScrolling(notebook);
+        }
+    
+        return NotebookActions.enableOutputScrolling(notebook);
       }
     },
     isEnabled,

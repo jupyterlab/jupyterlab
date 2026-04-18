@@ -1944,19 +1944,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Toggle output scrolling for all selected cells.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function toggleOutputScrolling(notebook: Notebook): void {
-    if (areOutputsScrolled(notebook)) {
-      return disableOutputScrolling(notebook);
-    }
-
-    return enableOutputScrolling(notebook);
-  }
-
-  /**
    * Disable output scrolling for all selected cells.
    *
    * @param notebook - The target notebook widget.
