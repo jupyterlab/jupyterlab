@@ -298,4 +298,38 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_03.png');
   });
+
+  test('Insert cell below collapsed section expands it', async ({ page }) => {
+    await page.notebook.selectCells(1);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft'); // collapse section
+    await page.waitForTimeout(200);
+
+    // Insert a cell below(inside) the collapsed header
+    await page.keyboard.press('b');
+    await page.waitForTimeout(200);
+
+    // Section should be expanded with new cell visible
+    expect(
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
+    ).toMatchSnapshot('insert_below_collapsed_section.png');
+  });
+
+  test('Move cell below collapsed section expands it', async ({ page }) => {
+    await page.notebook.selectCells(1);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForTimeout(200);
+
+    // Select a code cell below the collapsed section and move it up into it
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+
+    await page.keyboard.press('Control+Shift+ArrowUp');
+    await page.waitForTimeout(200);
+
+    expect(
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
+    ).toMatchSnapshot('move_cell_below_collapsed_section.png');
+  });
 });
