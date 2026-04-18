@@ -4955,6 +4955,21 @@
     }
   },
   {
+    "id": "notebook:toggle-output-scrolling",
+    "label": "Toggle Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:toggle-render-side-by-side-current",
     "label": "Render Side-by-Side",
     "caption": "",
