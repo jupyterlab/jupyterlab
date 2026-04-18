@@ -13,6 +13,7 @@ import {
 import type { Command, ViewUpdate } from '@codemirror/view';
 import { EditorView } from '@codemirror/view';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ISharedFile } from '@jupyter/ydoc';
 import type { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
@@ -262,6 +263,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   undo(): void {
     this.model.sharedModel.undo();
+    this.model.sharedModel.transact(() => {
+      if ('setState' in this.model.sharedModel) {
+        (this.model.sharedModel as ISharedFile).setState('dirty', true);
+      } else if ('notebook' in this.model.sharedModel) {
+        (this.model.sharedModel as any).notebook.setState('dirty', true);
+      }
+    }, false);
   }
 
   /**
@@ -269,6 +277,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   redo(): void {
     this.model.sharedModel.redo();
+    this.model.sharedModel.transact(() => {
+      if ('setState' in this.model.sharedModel) {
+        (this.model.sharedModel as ISharedFile).setState('dirty', true);
+      } else if ('notebook' in this.model.sharedModel) {
+        (this.model.sharedModel as any).notebook.setState('dirty', true);
+      }
+    }, false);
   }
 
   /**

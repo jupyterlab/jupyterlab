@@ -160,19 +160,14 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.getState('dirty') as boolean;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this._dirty;
+    const oldValue = this.dirty;
     if (newValue === oldValue) {
       return;
     }
-    this._dirty = newValue;
-    this.triggerStateChange({
-      name: 'dirty',
-      oldValue,
-      newValue
-    });
+    this.sharedModel.setState('dirty', newValue);
   }
 
   /**
@@ -385,7 +380,6 @@ close the notebook without saving it.`,
     this.sharedModel.fromJSON(copy);
 
     this._ensureMetadata();
-    this.dirty = true;
   }
 
   /**
@@ -432,10 +426,11 @@ close the notebook without saving it.`,
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
         if (value.name === 'dirty') {
-          // Setting `dirty` will trigger the state change.
-          // We always set `dirty` because the shared model state
-          // and the local attribute are synchronized one way shared model -> _dirty
-          this.dirty = value.newValue;
+          this.triggerStateChange({
+            name: 'dirty',
+            oldValue: undefined,
+            newValue: this.dirty
+          });
         } else if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
@@ -474,7 +469,6 @@ close the notebook without saving it.`,
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
   /**
@@ -494,7 +488,6 @@ close the notebook without saving it.`,
    */
   protected standaloneModel = false;
 
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);

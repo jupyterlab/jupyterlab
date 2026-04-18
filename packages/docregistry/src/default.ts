@@ -53,19 +53,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.getState('dirty') as boolean;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this._dirty;
-    if (newValue === oldValue) {
+    if (newValue === this.dirty) {
       return;
     }
-    this._dirty = newValue;
-    this.triggerStateChange({
-      name: 'dirty',
-      oldValue,
-      newValue
-    });
+    this.sharedModel.setState('dirty', newValue);
   }
 
   /**
@@ -163,7 +157,6 @@ export class DocumentModel
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
   private _onStateChanged(sender: ISharedFile, changes: DocumentChange): void {
@@ -172,12 +165,7 @@ export class DocumentModel
     }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name === 'dirty') {
-          // Setting `dirty` will trigger the state change.
-          // We always set `dirty` because the shared model state
-          // and the local attribute are synchronized one way shared model -> _dirty
-          this.dirty = value.newValue;
-        } else if (value.oldValue !== value.newValue) {
+        if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
@@ -193,7 +181,6 @@ export class DocumentModel
    */
   readonly sharedModel: ISharedFile;
   private _defaultLang = '';
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -661,11 +648,10 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (
-      this.context.model.dirty &&
-      !this.title.className.includes(DIRTY_CLASS)
-    ) {
-      this.title.className += ` ${DIRTY_CLASS}`;
+    if (this.context.model.dirty) {
+      if (!this.title.className.includes(DIRTY_CLASS)) {
+        this.title.className += ` ${DIRTY_CLASS}`;
+      }
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
     }

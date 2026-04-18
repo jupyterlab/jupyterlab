@@ -24,7 +24,7 @@
     "@codemirror/view": "^6.9.6",
     "@jupyter/react-components": "^0.16.6",
     "@jupyter/web-components": "^0.16.6",
-    "@jupyter/ydoc": "^3.0.0-a3",
+    "@jupyter/ydoc": "^3.4.1",
     "@jupyterlab/application": "~4.6.0-alpha.4",
     "@jupyterlab/application-extension": "~4.6.0-alpha.4",
     "@jupyterlab/apputils": "~4.7.0-alpha.4",
