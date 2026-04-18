@@ -17,12 +17,14 @@ import {
   Dialog,
   ICommandPalette,
   ISanitizer,
+  ISectionMoverRegistry,
   ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
   MainAreaWidget,
   Printing,
   Sanitizer,
+  SectionMoverRegistry,
   SessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
@@ -899,6 +901,17 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Plugin providing the section mover registry.
+ */
+const sectionMoverRegistry: JupyterFrontEndPlugin<ISectionMoverRegistry> = {
+  id: '@jupyterlab/apputils-extension:section-mover-registry',
+  description:
+    'Provides the section mover registry for panels that exchange moveable sections.',
+  provides: ISectionMoverRegistry,
+  activate: (): ISectionMoverRegistry => new SectionMoverRegistry()
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -923,6 +936,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   themesPlugin,
   themesPaletteMenuPlugin,
   toggleHeader,
+  sectionMoverRegistry,
   toolbarRegistry,
   utilityCommands,
   workspacesPlugin

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
+import type { ISectionPanelTarget } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
@@ -11,13 +12,15 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { IScore } from '@jupyterlab/ui-components';
 import {
+  AccordionToolbar,
   FilenameSearcher,
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { Panel } from '@lumino/widgets';
+import { AccordionPanel, Panel, SplitPanel } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
@@ -65,7 +68,7 @@ const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
  * and presents itself as a flat list of files and directories with
  * breadcrumbs.
  */
-export class FileBrowser extends SidePanel {
+export class FileBrowser extends SidePanel implements ISectionPanelTarget {
   /**
    * Construct a new file browser.
    *
@@ -607,6 +610,99 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Add a widget to the bottom area of the file browser.
+   *
+   * On first call, this wraps the file browser content in a vertical
+   * SplitPanel with a resizable handle. Subsequent calls add widgets
+   * to the bottom AccordionPanel.
+   *
+   * @param widget - The widget to add to the bottom area.
+   */
+  addBottomWidget(widget: Widget): void {
+    if (!this._splitPanel) {
+      this._splitPanel = new SplitPanel({
+        orientation: 'vertical',
+        spacing: 1
+      });
+      this._splitPanel.addClass('jp-FileBrowser-splitPanel');
+
+      this._bottomPanel = new AccordionPanel({
+        layout: AccordionToolbar.createLayout({})
+      });
+      this._bottomPanel.addClass('jp-FileBrowser-bottomPanel');
+
+      // Reparent mainPanel into the SplitPanel
+      this._splitPanel.addWidget(this.mainPanel);
+      this._splitPanel.addWidget(this._bottomPanel);
+
+      // Add SplitPanel to the SidePanel content
+      this.content.addWidget(this._splitPanel);
+
+      this._splitPanel.setRelativeSizes([0.7, 0.3]);
+    }
+
+    this._bottomPanel!.addWidget(widget);
+  }
+
+  /**
+   * Remove a widget from the bottom area of the file browser.
+   *
+   * If the bottom area becomes empty, the SplitPanel is unwrapped
+   * and the file browser returns to its normal layout.
+   *
+   * @param widget - The widget to remove from the bottom area.
+   */
+  removeBottomWidget(widget: Widget): void {
+    if (!this._bottomPanel) {
+      return;
+    }
+    widget.parent = null;
+
+    if (this._bottomPanel.widgets.length === 0) {
+      // Unwrap: move mainPanel back to content directly
+      this.content.addWidget(this.mainPanel);
+      this._splitPanel!.dispose();
+      this._splitPanel = null;
+      this._bottomPanel = null;
+    }
+  }
+
+  /**
+   * The widgets in the bottom area, if any.
+   */
+  get bottomWidgets(): ReadonlyArray<Widget> {
+    return this._bottomPanel?.widgets ?? [];
+  }
+
+  // ISectionPanelTarget implementation
+
+  addSection(widget: Widget): void {
+    this.addBottomWidget(widget);
+  }
+
+  removeSection(widget: Widget): void {
+    this.removeBottomWidget(widget);
+  }
+
+  get sections(): ReadonlyArray<Widget> {
+    return this.bottomWidgets;
+  }
+
+  /**
+   * The split panel used for the bottom area, if active.
+   */
+  get splitPanel(): SplitPanel | null {
+    return this._splitPanel;
+  }
+
+  /**
+   * The bottom accordion panel, if active.
+   */
+  get bottomPanel(): AccordionPanel | null {
+    return this._bottomPanel;
+  }
+
+  /**
    * Given a drive name and a local path, return the full
    * drive path which includes the drive name and the local path.
    *
@@ -644,6 +740,8 @@ export class FileBrowser extends SidePanel {
   private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
+  private _splitPanel: SplitPanel | null = null;
+  private _bottomPanel: AccordionPanel | null = null;
 }
 
 /**

@@ -7,6 +7,7 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import type { ISidebarWithSections } from '@jupyterlab/apputils';
 import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -504,7 +505,7 @@ class ListWidget extends ReactWidget {
  *
  * It is specialized for each based on its props.
  */
-class Section extends PanelWithToolbar {
+export class Section extends PanelWithToolbar {
   constructor(options: Section.IOptions) {
     super();
     this._listView = (options.viewMode ?? 'tree') === 'list';
@@ -768,11 +769,26 @@ namespace Section {
 /**
  * The interface exposing the running sessions sidebar widget properties.
  */
-export interface IRunningSessionSidebar {
+export interface IRunningSessionSidebar extends ISidebarWithSections {
   /**
    * The toolbar of the running sidebar.
    */
   readonly toolbar: Toolbar;
+
+  /**
+   * Remove a section by its ID and return the widget.
+   *
+   * @param sectionId - The identifier (manager name) of the section to remove.
+   * @returns The removed section widget, or null if not found.
+   */
+  removeSection(sectionId: string): Widget | null;
+
+  /**
+   * Re-insert a previously removed section back into the sidebar.
+   *
+   * @param widget - The section widget to re-insert.
+   */
+  reinsertSection(widget: Widget): void;
 }
 
 /**
@@ -824,6 +840,29 @@ export class RunningSessions
   }
 
   /**
+   * Remove a section by manager name and return the widget.
+   *
+   * @param managerName - The name of the manager whose section to remove.
+   * @returns The removed section widget, or null if not found.
+   */
+  removeSection(managerName: string): Widget | null {
+    const widget = this._sectionMap.get(managerName) ?? null;
+    if (widget) {
+      widget.parent = null;
+    }
+    return widget;
+  }
+
+  /**
+   * Re-insert a previously removed section back into the sidebar.
+   *
+   * @param widget - The section widget to re-insert.
+   */
+  reinsertSection(widget: Widget): void {
+    this.addWidget(widget);
+  }
+
+  /**
    * Add a section for a new manager.
    *
    * @param managers Managers
@@ -834,6 +873,7 @@ export class RunningSessions
     manager: IRunningSessions.IManager
   ) {
     const section = new Section({ manager, translator: this.translator });
+    this._sectionMap.set(manager.name, section);
     this.addWidget(section);
 
     const state = await this._getState();
@@ -884,6 +924,7 @@ export class RunningSessions
   protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
   private _stateDB: IStateDB | null;
+  private _sectionMap = new Map<string, Widget>();
 }
 
 /**

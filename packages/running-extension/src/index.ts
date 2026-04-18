@@ -10,7 +10,12 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
-import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  ICommandPalette,
+  ISectionMoverRegistry
+} from '@jupyterlab/apputils';
+import type { IRunningSessions } from '@jupyterlab/running';
 import {
   IRunningSessionManagers,
   IRunningSessionSidebar,
@@ -18,14 +23,21 @@ import {
   RunningSessions,
   SearchableSessions
 } from '@jupyterlab/running';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { IRecentsManager } from '@jupyterlab/docmanager';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   CommandToolbarButton,
   launcherIcon,
+  PanelWithToolbar,
   runningIcon
 } from '@jupyterlab/ui-components';
+import type {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import type { AccordionLayout, AccordionPanel, Widget } from '@lumino/widgets';
 import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
 import { addRecentlyClosedSessionManager } from './recents';
@@ -41,6 +53,9 @@ export namespace CommandIDs {
   export const kernelShutDownUnused = 'running:kernel-shut-down-unused';
   export const showPanel = 'running:show-panel';
   export const showModal = 'running:show-modal';
+  export const moveSectionToFileBrowser = 'running:move-section-to-filebrowser';
+  export const moveSectionBackFromFileBrowser =
+    'running:move-section-back-from-filebrowser';
 }
 
 /**
@@ -209,6 +224,414 @@ const searchPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * State DB key for persisting moved sections.
+ */
+const MOVE_STATE_KEY = 'running-sessions:moved-to-filebrowser';
+
+/**
+ * Shape of the persisted state for moved sections.
+ */
+interface IMovedSectionsState {
+  movedManagerNames: string[];
+  splitSizes?: number[];
+}
+
+/**
+ * Plugin to allow moving running session sections to the file browser sidebar.
+ */
+const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/running-extension:move-sections',
+  description:
+    'Allows moving running session sections to the file browser sidebar.',
+  requires: [IRunningSessionManagers, IRunningSessionSidebar, ITranslator],
+  optional: [IDefaultFileBrowser, IStateDB, ISectionMoverRegistry],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    managers: IRunningSessionManagers,
+    sidebar: IRunningSessionSidebar,
+    translator: ITranslator,
+    fileBrowser: IDefaultFileBrowser | null,
+    stateDB: IStateDB | null,
+    sectionMoverRegistry: ISectionMoverRegistry | null
+  ): void => {
+    if (!fileBrowser) {
+      return;
+    }
+
+    const trans = translator.load('jupyterlab');
+    const running = sidebar as RunningSessions;
+
+    if (sectionMoverRegistry) {
+      sectionMoverRegistry.registerSource(
+        '@jupyterlab/running-extension:running-sessions',
+        trans.__('Running Sessions'),
+        sidebar
+      );
+      sectionMoverRegistry.registerTarget(
+        '@jupyterlab/filebrowser-extension:default-file-browser',
+        trans.__('File Browser'),
+        fileBrowser
+      );
+    }
+
+    let lastClickedManagerName: string | null = null;
+    let lastClickedBottomWidget: PanelWithToolbar | null = null;
+    // For state persistence
+    const movedSections = new Set<string>();
+
+    const saveState = async () => {
+      if (!stateDB) {
+        return;
+      }
+      const state: IMovedSectionsState = {
+        movedManagerNames: Array.from(fileBrowser.bottomWidgets).map(
+          w => w.title.label
+        )
+      };
+      if (fileBrowser.splitPanel) {
+        state.splitSizes = fileBrowser.splitPanel.relativeSizes();
+      }
+      await stateDB.save(
+        MOVE_STATE_KEY,
+        state as unknown as ReadonlyPartialJSONValue
+      );
+    };
+
+    const addDragHandle = (widget: Widget): void => {
+      const panel = fileBrowser.bottomPanel;
+      if (!panel) {
+        return;
+      }
+      const idx = Array.from(fileBrowser.bottomWidgets).indexOf(widget);
+      if (idx < 0) {
+        return;
+      }
+      const titleEl = panel.titles[idx];
+      if (!titleEl.querySelector('.jp-FileBrowser-dragHandle')) {
+        const handle = document.createElement('span');
+        handle.className = 'jp-FileBrowser-dragHandle';
+        titleEl.prepend(handle);
+      }
+    };
+
+    let dragSetupDone = false;
+
+    const setupBottomPanelDrag = (): void => {
+      const panel = fileBrowser.bottomPanel!;
+
+      let draggedWidget: Widget | null = null;
+      let startY = 0;
+      let isDragging = false;
+
+      const indicator = document.createElement('div');
+      indicator.className = 'jp-FileBrowser-dropIndicator';
+      indicator.style.display = 'none';
+      panel.node.appendChild(indicator);
+
+      const getTargetSlot = (clientY: number): number => {
+        const layout = panel.layout as AccordionLayout;
+        const titles = Array.from(layout.titles);
+        for (let i = 0; i < titles.length; i++) {
+          const rect = titles[i].getBoundingClientRect();
+          if (clientY < rect.top + rect.height / 2) {
+            return i;
+          }
+        }
+        return titles.length;
+      };
+
+      const showIndicator = (targetSlot: number): void => {
+        const layout = panel.layout as AccordionLayout;
+        const titles = Array.from(layout.titles);
+        const panelRect = panel.node.getBoundingClientRect();
+        let top: number;
+        if (targetSlot < titles.length) {
+          top = titles[targetSlot].getBoundingClientRect().top - panelRect.top;
+        } else {
+          const last = titles[titles.length - 1].getBoundingClientRect();
+          top = last.bottom - panelRect.top;
+        }
+        indicator.style.top = `${top}px`;
+        indicator.style.display = 'block';
+      };
+
+      const endDrag = (clientY?: number): void => {
+        indicator.style.display = 'none';
+        panel.node.classList.remove('jp-mod-dragging');
+        if (isDragging && draggedWidget && clientY !== undefined) {
+          const currentIdx = Array.from(panel.widgets).indexOf(draggedWidget);
+          const targetSlot = getTargetSlot(clientY);
+          const insertIdx =
+            targetSlot > currentIdx ? targetSlot - 1 : targetSlot;
+          if (insertIdx !== currentIdx) {
+            panel.insertWidget(insertIdx, draggedWidget);
+            void saveState();
+          }
+        }
+        draggedWidget = null;
+        isDragging = false;
+      };
+
+      panel.node.addEventListener('pointerdown', (event: PointerEvent) => {
+        const target = event.target as HTMLElement;
+        const titleEl = target.closest(
+          '.jp-AccordionPanel-title'
+        ) as HTMLElement | null;
+        if (!titleEl || !target.closest('.jp-FileBrowser-dragHandle')) {
+          return;
+        }
+        const layout = panel.layout as AccordionLayout;
+        const idx = Array.from(layout.titles).indexOf(titleEl);
+        if (idx < 0) {
+          return;
+        }
+        draggedWidget = panel.widgets[idx];
+        startY = event.clientY;
+        panel.node.setPointerCapture(event.pointerId);
+      });
+
+      panel.node.addEventListener('pointermove', (event: PointerEvent) => {
+        if (!draggedWidget) {
+          return;
+        }
+        if (!isDragging && Math.abs(event.clientY - startY) > 5) {
+          isDragging = true;
+          panel.node.classList.add('jp-mod-dragging');
+        }
+        if (isDragging) {
+          showIndicator(getTargetSlot(event.clientY));
+        }
+      });
+
+      panel.node.addEventListener('pointerup', (event: PointerEvent) => {
+        endDrag(event.clientY);
+      });
+
+      panel.node.addEventListener('pointercancel', () => {
+        endDrag();
+      });
+    };
+
+    const moveToFileBrowser = (managerName: string) => {
+      const widget = running.removeSection(managerName);
+      if (!widget) {
+        return;
+      }
+      movedSections.add(managerName);
+
+      // Remember collapsed state before re-parenting clears it
+      const wasHidden = widget.isHidden;
+
+      fileBrowser.addBottomWidget(widget);
+
+      if (!dragSetupDone && fileBrowser.bottomPanel) {
+        setupBottomPanelDrag();
+        dragSetupDone = true;
+      }
+      addDragHandle(widget);
+
+      if (wasHidden && fileBrowser.bottomPanel) {
+        const idx = Array.from(fileBrowser.bottomWidgets).indexOf(widget);
+        if (idx >= 0) {
+          const titleEl = fileBrowser.bottomPanel.titles[idx];
+          titleEl.classList.remove('lm-mod-expanded');
+          titleEl.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      // Listen to split panel handle moves for state persistence
+      if (fileBrowser.splitPanel) {
+        fileBrowser.splitPanel.handleMoved.connect(saveState);
+      }
+
+      void saveState();
+    };
+
+    const moveBackToRunning = (managerName: string) => {
+      const widgets = fileBrowser.bottomWidgets;
+      const widget = widgets.find(w => w.title.label === managerName);
+      if (!widget) {
+        return;
+      }
+
+      fileBrowser.removeBottomWidget(widget);
+      running.reinsertSection(widget);
+      movedSections.delete(managerName);
+      void saveState();
+    };
+
+    // Identify right-clicked section in Running Sessions
+    running.node.addEventListener('contextmenu', (event: MouseEvent) => {
+      const titleEl = (event.target as HTMLElement).closest(
+        '.jp-AccordionPanel-title'
+      );
+      if (!titleEl) {
+        lastClickedManagerName = null;
+        return;
+      }
+      const accordion = running.content as AccordionPanel;
+      const layout = accordion.layout as AccordionLayout;
+      const index = Array.from(layout.titles).indexOf(titleEl as HTMLElement);
+      if (index >= 0) {
+        lastClickedManagerName = accordion.widgets[index].title.label;
+      } else {
+        lastClickedManagerName = null;
+      }
+    });
+
+    // Identify right-clicked section in FileBrowser bottom panel
+    fileBrowser.node.addEventListener('contextmenu', (event: MouseEvent) => {
+      const titleEl = (event.target as HTMLElement).closest(
+        '.jp-FileBrowser-bottomPanel .jp-AccordionPanel-title'
+      );
+      if (!titleEl) {
+        lastClickedBottomWidget = null;
+        return;
+      }
+      // Find the AccordionPanel within the bottom panel
+      const bottomPanel = fileBrowser.node.querySelector(
+        '.jp-FileBrowser-bottomPanel'
+      );
+      if (!bottomPanel) {
+        lastClickedBottomWidget = null;
+        return;
+      }
+      // Find all title elements in the bottom panel's accordion
+      const bottomWidgets = fileBrowser.bottomWidgets;
+      // The bottom panel is an AccordionPanel; match by title index
+      const accordion = fileBrowser.bottomPanel;
+      if (!accordion) {
+        lastClickedBottomWidget = null;
+        return;
+      }
+      const accLayout = accordion.layout as AccordionLayout;
+      const idx = Array.from(accLayout.titles).indexOf(titleEl as HTMLElement);
+      if (idx >= 0 && idx < bottomWidgets.length) {
+        const w = bottomWidgets[idx];
+        lastClickedBottomWidget = w instanceof PanelWithToolbar ? w : null;
+      } else {
+        lastClickedBottomWidget = null;
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.moveSectionToFileBrowser, {
+      label: trans.__('Move to File Browser'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      isVisible: () => lastClickedManagerName !== null,
+      execute: () => {
+        if (lastClickedManagerName) {
+          moveToFileBrowser(lastClickedManagerName);
+          lastClickedManagerName = null;
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.moveSectionBackFromFileBrowser, {
+      label: trans.__('Move back to Running Sessions'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      isVisible: () => lastClickedBottomWidget !== null,
+      execute: (args: ReadonlyPartialJSONObject) => {
+        const managerName =
+          (args?.managerName as string) ?? lastClickedBottomWidget?.title.label;
+        if (managerName) {
+          moveBackToRunning(managerName);
+          lastClickedBottomWidget = null;
+        }
+      }
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.moveSectionToFileBrowser,
+      selector: '#jp-running-sessions .jp-AccordionPanel-title',
+      rank: 10
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.moveSectionBackFromFileBrowser,
+      selector: '.jp-FileBrowser-bottomPanel .jp-AccordionPanel-title',
+      rank: 10
+    });
+
+    // Restore state on startup
+    if (stateDB) {
+      const pendingMoves = new Set<string>();
+
+      void stateDB.fetch(MOVE_STATE_KEY).then(value => {
+        const state = value as IMovedSectionsState | undefined;
+        if (!state?.movedManagerNames?.length) {
+          return;
+        }
+
+        const splitSizes = state.splitSizes;
+
+        // Try to move sections that are already registered
+        for (const name of state.movedManagerNames) {
+          const widget = running.removeSection(name);
+          if (widget) {
+            movedSections.add(name);
+            fileBrowser.addBottomWidget(widget);
+            if (!dragSetupDone && fileBrowser.bottomPanel) {
+              setupBottomPanelDrag();
+              dragSetupDone = true;
+            }
+            addDragHandle(widget);
+          } else {
+            // Manager not yet registered; wait for it
+            pendingMoves.add(name);
+          }
+        }
+
+        // Restore split sizes after all initial sections are moved
+        if (splitSizes && fileBrowser.splitPanel) {
+          fileBrowser.splitPanel.setRelativeSizes(splitSizes);
+          fileBrowser.splitPanel.handleMoved.connect(saveState);
+        }
+
+        // Watch for late-arriving managers
+        if (pendingMoves.size > 0) {
+          const onManagerAdded = (
+            _sender: unknown,
+            manager: IRunningSessions.IManager
+          ) => {
+            if (pendingMoves.has(manager.name)) {
+              pendingMoves.delete(manager.name);
+              // Delay slightly to let addSection complete
+              setTimeout(() => {
+                moveToFileBrowser(manager.name);
+                if (splitSizes && fileBrowser.splitPanel) {
+                  fileBrowser.splitPanel.setRelativeSizes(splitSizes);
+                }
+              }, 100);
+              if (pendingMoves.size === 0) {
+                managers.added.disconnect(onManagerAdded);
+              }
+            }
+          };
+          managers.added.connect(onManagerAdded);
+        }
+      });
+    }
+  }
+};
+
+/**
  * Export the plugins.
  */
-export default [plugin, sidebarPlugin, recentsPlugin, searchPlugin];
+export default [
+  plugin,
+  sidebarPlugin,
+  recentsPlugin,
+  searchPlugin,
+  moveSectionsPlugin
+];
