@@ -130,6 +130,19 @@ export namespace ILauncher {
     rank?: number;
 
     /**
+     * The rank used to control the ordering of launcher categories/sections.
+     *
+     * Lower values appear earlier in the launcher.
+     *
+     * If multiple items belong to the same category and specify different
+     * categoryRank values, the smallest (highest priority) value determines
+     * the position of that category in the launcher.
+     *
+     * If omitted, the category falls back to default ordering rules.
+     */
+    categoryRank?: number;
+
+    /**
      * For items that have a kernel associated with them, the URL of the kernel
      * icon.
      *

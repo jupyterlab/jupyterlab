@@ -74,4 +74,50 @@ describe('@jupyterlab/launcher', () => {
       expect(executeSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('Launcher category ordering', () => {
+    it('should use categoryRank to influence category ordering', async () => {
+      const commands = new CommandRegistry();
+
+      commands.addCommand('test:a', {
+        label: 'A',
+        execute: jest.fn()
+      });
+
+      const model = new LauncherModel();
+
+      model.add({
+        category: 'Custom',
+        command: 'test:a',
+        categoryRank: 10
+      });
+
+      model.add({ category: 'Console', command: 'test:a' });
+      model.add({ category: 'Notebook', command: 'test:a' });
+      model.add({ category: 'Other', command: 'test:a' });
+
+      const launcher = new Launcher({
+        callback: () => undefined,
+        commands,
+        cwd: '/tmp',
+        model
+      });
+
+      Widget.attach(launcher, document.body);
+
+      await framePromise();
+      await framePromise();
+
+      const titles = Array.from(
+        launcher.node.querySelectorAll('.jp-Launcher-sectionTitle')
+      ).map(node => node.textContent);
+
+      const customIndex = titles.indexOf('Custom');
+
+      expect(customIndex).toBeGreaterThan(-1);
+
+      launcher.dispose();
+      document.body.textContent = '';
+    });
+  });
 });
