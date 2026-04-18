@@ -4423,7 +4423,7 @@ function addCommands(
         if (NotebookActions.areOutputsScrolled(notebook)) {
           return NotebookActions.disableOutputScrolling(notebook);
         }
-    
+
         return NotebookActions.enableOutputScrolling(notebook);
       }
     },
