@@ -25,6 +25,9 @@ To access these options, while a notebook is open, browse the File menu:
 :class: jp-screenshot
 ```
 
+When exporting to HTML, a dialog will prompt you to choose whether to sanitize
+the HTML output, i.e. escape tags. This sends a `sanitize_html` param to nbconvert.
+
 Note: The exporting options depend on your nbconvert configuration. For more
 information visit the
 [official nbconvert documentation](https://nbconvert.readthedocs.io/en/latest/).

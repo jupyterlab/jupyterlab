@@ -662,11 +662,31 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         const { context } = current;
 
+        const serverVersion = PageConfig.getNotebookVersion();
+        const supportsHTMLSanitizationOption =
+          serverVersion < [4, 0, 0] /* Jupyter Server only */ &&
+          serverVersion >= [2, 99, 0]; // TODO update this when the flag is supported on a release
+
+        let sanitizeHtml = false;
+
+        if (args['format'] === 'html' && supportsHTMLSanitizationOption) {
+          const result = await InputDialog.getBoolean({
+            title: trans.__('Export as HTML'),
+            label: trans.__('Sanitize HTML output'),
+            value: true
+          });
+          if (!result.button.accept) {
+            return;
+          }
+          sanitizeHtml = result.value ?? false;
+        }
+
         const exportOptions: NbConvert.IExportOptions = {
           format: args['format'] as string,
           path: current.context.path,
           exporterOptions: {
-            download: true
+            download: true,
+            sanitizeHtml
           }
         };
 
