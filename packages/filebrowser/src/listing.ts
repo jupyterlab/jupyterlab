@@ -4,6 +4,7 @@
 import {
   Dialog,
   DOMUtils,
+  InputDialog,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -2516,13 +2517,20 @@ export class DirListing extends Widget {
   private async _doRename(): Promise<string> {
     this._inRename = true;
 
-    const selectedPaths = Object.keys(this.selection);
+    const selectedItems = Array.from(this.selectedItems());
 
     // Bail out if nothing has been selected.
-    if (selectedPaths.length === 0) {
+    if (selectedItems.length === 0) {
       this._inRename = false;
       return Promise.resolve('');
     }
+
+    // Bulk rename if multiple items are selected
+    if (selectedItems.length > 1) {
+      return this._doBulkRename(selectedItems);
+    }
+
+    const selectedPaths = Object.keys(this.selection);
 
     // Figure out which selected path to use for the rename.
     const items = this._sortedItems;
@@ -2585,7 +2593,7 @@ export class DirListing extends Widget {
         if (error !== 'File not renamed') {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Rename Error'),
-            error
+            error as any
           );
         }
         finalFilename = original;
@@ -2621,6 +2629,145 @@ export class DirListing extends Widget {
     return finalFilename;
   }
 
+  /**
+   * Rename multiple items at once.
+   */
+  private async _doBulkRename(items: Contents.IModel[]): Promise<string> {
+    const trans = this._trans;
+
+    const defaultName = PathExt.basename(
+      items[0].name,
+      PathExt.extname(items[0].name)
+    );
+
+    const result = await InputDialog.getText({
+      title: trans.__('Bulk Rename'),
+      label: trans.__('New name'),
+      okLabel: trans.__('Rename'),
+      text: defaultName
+    });
+
+    if (!result.button.accept) {
+      this._inRename = false;
+      return '';
+    }
+
+    const newName = result.value ?? '';
+
+    try {
+      return await this._bulkRenameCore(items, newName);
+    } catch (error) {
+      await showErrorMessage(
+        trans._p('showErrorMessage', 'Bulk Rename Error'),
+        error as any
+      );
+      return '';
+    } finally {
+      this._inRename = false;
+    }
+  }
+
+  /**
+   * Core logic for bulk renaming multiple items.
+   *
+   * @param items - The items to rename.
+   * @param newBaseName - The new base name for the items.
+   * @returns A promise that resolves with the new base name if successful, or an empty string.
+   */
+
+  private async _bulkRenameCore(
+    items: Contents.IModel[],
+    newBaseName: string
+  ): Promise<string> {
+    const trans = this._trans;
+    const manager = this._manager;
+
+    // STEP 1: Validate selection (same base name)
+    const baseNames = new Set(
+      items.map(item => PathExt.basename(item.name, PathExt.extname(item.name)))
+    );
+
+    if (baseNames.size !== 1) {
+      throw new Error(
+        trans.__(
+          'Cannot bulk rename: selected files must have the same base name.'
+        )
+      );
+    }
+
+    // STEP 2: Validate extensions (must be unique)
+    const extensions = items.map(item => PathExt.extname(item.name));
+    const extSet = new Set(extensions);
+
+    if (extSet.size !== extensions.length) {
+      throw new Error(
+        trans.__('Cannot rename: multiple files would result in the same name.')
+      );
+    }
+
+    // STEP 3: Validate new name
+    if (!isValidFileName(newBaseName)) {
+      throw new Error(
+        trans._p(
+          'showErrorMessage',
+          '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+          newBaseName
+        )
+      );
+    }
+
+    // STEP 4: Check conflicts
+    for (const item of items) {
+      const ext = PathExt.extname(item.name);
+      const newName = newBaseName + ext;
+      const newPath = PathExt.join(PathExt.dirname(item.path), newName);
+
+      const exists = this._sortedItems.some(
+        i => i.path === newPath && i.path !== item.path
+      );
+
+      if (exists) {
+        throw new Error(
+          trans.__('Cannot rename: file "%1" already exists.', newName)
+        );
+      }
+    }
+
+    // STEP 5: Perform rename
+    const results = await Promise.allSettled(
+      items.map(item => {
+        const ext = PathExt.extname(item.name);
+        const newName = newBaseName + ext;
+        const oldPath = item.path;
+        const newPath = PathExt.join(PathExt.dirname(oldPath), newName);
+
+        if (oldPath === newPath) {
+          return Promise.resolve();
+        }
+
+        return renameFile(manager, oldPath, newPath);
+      })
+    );
+
+    const failedReasons = results
+      .filter(
+        (r): r is PromiseRejectedResult =>
+          r.status === 'rejected' && r.reason !== 'File not renamed'
+      )
+      .map(r => r.reason?.message || String(r.reason));
+
+    if (failedReasons.length > 0) {
+      throw new Error(
+        trans.__(
+          'Some files could not be renamed: %1',
+          failedReasons.join(', ')
+        )
+      );
+    }
+    await this._model.refresh();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    return newBaseName;
+  }
   /**
    * Select a given item.
    */

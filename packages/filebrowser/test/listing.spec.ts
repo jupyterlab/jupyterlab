@@ -233,6 +233,163 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('#bulkRename', () => {
+      jest.setTimeout(30000);
+      it('should rename multiple files preserving extensions', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'data.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'data.py');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'data.txt');
+        const index2 = items.findIndex(i => i.name === 'data.py');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        await (dirListing as any)._bulkRenameCore(selected, 'bulk_renamed');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const itemNames = Array.from(dirListing.sortedItems()).map(
+          item => item.name
+        );
+        expect(itemNames).toContain('bulk_renamed.txt');
+        expect(itemNames).toContain('bulk_renamed.py');
+      });
+
+      it('should block rename for different base names', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'a.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'b.py');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'a.txt');
+        const index2 = items.findIndex(i => i.name === 'b.py');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        const beforeNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+
+        await (dirListing as any)._bulkRenameCore(selected, 'newname');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const afterNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+        expect(afterNames).toEqual(beforeNames);
+      });
+
+      it('should block rename when extensions are same (collision)', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'data1.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item2.path, 'data2.txt');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'data1.txt');
+        const index2 = items.findIndex(i => i.name === 'data2.txt');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        const beforeNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+
+        await (dirListing as any)._bulkRenameCore(selected, 'test');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const afterNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+        expect(afterNames).toEqual(beforeNames);
+      });
+
+      it('should block rename if target file already exists', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'data.txt');
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'data.py');
+        const item3 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item3.path, 'existing.py');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        dirListing.clearSelectedItems();
+        const items = Array.from(dirListing.sortedItems());
+        const index1 = items.findIndex(i => i.name === 'data.txt');
+        const index2 = items.findIndex(i => i.name === 'data.py');
+        (dirListing as any)._selectItem(index1, false);
+        (dirListing as any)._selectItem(index2, true);
+
+        const selected = Array.from(dirListing.selectedItems());
+        expect(selected.length).toBe(2);
+
+        const beforeNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+
+        await (dirListing as any)._bulkRenameCore(selected, 'existing');
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const afterNames = Array.from(dirListing.sortedItems()).map(
+          i => i.name
+        );
+        expect(afterNames).toEqual(beforeNames);
+      });
+    });
+
     describe('#_handleMultiSelect', () => {
       it('should only select when to-index is same as from-index', () => {
         // to-index unselected
