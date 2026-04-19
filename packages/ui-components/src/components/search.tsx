@@ -158,7 +158,7 @@ export const updateFilterFunction = (
   };
 };
 
-export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
+export const FilterBox = (props: IFilterBoxProps): React.JSX.Element => {
   const [filter, setFilter] = useState(props.initialQuery ?? '');
 
   if (props.forceRefresh) {
@@ -251,7 +251,7 @@ class FilenameSearcherWidget extends ReactWidget {
     }, this);
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return <FilterBox {...this._filterBoxProps} />;
   }
 

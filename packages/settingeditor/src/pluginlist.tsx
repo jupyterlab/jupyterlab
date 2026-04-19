@@ -338,7 +338,7 @@ export class PluginList extends ReactWidget {
     }
   }
 
-  mapPlugins(plugin: ISettingRegistry.IPlugin): JSX.Element {
+  mapPlugins(plugin: ISettingRegistry.IPlugin): React.JSX.Element {
     const { id, schema, version } = plugin;
     const trans = this.translator.load('jupyterlab');
     const title =
@@ -409,7 +409,7 @@ export class PluginList extends ReactWidget {
     );
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const trans = this.translator.load('jupyterlab');
     // Filter all plugins based on search value before displaying list.
     const allPlugins = this._model.plugins.filter(plugin => {

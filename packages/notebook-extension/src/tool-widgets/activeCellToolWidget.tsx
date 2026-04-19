@@ -95,7 +95,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
     this._refreshDebouncer = new Debouncer(update, 150);
   }
 
-  render(props: FieldProps): JSX.Element {
+  render(props: FieldProps): React.JSX.Element {
     const activeCell = this._tracker.activeCell;
     if (activeCell) this._cellModel = activeCell?.model || null;
     (this._cellModel?.sharedModel as ISharedText).changed.connect(

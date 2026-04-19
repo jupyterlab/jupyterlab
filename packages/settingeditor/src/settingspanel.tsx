@@ -81,7 +81,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   updateFilterSignal,
   translator,
   initialFilter
-}: ISettingsPanelProps): JSX.Element => {
+}: ISettingsPanelProps): React.JSX.Element => {
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
   const [filterPlugin, setFilter] = useState<SettingsEditor.PluginSearchFilter>(
     initialFilter ? () => initialFilter : null

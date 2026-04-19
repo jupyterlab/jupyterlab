@@ -32,7 +32,9 @@ export namespace ProgressCircle {
   }
 }
 
-export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
+export function ProgressCircle(
+  props: ProgressCircle.IProps
+): React.JSX.Element {
   const radius = 104;
   const d = (progress: number): string => {
     const angle = Math.max(progress * 3.6, 0.1);

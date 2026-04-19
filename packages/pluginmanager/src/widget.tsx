@@ -56,7 +56,7 @@ class AvailableList extends VDomRenderer<PluginListModel> {
     this.addClass('jp-pluginmanager-AvailableList');
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <>
         {this.model.statusError !== null ? (

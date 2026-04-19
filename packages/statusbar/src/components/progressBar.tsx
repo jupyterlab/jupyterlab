@@ -31,7 +31,7 @@ export namespace ProgressBar {
 /**
  * A functional tsx component for a progress bar.
  */
-export function ProgressBar(props: ProgressBar.IProps): JSX.Element {
+export function ProgressBar(props: ProgressBar.IProps): React.JSX.Element {
   const { width, percentage, ...rest } = props;
   return (
     <div

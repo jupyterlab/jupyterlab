@@ -70,7 +70,7 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
     );
   };
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return <ToolbarButtonComponent {...this._props} onClick={this.onclick} />;
   }
 

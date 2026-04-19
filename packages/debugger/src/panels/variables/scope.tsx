@@ -30,7 +30,7 @@ const ScopeSwitcherComponent = ({
   tree: VariablesBodyTree;
   grid: VariablesBodyGrid;
   trans: TranslationBundle;
-}): JSX.Element => {
+}): React.JSX.Element => {
   const [value, setValue] = useState('-');
   const scopes = model.scopes;
 
@@ -77,10 +77,10 @@ export class ScopeSwitcher extends ReactWidget {
   /**
    * Render the scope switcher.
    */
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
-        {(): JSX.Element => (
+        {(): React.JSX.Element => (
           <ScopeSwitcherComponent
             model={this._model}
             trans={this._trans}

@@ -74,7 +74,7 @@ export interface ISearchKeyBindings {
   readonly toggleSearchInSelection?: CommandRegistry.IKeyBinding;
 }
 
-function SearchInput(props: ISearchInputProps): JSX.Element {
+function SearchInput(props: ISearchInputProps): React.JSX.Element {
   const [rows, setRows] = useState<number>(1);
 
   const updateDimensions = useCallback(
@@ -149,7 +149,7 @@ interface ISearchEntryProps {
   translator?: ITranslator;
 }
 
-function SearchEntry(props: ISearchEntryProps): JSX.Element {
+function SearchEntry(props: ISearchEntryProps): React.JSX.Element {
   const trans = (props.translator ?? nullTranslator).load('jupyterlab');
 
   const caseButtonToggleClass = classes(
@@ -222,7 +222,7 @@ interface IReplaceEntryProps {
   translator?: ITranslator;
 }
 
-function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
+function ReplaceEntry(props: IReplaceEntryProps): React.JSX.Element {
   const trans = (props.translator ?? nullTranslator).load('jupyterlab');
 
   const preserveCaseButtonToggleClass = classes(
@@ -359,7 +359,7 @@ interface IFilterToggleProps {
   trans: TranslationBundle;
 }
 
-function FilterToggle(props: IFilterToggleProps): JSX.Element {
+function FilterToggle(props: IFilterToggleProps): React.JSX.Element {
   let className = `${FILTER_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
   if (props.visible) {
     className = `${className} ${FILTER_BUTTON_ENABLED_CLASS}`;
@@ -391,7 +391,7 @@ interface IFilterSelectionProps {
   onToggle: () => void;
 }
 
-function FilterSelection(props: IFilterSelectionProps): JSX.Element {
+function FilterSelection(props: IFilterSelectionProps): React.JSX.Element {
   return (
     <label
       className={

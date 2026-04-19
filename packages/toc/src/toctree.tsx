@@ -39,7 +39,7 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
   /**
    * Renders a table of contents tree.
    */
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const { documentType } = this.props;
     return (
       <TreeView
@@ -54,14 +54,16 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
   /**
    * Convert the flat headings list to a nested tree list
    */
-  protected buildTree(): JSX.Element[] {
+  protected buildTree(): React.JSX.Element[] {
     if (this.props.headings.length === 0) {
       return [];
     }
 
-    const buildOneTree = (currentIndex: number): [JSX.Element, number] => {
+    const buildOneTree = (
+      currentIndex: number
+    ): [React.JSX.Element, number] => {
       const items = this.props.headings;
-      const children = new Array<JSX.Element>();
+      const children = new Array<React.JSX.Element>();
       const current = items[currentIndex];
       let nextCandidateIndex = currentIndex + 1;
 
@@ -90,7 +92,7 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
       return [currentTree, nextCandidateIndex];
     };
 
-    const trees = new Array<JSX.Element>();
+    const trees = new Array<React.JSX.Element>();
     let currentIndex = 0;
     while (currentIndex < this.props.headings.length) {
       const [tree, nextIndex] = buildOneTree(currentIndex);

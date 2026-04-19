@@ -18,10 +18,10 @@ export const SourcePathComponent = ({
 }: {
   model: IDebugger.Model.ISources;
   trans: TranslationBundle;
-}): JSX.Element => {
+}): React.JSX.Element => {
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>
-      {(model): JSX.Element => (
+      {(model): React.JSX.Element => (
         <span
           onClick={(event): void => {
             if (event.ctrlKey) {

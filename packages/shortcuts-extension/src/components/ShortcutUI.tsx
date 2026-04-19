@@ -390,7 +390,7 @@ export class ShortcutUI
     }
   };
 
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (!this.state.shortcutsFetched) {
       return null;
     }

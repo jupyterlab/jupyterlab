@@ -23,7 +23,7 @@ export class CallstackBody extends ReactWidget {
   /**
    * Render the FramesComponent.
    */
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return <FramesComponent model={this._model} />;
   }
 
@@ -41,7 +41,7 @@ const FramesComponent = ({
   model
 }: {
   model: IDebugger.Model.ICallstack;
-}): JSX.Element => {
+}): React.JSX.Element => {
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 

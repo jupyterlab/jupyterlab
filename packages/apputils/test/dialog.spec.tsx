@@ -188,7 +188,7 @@ describe('@jupyterlab/apputils', () => {
               this.addClass('jp-Dialog-body');
             }
 
-            render(): JSX.Element {
+            render(): React.JSX.Element {
               return (
                 <div>
                   <textarea data-testid="dialog-textarea" />

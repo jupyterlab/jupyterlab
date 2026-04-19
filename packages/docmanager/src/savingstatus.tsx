@@ -65,7 +65,7 @@ export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
   /**
    * Render the SavingStatus item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (this.model === null || this.model.status === null) {
       return null;
     } else {

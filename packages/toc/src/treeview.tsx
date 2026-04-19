@@ -27,7 +27,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
    * This method will be called anytime the widget needs to be rendered, which
    * includes layout triggered rendering.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (!this.model || this.model.headings.length === 0) {
       return (
         <div className="jp-TableOfContents-placeholder">

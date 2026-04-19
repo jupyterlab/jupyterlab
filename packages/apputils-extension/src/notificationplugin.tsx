@@ -106,7 +106,9 @@ interface INotificationCenterProps {
 /**
  * Notification center view
  */
-function NotificationCenter(props: INotificationCenterProps): JSX.Element {
+function NotificationCenter(
+  props: INotificationCenterProps
+): React.JSX.Element {
   const { manager, onClose, trans } = props;
 
   // Markdown parsed notifications
@@ -333,7 +335,9 @@ interface INotificationStatusProps {
 /**
  * Status view
  */
-function NotificationStatus(props: INotificationStatusProps): JSX.Element {
+function NotificationStatus(
+  props: INotificationStatusProps
+): React.JSX.Element {
   return (
     <GroupItem
       role="button"

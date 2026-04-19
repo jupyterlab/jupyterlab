@@ -64,7 +64,7 @@ export class Component extends React.Component<IProps, IState> {
     }, 300);
   };
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const translator = this.props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 

@@ -91,8 +91,8 @@
     "@lumino/signaling": "^2.0.0",
     "@lumino/virtualdom": "^2.0.0",
     "@lumino/widgets": "^2.3.1-alpha.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "yjs": "^13.5.40"
   },
   "dependencies": {

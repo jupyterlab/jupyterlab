@@ -417,7 +417,7 @@ export class LogLevelSwitcher extends ReactWidget {
     }
   };
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     const logger = this._logConsole.logger;
     return (
       <>

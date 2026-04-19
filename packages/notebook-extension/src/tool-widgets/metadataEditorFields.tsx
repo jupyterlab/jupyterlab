@@ -75,7 +75,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
     }
   }
 
-  render(props: FieldProps): JSX.Element {
+  render(props: FieldProps): React.JSX.Element {
     const cell = this._tracker.activeCell;
     this.editor.source = cell
       ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
@@ -118,7 +118,7 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
     }
   }
 
-  render(props: FieldProps): JSX.Element {
+  render(props: FieldProps): React.JSX.Element {
     const notebook = this._tracker.currentWidget;
     this.editor.source = notebook
       ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })

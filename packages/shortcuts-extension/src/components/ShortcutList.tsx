@@ -25,7 +25,7 @@ export interface IShortcutListProps {
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps> {
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <div
         className="jp-Shortcuts-ShortcutListContainer"

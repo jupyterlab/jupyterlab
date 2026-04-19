@@ -142,7 +142,7 @@ export class WorkspaceSelectorWidget extends ReactWidget {
     });
   }
 
-  render(): JSX.Element {
+  render(): React.JSX.Element {
     return (
       <WorkspaceSelector
         currentWorkspace={this._currentWorkspace}

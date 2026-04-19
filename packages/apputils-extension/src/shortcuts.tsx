@@ -60,10 +60,10 @@ export function displayShortcuts(options: IOptions) {
    * `data-p-suppress-shortcuts` attributes are found.
    */
 
-  function formatKeys(keys: string[]): JSX.Element {
-    const topContainer: JSX.Element[] = [];
+  function formatKeys(keys: string[]): React.JSX.Element {
+    const topContainer: React.JSX.Element[] = [];
     keys.forEach((key, index) => {
-      const container: JSX.Element[] = [];
+      const container: React.JSX.Element[] = [];
       key.split(' ').forEach((ch, chIndex) => {
         container.push(
           <span className={SHORTCUT_KEY_CLASS} key={`ch-${chIndex}`}>

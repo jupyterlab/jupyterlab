@@ -111,7 +111,7 @@ export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model>
   /**
    * Render the NotebookTrust status item.
    */
-  render(): JSX.Element | null {
+  render(): React.JSX.Element | null {
     if (!this.model) {
       return null;
     }
