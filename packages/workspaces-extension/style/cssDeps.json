@@ -1,0 +1,8 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/filebrowser",
+  "@jupyterlab/running",
+  "@jupyterlab/workspaces-extension"
+]

@@ -136,6 +136,7 @@ import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
+import notebookCssDeps from '@jupyterlab/notebook/style/cssDeps.json';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
@@ -1483,7 +1484,10 @@ function activateClonedOutputs(
         index,
         translator
       });
-      const widget = new MainAreaWidget({ content });
+      const widget = new MainAreaWidget({
+        content,
+        cssDeps: notebookCssDeps
+      });
       current.context.addSibling(widget, {
         ref: current.id,
         mode: 'split-bottom',

@@ -48,6 +48,7 @@ export * from './runningSessions';
 export * from './sanitizer';
 export * from './semanticCommand';
 export * from './sessioncontext';
+export * from './shadowdomwidget';
 export * from './thememanager';
 export * from './tokens';
 export {

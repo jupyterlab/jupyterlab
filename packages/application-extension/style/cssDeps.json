@@ -1,0 +1,8 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/statusbar",
+  "@jupyterlab/application",
+  "@jupyterlab/property-inspector",
+  "@jupyterlab/application-extension"
+]

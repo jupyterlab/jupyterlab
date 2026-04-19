@@ -1,0 +1,7 @@
+[
+  "@jupyterlab/apputils",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/application",
+  "@jupyterlab/docmanager",
+  "@jupyterlab/rendermime-extension"
+]

@@ -1,0 +1,6 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/application",
+  "@jupyterlab/notebook",
+  "@jupyterlab/celltags-extension"
+]

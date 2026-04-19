@@ -1,0 +1,8 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/htmlviewer",
+  "@jupyterlab/htmlviewer-extension"
+]

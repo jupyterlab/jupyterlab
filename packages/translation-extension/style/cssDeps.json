@@ -1,0 +1,6 @@
+[
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/mainmenu",
+  "@jupyterlab/translation-extension"
+]

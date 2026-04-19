@@ -10,6 +10,7 @@ import { MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';
 import { Printing } from './printing';
+import { ShadowDOMWidget } from './shadowdomwidget';
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -26,7 +27,7 @@ const USE_CAPTURE = true;
  * This widget ensures its own focus when activated.
  */
 export class MainAreaWidget<T extends Widget = Widget>
-  extends Widget
+  extends ShadowDOMWidget
   implements Printing.IPrintable
 {
   /**
@@ -308,7 +309,8 @@ export namespace MainAreaWidget {
   /**
    * An options object for creating a main area widget.
    */
-  export interface IOptions<T extends Widget = Widget> extends Widget.IOptions {
+  export interface IOptions<T extends Widget = Widget>
+    extends ShadowDOMWidget.IOptions {
     /**
      * The child widget to wrap.
      */
@@ -347,7 +349,7 @@ export namespace MainAreaWidget {
    * https://stackoverflow.com/a/46941824
    */
   export interface IOptionsOptionalContent<T extends Widget = Widget>
-    extends Widget.IOptions {
+    extends ShadowDOMWidget.IOptions {
     /**
      * The child widget to wrap.
      */

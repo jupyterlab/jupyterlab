@@ -12,6 +12,7 @@ import type {
 import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
+import { getStyles as getTypestyleCSS } from 'typestyle/lib';
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
@@ -369,6 +370,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     // add the svg node to the container
     container.appendChild(svgElement);
 
+    // Ensure typestyle icon CSS is available inside shadow roots
+    Private.adoptTypestyleInShadow(container);
+
     return container;
   }
 
@@ -470,6 +474,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         // set up component state via useState hook
         const [, setId] = React.useState(this._uuid);
 
+        // ref for the wrapper element to adopt typestyle in shadow DOM
+        const wrapperRef = React.useRef<HTMLElement>(null);
+        React.useEffect(() => {
+          const node =
+            wrapperRef.current ??
+            (ref && 'current' in ref ? ref.current : null);
+          if (node) {
+            Private.adoptTypestyleInShadow(node);
+          }
+        });
+
         // subscribe to svg replacement via useEffect hook
         React.useEffect(() => {
           const onSvgReplaced = () => {
@@ -516,6 +531,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
         if (container) {
           Private.initContainer({ container, className, styleProps, title });
+          Private.adoptTypestyleInShadow(container);
 
           return (
             <React.Fragment>
@@ -524,9 +540,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             </React.Fragment>
           );
         } else {
-          let attributes = {};
+          let attributes: Record<string, unknown> = {};
           if (Tag !== React.Fragment) {
             attributes = {
+              ref: wrapperRef,
               className:
                 className || styleProps
                   ? classes(className, LabIconStyle.styleClass(styleProps))
@@ -860,6 +877,124 @@ namespace Private {
       return styleClass;
     } else {
       return '';
+    }
+  }
+
+  /**
+   * Ensure typestyle-generated icon CSS is available inside the
+   * shadow root that contains `node`, if any.
+   *
+   * If the node is not yet mounted in a shadow root, it is added
+   * to a pending set. A shared MutationObserver watches the document
+   * for reparenting and adopts the typestyle sheet as soon as the
+   * node lands inside a shadow root.
+   */
+  export function adoptTypestyleInShadow(node: Node): void {
+    if (_tryAdoptInShadow(node)) {
+      return;
+    }
+    // Not in a shadow root yet — defer until reparented.
+    _pendingNodes.add(node);
+    _ensureReparentObserver();
+  }
+
+  /**
+   * Attempt to adopt the typestyle sheet into the shadow root
+   * of `node`. Returns `true` if adoption occurred or no shadow
+   * root is involved (i.e. the node is in the main document).
+   */
+  function _tryAdoptInShadow(node: Node): boolean {
+    const root = node.getRootNode();
+    if (root instanceof ShadowRoot) {
+      if (!_adoptedShadowRoots.has(root)) {
+        _ensureTypestyleSheet();
+        if (_typestyleSheet) {
+          if (root.adoptedStyleSheets.indexOf(_typestyleSheet) === -1) {
+            root.adoptedStyleSheets = [
+              ...root.adoptedStyleSheets,
+              _typestyleSheet
+            ];
+          }
+          _adoptedShadowRoots.add(root);
+        }
+      }
+      return true;
+    }
+    // Node is connected to the main document — no shadow work needed.
+    if (node.isConnected) {
+      return true;
+    }
+    // Node is detached — it may be mounted into a shadow root later.
+    return false;
+  }
+
+  /** Nodes waiting to be mounted into a shadow root. */
+  const _pendingNodes = new Set<Node>();
+
+  /** The shared reparent observer instance. */
+  let _reparentObserver: MutationObserver | null = null;
+
+  /**
+   * Install (if needed) a MutationObserver on the document that
+   * watches for pending nodes being reparented into shadow roots.
+   * The observer disconnects itself when no nodes are pending.
+   */
+  function _ensureReparentObserver(): void {
+    if (_reparentObserver) {
+      return;
+    }
+    _reparentObserver = new MutationObserver(() => {
+      for (const node of _pendingNodes) {
+        if (_tryAdoptInShadow(node)) {
+          _pendingNodes.delete(node);
+        }
+      }
+      if (_pendingNodes.size === 0 && _reparentObserver) {
+        _reparentObserver.disconnect();
+        _reparentObserver = null;
+      }
+    });
+    _reparentObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  /** Constructable CSSStyleSheet kept in sync with typestyle output. */
+  let _typestyleSheet: CSSStyleSheet | null = null;
+
+  /** Shadow roots that have adopted the typestyle sheet. */
+  const _adoptedShadowRoots = new WeakSet<ShadowRoot>();
+
+  /** Whether the head MutationObserver has been installed. */
+  let _typestyleObserverInstalled = false;
+
+  /**
+   * Create (if needed) the constructable stylesheet from typestyle CSS
+   * and install a MutationObserver to keep it in sync.
+   */
+  function _ensureTypestyleSheet(): void {
+    if (_typestyleSheet) {
+      return;
+    }
+    _typestyleSheet = new CSSStyleSheet();
+    _typestyleSheet.replaceSync(getTypestyleCSS());
+
+    if (!_typestyleObserverInstalled) {
+      _typestyleObserverInstalled = true;
+      // Observe all <style> children of <head> for textContent changes.
+      // Typestyle updates its tag via textContent assignment, which fires
+      // a childList mutation (text node replaced).
+      const observer = new MutationObserver(() => {
+        if (_typestyleSheet) {
+          _typestyleSheet.replaceSync(getTypestyleCSS());
+        }
+      });
+      observer.observe(document.head, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
     }
   }
 

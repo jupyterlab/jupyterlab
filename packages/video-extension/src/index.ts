@@ -18,6 +18,7 @@ import type {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import cssDeps from '../style/cssDeps.json';
 import type { Contents, IContentProvider } from '@jupyterlab/services';
 import { IDefaultDrive } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
@@ -181,7 +182,8 @@ export class VideoViewerFactory extends ABCWidgetFactory<
     });
     const widget = new VideoDocumentWidget({
       content,
-      context
+      context,
+      cssDeps
     });
     return widget;
   }

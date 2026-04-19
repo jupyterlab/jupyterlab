@@ -28,6 +28,7 @@ import {
 } from '@jupyterlab/ui-components';
 import type { Menu } from '@lumino/widgets';
 import * as React from 'react';
+import helpCssDeps from '../style/cssDeps.json';
 
 /**
  * The command IDs used by the help plugin.
@@ -307,7 +308,10 @@ const open: JupyterFrontEndPlugin<void> = {
       content.addClass(HELP_CLASS);
       content.title.label = text;
       content.id = `${namespace}-${++counter}`;
-      const widget = new MainAreaWidget({ content });
+      const widget = new MainAreaWidget({
+        content,
+        cssDeps: helpCssDeps
+      });
       widget.addClass('jp-Help');
       return widget;
     }

@@ -1,11 +1,69 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
+import { MainAreaWidget, ShadowDOMWidget, Toolbar } from '@jupyterlab/apputils';
 import { MessageLoop } from '@lumino/messaging';
 import { BoxPanel, Widget } from '@lumino/widgets';
 
 describe('@jupyterlab/apputils', () => {
+  describe('ShadowDOMWidget', () => {
+    describe('#constructor()', () => {
+      it('should create a shadow root on the widget node', () => {
+        let widget = new ShadowDOMWidget();
+        expect(widget.node).not.toEqual(widget.attachmentNode);
+        expect(widget.attachmentNode.shadowRoot).not.toEqual(null);
+
+        widget = new ShadowDOMWidget();
+        expect(widget.node).toEqual(widget.attachmentNode);
+        expect(widget.attachmentNode.shadowRoot).toEqual(null);
+      });
+    });
+    describe('#adoptStyleSheet()', () => {
+      it('should adopt style sheets for widgets with shadow DOM', () => {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync('* { color: red; }');
+
+        let widget = new ShadowDOMWidget();
+        Widget.attach(widget, document.body);
+
+        let div = document.createElement('div');
+        widget.node.appendChild(div);
+
+        expect(window.getComputedStyle(div).color).toEqual('rgb(0, 0, 0)');
+
+        let wasAdopted = widget.adoptStyleSheet(sheet);
+        expect(wasAdopted).toEqual(true);
+        expect(window.getComputedStyle(div).color).toEqual('rgb(255, 0, 0)');
+
+        wasAdopted = widget.adoptStyleSheet(sheet);
+        expect(wasAdopted).toEqual(false);
+      });
+    });
+
+    describe('#removeAdoptedStyleSheet()', () => {
+      it('should adopt style sheets for widgets with shadow DOM', () => {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync('* { color: red; }');
+
+        let widget = new ShadowDOMWidget();
+        Widget.attach(widget, document.body);
+
+        let div = document.createElement('div');
+        widget.node.appendChild(div);
+
+        widget.adoptStyleSheet(sheet);
+        expect(window.getComputedStyle(div).color).toEqual('rgb(255, 0, 0)');
+
+        let wasRemoved = widget.removeAdoptedStyleSheet(sheet);
+        expect(wasRemoved).toEqual(true);
+        expect(window.getComputedStyle(div).color).toEqual('rgb(0, 0, 0)');
+
+        wasRemoved = widget.removeAdoptedStyleSheet(sheet);
+        expect(wasRemoved).toEqual(false);
+      });
+    });
+  });
+
   describe('MainAreaWidget', () => {
     describe('#constructor()', () => {
       it('should create a new main area widget', () => {

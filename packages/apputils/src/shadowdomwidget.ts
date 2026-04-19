@@ -1,0 +1,204 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Widget } from '@lumino/widgets';
+
+/**
+ * Cache of constructable CSSStyleSheet copies, keyed by package name.
+ * Shared across all shadow roots so each sheet is created only once.
+ */
+const _packageSheets = new Map<string, CSSStyleSheet[]>();
+
+/**
+ * Get constructable CSSStyleSheets for a given package name.
+ *
+ * Looks for all `<style data-package="NAME">` elements in the
+ * document (injected by style-loader with css-package-loader tagging),
+ * creates constructable CSSStyleSheets from their text content,
+ * and caches them for reuse across shadow roots.
+ */
+function getPackageStyleSheets(
+  packageName: string,
+  removeFromDocument = false
+): CSSStyleSheet[] {
+  const cached = _packageSheets.get(packageName);
+  if (cached) {
+    return cached;
+  }
+
+  const styles = document.querySelectorAll(
+    `style[data-package="${CSS.escape(packageName)}"]`
+  );
+  const sheets: CSSStyleSheet[] = [];
+  for (const style of styles) {
+    if (style.textContent) {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(style.textContent);
+      sheets.push(sheet);
+    }
+  }
+  if (sheets.length > 0) {
+    _packageSheets.set(packageName, sheets);
+  }
+  if (removeFromDocument) {
+    for (const style of styles) {
+      style.remove();
+    }
+  }
+  return sheets;
+}
+
+/**
+ * A widget backed by a shadow DOM root.
+ */
+export class ShadowDOMWidget extends Widget {
+  /**
+   * Global default for shadow DOM isolation.
+   * Can be set by application configuration before widgets are created.
+   * Shadow DOM is only activated for widgets that explicitly opt in by
+   * providing `cssDeps` in their constructor options.
+   */
+  static shadowEnabled = false;
+
+  /**
+   * Construct a new shadow DOM widget.
+   */
+  constructor(options: ShadowDOMWidget.IOptions = {}) {
+    super(options);
+    this._shadowAllowed =
+      options.shadowEnabled ?? ShadowDOMWidget.shadowEnabled;
+    if (this._shadowAllowed && options.cssDeps) {
+      this._enableShadow();
+      this.adoptPackageStyles(options.cssDeps, options.ownPackage);
+    } else {
+      this._attachmentNode = this.node;
+    }
+  }
+
+  /**
+   * Whether shadow DOM isolation is enabled for this widget.
+   */
+  get shadowEnabled(): boolean {
+    return this._root !== null;
+  }
+
+  /**
+   * Get the node which should be attached to the parent in order to attach the widget.
+   *
+   * When shadow DOM is enabled, this is a wrapper element whose shadow root
+   * contains the real widget node. Otherwise, it is the widget node itself.
+   */
+  get attachmentNode(): HTMLElement {
+    return this._attachmentNode;
+  }
+
+  /**
+   * Adopt a stylesheet in the shadow root.
+   *
+   * Returns `true` if the sheet was added and `false` if already present.
+   * No-op when shadow DOM is not enabled.
+   */
+  adoptStyleSheet(sheet: CSSStyleSheet): boolean {
+    if (!this._root) {
+      return false;
+    }
+    if (this._root.adoptedStyleSheets.indexOf(sheet) !== -1) {
+      return false;
+    }
+    this._root.adoptedStyleSheets = [...this._root.adoptedStyleSheets, sheet];
+    return true;
+  }
+
+  /**
+   * Adopt stylesheets for the given packages into this shadow root.
+   *
+   * @param packages - Array of package names (e.g. from a generated
+   *   `cssDeps.json`). For each package, a `<style data-package="NAME">`
+   *   element is looked up in the document, converted to a constructable
+   *   CSSStyleSheet (cached), and adopted into this widget's shadow root.
+   *
+   * No-op when shadow DOM is not enabled.
+   */
+  adoptPackageStyles(
+    packages: readonly string[],
+    ownPackage?: string | null
+  ): void {
+    if (!this._root) {
+      if (!this._shadowAllowed) {
+        return;
+      }
+      this._enableShadow();
+    }
+    // Default to the last entry in packages, which is always the
+    // widget's own package (by cssDeps.json generation convention).
+    // Pass `null` to skip style removal entirely (useful for
+    // extensions adopting extra CSS into an existing shadow root).
+    const own =
+      ownPackage === undefined ? packages[packages.length - 1] : ownPackage;
+    for (const pkg of packages) {
+      const removeFromDocument = own !== null && pkg === own;
+      for (const sheet of getPackageStyleSheets(pkg, removeFromDocument)) {
+        this.adoptStyleSheet(sheet);
+      }
+    }
+  }
+
+  /**
+   * Create the shadow root and attachment node.
+   */
+  private _enableShadow(): void {
+    const attachmentNode = document.createElement('div');
+    attachmentNode.classList.add('lm-attachmentNode');
+    this._root = attachmentNode.attachShadow({ mode: 'open' });
+    this._root.appendChild(this.node);
+    this._attachmentNode = attachmentNode;
+  }
+
+  /**
+   * Remove a previously adopted stylesheet from the shadow root.
+   *
+   * Returns `true` if the sheet was removed and `false` otherwise.
+   * No-op when shadow DOM is not enabled.
+   */
+  removeAdoptedStyleSheet(sheet: CSSStyleSheet): boolean {
+    if (!this._root) {
+      return false;
+    }
+    if (this._root.adoptedStyleSheets.indexOf(sheet) === -1) {
+      return false;
+    }
+    this._root.adoptedStyleSheets = this._root.adoptedStyleSheets.filter(
+      adopted => adopted !== sheet
+    );
+    return true;
+  }
+
+  private _shadowAllowed: boolean;
+  private _attachmentNode: HTMLElement;
+  private _root: ShadowRoot | null = null;
+}
+
+export namespace ShadowDOMWidget {
+  export interface IOptions extends Widget.IOptions {
+    /**
+     * Whether to enable shadow DOM isolation for this widget.
+     * Defaults to `false`.
+     */
+    shadowEnabled?: boolean;
+
+    /**
+     * Package names whose stylesheets should be adopted into the
+     * shadow root at construction time (e.g. from a generated
+     * `cssDeps.json`). Only used when `shadowEnabled` is `true`.
+     */
+    cssDeps?: readonly string[];
+
+    /**
+     * The package name of the widget itself, e.g. `"@jupyterlab/launcher"`.
+     * When provided alongside `cssDeps`, the `<style>` elements for this
+     * package will be removed from the document after being cached,
+     * preventing style leaking into non-shadow-DOM areas.
+     */
+    ownPackage?: string;
+  }
+}

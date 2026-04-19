@@ -1,0 +1,7 @@
+[
+  "@jupyterlab/apputils",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/imageviewer",
+  "@jupyterlab/imageviewer-extension"
+]

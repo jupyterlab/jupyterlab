@@ -10,6 +10,7 @@ import type { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
+import cssDeps from '../style/cssDeps.json';
 
 /**
  * A widget factory for notebook panels.
@@ -99,7 +100,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     };
     const content = this.contentFactory.createNotebook(nbOptions);
 
-    return new NotebookPanel({ context, content });
+    return new NotebookPanel({ context, content, cssDeps });
   }
 
   private _editorConfig: StaticNotebook.IEditorConfig;

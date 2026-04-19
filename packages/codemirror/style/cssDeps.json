@@ -1,0 +1,5 @@
+[
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/documentsearch",
+  "@jupyterlab/codemirror"
+]

@@ -24,6 +24,7 @@ import type { PanelLayout, Widget } from '@lumino/widgets';
 import type { IMapChange } from '@jupyter/ydoc';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import cssDeps from '../style/cssDeps.json';
 
 /*
  * Text mime types
@@ -569,6 +570,14 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
+    // Adopt cell-toolbar CSS into shadow root (no-op if shadow DOM is off)
+    // See https://github.com/jupyterlab/jupyterlab/issues/18771 for discussion.
+    // We could break the cycle of dependencies by adding it to ignore list of
+    // integrity script and then we could add it to notebook's index.css but
+    // it would then always include the styles of cell toolbar
+    // even if this package is disabled.
+    panel.adoptPackageStyles(cssDeps, null);
+
     // Create a factory that passes the widget ID to the toolbar factory
     const factoryWithWidgetId = (widget: Widget) => {
       return this._toolbarFactory(widget, {

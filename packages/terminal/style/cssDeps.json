@@ -1,0 +1,6 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/apputils",
+  "@xterm/xterm",
+  "@jupyterlab/terminal"
+]

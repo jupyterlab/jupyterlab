@@ -1,0 +1,5 @@
+[
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/theme-dark-high-contrast-extension"
+]

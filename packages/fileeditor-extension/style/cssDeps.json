@@ -1,0 +1,21 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/statusbar",
+  "@jupyterlab/apputils",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application",
+  "@jupyterlab/documentsearch",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/completer",
+  "@jupyterlab/filebrowser",
+  "@jupyterlab/toc",
+  "@jupyterlab/console",
+  "@jupyterlab/lsp",
+  "@jupyterlab/fileeditor",
+  "@jupyterlab/launcher",
+  "@jupyterlab/mainmenu",
+  "@jupyterlab/fileeditor-extension"
+]

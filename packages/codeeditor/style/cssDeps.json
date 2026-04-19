@@ -1,0 +1,8 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/statusbar",
+  "@jupyterlab/apputils",
+  "@lumino/dragdrop",
+  "@jupyterlab/codeeditor"
+]

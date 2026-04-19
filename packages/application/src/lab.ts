@@ -206,23 +206,42 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * This introduces a slight delay to the command invocation, but no delay to user input.
    */
   protected evtKeydown(keyDownEvent: KeyboardEvent): void {
+    // When the event originates inside a shadow DOM, the browser retargets
+    // event.target to the shadow host.  Lumino's targetDistance() then walks
+    // parentElement from the *host* upward and never sees the nodes inside
+    // the shadow root, so every CSS-selector-based keybinding fails.
+    //
+    // Fix: temporarily patch `parentElement` on shadow-boundary elements
+    // so that the walk crosses from inside the shadow root to the host,
+    // and wrap the event so `target` returns the real originating element.
+    const { event: eventForCommands, restore } =
+      Private.shadowAwareEvent(keyDownEvent);
+
     const permissionToExecute = new PromiseDelegate<boolean>();
 
     // Hold the execution of any keybinding until we know if this event would cause text insertion
     this.commands.holdKeyBindingExecution(
-      keyDownEvent,
+      eventForCommands,
       permissionToExecute.promise
     );
 
     // Process the key immediately to invoke the prevent default handlers as needed
-    this.commands.processKeydownEvent(keyDownEvent);
+    this.commands.processKeydownEvent(eventForCommands);
+
+    // Restore any temporarily patched parentElement properties.
+    restore();
 
     // If we do not know the target, we cannot check if input would be inserted
     // as there is no target to attach the `beforeinput` event listener; in that
     // case we just permit execution immediately (this may happen for programmatic
     // uses of keydown)
-    const target = keyDownEvent.target;
-    if (!target) {
+    // Use the real target from composedPath for beforeinput checks,
+    // since the retargeted target (shadow host) won't match selectors
+    // for elements inside the shadow root.
+    const realTarget =
+      (keyDownEvent.composedPath()[0] as EventTarget | undefined) ??
+      keyDownEvent.target;
+    if (!realTarget) {
       return permissionToExecute.resolve(true);
     }
 
@@ -231,10 +250,10 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 
     const disconnectListeners = () => {
       if (onBeforeInput) {
-        target.removeEventListener('beforeinput', onBeforeInput);
+        realTarget.removeEventListener('beforeinput', onBeforeInput);
       }
       if (onBeforeKeyUp) {
-        target.removeEventListener('keyup', onBeforeKeyUp);
+        realTarget.removeEventListener('keyup', onBeforeKeyUp);
       }
     };
 
@@ -242,12 +261,14 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     const causesInputPromise = Promise.race([
       new Promise(resolve => {
         onBeforeInput = (inputEvent: InputEvent) => {
+          // Get the real target inside shadow DOM if applicable.
+          const inputTarget = inputEvent.composedPath()[0];
           switch (inputEvent.inputType) {
             case 'historyUndo':
             case 'historyRedo': {
               if (
-                inputEvent.target instanceof Element &&
-                inputEvent.target.closest('[data-jp-undoer]')
+                inputTarget instanceof Element &&
+                inputTarget.closest('[data-jp-undoer]')
               ) {
                 // Allow to use custom undo/redo bindings on `jpUndoer`s
                 inputEvent.preventDefault();
@@ -258,8 +279,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
             }
             case 'insertLineBreak': {
               if (
-                inputEvent.target instanceof Element &&
-                inputEvent.target.closest('.jp-Cell')
+                inputTarget instanceof Element &&
+                inputTarget.closest('.jp-Cell')
               ) {
                 // Allow to override the default action of Shift + Enter on cells as this is used for cell execution
                 inputEvent.preventDefault();
@@ -272,7 +293,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
           disconnectListeners();
           return resolve(true);
         };
-        target.addEventListener('beforeinput', onBeforeInput, { once: true });
+        realTarget.addEventListener('beforeinput', onBeforeInput, {
+          once: true
+        });
       }),
       new Promise(resolve => {
         onBeforeKeyUp = (keyUpEvent: KeyboardEvent) => {
@@ -281,7 +304,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
             return resolve(false);
           }
         };
-        target.addEventListener('keyup', onBeforeKeyUp, { once: true });
+        realTarget.addEventListener('keyup', onBeforeKeyUp, { once: true });
       }),
       new Promise(resolve => {
         setTimeout(() => {
@@ -591,4 +614,92 @@ namespace Private {
    * The value represents the number in milliseconds.
    */
   export const INPUT_GUARD_TIMEOUT = 10;
+
+  /**
+   * If the keyboard event crossed a shadow DOM boundary, prepare it for
+   * Lumino's `targetDistance()` which walks `event.target.parentElement`.
+   *
+   * Two things are done:
+   * 1. The event is wrapped in a Proxy so that `event.target` returns
+   *    the real originating element (from `composedPath()`).
+   * 2. The element at the shadow boundary (direct child of the shadow
+   *    root) gets a temporary instance-level `parentElement` override
+   *    that resolves to the shadow host, bridging the gap.
+   *
+   * The returned `restore` callback **must** be called after synchronous
+   * processing to undo the `parentElement` patch.
+   *
+   * If the event did not cross a shadow boundary, the original event is
+   * returned with a no-op restore.
+   */
+  export function shadowAwareEvent(event: KeyboardEvent): {
+    event: KeyboardEvent;
+    restore: () => void;
+  } {
+    const noop = { event, restore: () => {} };
+    const path = event.composedPath();
+    const realTarget = path[0] as Element | undefined;
+
+    // No shadow boundary crossed — composedPath[0] is the same as target.
+    if (!realTarget || realTarget === event.target) {
+      return noop;
+    }
+
+    // Find shadow-boundary elements: elements whose next entry in the
+    // composed path is a ShadowRoot.  Temporarily override their
+    // `parentElement` to point to the shadow host (skipping the
+    // ShadowRoot) so that `targetDistance`'s parentElement walk crosses
+    // the boundary.
+    const patches: Array<{
+      element: Element;
+      descriptor: PropertyDescriptor | undefined;
+    }> = [];
+
+    for (let i = 0; i < path.length - 1; i++) {
+      const current = path[i];
+      if (!(current instanceof Element)) {
+        continue;
+      }
+      const next = path[i + 1];
+      if (next instanceof ShadowRoot) {
+        const host = path[i + 2] as Element | undefined;
+        if (host) {
+          patches.push({
+            element: current,
+            descriptor: Object.getOwnPropertyDescriptor(
+              current,
+              'parentElement'
+            )
+          });
+          Object.defineProperty(current, 'parentElement', {
+            get: () => host,
+            configurable: true
+          });
+        }
+      }
+    }
+
+    // Wrap the event so `target` returns the real originating element.
+    const wrapped = new Proxy(event, {
+      get(target, prop, receiver) {
+        if (prop === 'target') {
+          return realTarget;
+        }
+        const value = Reflect.get(target, prop, target);
+        return typeof value === 'function' ? value.bind(target) : value;
+      }
+    });
+
+    const restore = () => {
+      for (const { element, descriptor } of patches) {
+        if (descriptor) {
+          Object.defineProperty(element, 'parentElement', descriptor);
+        } else {
+          delete (element as any).parentElement;
+        }
+      }
+    };
+
+    return { event: wrapped, restore };
+  }
 }

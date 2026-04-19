@@ -1,0 +1,8 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/docmanager"
+]

@@ -55,6 +55,12 @@
       "title": "Enable Ctrl+ Scroll Zoom",
       "description": "Zoom the widget under the mouse when using Ctrl+ mouse wheel.",
       "default": false
+    },
+    "shadowEnabled": {
+      "type": "boolean",
+      "title": "[Experimental] Shadow DOM isolation",
+      "description": "Isolate styles of main area widgets using shadow DOM. Requires a page reload to take effect.",
+      "default": false
     }
   },
   "additionalProperties": false,

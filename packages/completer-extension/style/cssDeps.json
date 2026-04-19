@@ -1,0 +1,7 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/application",
+  "@jupyterlab/completer",
+  "@jupyterlab/completer-extension"
+]

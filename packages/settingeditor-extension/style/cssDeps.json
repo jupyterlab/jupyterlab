@@ -1,0 +1,10 @@
+[
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/application",
+  "@jupyterlab/pluginmanager",
+  "@jupyterlab/settingeditor",
+  "@jupyterlab/settingeditor-extension"
+]

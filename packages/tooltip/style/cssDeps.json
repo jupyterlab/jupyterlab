@@ -1,0 +1,7 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/tooltip"
+]

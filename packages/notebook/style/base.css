@@ -16,7 +16,8 @@
 | CSS variables
 |----------------------------------------------------------------------------*/
 
-:root {
+:root,
+:host {
   --jp-side-by-side-output-size: 1fr;
   --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
   --jp-private-notebook-dragImage-width: 304px;

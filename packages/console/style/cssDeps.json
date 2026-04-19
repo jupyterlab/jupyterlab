@@ -1,0 +1,11 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/rendermime",
+  "@lumino/dragdrop",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/cells",
+  "@jupyterlab/console"
+]

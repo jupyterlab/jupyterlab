@@ -1,0 +1,5 @@
+[
+  "@jupyterlab/rendermime",
+  "@jupyterlab/application",
+  "@jupyterlab/mathjax-extension"
+]

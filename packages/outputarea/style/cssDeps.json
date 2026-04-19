@@ -1,0 +1,6 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/apputils",
+  "@jupyterlab/rendermime",
+  "@jupyterlab/outputarea"
+]

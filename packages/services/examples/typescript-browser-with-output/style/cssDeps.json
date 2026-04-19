@@ -1,0 +1,5 @@
+[
+  "@jupyterlab/rendermime",
+  "@jupyterlab/outputarea",
+  "@jupyterlab/example-services-outputarea"
+]

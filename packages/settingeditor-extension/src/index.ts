@@ -37,6 +37,7 @@ import type {
   JsonSettingEditor,
   SettingsEditor
 } from '@jupyterlab/settingeditor';
+import settingeditorCssDeps from '@jupyterlab/settingeditor/style/cssDeps.json';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -172,7 +173,8 @@ function activate(
         translator,
         status,
         query: args.query as string
-      })
+      }),
+      cssDeps: settingeditorCssDeps
     });
 
     editor.toolbar.addItem(
@@ -406,7 +408,8 @@ function activateJSON(
       });
 
       const container = new MainAreaWidget<JsonSettingEditor>({
-        content: editor
+        content: editor,
+        cssDeps: settingeditorCssDeps
       });
 
       container.id = namespace;
@@ -565,7 +568,10 @@ function activateJSON(
             handleImport: applySettings,
             translator: translator
           });
-          const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
+          const widget = new MainAreaWidget<ImportSettingsWidget>({
+            content,
+            cssDeps: settingeditorCssDeps
+          });
           widget.title.label = trans.__('Import Settings');
           widget.title.icon = fileUploadIcon;
           app.shell.add(widget, 'main');

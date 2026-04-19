@@ -1,0 +1,8 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/apputils",
+  "@jupyterlab/codeeditor",
+  "@jupyterlab/codemirror",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/lsp"
+]

@@ -1,0 +1,7 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/apputils",
+  "@jupyterlab/application",
+  "@jupyterlab/documentsearch",
+  "@jupyterlab/documentsearch-extension"
+]

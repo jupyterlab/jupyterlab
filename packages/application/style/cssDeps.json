@@ -1,0 +1,9 @@
+[
+  "@fortawesome/fontawesome-free",
+  "@fortawesome/fontawesome-free",
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/application"
+]

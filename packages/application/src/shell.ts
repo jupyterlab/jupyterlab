@@ -3,12 +3,12 @@
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
+import { ShadowDOMWidget } from '@jupyterlab/apputils';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
-  DockPanelSvg,
   LabIcon,
   TabBarSvg,
   tabIcon,
@@ -33,6 +33,12 @@ import {
   TabBar,
   Widget
 } from '@lumino/widgets';
+import {
+  ShadowBoxLayout,
+  ShadowDockPanelSvg,
+  ShadowSplitLayout,
+  ShadowStackedLayout
+} from './shadowlayouts';
 import type { JupyterFrontEnd } from './frontend';
 import type { LayoutRestorer } from './layoutrestorer';
 
@@ -128,6 +134,12 @@ export namespace ILabShell {
      * `contentVisibility` is only available in Chromium-based browsers.
      */
     hiddenMode: 'display' | 'scale' | 'contentVisibility';
+
+    /**
+     * Whether shadow DOM isolation is enabled for main area widgets
+     * (experimental). Requires page reload.
+     */
+    shadowEnabled: boolean;
   }
 
   /**
@@ -341,17 +353,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     skipLinkWrapper.addClass('jp-skiplink-wrapper');
     skipLinkWrapper.addWidget(skipLinkWidget);
 
-    const headerPanel = (this._headerPanel = new BoxPanel());
+    const headerPanel = (this._headerPanel = new BoxPanel({
+      layout: new ShadowBoxLayout()
+    }));
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
     menuHandler.panel.node.setAttribute('role', 'navigation');
     const topHandler = (this._topHandler = new Private.PanelHandler());
     topHandler.panel.node.setAttribute('role', 'banner');
-    const bottomPanel = (this._bottomPanel = new BoxPanel());
+    const bottomPanel = (this._bottomPanel = new BoxPanel({
+      layout: new ShadowBoxLayout()
+    }));
     bottomPanel.node.setAttribute('role', 'contentinfo');
-    const hboxPanel = new BoxPanel();
+    const hboxPanel = new BoxPanel({
+      layout: new ShadowBoxLayout()
+    });
     const vsplitPanel = (this._vsplitPanel =
       new Private.RestorableSplitPanel());
-    const dockPanel = (this._dockPanel = new DockPanelSvg({
+    const dockPanel = (this._dockPanel = new ShadowDockPanelSvg({
       hiddenMode: Widget.HiddenMode.Display
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -363,7 +381,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }));
     const leftHandler = (this._leftHandler = new Private.SideBarHandler());
     const rightHandler = (this._rightHandler = new Private.SideBarHandler());
-    const rootLayout = new BoxLayout();
+    const rootLayout = new ShadowBoxLayout();
 
     headerPanel.id = 'jp-header-panel';
     menuHandler.panel.id = 'jp-menu-panel';
@@ -1361,6 +1379,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * @param config Shell configuration
    */
   updateConfig(config: Partial<ILabShell.IConfig>): void {
+    if (config.shadowEnabled !== undefined) {
+      ShadowDOMWidget.shadowEnabled = config.shadowEnabled;
+    }
     if (config.hiddenMode) {
       switch (config.hiddenMode) {
         case 'display':
@@ -1974,7 +1995,9 @@ namespace Private {
         allowDeselect: true,
         orientation: 'vertical'
       });
-      this._stackedPanel = new StackedPanel();
+      this._stackedPanel = new StackedPanel({
+        layout: new ShadowStackedLayout()
+      });
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
@@ -2443,7 +2466,13 @@ namespace Private {
      * Construct a new RestorableSplitPanel.
      */
     constructor(options: SplitPanel.IOptions = {}) {
-      super(options);
+      super({
+        ...options,
+        layout: new ShadowSplitLayout({
+          renderer: SplitPanel.defaultRenderer,
+          ...options
+        })
+      });
       this._updated = new Signal(this);
     }
 

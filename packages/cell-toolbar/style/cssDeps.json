@@ -1,0 +1,9 @@
+[
+  "@lumino/widgets",
+  "@jupyterlab/ui-components",
+  "@jupyterlab/apputils",
+  "@jupyterlab/docregistry",
+  "@jupyterlab/cells",
+  "@jupyterlab/notebook",
+  "@jupyterlab/cell-toolbar"
+]

@@ -232,6 +232,10 @@ export async function ensurePackage(
     if (name === '.' || name === '..') {
       return;
     }
+    // Skip self-imports (e.g. importing own style/cssDeps.json via package name)
+    if (name === data.name) {
+      return;
+    }
     // Skip processing Node.js-native dependencies
     if (name.startsWith('node:')) {
       if (options.allowNodeDependencies) {
@@ -299,12 +303,33 @@ export async function ensurePackage(
       messages.push(
         ...(await ensureFile(jsIndexPath, jsIndexContents.join('\n'), false))
       );
+
+      // Template the CSS dependency list for shadow DOM style adoption.
+      // Extract package names from cssImports (e.g. "@lumino/widgets/style/index.css" → "@lumino/widgets")
+      const cssDepsPackages = cssImports.map(x => {
+        const parts = x.split('/');
+        return parts[0].startsWith('@') ? parts[0] + '/' + parts[1] : parts[0];
+      });
+      // Include the package itself
+      cssDepsPackages.push(data.name);
+      const cssDepsContents = JSON.stringify(cssDepsPackages, null, 2) + '\n';
+      const cssDepsPath = path.join(pkgPath, 'style/cssDeps.json');
+      // Remove old .js variant if present
+      const oldCssDepsPath = path.join(pkgPath, 'style/cssDeps.js');
+      if (fs.existsSync(oldCssDepsPath)) {
+        fs.removeSync(oldCssDepsPath);
+      }
+      if (!fs.existsSync(cssDepsPath)) {
+        fs.ensureFileSync(cssDepsPath);
+      }
+      messages.push(...(await ensureFile(cssDepsPath, cssDepsContents, false)));
     } else {
       if (
         fs.existsSync(path.join(pkgPath, 'style')) &&
         fs
           .readdirSync(path.join(pkgPath, 'style'))
-          .filter(f => !['index.css', 'index.js'].includes(f)).length === 0
+          .filter(f => !['index.css', 'index.js', 'cssDeps.json'].includes(f))
+          .length === 0
       ) {
         fs.removeSync(path.join(pkgPath, 'style'));
       }

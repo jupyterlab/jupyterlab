@@ -7,6 +7,7 @@ import type {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import cssDeps from '../style/cssDeps.json';
 import type {
   DocumentRegistry,
   IDocumentWidget
@@ -276,7 +277,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
     });
 
     content.title.icon = textEditorIcon;
-    const widget = new FileEditorWidget({ content, context });
+    const widget = new FileEditorWidget({ content, context, cssDeps });
     return widget;
   }
 
