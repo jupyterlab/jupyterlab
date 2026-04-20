@@ -138,6 +138,11 @@ namespace CommandIDs {
   // For main browser only.
   export const activateBrowser = 'filebrowser:activate-browser';
 
+  /**
+   * @deprecated Use `filebrowser:show-browser` instead.
+   */
+  export const activate = 'filebrowser:activate';
+
   export const toggleFileFilter = 'filebrowser:toggle-file-filter';
 
   export const toggleNavigateToCurrentDirectory =
@@ -161,6 +166,11 @@ namespace CommandIDs {
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 
   export const editPath = 'filebrowser:edit-path';
+
+  /**
+   * @deprecated Use `filebrowser:activate-browser` instead.
+   */
+  export const toggleMain = 'filebrowser:toggle-main';
 }
 
 /**
@@ -635,6 +645,35 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           browserTab?.focus();
         });
       }
+    });
+
+    // Backward-compatible alias for older command ID.
+    commands.addCommand(CommandIDs.activate, {
+      label: trans.__('Open the file browser for the provided `path`.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__('The path to open in the file browser')
+            }
+          }
+        }
+      },
+      execute: args => commands.execute(CommandIDs.showBrowser, args)
+    });
+
+    // Backward-compatible alias for older command ID.
+    commands.addCommand(CommandIDs.toggleMain, {
+      label: trans.__('File Browser'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => commands.execute(CommandIDs.activateBrowser, args)
     });
 
     commands.addCommand(CommandIDs.showBrowser, {
