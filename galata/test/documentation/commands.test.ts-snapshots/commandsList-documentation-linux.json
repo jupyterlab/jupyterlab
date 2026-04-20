@@ -2407,18 +2407,15 @@
     }
   },
   {
-    "id": "filebrowser:show-browser",
-    "label": "Open the file browser for the provided `path`.",
+    "id": "filebrowser:activate-browser",
+    "label": "File Browser",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl Shift F"
+    ],
     "args": {
       "type": "object",
-      "properties": {
-        "path": {
-          "type": "string",
-          "description": "The path to open in the file browser"
-        }
-      }
+      "properties": {}
     }
   },
   {
@@ -2790,15 +2787,18 @@
     }
   },
   {
-    "id": "filebrowser:activate-browser",
-    "label": "File Browser",
+    "id": "filebrowser:show-browser",
+    "label": "Open the file browser for the provided `path`.",
     "caption": "",
-    "shortcuts": [
-      "Ctrl Shift F"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to open in the file browser"
+        }
+      }
     }
   },
   {
