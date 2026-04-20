@@ -2407,7 +2407,7 @@
     }
   },
   {
-    "id": "filebrowser:activate",
+    "id": "filebrowser:show-browser",
     "label": "Open the file browser for the provided `path`.",
     "caption": "",
     "shortcuts": [],
@@ -2790,7 +2790,7 @@
     }
   },
   {
-    "id": "filebrowser:toggle-main",
+    "id": "filebrowser:activate-browser",
     "label": "File Browser",
     "caption": "",
     "shortcuts": [
