@@ -1385,11 +1385,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (config.dockPanelPadding !== undefined) {
       if (config.dockPanelPadding === false) {
         this._dockPanel.node.style.setProperty(
-          '--jp-dock-panel-padding',
+          '--jp-private-dock-panel-padding',
           '0px'
         );
       } else {
-        this._dockPanel.node.style.removeProperty('--jp-dock-panel-padding');
+        this._dockPanel.node.style.removeProperty(
+          '--jp-private-dock-panel-padding'
+        );
       }
       this._dockPanel.fit();
     }
