@@ -2419,6 +2419,31 @@
     }
   },
   {
+    "id": "filebrowser:activate",
+    "label": "Open the file browser for the provided `path`.",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to open in the file browser"
+        }
+      }
+    }
+  },
+  {
+    "id": "filebrowser:toggle-main",
+    "label": "File Browser",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:copy",
     "label": "Copy",
     "caption": "",
@@ -2717,6 +2742,21 @@
     }
   },
   {
+    "id": "filebrowser:show-browser",
+    "label": "Open the file browser for the provided `path`.",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to open in the file browser"
+        }
+      }
+    }
+  },
+  {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
     "caption": "",
@@ -2784,21 +2824,6 @@
     "args": {
       "type": "object",
       "properties": {}
-    }
-  },
-  {
-    "id": "filebrowser:show-browser",
-    "label": "Open the file browser for the provided `path`.",
-    "caption": "",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {
-        "path": {
-          "type": "string",
-          "description": "The path to open in the file browser"
-        }
-      }
     }
   },
   {
