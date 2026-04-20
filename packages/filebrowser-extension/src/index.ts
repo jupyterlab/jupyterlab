@@ -618,7 +618,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
     commands.addCommand(CommandIDs.activateBrowser, {
-      label: trans.__('Activate and focus the file browser.'),
+      label: trans.__('File Browser'),
       describedBy: {
         args: {
           type: 'object',
