@@ -2407,18 +2407,6 @@
     }
   },
   {
-    "id": "filebrowser:activate-browser",
-    "label": "File Browser",
-    "caption": "",
-    "shortcuts": [
-      "Ctrl Shift F"
-    ],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
     "id": "filebrowser:activate",
     "label": "Open the file browser for the provided `path`.",
     "caption": "",
@@ -2434,10 +2422,12 @@
     }
   },
   {
-    "id": "filebrowser:toggle-main",
+    "id": "filebrowser:activate-browser",
     "label": "File Browser",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl Shift F"
+    ],
     "args": {
       "type": "object",
       "properties": {}
@@ -2819,6 +2809,16 @@
   {
     "id": "filebrowser:toggle-last-modified",
     "label": "Show Last Modified Column",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "filebrowser:toggle-main",
+    "label": "File Browser",
     "caption": "",
     "shortcuts": [],
     "args": {
