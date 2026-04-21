@@ -738,7 +738,8 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
       formatList.forEach(function (key) {
-        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+        const capCaseKey = trans.__(formattedKey);
         const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
         let args = {
           format: key,
@@ -1074,7 +1075,8 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
             value => value.const === key
           ).length > 0;
         if (!mimetypeExists) {
-          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          const altOption = trans.__(formattedKey);
           const option = formatLabels[key] ? formatLabels[key] : altOption;
           const mimeTypeValue = response[key].output_mimetype;
 
@@ -5081,7 +5083,7 @@ namespace Private {
       this._index = options.index !== undefined ? options.index : -1;
       this._cell = options.cell || null;
       this.id = `LinkedOutputView-${UUID.uuid4()}`;
-      this.title.label = 'Output View';
+      this.title.label = trans.__('Output View');
       this.title.icon = notebookIcon;
       this.title.caption = this._notebook.title.label
         ? trans.__('For Notebook: %1', this._notebook.title.label)

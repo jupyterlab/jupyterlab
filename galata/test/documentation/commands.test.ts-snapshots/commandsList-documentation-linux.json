@@ -2501,7 +2501,7 @@
   },
   {
     "id": "filebrowser:go-up",
-    "label": "go up",
+    "label": "Go Up",
     "caption": "",
     "shortcuts": [
       "Backspace"

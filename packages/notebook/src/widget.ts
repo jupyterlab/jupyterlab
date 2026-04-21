@@ -1649,6 +1649,7 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
     super({
       renderer: {
         createOuter(): HTMLElement {
@@ -1658,7 +1659,7 @@ export class Notebook extends StaticNotebook {
         createViewport(): HTMLElement {
           const el = document.createElement('div');
           el.setAttribute('role', 'feed');
-          el.setAttribute('aria-label', 'Cells');
+          el.setAttribute('aria-label', trans.__('Cells'));
           return el;
         },
 
@@ -2838,7 +2839,9 @@ export class Notebook extends StaticNotebook {
     if (widget && widget.editorWidget?.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
-      event.preventDefault();
+      if (!target.closest('[data-jp-suppress-context-menu]')) {
+        event.preventDefault();
+      }
     }
   }
 

@@ -4,7 +4,7 @@
   "private": true,
   "main": "./index.js",
   "scripts": {
-    "build": "npm run clean && build-labextension --development --core-path ../core_package .",
+    "build": "npm run clean && jupyter-builder build --development=true --core-package-file ../core_package/package.json .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
+    "@jupyter/builder": "^0.0.6",
     "@jupyterlab/builder": "^4.6.0-alpha.4",
     "rimraf": "~5.0.5"
   },
