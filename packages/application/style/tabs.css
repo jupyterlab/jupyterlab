@@ -63,10 +63,10 @@
 .lm-DockPanel-tabBar .lm-TabBar-tab:focus-visible,
 .lm-DockPanel-tabBar .lm-TabBar-addButton:focus-visible,
 .lm-TabPanel-tabBar .lm-TabBar-tab:focus-visible {
-  outline-width: 3px;
+  outline-width: var(--jp-focus-outline-width);
   outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
-  outline-offset: -3px;
+  outline-offset: calc(-1 * var(--jp-focus-outline-width));
 }
 
 .lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after,

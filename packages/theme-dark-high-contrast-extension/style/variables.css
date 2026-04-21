@@ -498,3 +498,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-completer-type-background9: #bcbd22;
   --jp-completer-type-background10: #17becf;
 }
+
+/* Thicker focus outline for the console, tabs, and launcher cards so that
+    they are more visible against the white borders.
+*/
+.jp-CodeConsole-input:focus-visible,
+.jp-CodeConsole-content:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-tab:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-addButton:focus-visible,
+.lm-TabPanel-tabBar .lm-TabBar-tab:focus-visible {
+  outline-width: 3px;
+  outline-offset: -3px;
+}
+
+.jp-LauncherCard:focus:not(:active) {
+  outline-width: 3px;
+}
