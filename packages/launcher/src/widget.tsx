@@ -152,8 +152,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
         return Math.min(
           ...items.map(
-            (item: ILauncher.IItemOptions) =>
-              item.categoryRank ?? defaultRank
+            (item: ILauncher.IItemOptions) => item.categoryRank ?? defaultRank
           )
         );
       };
