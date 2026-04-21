@@ -511,6 +511,6 @@ all of MD as it is not optimized for dense, information rich UIs.
   outline-offset: -3px;
 }
 
-.jp-LauncherCard:focus:not(:active) {
+.jp-LauncherCard:focus-visible {
   outline-width: 3px;
 }

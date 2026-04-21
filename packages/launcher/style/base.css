@@ -111,11 +111,15 @@
 }
 
 .jp-LauncherCard:focus:not(:active) {
+  border: 1px solid var(--jp-focus-outline-color);
+  box-shadow: var(--jp-elevation-z6);
+}
+
+.jp-LauncherCard:focus-visible {
   outline-width: var(--jp-focus-outline-width);
   outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
   outline-offset: calc(-1 * var(--jp-border-width));
-  box-shadow: var(--jp-elevation-z6);
 }
 
 .jp-LauncherCard:hover {
