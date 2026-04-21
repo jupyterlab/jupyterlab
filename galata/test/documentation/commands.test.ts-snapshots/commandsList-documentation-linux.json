@@ -230,6 +230,16 @@
     }
   },
   {
+    "id": "application:toggle-down-area",
+    "label": "Show Bottom Panel",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:toggle-fullscreen-mode",
     "label": "Fullscreen Mode",
     "caption": "",

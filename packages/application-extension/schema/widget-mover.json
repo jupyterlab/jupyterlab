@@ -5,7 +5,7 @@
     "context": [
       {
         "type": "submenu",
-        "selector": "[id^='jp-'] .lm-TabBar-tab",
+        "selector": ".lm-TabBar-tab[data-id]",
         "rank": 500,
         "submenu": {
           "id": "jp-contextmenu-move-widget",

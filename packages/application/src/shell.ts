@@ -65,6 +65,11 @@ const DEFAULT_RANK = 900;
 const ACTIVITY_CLASS = 'jp-Activity';
 
 /**
+ * The default relative size of the down area when it is expanded.
+ */
+const DEFAULT_DOWN_AREA_SIZE = 0.25;
+
+/**
  * The JupyterLab application shell token.
  */
 export const ILabShell = new Token<ILabShell>(
@@ -266,6 +271,11 @@ export namespace ILabShell {
   }
 
   export interface IDownArea {
+    /**
+     * A flag denoting whether the down area has been collapsed.
+     */
+    readonly collapsed?: boolean;
+
     /**
      * The current widget that has down area focus.
      */
@@ -617,6 +627,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Whether the down area is collapsed.
+   */
+  get downCollapsed(): boolean {
+    return this._downPanel.isHidden;
+  }
+
+  /**
    * A signal emitted when the main area's layout is modified.
    */
   get layoutModified(): ISignal<this, void> {
@@ -835,7 +852,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       title => title.owner.id === id
     );
     if (tabIndex >= 0) {
+      const wasHidden = this._downPanel.isHidden;
       this._downPanel.currentIndex = tabIndex;
+      if (wasHidden) {
+        this._showDownPanel();
+        this._onLayoutModified();
+      }
+      this._downPanel.currentWidget?.activate();
       return;
     }
 
@@ -1043,12 +1066,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Move a widget type to a new area.
+   * Move a widget to a new area and update the shell user layout.
    *
-   * The type is determined from the `widget.id` and fallback to `widget.id`.
+   * The widget is reparented to `area` immediately. The type used as the
+   * user-layout key is determined from `widget.id`, falling back to
+   * `widget.id` itself.
    *
    * #### Notes
-   * If `mode` is undefined, both mode are updated.
+   * If `mode` is undefined, both modes are updated in the user layout.
+   * When `mode` is set, only that mode's user layout is updated, but the
+   * live widget is still reparented regardless of mode.
+   *
    * The new layout is stored in the shell user layout. Callers are
    * responsible for persisting it when needed.
    *
@@ -1107,6 +1135,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Collapse the down area.
+   */
+  collapseDown(): void {
+    if (!this._downPanel.isHidden) {
+      this._hideDownPanel();
+      this._onLayoutModified();
+    }
+  }
+
+  /**
    * Dispose the shell.
    */
   dispose(): void {
@@ -1138,6 +1176,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   expandRight(): void {
     this._rightHandler.expand();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Expand the down area.
+   */
+  expandDown(): void {
+    if (this._downPanel.stackedPanel.widgets.length === 0) {
+      return;
+    }
+
+    this._showDownPanel();
+    this._downPanel.currentWidget?.activate();
     this._onLayoutModified();
   }
 
@@ -1264,6 +1315,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Rehydrate the down area
     if (downArea) {
       const { currentWidget, widgets, size } = downArea;
+      const collapsed = downArea.collapsed ?? !size;
 
       const widgetIds = widgets?.map(widget => widget.id) ?? [];
       // Remove absent widgets
@@ -1296,18 +1348,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         const index = this._downPanel.stackedPanel.widgets.findIndex(
           widget => widget.id === currentWidget.id
         );
-        if (index) {
+        if (index >= 0) {
           this._downPanel.currentIndex = index;
-          this._downPanel.currentWidget?.activate();
         }
       }
 
-      if (size && size > 0.0) {
-        this._vsplitPanel.setRelativeSizes([1.0 - size, size]);
+      if (!collapsed && widgets?.length && size && size > 0.0) {
+        this._showDownPanel(size);
+        this._downPanel.currentWidget?.activate();
       } else {
-        // Close all tabs and hide the panel
-        this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
-        this._downPanel.hide();
+        this._hideDownPanel();
+        if (size && size > 0.0) {
+          // Remember the saved size so a later expand restores the user's
+          // previous height. `_hideDownPanel` seeds `_lastDownAreaSize`
+          // from the current splitter, which at cold startup reflects the
+          // default layout rather than the persisted value.
+          this._lastDownAreaSize = size;
+        }
       }
     }
 
@@ -1358,9 +1415,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
             : this._dockPanel.saveLayout()
       },
       downArea: {
+        collapsed: this.downCollapsed,
         currentWidget: this._downPanel.currentWidget,
         widgets: Array.from(this._downPanel.stackedPanel.widgets),
-        size: this._vsplitPanel.relativeSizes()[1]
+        size:
+          this._downPanel.stackedPanel.widgets.length === 0
+            ? 0
+            : this.downCollapsed
+              ? this._lastDownAreaSize
+              : this._vsplitPanel.relativeSizes()[1]
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
@@ -1748,11 +1811,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
 
     this._downPanel.addWidget(widget);
-    this._onLayoutModified();
 
     if (this._downPanel.isHidden) {
-      this._downPanel.show();
+      this._showDownPanel();
     }
+
+    this._onLayoutModified();
+  }
+
+  private _showDownPanel(size: number = this._lastDownAreaSize): void {
+    const downSize = size > 0.0 ? size : DEFAULT_DOWN_AREA_SIZE;
+    this._lastDownAreaSize = downSize;
+    this._vsplitPanel.setRelativeSizes([
+      Math.max(1.0 - downSize, 0.0),
+      downSize
+    ]);
+    this._downPanel.show();
+  }
+
+  private _hideDownPanel(): void {
+    const size = this._vsplitPanel.relativeSizes()[1];
+    if (size > 0.0) {
+      this._lastDownAreaSize = size;
+    }
+    this._downPanel.hide();
   }
 
   /*
@@ -1838,7 +1920,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _onTabPanelChanged(): void {
     if (this._downPanel.stackedPanel.widgets.length === 0) {
-      this._downPanel.hide();
+      this._hideDownPanel();
     }
     this._onLayoutModified();
   }
@@ -1916,6 +1998,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _dockPanel: DockPanel;
   private _downPanel: TabPanel;
   private _isRestored = false;
+  private _lastDownAreaSize = DEFAULT_DOWN_AREA_SIZE;
   private _layoutModified = new Signal<this, void>(this);
   private _layoutDebouncer = new Debouncer(() => {
     this._layoutModified.emit(undefined);
@@ -2352,21 +2435,17 @@ namespace Private {
           widgetIdSet.has(widget.id) ? widgetIds[savedIndex++] : widget.id
         );
 
-        while (
-          !ArrayExt.shallowEqual(
-            targetIds,
-            this._stackedPanel.widgets.map(widget => widget.id)
-          )
-        ) {
-          this._stackedPanel.widgets.forEach((widget, index) => {
-            const position = targetIds.findIndex(id => widget.id === id);
-            if (position >= 0 && position !== index) {
-              ArrayExt.move(this._items, index, position);
-              this._stackedPanel.insertWidget(position, widget);
-              this._sideBar.insertTab(position, widget.title);
-            }
-          });
-        }
+        targetIds.forEach((id, targetIndex) => {
+          const currentIndex = this._stackedPanel.widgets.findIndex(
+            widget => widget.id === id
+          );
+          if (currentIndex >= 0 && currentIndex !== targetIndex) {
+            const widget = this._stackedPanel.widgets[currentIndex];
+            ArrayExt.move(this._items, currentIndex, targetIndex);
+            this._stackedPanel.insertWidget(targetIndex, widget);
+            this._sideBar.insertTab(targetIndex, widget.title);
+          }
+        });
       }
 
       if (data.currentWidget) {

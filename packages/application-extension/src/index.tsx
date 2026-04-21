@@ -102,6 +102,8 @@ namespace CommandIDs {
 
   export const toggleRightArea: string = 'application:toggle-right-area';
 
+  export const toggleDownArea: string = 'application:toggle-down-area';
+
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
   export const toggleSidebarWidget: string =
@@ -540,6 +542,28 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isEnabled: () => !labShell.isEmpty('right')
       });
 
+      commands.addCommand(CommandIDs.toggleDownArea, {
+        label: trans.__('Show Bottom Panel'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
+        execute: () => {
+          if (labShell.downCollapsed) {
+            labShell.expandDown();
+          } else {
+            labShell.collapseDown();
+            if (labShell.currentWidget) {
+              labShell.activateById(labShell.currentWidget.id);
+            }
+          }
+        },
+        isToggled: () => !labShell.downCollapsed,
+        isEnabled: () => !labShell.isEmpty('down')
+      });
+
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
         label: args =>
           args === undefined ||
@@ -883,6 +907,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
+        CommandIDs.toggleDownArea,
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
