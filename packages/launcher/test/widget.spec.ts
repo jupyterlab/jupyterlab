@@ -112,9 +112,19 @@ describe('@jupyterlab/launcher', () => {
         launcher.node.querySelectorAll('.jp-Launcher-sectionTitle')
       ).map(node => node.textContent);
 
+      const notebookIndex = titles.indexOf('Notebook');
       const customIndex = titles.indexOf('Custom');
+      const consoleIndex = titles.indexOf('Console');
+      const otherIndex = titles.indexOf('Other');
 
+      expect(notebookIndex).toBeGreaterThan(-1);
       expect(customIndex).toBeGreaterThan(-1);
+      expect(consoleIndex).toBeGreaterThan(-1);
+      expect(otherIndex).toBeGreaterThan(-1);
+
+      expect(notebookIndex).toBeLessThan(customIndex);
+      expect(customIndex).toBeLessThan(consoleIndex);
+      expect(consoleIndex).toBeLessThan(otherIndex);
 
       launcher.dispose();
       document.body.textContent = '';
