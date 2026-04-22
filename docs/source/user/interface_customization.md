@@ -109,9 +109,9 @@ The file browser moved from the left sidebar to the main work area.
 The sessions and tabs panel moved from the left sidebar to the down area.
 :::
 
-Those changes are stored in the same `layout` setting described above, so they
-remain in effect until you move the widget again or reset the application
-layout.
+Those changes are stored in the workspace layout, so they are restored when you
+reopen the same workspace. They do not change the type-based `layout` setting
+described above, which controls the default area for future widgets.
 
 (activity-bar-position-customization)=
 
