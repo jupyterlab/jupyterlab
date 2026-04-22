@@ -939,7 +939,10 @@ export class BreadCrumbs extends Widget {
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
     if (this._isEditMode) {
-      if (localPath !== this._lastPath) {
+      if (
+        this._pathNavigator.shouldCloseForRefreshedPath(localPath) ||
+        localPath !== this._lastPath
+      ) {
         this._exitEditMode();
         this._onPathEdited?.();
       }
