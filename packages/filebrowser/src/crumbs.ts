@@ -257,6 +257,11 @@ export class BreadCrumbs extends Widget {
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
 
+    // We track the path on which we are;
+    // this is to make sure we don't exit edit mode on model refresh if
+    // the path has not changed.
+    this._lastPath = localPath;
+
     // Invalidate cached widths if the path changed
     if (this._previousState && this._previousState.path !== localPath) {
       this._cachedWidths = null;
@@ -889,6 +894,10 @@ export class BreadCrumbs extends Widget {
    */
   enterEditMode(): void {
     this._isEditMode = true;
+    // Snapshot the current path so _onModelRefreshed can reliably detect
+    // whether the path actually changed while in edit mode.
+    const contents = this._model.manager.services.contents;
+    this._lastPath = contents.localPath(this._model.path);
     this.node.classList.add(BREADCRUMB_EDIT_MODE_CLASS);
     // Clear cached state so that when we exit edit mode, onUpdateRequest
     // will unconditionally re-render the breadcrumbs (the path may have
@@ -927,14 +936,13 @@ export class BreadCrumbs extends Widget {
    * If we are in edit mode, dismiss it (the model path may have changed).
    */
   private _onModelRefreshed(): void {
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
     if (this._isEditMode) {
-      const contents = this._model.manager.services.contents;
-      const localPath = contents.localPath(this._model.path);
-      if (!this._pathNavigator.shouldCloseForRefreshedPath(localPath)) {
-        return;
+      if (localPath !== this._lastPath) {
+        this._exitEditMode();
+        this._onPathEdited?.();
       }
-      this._exitEditMode();
-      this._onPathEdited?.();
       return;
     }
     this.update();
@@ -960,6 +968,7 @@ export class BreadCrumbs extends Widget {
   } | null = null;
   private _lastRenderedWidth = 0;
   private _isEditMode = false;
+  private _lastPath = '';
   private _crumbContainer: HTMLElement;
   private _crumbContent: HTMLElement;
   private _pathNavigator: PathNavigator;
