@@ -274,6 +274,7 @@ export class BreadCrumbs extends Widget {
       minimumRightItems: adaptiveItems.right
     };
     if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
+      this._runPostActivationFocus();
       return;
     }
     this._previousState = state;
@@ -281,16 +282,24 @@ export class BreadCrumbs extends Widget {
     Private.updateCrumbs(this._crumbContent, this._crumbs, state);
     this._syncCrumbTabIndices();
 
-    if (this._restoreBreadcrumbFocusAfterUpdate) {
-      this._restoreBreadcrumbFocusAfterUpdate = false;
-      requestAnimationFrame(() => {
-        if (this.isDisposed || this._isEditMode) {
-          return;
-        }
-        this._focusPreviouslyActivatedCrumb();
-        this._onPathActivated?.();
-      });
+    this._runPostActivationFocus();
+  }
+
+  /**
+   * Restore crumb focus after breadcrumb activation and invoke activation callback.
+   */
+  private _runPostActivationFocus(): void {
+    if (!this._restoreBreadcrumbFocusAfterUpdate) {
+      return;
     }
+    this._restoreBreadcrumbFocusAfterUpdate = false;
+    requestAnimationFrame(() => {
+      if (this.isDisposed || this._isEditMode) {
+        return;
+      }
+      this._focusPreviouslyActivatedCrumb();
+      this._onPathActivated?.(this._lastActivatedCrumb?.kind ?? 'item');
+    });
   }
 
   /**
@@ -955,7 +964,7 @@ export class BreadCrumbs extends Widget {
   private _crumbContent: HTMLElement;
   private _pathNavigator: PathNavigator;
   private _onPathEdited?: () => void;
-  private _onPathActivated?: () => void;
+  private _onPathActivated?: (kind: BreadCrumbs.IActivatedKind) => void;
   private _lastActivatedCrumb:
     | { kind: 'preferred' | 'root' }
     | { kind: 'item'; path: string }
@@ -1008,8 +1017,13 @@ export namespace BreadCrumbs {
     /**
      * Callback invoked after breadcrumb activation changes directory.
      */
-    onPathActivated?: () => void;
+    onPathActivated?: (kind: IActivatedKind) => void;
   }
+
+  /**
+   * Breadcrumb segment type that initiated activation.
+   */
+  export type IActivatedKind = 'preferred' | 'root' | 'item';
 }
 
 /**
