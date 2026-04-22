@@ -26,12 +26,45 @@ test.describe('Output Scrolling', () => {
   });
 
   test('Scrolling mode', async ({ page }) => {
+    await page.notebook.selectCells(0);
+    expect(
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.isToggled(
+          'notebook:toggle-output-scrolling'
+        );
+      })
+    ).toBe(false);
+
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute(
+        'notebook:toggle-output-scrolling'
+      );
+    });
+    await expect(page.locator(`${cellSelector} >> nth=0`)).toHaveClass(
+      /jp-mod-outputsScrolled/
+    );
+    expect(
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.isToggled(
+          'notebook:toggle-output-scrolling'
+        );
+      })
+    ).toBe(true);
+
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute(
+        'notebook:toggle-output-scrolling'
+      );
+    });
+    await expect(page.locator(`${cellSelector} >> nth=0`)).not.toHaveClass(
+      /jp-mod-outputsScrolled/
+    );
+
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute(
         'notebook:enable-output-scrolling'
       );
     });
-    await page.notebook.selectCells(0);
     await expect(page.locator(`${cellSelector} >> nth=0`)).toHaveClass(
       /jp-mod-outputsScrolled/
     );

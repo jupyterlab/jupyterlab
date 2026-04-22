@@ -459,6 +459,7 @@ function addCommands(
       const term = new XTerm(session, options, translator);
 
       term.title.icon = terminalIcon;
+      // eslint-disable-next-line jupyter/no-untranslated-string
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
@@ -706,10 +707,11 @@ function addCommands(
         return trans.__('Set terminal theme to the provided `theme`.');
       }
       const theme = args['theme'] as string;
+      const rawTheme = theme[0].toLocaleUpperCase() + theme.slice(1);
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
-          : trans.__(theme[0].toUpperCase() + theme.slice(1));
+          : trans.__(rawTheme);
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;

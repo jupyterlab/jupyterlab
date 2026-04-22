@@ -231,6 +231,9 @@ export default defineConfig([
       'jupyter/command-described-by': 'error',
       'jupyter/plugin-activation-args': 'error',
       'jupyter/plugin-description': 'error',
+      'jupyter/token-format': 'error',
+      'jupyter/no-translation-concatenation': 'error',
+      'jupyter/no-untranslated-string': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -443,16 +446,19 @@ export default defineConfig([
   {
     files: [
       '**/*.spec.ts',
+      '**/*.spec.tsx',
       '**/test/**/*.ts',
       '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',
-      'packages/services/src/serverconnection.ts'
+      'packages/services/src/serverconnection.ts',
+      'docs/source/extension/*.tsx'
     ],
 
     rules: {
       'no-restricted-syntax': 'off',
-      'jupyter/command-described-by': 'off'
+      'jupyter/command-described-by': 'off',
+      'jupyter/no-untranslated-string': 'off'
     }
   },
   {
