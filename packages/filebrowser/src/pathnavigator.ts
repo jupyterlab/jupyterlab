@@ -163,15 +163,34 @@ export class PathNavigator extends Widget {
     }
     // Collapse any double slashes that may result from the above transforms.
     normalized = normalized.replace(/\/\/+/g, '/');
+    const submittedLocalPath = this._model.manager.services.contents.localPath(
+      normalized || '/'
+    );
+    this._pendingSubmittedLocalPath = submittedLocalPath;
     // Hide suggestions immediately so the input looks committed.
     this._suggestionsNode.style.display = 'none';
     this._model
       .cd(normalized || '/')
       .then(() => this._close())
       .catch(error => {
+        this._pendingSubmittedLocalPath = null;
         void showErrorMessage(this._trans.__('Open Error'), error);
         this._close();
       });
+  }
+
+  /**
+   * Whether a refresh corresponds to the most recent submitted path.
+   */
+  shouldCloseForRefreshedPath(localPath: string): boolean {
+    if (this._pendingSubmittedLocalPath === null) {
+      return false;
+    }
+    if (this._pendingSubmittedLocalPath !== localPath) {
+      return false;
+    }
+    this._pendingSubmittedLocalPath = null;
+    return true;
   }
 
   /**
@@ -426,6 +445,7 @@ export class PathNavigator extends Widget {
   private _suggestionDirPath = '';
   private _suggestionFetchTime = 0;
   private _fetchId = 0;
+  private _pendingSubmittedLocalPath: string | null = null;
 }
 
 export namespace PathNavigator {
