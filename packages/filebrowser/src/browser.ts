@@ -105,12 +105,9 @@ export class FileBrowser extends SidePanel {
       },
       onPathActivated: kind => {
         requestAnimationFrame(() => {
-          if (!(this.listing.sortedItems().next().done ?? false)) {
+          const hasItems = !(this.listing.sortedItems().next().done ?? false);
+          if (hasItems || kind === 'preferred') {
             this.focusFirstListingItem();
-            return;
-          }
-          if (kind === 'preferred') {
-            this.crumbs.focusLastCrumb();
           }
         });
       }
