@@ -278,14 +278,14 @@ export class BreadCrumbs extends Widget {
       minimumLeftItems: adaptiveItems.left,
       minimumRightItems: adaptiveItems.right
     };
-    if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
-      this._runPostActivationFocus();
-      return;
+    const stateUnchanged =
+      this._previousState !== null &&
+      JSONExt.deepEqual(state, this._previousState);
+    if (!stateUnchanged) {
+      this._previousState = state;
+      Private.updateCrumbs(this._crumbContent, this._crumbs, state);
+      this._syncCrumbTabIndices();
     }
-    this._previousState = state;
-
-    Private.updateCrumbs(this._crumbContent, this._crumbs, state);
-    this._syncCrumbTabIndices();
 
     this._runPostActivationFocus();
   }
@@ -401,38 +401,37 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Navigate to the directory represented by a breadcrumb segment (same as click).
+   * Navigate to the directory represented by a breadcrumb segment.
    */
   private _activateCrumbSegment(crumb: HTMLElement): void {
     this._focusCrumb(crumb);
-    if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
-      this._restoreBreadcrumbFocusAfterUpdate = true;
-      const preferredPath = PageConfig.getOption('preferredPath');
-      const path = preferredPath ? '/' + preferredPath : preferredPath;
-      this._model.cd(path).catch(error => {
-        this._restoreBreadcrumbFocusAfterUpdate = false;
-        void showErrorMessage(this._trans.__('Open Error'), error);
-      });
+    const destination = this._destinationForCrumb(crumb);
+    if (!destination) {
       return;
     }
-    if (
-      crumb.classList.contains(BREADCRUMB_ITEM_CLASS) ||
-      crumb.classList.contains(BREADCRUMB_ROOT_CLASS)
-    ) {
-      let destination: string | undefined;
-      if (crumb.classList.contains(BREADCRUMB_ROOT_CLASS)) {
-        destination = '/';
-      } else {
-        destination = `/${crumb.dataset.path}`;
-      }
-      if (destination) {
-        this._restoreBreadcrumbFocusAfterUpdate = true;
-        this._model.cd(destination).catch(error => {
-          this._restoreBreadcrumbFocusAfterUpdate = false;
-          void showErrorMessage(this._trans.__('Open Error'), error);
-        });
-      }
+
+    this._restoreBreadcrumbFocusAfterUpdate = true;
+    this._model.cd(destination).catch(error => {
+      this._restoreBreadcrumbFocusAfterUpdate = false;
+      void showErrorMessage(this._trans.__('Open Error'), error);
+    });
+  }
+
+  /**
+   * Resolve the destination path for an activated breadcrumb segment.
+   */
+  private _destinationForCrumb(crumb: HTMLElement): string | null {
+    if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+      const preferredPath = PageConfig.getOption('preferredPath');
+      return preferredPath ? '/' + preferredPath : preferredPath;
     }
+    if (crumb.classList.contains(BREADCRUMB_ROOT_CLASS)) {
+      return '/';
+    }
+    if (crumb.classList.contains(BREADCRUMB_ITEM_CLASS)) {
+      return `/${crumb.dataset.path}`;
+    }
+    return null;
   }
 
   /**
@@ -883,7 +882,7 @@ export class BreadCrumbs extends Widget {
     const localPath = contents.localPath(this._model.path);
     if (this._isEditMode) {
       if (
-        this._pathNavigator.shouldCloseForRefreshedPath(localPath) ||
+        this._pathNavigator.matchesSubmittedPath(localPath) ||
         localPath !== this._lastPath
       ) {
         this._exitEditMode();
