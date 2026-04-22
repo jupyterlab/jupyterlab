@@ -160,14 +160,14 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this.sharedModel.getState('dirty') as boolean;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
     const oldValue = this.dirty;
     if (newValue === oldValue) {
       return;
     }
-    this.sharedModel.setState('dirty', newValue);
+    this.sharedModel.dirty = newValue;
   }
 
   /**

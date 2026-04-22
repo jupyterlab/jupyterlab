@@ -270,8 +270,6 @@ export namespace NotebookActions {
       .replace(/\n+$/, '');
 
     nbModel.sharedModel.transact(() => {
-      nbModel.sharedModel.setState('dirty', true);
-
       // Insert new cells above the current cell (if any)
       if (newCells.length > 0) {
         nbModel.sharedModel.insertCells(index, newCells);
@@ -446,7 +444,6 @@ export namespace NotebookActions {
 
     // Make the changes while preserving history.
     model.sharedModel.transact(() => {
-      model.sharedModel.setState('dirty', true);
       model.sharedModel.deleteCell(active);
       model.sharedModel.insertCell(active, newModel);
       toDelete
@@ -505,18 +502,15 @@ export namespace NotebookActions {
     const model = notebook.model;
 
     const newIndex = notebook.activeCell ? notebook.activeCellIndex : 0;
-    model.sharedModel.transact(() => {
-      model.sharedModel.setState('dirty', true);
-      model.sharedModel.insertCell(newIndex, {
-        cell_type: notebook.notebookConfig.defaultCell,
-        metadata:
-          notebook.notebookConfig.defaultCell === 'code'
-            ? {
-                // This is an empty cell created by user, thus is trusted
-                trusted: true
-              }
-            : {}
-      });
+    model.sharedModel.insertCell(newIndex, {
+      cell_type: notebook.notebookConfig.defaultCell,
+      metadata:
+        notebook.notebookConfig.defaultCell === 'code'
+          ? {
+              // This is an empty cell created by user, thus is trusted
+              trusted: true
+            }
+          : {}
     });
     // Make the newly inserted cell active.
     notebook.activeCellIndex = newIndex;
@@ -545,18 +539,15 @@ export namespace NotebookActions {
     const model = notebook.model;
 
     const newIndex = notebook.activeCell ? notebook.activeCellIndex + 1 : 0;
-    model.sharedModel.transact(() => {
-      model.sharedModel.setState('dirty', true);
-      model.sharedModel.insertCell(newIndex, {
-        cell_type: notebook.notebookConfig.defaultCell,
-        metadata:
-          notebook.notebookConfig.defaultCell === 'code'
-            ? {
-                // This is an empty cell created by user, thus is trusted
-                trusted: true
-              }
-            : {}
-      });
+    model.sharedModel.insertCell(newIndex, {
+      cell_type: notebook.notebookConfig.defaultCell,
+      metadata:
+        notebook.notebookConfig.defaultCell === 'code'
+          ? {
+              // This is an empty cell created by user, thus is trusted
+              trusted: true
+            }
+          : {}
     });
     // Make the newly inserted cell active.
     notebook.activeCellIndex = newIndex;
@@ -753,18 +744,15 @@ export namespace NotebookActions {
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
       // Do not use push here, as we want an widget insertion
       // to make sure no placeholder widget is rendered.
-      model.sharedModel.transact(() => {
-        model.sharedModel.setState('dirty', true);
-        model.sharedModel.insertCell(notebook.widgets.length, {
-          cell_type: notebook.notebookConfig.defaultCell,
-          metadata:
-            notebook.notebookConfig.defaultCell === 'code'
-              ? {
-                  // This is an empty cell created by user, thus is trusted
-                  trusted: true
-                }
-              : {}
-        });
+      model.sharedModel.insertCell(notebook.widgets.length, {
+        cell_type: notebook.notebookConfig.defaultCell,
+        metadata:
+          notebook.notebookConfig.defaultCell === 'code'
+            ? {
+                // This is an empty cell created by user, thus is trusted
+                trusted: true
+              }
+            : {}
       });
       notebook.activeCellIndex++;
       if (notebook.activeCell?.inViewport === false) {
@@ -823,18 +811,15 @@ export namespace NotebookActions {
       translator
     );
     const model = notebook.model;
-    model.sharedModel.transact(() => {
-      model.sharedModel.setState('dirty', true);
-      model.sharedModel.insertCell(notebook.activeCellIndex + 1, {
-        cell_type: notebook.notebookConfig.defaultCell,
-        metadata:
-          notebook.notebookConfig.defaultCell === 'code'
-            ? {
-                // This is an empty cell created by user, thus is trusted
-                trusted: true
-              }
-            : {}
-      });
+    model.sharedModel.insertCell(notebook.activeCellIndex + 1, {
+      cell_type: notebook.notebookConfig.defaultCell,
+      metadata:
+        notebook.notebookConfig.defaultCell === 'code'
+          ? {
+              // This is an empty cell created by user, thus is trusted
+              trusted: true
+            }
+          : {}
     });
     notebook.activeCellIndex++;
     if (notebook.activeCell?.inViewport === false) {
@@ -1514,7 +1499,6 @@ export namespace NotebookActions {
     const prevActiveCellIndex = notebook.activeCellIndex;
 
     model.sharedModel.transact(() => {
-      model.sharedModel.setState('dirty', true);
       // Set the starting index of the paste operation depending upon the mode.
       switch (mode) {
         case 'below':
@@ -1597,11 +1581,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     notebook.mode = 'command';
-    if (notebook.model!.sharedModel.undo()) {
-      notebook.model!.sharedModel.transact(() => {
-        notebook.model!.sharedModel.setState('dirty', true);
-      }, false);
-    }
+    notebook.model.sharedModel.undo();
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -1622,11 +1602,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    if (notebook.model!.sharedModel.redo()) {
-      notebook.model!.sharedModel.transact(() => {
-        notebook.model!.sharedModel.setState('dirty', true);
-      }, false);
-    }
+    notebook.model.sharedModel.redo();
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -1682,8 +1658,6 @@ export namespace NotebookActions {
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
         cell.sharedModel.transact(() => {
-          // FIXME: don't set dirty if clearExecution has no effect?
-          cell.sharedModel.notebook?.setState('dirty', true);
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
@@ -1713,8 +1687,6 @@ export namespace NotebookActions {
 
       if (cell.type === 'code') {
         cell.sharedModel.transact(() => {
-          // FIXME: don't set dirty if clearExecution has no effect?
-          cell.sharedModel.notebook?.setState('dirty', true);
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
@@ -2928,7 +2900,6 @@ namespace Private {
           newSource = Private.setMarkdownHeader(newSource, headingLevel);
         }
         notebookSharedModel.transact(() => {
-          notebook.model!.sharedModel.setState('dirty', true);
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
             // After change of type outputs are deleted so cell can be trusted.
@@ -2951,7 +2922,6 @@ namespace Private {
         });
       } else if (value === 'markdown' && headingLevel !== undefined) {
         notebookSharedModel.transact(() => {
-          notebook.model!.sharedModel.setState('dirty', true);
           child.model.sharedModel.setSource(
             Private.setMarkdownHeader(
               child.model.sharedModel.getSource(),
@@ -3001,7 +2971,6 @@ namespace Private {
     if (toDelete.length > 0) {
       // Delete the cells as one undo event.
       sharedModel.transact(() => {
-        sharedModel.setState('dirty', true);
         // Delete cells in reverse order to maintain the correct indices.
         toDelete.reverse().forEach(index => {
           sharedModel.deleteCell(index);
@@ -3231,12 +3200,9 @@ namespace Private {
       const state = Private.getState(notebook);
       const model = notebook.model!;
       const sharedModel = model!.sharedModel;
-      sharedModel.transact(() => {
-        sharedModel.setState('dirty', true);
-        sharedModel.insertCell(cellIndex, {
-          cell_type: 'markdown',
-          source: '#'.repeat(headingLevel) + ' '
-        });
+      sharedModel.insertCell(cellIndex, {
+        cell_type: 'markdown',
+        source: '#'.repeat(headingLevel) + ' '
       });
       notebook.activeCellIndex = cellIndex;
       if (notebook.activeCell?.inViewport === false) {

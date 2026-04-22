@@ -53,13 +53,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this.sharedModel.getState('dirty') as boolean;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
     if (newValue === this.dirty) {
       return;
     }
-    this.sharedModel.setState('dirty', newValue);
+    this.sharedModel.dirty = newValue;
   }
 
   /**
