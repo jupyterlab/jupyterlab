@@ -374,7 +374,7 @@ describe('docregistry/default', () => {
     describe('#dirty', () => {
       it('should get the dirty state of the document', () => {
         const model = new DocumentModel();
-        expect(model.dirty).toBe(undefined);
+        expect(model.dirty).toBe(false);
       });
 
       it('should emit `stateChanged` when changed', () => {
