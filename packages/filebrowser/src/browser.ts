@@ -94,7 +94,16 @@ export class FileBrowser extends SidePanel {
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
     this.mainPanel.title.label = this._trans.__('File Browser');
 
-    this.crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs = new BreadCrumbs({
+      model,
+      translator,
+      onPathEdited: () => {
+        // Wait a frame so listing updates are reflected before focusing.
+        requestAnimationFrame(() => {
+          this.focusFirstListingItem();
+        });
+      }
+    });
     this.crumbs.addClass(CRUMBS_CLASS);
 
     // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
@@ -406,6 +415,25 @@ export class FileBrowser extends SidePanel {
 
   clearSelectedItems(): void {
     this.listing.clearSelectedItems();
+  }
+
+  /**
+   * Move focus to the first listing item (or trailing breadcrumb when empty).
+   */
+  focusFirstListingItem(): void {
+    if (this.listing.sortedItems().next().done ?? false) {
+      this.crumbs.focusLastCrumb();
+      return;
+    }
+
+    const listing = this.listing as DirListing & {
+      focusFirstItem?: () => void;
+    };
+    if (listing.focusFirstItem) {
+      listing.focusFirstItem();
+      return;
+    }
+    listing.node.focus();
   }
 
   /**

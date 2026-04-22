@@ -91,6 +91,7 @@ export class BreadCrumbs extends Widget {
     this._fullPath = options.fullPath || false;
     this._minimumLeftItems = options.minimumLeftItems ?? 0;
     this._minimumRightItems = options.minimumRightItems ?? 2;
+    this._onPathEdited = options.onPathEdited;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     const hasPreferred = PageConfig.getOption('preferredPath');
@@ -345,6 +346,10 @@ export class BreadCrumbs extends Widget {
   private _focusTrailingCrumb(): void {
     const items = this._getFocusableCrumbElements();
     if (items.length === 0) {
+      // If there is no focusable crumb segment (e.g. root-restricted path),
+      // keep focus inside the breadcrumb widget itself.
+      this.node.tabIndex = -1;
+      this.node.focus();
       return;
     }
     this._focusCrumb(items[items.length - 1]);
@@ -837,6 +842,16 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Move focus to the trailing breadcrumb segment.
+   */
+  focusLastCrumb(): void {
+    // Defer to ensure any pending breadcrumb DOM updates are applied.
+    requestAnimationFrame(() => {
+      this._focusTrailingCrumb();
+    });
+  }
+
+  /**
    * Exit edit mode and restore the breadcrumb display.
    */
   private _exitEditMode(): void {
@@ -859,6 +874,7 @@ export class BreadCrumbs extends Widget {
     if (this._isEditMode) {
       if (localPath !== this._lastPath) {
         this._exitEditMode();
+        this._onPathEdited?.();
       }
       return;
     }
@@ -889,6 +905,7 @@ export class BreadCrumbs extends Widget {
   private _crumbContainer: HTMLElement;
   private _crumbContent: HTMLElement;
   private _pathNavigator: PathNavigator;
+  private _onPathEdited?: () => void;
 
   /**
    * After `cd()` rebuilds the trail, restore focus to the current-directory segment.
@@ -928,6 +945,11 @@ export namespace BreadCrumbs {
      * Number of items to show on right of ellipsis
      */
     minimumRightItems?: number;
+
+    /**
+     * Callback invoked after path edit changes directory.
+     */
+    onPathEdited?: () => void;
   }
 }
 
