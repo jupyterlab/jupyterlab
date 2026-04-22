@@ -446,7 +446,12 @@ export class BreadCrumbs extends Widget {
     const crumb = this._resolveCrumbFromEventTarget(event.target);
 
     if (isActivateKey && crumb && this._crumbContent.contains(crumb)) {
-      if (this._isCurrentDirectoryCrumb(crumb)) {
+      if (
+        event.key === ' ' &&
+        crumb.classList.contains(BREADCRUMB_ROOT_CLASS)
+      ) {
+        this.enterEditMode();
+      } else if (this._isCurrentDirectoryCrumb(crumb)) {
         this.enterEditMode();
       } else {
         this._activateCrumbSegment(crumb);
