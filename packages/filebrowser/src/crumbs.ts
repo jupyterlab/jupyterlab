@@ -92,6 +92,7 @@ export class BreadCrumbs extends Widget {
     this._minimumLeftItems = options.minimumLeftItems ?? 0;
     this._minimumRightItems = options.minimumRightItems ?? 2;
     this._onPathEdited = options.onPathEdited;
+    this._onPathActivated = options.onPathActivated;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     const hasPreferred = PageConfig.getOption('preferredPath');
@@ -291,7 +292,8 @@ export class BreadCrumbs extends Widget {
         if (this.isDisposed || this._isEditMode) {
           return;
         }
-        this._focusTrailingCrumb();
+        this._focusPreviouslyActivatedCrumb();
+        this._onPathActivated?.();
       });
     }
   }
@@ -356,6 +358,60 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Stash metadata for the crumb activated before navigation.
+   */
+  private _rememberActivatedCrumb(crumb: HTMLElement): void {
+    if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+      this._lastActivatedCrumb = { kind: 'preferred' };
+      return;
+    }
+    if (crumb.classList.contains(BREADCRUMB_ROOT_CLASS)) {
+      this._lastActivatedCrumb = { kind: 'root' };
+      return;
+    }
+    this._lastActivatedCrumb = {
+      kind: 'item',
+      path: crumb.dataset.path ?? ''
+    };
+  }
+
+  /**
+   * Restore focus to the crumb that initiated the last navigation.
+   */
+  private _focusPreviouslyActivatedCrumb(): void {
+    const activated = this._lastActivatedCrumb;
+    if (!activated) {
+      this._focusTrailingCrumb();
+      return;
+    }
+
+    let target: HTMLElement | null = null;
+    switch (activated.kind) {
+      case 'preferred':
+        target = this._crumbContent.querySelector<HTMLElement>(
+          `.${BREADCRUMB_PREFERRED_CLASS}`
+        );
+        break;
+      case 'root':
+        target = this._crumbContent.querySelector<HTMLElement>(
+          `.${BREADCRUMB_ROOT_CLASS}`
+        );
+        break;
+      case 'item':
+        target = this._crumbContent.querySelector<HTMLElement>(
+          `.${BREADCRUMB_ITEM_CLASS}[data-path="${activated.path}"]`
+        );
+        break;
+    }
+
+    if (target) {
+      this._focusCrumb(target);
+      return;
+    }
+    this._focusTrailingCrumb();
+  }
+
+  /**
    * Walk from an event target to the nearest breadcrumb segment host, if any.
    */
   private _resolveCrumbFromEventTarget(
@@ -396,6 +452,7 @@ export class BreadCrumbs extends Widget {
   private _activateCrumbSegment(crumb: HTMLElement): void {
     this._focusCrumb(crumb);
     if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+      this._rememberActivatedCrumb(crumb);
       this._restoreBreadcrumbFocusAfterUpdate = true;
       const preferredPath = PageConfig.getOption('preferredPath');
       const path = preferredPath ? '/' + preferredPath : preferredPath;
@@ -416,6 +473,7 @@ export class BreadCrumbs extends Widget {
         destination = `/${crumb.dataset.path}`;
       }
       if (destination) {
+        this._rememberActivatedCrumb(crumb);
         this._restoreBreadcrumbFocusAfterUpdate = true;
         this._model.cd(destination).catch(error => {
           this._restoreBreadcrumbFocusAfterUpdate = false;
@@ -906,6 +964,11 @@ export class BreadCrumbs extends Widget {
   private _crumbContent: HTMLElement;
   private _pathNavigator: PathNavigator;
   private _onPathEdited?: () => void;
+  private _onPathActivated?: () => void;
+  private _lastActivatedCrumb:
+    | { kind: 'preferred' | 'root' }
+    | { kind: 'item'; path: string }
+    | null = null;
 
   /**
    * After `cd()` rebuilds the trail, restore focus to the current-directory segment.
@@ -950,6 +1013,11 @@ export namespace BreadCrumbs {
      * Callback invoked after path edit changes directory.
      */
     onPathEdited?: () => void;
+
+    /**
+     * Callback invoked after breadcrumb activation changes directory.
+     */
+    onPathActivated?: () => void;
   }
 }
 

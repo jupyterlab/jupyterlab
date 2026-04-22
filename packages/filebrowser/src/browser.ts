@@ -102,6 +102,13 @@ export class FileBrowser extends SidePanel {
         requestAnimationFrame(() => {
           this.focusFirstListingItem();
         });
+      },
+      onPathActivated: () => {
+        requestAnimationFrame(() => {
+          if (!(this.listing.sortedItems().next().done ?? false)) {
+            this.focusFirstListingItem();
+          }
+        });
       }
     });
     this.crumbs.addClass(CRUMBS_CLASS);
