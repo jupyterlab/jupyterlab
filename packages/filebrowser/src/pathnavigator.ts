@@ -164,9 +164,8 @@ export class PathNavigator extends Widget {
     }
     // Collapse any double slashes that may result from the above transforms.
     normalized = normalized.replace(/\/\/+/g, '/');
-    this._pendingSubmittedLocalPath = this._model.manager.services.contents.localPath(
-      normalized || '/'
-    );
+    this._pendingSubmittedLocalPath =
+      this._model.manager.services.contents.localPath(normalized || '/');
     // Hide suggestions immediately so the input looks committed.
     this._suggestionsNode.style.display = 'none';
     this._model
