@@ -63,15 +63,19 @@
   height: 100%;
 }
 
+.jp-DocumentSearch-button-content svg {
+  width: 100%;
+  height: 100%;
+}
+
 .jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-wrapper {
   height: calc(var(--jp-private-document-search-button-height) - 6px);
   width: calc(var(--jp-private-document-search-button-height) - 6px);
   margin: 3px 3px 3px 1px;
 }
 
-.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-content svg {
-  height: 90%;
-  width: 90%;
+.jp-DocumentSearch-input-wrapper .jp-DocumentSearch-button-content {
+  padding: 1px;
 }
 
 .jp-DocumentSearch-input-wrapper {
