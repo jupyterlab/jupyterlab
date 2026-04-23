@@ -131,7 +131,262 @@ Try these helpers in a browser playground:
    :::
 
 ```{raw} html
-<div class="jp-plugin-playground-embed" data-playground-mode="simple">
+<script type="text/plain" id="jp-plugin-playground-source-ui-helpers">
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+import {
+  Dialog,
+  ICommandPalette,
+  InputDialog,
+  MainAreaWidget,
+  Notification,
+  showDialog
+} from '@jupyterlab/apputils';
+
+import { FileDialog, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+
+import { Widget } from '@lumino/widgets';
+
+const applyEmbedLayout = async (
+  app: JupyterFrontEnd,
+  options: {
+    hideHeader?: boolean;
+    hideLeft?: boolean;
+    hideRight?: boolean;
+    hideStatusBar?: boolean;
+  } = {}
+): Promise<void> => {
+  const {
+    hideHeader = true,
+    hideLeft = true,
+    hideRight = true,
+    hideStatusBar = true
+  } = options;
+
+  const run = async (
+    command: string,
+    args?: { [key: string]: unknown }
+  ): Promise<void> => {
+    if (!app.commands.hasCommand(command)) {
+      return;
+    }
+    try {
+      if (args) {
+        await app.commands.execute(command, args);
+      } else {
+        await app.commands.execute(command);
+      }
+    } catch {
+      /* command may not be available in all host shells */
+    }
+  };
+
+  await run('application:set-mode', { mode: 'single-document' });
+
+  const collapseIfVisible = async (command: string): Promise<void> => {
+    if (!app.commands.hasCommand(command)) {
+      return;
+    }
+    if (app.commands.isToggled(command)) {
+      await run(command);
+    }
+  };
+
+  if (hideLeft) {
+    await collapseIfVisible('application:toggle-left-area');
+  }
+  if (hideRight) {
+    await collapseIfVisible('application:toggle-right-area');
+  }
+  if (hideHeader) {
+    await collapseIfVisible('application:toggle-header');
+  }
+  if (hideStatusBar) {
+    await collapseIfVisible('statusbar:toggle');
+  }
+};
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'ui-helpers-demo:plugin',
+  autoStart: true,
+  requires: [ICommandPalette, IFileBrowserFactory],
+  activate: (
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    browserFactory: IFileBrowserFactory
+  ) => {
+    const dialogCommand = 'ui-helpers-demo:dialog';
+    const inputCommand = 'ui-helpers-demo:input';
+    const notificationCommand = 'ui-helpers-demo:notification';
+    const openFileDialogCommand = 'ui-helpers-demo:file-dialog-open';
+    const openFolderDialogCommand = 'ui-helpers-demo:file-dialog-folder';
+    const openPanelCommand = 'ui-helpers-demo:open-panel';
+
+    const runDialog = async () => {
+      await showDialog({
+        title: 'UI Helpers Demo',
+        body: 'This dialog is shown from an interactive documentation example.',
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Sounds good' })]
+      });
+    };
+
+    const runInput = async () => {
+      const result = await InputDialog.getText({
+        title: 'What should the notification say?'
+      });
+
+      if (result.button.accept && result.value) {
+        Notification.info(result.value, { autoClose: 3000 });
+      }
+    };
+
+    const runNotification = () => {
+      Notification.success('This is a success notification from the docs demo.', {
+        autoClose: 3000
+      });
+    };
+
+    const runOpenFilesDialog = async () => {
+      const result = await FileDialog.getOpenFiles({
+        manager: browserFactory.defaultBrowser.model.manager
+      });
+      if (result.button.accept) {
+        Notification.info(`Selected ${result.value.length} item(s).`, {
+          autoClose: 3000
+        });
+      }
+    };
+
+    const runOpenFolderDialog = async () => {
+      const result = await FileDialog.getExistingDirectory({
+        manager: browserFactory.defaultBrowser.model.manager
+      });
+      if (result.button.accept) {
+        Notification.info(`Selected folder: ${String(result.value)}`, {
+          autoClose: 3000
+        });
+      }
+    };
+
+    let panel: MainAreaWidget<Widget> | null = null;
+
+    const createActionButton = (
+      label: string,
+      action: () => Promise<void> | void
+    ): HTMLButtonElement => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.style.padding = '0.4rem 0.75rem';
+      button.style.border = '1px solid var(--jp-border-color2)';
+      button.style.borderRadius = '6px';
+      button.style.background = 'var(--jp-layout-color1)';
+      button.style.cursor = 'pointer';
+      button.addEventListener('click', () => {
+        void Promise.resolve(action()).catch(error => {
+          console.error(error);
+          Notification.error('Demo action failed.', { autoClose: 4000 });
+        });
+      });
+      return button;
+    };
+
+    const ensurePanel = (): MainAreaWidget<Widget> => {
+      if (panel && !panel.isDisposed) {
+        return panel;
+      }
+
+      const content = new Widget();
+      const intro = document.createElement('p');
+      intro.textContent =
+        'Use these buttons to preview dialogs, notifications, and file dialogs.';
+      intro.style.margin = '0 0 0.75rem 0';
+      content.node.style.padding = '1rem';
+      content.node.appendChild(intro);
+
+      const actions = document.createElement('div');
+      actions.style.display = 'grid';
+      actions.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+      actions.style.gap = '0.5rem';
+
+      actions.appendChild(createActionButton('Show Dialog', runDialog));
+      actions.appendChild(createActionButton('Ask For Text', runInput));
+      actions.appendChild(createActionButton('Show Notification', runNotification));
+      actions.appendChild(createActionButton('Open Files Dialog', runOpenFilesDialog));
+      actions.appendChild(createActionButton('Open Folder Dialog', runOpenFolderDialog));
+
+      content.node.appendChild(actions);
+
+      panel = new MainAreaWidget({ content });
+      panel.id = 'ui-helpers-demo:panel';
+      panel.title.label = 'UI Helpers Playground';
+      panel.title.closable = true;
+      return panel;
+    };
+
+    app.commands.addCommand(dialogCommand, {
+      label: 'UI Helpers Demo: Show Dialog',
+      execute: runDialog
+    });
+
+    app.commands.addCommand(inputCommand, {
+      label: 'UI Helpers Demo: Ask For Text',
+      execute: runInput
+    });
+
+    app.commands.addCommand(notificationCommand, {
+      label: 'UI Helpers Demo: Notify',
+      execute: runNotification
+    });
+
+    app.commands.addCommand(openFileDialogCommand, {
+      label: 'UI Helpers Demo: Open Files Dialog',
+      execute: runOpenFilesDialog
+    });
+
+    app.commands.addCommand(openFolderDialogCommand, {
+      label: 'UI Helpers Demo: Open Folder Dialog',
+      execute: runOpenFolderDialog
+    });
+
+    app.commands.addCommand(openPanelCommand, {
+      label: 'UI Helpers Demo: Open Playground Panel',
+      execute: () => {
+        const widget = ensurePanel();
+        if (!widget.isAttached) {
+          app.shell.add(widget, 'main');
+        }
+        app.shell.activateById(widget.id);
+      }
+    });
+
+    palette.addItem({ command: openPanelCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: dialogCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: inputCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: notificationCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: openFileDialogCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: openFolderDialogCommand, category: 'User Interface Helpers' });
+
+    // Apply a compact iframe profile and open the playground panel.
+    const isEmbeddedDocs =
+      new URLSearchParams(window.location.search).get('embed') === '1';
+
+    void app.restored
+      .then(async () => {
+        if (isEmbeddedDocs) {
+          await applyEmbedLayout(app);
+        }
+        await app.commands.execute(openPanelCommand);
+      })
+      .catch(() => {
+        /* no-op */
+      });
+  }
+};
+
+export default plugin;
+</script>
+<div class="jp-plugin-playground-embed" data-playground-mode="simple" data-playground-source-id="jp-plugin-playground-source-ui-helpers" data-playground-file-name="index.ts">
   <p class="jp-plugin-playground-description">
     Interactive dialogs + notifications example.
   </p>
@@ -139,10 +394,10 @@ Try these helpers in a browser playground:
     <button type="button" class="jp-plugin-playground-load">
       Load Interactive Example
     </button>
-    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?plugin=1.g.H4sIAAb822kC_81Z_2_bNhb_V7hgmOTCVpLedgeoa3dpkqI5ZFvQpLcfmgKjJdrmQpEaSTk2Mv_v9_hFFvXFqZvLAQcUtSI-ft7j-_6oh4MlkYoKfpAejw9mlJFfcEEO0gPKc7JKtDoYHyhRycy-K0ohNXpA_6rKtSbynRRcn_N83H1xxao55WiDZlIUKPrnH26Z4ekhLktGM6yBZfTqlt_yGvSWI3RGMRPzsXm8OBVFgQEKM6I1ce94WemA5mdM-Ykk-Deaz4m2r34Rms48vn2hFuLebbnlO-SpNGWqLQx6B5rwnNCF-eOtFPcKTogzLeR68GhGe1NH1kFzAjabWFVQLg7v7WvPOhNcaWTUsz4vpiS_xGtRafQaYbXmGYrNYWA17SnfLIjSHFilTo0ILWhO3hOcE_lTiqZCMIL5q2bpksz04MIHOl8Mr1xrrCv1FncBNyDhw-aWj1J0BYejivy4FDR_g16_ccK4c_Xkgm1aVs6ujVD9t1ai_uutOH6pFsUrwmq05i0r3lajWbDOlSKlJeVzD4zlXMHxHtCnO7Ku1z6nqOJ3XNyDPxuynQdFiM5Q_A3YKPHwKllg5f049u9Go5oaIUl0JWslb9yPBufaEhhAI1SwB6S8x9Q6SsOGrEhWaVLzGNuTjF7VezaIMEW-DiPY7eVDEFXZokE5fFGrERV4jbjQaEoQXmIKwcAIggSAGUMLASZQC8KYQi8Og7NuvJGcLGCkOAqSQ6qInhQiJ9EYDGIeUhQpsAcjk1xkVUG4jtBm1LJ0JhjDpSIXs39TRY0QW7t3LP4_tqI1XAhB1Y2Yg-yDCI0GOspv6clg1nGy3ey29s7dVqW2rCcMNk4w5MvI4W9CVBtnT4KVZudOXBftTwJe2K1DoNvo_zKusqRTLD1qA7cJ0m5pC1Y6XMdqD3G8KPhQVFGQjpVQOic5KUTq9kc2j-BKCxBQ6rRJWpL8WVFJIEF_6ha2ofLy2QFlmi6xBsf3WWtn-keodGjpYN1EaNqCT4d42twWhIFTTG5roMcEFfRO7giiV-Emaur0I3vsensLD-r2IztDsjaAKAlvivYjEKZKT5zUE7NpAEYw8LuvAprZLX2oK8wJewTD0ExKQxT5KA-KlpOgSWGhdWqPb9qbOEjvmmpm8uXHC_TesUNnwC4aNyRTkYMfRDcLqryRETwZOO66FMzBjuBo1gsJqnOuVT0iK1yUjCQtxEpr24N8cgIlGeYZYW_t63g09t1dIu78qwcEhYIwkOJaVJAk0VyI3OT0z9vSs02Efe3YZnCXcjwVURWzNFZXQfuYQN91Q1Z6SGm_LbDVa8VypBek5ZpI4fVPUUu8sFY7honTRIKzjJQaffedFyRZYlaRVi0P29WE8pmIQ1JT-Uw2OWVCgWR_Ozo6alTSFOa-bkJYOH5HOS2mqgIplYqdJ8A_jPyr9sGtTxh1gCOAx4A3JaYyBy1FW9B9TPirj1n1uKcPGrOJdWPLLVJoUAg6PCcy7WS_JCczDFA-_SWmt2CJJ-6JvduwXzDk79eEkUyTHH37EBo1YYTP9WKDqCZFrEbJ7y017lQk2s_0v3YS2H-h1PMVVRp6pTOoXFZz_4_KdZk3BSVf28auFUCjzbMoFyopskk67YycP7qfN-gvxCvodV_bn45RMiDX5CQz0rvMZ0KyZuZTYGsOcaUfGiFvtHan-hcyv44S2tj3Nz9fOthzRkyGHjDztGZbZ_HECeV3xJEjiBodeGPodWl66Hq9twwp9BT6EMvVHaVLovQa6kSJ8xzOZ6COku8lKdBR8o8f4Dcapp8K6WbE6LhcISUYzdESy3gy-aOcuMUJNHtCvhw9ivAB57RSBufv5WoXJc7u5tJUIEO35cLs_O24HO_iklVSCStnKWy17NHBwc-XoJ9LiCXCiYyjDPrcO8idnYBE1qy1rRNwY8GWJHaeEI9GiR2_YiKlYfim7dbGzDCTJ3bV0TS27IWQo4pMS-A9Dc1gaiO5TelhjHzfKTntOGke3Qzkz7wj4ROuKklsR2Rr0s5gCg9n8oMNPVNGv7FPMEudUVWCfHkrS3gZLE0Yy-1QyLbuysm9v5iJm4PUDayW4pFwKYNIsbTtSGhkij7C3A1VE_737RHSApWSLClwd32XGrcqLfxpmkXTXdYESdTh5pyvgCmfchtT6KgOKHQUhYcxAiUcknA_EI9b4deihUGD8Px0QVkeW45ho-MvqqzfqEeUlNNloCZP78XIwYAQYEaMuaR5tIPMrN0Q6DQB91SwqrAMI0lK4BQbP53MqB6jgvICr-KXL4_K1Rgdz-RotBMSly4L1dmnSxaevZ-64-gaWmTfykK0bNv0Uf-oX0I6UXfoHQSzaUQdlO1Qn4BkZQpD3MGFb56AaloJ2xKo1nk7XduTgW3h7iMHvcuo43bDDuq5hrSlTzImxNtJBoaOOgME6cvnlcERbTudhaR2VkhswTN7gjnrCtzaVZPhPRkkVuxupsztQDeDhtmrSaCtqySI4Po2qjWdB51OPVd15r8UtZy3pvY3f2njzJ7_6IsChJP-PvzbLj8kgA2BvfkPXBvsI4YNjPWwAGHQ7C3H4O3DPpIMxNiQUJ2Y-zq5-tcZ-0vWDtKdogUsvkq28H5kb6GaEEN2_4Bcvd7KFS33wQVCL-hF4rC7sXe_jgrajBOtcbbotBnuQPZC25wmdtRjFBWQaKJWqxQMx80Wf6n3dn1R74XE0x8-Gv35qz3D7MKMjA_N14u-CsFvydxe8ZnWQ6IL05TOcEZqRUZN3nsEuJNYngm1nS2eCXQwBTwT9o6wfk70oeDcF99xODxEJ-arIcIGugQHAzeWuCDQZwrbRpp-0jCz9zdlEz2uLrVubpX99piT_Mxc82w7WVNIP364vCZYZosrDOgKnJfn4j5hor5Jsosjc3MQR8TARBCFr02n2fRZdsYx0QDzjRaS5DWHBGTj8eBVhQvLtmjdkKy_Z7U-nppPMLsCcvcHsG5QhQPPVlo3jPUEPXwB_jgR5fZL13ZK2n5wICv7Udjfk_gvD7BysPkPQVvnW4wfAAA" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
       JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
     </a>
-    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html?plugin=1.g.H4sIAAb822kC_81Z_2_bNhb_V7hgmOTCVpLedgeoa3dpkqI5ZFvQpLcfmgKjJdrmQpEaSTk2Mv_v9_hFFvXFqZvLAQcUtSI-ft7j-_6oh4MlkYoKfpAejw9mlJFfcEEO0gPKc7JKtDoYHyhRycy-K0ohNXpA_6rKtSbynRRcn_N83H1xxao55WiDZlIUKPrnH26Z4ekhLktGM6yBZfTqlt_yGvSWI3RGMRPzsXm8OBVFgQEKM6I1ce94WemA5mdM-Ykk-Deaz4m2r34Rms48vn2hFuLebbnlO-SpNGWqLQx6B5rwnNCF-eOtFPcKTogzLeR68GhGe1NH1kFzAjabWFVQLg7v7WvPOhNcaWTUsz4vpiS_xGtRafQaYbXmGYrNYWA17SnfLIjSHFilTo0ILWhO3hOcE_lTiqZCMIL5q2bpksz04MIHOl8Mr1xrrCv1FncBNyDhw-aWj1J0BYejivy4FDR_g16_ccK4c_Xkgm1aVs6ujVD9t1ai_uutOH6pFsUrwmq05i0r3lajWbDOlSKlJeVzD4zlXMHxHtCnO7Ku1z6nqOJ3XNyDPxuynQdFiM5Q_A3YKPHwKllg5f049u9Go5oaIUl0JWslb9yPBufaEhhAI1SwB6S8x9Q6SsOGrEhWaVLzGNuTjF7VezaIMEW-DiPY7eVDEFXZokE5fFGrERV4jbjQaEoQXmIKwcAIggSAGUMLASZQC8KYQi8Og7NuvJGcLGCkOAqSQ6qInhQiJ9EYDGIeUhQpsAcjk1xkVUG4jtBm1LJ0JhjDpSIXs39TRY0QW7t3LP4_tqI1XAhB1Y2Yg-yDCI0GOspv6clg1nGy3ey29s7dVqW2rCcMNk4w5MvI4W9CVBtnT4KVZudOXBftTwJe2K1DoNvo_zKusqRTLD1qA7cJ0m5pC1Y6XMdqD3G8KPhQVFGQjpVQOic5KUTq9kc2j-BKCxBQ6rRJWpL8WVFJIEF_6ha2ofLy2QFlmi6xBsf3WWtn-keodGjpYN1EaNqCT4d42twWhIFTTG5roMcEFfRO7giiV-Emaur0I3vsensLD-r2IztDsjaAKAlvivYjEKZKT5zUE7NpAEYw8LuvAprZLX2oK8wJewTD0ExKQxT5KA-KlpOgSWGhdWqPb9qbOEjvmmpm8uXHC_TesUNnwC4aNyRTkYMfRDcLqryRETwZOO66FMzBjuBo1gsJqnOuVT0iK1yUjCQtxEpr24N8cgIlGeYZYW_t63g09t1dIu78qwcEhYIwkOJaVJAk0VyI3OT0z9vSs02Efe3YZnCXcjwVURWzNFZXQfuYQN91Q1Z6SGm_LbDVa8VypBek5ZpI4fVPUUu8sFY7honTRIKzjJQaffedFyRZYlaRVi0P29WE8pmIQ1JT-Uw2OWVCgWR_Ozo6alTSFOa-bkJYOH5HOS2mqgIplYqdJ8A_jPyr9sGtTxh1gCOAx4A3JaYyBy1FW9B9TPirj1n1uKcPGrOJdWPLLVJoUAg6PCcy7WS_JCczDFA-_SWmt2CJJ-6JvduwXzDk79eEkUyTHH37EBo1YYTP9WKDqCZFrEbJ7y017lQk2s_0v3YS2H-h1PMVVRp6pTOoXFZz_4_KdZk3BSVf28auFUCjzbMoFyopskk67YycP7qfN-gvxCvodV_bn45RMiDX5CQz0rvMZ0KyZuZTYGsOcaUfGiFvtHan-hcyv44S2tj3Nz9fOthzRkyGHjDztGZbZ_HECeV3xJEjiBodeGPodWl66Hq9twwp9BT6EMvVHaVLovQa6kSJ8xzOZ6COku8lKdBR8o8f4Dcapp8K6WbE6LhcISUYzdESy3gy-aOcuMUJNHtCvhw9ivAB57RSBufv5WoXJc7u5tJUIEO35cLs_O24HO_iklVSCStnKWy17NHBwc-XoJ9LiCXCiYyjDPrcO8idnYBE1qy1rRNwY8GWJHaeEI9GiR2_YiKlYfim7dbGzDCTJ3bV0TS27IWQo4pMS-A9Dc1gaiO5TelhjHzfKTntOGke3Qzkz7wj4ROuKklsR2Rr0s5gCg9n8oMNPVNGv7FPMEudUVWCfHkrS3gZLE0Yy-1QyLbuysm9v5iJm4PUDayW4pFwKYNIsbTtSGhkij7C3A1VE_737RHSApWSLClwd32XGrcqLfxpmkXTXdYESdTh5pyvgCmfchtT6KgOKHQUhYcxAiUcknA_EI9b4deihUGD8Px0QVkeW45ho-MvqqzfqEeUlNNloCZP78XIwYAQYEaMuaR5tIPMrN0Q6DQB91SwqrAMI0lK4BQbP53MqB6jgvICr-KXL4_K1Rgdz-RotBMSly4L1dmnSxaevZ-64-gaWmTfykK0bNv0Uf-oX0I6UXfoHQSzaUQdlO1Qn4BkZQpD3MGFb56AaloJ2xKo1nk7XduTgW3h7iMHvcuo43bDDuq5hrSlTzImxNtJBoaOOgME6cvnlcERbTudhaR2VkhswTN7gjnrCtzaVZPhPRkkVuxupsztQDeDhtmrSaCtqySI4Po2qjWdB51OPVd15r8UtZy3pvY3f2njzJ7_6IsChJP-PvzbLj8kgA2BvfkPXBvsI4YNjPWwAGHQ7C3H4O3DPpIMxNiQUJ2Y-zq5-tcZ-0vWDtKdogUsvkq28H5kb6GaEEN2_4Bcvd7KFS33wQVCL-hF4rC7sXe_jgrajBOtcbbotBnuQPZC25wmdtRjFBWQaKJWqxQMx80Wf6n3dn1R74XE0x8-Gv35qz3D7MKMjA_N14u-CsFvydxe8ZnWQ6IL05TOcEZqRUZN3nsEuJNYngm1nS2eCXQwBTwT9o6wfk70oeDcF99xODxEJ-arIcIGugQHAzeWuCDQZwrbRpp-0jCz9zdlEz2uLrVubpX99piT_Mxc82w7WVNIP364vCZYZosrDOgKnJfn4j5hor5Jsosjc3MQR8TARBCFr02n2fRZdsYx0QDzjRaS5DWHBGTj8eBVhQvLtmjdkKy_Z7U-nppPMLsCcvcHsG5QhQPPVlo3jPUEPXwB_jgR5fZL13ZK2n5wICv7Udjfk_gvD7BysPkPQVvnW4wfAAA" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
       Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
     </a>
   </div>

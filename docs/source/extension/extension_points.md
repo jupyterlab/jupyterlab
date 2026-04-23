@@ -154,7 +154,112 @@ Try this section in a browser playground:
    :::
 
 ```{raw} html
-<div class="jp-plugin-playground-embed" data-playground-mode="simple">
+<script type="text/plain" id="jp-plugin-playground-source-extension-points">
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+import { ICommandPalette } from '@jupyterlab/apputils';
+
+const applyEmbedLayout = async (
+  app: JupyterFrontEnd,
+  options: {
+    hideHeader?: boolean;
+    hideLeft?: boolean;
+    hideRight?: boolean;
+    hideStatusBar?: boolean;
+  } = {}
+): Promise<void> => {
+  const {
+    hideHeader = true,
+    hideLeft = true,
+    hideRight = true,
+    hideStatusBar = true
+  } = options;
+
+  const run = async (
+    command: string,
+    args?: { [key: string]: unknown }
+  ): Promise<void> => {
+    if (!app.commands.hasCommand(command)) {
+      return;
+    }
+    try {
+      if (args) {
+        await app.commands.execute(command, args);
+      } else {
+        await app.commands.execute(command);
+      }
+    } catch {
+      /* command may not be available in all host shells */
+    }
+  };
+
+  await run('application:set-mode', { mode: 'single-document' });
+
+  const collapseIfVisible = async (command: string): Promise<void> => {
+    if (!app.commands.hasCommand(command)) {
+      return;
+    }
+    if (app.commands.isToggled(command)) {
+      await run(command);
+    }
+  };
+
+  if (hideLeft) {
+    await collapseIfVisible('application:toggle-left-area');
+  }
+  if (hideRight) {
+    await collapseIfVisible('application:toggle-right-area');
+  }
+  if (hideHeader) {
+    await collapseIfVisible('application:toggle-header');
+  }
+  if (hideStatusBar) {
+    await collapseIfVisible('statusbar:toggle');
+  }
+};
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'extension-points-command-demo:plugin',
+  autoStart: true,
+  requires: [ICommandPalette],
+  activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
+    const commandID = 'extension-points-command-demo:toggle';
+    let toggled = false;
+
+    app.commands.addCommand(commandID, {
+      label: 'Extension Points Demo Command',
+      caption: 'Added from the interactive docs example',
+      isToggled: () => toggled,
+      execute: () => {
+        toggled = !toggled;
+      }
+    });
+
+    palette.addItem({
+      command: commandID,
+      category: 'Common Extension Points'
+    });
+
+    // Apply a compact iframe profile and then open command palette for discoverability.
+    const isEmbeddedDocs =
+      new URLSearchParams(window.location.search).get('embed') === '1';
+
+    void app.restored
+      .then(async () => {
+        if (isEmbeddedDocs) {
+          await applyEmbedLayout(app);
+        }
+        await app.commands.execute('apputils:activate-command-palette');
+      })
+      .catch(() => {
+        /* command may not be available in all host shells */
+      });
+  }
+};
+
+export default plugin;
+</script>
+<div class="jp-plugin-playground-embed" data-playground-mode="simple" data-playground-source-id="jp-plugin-playground-source-extension-points" data-playground-file-name="index.ts">
   <p class="jp-plugin-playground-description">
     Interactive command registry + command palette example.
   </p>
@@ -162,10 +267,10 @@ Try this section in a browser playground:
     <button type="button" class="jp-plugin-playground-load">
       Load Interactive Example
     </button>
-    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?plugin=1.g.H4sIAAb822kC_7VWbW_bNhD-K1djgKTCdtoB-6Is7bqmw1IERdBu-9IUKC2dbK4UqZFUEsPQf9-RIiX5JejWYV_8wuM999w7d7M71IYrOcufz2cVF_iO1TjLZ1yW-LC0ZjafGdXqwp_VjdIWdvC2bbYW9S9aSftGlvPDgxvRrrmEDiqtakh--rMXC7Y6Y00jeMEsmUzOb-WtHECvXqu6ZqTMBFqLc3inLK_C3cewWsuF6YEKJY0Fh799U6-wvGZb1Vq4AGa2soD0VoKT5kfsnUA1zorJYef-AWx4ib8iK1G_zGGllEAmz0fRNVb2pOA9X29OSz5YZlvzMzsE7IjhrruVWQ435CE3-OOd4uULuHjRk-n9OuJFala3ON8ndXzqGR0fD3SCKFIJgfARjbZ1K_fD6AQ-VzkYq7lcB2Cm14bc28HHL7iNsk85tPKLVPeURHftUUcBeAXpE8rRMsCb5YaZUBZpOMuyeBtAo211DHLXf1m9HS84QEdqokMs7xn3hTKawQcsWovRxtx7kp1HnQ5QGPx3GBPtwA-olIvNiHL2NIYRarYFqSysENgd41TcAoE6iAkBG0UpMBsUwsDTs4mvXUhSz4WSlCaT7soN2kWtSkzmlBD3I4fEUD4ELkpVtDVKm0CX7WW6UEKwxuBV9Qc33JEY8n6Q8f85iz5xUwhuflNr4n4SYYzAQfD34uQwY58Myr3qkd_7obTe9EKQ4oJpZEmP301RfZ99E6x2mo_i9t3-TcAbr3oKdOj-r-Maf3XFdEAd4brJ2G38xM9PL4JYIb0tTjWU4INF6fbOolFcWrMIiVuUWKu8R0v8VGGtVURX23wcYRr_arlGGtcfD7bGp16nsPyOWar49OTEh6a_nR8unWxSxrEjvPzqkuh_hXWITyg9woP-pCTVitEACXUI-3ODleVBc1xdzsfaplmAgiL2JtqGG28bLskmBM1kHq8XzA9wUnhVlmTab027cdOEIuADg0D9bwAfWN0Q30F1aDEKmw9EoD9cCBMuiifjcHT0Sfh5Pgqne3zJZaXSz4F21Mvhu12EeAkJPQ2AHFBVlXTLz_Opob4eXgtliMb3Pzx7Noq644mbDREPCXfBvrJYpwPkMNbG2I-htLhWmhZZ4vhS5A9zkBzZOTuDV-4FAswBNhRv6jlNTypotHLPK_Bub1DSpqWPuAACP6iUhpKbQtGzjK244Ha7nJYjN_5tQ5m9dDm8iFwl3sPv768_INPF5oaRRZPe0xtO3S-FCqE3Xpgt12jTBB1MQnm8oLp-ngwOuFb19UntZZXGMlpYOtJpWAaH-XdzZZ9adpC1uC_3HmeuO7NJpXT_aMEm8d2Xxz4f-jCEMZmUQjY44NdvesT9P6zhoeiGaYgP_jVbYsVaEcciSWbd3z2Jd9JqCwAA" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
       JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
     </a>
-    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html?plugin=1.g.H4sIAAb822kC_7VWbW_bNhD-K1djgKTCdtoB-6Is7bqmw1IERdBu-9IUKC2dbK4UqZFUEsPQf9-RIiX5JejWYV_8wuM999w7d7M71IYrOcufz2cVF_iO1TjLZ1yW-LC0ZjafGdXqwp_VjdIWdvC2bbYW9S9aSftGlvPDgxvRrrmEDiqtakh--rMXC7Y6Y00jeMEsmUzOb-WtHECvXqu6ZqTMBFqLc3inLK_C3cewWsuF6YEKJY0Fh799U6-wvGZb1Vq4AGa2soD0VoKT5kfsnUA1zorJYef-AWx4ib8iK1G_zGGllEAmz0fRNVb2pOA9X29OSz5YZlvzMzsE7IjhrruVWQ435CE3-OOd4uULuHjRk-n9OuJFala3ON8ndXzqGR0fD3SCKFIJgfARjbZ1K_fD6AQ-VzkYq7lcB2Cm14bc28HHL7iNsk85tPKLVPeURHftUUcBeAXpE8rRMsCb5YaZUBZpOMuyeBtAo211DHLXf1m9HS84QEdqokMs7xn3hTKawQcsWovRxtx7kp1HnQ5QGPx3GBPtwA-olIvNiHL2NIYRarYFqSysENgd41TcAoE6iAkBG0UpMBsUwsDTs4mvXUhSz4WSlCaT7soN2kWtSkzmlBD3I4fEUD4ELkpVtDVKm0CX7WW6UEKwxuBV9Qc33JEY8n6Q8f85iz5xUwhuflNr4n4SYYzAQfD34uQwY58Myr3qkd_7obTe9EKQ4oJpZEmP301RfZ99E6x2mo_i9t3-TcAbr3oKdOj-r-Maf3XFdEAd4brJ2G38xM9PL4JYIb0tTjWU4INF6fbOolFcWrMIiVuUWKu8R0v8VGGtVURX23wcYRr_arlGGtcfD7bGp16nsPyOWar49OTEh6a_nR8unWxSxrEjvPzqkuh_hXWITyg9woP-pCTVitEACXUI-3ODleVBc1xdzsfaplmAgiL2JtqGG28bLskmBM1kHq8XzA9wUnhVlmTab027cdOEIuADg0D9bwAfWN0Q30F1aDEKmw9EoD9cCBMuiifjcHT0Sfh5Pgqne3zJZaXSz4F21Mvhu12EeAkJPQ2AHFBVlXTLz_Opob4eXgtliMb3Pzx7Noq644mbDREPCXfBvrJYpwPkMNbG2I-htLhWmhZZ4vhS5A9zkBzZOTuDV-4FAswBNhRv6jlNTypotHLPK_Bub1DSpqWPuAACP6iUhpKbQtGzjK244Ha7nJYjN_5tQ5m9dDm8iFwl3sPv768_INPF5oaRRZPe0xtO3S-FCqE3Xpgt12jTBB1MQnm8oLp-ngwOuFb19UntZZXGMlpYOtJpWAaH-XdzZZ9adpC1uC_3HmeuO7NJpXT_aMEm8d2Xxz4f-jCEMZmUQjY44NdvesT9P6zhoeiGaYgP_jVbYsVaEcciSWbd3z2Jd9JqCwAA" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
       Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
     </a>
   </div>
