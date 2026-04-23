@@ -444,19 +444,22 @@ export class BreadCrumbs extends Widget {
 
     const isActivateKey = event.key === 'Enter' || event.key === ' ';
     const crumb = this._resolveCrumbFromEventTarget(event.target);
+    const localPath = this._model.manager.services.contents.localPath(
+      this._model.path
+    );
 
     if (isActivateKey && crumb && this._crumbContent.contains(crumb)) {
-      if (
+      const enterEditModeFromRoot =
         event.key === ' ' &&
         crumb.classList.contains(BREADCRUMB_ROOT_CLASS) &&
-        this._model.manager.services.contents.localPath(this._model.path) === ''
-      ) {
-        this.enterEditMode();
-      } else if (this._isCurrentDirectoryCrumb(crumb)) {
+        localPath === '';
+
+      if (this._isCurrentDirectoryCrumb(crumb) || enterEditModeFromRoot) {
         this.enterEditMode();
       } else {
         this._activateCrumbSegment(crumb);
       }
+
       event.preventDefault();
       event.stopPropagation();
       return;
