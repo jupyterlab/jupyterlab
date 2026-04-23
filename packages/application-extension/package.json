@@ -43,7 +43,6 @@
     "@jupyterlab/property-inspector": "^4.6.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.4",
     "@jupyterlab/statedb": "^4.6.0-alpha.4",
-    "@jupyterlab/statusbar": "^4.6.0-alpha.4",
     "@jupyterlab/translation": "^4.6.0-alpha.4",
     "@jupyterlab/ui-components": "^4.6.0-alpha.4",
     "@lumino/algorithm": "^2.0.4",

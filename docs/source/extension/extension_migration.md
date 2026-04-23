@@ -1024,8 +1024,8 @@ index 6f1562f..3fcdf37 100644
 +    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
 +    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
 +    "build:lib": "tsc",
-+    "build:labextension": "jupyter labextension build .",
-+    "build:labextension:dev": "jupyter labextension build --development True .",
++    "build:labextension": "jupyter-builder build .",
++    "build:labextension:dev": "jupyter-builder build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
 +    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
    "clean:labextension": "rimraf myextension/labextension",
@@ -1064,7 +1064,7 @@ The diff also shows the new `@jupyterlab/builder` as a `devDependency`.
 It hides away internal dependencies such as `webpack`, and produces the assets that can then be distributed as part of a Python package.
 
 Extension developers do not need to interact with `@jupyterlab/builder` directly, but instead can use the
-`jupyter labextension build` command. This command is run automatically as part of the `build` script
+`jupyter-builder build` command. This command is run automatically as part of the `build` script
 (`jlpm run build`).
 
 For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`

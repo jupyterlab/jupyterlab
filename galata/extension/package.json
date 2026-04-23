@@ -25,7 +25,7 @@
   ],
   "scripts": {
     "build": "npm run build:lib && npm run build:labextension",
-    "build:labextension": "node ../../node_modules/@jupyterlab/builder/lib/build-labextension.js --core-path ../../dev_mode --development .",
+    "build:labextension": "node ../../node_modules/@jupyter/builder/lib/build-labextension.js --development --core-package-file ../../dev_mode/package.json .",
     "build:lib": "tsc",
     "clean": "npm run clean:lib && npm run clean:labextension",
     "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
@@ -46,6 +46,7 @@
     "@lumino/signaling": "^2.1.5"
   },
   "devDependencies": {
+    "@jupyter/builder": "^0.0.6",
     "@jupyterlab/builder": "^4.6.0-alpha.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"

@@ -471,7 +471,7 @@ export class Dialog<T> extends Widget {
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      this._buttonNodes[this._defaultButton]?.focus();
+      (this._primary ?? this._buttonNodes[this._defaultButton])?.focus();
     }
   }
 
