@@ -148,7 +148,7 @@ export namespace PageConfig {
       path = URLExt.join(
         path,
         'workspaces',
-        encodeURIComponent(getOption('workspace') ?? defaultWorkspace)
+        encodeURIComponent(workspace)
       );
     }
     const treePath = options.treePath ?? getOption('treePath');
