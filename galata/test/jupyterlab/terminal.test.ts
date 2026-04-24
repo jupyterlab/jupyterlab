@@ -332,13 +332,12 @@ test.describe('Open in Terminal from File Browser', () => {
     // Iterate through tabs, activate each, and check content
     const foundFolders = new Set<string>();
     for (let i = 0; i < 2; i++) {
-      await tabs.nth(i).click();
+      const tab = tabs.nth(i);
+      await tab.click();
 
-      // Find the currently visible terminal container
-      const activeTerminalContainer = page.locator(
-        '.lm-DockPanel .jp-Terminal:visible'
-      );
-      await expect(activeTerminalContainer).toHaveCount(1);
+      // Use the tab's data-id to locate the exact terminal widget
+      const widgetId = await tab.getAttribute('data-id');
+      const activeTerminalContainer = page.locator(`#${widgetId}`);
       await activeTerminalContainer.waitFor({ state: 'visible' });
 
       // Ensure the body is visible then run pwd via helper
