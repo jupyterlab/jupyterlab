@@ -4810,6 +4810,7 @@ __metadata:
     stylelint-config-recommended: ^13.0.0
     stylelint-config-standard: ^34.0.0
     stylelint-csstree-validator: ^3.0.0
+    stylelint-declaration-strict-value: ^1.11.1
     stylelint-prettier: ^4.0.0
     typedoc: ~0.27.4
     typedoc-plugin-mdn-links: ^4.0.4
@@ -20758,6 +20759,15 @@ __metadata:
   peerDependencies:
     stylelint: ">=7.0.0 <16.0.0"
   checksum: e518c8c17714022946b7637c23a6816fd2ccdd6052a19c5a138b3f7ce9b913ead9c612ac4401e102f14800a19967dbfd4b588b44cbf3f3c6a5984bef7bda4017
+  languageName: node
+  linkType: hard
+
+"stylelint-declaration-strict-value@npm:^1.11.1":
+  version: 1.11.1
+  resolution: "stylelint-declaration-strict-value@npm:1.11.1"
+  peerDependencies:
+    stylelint: ">=16 <=17"
+  checksum: 7456304bf32a1172712604dfeabd8fdb4cee51c09152315f62913359b9ee601825f291597fc91b34fc57a6731fbdf0e6647667a7f3e3f245273efa378268ac65
   languageName: node
   linkType: hard
 
