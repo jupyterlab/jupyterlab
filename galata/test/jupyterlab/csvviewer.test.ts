@@ -95,10 +95,11 @@ test.describe('CSV Viewer - comment character', () => {
   test('should show the Comment toolbar control', async ({ page }) => {
     await page.filebrowser.open(csvFileName);
 
-    const commentDropdown = page.locator('.jp-CSVComment select');
+    // The select is wrapped by Styling.wrapSelect inside the jp-CSVComment-dropdown div
+    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
     await expect(commentDropdown).toBeVisible();
 
-    // Default value should be 'none' (empty string)
+    // Default value should be empty string (none)
     await expect(commentDropdown).toHaveValue('');
   });
 
@@ -110,13 +111,9 @@ test.describe('CSV Viewer - comment character', () => {
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
 
-    // Without a comment char, the first '#' comment line becomes the header.
-    // The header cell should contain the raw comment text, not 'id'.
-    const headerCell = page.locator(
-      '.jp-CSVViewer .lm-DataGrid-headerCell:first-child'
-    );
-    await expect(headerCell).not.toHaveText('id');
-
+    // Without a comment char set, the '#' lines are treated as data rows.
+    // Verify the visual state via snapshot — the DataGrid is canvas-based
+    // so there are no DOM elements for individual cells.
     expect(await csvLocator.screenshot()).toMatchSnapshot(
       'csv-comments-no-comment-char.png'
     );
@@ -130,20 +127,16 @@ test.describe('CSV Viewer - comment character', () => {
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
 
-    // Select '#' as comment character
-    const commentDropdown = page.locator('.jp-CSVComment select');
+    // Select '#' as comment character using the correct wrapped select selector
+    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
     await commentDropdown.selectOption('#');
     await expect(commentDropdown).toHaveValue('#');
 
     // Wait for the grid to re-render
     await page.waitForTimeout(200);
 
-    // The header row should now be 'id', 'name', etc. — not the comment line
-    const headerCell = page.locator(
-      '.jp-CSVViewer .lm-DataGrid-headerCell:first-child'
-    );
-    await expect(headerCell).toHaveText('id');
-
+    // Verify the grid now shows the data rows correctly via snapshot.
+    // The DataGrid is canvas-based — individual cells have no DOM elements.
     expect(await csvLocator.screenshot()).toMatchSnapshot(
       'csv-comments-with-comment-char.png'
     );
@@ -157,21 +150,22 @@ test.describe('CSV Viewer - comment character', () => {
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
 
-    const commentDropdown = page.locator('.jp-CSVComment select');
+    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
 
-    // Enable comment char
+    // Enable comment char — grid should re-render without comment rows
     await commentDropdown.selectOption('#');
     await page.waitForTimeout(200);
 
-    // Revert to 'none'
+    const withCommentScreenshot = await csvLocator.screenshot();
+
+    // Revert to none — grid should re-render including comment rows as data
     await commentDropdown.selectOption('');
     await page.waitForTimeout(200);
 
-    // Header should no longer be 'id' — raw comment line is back as header
-    const headerCell = page.locator(
-      '.jp-CSVViewer .lm-DataGrid-headerCell:first-child'
-    );
-    await expect(headerCell).not.toHaveText('id');
+    const withoutCommentScreenshot = await csvLocator.screenshot();
+
+    // The two states must produce different renders
+    expect(withCommentScreenshot).not.toEqual(withoutCommentScreenshot);
   });
 
   test.afterEach(async ({ page }) => {

@@ -45,7 +45,8 @@ export class CSVDelimiter extends Widget {
           [',', ','],
           [';', ';'],
           ['\t', 'tab'],
-          ['|', 'pipe']
+          ['|', 'pipe'],
+          ['#', '#']
         ]
       })
     });
