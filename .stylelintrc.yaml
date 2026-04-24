@@ -54,3 +54,12 @@ rules:
     color: ['/var\(/', '/^[a-zA-Z]+$/']
     background-color: ['/var\(/', '/^[a-zA-Z]+$/']
     border: ['/var\(/', '/^none$/', '/^0$/']
+
+overrides:
+  - files:
+      - 'packages/rendermime/style/base.css'
+      - 'packages/apputils-extension/style/splash.css'
+    rules:
+      declaration-property-value-allowed-list:
+        color: ['/.*/']
+        background-color: ['/.*/']
