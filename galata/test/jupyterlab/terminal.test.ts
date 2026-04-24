@@ -24,6 +24,9 @@ async function runCommand(
   command: string,
   verify = false
 ): Promise<void> {
+  await terminalLocator.waitFor({ state: 'visible' });
+  await terminalLocator.locator('.jp-Terminal-body').focus();
+
   await terminalLocator
     .locator(TERMINAL_INPUT_SELECTOR)
     .waitFor({ state: 'visible' });
