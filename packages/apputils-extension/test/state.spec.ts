@@ -40,7 +40,7 @@ describe('@jupyterlab/apputils-extension', () => {
       navigate: navigateMock,
       reload: reloadMock,
       register: registerMock,
-      stop: new Token<void>('stop'),
+      stop: new Token<void>('test:stop'),
       routed: {} as any
     } as unknown as IRouter;
 
