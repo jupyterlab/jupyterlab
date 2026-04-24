@@ -5,7 +5,7 @@
  */
 
 const merge = require('webpack-merge').default;
-const WPPlugin = require('@jupyter/builder').WPPlugin;
+const WPPlugin = require('@jupyterlab/builder').WPPlugin;
 const config = require('./webpack.config');
 
 config[0] = merge(config[0], {
