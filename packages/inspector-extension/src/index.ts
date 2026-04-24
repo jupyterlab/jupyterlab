@@ -95,7 +95,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       return inspector;
     }
     function closeInspector(): void {
-      inspector.dispose();
+      if (isInspectorOpen()) {
+        inspector.dispose();
+      }
     }
 
     // Add inspector:open command to registry.
