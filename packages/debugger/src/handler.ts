@@ -266,6 +266,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       if (!handler) {
         return;
       }
+
       handler.dispose();
       delete this._handlers[widget.id];
       delete this._kernelChangedHandlers[widget.id];

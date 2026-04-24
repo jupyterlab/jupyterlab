@@ -3,6 +3,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
+import path from 'path';
 import { positionMouseOver } from './utils';
 
 test.use({
@@ -243,7 +244,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
+    await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
 
@@ -256,9 +257,12 @@ test.describe('Debugger', () => {
       'Locals'
     );
 
+    const variablesLocator = await page.debugger.getVariablesPanelLocator();
+    const bbox = (await variablesLocator.boundingBox())!;
+
     expect(
       await page.screenshot({
-        clip: { y: 58, x: 998, width: 280, height: 138 }
+        clip: { ...bbox, y: bbox?.y - 35, height: bbox.height }
       })
     ).toMatchSnapshot('debugger_variables.png');
   });
@@ -270,7 +274,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
+    await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
 
@@ -284,12 +288,14 @@ test.describe('Debugger', () => {
       page.locator('[aria-label="side panel content"] >> text=add').first()
     ).toBeVisible();
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 196, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-callstack.png'
-    });
+    const callstackLocator = await page.debugger.getCallStackPanelLocator();
+    const bbox = (await callstackLocator.boundingBox())!;
+
+    expect(
+      await page.screenshot({
+        clip: { ...bbox, y: bbox?.y - 35, height: bbox.height + 35 }
+      })
+    ).toMatchSnapshot('debugger_callstack.png');
 
     await page.click('jp-button[title^=Continue]');
   });
@@ -301,7 +307,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
+    await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
 
@@ -314,44 +320,105 @@ test.describe('Debugger', () => {
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/Cell \[\d+\]/);
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 334, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-breakpoints.png'
-    });
+    const bbox = (await breakpointsPanel.boundingBox())!;
+
+    expect(
+      await page.screenshot({
+        clip: { ...bbox, y: bbox?.y - 35, height: bbox.height + 35 }
+      })
+    ).toMatchSnapshot('debugger_breakpoints.png');
 
     await page.click('jp-button[title^=Continue]');
   });
 
-  test('Source panel', async ({ page, tmpPath }) => {
-    await page.goto(`tree/${tmpPath}`);
+  test.describe('Show sources', () => {
+    test.describe('showSourcesInMainArea = false', () => {
+      test.use({
+        mockSettings: {
+          ...galata.DEFAULT_SETTINGS,
+          '@jupyterlab/debugger-extension:main': {
+            showSourcesInMainArea: false
+          }
+        }
+      });
 
-    await createNotebook(page);
+      test('sources in sidebar', async ({ page, tmpPath }) => {
+        await page.goto(`tree/${tmpPath}`);
+        await createNotebook(page);
 
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
+        await page.debugger.switchOn();
+        await page.waitForCondition(() => page.debugger.isOpen());
+        await page.sidebar.setWidth(275, 'right');
 
-    await setBreakpoint(page);
+        await setBreakpoint(page);
 
-    // Don't wait as it will be blocked
-    await page.notebook.runCell(1, { wait: false });
+        // Don't wait as it will be blocked
+        await page.notebook.runCell(1, { wait: false });
 
-    // Wait to be stopped on the breakpoint
-    await page.debugger.waitForCallStack();
-    await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
-      'Cell ['
-    );
+        // Wait to be stopped on the breakpoint
+        await page.debugger.waitForCallStack();
 
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 478, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-source.png'
+        await expect(
+          page.locator('.jp-DebuggerSources-header-path')
+        ).toContainText('Cell [');
+
+        expect(
+          await page.screenshot({
+            clip: { y: 334, x: 974, width: 300, height: 360 }
+          })
+        ).toMatchSnapshot('debugger_with_source_panel.png');
+        await page.click('jp-button[title^=Continue]');
+        await expect(page.locator('.jp-DebuggerSources')).toBeVisible();
+      });
     });
 
-    await page.click('jp-button[title^=Continue]');
+    test.describe('showSourcesInMainArea = true', () => {
+      test.use({
+        mockSettings: {
+          ...galata.DEFAULT_SETTINGS,
+          '@jupyterlab/debugger-extension:main': {
+            showSourcesInMainArea: true
+          }
+        }
+      });
+
+      test('sources in main area', async ({ page, request, tmpPath }) => {
+        await page.goto(`tree/${tmpPath}`);
+        const localFile = path.resolve(__dirname, 'add.py');
+
+        const contents = galata.newContentsHelper(request, page);
+        await contents.uploadFile(localFile, `${tmpPath}/add.py`);
+
+        await createNotebook(page);
+
+        await page.debugger.switchOn();
+        await page.waitForCondition(() => page.debugger.isOpen());
+
+        await page.notebook.setCell(
+          0,
+          'code',
+          'from add import add \nresult = add(1, 2)\nprint(result)'
+        );
+
+        await page.notebook.clickCellGutter(0, 2);
+
+        // Don't wait as it will be blocked
+        await page.notebook.runCell(0, { wait: false });
+
+        // Wait to be stopped on the breakpoint
+        await page.debugger.waitForCallStack();
+        await page.click('jp-button[aria-label="Step In (F11)"]');
+        await page.debugger.waitForCallStack();
+
+        await expect(page.locator('.cm-editor.jp-mod-readOnly')).toBeVisible();
+
+        expect(
+          await page.locator('#jp-main-dock-panel').screenshot()
+        ).toMatchSnapshot('debugger_open_module.png');
+
+        await page.click('jp-button[title^=Continue]');
+      });
+    });
   });
 });
 

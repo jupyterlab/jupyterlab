@@ -79,7 +79,8 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           }
           return app.commands.execute('notebook:delete-cell', args);
         }
-      }
+      },
+      isEnabled: args => app.commands.isEnabled('notebook:delete-cell')
     });
 
     /**

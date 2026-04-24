@@ -290,6 +290,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                       property={property}
                       removeProperty={removeProperty}
                       setProperty={debouncedSetProperty}
+                      trans={props.trans}
                     />
                   );
                 })}
@@ -319,6 +320,7 @@ function PropertyFrom(props: {
   property: ISettingProperty;
   removeProperty: (hash: string) => void;
   setProperty: Debouncer<void, any, [hash: string, property: ISettingProperty]>;
+  trans: TranslationBundle;
 }): JSX.Element {
   const [state, setState] = useState<{
     property: string;
@@ -371,7 +373,7 @@ function PropertyFrom(props: {
           className="form-control"
           type="text"
           required={true}
-          placeholder={'Property name'}
+          placeholder={props.trans.__('Property name')}
           value={state.property}
           onChange={e => {
             changeName(e.target.value);
@@ -384,15 +386,15 @@ function PropertyFrom(props: {
             changeType(e.target.value as 'boolean' | 'string' | 'number')
           }
         >
-          <option value="string">String</option>
-          <option value="number">Number</option>
-          <option value="boolean">Boolean</option>
+          <option value="string">{props.trans.__('String')}</option>
+          <option value="number">{props.trans.__('Number')}</option>
+          <option value="boolean">{props.trans.__('Boolean')}</option>
         </select>
         <input
           className="form-control"
           type={TYPE_MAP[state.type]}
           required={false}
-          placeholder={'Property value'}
+          placeholder={props.trans.__('Property value')}
           value={state.type !== 'boolean' ? state.value : undefined}
           checked={state.type === 'boolean' ? state.value : undefined}
           onChange={

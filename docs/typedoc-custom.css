@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 header.tsd-page-toolbar .title {
   --lab-logo-light: url(../../_static/logo-rectangle.svg);
   --lab-logo-dark: url(../../_static/logo-rectangle-dark.svg);

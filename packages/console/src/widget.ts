@@ -140,7 +140,10 @@ export class CodeConsole extends Widget {
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
+    // Make content panel focusable for keyboard scrolling
+    this._content.node.tabIndex = 0;
     this._input.addClass(INPUT_CLASS);
+    this._input.node.tabIndex = 0;
 
     layout.addWidget(this._splitPanel);
 
@@ -264,6 +267,8 @@ export class CodeConsole extends Widget {
       this.clear();
     }
     cell.addClass(CONSOLE_CELL_CLASS);
+    // Make cells in content area not tabbable (output cells)
+    cell.editor?.setOption('tabFocusable', false);
     this._content.addWidget(cell);
     this._cells.push(cell);
     if (msgId) {
@@ -310,7 +315,8 @@ export class CodeConsole extends Widget {
         scrollPastEnd: false,
         smartIndent: false,
         tabSize: 4,
-        theme: 'jupyter'
+        theme: 'jupyter',
+        tabFocusable: false // Banner is in content area, not tabbable
       }
     })).initializeState();
     banner.addClass(BANNER_CLASS);
@@ -438,6 +444,9 @@ export class CodeConsole extends Widget {
       cell.model.setMetadata(key, metadata[key]);
     }
     this.addCell(cell);
+    if (this._config.hideCodeInput) {
+      cell.inputArea?.setHidden(true);
+    }
     return this._execute(cell);
   }
 
@@ -719,6 +728,9 @@ export class CodeConsole extends Widget {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
 
+      // Make the cell not tabbable when it becomes read-only output
+      promptCell.editor?.setOption('tabFocusable', false);
+
       // Disconnect the content change listener
       promptCell.model.sharedModel.changed.disconnect(
         this._onPromptContentChanged,
@@ -799,14 +811,15 @@ export class CodeConsole extends Widget {
     if (!editor) {
       return;
     }
-    if (event.keyCode === 13 && !editor.hasFocus()) {
+    if (event.key === 'Enter' && !editor.hasFocus()) {
       event.preventDefault();
       editor.focus();
-    } else if (event.keyCode === 27 && editor.hasFocus()) {
+    } else if (event.key === 'Escape' && editor.hasFocus()) {
       // Set to command mode
       event.preventDefault();
       event.stopPropagation();
-      this.node.focus();
+      editor.setOption('tabFocusable', false);
+      this._input.node.focus();
     }
   }
 
@@ -1174,6 +1187,10 @@ export class CodeConsole extends Widget {
    * Update the layout of the code console.
    */
   private _updateLayout(): void {
+    // Detach from split panel to reset DOM/tab order when re-inserting
+    this._input.parent = null;
+    this._content.parent = null;
+
     const { promptCellPosition = 'bottom' } = this._config;
 
     // Reset manual resize flag when layout changes
@@ -1203,6 +1220,8 @@ export class CodeConsole extends Widget {
       // adjust the sizes if the prompt cell is moved with code in it
       this._adjustSplitPanelForInputGrowth();
     });
+
+    this.promptCell?.editor?.focus();
   }
 
   private _banner: RawCell | null = null;
@@ -1316,7 +1335,8 @@ export namespace CodeConsole {
    */
   export const defaultEditorConfig: Record<string, any> = {
     codeFolding: false,
-    lineNumbers: false
+    lineNumbers: false,
+    tabFocusable: false
   };
 
   /**
