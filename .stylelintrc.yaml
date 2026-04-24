@@ -59,6 +59,8 @@ overrides:
   - files:
       - 'packages/rendermime/style/base.css'
       - 'packages/apputils-extension/style/splash.css'
+      - 'docs/source/snippets/galata/test/documentation/data/custom-markdown.css'
+      - 'docs/source/snippets/galata/test/documentation/data/custom-jupyter.css'
     rules:
       declaration-property-value-allowed-list:
         color: ['/.*/']
