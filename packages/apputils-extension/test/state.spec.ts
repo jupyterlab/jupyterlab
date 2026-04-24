@@ -113,15 +113,20 @@ describe('@jupyterlab/apputils-extension', () => {
           '?reset&other=1',
           '?foo=bar&reset',
           '?foo=bar&reset&baz=1',
+          '?reset#section',
+          '?foo=bar&reset#section',
           '?reset=1',
           '?reset=true',
           '?reset=',
           '?reset=1&other=2',
           '?foo=bar&reset=1',
-          '?foo=bar&reset=true&baz=1'
+          '?foo=bar&reset=true&baz=1',
+          '?reset=1#section',
+          '?foo=bar&reset=1#section'
         ];
         const notMatching = [
           '?noreset',
+          '?noreset#section',
           '?resetAll',
           '?other=reset',
           '/lab/tree/notebook.ipynb'

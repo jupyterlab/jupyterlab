@@ -58,9 +58,10 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
 
 /**
  * Pattern matching the `reset` query parameter in a URL.
- * Matches bare `?reset`, `?reset=<value>`, and `&reset` variants.
+ * Matches bare `?reset`, `?reset=<value>`, and `&reset` variants,
+ * including URLs where `reset` is followed by a hash fragment.
  */
-const RESET_QUERY_PATTERN = /(\?reset|\&reset)(=[^&]*)?($|&)/;
+const RESET_QUERY_PATTERN = /(\?reset|\&reset)(=[^&#]*)?($|&|#)/;
 
 /**
  * The command IDs used by the apputils plugin.
