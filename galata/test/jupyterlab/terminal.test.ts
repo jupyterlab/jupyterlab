@@ -27,7 +27,7 @@ async function runCommand(
   await terminalLocator
     .locator(TERMINAL_INPUT_SELECTOR)
     .waitFor({ state: 'visible' });
-  await terminalLocator.click();
+
   await page.keyboard.type(command);
   if (verify) {
     await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
@@ -334,9 +334,11 @@ test.describe('Open in Terminal from File Browser', () => {
     for (let i = 0; i < 2; i++) {
       const tab = tabs.nth(i);
       await tab.click();
+      await expect(tab).toHaveClass(/lm-mod-current/);
 
       // Use the tab's data-id to locate the exact terminal widget
       const widgetId = await tab.getAttribute('data-id');
+      expect(widgetId).not.toBeNull();
       const activeTerminalContainer = page.locator(`#${widgetId}`);
       await activeTerminalContainer.waitFor({ state: 'visible' });
 
