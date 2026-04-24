@@ -46,6 +46,18 @@ test.describe('File Edit Operations', () => {
     await page.keyboard.press('Alt+A');
     expect(await getEditorText(page)).toBe('first\n/* second\nthird */');
   });
+  test('Should fall back to line comment on Alt + A for Python', async ({
+    page
+  }) => {
+    // Python has no block comment syntax, so Alt+A should fall back to
+    // line comments (via toggleBlockCommentWithFallback)
+    // Select "second" and "third"
+    await page.getByRole('textbox').getByText('second').last().dblclick();
+    await page.keyboard.press('Shift+ArrowDown');
+    // Toggle block comment (falls back to line comment for Python)
+    await page.keyboard.press('Alt+A');
+    expect(await getEditorText(page)).toBe('first\n# second\n# third');
+  });
 });
 
 test.describe('Console Interactions', () => {

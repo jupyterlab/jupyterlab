@@ -128,6 +128,13 @@ export namespace ILabShell {
      * `contentVisibility` is only available in Chromium-based browsers.
      */
     hiddenMode: 'display' | 'scale' | 'contentVisibility';
+
+    /**
+     * Whether to show padding around the main dock panel area.
+     *
+     * Set to `false` for a more compact layout.
+     */
+    dockPanelPadding?: boolean;
   }
 
   /**
@@ -819,6 +826,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * @param area Name of area to activate
    */
   activateArea(area: ILabShell.Area = 'main'): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area) {
       case 'main':
         {
@@ -1373,12 +1381,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           break;
       }
     }
+
+    if (config.dockPanelPadding !== undefined) {
+      if (config.dockPanelPadding === false) {
+        this._dockPanel.node.style.setProperty(
+          '--jp-private-dock-panel-padding',
+          '0px'
+        );
+      } else {
+        this._dockPanel.node.style.removeProperty(
+          '--jp-private-dock-panel-padding'
+        );
+      }
+      this._dockPanel.fit();
+    }
   }
 
   /**
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IterableIterator<Widget> {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();

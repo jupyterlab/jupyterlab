@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-simple-list",
-  "version": "4.6.0-alpha.3",
+  "version": "4.6.0-alpha.4",
   "private": true,
   "style": "style/index.css",
   "scripts": {
@@ -9,16 +9,16 @@
     "watch": "rspack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0-alpha.3",
-    "@jupyterlab/coreutils": "^6.6.0-alpha.3",
-    "@jupyterlab/observables": "^5.6.0-alpha.3",
-    "@jupyterlab/theme-light-extension": "^4.6.0-alpha.3",
-    "@jupyterlab/ui-components": "^4.6.0-alpha.3",
+    "@jupyterlab/application": "^4.6.0-alpha.4",
+    "@jupyterlab/coreutils": "^6.6.0-alpha.4",
+    "@jupyterlab/observables": "^5.6.0-alpha.4",
+    "@jupyterlab/theme-light-extension": "^4.6.0-alpha.4",
+    "@jupyterlab/ui-components": "^4.6.0-alpha.4",
     "@lumino/messaging": "^2.0.4",
     "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.7.5",
+    "@rspack/cli": "^1.7.8",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
