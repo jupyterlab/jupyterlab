@@ -2471,6 +2471,16 @@
     }
   },
   {
+    "id": "filebrowser:edit-path",
+    "label": "Edit File Browser Path",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
@@ -2491,7 +2501,7 @@
   },
   {
     "id": "filebrowser:go-up",
-    "label": "go up",
+    "label": "Go Up",
     "caption": "",
     "shortcuts": [
       "Backspace"
@@ -4942,6 +4952,21 @@
     "args": {
       "type": "object",
       "properties": {}
+    }
+  },
+  {
+    "id": "notebook:toggle-output-scrolling",
+    "label": "Toggle Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu"
+        }
+      }
     }
   },
   {

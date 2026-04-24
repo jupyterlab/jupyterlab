@@ -408,13 +408,36 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       this.title.label = title;
     });
 
-    // Do not add any Ctrl+C/Ctrl+V handling on macOS,
-    // where Cmd+C/Cmd+V works as intended.
-    if (Platform.IS_MAC) {
-      return;
-    }
-
     term.attachCustomKeyEventHandler(event => {
+      // Send Shift+Enter as a line feed (\n) rather than carriage
+      // return (\r), so terminal applications can distinguish
+      // between Enter (execute) and Shift+Enter (newline). Handle
+      // only keydown and call preventDefault() so the browser
+      // suppresses the follow-up keypress event that xterm.js would
+      // otherwise turn into a \r.
+      // Skip during IME composition so composed text isn't split by
+      // an injected \n.
+      if (
+        event.type === 'keydown' &&
+        event.shiftKey &&
+        event.key === 'Enter' &&
+        !event.isComposing &&
+        event.keyCode !== 229
+      ) {
+        event.preventDefault();
+        this.session.send({
+          type: 'stdin',
+          content: ['\n']
+        });
+        return false;
+      }
+
+      // Do not add any Ctrl+C/Ctrl+V handling on macOS,
+      // where Cmd+C/Cmd+V works as intended.
+      if (Platform.IS_MAC) {
+        return true;
+      }
+
       if (event.ctrlKey && event.key === 'c' && term.hasSelection()) {
         // Return so that the usual OS copy happens
         // instead of interrupt signal.

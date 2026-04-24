@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('./pathnavigator.css');
+
 /*-----------------------------------------------------------------------------
 | Variables
 |----------------------------------------------------------------------------*/
@@ -54,6 +56,20 @@
 .jp-BreadCrumbs {
   flex: 0 0 auto;
   margin: 8px 12px;
+  cursor: text;
+}
+
+.jp-BreadCrumbs:hover:not(:has(.jp-BreadCrumbs-content:hover)) {
+  background: var(--jp-layout-color2);
+}
+
+/* The container holds breadcrumb icons, separators, and items */
+.jp-BreadCrumbs-container {
+  min-width: 0;
+}
+
+.jp-BreadCrumbs.jp-mod-editMode > .jp-BreadCrumbs-container {
+  display: none;
 }
 
 .jp-BreadCrumbs-item {
@@ -61,6 +77,7 @@
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
+  word-break: break-word;
 }
 
 .jp-BreadCrumbs-item:hover {
