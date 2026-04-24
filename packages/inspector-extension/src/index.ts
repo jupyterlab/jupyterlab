@@ -61,6 +61,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     );
     const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
+    const datasetKey = 'jpInspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
@@ -75,6 +76,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       if (!isInspectorOpen()) {
         inspector = new MainAreaWidget({
           content: new InspectorPanel({ translator })
+        });
+        inspector.disposed.connect(() => {
+          delete document.body.dataset[datasetKey];
         });
         inspector.id = 'jp-inspector';
         inspector.title.label = openedLabel;
@@ -92,6 +96,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         });
       }
       shell.activateById(inspector.id);
+      document.body.dataset[datasetKey] = 'open';
       return inspector;
     }
     function closeInspector(): void {
