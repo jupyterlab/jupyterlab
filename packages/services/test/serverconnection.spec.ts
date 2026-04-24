@@ -98,18 +98,20 @@ describe('ServerConnection', () => {
     beforeEach(() => {
       // Clear token so XSRF cookie is used for authentication
       PageConfig.setOption('token', '');
-      // Save the original cookie property descriptor for restoration
-      cookieDescriptor = Object.getOwnPropertyDescriptor(
-        Document.prototype,
-        'cookie'
-      );
+      // Save the original own-property descriptor on `document` itself.
+      // The test defines `cookie` as an instance-level override, so the
+      // same own-property must be restored (or removed) in afterEach —
+      // restoring only the prototype descriptor leaves the instance
+      // override in place and leaks the mock into later tests.
+      cookieDescriptor = Object.getOwnPropertyDescriptor(document, 'cookie');
     });
 
     afterEach(() => {
       PageConfig.setOption('token', originalToken);
-      // Restore the original cookie property descriptor
       if (cookieDescriptor) {
-        Object.defineProperty(Document.prototype, 'cookie', cookieDescriptor);
+        Object.defineProperty(document, 'cookie', cookieDescriptor);
+      } else {
+        delete (document as { cookie?: string }).cookie;
       }
     });
 
