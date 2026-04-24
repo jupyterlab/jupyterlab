@@ -815,6 +815,13 @@ export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
   }
 
   /**
+   * Whether hidden files are currently included.
+   */
+  get includeHiddenFiles(): boolean {
+    return this._includeHiddenFiles;
+  }
+
+  /**
    * Set the inclusion of hidden files. Triggers a model refresh.
    */
   showHiddenFiles(value: boolean): void {

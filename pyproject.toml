@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.21.1"]
+requires = ["hatchling>=1.21.1", "jupyter-builder>=0.0.6"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,6 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
+    "jupyter-builder>=0.0.6",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -55,7 +56,6 @@ dynamic = [
 ]
 
 [project.scripts]
-jlpm = "jupyterlab.jlpmapp:main"
 jupyter-lab = "jupyterlab.labapp:main"
 jupyter-labextension = "jupyterlab.labextensions:main"
 jupyter-labhub = "jupyterlab.labhubapp:main"
@@ -121,7 +121,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.15.4",
+    "ruff==0.15.9",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -241,6 +241,7 @@ before-bump-version = [
 before-build-npm = [
     "jlpm",
     "jlpm run build:all",
+    "node buildutils/lib/update-core-mode.js --skip-assets",
 ]
 before-build-python = [
     "node buildutils/lib/local-repository start",

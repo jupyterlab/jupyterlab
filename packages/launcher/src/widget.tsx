@@ -109,11 +109,6 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
       return null;
     }
 
-    const knownCategories = [
-      this._trans.__('Notebook'),
-      this._trans.__('Console'),
-      this._trans.__('Other')
-    ];
     const kernelCategories = [
       this._trans.__('Notebook'),
       this._trans.__('Console')
@@ -143,15 +138,32 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
-    const orderedCategories: string[] = [];
-    for (const cat of knownCategories) {
-      orderedCategories.push(cat);
-    }
-    for (const cat in categories) {
-      if (knownCategories.indexOf(cat) === -1) {
-        orderedCategories.push(cat);
-      }
-    }
+    const defaultCategoryRanks: Record<string, number> = {
+      [this._trans.__('Notebook')]: 0,
+      [this._trans.__('Console')]: 20,
+      [this._trans.__('Other')]: 100
+    };
+
+    const orderedCategories = Object.keys(categories).sort((a, b) => {
+      const getRank = (cat: string): number => {
+        const items = categories[cat] ?? [];
+
+        const defaultRank = defaultCategoryRanks[cat] ?? Infinity;
+
+        return Math.min(
+          ...items.map(
+            (item: ILauncher.IItemOptions) => item.categoryRank ?? defaultRank
+          )
+        );
+      };
+
+      const rankA = getRank(a);
+      const rankB = getRank(b);
+
+      if (rankA !== rankB) return rankA - rankB;
+
+      return a.localeCompare(b);
+    });
 
     // Now create the sections for each category
     orderedCategories.forEach(cat => {

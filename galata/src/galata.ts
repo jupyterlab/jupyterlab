@@ -641,7 +641,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(Routes.contents, async (route, request) => {
+      await page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
@@ -712,7 +712,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(Routes.contents, async (route, request) => {
+      await page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
@@ -781,11 +781,11 @@ export namespace galata {
      * @param page Page model object
      * @param config In-memory config
      */
-    export function mockConfig(
+    export async function mockConfig(
       page: Page,
       config: Record<string, JSONObject>
     ): Promise<void> {
-      return page.route(Routes.config, (route, request) => {
+      await page.route(Routes.config, (route, request) => {
         const section = Routes.config.exec(request.url())?.groups
           ?.section as string;
         switch (request.method()) {
@@ -822,11 +822,11 @@ export namespace galata {
      * @param page Page model object
      * @param customCSS Custom CSS content
      */
-    export function mockCustomCSS(
+    export async function mockCustomCSS(
       page: Page,
       customCSS: string
     ): Promise<void> {
-      return page.route(Routes.customCSS, async (route, request) => {
+      await page.route(Routes.customCSS, async (route, request) => {
         switch (request.method()) {
           case 'GET':
             return route.fulfill({
@@ -889,7 +889,7 @@ export namespace galata {
      * @param runners Mapping of current test runners
      * @param type Type of runner; session or terminal
      */
-    export function mockRunners(
+    export async function mockRunners(
       page: Page,
       runners: Map<string, any>,
       type: 'kernels' | 'sessions' | 'terminals',
@@ -905,7 +905,7 @@ export namespace galata {
       ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
-      return page.route(routeRegex, async (route, request) => {
+      await page.route(routeRegex, async (route, request) => {
         switch (request.method()) {
           case 'DELETE': {
             // slice is used to remove the '/' prefix
@@ -1142,11 +1142,11 @@ export namespace galata {
      * @param page Page model object
      * @param workspace In-memory workspace
      */
-    export function mockState(
+    export async function mockState(
       page: Page,
       workspace: Workspace.IWorkspace
     ): Promise<void> {
-      return page.route(Routes.workspaces, (route, request) => {
+      await page.route(Routes.workspaces, (route, request) => {
         switch (request.method()) {
           case 'GET': {
             const id = Routes.workspaces.exec(request.url())?.groups?.id;
@@ -1191,7 +1191,7 @@ export namespace galata {
      * @param settings In-memory settings
      * @param mockedSettings Test mocked settings
      */
-    export function mockSettings(
+    export async function mockSettings(
       page: Page,
       settings: ISettingRegistry.IPlugin[],
       mockedSettings: Record<string, any>
@@ -1206,7 +1206,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(settingsRegex, async (route, request) => {
+      await page.route(settingsRegex, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // slice is used to remove the '/' prefix
@@ -1320,8 +1320,11 @@ export namespace galata {
      * @param page Page model object
      * @param user In-memory user
      */
-    export function mockUser(page: Page, user: User.IUser): Promise<void> {
-      return page.route(Routes.user, (route, request) => {
+    export async function mockUser(
+      page: Page,
+      user: User.IUser
+    ): Promise<void> {
+      await page.route(Routes.user, (route, request) => {
         switch (request.method()) {
           case 'GET':
             return route.fulfill({

@@ -235,8 +235,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
-    consoles: IConsoleTracker,
-    translator: ITranslator
+    consoles: IConsoleTracker
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
