@@ -10,7 +10,8 @@
 }
 
 .lm-DataGrid-scrollCorner {
-  background-color: var(--jp-layout-color2);
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  background-color: #f0f0f0;
 }
 
 .lm-DataGrid-scrollCorner::after {
@@ -20,5 +21,6 @@
   left: 0;
   width: 1px;
   height: 1px;
-  background-color: var(--jp-border-color1);
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  background-color: #a0a0a0;
 }
