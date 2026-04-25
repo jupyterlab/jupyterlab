@@ -345,13 +345,14 @@ test.describe('Open in Terminal from File Browser', () => {
       const activeTerminalContainer = page.locator(`#${widgetId}`);
       await activeTerminalContainer.waitFor({ state: 'visible' });
 
-      // Ensure the body is visible then run pwd via helper
       await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
-      await runCommand(page, activeTerminalContainer, 'pwd');
-
       const activeBody = activeTerminalContainer.locator(
         '.jp-Terminal-body:visible'
       );
+      await activeBody.click();
+
+      await runCommand(page, activeTerminalContainer, 'pwd');
+
       await expect(activeBody).toContainText(
         new RegExp(`${folderA}|${folderB}`),
         {
