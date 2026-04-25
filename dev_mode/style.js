@@ -6,6 +6,7 @@ import '@jupyterlab/apputils-extension/style/index.js';
 import '@jupyterlab/audio-extension/style/index.js';
 import '@jupyterlab/cell-toolbar-extension/style/index.js';
 import '@jupyterlab/celltags-extension/style/index.js';
+import '@jupyterlab/code-optimizer-extension/style/index.js';
 import '@jupyterlab/codemirror-extension/style/index.js';
 import '@jupyterlab/completer-extension/style/index.js';
 import '@jupyterlab/console-extension/style/index.js';

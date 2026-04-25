@@ -1,0 +1,9 @@
+/* -----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-code-optimizer-button {
+  /* Button styling for optimizer toolbar button */
+  margin-left: 4px;
+}

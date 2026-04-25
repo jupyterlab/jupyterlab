@@ -162,3 +162,15 @@ untitled*.txt
 
 # temporary files, useful for testing
 tmp
+
+# code optimizer project documentation (private)
+docs/code-optimizer/
+
+# midterm coursework (private)
+Midterm/
+
+# temporary test scripts
+test_*.py
+
+# Jupyter runtime data
+.jupyter/

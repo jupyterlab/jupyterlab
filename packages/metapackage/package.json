@@ -15,6 +15,7 @@
   "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -48,6 +49,8 @@
     "@jupyterlab/cell-toolbar-extension": "^4.6.0-alpha.4",
     "@jupyterlab/cells": "^4.6.0-alpha.4",
     "@jupyterlab/celltags-extension": "^4.6.0-alpha.4",
+    "@jupyterlab/code-optimizer": "^4.6.0-alpha.4",
+    "@jupyterlab/code-optimizer-extension": "^4.6.0-alpha.4",
     "@jupyterlab/codeeditor": "^4.6.0-alpha.4",
     "@jupyterlab/codemirror": "^4.6.0-alpha.4",
     "@jupyterlab/codemirror-extension": "^4.6.0-alpha.4",
@@ -151,5 +154,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

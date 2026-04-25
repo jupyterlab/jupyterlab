@@ -36,6 +36,17 @@ import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { ToolbarButton } from '@jupyterlab/ui-components';
+import { RuleBasedOptimizer, LLMOptimizer } from '@jupyterlab/code-optimizer';
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
 
 import {
   IEditorExtensionRegistry,
@@ -130,7 +141,7 @@ import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
-import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
+import { ContextMenu, Menu, Widget } from '@lumino/widgets';
 import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
@@ -2026,6 +2037,104 @@ function activateNotebookHandler(
     });
     // Add the notebook panel to the tracker.
     void tracker.add(widget);
+  });
+
+  // Add optimize button to notebook toolbar
+  tracker.widgetAdded.connect((sender, notebookPanel) => {
+    const optimizeButton = new ToolbarButton({
+      icon: runIcon,
+      tooltip: 'Optimize Current Cell',
+      onClick: async () => {
+        const cell = tracker.activeCell;
+        if (cell && cell.model.type === 'code') {
+          const originalCode = cell.model.sharedModel.getSource();
+          
+          // Try to load settings for LLM configuration
+          let settings: ISettingRegistry.ISettings | null = null;
+          if (settingRegistry) {
+            try {
+              settings = await settingRegistry.load('@jupyterlab/code-optimizer-extension:plugin');
+            } catch (e) {
+              console.warn('Could not load code optimizer settings:', e);
+            }
+          }
+
+          // Check if LLM is enabled
+          const enableLLM = settings?.get('enableLLM').composite as boolean ?? false;
+          const llmProvider = settings?.get('llmProvider').composite as string ?? 'openai';
+          const llmModel = settings?.get('llmModel').composite as string ?? 'gpt-4';
+          const llmApiKey = settings?.get('llmApiKey').composite as string ?? '';
+          const llmBaseUrl = settings?.get('llmBaseUrl').composite as string ?? '';
+
+          let optimized;
+          let method = 'rule-based';
+
+          if (enableLLM && llmApiKey) {
+            try {
+              const llmOptimizer = new LLMOptimizer({
+                provider: llmProvider as 'openai' | 'anthropic' | 'google',
+                apiKey: llmApiKey,
+                model: llmModel,
+                baseUrl: llmBaseUrl || undefined
+              });
+              optimized = await llmOptimizer.optimize(originalCode, 'python');
+              method = `LLM (${llmProvider})`;
+            } catch (error) {
+              console.warn('LLM optimization failed, falling back to rule-based:', error);
+              const ruleOptimizer = new RuleBasedOptimizer();
+              optimized = ruleOptimizer.optimize(originalCode, 'python');
+              method = 'rule-based (LLM fallback)';
+            }
+          } else {
+            const ruleOptimizer = new RuleBasedOptimizer();
+            optimized = ruleOptimizer.optimize(originalCode, 'python');
+            method = 'rule-based';
+          }
+
+          // Create dialog body with diff view
+          const body = new Widget();
+          body.addClass('jp-OptimizerDialog');
+          
+          const originalDiv = document.createElement('div');
+          originalDiv.innerHTML = `<h3>Original Code:</h3><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(originalCode)}</pre>`;
+          
+          const optimizedDiv = document.createElement('div');
+          optimizedDiv.innerHTML = `<h3>Optimized Code:</h3><pre style="background: #e8f5e9; padding: 10px; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(optimized.code)}</pre>`;
+          
+          body.node.appendChild(originalDiv);
+          body.node.appendChild(document.createElement('br'));
+          body.node.appendChild(optimizedDiv);
+
+          // Show optimization method
+          const methodDiv = document.createElement('div');
+          methodDiv.innerHTML = `<h3>Optimization Method:</h3><p><strong>${method}</strong></p>`;
+          body.node.appendChild(methodDiv);
+
+          // Show transformations applied
+          if (optimized.transformations.length > 0) {
+            const transformDiv = document.createElement('div');
+            transformDiv.innerHTML = `<h3>Transformations Applied:</h3><ul>${optimized.transformations.map((t: any) => `<li>${t.description}</li>`).join('')}</ul>`;
+            body.node.appendChild(transformDiv);
+          }
+
+          const buttons = optimized.code === originalCode
+            ? [Dialog.okButton({ label: 'Close' })]
+            : [Dialog.cancelButton({ label: 'Reject' }), Dialog.okButton({ label: 'Accept' })];
+
+          showDialog({
+            title: optimized.code === originalCode ? `Code Optimization - No Changes (${method})` : `Code Optimization - Review Changes (${method})`,
+            body: body,
+            buttons
+          }).then(result => {
+            if (result.button.accept && optimized.code !== originalCode) {
+              cell.model.sharedModel.setSource(optimized.code);
+            }
+          });
+        }
+      }
+    });
+
+    notebookPanel.toolbar.addItem('optimize-cell', optimizeButton);
   });
 
   /**

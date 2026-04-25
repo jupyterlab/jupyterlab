@@ -1,0 +1,115 @@
+{
+  "title": "Code Optimizer",
+  "description": "Settings for code optimizer",
+  "type": "object",
+  "properties": {
+    "enableAutoOptimize": {
+      "type": "boolean",
+      "title": "Enable automatic optimization",
+      "description": "Automatically optimize code before execution",
+      "default": false
+    },
+    "enableImportOptimization": {
+      "type": "boolean",
+      "title": "Enable import optimization",
+      "description": "Sort and clean import statements",
+      "default": true
+    },
+    "enableSimplification": {
+      "type": "boolean",
+      "title": "Enable code simplification",
+      "description": "Fold constants and simplify expressions",
+      "default": true
+    },
+    "enableComplexityReduction": {
+      "type": "boolean",
+      "title": "Enable complexity reduction",
+      "description": "Extract repeated patterns",
+      "default": true
+    },
+    "enableReusability": {
+      "type": "boolean",
+      "title": "Enable reusability improvements",
+      "description": "Extract common patterns into functions",
+      "default": true
+    },
+    "enableLSP": {
+      "type": "boolean",
+      "title": "Enable LSP-based optimization",
+      "description": "Use Language Server Protocol for code optimization",
+      "default": true
+    },
+    "enableRuleBased": {
+      "type": "boolean",
+      "title": "Enable rule-based optimization",
+      "description": "Use rule-based optimizer as fallback",
+      "default": true
+    },
+    "lspTimeout": {
+      "type": "number",
+      "title": "LSP timeout (ms)",
+      "description": "Maximum time to wait for LSP response",
+      "default": 5000,
+      "minimum": 1000,
+      "maximum": 30000
+    },
+    "fallbackToRuleBased": {
+      "type": "boolean",
+      "title": "Fallback to rule-based",
+      "description": "Fall back to rule-based if LSP fails",
+      "default": true
+    },
+    "enableLLM": {
+      "type": "boolean",
+      "title": "Enable LLM-based optimization",
+      "description": "Use Large Language Model for code optimization",
+      "default": false
+    },
+    "llmProvider": {
+      "type": "string",
+      "title": "LLM Provider",
+      "description": "LLM provider to use (openai, anthropic, or google)",
+      "default": "openai",
+      "enum": ["openai", "anthropic", "google"]
+    },
+    "llmModel": {
+      "type": "string",
+      "title": "LLM Model",
+      "description": "LLM model to use (e.g., gpt-4, claude-3-5-sonnet-20241022)",
+      "default": "gpt-4"
+    },
+    "llmApiKey": {
+      "type": "string",
+      "title": "LLM API Key",
+      "description": "API key for LLM provider",
+      "default": "",
+      "secret": true
+    },
+    "llmBaseUrl": {
+      "type": "string",
+      "title": "LLM Base URL",
+      "description": "Custom base URL for LLM API (optional)",
+      "default": ""
+    },
+    "llmTimeout": {
+      "type": "number",
+      "title": "LLM timeout (ms)",
+      "description": "Maximum time to wait for LLM response",
+      "default": 30000,
+      "minimum": 5000,
+      "maximum": 120000
+    },
+    "llmFallbackToLSP": {
+      "type": "boolean",
+      "title": "Fallback to LSP",
+      "description": "Fall back to LSP if LLM fails",
+      "default": true
+    },
+    "llmFallbackToRuleBased": {
+      "type": "boolean",
+      "title": "Fallback to rule-based",
+      "description": "Fall back to rule-based if LLM and LSP fail",
+      "default": true
+    }
+  }
+}

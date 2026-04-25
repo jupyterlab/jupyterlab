@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "commonjs",
+    "lib": [
+      "ES2018",
+      "DOM"
+    ],
+    "jsx": "react",
+    "declaration": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/*",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib"
+  ],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../code-optimizer"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../settingregistry"
+    }
+  ],
+  "extends": "../../tsconfigbase"
+}

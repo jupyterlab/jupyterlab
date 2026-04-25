@@ -4,3 +4,6 @@
  * @packageDocumentation
  * @module metapackage
  */
+
+export * from '@jupyterlab/code-optimizer';
+export * from '@jupyterlab/code-optimizer-extension';
