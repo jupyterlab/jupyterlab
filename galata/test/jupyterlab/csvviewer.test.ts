@@ -127,7 +127,7 @@ test.describe('CSV Viewer - comment character', () => {
     const screenshotWithComment = await csvLocator.screenshot();
 
     // The two renders must differ — the comment lines affect the data layout
-    expect(screenshotWithComment).not.toEqual(screenshotWithoutComment);
+    expect(Buffer.compare(screenshotWithComment, screenshotWithoutComment)).not.toBe(0);
   });
 
   test('should revert to raw rendering when comment char is cleared', async ({
@@ -153,7 +153,7 @@ test.describe('CSV Viewer - comment character', () => {
     const withoutCommentScreenshot = await csvLocator.screenshot();
 
     // The two states must produce different renders
-    expect(withCommentScreenshot).not.toEqual(withoutCommentScreenshot);
+    expect(Buffer.compare(withCommentScreenshot, withoutCommentScreenshot)).not.toBe(0);
   });
 
   test.afterEach(async ({ page }) => {
