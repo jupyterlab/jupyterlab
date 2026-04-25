@@ -185,6 +185,12 @@ jobs:
     if: ${{ !cancelled() }}
     needs: test
     runs-on: ubuntu-22.04
+    outputs:
+      report-url: ${{ steps.upload-report.outputs.artifact-url }}
+      failing: ${{ steps.test-counts.outputs.failing }}
+      flaky: ${{ steps.test-counts.outputs.flaky }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout lockfile
         uses: actions/checkout@v6
@@ -248,6 +254,18 @@ jobs:
         run: |
           npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,json,github ./artifacts/final/
 
+      - name: Extract failing and flaky counts
+        id: test-counts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('merged-report.json', 'utf8'));
+            const failing = Number(report?.stats?.unexpected ?? 0);
+            const flaky = Number(report?.stats?.flaky ?? 0);
+            core.setOutput('failing', String(failing));
+            core.setOutput('flaky', String(flaky));
+
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
         with:
@@ -271,7 +289,37 @@ jobs:
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
 
-      - name: Add report link to preview comment
+      - name: Merge and upload test results
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact/merge@v6
+        with:
+          # The name matches the pattern so that it is picked again on re-runs
+          name: galata-test-assets-merged
+          pattern: galata-test-assets-*
+          delete-merged: true
+
+      - name: Merge blobs and delete individual shards
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact/merge@v6
+        with:
+          # The name matches the pattern so that it is picked again on re-runs
+          name: galata-blobs-merged
+          pattern: galata-blobs-*
+          delete-merged: true
+          retention-days: 1
+          compression-level: 1
+
+  update-preview-comment:
+    name: Add report link to preview comment
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs: merge-reports
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Update binder preview comment
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -280,17 +328,14 @@ jobs:
               return;
             }
 
-            const fs = require('fs');
-            const reportUrl = '${{ steps.upload-report.outputs.artifact-url }}';
-            let failing = 0;
-            let flaky = 0;
-            try {
-              const report = JSON.parse(fs.readFileSync('merged-report.json', 'utf8'));
-              failing = Number(report?.stats?.unexpected ?? 0);
-              flaky = Number(report?.stats?.flaky ?? 0);
-            } catch (error) {
-              console.warn(`Could not read merged-report.json for test counts: ${error.message}`);
+            const reportUrl = '${{ needs.merge-reports.outputs.report-url }}';
+            if (!reportUrl) {
+              console.warn('Missing report URL from merge-reports job output; skipping preview comment update.');
+              return;
             }
+
+            const failing = Number('${{ needs.merge-reports.outputs.failing }}');
+            const flaky = Number('${{ needs.merge-reports.outputs.flaky }}');
             const reportLinePrefix = 'View the integration tests report in browser: ';
 
             let badgeStatus;
@@ -343,24 +388,3 @@ jobs:
                 body: updatedBody
               });
             }
-
-      - name: Merge and upload test results
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        uses: actions/upload-artifact/merge@v6
-        with:
-          # The name matches the pattern so that it is picked again on re-runs
-          name: galata-test-assets-merged
-          pattern: galata-test-assets-*
-          delete-merged: true
-
-      - name: Merge blobs and delete individual shards
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact/merge@v6
-        with:
-          # The name matches the pattern so that it is picked again on re-runs
-          name: galata-blobs-merged
-          pattern: galata-blobs-*
-          delete-merged: true
-          retention-days: 1
-          compression-level: 1
