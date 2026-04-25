@@ -51,17 +51,14 @@ rules:
     # Allow MathJax internal font families (e.g. MJXZERO).
     font-family: ['/^var\(/', '/^["'']?MJX/']
     font-size: ['/var\(/', '/^0$/', '/^unset$/', '/^inherit$/', '/^(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)%$/']
-    color: ['/var\(/', '/^[a-zA-Z]+$/']
-    background-color: ['/var\(/', '/^[a-zA-Z]+$/']
-    border: ['/var\(/', '/transparent/', '/^none$/', '/^0$/']
-    border-color: ['/var\(/', '/^transparent$/']
+    color: ['/var\(/', '/^unset|inherit|white|black$/', '/^transparent$/']
+    background-color: ['/var\(/', '/^unset|inherit|initial|white|black$/', '/^transparent$/']
+    border: ['/var\(/', '/transparent/', '/^none$/', '/^unset|inherit$/', '/^0$/']
+    border-color: ['/var\(/', '/^transparent$/', '/^unset|inherit$/']
 
 overrides:
   - files:
-      - 'packages/rendermime/style/base.css'
-      - 'packages/apputils-extension/style/splash.css'
-      - 'docs/source/snippets/galata/test/documentation/data/custom-markdown.css'
-      - 'docs/source/snippets/galata/test/documentation/data/custom-jupyter.css'
+      - 'docs/source/snippets/galata/test/documentation/data/*.css'
     rules:
       declaration-property-value-allowed-list:
         color: ['/.*/']

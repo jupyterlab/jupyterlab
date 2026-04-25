@@ -13,13 +13,13 @@
 }
 
 [data-term-theme='inherit'] .xterm .xterm-screen canvas {
-  border: 1px solid var(--jp-layout-color0);
+  border: var(--jp-border-width) solid var(--jp-layout-color0);
 }
 
 [data-term-theme='light'] .xterm .xterm-screen canvas {
-  border: 1px solid #fff;
+  border: var(--jp-border-width) solid #fff;
 }
 
 [data-term-theme='dark'] .xterm .xterm-screen canvas {
-  border: 1px solid #000;
+  border: var(--jp-border-width) solid #000;
 }

@@ -69,7 +69,7 @@
 }
 
 .lm-ScrollBar-button {
-  background-color: #f0f0f0;
+  background-color: var(--jp-layout-color2);
   background-position: center center;
   min-height: 15px;
   max-height: 15px;
@@ -78,27 +78,27 @@
 }
 
 .lm-ScrollBar-button:hover {
-  background-color: #dadada;
+  background-color: var(--jp-layout-color3);
 }
 
 .lm-ScrollBar-button.lm-mod-active {
-  background-color: #cdcdcd;
+  background-color: var(--jp-border-color1);
 }
 
 .lm-ScrollBar-track {
-  background: #f0f0f0;
+  background: var(--jp-layout-color2);
 }
 
 .lm-ScrollBar-thumb {
-  background: #cdcdcd;
+  background: var(--jp-border-color1);
 }
 
 .lm-ScrollBar-thumb:hover {
-  background: #bababa;
+  background: var(--jp-border-color0);
 }
 
 .lm-ScrollBar-thumb.lm-mod-active {
-  background: #a0a0a0;
+  background: var(--jp-layout-color3);
 }
 
 .lm-ScrollBar[data-orientation='horizontal'] .lm-ScrollBar-thumb {

@@ -6,11 +6,11 @@
 .lm-DataGrid {
   min-width: 64px;
   min-height: 64px;
-  border: 1px solid #a0a0a0;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .lm-DataGrid-scrollCorner {
-  background-color: #f0f0f0;
+  background-color: var(--jp-layout-color2);
 }
 
 .lm-DataGrid-scrollCorner::after {
@@ -20,5 +20,5 @@
   left: 0;
   width: 1px;
   height: 1px;
-  background-color: #a0a0a0;
+  background-color: var(--jp-border-color1);
 }
