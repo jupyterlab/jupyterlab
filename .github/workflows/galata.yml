@@ -243,8 +243,10 @@ jobs:
           echo "Prepared $COUNT blob report chunks for Playwright merge."
 
       - name: Merge Playwright reports
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
         run: |
-          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,github ./artifacts/final/
+          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,json,github ./artifacts/final/
 
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
@@ -268,6 +270,79 @@ jobs:
       - name: Add report link to job summary
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Add report link to preview comment
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            if (!context.issue.number) {
+              return;
+            }
+
+            const fs = require('fs');
+            const reportUrl = '${{ steps.upload-report.outputs.artifact-url }}';
+            let failing = 0;
+            let flaky = 0;
+            try {
+              const report = JSON.parse(fs.readFileSync('merged-report.json', 'utf8'));
+              failing = Number(report?.stats?.unexpected ?? 0);
+              flaky = Number(report?.stats?.flaky ?? 0);
+            } catch (error) {
+              console.warn(`Could not read merged-report.json for test counts: ${error.message}`);
+            }
+            const reportLinePrefix = 'View the integration tests report in browser: ';
+
+            let badgeStatus;
+            let badgeColor;
+            let badgeTitle;
+            if (failing > 0) {
+              badgeStatus = `${failing}_failing`;
+              badgeColor = 'red';
+              badgeTitle = `${failing} failing UI tests`;
+            } else if (flaky > 0) {
+              badgeStatus = `${flaky}_flaky`;
+              badgeColor = 'orange';
+              badgeTitle = `${flaky} flaky UI tests`;
+            } else {
+              badgeStatus = 'All_passing';
+              badgeColor = 'success';
+              badgeTitle = 'All tests UI tests passed';
+            }
+
+            const badgeUrl = `https://img.shields.io/badge/UI_tests-${badgeStatus}-${badgeColor}`;
+            const reportBadge = `[![UI tests report](${badgeUrl} '${badgeTitle}')](${reportUrl})`;
+            const reportLine = `${reportLinePrefix}${reportBadge}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            const binderComment = comments
+              .slice()
+              .reverse()
+              .find(comment => comment.body.includes("![Binder]("));
+            if (!binderComment) {
+              return;
+            }
+
+            const existingReportLine = binderComment.body
+              .split('\n')
+              .find(line => line.startsWith(reportLinePrefix));
+            const updatedBody =
+              existingReportLine === undefined
+                ? `${binderComment.body.trimEnd()}\n\n${reportLine}`
+                : binderComment.body.replace(existingReportLine, reportLine);
+
+            if (binderComment.body.trim() !== updatedBody.trim()) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: binderComment.id,
+                body: updatedBody
+              });
+            }
 
       - name: Merge and upload test results
         if: ${{ !cancelled() }}
