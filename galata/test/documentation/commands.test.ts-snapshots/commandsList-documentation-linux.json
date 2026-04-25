@@ -3450,9 +3450,7 @@
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3467,9 +3465,7 @@
     "id": "inspector:open",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3492,7 +3488,9 @@
     "id": "inspector:toggle",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl I"
+    ],
     "args": {
       "type": "object",
       "properties": {
