@@ -185,10 +185,6 @@ jobs:
     if: ${{ !cancelled() }}
     needs: test
     runs-on: ubuntu-22.04
-    outputs:
-      report-url: ${{ steps.upload-report.outputs.artifact-url }}
-      failing: ${{ steps.test-counts.outputs.failing }}
-      flaky: ${{ steps.test-counts.outputs.flaky }}
     permissions:
       contents: read
     steps:
@@ -289,6 +285,27 @@ jobs:
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
 
+      - name: Save PR comment data
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            fs.writeFileSync('pr-comment-data.json', JSON.stringify({
+              prNumber: context.payload.pull_request.number,
+              reportUrl: '${{ steps.upload-report.outputs.artifact-url }}',
+              failing: ${{ steps.test-counts.outputs.failing || 0 }},
+              flaky: ${{ steps.test-counts.outputs.flaky || 0 }},
+            }));
+
+      - name: Upload PR comment data
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: galata-pr-comment-data
+          path: pr-comment-data.json
+          retention-days: 1
+
       - name: Merge and upload test results
         if: ${{ !cancelled() }}
         continue-on-error: true
@@ -309,82 +326,3 @@ jobs:
           delete-merged: true
           retention-days: 1
           compression-level: 1
-
-  update-preview-comment:
-    name: Add report link to preview comment
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    needs: merge-reports
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Update binder preview comment
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            if (!context.issue.number) {
-              return;
-            }
-
-            const reportUrl = '${{ needs.merge-reports.outputs.report-url }}';
-            if (!reportUrl) {
-              console.warn('Missing report URL from merge-reports job output; skipping preview comment update.');
-              return;
-            }
-
-            const failing = Number('${{ needs.merge-reports.outputs.failing }}');
-            const flaky = Number('${{ needs.merge-reports.outputs.flaky }}');
-            const reportLinePrefix = 'View the integration tests report in browser: ';
-
-            let badgeStatus;
-            let badgeColor;
-            let badgeTitle;
-            if (failing > 0) {
-              badgeStatus = `${failing}_failing`;
-              badgeColor = 'red';
-              badgeTitle = `${failing} failing UI tests`;
-            } else if (flaky > 0) {
-              badgeStatus = `${flaky}_flaky`;
-              badgeColor = 'orange';
-              badgeTitle = `${flaky} flaky UI tests`;
-            } else {
-              badgeStatus = 'All_passing';
-              badgeColor = 'success';
-              badgeTitle = 'All tests UI tests passed';
-            }
-
-            const badgeUrl = `https://img.shields.io/badge/UI_tests-${badgeStatus}-${badgeColor}`;
-            const reportBadge = `[![UI tests report](${badgeUrl} '${badgeTitle}')](${reportUrl})`;
-            const reportLine = `${reportLinePrefix}${reportBadge}`;
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number
-            });
-            const binderComment = comments
-              .slice()
-              .reverse()
-              .find(comment => comment.body.includes("![Binder]("));
-            if (!binderComment) {
-              return;
-            }
-
-            const existingReportLine = binderComment.body
-              .split('\n')
-              .find(line => line.startsWith(reportLinePrefix));
-            const updatedBody =
-              existingReportLine === undefined
-                ? `${binderComment.body.trimEnd()}\n\n${reportLine}`
-                : binderComment.body.replace(existingReportLine, reportLine);
-
-            if (binderComment.body.trim() !== updatedBody.trim()) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: binderComment.id,
-                body: updatedBody
-              });
-            }
