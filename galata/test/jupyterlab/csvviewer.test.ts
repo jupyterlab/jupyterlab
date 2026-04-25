@@ -112,6 +112,9 @@ test.describe('CSV Viewer - comment character', () => {
     await expect(csvLocator).toBeVisible();
 
     // The DataGrid is canvas-based — no DOM cell elements exist.
+    // Wait for initial render (RENDER_TIMEOUT in widget is 1000 ms)
+    await page.waitForTimeout(1500);
+
     // Take a screenshot with no comment char (# lines treated as data rows).
     const screenshotWithoutComment = await csvLocator.screenshot();
 
@@ -137,6 +140,9 @@ test.describe('CSV Viewer - comment character', () => {
 
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
+
+    // Wait for initial render (RENDER_TIMEOUT in widget is 1000 ms)
+    await page.waitForTimeout(1500);
 
     const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
 
