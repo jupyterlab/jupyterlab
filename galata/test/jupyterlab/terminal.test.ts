@@ -334,7 +334,7 @@ test.describe('Open in Terminal from File Browser', () => {
 
     // Iterate through tabs, activate each, and check content
     const foundFolders = new Set<string>();
-    for (let i = 0; i < 2; i++) {
+    for (let i of [1, 0]) {
       const tab = tabs.nth(i);
       await tab.click();
       await expect(tab).toHaveClass(/lm-mod-current/);
