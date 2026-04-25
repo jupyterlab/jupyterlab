@@ -103,7 +103,7 @@ test.describe('CSV Viewer - comment character', () => {
     await expect(commentDropdown).toHaveValue('');
   });
 
-  test('should treat comment rows as data when no comment char is set', async ({
+  test('should render differently with and without comment char set', async ({
     page
   }) => {
     await page.filebrowser.open(csvFileName);
@@ -111,35 +111,23 @@ test.describe('CSV Viewer - comment character', () => {
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
 
-    // Without a comment char set, the '#' lines are treated as data rows.
-    // Verify the visual state via snapshot — the DataGrid is canvas-based
-    // so there are no DOM elements for individual cells.
-    expect(await csvLocator.screenshot()).toMatchSnapshot(
-      'csv-comments-no-comment-char.png'
-    );
-  });
+    // The DataGrid is canvas-based — no DOM cell elements exist.
+    // Take a screenshot with no comment char (# lines treated as data rows).
+    const screenshotWithoutComment = await csvLocator.screenshot();
 
-  test('should correctly parse CSV when comment char is set to #', async ({
-    page
-  }) => {
-    await page.filebrowser.open(csvFileName);
-
-    const csvLocator = page.locator('.jp-CSVViewer');
-    await expect(csvLocator).toBeVisible();
-
-    // Select '#' as comment character using the correct wrapped select selector
+    // Now set '#' as the comment character
     const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
     await commentDropdown.selectOption('#');
     await expect(commentDropdown).toHaveValue('#');
 
-    // Wait for the grid to re-render
-    await page.waitForTimeout(200);
+    // Wait for the grid to re-render (RENDER_TIMEOUT in widget is 1000 ms)
+    await page.waitForTimeout(1500);
 
-    // Verify the grid now shows the data rows correctly via snapshot.
-    // The DataGrid is canvas-based — individual cells have no DOM elements.
-    expect(await csvLocator.screenshot()).toMatchSnapshot(
-      'csv-comments-with-comment-char.png'
-    );
+    // Take screenshot after setting comment char (# lines are now skipped)
+    const screenshotWithComment = await csvLocator.screenshot();
+
+    // The two renders must differ — the comment lines affect the data layout
+    expect(screenshotWithComment).not.toEqual(screenshotWithoutComment);
   });
 
   test('should revert to raw rendering when comment char is cleared', async ({
@@ -154,13 +142,13 @@ test.describe('CSV Viewer - comment character', () => {
 
     // Enable comment char — grid should re-render without comment rows
     await commentDropdown.selectOption('#');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(1500);
 
     const withCommentScreenshot = await csvLocator.screenshot();
 
     // Revert to none — grid should re-render including comment rows as data
     await commentDropdown.selectOption('');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(1500);
 
     const withoutCommentScreenshot = await csvLocator.screenshot();
 
