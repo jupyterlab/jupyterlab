@@ -333,34 +333,25 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
+    const activeTerminal = page.locator('.jp-Terminal-body:visible');
     const foundFolders = new Set<string>();
-    for (let i of [1, 0]) {
-      const tab = tabs.nth(i);
-      await tab.click();
-      await expect(tab).toHaveClass(/lm-mod-current/);
+    for (let i = 0; i < 2; i++) {
+      await tabs.nth(i).click();
+      await activeTerminal.waitFor({ state: 'visible' });
 
-      // Use the tab's data-id to locate the exact terminal widget
-      const widgetId = await tab.getAttribute('data-id');
-      expect(widgetId).not.toBeNull();
-      const activeTerminalContainer = page.locator(`#${widgetId}`);
-      await activeTerminalContainer.waitFor({ state: 'visible' });
+      // Find the currently visible terminal body
+      await expect(activeTerminal).toHaveCount(1);
 
-      await activeTerminalContainer.locator('.jp-Terminal-body').waitFor();
-      const activeBody = activeTerminalContainer.locator(
-        '.jp-Terminal-body:visible'
-      );
-      await activeBody.click();
+      await activeTerminal.click();
+      await page.keyboard.type('pwd');
+      await page.keyboard.press('Enter');
 
-      await runCommand(page, activeTerminalContainer, 'pwd');
-
-      await expect(activeBody).toContainText(
+      await expect(activeTerminal).toContainText(
         new RegExp(`${folderA}|${folderB}`),
-        {
-          timeout: 10000
-        }
+        { timeout: 10000 }
       );
 
-      const text = await activeBody.textContent();
+      const text = await activeTerminal.textContent();
       if (text?.includes(folderA)) {
         foundFolders.add(folderA);
       }
