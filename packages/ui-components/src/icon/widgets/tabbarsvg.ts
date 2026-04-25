@@ -3,6 +3,7 @@
 
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { Message } from '@lumino/messaging';
 import type { VirtualElement } from '@lumino/virtualdom';
 import { hpass } from '@lumino/virtualdom';
 import type { Widget } from '@lumino/widgets';
@@ -34,6 +35,44 @@ export class TabBarSvg<T> extends TabBar<T> {
       title: trans.__('New Launcher')
     });
   }
+
+  /**
+   * Add wheel listener when widget is attached.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('wheel', this._onWheel, { passive: false });
+  }
+
+  /**
+   * Remove wheel listener before widget is detached.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('wheel', this._onWheel);
+    super.onBeforeDetach(msg);
+  }
+
+  /**
+   * Convert vertical wheel motion into horizontal tab scrolling.
+   */
+  private _onWheel = (event: WheelEvent): void => {
+    const content = this.node.querySelector(
+      '.lm-TabBar-content'
+    ) as HTMLElement | null;
+    if (!content) {
+      return;
+    }
+    const delta =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
+    if (delta === 0) {
+      return;
+    }
+    // Scroll tab strip horizontally with the mouse wheel.
+    content.scrollLeft += delta;
+    event.preventDefault();
+  };
 }
 
 export namespace TabBarSvg {
