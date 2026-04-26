@@ -18,8 +18,8 @@ on:
       repeat_each:
         description: Number of times to repeat each matching test (passed to --repeat-each)
         required: false
-        default: '1'
-        type: string
+        default: 1
+        type: number
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
@@ -151,7 +151,7 @@ jobs:
       - name: Test
         env:
           TEST_PATTERN: ${{ github.event.inputs.test_pattern || '' }}
-          REPEAT_EACH: ${{ github.event.inputs.repeat_each || '1' }}
+          REPEAT_EACH: ${{ github.event.inputs.repeat_each || 1 }}
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
