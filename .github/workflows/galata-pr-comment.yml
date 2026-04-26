@@ -35,7 +35,7 @@ jobs:
               return;
             }
 
-            const reportLinePrefix = 'View the integration tests report in browser: ';
+            const reportLinePrefix = 'View the integration tests report in the browser: ';
 
             let badgeStatus;
             let badgeColor;
