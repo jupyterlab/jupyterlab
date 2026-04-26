@@ -31,7 +31,7 @@ the layout of the application areas and tabs, etc.
 Workspaces can be saved on the server with
 {ref}`named workspace URLs <url-workspaces>` or
 {ref}`using workspace commands <workspaces-gui>` available in the menu and sidebar.
-To learn more about URLs in Jupyterlab, visit {ref}`urls`.
+To learn more about URLs in JupyterLab, visit {ref}`urls`.
 
 In the user interface, the current workspace can be changed using the workspace
 selector widget located in the top bar.

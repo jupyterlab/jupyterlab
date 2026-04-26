@@ -67,7 +67,8 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       // upon unhiding a PDF. But triggering a refresh of the URL makes it
       // find it again. No idea what the reason for this is.
       if (Private.IS_FIREFOX) {
-        this._object.data = this._object.data; // eslint-disable-line
+        // eslint-disable-next-line no-self-assign
+        this._object.data = this._object.data;
       }
       return Promise.resolve(void 0);
     }

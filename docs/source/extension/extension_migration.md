@@ -18,10 +18,28 @@ However, if an extension uses the experimental {ref}`webpackConfig` option, it
 may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
 Webpack config to Rspack.
 
+### For theme authors
+
+- Fonts in data grids (used by CSV/TSV viewer, debugger variable table) can now be customized with:
+  - new `--jp-datagrid-font-size` variable controlling the font size; if not specified by a theme, the fallback of 12px will be used,
+  - new `--jp-datagrid-font-family` variable controlling the font family; if not specified, `--jp-content-font-family` will be used as a fallback.
+
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
 - The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
+- Synchronization properties (`syncEditable` and `syncCollapse`) of the {ts:class}`cells.Cell` class and its derivatives, as well as `CodeCell.syncScrolled`, now default to `undefined` rather than `false`. In notebook initialization, these values are now only set to `true` if `undefined`, so custom notebook content factories ({ts:interface}`notebook.NotebookPanel.IContentFactory`) can explicitly set them to `true` or `false` without being overwritten later.
+
+### Testing with Galata
+
+- The `runCell()` method of notebook helper now takes `options: {inplace?: boolean; wait?: boolean}` as a second argument.
+  Setting the `wait` option to `false` skips waiting for the cell execution to finish, but still waits until the execution
+  has been scheduled.
+- When `autoGoto` is enabled, the workspace is now reset automatically; to opt out, set `resetWorkspace` fixture to `false`.
+- The galata's `page.waitForCondition()` now uses a default timeout of 15 seconds, simplifying debugging and reducing time to retry.
+  The `timeout` argument can be used to control the timeout duration.
+- Errors after page fixture teardown are now gracefully ignored to prevent the errors from delayed server requests
+  from failing tests during the teardown phase.
 
 ## JupyterLab 4.5.0 to 4.5.1
 
@@ -311,7 +329,7 @@ See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more c
 
 - Some CSS rules for `button` with the class `.jp-ToolbarButtonComponent` has been kept for backward compatibility.
 
-  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  These rules are now **deprecated** and will be removed in JupyterLab 5.
   The `button` elements in toolbars must be updated to `jp-button`, from
   [jupyter-ui-toolkit](https://github.com/jupyterlab-contrib/jupyter-ui-toolkit).
 
@@ -419,7 +437,6 @@ package configuration.
 - Create a file `.yarnrc.yml` containing:
 
 ```yaml
-enableImmutableInstalls: false
 nodeLinker: node-modules
 ```
 
@@ -1007,8 +1024,8 @@ index 6f1562f..3fcdf37 100644
 +    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
 +    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
 +    "build:lib": "tsc",
-+    "build:labextension": "jupyter labextension build .",
-+    "build:labextension:dev": "jupyter labextension build --development True .",
++    "build:labextension": "jupyter-builder build .",
++    "build:labextension:dev": "jupyter-builder build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
 +    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
    "clean:labextension": "rimraf myextension/labextension",
@@ -1047,7 +1064,7 @@ The diff also shows the new `@jupyterlab/builder` as a `devDependency`.
 It hides away internal dependencies such as `webpack`, and produces the assets that can then be distributed as part of a Python package.
 
 Extension developers do not need to interact with `@jupyterlab/builder` directly, but instead can use the
-`jupyter labextension build` command. This command is run automatically as part of the `build` script
+`jupyter-builder build` command. This command is run automatically as part of the `build` script
 (`jlpm run build`).
 
 For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`

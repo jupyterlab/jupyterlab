@@ -48,6 +48,18 @@ showDialog({
 If no options are specified, the dialog will only contain _OK_ and _Cancel_ buttons.
 :::
 
+### Dialog Button Helpers and Defaults
+
+Use the {ts:namespace}`apputils.Dialog` helpers from {ts:module}`apputils` to
+get consistent labels, styling and behavior:
+
+- {ts:function}`apputils.Dialog.okButton`: creates an accept button (`accept: true`) with a default localized `Ok` label.
+- {ts:function}`apputils.Dialog.cancelButton`: creates a reject button (`accept: false`) with a default localized `Cancel` label.
+- {ts:function}`apputils.Dialog.warnButton`: creates a warning-styled button (`displayType: 'warn'`); acceptance and label still follow {ts:function}`apputils.Dialog.createButton`.
+- {ts:function}`apputils.Dialog.createButton`: generic helper; if `accept` is omitted it defaults to `true`, and the default label is `Ok` for accept buttons and `Cancel` otherwise.
+
+You only need to provide `label` when you want custom text.
+
 ### Message Dialogs
 
 Helper functions to show a message to the user are available in the {ts:module}`apputils` package.

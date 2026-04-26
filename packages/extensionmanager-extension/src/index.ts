@@ -126,16 +126,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('Extension Manager'),
-      execute: () => {
+      execute: (args: { query?: string }) => {
         if (view) {
           shell.activateById(view.id);
+          if (args.query !== undefined) {
+            view.setQuery(args.query);
+          }
         }
       },
       isVisible: () => model.isEnabled,
       describedBy: {
         args: {
           type: 'object',
-          properties: {}
+          properties: {
+            query: {
+              type: 'string',
+              description: trans.__(
+                'Search query to pre-fill in the extension manager'
+              )
+            }
+          }
         }
       }
     });

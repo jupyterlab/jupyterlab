@@ -15,6 +15,7 @@
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper > input,
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper > select,
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper > textarea {
+  font-family: var(--jp-ui-font-family);
   font-size: var(--jp-content-font-size2);
   border-color: var(--jp-input-border-color);
   border-style: solid;

@@ -15,8 +15,10 @@ import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -59,6 +61,8 @@ namespace CommandIDs {
   export const setTheme = 'terminal:set-theme';
 
   export const shutdown = 'terminal:shut-down';
+
+  export const openFolderInTerminal = 'terminal:open-folder-in-terminal';
 }
 
 /**
@@ -83,9 +87,72 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
 };
 
 /**
- * Export the plugin as default.
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
  */
-export default plugin;
+const openFolderInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/terminal-extension:open-folder-in-terminal',
+  description: 'Adds an "Open in Terminal" command for the file browser.',
+  requires: [IFileBrowserFactory, ITranslator, ITerminalTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    fileBrowserFactory: IFileBrowserFactory,
+    translator: ITranslator,
+    tracker: ITerminalTracker
+  ): void => {
+    if (!app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openFolderInTerminal, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const { tracker } = fileBrowserFactory;
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const items = Array.from(widget.selectedItems());
+        if (items.length === 0) {
+          return;
+        }
+
+        for (const item of items) {
+          // Only open a terminal for directories.
+          if (item.type !== 'directory') {
+            continue;
+          }
+          try {
+            // Open one terminal for each selected directory.
+            await commands.execute(CommandIDs.createNew, {
+              cwd: item.path
+            });
+          } catch (error) {
+            void showErrorMessage(
+              trans.__('Failed to open new terminal'),
+              error as Error
+            );
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+export default [plugin, openFolderInTerminalPlugin];
 
 /**
  * Activate the terminal plugin.
@@ -392,6 +459,7 @@ function addCommands(
       const term = new XTerm(session, options, translator);
 
       term.title.icon = terminalIcon;
+      // eslint-disable-next-line jupyter/no-untranslated-string
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
@@ -639,10 +707,11 @@ function addCommands(
         return trans.__('Set terminal theme to the provided `theme`.');
       }
       const theme = args['theme'] as string;
+      const rawTheme = theme[0].toLocaleUpperCase() + theme.slice(1);
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
-          : trans.__(theme[0].toUpperCase() + theme.slice(1));
+          : trans.__(rawTheme);
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;

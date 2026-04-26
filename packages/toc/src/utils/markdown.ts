@@ -79,35 +79,40 @@ export async function parseHeadings(
   markdownText: string,
   parser: IMarkdownParser | null
 ): Promise<IMarkdownHeading[]> {
-  if (!parser) {
-    console.warn("Couldn't parse headings; Markdown parser is null");
+  if (!parser || !parser.getHeadingTokens) {
+    console.warn(
+      'Unable to parse headings; Markdown parser is missing or does not implement getHeadingTokens().'
+    );
     return [];
   }
-  const renderedHtml = await parser.render(markdownText);
 
-  const headings = new Array<IMarkdownHeading>();
-  const domParser = new DOMParser();
-  const htmlDocument = domParser.parseFromString(renderedHtml, 'text/html');
+  // Get the heading tokens from the parser, including the source line metadata
+  const headingTokens = await parser.getHeadingTokens(markdownText);
 
-  // Query all heading elements (h1-h6)
-  const headingElements = htmlDocument.querySelectorAll(
-    'h1, h2, h3, h4, h5, h6'
+  // Convert each heading token into HTML and extract the heading elements,
+  // as this provides a clean and reliable way to retrieve the headings.
+  const parseHeadings = await Promise.all(
+    headingTokens.map(async token => {
+      const renderedHtml = await parser.render(token.raw);
+      const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
+      const htmlHeadings = Array.from(
+        dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
+
+      return htmlHeadings.map(e => ({
+        text: e.textContent?.trim() || '',
+        line: token.line,
+        level: parseInt(e.tagName[1], 10),
+        raw: token.raw.replace(/\n+$/, ''),
+        skip: skipHeading.test(token.raw)
+      }));
+    })
   );
 
-  headingElements.forEach((headingElement, lineIdx) => {
-    const level = parseInt(headingElement.tagName.substring(1), 10);
-    const headingText = headingElement.textContent?.trim() || '';
-
-    headings.push({
-      text: headingText,
-      line: lineIdx, // Line index within the parsed HTML, not the original Markdown source line
-      level: level,
-      raw: headingElement.outerHTML, // Parsed HTML string, not raw Markdown
-      skip: skipHeading.test(headingElement.outerHTML)
-    });
-  });
-
-  return headings;
+  return parseHeadings.reduce(
+    (acc, curr) => acc.concat(curr),
+    [] as IMarkdownHeading[]
+  );
 }
 
 /**

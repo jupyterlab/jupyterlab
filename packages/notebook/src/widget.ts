@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DOMUtils, SystemClipboard } from '@jupyterlab/apputils';
+import { DOMUtils } from '@jupyterlab/apputils';
 import type {
   ICellModel,
   ICodeCellModel,
@@ -175,7 +175,6 @@ export type NotebookMode = 'command' | 'edit';
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
-  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
@@ -628,6 +627,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     args: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this.removeHeader();
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add': {
         let index = 0;
@@ -725,9 +725,15 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       translator: this.translator
     };
     const cell = this.contentFactory.createCodeCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
-    cell.syncScrolled = true;
+    if (cell.syncCollapse === undefined) {
+      cell.syncCollapse = true;
+    }
+    if (cell.syncEditable === undefined) {
+      cell.syncEditable = true;
+    }
+    if (cell.syncScrolled === undefined) {
+      cell.syncScrolled = true;
+    }
     cell.outputArea.inputRequested.connect((_, stdin) => {
       this._onInputRequested(cell).catch(reason => {
         console.error('Failed to scroll to cell requesting input.', reason);
@@ -759,8 +765,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
+    if (cell.syncCollapse === undefined) {
+      cell.syncCollapse = true;
+    }
+    if (cell.syncEditable === undefined) {
+      cell.syncEditable = true;
+    }
     // Connect collapsed signal for each markdown cell widget
     cell.headingCollapsedChanged.connect(this._onCellCollapsed, this);
     return cell;
@@ -779,8 +789,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       placeholder: this._notebookConfig.windowingMode !== 'none'
     };
     const cell = this.contentFactory.createRawCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
+    if (cell.syncCollapse === undefined) {
+      cell.syncCollapse = true;
+    }
+    if (cell.syncEditable === undefined) {
+      cell.syncEditable = true;
+    }
     return cell;
   }
 
@@ -1635,6 +1649,7 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
     super({
       renderer: {
         createOuter(): HTMLElement {
@@ -1644,7 +1659,7 @@ export class Notebook extends StaticNotebook {
         createViewport(): HTMLElement {
           const el = document.createElement('div');
           el.setAttribute('role', 'feed');
-          el.setAttribute('aria-label', 'Cells');
+          el.setAttribute('aria-label', trans.__('Cells'));
           return el;
         },
 
@@ -1882,38 +1897,40 @@ export class Notebook extends StaticNotebook {
     return this._lastClipboardInteraction;
   }
   set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
-    const clipboard = SystemClipboard.getInstance();
+    this._lastClipboardInteraction = newValue;
+  }
+
+  /**
+   * This function should be called when a clipboard interaction involve notebook cells.
+   *
+   * @param interaction - the clipboard interaction (copy, cut or paste).
+   * @param cells - the cells copied, cut or pasted.
+   */
+  recordCellClipboardInteraction(
+    interaction: 'copy' | 'cut' | 'paste' | null,
+    cells: nbformat.IBaseCell[]
+  ) {
     const lastInteraction = this._lastClipboardInteraction;
-    clipboard
-      .getData(JUPYTER_CELL_MIME)
-      .then(data => {
-        if (data !== null) {
-          if (newValue === 'copy' || newValue === 'cut') {
-            this._localCopy = data as nbformat.IBaseCell[];
-          } else if (newValue === 'paste') {
-            const pasted = data as nbformat.IBaseCell[];
+    if (interaction === 'copy' || interaction === 'cut') {
+      this._localCopy = cells;
+    } else if (interaction === 'paste') {
+      const pasted = cells;
+      // Check if the current clipboard match the previously copied/cut cells.
+      const isLocal = ArrayExt.shallowEqual(
+        pasted,
+        this._localCopy,
+        JSONExt.deepEqual
+      );
 
-            // Check if the current clipboard match the previously copied/cut cells.
-            const isLocal = ArrayExt.shallowEqual(
-              pasted,
-              this._localCopy,
-              JSONExt.deepEqual
-            );
-
-            // Emit a signal with the last interaction and the number of pasted cells.
-            this._cellsPasted.emit({
-              previousInteraction: isLocal ? lastInteraction : null,
-              cellCount: pasted.length
-            });
-          }
-        }
-      })
-      .catch(() => {
-        // This is a no-op if the clipboard is not available.
+      // Emit a signal with the last interaction and the number of pasted cells.
+      this._cellsPasted.emit({
+        previousInteraction: isLocal ? lastInteraction : null,
+        cellCount: pasted.length
       });
+    }
 
     // Update the last clipboard interaction.
-    this._lastClipboardInteraction = newValue;
+    this.lastClipboardInteraction = interaction;
   }
 
   /**
@@ -2032,7 +2049,8 @@ export class Notebook extends StaticNotebook {
       this._selectionChanged.emit(void 0);
     }
     // Make sure we have a valid active cell.
-    this.activeCellIndex = this.activeCellIndex; // eslint-disable-line
+    // eslint-disable-next-line no-self-assign
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
@@ -2821,7 +2839,9 @@ export class Notebook extends StaticNotebook {
     if (widget && widget.editorWidget?.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
-      event.preventDefault();
+      if (!target.closest('[data-jp-suppress-context-menu]')) {
+        event.preventDefault();
+      }
     }
   }
 
@@ -3009,6 +3029,7 @@ export class Notebook extends StaticNotebook {
     event.stopPropagation();
 
     // If in select mode, update the selection
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (this._mouseMode) {
       case 'select': {
         const target = event.target as HTMLElement;
@@ -3393,6 +3414,10 @@ export class Notebook extends StaticNotebook {
         const cell = this.widgets[i];
         if (!cell.model.isDisposed && cell.editor) {
           cell.model.selections.delete(cell.editor.uuid);
+          // Collapse the editor's visual selection to the cursor position
+          // to avoid multiple cells showing highlighted text.
+          const cursor = cell.editor.getCursorPosition();
+          cell.editor.setCursorPosition(cursor, { scroll: false });
         }
       }
     }

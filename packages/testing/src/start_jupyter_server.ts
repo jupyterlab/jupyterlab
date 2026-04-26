@@ -184,7 +184,6 @@ namespace Private {
   /**
    * Install a spec in the data directory.
    */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   export function installSpec(dataDir: string, name: string, spec: any): void {
     const specDir = path.join(dataDir, 'kernels', name);
     fs.mkdirSync(specDir, { recursive: true });
@@ -368,7 +367,6 @@ namespace Private {
     baseUrl: string,
     startDelegate: PromiseDelegate<string>
   ): Promise<void> {
-    // eslint-disable-next-line
     while (true) {
       try {
         await fetch(URLExt.join(baseUrl, 'api'));

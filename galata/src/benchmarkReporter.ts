@@ -16,7 +16,7 @@ import type {
 import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import fs from 'fs';
 import path from 'path';
-import si from 'systeminformation';
+import os from 'node:os';
 import * as vega from 'vega';
 import * as vl from 'vega-lite';
 import * as vs from 'vega-statistics';
@@ -686,12 +686,23 @@ class BenchmarkReporter implements Reporter {
   }
 
   protected async getMetadata(browser?: string): Promise<any> {
-    const cpu = await si.cpu();
-    // Keep only non-variable value
-    const totalMemory = (await si.mem()).total;
-    // Remove some os information
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { hostname, fqdn, ...osInfo } = await si.osInfo();
+    const cpus = os.cpus();
+    // Collect information in a format compatible with
+    // the `systeminformation` package output but only
+    // using built-in Node.js functionality.
+    const first = cpus[0];
+    const cpu = {
+      speed: first.speed,
+      model: first.model,
+      processors: cpus.length,
+      cores: os.availableParallelism()
+    };
+    const totalMemory = os.totalmem();
+    const osInfo = {
+      platform: os.platform(),
+      release: os.release(),
+      arch: os.arch()
+    };
 
     const browsers = ['chromium', 'firefox', 'webkit'];
     const browserVersions: { [name: string]: string } = {};
