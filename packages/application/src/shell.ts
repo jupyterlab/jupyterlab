@@ -1,39 +1,40 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
   DockPanelSvg,
   LabIcon,
-  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IMessageHandler, Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { DockLayout, DockPanel, TabPanel, Title } from '@lumino/widgets';
 import {
   AccordionPanel,
   BoxLayout,
   BoxPanel,
-  DockLayout,
-  DockPanel,
   FocusTracker,
   Panel,
   SplitPanel,
   StackedPanel,
   TabBar,
-  TabPanel,
-  Title,
   Widget
 } from '@lumino/widgets';
-import { JupyterFrontEnd } from './frontend';
-import { LayoutRestorer } from './layoutrestorer';
+import type { JupyterFrontEnd } from './frontend';
+import type { LayoutRestorer } from './layoutrestorer';
 
 /**
  * The class name added to AppShell instances.
@@ -127,6 +128,13 @@ export namespace ILabShell {
      * `contentVisibility` is only available in Chromium-based browsers.
      */
     hiddenMode: 'display' | 'scale' | 'contentVisibility';
+
+    /**
+     * Whether to show padding around the main dock panel area.
+     *
+     * Set to `false` for a more compact layout.
+     */
+    dockPanelPadding?: boolean;
   }
 
   /**
@@ -818,6 +826,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * @param area Name of area to activate
    */
   activateArea(area: ILabShell.Area = 'main'): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area) {
       case 'main':
         {
@@ -1372,12 +1381,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           break;
       }
     }
+
+    if (config.dockPanelPadding !== undefined) {
+      if (config.dockPanelPadding === false) {
+        this._dockPanel.node.style.setProperty(
+          '--jp-private-dock-panel-padding',
+          '0px'
+        );
+      } else {
+        this._dockPanel.node.style.removeProperty(
+          '--jp-private-dock-panel-padding'
+        );
+      }
+      this._dockPanel.fit();
+    }
   }
 
   /**
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IterableIterator<Widget> {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
@@ -1635,8 +1659,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
 
-    options = options || {};
-
     const { title } = widget;
     // Add widget ID to tab so that we can get a handle on the tab's widget
     // (for context menu support)
@@ -1681,8 +1703,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-      ? bars[0]
-      : null;
+        ? bars[0]
+        : null;
   }
 
   /*

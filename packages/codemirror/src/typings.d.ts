@@ -4,7 +4,7 @@
  */
 
 declare module '@codemirror/legacy-modes/mode/python' {
-  import { StreamParser } from '@codemirror/language';
+  import type { StreamParser } from '@codemirror/language';
 
   export const python: StreamParser<unknown>;
   export const cython: StreamParser<unknown>;

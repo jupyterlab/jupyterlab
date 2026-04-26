@@ -7,7 +7,7 @@
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';

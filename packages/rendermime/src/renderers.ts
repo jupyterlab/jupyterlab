@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { removeMath, replaceMath } from './latex';
 
@@ -1671,6 +1672,7 @@ namespace Private {
 
       while (numbers.length) {
         const n = numbers.shift();
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (n) {
           case 0:
             fg = bg = [];

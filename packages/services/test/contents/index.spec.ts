@@ -7,13 +7,8 @@ import {
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import {
-  Contents,
-  ContentsManager,
-  Drive,
-  IContentProvider,
-  ServerConnection
-} from '../../src';
+import type { Contents, IContentProvider } from '../../src';
+import { ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
@@ -459,6 +454,19 @@ describe('contents', () => {
     it('should rename a file', async () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
+      const model = await rename;
+      expect(model.created).toBe(DEFAULT_FILE.created);
+    });
+
+    it('should overwrite a file', async () => {
+      // Rename
+      handleRequest(contents, 200, DEFAULT_FILE);
+      // Delete
+      handleRequest(contents, 204, DEFAULT_FILE);
+      // Overwrite
+      handleRequest(contents, 200, DEFAULT_FILE);
+
+      const rename = contents.overwrite('/foo/bar.txt', '/foo/baz.txt');
       const model = await rename;
       expect(model.created).toBe(DEFAULT_FILE.created);
     });

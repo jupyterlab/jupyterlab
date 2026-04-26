@@ -1,26 +1,24 @@
-/* eslint-disable @typescript-eslint/ban-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
 import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
+import type { Extension, StateCommand, Text } from '@codemirror/state';
 import {
   Compartment,
   EditorSelection,
   EditorState,
-  Extension,
-  Prec,
-  StateCommand,
-  Text
+  Prec
 } from '@codemirror/state';
-import { Command, EditorView, ViewUpdate } from '@codemirror/view';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { SyntaxNodeRef } from '@lezer/common';
+import type { Command, ViewUpdate } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ExtensionsHandler } from './extension';
 import { EditorLanguageRegistry } from './language';
-import {
+import type {
   IEditorExtensionRegistry,
   IEditorLanguageRegistry,
   IExtensionsHandler
@@ -30,16 +28,6 @@ import {
  * The class name added to CodeMirrorWidget instances.
  */
 const EDITOR_CLASS = 'jp-CodeMirrorEditor';
-
-/**
- * The key code for the up arrow key.
- */
-const UP_ARROW = 38;
-
-/**
- * The key code for the down arrow key.
- */
-const DOWN_ARROW = 40;
 
 /**
  * CodeMirror editor.
@@ -94,6 +82,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
+
+    const scroller = host.querySelector('.cm-scroller') as HTMLElement | null;
+    if (scroller) {
+      scroller.classList.add('jp-zoom-target');
+    }
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -623,7 +616,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   protected onKeydown(event: KeyboardEvent): boolean {
     const position = this.state.selection.main.head;
 
-    if (position === 0 && event.keyCode === UP_ARROW) {
+    if (position === 0 && event.key === 'ArrowUp') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
       }
@@ -631,7 +624,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     const line = this.doc.lineAt(position).number;
-    if (line === 1 && event.keyCode === UP_ARROW) {
+    if (line === 1 && event.key === 'ArrowUp') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('topLine');
       }
@@ -639,7 +632,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     const length = this.doc.length;
-    if (position === length && event.keyCode === DOWN_ARROW) {
+    if (position === length && event.key === 'ArrowDown') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
       }

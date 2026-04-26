@@ -1,24 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import {
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type {
   Kernel,
   KernelMessage,
   KernelSpec,
   ServerConnection,
   Session
 } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
@@ -1858,9 +1857,7 @@ namespace Private {
 
     const body = document.createElement('div');
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${
-      sessionContext.name
-    }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name}"`;
     body.appendChild(text);
 
     const select = document.createElement('select');

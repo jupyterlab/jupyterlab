@@ -7,18 +7,29 @@
  * @module services-extension
  */
 
+import type {
+  Contents,
+  Event,
+  IContentProvider,
+  Kernel,
+  KernelSpec,
+  NbConvert,
+  ServiceManagerPlugin,
+  Session,
+  Setting,
+  Terminal,
+  User,
+  Workspace
+} from '@jupyterlab/services';
 import {
   ConfigSection,
   ConfigSectionManager,
   ConnectionStatus,
-  Contents,
   ContentsManager,
   Drive,
-  Event,
   EventManager,
   IConfigSectionManager,
   IConnectionStatus,
-  IContentProvider,
   IContentsManager,
   IDefaultContentProvider,
   IDefaultDrive,
@@ -33,25 +44,16 @@ import {
   ITerminalManager,
   IUserManager,
   IWorkspaceManager,
-  Kernel,
   KernelManager,
-  KernelSpec,
   KernelSpecManager,
-  NbConvert,
   NbConvertManager,
   RestContentProvider,
   ServerConnection,
   ServiceManager,
-  ServiceManagerPlugin,
-  Session,
   SessionManager,
-  Setting,
   SettingManager,
-  Terminal,
   TerminalManager,
-  User,
   UserManager,
-  Workspace,
   WorkspaceManager
 } from '@jupyterlab/services';
 

@@ -219,6 +219,7 @@ intended to be used for adding context menu items and keyboard shortcuts.
 - `jp-SettingEditor`: applied to setting editors
 - `jp-SideBar`: applied to sidebars
 - `jp-Terminal`: applied to terminals
+- `jp-zoom-target`: applied to the element within a widget that should respond to zoom actions. Extensions can add this class to define where per-widget zoom should be applied.
 
 **CSS classes that describe the state of a widget**
 

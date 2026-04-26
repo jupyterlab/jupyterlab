@@ -5,10 +5,10 @@
 
 import DuplicatePackageCheckerPlugin from 'duplicate-package-checker-webpack-plugin';
 import * as fs from 'fs-extra';
-import * as rspack from '@rspack/core';
+import type * as rspack from '@rspack/core';
 import { LicenseWebpackPlugin } from 'license-webpack-plugin';
-import { LicenseIdentifiedModule } from 'license-webpack-plugin/dist/LicenseIdentifiedModule';
-import { PluginOptions } from 'license-webpack-plugin/dist/PluginOptions';
+import type { LicenseIdentifiedModule } from 'license-webpack-plugin/dist/LicenseIdentifiedModule';
+import type { PluginOptions } from 'license-webpack-plugin/dist/PluginOptions';
 
 // From
 // https://github.com/webpack/webpack/blob/95120bdf98a01649740b104bebc426b0123651ce/lib/WatchIgnorePlugin.js

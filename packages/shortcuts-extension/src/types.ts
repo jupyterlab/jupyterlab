@@ -3,11 +3,15 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import type { CommandRegistry } from '@lumino/commands';
-import type { ISignal } from '@lumino/signaling';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * Identifiers of commands registered by shortcuts UI.
@@ -43,6 +47,20 @@ export interface IKeybinding {
    * Whether this keybinding comes from default values (schema or default overrides), or is set by user.
    */
   readonly isDefault: boolean;
+}
+
+/**
+ * The advanced options.
+ */
+export interface ICustomOptions {
+  /**
+   * The DOM selector that catches the shortcut.
+   */
+  selector: string;
+  /**
+   * The args sent to the command.
+   */
+  args: ReadonlyJSONObject;
 }
 
 /**
@@ -89,6 +107,10 @@ export interface IShortcutTarget {
    * Arguments influence the command label and execution.
    */
   readonly args: ReadonlyPartialJSONObject | undefined;
+  /**
+   * Whether this shortcut has been defined by the user or not.
+   */
+  readonly userDefined?: boolean;
 }
 
 /**
@@ -164,6 +186,7 @@ export namespace IShortcutUI {
     >;
     commandRegistry: Omit<CommandRegistry, 'execute'>;
     actionRequested: ISignal<unknown, ActionRequest>;
+    editorFactory?: CodeEditor.Factory;
   }
 }
 
@@ -210,15 +233,49 @@ export interface IShortcutUI {
     keybinding: IKeybinding,
     keys: string[]
   ): Promise<void>;
+  /**
+   * Update the selector and args for a user defined shortcut.
+   */
+  setCustomOptions(
+    target: IShortcutTarget,
+    options: ICustomOptions
+  ): Promise<boolean>;
+  /**
+   * Toggles showing add command row.
+   */
+  toggleAddCommandRow(): void;
 }
 
 /**
  * Registry of shortcuts targets.
  */
-export interface IShortcutRegistry
-  extends ReadonlyMap<string, IShortcutTarget> {
+export interface IShortcutRegistry extends ReadonlyMap<
+  string,
+  IShortcutTarget
+> {
   /**
    * Find targets that would conflict with given keys chord under given sequence.
    */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[];
+}
+
+/**
+ * Match type to search in shortcuts.
+ */
+export const enum MatchType {
+  Label,
+  Category,
+  Split,
+  Default
+}
+
+/**
+ *  Search result data
+ **/
+export interface ISearchResult {
+  matchType: MatchType;
+  categoryIndices: number[] | null;
+  labelIndices: number[] | null;
+  score: number;
+  item: IShortcutTarget;
 }

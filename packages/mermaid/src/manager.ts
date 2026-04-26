@@ -8,11 +8,11 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { LruCache } from '@jupyterlab/coreutils';
 
-import { IThemeManager } from '@jupyterlab/apputils';
+import type { IThemeManager } from '@jupyterlab/apputils';
 
+import type { IMermaidManager } from './tokens';
 import {
   DETAILS_CLASS,
-  IMermaidManager,
   MERMAID_CLASS,
   MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,
@@ -226,7 +226,7 @@ export class MermaidManager implements IMermaidManager {
     // add accessible caption, with fallback to raw mermaid source
     if (info.accessibleDescription) {
       const caption = document.createElement('figcaption');
-      caption.className = 'sr-only';
+      caption.className = 'jp-sr-only';
       caption.textContent = info.accessibleDescription;
       figure.appendChild(caption);
     }

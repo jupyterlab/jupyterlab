@@ -222,7 +222,7 @@ example, if the {ref}`application-directory` is
 
 JupyterLab also allows you to **export** and **import** an `overrides.json` file
 directly through the interface. You can generate an `overrides.json` file based
-on your current customized settings by clicking the **Export** button in the **Settings Editor**
+on your current customized settings by clicking the **Export** button in the **Settings Editor**.
 Similarly, you can use the **Import** button to apply an existing `overrides.json` file.
 This makes it easier to back up, share, or reuse your configuration.
 

@@ -1,17 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-import { IDocumentInfo } from '../ws-connection/types';
-import { IPosition } from '../positioning';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { IDocumentInfo } from '../ws-connection/types';
+import type { IPosition } from '../positioning';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Document, ILSPCodeExtractorsManager } from '../tokens';
+import type { Document, ILSPCodeExtractorsManager } from '../tokens';
 import { DocumentConnectionManager } from '../connection_manager';
-import { IForeignCodeExtractor } from '../extractors/types';
-import { LanguageIdentifier } from '../lsp';
-import {
+import type { IForeignCodeExtractor } from '../extractors/types';
+import type { LanguageIdentifier } from '../lsp';
+import type {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,

@@ -343,7 +343,7 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
-From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
+From JupyterLab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
 This requires you to define a keyboard shortcut for `apputils:run-all-enabled` command:
 
 ```json
@@ -511,13 +511,11 @@ To add a new entry in an existing menu:
 Here is the list of default menu ids:
 
 - File menu: `jp-mainmenu-file`
-
   - New file submenu: `jp-mainmenu-file-new`
 
 - Edit menu: `jp-mainmenu-edit`
 
 - View menu: `jp-mainmenu-view`
-
   - Appearance submenu: `jp-mainmenu-view-appearance`
 
 - Run menu: `jp-mainmenu-run`
@@ -1219,12 +1217,10 @@ the Contents API methods such as `get()` and `save()`, and optionally a custom `
 the intended use cases, and the way these are exposed in the user interface are different:
 
 - Drive:
-
   - Use case: provision of additional content, not available on the default drive.
   - UI: paths of files and directories from the drive are prefixed with the drive name and colon.
 
 - Content Provider:
-
   - Use case: modification of the protocol used for data retrieval
     (e.g., streaming of the content, real-time collaboration),
     by extending the Contents API methods for files which already

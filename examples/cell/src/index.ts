@@ -52,7 +52,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 

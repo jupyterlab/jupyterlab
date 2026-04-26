@@ -3,18 +3,18 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CellType } from '@jupyterlab/nbformat';
-import { IDataConnector } from '@jupyterlab/statedb';
-import {
+import type { CellType } from '@jupyterlab/nbformat';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type {
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { ISchemaValidator } from './settingregistry';
+import { Token } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { ISchemaValidator } from './settingregistry';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 /**
@@ -38,8 +38,10 @@ export const ISettingRegistry = new Token<ISettingRegistry>(
 /**
  * The settings connector interface.
  */
-export interface ISettingConnector
-  extends IDataConnector<ISettingRegistry.IPlugin, string> {}
+export interface ISettingConnector extends IDataConnector<
+  ISettingRegistry.IPlugin,
+  string
+> {}
 
 /**
  * The settings registry interface.

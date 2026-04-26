@@ -2,17 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
-  IRenderMime,
   MimeModel,
   RenderedHTML,
   RenderedText,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
-import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
+import type { Contents, ServiceManager, Session } from '@jupyterlab/services';
+import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { JSONObject, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import json2html from 'json-to-html';
 

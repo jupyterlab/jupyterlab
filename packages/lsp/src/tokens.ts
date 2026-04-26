@@ -1,30 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServerConnection } from '@jupyterlab/services';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ServerConnection } from '@jupyterlab/services';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { FocusTracker, Widget } from '@lumino/widgets';
+import type { FocusTracker, Widget } from '@lumino/widgets';
 import { Token } from '@lumino/coreutils';
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { ISignal, Signal } from '@lumino/signaling';
 
-import { EditorAdapter, WidgetLSPAdapter } from './adapters';
-import { IForeignCodeExtractor } from './extractors/types';
-import {
+import type { EditorAdapter, WidgetLSPAdapter } from './adapters';
+import type { IForeignCodeExtractor } from './extractors/types';
+import type {
   AnyCompletion,
   AnyLocation,
   ClientCapabilities,
   LanguageIdentifier
 } from './lsp';
-import { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
-import * as SCHEMA from './schema';
-import { VirtualDocument } from './virtual/document';
-import {
-  IDocumentInfo,
-  ILspConnection,
-  ILspOptions
-} from './ws-connection/types';
+import type { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
+import type * as SCHEMA from './schema';
+import type { VirtualDocument } from './virtual/document';
+import type { ILspConnection, ILspOptions } from './ws-connection/types';
+import { IDocumentInfo } from './ws-connection/types';
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';

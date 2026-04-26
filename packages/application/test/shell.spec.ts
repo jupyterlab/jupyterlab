@@ -5,8 +5,9 @@ import { LabShell, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
 import { framePromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import { Message } from '@lumino/messaging';
-import { DockPanel, Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { DockPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 class ContentWidget extends Widget {

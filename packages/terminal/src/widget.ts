@@ -1,16 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Terminal as TerminalNS } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Terminal as TerminalNS } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Platform } from '@lumino/domutils';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import type {
   ITerminalInitOnlyOptions,
@@ -78,6 +77,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       sender: TerminalNS.ITerminalConnection,
       msg: TerminalNS.IMessage
     ): void => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.type) {
         case 'stdout':
           if (msg.content) {
@@ -166,7 +166,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
 
     this._options[option] = value;
-
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (option) {
       case 'fontFamily':
         this._term.options.fontFamily = value as string | undefined;
@@ -408,13 +408,36 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       this.title.label = title;
     });
 
-    // Do not add any Ctrl+C/Ctrl+V handling on macOS,
-    // where Cmd+C/Cmd+V works as intended.
-    if (Platform.IS_MAC) {
-      return;
-    }
-
     term.attachCustomKeyEventHandler(event => {
+      // Send Shift+Enter as a line feed (\n) rather than carriage
+      // return (\r), so terminal applications can distinguish
+      // between Enter (execute) and Shift+Enter (newline). Handle
+      // only keydown and call preventDefault() so the browser
+      // suppresses the follow-up keypress event that xterm.js would
+      // otherwise turn into a \r.
+      // Skip during IME composition so composed text isn't split by
+      // an injected \n.
+      if (
+        event.type === 'keydown' &&
+        event.shiftKey &&
+        event.key === 'Enter' &&
+        !event.isComposing &&
+        event.keyCode !== 229
+      ) {
+        event.preventDefault();
+        this.session.send({
+          type: 'stdin',
+          content: ['\n']
+        });
+        return false;
+      }
+
+      // Do not add any Ctrl+C/Ctrl+V handling on macOS,
+      // where Cmd+C/Cmd+V works as intended.
+      if (Platform.IS_MAC) {
+        return true;
+      }
+
       if (event.ctrlKey && event.key === 'c' && term.hasSelection()) {
         // Return so that the usual OS copy happens
         // instead of interrupt signal.
@@ -437,6 +460,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     sender: TerminalNS.ITerminalConnection,
     msg: TerminalNS.IMessage
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msg.type) {
       case 'stdout':
         if (msg.content) {

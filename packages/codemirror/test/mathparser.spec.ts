@@ -8,7 +8,8 @@
 
 import { parseMathIPython } from '@jupyterlab/codemirror';
 import { Tree } from '@lezer/common';
-import { MarkdownParser, parser } from '@lezer/markdown';
+import type { MarkdownParser } from '@lezer/markdown';
+import { parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
 import { stexMath } from '@codemirror/legacy-modes/mode/stex';
 

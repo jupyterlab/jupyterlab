@@ -1,18 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import {
-  IObservableList,
-  IObservableMap,
-  ObservableMap
-} from '@jupyterlab/observables';
-import { IDisposable } from '@lumino/disposable';
+import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**

@@ -3,6 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { LRParser } from '@lezer/lr';
+import type { LRParser } from '@lezer/lr';
 
 export declare const parser: LRParser;

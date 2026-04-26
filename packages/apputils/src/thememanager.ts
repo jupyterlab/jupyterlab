@@ -1,18 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
-import { ISplashScreen, IThemeManager } from './tokens';
+import type { ISplashScreen, IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -395,23 +395,35 @@ export class ThemeManager implements IThemeManager {
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {
-      // override validation is against the CSS property in the description
-      // field. Example: for key ui-font-family, .description is font-family
-      let description;
+      // Map each override key to its corresponding CSS property for
+      // validation via CSS.supports(). These must be hardcoded rather
+      // than read from schema description fields, which get translated
+      // by the i18n system and break CSS validation in non-English locales.
+      let cssProp;
       switch (key) {
+        case 'code-font-family':
+        case 'content-font-family':
+        case 'ui-font-family':
+          cssProp = 'font-family';
+          break;
         case 'code-font-size':
         case 'content-font-size1':
         case 'ui-font-size1':
-          description = 'font-size';
+          cssProp = 'font-size';
           break;
         case 'rendermime-error-background':
-          description = 'background';
+          cssProp = 'background';
           break;
         default:
-          description = overidesSchema[key].description;
+          console.warn(
+            `No CSS property mapping for override key '${key}'. ` +
+              'CSS validation will be skipped for this key.'
+          );
           break;
       }
-      this._overrideProps[key] = description;
+      if (cssProp) {
+        this._overrideProps[key] = cssProp;
+      }
     });
   }
 
@@ -519,9 +531,15 @@ export class ThemeManager implements IThemeManager {
 
     const themeProps = this._settings.schema.properties?.theme;
     if (themeProps) {
-      themeProps.enum = Object.keys(themes).map(
-        value => themes[value].displayName ?? value
-      );
+      // Use oneOf with const/title so the stored value is always the
+      // untranslated theme name while the dropdown shows the translated
+      // displayName. Using enum with displayNames broke validation in
+      // non-English locales (see #18543).
+      delete themeProps.enum;
+      themeProps.oneOf = Object.keys(themes).map(value => ({
+        const: value,
+        title: themes[value].displayName ?? value
+      }));
     }
 
     // Unload the previously loaded theme.

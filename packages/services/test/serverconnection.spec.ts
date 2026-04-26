@@ -5,7 +5,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer } from '@jupyterlab/testing';
 import { ServerConnection } from '../src';
 import { getRequestHandler } from './utils';
-import { KernelMessage } from '../src/kernel';
+import type { KernelMessage } from '../src/kernel';
 
 const server = new JupyterServer();
 

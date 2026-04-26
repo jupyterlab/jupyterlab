@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { JupyterPluginRegistry } from '@jupyterlab/coreutils';
-import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
+import type { IPlugin } from '@lumino/coreutils';
+import { PluginRegistry, Token } from '@lumino/coreutils';
 
 describe('JupyterPluginRegistry', () => {
   let registry: JupyterPluginRegistry;
@@ -17,7 +23,7 @@ describe('JupyterPluginRegistry', () => {
   });
 
   it('should log plugin activation time with dependant count', async () => {
-    const slowPluginToken = new Token<any>('slow-plugin-token');
+    const slowPluginToken = new Token<any>('Test:SlowPlugin');
     const mockPlugins: IPlugin<any, any>[] = [
       {
         id: 'slow-plugin',

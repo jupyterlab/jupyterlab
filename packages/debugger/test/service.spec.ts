@@ -1,11 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { KernelSpec, Session } from '@jupyterlab/services';
 import {
   KernelManager,
-  KernelSpec,
   KernelSpecManager,
-  Session,
   SessionManager
 } from '@jupyterlab/services';
 
@@ -22,7 +21,7 @@ import { JSONExt, UUID } from '@lumino/coreutils';
 
 import { Debugger } from '../src/debugger';
 
-import { IDebugger } from '../src/tokens';
+import type { IDebugger } from '../src/tokens';
 
 import { handleRequest, KERNELSPECS } from './utils';
 import { DebuggerDisplayRegistry } from '../src';
@@ -34,7 +33,7 @@ import {
   EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 /**
  * A Test class to mock a KernelSpecManager

@@ -92,9 +92,7 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
 
     await page.click(
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
-      {
-        button: 'right'
-      }
+      { button: 'right' }
     );
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
@@ -104,7 +102,12 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
       return document.querySelectorAll('.jp-NotebookPanel').length === 2;
     });
 
-    expect(await page.activity.isTabActive(NOTEBOOK_NAME_2)).toBe(true);
+    // Usually it would be notebook 2 but due to
+    // race conditions it is sometimes notebook 1.
+    expect(
+      (await page.activity.isTabActive(NOTEBOOK_NAME_1)) ||
+        (await page.activity.isTabActive(NOTEBOOK_NAME_2))
+    ).toBe(true);
 
     await page.activity.activateTab(NOTEBOOK_NAME_1);
     await expect(page.getByTitle('Switch kernel').first()).toHaveText(

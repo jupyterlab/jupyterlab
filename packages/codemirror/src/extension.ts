@@ -9,13 +9,9 @@ import {
   indentOnInput,
   indentUnit
 } from '@codemirror/language';
-import {
-  Compartment,
-  EditorState,
-  Extension,
-  Prec,
-  StateEffect
-} from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
+import { Compartment, EditorState, Prec, StateEffect } from '@codemirror/state';
+import type { KeyBinding } from '@codemirror/view';
 import {
   crosshairCursor,
   drawSelection,
@@ -25,20 +21,23 @@ import {
   highlightSpecialChars,
   highlightTrailingWhitespace,
   highlightWhitespace,
-  KeyBinding,
   keymap,
   lineNumbers,
   rectangularSelection,
   scrollPastEnd,
   tooltips
 } from '@codemirror/view';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IObservableDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IObservableDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { StateCommands } from './commands';
-import { customTheme, CustomTheme, rulers } from './extensions';
-import {
+import type { CustomTheme } from './extensions';
+import { customTheme, rulers } from './extensions';
+import type {
   IConfigurableExtension,
   IEditorExtensionFactory,
   IEditorExtensionRegistry,

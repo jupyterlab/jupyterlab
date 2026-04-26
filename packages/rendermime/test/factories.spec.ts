@@ -2,19 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser,
+  IRenderMime
+} from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
-  IMarkdownParser,
-  IRenderMime,
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
   svgRendererFactory,
   textRendererFactory
 } from '@jupyterlab/rendermime';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 function createModel(
@@ -293,7 +296,11 @@ describe('rendermime/factories', () => {
 
       beforeAll(() => {
         markdownParser = {
-          render: (content: string): Promise<string> => Promise.resolve(content)
+          render: (content: string): Promise<string> =>
+            Promise.resolve(content),
+          getHeadingTokens: (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 

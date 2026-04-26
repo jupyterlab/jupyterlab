@@ -7,16 +7,16 @@
  * @module rendermime-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISanitizer } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
   ILatexTypesetter,
   IMarkdownParser,
-  IRenderMime,
   IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
