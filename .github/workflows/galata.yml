@@ -155,8 +155,13 @@ jobs:
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
+          MAX_REPEAT_EACH=20
           if ! [[ "${REPEAT_EACH}" =~ ^[1-9][0-9]*$ ]]; then
             echo "Invalid repeat_each: '${REPEAT_EACH}'. Expected a positive integer."
+            exit 1
+          fi
+          if (( REPEAT_EACH > MAX_REPEAT_EACH )); then
+            echo "Invalid repeat_each: '${REPEAT_EACH}'. Maximum allowed value is ${MAX_REPEAT_EACH}."
             exit 1
           fi
 
