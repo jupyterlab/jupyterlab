@@ -5,12 +5,12 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
+import type { Session } from '../../src';
 import {
   KernelAPI,
   KernelManager,
   KernelMessage,
   ServerConnection,
-  Session,
   SessionAPI,
   SessionManager
 } from '../../src';

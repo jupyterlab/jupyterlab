@@ -364,6 +364,37 @@
         "rank": 5
       },
       {
+        "type": "submenu",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
+        "rank": 5,
+        "submenu": {
+          "id": "jp-mainmenu-view-split-tab-submenu",
+          "label": "Split Tab",
+          "items": [
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "left" },
+              "rank": 1
+            },
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "right" },
+              "rank": 2
+            },
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "top" },
+              "rank": 3
+            },
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "bottom" },
+              "rank": 4
+            }
+          ]
+        }
+      },
+      {
         "command": "__internal:context-menu-info",
         "selector": "body",
         "rank": 9007199254740991

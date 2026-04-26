@@ -5,22 +5,22 @@
  * @module markdownviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
-  MarkdownDocument,
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownViewerTableOfContentsFactory
 } from '@jupyterlab/markdownviewer';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
-  IRenderMime,
   IRenderMimeRegistry,
   markdownRendererFactory
 } from '@jupyterlab/rendermime';

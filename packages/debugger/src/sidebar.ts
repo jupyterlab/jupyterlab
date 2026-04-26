@@ -1,17 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager } from '@jupyterlab/apputils';
+import type { IThemeManager } from '@jupyterlab/apputils';
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon, SidePanel } from '@jupyterlab/ui-components';
 
 import { Widget } from '@lumino/widgets';
-
-import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
@@ -23,7 +22,9 @@ import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
 
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
+
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A debugger sidebar.
@@ -48,7 +49,14 @@ export class DebuggerSidebar extends SidePanel {
       service,
       themeManager
     } = options;
+
     const model = service.model;
+    this._sourcesOptions = {
+      model: model.sources,
+      service,
+      editorServices,
+      translator
+    };
 
     this.variables = new VariablesPanel({
       model: model.variables,
@@ -71,13 +79,6 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    this.sources = new SourcesPanel({
-      model: model.sources,
-      service,
-      editorServices,
-      translator
-    });
-
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
       service,
@@ -96,8 +97,37 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    this.addWidget(this.sources);
     this.addWidget(this.kernelSources);
+  }
+
+  /**
+   * Whether to show the sources panel in the sidebar.
+   */
+  get showSourcesPanel(): boolean {
+    return this._showSourcesPanel;
+  }
+
+  set showSourcesPanel(value: boolean) {
+    if (value === this._showSourcesPanel) {
+      return;
+    }
+
+    this._showSourcesPanel = value;
+
+    if (value) {
+      // ShowSourcesPanel is true => ensure widget exists
+
+      if (!this._sources || this._sources.isDisposed) {
+        this._sources = new SourcesPanel(this._sourcesOptions);
+        this.insertWidget(3, this._sources);
+      }
+    } else {
+      // ShowSourcesPanel is false => remove widget if present
+      if (this._sources && !this._sources.isDisposed) {
+        this._sources.dispose();
+        this._sources = undefined;
+      }
+    }
   }
 
   /**
@@ -118,9 +148,17 @@ export class DebuggerSidebar extends SidePanel {
   /**
    * The sources widget.
    */
-  readonly sources: SourcesPanel;
+  get sources(): SourcesPanel | undefined {
+    return this._sources;
+  }
 
   readonly kernelSources: KernelSourcesPanel;
+
+  private _sources?: SourcesPanel;
+
+  private _showSourcesPanel = false;
+
+  private _sourcesOptions: SourcesPanel.IOptions;
 }
 
 /**
@@ -152,6 +190,11 @@ export namespace DebuggerSidebar {
     editorServices: IEditorServices;
 
     /**
+     * Settings from the setting registry
+     */
+    settings?: ISettingRegistry.ISettings | null;
+
+    /**
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
@@ -160,16 +203,6 @@ export namespace DebuggerSidebar {
      * An optional application language translator.
      */
     translator?: ITranslator;
-
-    /**
-     * The notebook tracker (required to resolve notebook breakpoints).
-     */
-    notebookTracker: INotebookTracker | null;
-
-    /**
-     * The debugger configuration.
-     */
-    config: IDebugger.IConfig;
   }
 
   /**

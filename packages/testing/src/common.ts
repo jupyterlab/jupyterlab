@@ -7,7 +7,8 @@ import { simulate as simulateEvent } from 'simulate-event';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { sleep } from '@jupyterlab/coreutils/lib/testutils';
 
@@ -235,7 +236,7 @@ export async function acceptDialog(
   const node = host.getElementsByClassName('jp-Dialog')[0];
 
   if (node) {
-    simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
+    simulate(node as HTMLElement, 'keydown', { key: 'Enter' });
   }
 }
 
@@ -274,6 +275,6 @@ export async function dismissDialog(
   const node = host.getElementsByClassName('jp-Dialog')[0];
 
   if (node) {
-    simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+    simulate(node as HTMLElement, 'keydown', { key: 'Escape' });
   }
 }

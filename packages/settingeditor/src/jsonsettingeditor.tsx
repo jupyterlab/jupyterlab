@@ -3,17 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IStateDB } from '@jupyterlab/statedb';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ReactWidget } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
-import { ISignal } from '@lumino/signaling';
-import { SplitPanel, Widget } from '@lumino/widgets';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import { SplitPanel } from '@lumino/widgets';
 import * as React from 'react';
 import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 import { PluginEditor } from './plugineditor';

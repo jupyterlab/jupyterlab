@@ -1,13 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ILabShell } from '@jupyterlab/application';
+import type { ILabShell } from '@jupyterlab/application';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { ITranslator } from '@jupyterlab/translation';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
+import type { ITranslator } from '@jupyterlab/translation';
 import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * A class used to consolidate the signals used to rerender the open tabs section.

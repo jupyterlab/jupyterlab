@@ -18,7 +18,7 @@ import '../index.css';
 import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 
 import { Widget } from '@lumino/widgets';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { ObservableList } from '@jupyterlab/observables';
 
 function getRandomInt(max: number): number {
@@ -120,9 +120,7 @@ class MyList extends WindowedListModel {
     );
     if (!widget) {
       widget = new ContentWidget(
-        `item-${
-          (this.itemsList as ObservableList<{ index: number }>).get(i).index
-        }`
+        `item-${(this.itemsList as ObservableList<{ index: number }>).get(i).index}`
       );
       this.widgetsCache.set(
         (this.itemsList as ObservableList<{ index: number }>).get(i),

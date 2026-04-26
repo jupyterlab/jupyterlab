@@ -13,21 +13,30 @@ jobs:
     name: Windows
     strategy:
       matrix:
+        python-version: ["3.14"]
         group: [integrity, python]
-        python-version: ["3.13"]
+        include:
+          - group: integrity
+            optional_dependencies: dev
+          - group: python
+            optional_dependencies: test
       fail-fast: false
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
+          python_cache_key_suffix: ${{ matrix.optional_dependencies }}
 
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
+          OPTIONAL_DEPENDENCIES: ${{ matrix.optional_dependencies }}
         run: .\scripts\ci_install
         shell: pwsh
 

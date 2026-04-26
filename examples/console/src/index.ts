@@ -32,13 +32,10 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationManager
-} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator, TranslationManager } from '@jupyterlab/translation';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 async function main(): Promise<any> {
   const translator = new TranslationManager();

@@ -3,7 +3,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import sanitize from 'sanitize-html';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.

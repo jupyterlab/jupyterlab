@@ -1076,7 +1076,7 @@ def replace_stars(comp, loose):
 #  1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
 #  1.2 - 3.4 => >=1.2.0 <3.5.0
 def hyphen_replace(mob):
-    from_, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb = mob.groups()
+    from_, fM, fm, fp, _, _, to, tM, tm, tp, tpr, _ = mob.groups()
     if is_x(fM):
         from_ = ""
     elif is_x(fm):

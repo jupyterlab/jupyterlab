@@ -5,20 +5,18 @@
  * @module docmanager-extension
  */
 
-import {
-  ILabShell,
-  ILabStatus,
+import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILabStatus, JupyterLab } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   addCommandToolbarButtonClass,
   CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
   InputDialog,
-  ISessionContext,
   ISessionContextDialogs,
   Notification,
   ReactWidget,
@@ -27,7 +25,8 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   DocumentManagerDialogs,
@@ -38,22 +37,24 @@ import {
   PathStatus,
   SavingStatus
 } from '@jupyterlab/docmanager';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { IUrlResolverFactory } from '@jupyterlab/rendermime';
-import { Contents, Kernel } from '@jupyterlab/services';
+import type { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
@@ -123,7 +124,9 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
         if (!widget.isAttached) {
           shell.add(widget, 'main', options || {});
         }
-        shell.activateById(widget.id);
+        if (options?.activate ?? true) {
+          shell.activateById(widget.id);
+        }
         this._opened.emit(widget);
       }
 
@@ -856,16 +859,90 @@ function addCommands(
           },
           kernel: {
             type: 'object',
-            description: 'The kernel model to use'
+            description:
+              'The kernel model to use. See the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) for more information.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'Unique identifier of the kernel on the server'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              }
+            }
           },
           kernelPreference: {
             type: 'object',
             description:
-              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values'
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'The id of an existing kernel'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              },
+              language: {
+                type: 'string',
+                description: 'The preferred kernel language'
+              },
+              shouldStart: {
+                type: 'boolean',
+                description:
+                  'A kernel should be started automatically (default `true`)'
+              },
+              canStart: {
+                type: 'boolean',
+                description: 'A kernel can be started (default `true`)'
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description:
+                  'Shut down the session when session context is disposed (default `false`)'
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description:
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description:
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+              }
+            }
           },
           options: {
             type: 'object',
-            description: 'Additional options for opening'
+            description: 'Additional options for opening the widget',
+            properties: {
+              ref: {
+                type: 'string',
+                description:
+                  'The reference widget id for the insert location (default `null`)'
+              },
+              mode: {
+                type: 'string',
+                description:
+                  'The insertion mode relative to a reference widget ("split-top", "split-bottom", "split-left", "split-right", "tab-before", "tab-after")'
+              },
+              activate: {
+                type: 'boolean',
+                description: 'Whether to activate the widget (default `true`)'
+              },
+              rank: {
+                type: 'number',
+                description: 'The rank order of the widget among its siblings'
+              },
+              type: {
+                type: 'string',
+                description:
+                  'Type of widget to open, used to load user customization (typically a factory name or widget id)'
+              }
+            }
           },
           icon: {
             type: 'string',

@@ -54,79 +54,85 @@ The recommended time period for the Release Candidate phase is a minimum of 1 we
 
 ## Automated Releases with the Jupyter Releaser
 
-The recommended way to make a release is to use [`jupyter_releaser`](https://jupyter-releaser.readthedocs.io/en/latest/how_to_guides/convert_repo_from_repo.html).
+The recommended way to make a release is to use the following [Jupyter Releaser](https://jupyter-releaser.readthedocs.io/en/latest/how_to_guides/convert_repo_from_repo.html) workflows.
 
 ### Workflow
 
-The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
+The full process is documented in the [Jupyter Release docs](https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html). There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
 
-Here is a quick summary of the different steps.
+Here is a quick summary of the action items, with each step linked to further context below.
 
-#### Communicate on Zulip
+1. [Communicate on Zulip](#communicate-on-zulip): Post a message to [#jupyterlab > Release Coordination](https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination) that you are starting a release.
+2. [Run the Prep Release workflow](#prep-release) to prepare a draft GitHub release
+   1. Go to the [Prep Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/prep-release.yml) workflow
+   2. Click the "Run Workflow" dropdown menu on the right.
+      - `New Version Specifier`: `next` if releasing a patch release (these are the most common), otherwise `major`, `minor` or `release` as per the [bump version table](#bump-version)
+      - `The branch to target`: leave blank if releasing the `main` branch, otherwise fill in with the repo branch you are releasing
+   3. Click the green "Run Workflow" button at the bottom of the dialog box to trigger the workflow
+   4. After the workflow runs, examine the draft release statement at https://github.com/jupyterlab/jupyterlab/releases. If changes are needed, edit relevant PR titles, labels, etc., then re-run the Prep Release workflow to generate a new draft release.
+3. [Run the Release workflow](#publish-release) to create a release and publish it to NPM and PyPI
+   1. Go to the [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow
+   2. Click the "Run Workflow" dropdown menu on the right. If releasing a different branch than main, fill in "The target branch"
+   3. Click the green "Run Workflow" button at the bottom of the dialog box to trigger the workflow
+4. Post a message to [#jupyterlab > Release Coordination](https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination) with a link to the GitHub release.
+5. If this is a stable release, or a prerelease you want to call wider attention to, post a message to [#releases > JupyterLab](https://jupyter.zulipchat.com/#narrow/channel/407388-Releases/topic/jupyterlab)
+
+<!-- For future consideration - manually test the release, for example, by creating a simple binder config in a GitHub gist with a single `requirements.txt` file consisting of the line `jupyterlab==[release version]`, then going to the binder link https://mybinder.org/v2/gist/[USER]/[GIST_URL]/HEAD?urlpath=lab
+-->
+
+### Communicate on Zulip
 
 It is good practice to let other maintainers and users know when starting a new release.
 
-For this we usually leave a small message in the "Release Coordination" topic of the `jupyterlab` channel on Zulip: https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination.
-Once the release is done, we also post a message with a link to the release notes, which include the changelog.
+We usually leave a small message in the ["Release Coordination"](https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination) topic of the `jupyterlab` channel on Zulip. Once the release is done, we also post a message with a link to the release notes.
 
-#### 1. Prep Release
+### Prep Release
 
-The first step is to generate a new changelog entry for the upcoming release.
+The first step is to generate a new draft GitHub Release for the upcoming release. This step does not modify the source in the repo and does not release packages. We use the [Prep Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/prep-release.yml) workflow as documented [here](https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html#prep-release). We run this workflow from the main branch (i.e., we want the latest workflow configuration), even if we are releasing a different branch.
 
-We use the "Prep Release" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html#prep-release
+The [Prep Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/prep-release.yml) workflow takes a couple of input parameters. Commonly specified parameters are:
 
-Go the Actions tab of the JupyterLab Repo and click on the `1. Prep Release` workflow: https://github.com/jupyterlab/jupyterlab/actions
+| Input                 | Description                                                                                                                                                                                                                         | Default Value (used if blank) |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| New Version Specifier | The version we will be releasing. The default `next` bumps the patch release of the current version in the target branch. The version spec follows the specification documented below in the [Bump Version](#bump-version) section. | `next`                        |
+| The branch to target  | The branch that is being released                                                                                                                                                                                                   | `main`                        |
 
-The workflow takes a couple of input parameters. Here is an overview with example values:
+Other fields that are not commonly set in JupyterLab releases:
 
-| Input        | Description                                             | Example Value           |
-| ------------ | ------------------------------------------------------- | ----------------------- |
-| Target       | The owner/repo GitHub target                            | `jupyterlab/jupyterlab` |
-| Branch       | The branch to target                                    | `main`                  |
-| Version Spec | New Version Spec                                        | `next`                  |
-| Since        | Use PRs since activity since this date or git reference | `v4.0.0a15`             |
-
-The version spec follows the specification documented below in the [Bump Version](#bump-version) section.
-
-We can use `next` when making a `patch` release or a `build` pre-release.
+- `Post Version Specifier`
+- `Set a placeholder in the changelog and don't publish the release.`
+- `Use PRs with activity since this date or git reference`: defaults to the last tag. This is never configured in JupyterLab releases.
+- `Use PRs with activity since the last stable git tag`:
 
 Click on "Run workflow", then once completed:
 
-1. Go to the Releases: https://github.com/jupyterlab/jupyterlab/releases
-1. Check the draft GitHub Release has been created
-1. Make edits to the changelog if needed. ⚠️ If you make edits to the content of the GitHub Release, then don't forget to click on "Save Draft" and not "Publish Release".
+1. Go to the GitHub Releases: https://github.com/jupyterlab/jupyterlab/releases
+2. Check the draft GitHub Release has been created
+3. Examine the text of the draft release. If changes are needed to the information, you can edit PR titles, labels, etc., then re-run the Prep Release workflow to generate a new draft release. ⚠️ In the rare event that you make direct edits to the content of the draft release itself, then don't forget to click on "Save Draft" and not "Publish Release".
 
-### 2. Publish Release
+### Publish Release
 
-#### PyPI and npm tokens
+The second step is to generate and publish release artifacts. We use the [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow to build JupyterLab, generate Javascript and Python packages, and publish those to NPM and PyPI. We run this workflow from the main branch (i.e., we want the latest workflow configuration), even if we are releasing a different branch.
 
-Before running the "Publish Release" workflow, make sure you have been added to:
+The [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow takes a couple of input parameters. Commonly specified parameters are:
 
-- the `jupyterlab` project on PyPI: https://pypi.org/project/jupyterlab/
-- the `@jupyterlab` organization on npm: https://www.npmjs.com/settings/jupyterlab/packages
+| Input                               | Description                                                                                              | Default Value (used if blank)        |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| The target branch                   | The branch that is being released                                                                        | `main`                               |
+| The URL of the draft GitHub release | The URL of the draft GitHub release that was generated by the Prep Release worfklow in the previous step | the most recent GitHub draft release |
 
-Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/stable/get_started/making_release_from_releaser.html#set-up) for more information.
+Other fields that are not commonly set in JupyterLab releases:
 
-#### Running the workflow
-
-On the [Actions](https://github.com/jupyterlab/jupyterlab/actions) page, select the "2. Publish Release" workflow.
-
-Fill in the information as mentioned in the body of the changelog PR, for example:
-
-| Input                                 | Value |
-| ------------------------------------- | ----- |
-| The target branch                     | main  |
-| The URL of the draft GitHub release   |       |
-| Comma separated list of steps to skip |       |
+- `Comma separated list of steps to skip`: it is possible to skip some steps of the release manually. We almost never use this functionality any more.
 
 The "Publish Release" workflow:
 
 - builds and uploads the `jupyterlab` Python package to PyPI
 - builds the `@jupyterlab/*` packages and uploads them to `npm`
 - creates a new GitHub Release with the new changelog entry as release notes
-- creates a PR to forward port the new changelog entry to the main branch (when releasing from a branch that is not the default)
+- if releasing from a branch other than `main`, creates a PR to forward-port the new changelog entry to the main branch
 
-Then follow the [Post release candidate checklist](#post-release-candidate-checklist) if applicable.
+After the release is published, consider the [Post-release candidate checklist](#post-release-candidate-checklist) if this was a major or minor release.
 
 ## Manual Release Process
 
@@ -256,7 +262,7 @@ These lines:
     private. Use `npm access public @jupyterlab/<name>` to make it public.
   - The build will fail if we forget to include `style/` in the `files:`
     of a package (it will fail on the `jupyter lab build` command because
-    webpack cannot find the referenced styles to import.
+    webpack cannot find the referenced styles to import).
 - [ ] Update the other repos:
   - [ ] https://github.com/jupyterlab/extension-template
   - [ ] https://github.com/jupyterlab/jupyter-renderers

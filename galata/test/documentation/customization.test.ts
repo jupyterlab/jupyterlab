@@ -230,6 +230,9 @@ test.describe('Customized', () => {
     await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
 
     expect(
       await page

@@ -194,10 +194,20 @@ process.on('unhandledRejection', (error, promise) => {
   promise.catch(err => console.error('promise rejected', err));
 });
 
+// https://github.com/jsdom/jsdom/issues/3991
+if (typeof CSS === 'undefined') {
+  (globalThis as any).CSS = {
+    escape: (value: string) =>
+      value.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&')
+  };
+} else if (typeof CSS.escape === 'undefined') {
+  (CSS as any).escape = (value: string) =>
+    value.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+}
+
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
-  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {

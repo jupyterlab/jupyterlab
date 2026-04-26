@@ -8,7 +8,8 @@ import type { Extension, StateEffect } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 

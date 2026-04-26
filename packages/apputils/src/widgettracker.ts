@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRestorable, RestorablePool } from '@jupyterlab/statedb';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { FocusTracker, Widget } from '@lumino/widgets';
+import type { IRestorable } from '@jupyterlab/statedb';
+import { RestorablePool } from '@jupyterlab/statedb';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import { FocusTracker } from '@lumino/widgets';
 
 /**
  * A tracker that tracks widgets.

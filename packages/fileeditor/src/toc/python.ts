@@ -3,11 +3,16 @@
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
-import { Widget } from '@lumino/widgets';
-import { FileEditor } from '../widget';
-import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { TableOfContents } from '@jupyterlab/toc';
+import { TableOfContentsModel } from '@jupyterlab/toc';
+import type { Widget } from '@lumino/widgets';
+import type { FileEditor } from '../widget';
+import type { IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory } from './factory';
 
 /**
  * Regular expression to create the outline
@@ -68,9 +73,8 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       if (KEYWORDS.flags.includes('d')) {
         hasKeyword = KEYWORDS.exec(line);
       } else {
-        const { default: execWithIndices } = await import(
-          'regexp-match-indices'
-        );
+        const { default: execWithIndices } =
+          await import('regexp-match-indices');
         hasKeyword = execWithIndices(KEYWORDS, line);
       }
       if (hasKeyword) {

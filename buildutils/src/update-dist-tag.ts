@@ -9,6 +9,25 @@ import packageJson from 'package-json';
 import { program as commander } from 'commander';
 import semver from 'semver';
 
+// Versions to ignore when determining dist-tags.
+// These were published prematurely and should not affect tag resolution.
+// See:
+// - https://github.com/jupyterlab/jupyterlab/pull/12581
+// - https://github.com/jupyterlab/jupyterlab/issues/14335
+const IGNORED_VERSIONS: Record<string, string[]> = {
+  '@jupyterlab/rendermime-interfaces': [
+    '4.0.0-alpha.1',
+    '4.0.0-alpha.2',
+    '4.0.0-alpha.3',
+    '4.0.0-alpha.4',
+    '4.0.0-alpha.5',
+    '4.0.0-alpha.6',
+    '4.0.0-alpha.7',
+    '4.0.0-alpha.8',
+    '4.0.0-alpha.9'
+  ]
+};
+
 /**
  * Handle an individual package on the path - update the dependency.
  */
@@ -32,7 +51,10 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
   const pkg = data.name;
 
   const npmData = await packageJson(pkg, { allVersions: true });
-  const versions = Object.keys(npmData.versions).sort(semver.rcompare);
+  const ignoredVersions = IGNORED_VERSIONS[pkg] || [];
+  const versions = Object.keys(npmData.versions)
+    .filter(v => !ignoredVersions.includes(v))
+    .sort(semver.rcompare);
   const tags = npmData['dist-tags'];
 
   // Go through the versions. The latest prerelease is 'next', the latest

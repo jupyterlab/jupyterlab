@@ -4,7 +4,6 @@
 # Distributed under the terms of the Modified BSD License.
 
 import sys
-from typing import Optional
 
 from jupyterlab_server.translation_utils import translator
 
@@ -19,7 +18,7 @@ class ReadOnlyExtensionManager(ExtensionManager):
         """Extension manager metadata."""
         return ExtensionManagerMetadata("read-only", install_path=sys.prefix)
 
-    async def get_latest_version(self, pkg: str) -> Optional[str]:
+    async def get_latest_version(self, pkg: str) -> str | None:
         """Return the latest available version for a given extension.
 
         Args:
@@ -31,7 +30,7 @@ class ReadOnlyExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], int | None]:
         """List the available extensions.
 
         Args:
@@ -44,7 +43,7 @@ class ReadOnlyExtensionManager(ExtensionManager):
         """
         return {}, None
 
-    async def install(self, extension: str, version: Optional[str] = None) -> ActionResult:
+    async def install(self, extension: str, version: str | None = None) -> ActionResult:
         """Install the required extension.
 
         Note:

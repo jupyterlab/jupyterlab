@@ -4,10 +4,10 @@
  */
 
 import { Text } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
-import { ContextMenu, Menu } from '@lumino/widgets';
+import type { ContextMenu, Menu } from '@lumino/widgets';
 
 /**
  * Helper functions to build a menu from the settings

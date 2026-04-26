@@ -14,8 +14,8 @@ function _classes(
       c && typeof c === 'object'
         ? Object.keys(c).map(key => !!c[key] && key)
         : typeof c === 'string'
-        ? c.split(/\s+/)
-        : []
+          ? c.split(/\s+/)
+          : []
     )
     .reduce((flattened, c) => flattened.concat(c), [] as string[])
     .filter(c => !!c) as string[];

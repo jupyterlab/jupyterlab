@@ -136,6 +136,10 @@
   color: inherit;
 }
 
+.jp-Completer-item.jp-mod-active .jp-Completer-typeExtended {
+  color: var(--jp-ui-font-color0);
+}
+
 .jp-Completer-type[data-color-index='0'] {
   background: var(--jp-completer-type-background0, transparent);
 }
@@ -209,8 +213,11 @@
 }
 
 .jp-GhostText {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color0);
   white-space: pre-wrap;
+  font-style: italic;
+  transition: opacity 0.2s ease;
+  opacity: 0.38;
 }
 
 .jp-GhostText-lineSpacer,

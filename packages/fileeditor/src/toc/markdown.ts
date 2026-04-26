@@ -1,17 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
-import {
-  TableOfContents,
-  TableOfContentsModel,
-  TableOfContentsUtils
-} from '@jupyterlab/toc';
-import { Widget } from '@lumino/widgets';
-import { FileEditor } from '../widget';
-import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import type { TableOfContents } from '@jupyterlab/toc';
+import { TableOfContentsModel, TableOfContentsUtils } from '@jupyterlab/toc';
+import type { Widget } from '@lumino/widgets';
+import type { FileEditor } from '../widget';
+import type { IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory } from './factory';
 
 /**
  * Table of content model for Markdown files.

@@ -3,16 +3,17 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import {
-  ILanguageServerManager,
+import type {
   TLanguageServerConfigurations,
   TLanguageServerId,
   TSessionMap,
   TSpecsMap
 } from './tokens';
-import { ServerSpecProperties } from './schema';
+import { ILanguageServerManager } from './tokens';
+import type { ServerSpecProperties } from './schema';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 export class LanguageServerManager implements ILanguageServerManager {

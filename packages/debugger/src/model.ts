@@ -1,21 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDebugger } from './tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+
+import { DebuggerDisplayRegistry } from './displayregistry';
 
 import { BreakpointsModel } from './panels/breakpoints/model';
 
 import { CallstackModel } from './panels/callstack/model';
 
-import { SourcesModel } from './panels/sources/model';
-
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
+import { SourcesModel } from './panels/sources/model';
+
 import { VariablesModel } from './panels/variables/model';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IConsoleTracker } from '@jupyterlab/console';
+
+import type { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A model for a debugger.
@@ -25,23 +28,18 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const { config, notebookTracker, consoleTracker } = options;
-
-    this.breakpoints = new BreakpointsModel({
-      config,
-      notebookTracker,
-      consoleTracker
-    });
+    const displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
+    this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
-      config,
-      notebookTracker,
-      consoleTracker
+      displayRegistry
     });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
-      notebookTracker,
-      config
+      mimeTypeService: options.mimeTypeService,
+      getSource: options.getSource,
+      displayRegistry
     });
     this.kernelSources = new KernelSourcesModel();
   }
@@ -172,6 +170,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.variables.scopes = [];
     this.sources.currentSource = null;
     this.kernelSources.kernelSources = null;
+    // eslint-disable-next-line jupyter/no-untranslated-string
     this.title = '-';
   }
 
@@ -193,18 +192,16 @@ export namespace DebuggerModel {
    */
   export interface IOptions {
     /**
-     * Debugger configuration.
+     * Get source
      */
-    config: IDebugger.IConfig;
-
+    getSource(): Promise<IDebugger.Source>;
     /**
-     * The notebook tracker.
+     * The display registry.
      */
-    notebookTracker: INotebookTracker | null;
-
+    displayRegistry?: IDebuggerDisplayRegistry | null;
     /**
-     * The console tracker.
+     * The mimetype services.
      */
-    consoleTracker: IConsoleTracker | null;
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

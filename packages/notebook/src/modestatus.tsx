@@ -4,14 +4,11 @@
  */
 
 import { TextItem } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { Notebook, NotebookMode } from '.';
+import type { Notebook, NotebookMode } from '.';
 
 /**
  * A pure function for rendering a Command/Edit mode component.

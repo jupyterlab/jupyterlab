@@ -232,11 +232,12 @@ module.exports = {
   },
   githubPages: false,
   navigationLinks: {
-    GitHub: 'https://github.com/jupyterlab/jupyterlab',
-    Jupyter: 'https://jupyter.org'
+    Jupyter: 'https://jupyter.org',
+    GitHub: 'https://github.com/jupyterlab/jupyterlab'
   },
   name: '@jupyterlab',
-  plugin: ['typedoc-plugin-mdn-links'],
+  plugin: ['typedoc-plugin-mdn-links', './docs/typedoc-customizations.js'],
+  customCss: './docs/typedoc-custom.css',
   out: 'docs/source/api',
   readme: 'README.md',
   theme: 'default',

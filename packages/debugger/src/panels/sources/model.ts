@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { isCodeCellModel } from '@jupyterlab/cells';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
+import type { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -17,13 +18,50 @@ export class SourcesModel implements IDebugger.Model.ISources {
    * @param options The Sources.Model instantiation options.
    */
   constructor(options: SourcesModel.IOptions) {
-    this.currentFrameChanged = options.currentFrameChanged;
-    this._notebookTracker = options.notebookTracker ?? undefined;
-    this._config = options.config;
+    this._currentSource = null;
+    this._currentFrame = null;
+
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
+
+    if (options.mimeTypeService) {
+      this._mimeTypeService = options.mimeTypeService;
+    }
+
+    options.currentFrameChanged.connect(async (_, frame) => {
+      if (!frame) {
+        this._currentFrame = null;
+        this.currentSource = null;
+        return;
+      }
+
+      const displayPath = this.getDisplayName(frame);
+
+      const source = await options.getSource({
+        sourceReference: 0,
+        path: frame?.source?.path
+      });
+
+      const { content, mimeType } = source;
+
+      const editorMimeType =
+        mimeType ||
+        this._mimeTypeService?.getMimeTypeByFilePath(frame.source?.path ?? '');
+
+      this._currentFrame = frame;
+
+      this.currentSource = {
+        content: content,
+        mimeType: editorMimeType,
+        path: displayPath
+      };
+    });
   }
 
   /**
    * Signal emitted when the current frame changes.
+   *
+   * @deprecated since 4.6.0, will be removed in 5.0.
    */
   readonly currentFrameChanged: ISignal<
     IDebugger.Model.ICallstack,
@@ -62,6 +100,13 @@ export class SourcesModel implements IDebugger.Model.ISources {
   }
 
   /**
+   * Return the current frame.
+   */
+  get currentFrame(): IDebugger.IStackFrame | null {
+    return this._currentFrame;
+  }
+
+  /**
    * Open a source in the main area.
    */
   open(): void {
@@ -73,36 +118,17 @@ export class SourcesModel implements IDebugger.Model.ISources {
    *
    * For notebook cells, shows execution count if available, [*] if running, or [ ] if never executed.
    */
+  /**
+   * Returns a human-readable display for a frame.
+   */
   getDisplayName(frame: IDebugger.IStackFrame): string {
-    let display = frame.source?.path ?? '';
-
-    if (!this._notebookTracker || !this._config || !frame.source?.path) {
-      return display;
+    let name = this._displayRegistry.getDisplayName(
+      frame.source as IDebugger.Source
+    );
+    if (frame.line !== undefined) {
+      name += `:${frame.line}`;
     }
-
-    this._notebookTracker.forEach(panel => {
-      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach(cell => {
-        if (cell.model.type !== 'code') return;
-
-        const code = cell.model.sharedModel.getSource();
-        const codeId = this._config!.getCodeId(code, kernelName);
-
-        if (codeId === frame.source?.path) {
-          if (isCodeCellModel(cell.model)) {
-            if (cell.model.executionState === 'running') {
-              display = `Cell [*]`;
-            } else if (cell.model.executionCount === null) {
-              display = `Cell [ ]`;
-            } else {
-              display = `Cell [${cell.model.executionCount}]`;
-            }
-          }
-        }
-      });
-    });
-
-    return display;
+    return name;
   }
 
   private _currentSource: IDebugger.Source | null;
@@ -114,8 +140,9 @@ export class SourcesModel implements IDebugger.Model.ISources {
     SourcesModel,
     IDebugger.Source | null
   >(this);
-  private _notebookTracker?: INotebookTracker;
-  private _config?: IDebugger.IConfig;
+  private _displayRegistry: IDebuggerDisplayRegistry;
+  private _mimeTypeService: IEditorMimeTypeService | null = null;
+  private _currentFrame: IDebugger.IStackFrame | null;
 }
 
 /**
@@ -135,13 +162,21 @@ export namespace SourcesModel {
     >;
 
     /**
-     * Optional notebook tracker to resolve cell execution numbers.
+     * Get source
      */
-    notebookTracker: INotebookTracker | null;
+    getSource(args: {
+      sourceReference: number;
+      path: string | undefined;
+    }): Promise<IDebugger.Source>;
 
     /**
-     * Debugger config used to get code ids.
+     * The display registry.
      */
-    config: IDebugger.IConfig;
+
+    displayRegistry?: IDebuggerDisplayRegistry;
+    /**
+     * The mimetype service.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

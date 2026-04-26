@@ -3,15 +3,18 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { Toolbar } from '@jupyterlab/ui-components';
+import type { IObservableList } from '@jupyterlab/observables';
+import { ObservableList } from '@jupyterlab/observables';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { Toolbar } from '@jupyterlab/ui-components';
 import { findIndex } from '@lumino/algorithm';
-import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { PartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
-import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
+import type { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
 
 /**
  * Default toolbar item rank

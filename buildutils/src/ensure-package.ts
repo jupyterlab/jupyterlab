@@ -102,9 +102,8 @@ export async function ensurePackage(
               backwardVersions[data.name][name]
             } || ${seenDeps[name]}`
           );
-          deps[name] = `${backwardVersions[data.name][name]} || ${
-            seenDeps[name]
-          }`;
+          deps[name] =
+            `${backwardVersions[data.name][name]} || ${seenDeps[name]}`;
         } else {
           messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
           deps[name] = seenDeps[name];
@@ -171,8 +170,8 @@ export async function ensurePackage(
     let entryPoint = fs.existsSync(path.join(pkgPath, 'src/index.ts'))
       ? 'src/index.ts'
       : fs.existsSync(path.join(pkgPath, 'src/index.tsx'))
-      ? 'src/index.tsx'
-      : null;
+        ? 'src/index.tsx'
+        : null;
     if (entryPoint) {
       utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
         extends: ['../../typedoc.base.json'],
@@ -232,6 +231,17 @@ export async function ensurePackage(
     }
     if (name === '.' || name === '..') {
       return;
+    }
+    // Skip processing Node.js-native dependencies
+    if (name.startsWith('node:')) {
+      if (options.allowNodeDependencies) {
+        return;
+      } else {
+        messages.push(
+          `Node.js dependencies are not allowed in ${data.name} package (seen ${name})`
+        );
+        return;
+      }
     }
     if (!deps[name]) {
       if (!(name in seenDeps)) {
@@ -865,6 +875,11 @@ export interface IEnsurePackageOptions {
    * Older versions supported by core packages in addition to the latest.
    */
   backwardVersions?: Record<string, Record<string, string>>;
+
+  /**
+   * Whether Node.js imports are allowed.
+   */
+  allowNodeDependencies?: boolean;
 }
 
 /**

@@ -1,12 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor .cm-content';
@@ -37,7 +33,7 @@ async function setupDebuggerConsole(
   await page.debugger.waitForBreakPoints();
 
   // Run the cell (non-blocking) to hit the breakpoint
-  void page.notebook.runCell(0);
+  await page.notebook.runCell(0, { wait: false });
 
   // Wait for the debugger to stop at the breakpoint
   await page.debugger.waitForCallStack();
@@ -71,6 +67,16 @@ test.describe('Debugger Console', () => {
   });
 
   test.afterEach(async ({ page }) => {
+    // Close the console and wait for debugger button to be active again
+    const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
+    if (await debugConsoleWidget.isVisible()) {
+      const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
+      await evaluateButton.click();
+      const toolbar = await page.notebook.getToolbarLocator();
+      const button = toolbar?.locator('.jp-DebuggerBugButton');
+      await button!.locator('[aria-pressed="true"]').waitFor();
+    }
+
     try {
       // Try to switch off debugger if it's still active
       if (await page.debugger.isOn()) {
@@ -142,9 +148,6 @@ test.describe('Debugger Console', () => {
     await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
 
-    // Wait for output to appear
-    await page.waitForTimeout(1000);
-
     // Check that the output shows the correct value (42)
     const outputArea = debugConsoleWidget
       .locator('.jp-OutputArea-child')
@@ -166,9 +169,6 @@ test.describe('Debugger Console', () => {
     // Evaluate an expression using local variables
     await inputArea.fill('user_count + 10');
     await inputArea.press('Shift+Enter');
-
-    // Wait for output to appear
-    await page.waitForTimeout(1000);
 
     // Check that the output shows the correct value (52)
     const outputArea = debugConsoleWidget
@@ -192,9 +192,6 @@ test.describe('Debugger Console', () => {
     await inputArea.fill('data_list');
     await inputArea.press('Shift+Enter');
 
-    // Wait for output to appear
-    await page.waitForTimeout(1000);
-
     // Check that the output shows the list
     const outputArea = debugConsoleWidget
       .locator('.jp-OutputArea-child')
@@ -213,7 +210,6 @@ test.describe('Debugger Console', () => {
 
     await inputArea.fill('welcome_message.');
     await inputArea.press('Tab');
-    await page.waitForTimeout(1000);
 
     // Find the visible completer and interact with it
     const visibleCompleter = page
@@ -248,7 +244,6 @@ test.describe('Debugger Console', () => {
     // Type 'user_' and trigger completion
     await inputArea.fill('user_');
     await inputArea.press('Tab');
-    await page.waitForTimeout(1000);
 
     // Find the visible completer and interact with it
     const visibleCompleter = page
@@ -281,9 +276,6 @@ test.describe('Debugger Console', () => {
     await expect(continueButton).toBeVisible();
     await continueButton.click();
 
-    // Wait a moment for the debugger to continue
-    await page.waitForTimeout(1000);
-
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -295,9 +287,6 @@ test.describe('Debugger Console', () => {
     // Try to evaluate some code when debugger has no stopped threads
     await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
-
-    // Wait for output to appear
-    await page.waitForTimeout(1000);
 
     // Check that the output shows the error message
     const outputArea = debugConsoleWidget
@@ -320,7 +309,6 @@ test.describe('Debugger Console', () => {
     // First, verify the original value
     await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     let outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('42');
@@ -329,13 +317,11 @@ test.describe('Debugger Console', () => {
     await inputArea.click();
     await inputArea.fill('user_count = 100');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     // Verify the variable now has the new value
     await inputArea.click();
     await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('100');
@@ -344,13 +330,11 @@ test.describe('Debugger Console', () => {
     await inputArea.click();
     await inputArea.fill('welcome_message = "modified message"');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     // Verify the modification
     await inputArea.click();
     await inputArea.fill('welcome_message');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('modified message');
@@ -370,7 +354,6 @@ test.describe('Debugger Console', () => {
     // Test function call
     await inputArea.fill('len(data_list)');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     let outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('5');
@@ -379,7 +362,6 @@ test.describe('Debugger Console', () => {
     await inputArea.click();
     await inputArea.fill('user_count * 2 + len(welcome_message)');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('95'); // 42 * 2 + 11 = 95
@@ -388,7 +370,6 @@ test.describe('Debugger Console', () => {
     await inputArea.click();
     await inputArea.fill('[x * 2 for x in data_list]');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('[2, 4, 6, 8, 10]');
@@ -397,7 +378,6 @@ test.describe('Debugger Console', () => {
     await inputArea.click();
     await inputArea.fill('welcome_message.upper()');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('HELLO WORLD');
@@ -415,7 +395,6 @@ test.describe('Debugger Console', () => {
     // Test bad input
     await inputArea.fill('1 / 0');
     await inputArea.press('Shift+Enter');
-    await page.waitForTimeout(1000);
 
     let outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('Evaluation resulted in an error');
