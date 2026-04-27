@@ -147,65 +147,6 @@ import { FileDialog, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { Widget } from '@lumino/widgets';
 
-const applyEmbedLayout = async (
-  app: JupyterFrontEnd,
-  options: {
-    hideHeader?: boolean;
-    hideLeft?: boolean;
-    hideRight?: boolean;
-    hideStatusBar?: boolean;
-  } = {}
-): Promise<void> => {
-  const {
-    hideHeader = true,
-    hideLeft = true,
-    hideRight = true,
-    hideStatusBar = true
-  } = options;
-
-  const run = async (
-    command: string,
-    args?: { [key: string]: unknown }
-  ): Promise<void> => {
-    if (!app.commands.hasCommand(command)) {
-      return;
-    }
-    try {
-      if (args) {
-        await app.commands.execute(command, args);
-      } else {
-        await app.commands.execute(command);
-      }
-    } catch {
-      /* command may not be available in all host shells */
-    }
-  };
-
-  await run('application:set-mode', { mode: 'single-document' });
-
-  const collapseIfVisible = async (command: string): Promise<void> => {
-    if (!app.commands.hasCommand(command)) {
-      return;
-    }
-    if (app.commands.isToggled(command)) {
-      await run(command);
-    }
-  };
-
-  if (hideLeft) {
-    await collapseIfVisible('application:toggle-left-area');
-  }
-  if (hideRight) {
-    await collapseIfVisible('application:toggle-right-area');
-  }
-  if (hideHeader) {
-    await collapseIfVisible('application:toggle-header');
-  }
-  if (hideStatusBar) {
-    await collapseIfVisible('statusbar:toggle');
-  }
-};
-
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'ui-helpers-demo:plugin',
   autoStart: true,
@@ -367,15 +308,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     palette.addItem({ command: openFileDialogCommand, category: 'User Interface Helpers' });
     palette.addItem({ command: openFolderDialogCommand, category: 'User Interface Helpers' });
 
-    // Apply a compact iframe profile and open the playground panel.
-    const isEmbeddedDocs =
-      new URLSearchParams(window.location.search).get('embed') === '1';
-
     void app.restored
       .then(async () => {
-        if (isEmbeddedDocs) {
-          await applyEmbedLayout(app);
-        }
         await app.commands.execute(openPanelCommand);
       })
       .catch(() => {
@@ -386,7 +320,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
 export default plugin;
 </script>
-<div class="jp-plugin-playground-embed" data-playground-mode="simple" data-playground-source-id="jp-plugin-playground-source-ui-helpers" data-playground-file-name="index.ts">
+<div class="jp-plugin-playground-embed" data-playground-mode="simple" data-playground-hide="all" data-playground-source-id="jp-plugin-playground-source-ui-helpers" data-playground-file-name="index.ts">
   <p class="jp-plugin-playground-description">
     Interactive dialogs + notifications example.
   </p>

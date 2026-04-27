@@ -6,6 +6,15 @@
 document.addEventListener('DOMContentLoaded', () => {
   const LOADED_LABEL = 'Unload Interactive Example';
   const PLAYGROUND_PARAM = 'plugin';
+  const HIDE_QUERY_PARAM = 'hide';
+  const HIDE_QUERY_VALUE_ALL = 'all';
+  const HIDE_QUERY_VALUE_MENU = 'menu';
+  const HIDE_QUERY_VALUE_STATUSBAR = 'statusbar';
+  const VALID_HIDE_VALUES = new Set([
+    HIDE_QUERY_VALUE_ALL,
+    HIDE_QUERY_VALUE_MENU,
+    HIDE_QUERY_VALUE_STATUSBAR
+  ]);
 
   const bytesToBase64Url = bytes => {
     let binary = '';
@@ -78,14 +87,43 @@ document.addEventListener('DOMContentLoaded', () => {
     return lines.map(line => line.slice(minIndent)).join('\n');
   };
 
+  const getPlaygroundHideValues = embed => {
+    const hideValues = new Set();
+    const configuredHideValues = (embed.dataset.playgroundHide || '').split(
+      ','
+    );
+
+    for (const rawValue of configuredHideValues) {
+      const value = rawValue.trim().toLowerCase();
+      if (VALID_HIDE_VALUES.has(value)) {
+        hideValues.add(value);
+      }
+    }
+
+    return Array.from(hideValues);
+  };
+
+  const getPlaygroundQuery = embed => {
+    const params = new URLSearchParams(embed.dataset.playgroundQuery || '');
+    for (const hideValue of getPlaygroundHideValues(embed)) {
+      params.append(HIDE_QUERY_PARAM, hideValue);
+    }
+    const query = params.toString();
+    return query || null;
+  };
+
   const applyPlaygroundQuery = (source, query) => {
     if (!query) {
       return source;
     }
     const url = new URL(source);
     const params = new URLSearchParams(query);
-    for (const [key, value] of params.entries()) {
-      url.searchParams.set(key, value);
+    const queryKeys = new Set(params.keys());
+    for (const key of queryKeys) {
+      url.searchParams.delete(key);
+      for (const value of params.getAll(key)) {
+        url.searchParams.append(key, value);
+      }
     }
     return url.toString();
   };
@@ -205,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadButton.textContent = defaultLabel;
     loadButton.setAttribute('aria-pressed', 'false');
 
-    const query = embed.dataset.playgroundQuery;
+    const query = getPlaygroundQuery(embed);
     const tokenPromise = getPlaygroundToken(embed);
     tokenPromise.then(token => {
       configureActionLinks(embed, query, token);
