@@ -91,13 +91,6 @@
   List view pagination styling
 */
 
-.jp-extensionmanager-view ul.pagination {
-  display: flex;
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .jp-extensionmanager-pagination li {
   display: inline-block;
 }
