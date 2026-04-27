@@ -47,15 +47,8 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
       await settingsManager.save(pluginId, raw);
     }, SETTING_ID);
 
-    // Navigate to the target directory
-    await page.evaluate(async p => {
-      await window.jupyterapp.commands.execute('filebrowser:open-path', {
-        path: p
-      });
-    }, `${tmpPath}/${path}`);
-
-    // Wait for breadcrumbs to reflect the navigated path
-    await page.locator(`${BREADCRUMB_SELECTOR} >> text=dir5`).waitFor();
+    // Navigate to the target directory and wait for the breadcrumbs to settle
+    await page.filebrowser.openDirectoryByCommand(`${tmpPath}/${path}`);
 
     // Widen sidebar
     await page.sidebar.setWidth(800);
@@ -77,13 +70,15 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await page.contents.createDirectory(`${tmpPath}/beta`);
     await page.contents.createDirectory(`${tmpPath}/gamma`);
 
+    // The previous test leaves the file browser deep inside `tmpPath`.
+    // Refresh so its model picks up the freshly created sibling directories
+    // before we ask `filebrowser:open-path` to resolve `${tmpPath}/alpha`,
+    // otherwise the lookup can race and trigger an error dialog that hangs
+    // the command (see https://github.com/jupyterlab/jupyterlab/issues/18806).
+    await page.filebrowser.refresh();
+
     // Navigate into one of them so the breadcrumb path is non-empty
-    await page.evaluate(async p => {
-      await window.jupyterapp.commands.execute('filebrowser:open-path', {
-        path: p
-      });
-    }, `${tmpPath}/alpha`);
-    await page.locator(`${BREADCRUMB_SELECTOR} >> text=alpha`).waitFor();
+    await page.filebrowser.openDirectoryByCommand(`${tmpPath}/alpha`);
 
     // Click on the empty space of the breadcrumb bar to enter edit mode
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
