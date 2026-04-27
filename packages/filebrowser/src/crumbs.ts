@@ -423,7 +423,7 @@ export class BreadCrumbs extends Widget {
   private _destinationForCrumb(crumb: HTMLElement): string | null {
     if (crumb.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
       const preferredPath = PageConfig.getOption('preferredPath');
-      return preferredPath ? '/' + preferredPath : preferredPath;
+      return preferredPath ? '/' + preferredPath : '/';
     }
     if (crumb.classList.contains(BREADCRUMB_ROOT_CLASS)) {
       return '/';
