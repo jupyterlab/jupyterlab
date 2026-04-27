@@ -580,8 +580,6 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       event.stopPropagation();
       if (!this._escapePressedOnce) {
         this._escapePressedOnce = true;
-        console.log('escapeHintRequested');
-        this._escapeHintRequested.emit();
         this._scheduleEscapeReset();
         return;
       }
@@ -619,6 +617,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._clearEscapeResetTimer();
     this._escapeResetTimer = window.setTimeout(() => {
       this._escapePressedOnce = false;
+      this._escapeHintRequested.emit();
       this._escapeResetTimer = null;
     }, ESCAPE_FOCUS_DELAY_MS);
   }
