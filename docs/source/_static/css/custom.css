@@ -107,7 +107,7 @@ main button.jp-plugin-playground-load {
   border-radius: 4px;
   padding: 0.4rem 0.8rem;
   background: var(--pst-color-primary, #0969da);
-  color: #fff;
+  color: white;
   cursor: pointer;
 }
 
