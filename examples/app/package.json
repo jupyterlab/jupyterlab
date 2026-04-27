@@ -7,11 +7,10 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyter/builder": "^0.0.6",
+    "@jupyter/builder": "^0.0.8",
     "@jupyterlab/application": "^4.6.0-alpha.4",
     "@jupyterlab/application-extension": "^4.6.0-alpha.4",
     "@jupyterlab/apputils-extension": "^4.6.0-alpha.4",
-    "@jupyterlab/builder": "^4.6.0-alpha.4",
     "@jupyterlab/celltags-extension": "^4.6.0-alpha.4",
     "@jupyterlab/codemirror-extension": "^4.6.0-alpha.4",
     "@jupyterlab/completer-extension": "^4.6.0-alpha.4",

@@ -2315,9 +2315,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/builder@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "@jupyter/builder@npm:0.0.6"
+"@jupyter/builder@npm:^0.0.8":
+  version: 0.0.8
+  resolution: "@jupyter/builder@npm:0.0.8"
   dependencies:
     "@jupyterlab/core-meta": 4.6.0-alpha.4
     "@rspack/core": ^1.7.7
@@ -2336,7 +2336,7 @@ __metadata:
     supports-color: ^7.2.0
     webpack-merge: ^5.8.0
     worker-loader: ^3.0.2
-  checksum: b706a10dcc33e4228c7336471c73e73ecb45afbd8fc21ac5d59dd95fd31a39ea6ba1ee5846f64140ee9cb2965c0422d5b487246d1c961810b8686df740d8542d
+  checksum: 5f80322e4eecd4c643e73996b9f383bc9bc60cc5d52d5909c80e658bfb7c9e8727a219c4330994cfc2df5d5fd900d89e28e2b29bd4d5078a32c142d22d4d9e9f
   languageName: node
   linkType: hard
 
@@ -2414,7 +2414,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-top@workspace:dev_mode"
   dependencies:
-    "@jupyter/builder": ^0.0.6
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/application": ~4.6.0-alpha.4
     "@jupyterlab/application-extension": ~4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ~4.6.0-alpha.4
@@ -3299,11 +3299,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-app@workspace:examples/app"
   dependencies:
-    "@jupyter/builder": ^0.0.6
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/application-extension": ^4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
-    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/celltags-extension": ^4.6.0-alpha.4
     "@jupyterlab/codemirror-extension": ^4.6.0-alpha.4
     "@jupyterlab/completer-extension": ^4.6.0-alpha.4
@@ -3403,11 +3402,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-core@workspace:examples/federated/core_package"
   dependencies:
-    "@jupyter/builder": ^0.0.6
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/application-extension": ^4.6.0-alpha.4
     "@jupyterlab/apputils-extension": ^4.6.0-alpha.4
-    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/celltags-extension": ^4.6.0-alpha.4
     "@jupyterlab/codemirror-extension": ^4.6.0-alpha.4
     "@jupyterlab/completer-extension": ^4.6.0-alpha.4
@@ -3461,9 +3459,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-md@workspace:examples/federated/md_package"
   dependencies:
-    "@jupyter/builder": ^0.0.6
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/application": ^4.6.0-alpha.4
-    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/example-federated-middle": ^3.5.0-alpha.4
     "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.4
     "@lumino/widgets": ^2.7.5
@@ -3475,8 +3472,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-middle@workspace:examples/federated/middle_package"
   dependencies:
-    "@jupyter/builder": ^0.0.6
-    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyter/builder": ^0.0.8
     "@lumino/coreutils": ^2.2.2
     rimraf: ~5.0.5
   languageName: unknown
@@ -3792,10 +3788,9 @@ __metadata:
   resolution: "@jupyterlab/galata-extension@workspace:galata/extension"
   dependencies:
     "@fontsource-variable/noto-sans-sc": ^5.2.10
-    "@jupyter/builder": ^0.0.6
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/application": ^4.6.0-alpha.4
     "@jupyterlab/apputils": ^4.7.0-alpha.4
-    "@jupyterlab/builder": ^4.6.0-alpha.4
     "@jupyterlab/cells": ^4.6.0-alpha.4
     "@jupyterlab/debugger": ^4.6.0-alpha.4
     "@jupyterlab/docmanager": ^4.6.0-alpha.4
@@ -4462,8 +4457,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-consumer@workspace:jupyterlab/tests/mock_packages/interop/consumer"
   dependencies:
-    "@jupyter/builder": ^0.0.6
-    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/mock-token": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
@@ -4472,8 +4466,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
-    "@jupyter/builder": ^0.0.6
-    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/launcher": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
@@ -4482,8 +4475,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-provider@workspace:jupyterlab/tests/mock_packages/interop/provider"
   dependencies:
-    "@jupyter/builder": ^0.0.6
-    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/mock-token": ^4.6.0-alpha.4
   languageName: unknown
   linkType: soft
@@ -4492,8 +4484,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension"
   dependencies:
-    "@jupyter/builder": ^0.0.6
-    "@jupyterlab/builder": ^4.6.0-alpha.4
+    "@jupyter/builder": ^0.0.8
     "@jupyterlab/services": ^7.6.0-alpha.4
   languageName: unknown
   linkType: soft
