@@ -425,7 +425,7 @@ export class FileBrowser extends SidePanel {
   /**
    * Move focus to the first listing item (or trailing breadcrumb when empty).
    */
-  focusFirstListingItem(): void {
+  private _focusFirstListingItem(): void {
     if (this.listing.sortedItems().next().done ?? false) {
       this.crumbs.focusLastCrumb();
       return;
