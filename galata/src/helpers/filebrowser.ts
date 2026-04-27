@@ -200,41 +200,6 @@ export class FileBrowserHelper {
   }
 
   /**
-   * Deep-link the file browser to a directory via the
-   * `filebrowser:open-path` command, then wait for the breadcrumbs
-   * to reflect the new path.
-   *
-   * Unlike {@link openDirectory}, which clicks through each directory
-   * in turn, this dispatches the command directly. The synchronisation
-   * point is the breadcrumb update, which avoids a race where callers
-   * proceed to interact with the file browser before the navigation
-   * has settled.
-   *
-   * @param dirPath Directory path
-   * @returns Action success status
-   */
-  async openDirectoryByCommand(dirPath: string): Promise<boolean> {
-    const breadcrumbs = this.page.locator('.jp-FileBrowser .jp-BreadCrumbs');
-    await breadcrumbs.waitFor();
-
-    await this.page.evaluate(async path => {
-      await window.jupyterapp.commands.execute('filebrowser:open-path', {
-        path
-      });
-    }, dirPath);
-
-    const lastSegment = dirPath
-      .split('/')
-      .filter(segment => segment.length > 0)
-      .pop();
-    if (lastSegment) {
-      await breadcrumbs.locator(`text=${lastSegment}`).waitFor();
-    }
-
-    return true;
-  }
-
-  /**
    * Trigger a file browser refresh
    */
   async refresh(): Promise<void> {
