@@ -135,6 +135,7 @@
   top: -1.15em;
   padding-bottom: 0.05em;
   left: -1px;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   font-size: 0.95em;
   font-family: var(--jp-ui-font-family);
   font-weight: bold;

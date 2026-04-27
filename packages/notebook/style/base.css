@@ -455,6 +455,7 @@
 
 .jp-Notebook .jp-scrollbarItem-source {
   display: inline-block;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   font-size: 3px;
   vertical-align: middle;
   max-height: 10em;
