@@ -324,6 +324,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   /**
+   * A signal emitted when users should be reminded how to leave terminal focus.
+   */
+  get escapeHintRequested(): ISignal<this, void> {
+    return this._escapeHintRequested;
+  }
+
+  /**
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
@@ -573,6 +580,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       event.stopPropagation();
       if (!this._escapePressedOnce) {
         this._escapePressedOnce = true;
+        console.log('escapeHintRequested');
+        this._escapeHintRequested.emit();
         this._scheduleEscapeReset();
         return;
       }
@@ -633,6 +642,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _termOpened = false;
   private _trans: TranslationBundle;
   private _themeChanged = new Signal<this, void>(this);
+  private _escapeHintRequested = new Signal<this, void>(this);
   private _escapePressedOnce = false;
   private _escapeResetTimer: number | null = null;
   private _terminalId: number;

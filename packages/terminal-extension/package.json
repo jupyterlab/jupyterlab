@@ -46,6 +46,7 @@
     "@jupyterlab/running": "^4.6.0-alpha.4",
     "@jupyterlab/services": "^7.6.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.4",
+    "@jupyterlab/statusbar": "^4.6.0-alpha.4",
     "@jupyterlab/terminal": "^4.6.0-alpha.4",
     "@jupyterlab/translation": "^4.6.0-alpha.4",
     "@jupyterlab/ui-components": "^4.6.0-alpha.4",
