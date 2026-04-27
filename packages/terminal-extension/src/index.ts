@@ -194,7 +194,6 @@ function activate(
   let clearEscapeHintTimeout: number | null = null;
 
   if (statusBar && escapeHintStatus) {
-    console.log('registering escape hint status item');
     statusBar.registerStatusItem('@jupyterlab/terminal-extension:escape-hint', {
       item: escapeHintStatus,
       align: 'middle',
