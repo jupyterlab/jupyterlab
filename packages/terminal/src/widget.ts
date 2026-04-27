@@ -575,15 +575,21 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       !!xtermViewport &&
       (activeElement === xtermViewport ||
         xtermViewport.contains(activeElement));
+    const textareaFocused = !!xtermTextarea && activeElement === xtermTextarea;
 
     if (event.key === 'Escape') {
-      event.preventDefault();
-      event.stopPropagation();
+      if (!textareaFocused) {
+        this._clearEscapeResetTimer();
+        this._escapePressedOnce = false;
+        return;
+      }
       if (!this._escapePressedOnce) {
         this._escapePressedOnce = true;
         this._scheduleEscapeReset();
         return;
       }
+      event.preventDefault();
+      event.stopPropagation();
       this._clearEscapeResetTimer();
       this._escapePressedOnce = false;
       if (xtermTextarea) {
