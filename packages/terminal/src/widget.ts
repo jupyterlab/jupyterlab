@@ -35,6 +35,11 @@ const TERMINAL_CLASS = 'jp-Terminal';
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
 /**
+ * The class name for screen reader only text.
+ */
+const SR_ONLY_CLASS = 'jp-sr-only';
+
+/**
  * The delay in milliseconds to reset the escape key press.
  */
 const ESCAPE_FOCUS_DELAY_MS = 350;
@@ -75,6 +80,15 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this.addClass(TERMINAL_CLASS);
 
     this._setThemeAttribute(theme);
+    this._terminalId = Private.id++;
+    this.id = `jp-Terminal-${this._terminalId}`;
+    this._escapeInstructionsId = `jp-Terminal-escape-instructions-${this._terminalId}`;
+    this.node.insertAdjacentHTML(
+      'beforeend',
+      `<p id="${this._escapeInstructionsId}" class="${SR_ONLY_CLASS}">${this._trans.__(
+        'Press Escape twice to leave terminal focus. Press Enter to return focus to the terminal input.'
+      )}</p>`
+    );
 
     // Buffer session message while waiting for the terminal
     let buffer = '';
@@ -108,7 +122,6 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
         this._searchAddon = searchAddon;
         this._initializeTerm();
 
-        this.id = `jp-Terminal-${Private.id++}`;
         this.title.label = this._trans.__('Terminal');
         this._isReady = true;
         this._ready.resolve();
@@ -356,6 +369,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     if (!this._termOpened) {
       this._term.open(this.node);
       this._term.element?.classList.add(TERMINAL_BODY_CLASS);
+      this._term.textarea?.setAttribute(
+        'aria-describedby',
+        this._escapeInstructionsId
+      );
+      this._term.element
+        ?.querySelector('.xterm-viewport')
+        ?.setAttribute('aria-describedby', this._escapeInstructionsId);
       this._termOpened = true;
     }
 
@@ -615,6 +635,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _themeChanged = new Signal<this, void>(this);
   private _escapePressedOnce = false;
   private _escapeResetTimer: number | null = null;
+  private _terminalId: number;
+  private _escapeInstructionsId: string;
 
   /**
    * Handle the DOM events for the widget.
