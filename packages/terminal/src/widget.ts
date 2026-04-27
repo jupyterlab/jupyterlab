@@ -83,12 +83,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._terminalId = Private.id++;
     this.id = `jp-Terminal-${this._terminalId}`;
     this._escapeInstructionsId = `jp-Terminal-escape-instructions-${this._terminalId}`;
-    this.node.insertAdjacentHTML(
-      'beforeend',
-      `<p id="${this._escapeInstructionsId}" class="${SR_ONLY_CLASS}">${this._trans.__(
-        'Press Escape twice to leave terminal focus. Press Enter to return focus to the terminal input.'
-      )}</p>`
+    const escapeInstructions = document.createElement('p');
+    escapeInstructions.id = this._escapeInstructionsId;
+    escapeInstructions.className = SR_ONLY_CLASS;
+    escapeInstructions.textContent = this._trans.__(
+      'Press Escape twice to leave terminal focus. Press Enter to return focus to the terminal input.'
     );
+    this.node.appendChild(escapeInstructions);
 
     // Buffer session message while waiting for the terminal
     let buffer = '';
