@@ -100,12 +100,12 @@ export class FileBrowser extends SidePanel {
       onPathEdited: () => {
         // Wait a frame so listing updates are reflected before focusing.
         requestAnimationFrame(() => {
-          this.focusFirstListingItem();
+          this._focusFirstListingItem();
         });
       },
       onPathActivated: () => {
         requestAnimationFrame(() => {
-          this.focusFirstListingItem();
+          this._focusFirstListingItem();
         });
       }
     });
