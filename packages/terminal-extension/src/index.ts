@@ -69,6 +69,11 @@ namespace CommandIDs {
 }
 
 /**
+ * The duration in milliseconds to display the escape hint.
+ */
+const ESCAPE_HINT_DISPLAY_MS = 1500;
+
+/**
  * The default terminal extension.
  */
 const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
@@ -291,7 +296,7 @@ function activate(
       clearEscapeHintTimeout = window.setTimeout(() => {
         escapeHintStatus.model.setActive(false);
         clearEscapeHintTimeout = null;
-      }, 1500);
+      }, ESCAPE_HINT_DISPLAY_MS);
     });
   });
 
