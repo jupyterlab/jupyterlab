@@ -36,38 +36,17 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this.addClass(IMAGE_CLASS);
     this.addClass('jp-zoom-target');
 
-    const imagePanel = document.createElement('div');
-    imagePanel.className = 'jp-ImageViewer-imagePanel';
-
+    this._imagePanel = document.createElement('div');
+    this._imagePanel.className = 'jp-ImageViewer-imagePanel';
+    this._imagePanel.addEventListener('wheel', this._evtWheel, {
+      passive: false
+    });
+    this._imagePanel.addEventListener('mousedown', this._evtMouseDown);
+    this._imagePanel.addEventListener('dblclick', this._evtDoubleClick);
     this._img = document.createElement('img');
-    imagePanel.appendChild(this._img);
-    this.node.appendChild(imagePanel);
-
-    const zoomBar = document.createElement('div');
-    zoomBar.className = 'jp-ImageViewer-zoomBar';
-    const zoomOutBtn = document.createElement('button');
-    zoomOutBtn.type = 'button';
-    zoomOutBtn.className = 'jp-Button jp-mod-minimal jp-mod-small jp-ImageViewer-zoomOut';
-    zoomOutBtn.textContent = '-';
-    zoomOutBtn.title = 'Zoom out';
-    zoomOutBtn.setAttribute('aria-label', 'Zoom out');
-    zoomOutBtn.addEventListener('click', (e: MouseEvent) => {
-      e.stopPropagation();
-      this.zoomOut();
-    });
-    const zoomInBtn = document.createElement('button');
-    zoomInBtn.type = 'button';
-    zoomInBtn.className = 'jp-Button jp-mod-minimal jp-mod-small jp-ImageViewer-zoomIn';
-    zoomInBtn.textContent = '+';
-    zoomInBtn.title = 'Zoom in';
-    zoomInBtn.setAttribute('aria-label', 'Zoom in');
-    zoomInBtn.addEventListener('click', (e: MouseEvent) => {
-      e.stopPropagation();
-      this.zoomIn();
-    });
-    zoomBar.appendChild(zoomOutBtn);
-    zoomBar.appendChild(zoomInBtn);
-    this.node.appendChild(zoomBar);
+    this._img.addEventListener('load', this._onImageLoaded);
+    this._imagePanel.appendChild(this._img);
+    this.node.appendChild(this._imagePanel);
 
     this._onTitleChanged();
     context.pathChanged.connect(this._onTitleChanged, this);
@@ -111,10 +90,12 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     return this._scale;
   }
   set scale(value: number) {
-    if (value === this._scale) {
+    const normalized = Math.max(0.05, value);
+    if (normalized === this._scale) {
       return;
     }
-    this._scale = value;
+    this._fitToScreen = false;
+    this._scale = normalized;
     this._updateStyle();
   }
 
@@ -149,9 +130,30 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   }
 
   /**
+   * Reset zoom to 100%.
+   */
+  resetZoom(): void {
+    this.scale = 1;
+  }
+
+  /**
+   * Fit image to the visible panel while preserving aspect ratio.
+   */
+  fitToScreen(): void {
+    this._fitToScreen = true;
+    this._fitImageToPanel();
+  }
+
+  /**
    * Dispose of resources held by the image viewer.
    */
   dispose(): void {
+    document.removeEventListener('mousemove', this._evtMouseMove);
+    document.removeEventListener('mouseup', this._evtMouseUp);
+    this._imagePanel.removeEventListener('wheel', this._evtWheel);
+    this._imagePanel.removeEventListener('mousedown', this._evtMouseDown);
+    this._imagePanel.removeEventListener('dblclick', this._evtDoubleClick);
+    this._img.removeEventListener('load', this._onImageLoaded);
     if (this._img.src) {
       URL.revokeObjectURL(this._img.src || '');
     }
@@ -212,6 +214,16 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   }
 
   /**
+   * Handle resize messages.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    super.onResize(msg);
+    if (this._fitToScreen) {
+      this._fitImageToPanel();
+    }
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -243,6 +255,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       this._img.src = URL.createObjectURL(a);
     }
     URL.revokeObjectURL(oldurl);
+    this._fitToScreen = true;
   }
 
   /**
@@ -254,13 +267,142 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     const transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0)`;
     this._img.style.transform = `scale(${this._scale}) ${transform}`;
     this._img.style.filter = `invert(${this._colorinversion})`;
+    this._syncPanMode();
+  }
+
+  /**
+   * Handle image load event.
+   */
+  private _onImageLoaded = (): void => {
+    if (this._fitToScreen) {
+      this._fitImageToPanel();
+    } else {
+      this._syncPanMode();
+    }
+  };
+
+  /**
+   * Fit image dimensions into the panel.
+   */
+  private _fitImageToPanel(): void {
+    const { naturalWidth, naturalHeight } = this._img;
+    const { clientWidth, clientHeight } = this._imagePanel;
+    if (!naturalWidth || !naturalHeight || !clientWidth || !clientHeight) {
+      return;
+    }
+    const scale = Math.min(
+      1,
+      clientWidth / naturalWidth,
+      clientHeight / naturalHeight
+    );
+    this._scale = scale;
+    this._updateStyle();
+    this._imagePanel.scrollLeft = 0;
+    this._imagePanel.scrollTop = 0;
+  }
+
+  /**
+   * Handle Ctrl+wheel zoom.
+   */
+  private _evtWheel = (event: WheelEvent): void => {
+    if (!event.ctrlKey) {
+      return;
+    }
+    event.preventDefault();
+    if (event.deltaY < 0) {
+      this.zoomIn();
+    } else if (event.deltaY > 0) {
+      this.zoomOut();
+    }
+  };
+
+  /**
+   * Handle drag start for panning.
+   */
+  private _evtMouseDown = (event: MouseEvent): void => {
+    if (event.button !== 0 || !this._canPan()) {
+      return;
+    }
+    this._isPanning = true;
+    this._panStartX = event.clientX;
+    this._panStartY = event.clientY;
+    this._panStartLeft = this._imagePanel.scrollLeft;
+    this._panStartTop = this._imagePanel.scrollTop;
+    this._imagePanel.classList.add('jp-mod-panning');
+    document.addEventListener('mousemove', this._evtMouseMove);
+    document.addEventListener('mouseup', this._evtMouseUp);
+    event.preventDefault();
+  };
+
+  /**
+   * Handle drag move for panning.
+   */
+  private _evtMouseMove = (event: MouseEvent): void => {
+    if (!this._isPanning) {
+      return;
+    }
+    this._imagePanel.scrollLeft =
+      this._panStartLeft - (event.clientX - this._panStartX);
+    this._imagePanel.scrollTop =
+      this._panStartTop - (event.clientY - this._panStartY);
+  };
+
+  /**
+   * Handle drag end for panning.
+   */
+  private _evtMouseUp = (): void => {
+    if (!this._isPanning) {
+      return;
+    }
+    this._isPanning = false;
+    this._imagePanel.classList.remove('jp-mod-panning');
+    document.removeEventListener('mousemove', this._evtMouseMove);
+    document.removeEventListener('mouseup', this._evtMouseUp);
+  };
+
+  /**
+   * Toggle quick zoom on double-click.
+   */
+  private _evtDoubleClick = (event: MouseEvent): void => {
+    if (event.button !== 0) {
+      return;
+    }
+    if (this._fitToScreen) {
+      this.resetZoom();
+    } else {
+      this.fitToScreen();
+    }
+  };
+
+  /**
+   * Check whether panning is currently useful.
+   */
+  private _canPan(): boolean {
+    return (
+      this._imagePanel.scrollWidth > this._imagePanel.clientWidth ||
+      this._imagePanel.scrollHeight > this._imagePanel.clientHeight
+    );
+  }
+
+  /**
+   * Update panning cursor classes.
+   */
+  private _syncPanMode(): void {
+    this._imagePanel.classList.toggle('jp-mod-canPan', this._canPan());
   }
 
   private _mimeType: string;
   private _scale = 1;
+  private _fitToScreen = true;
   private _matrix = [1, 0, 0, 1];
   private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
+  private _isPanning = false;
+  private _panStartX = 0;
+  private _panStartY = 0;
+  private _panStartLeft = 0;
+  private _panStartTop = 0;
+  private _imagePanel: HTMLDivElement;
   private _img: HTMLImageElement;
 }
 
