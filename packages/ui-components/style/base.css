@@ -100,7 +100,7 @@
 .jp-Button.jp-mod-small {
   min-height: 24px;
   min-width: 24px;
-  font-size: 12px;
+  font-size: calc(var(--jp-ui-font-size1) * 12 / 13);
   padding: 0 7px;
 }
 
@@ -134,7 +134,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  font-size: 14px;
+  font-size: var(--jp-content-font-size1);
   font-weight: 400;
   height: 30px;
   line-height: 30px;
