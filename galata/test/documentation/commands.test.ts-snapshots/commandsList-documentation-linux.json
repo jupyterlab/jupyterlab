@@ -2471,6 +2471,16 @@
     }
   },
   {
+    "id": "filebrowser:edit-path",
+    "label": "Edit File Browser Path",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
@@ -2491,7 +2501,7 @@
   },
   {
     "id": "filebrowser:go-up",
-    "label": "go up",
+    "label": "Go Up",
     "caption": "",
     "shortcuts": [
       "Backspace"
@@ -3440,9 +3450,7 @@
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3457,9 +3465,7 @@
     "id": "inspector:open",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3482,7 +3488,9 @@
     "id": "inspector:toggle",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl I"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -4942,6 +4950,21 @@
     "args": {
       "type": "object",
       "properties": {}
+    }
+  },
+  {
+    "id": "notebook:toggle-output-scrolling",
+    "label": "Toggle Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu"
+        }
+      }
     }
   },
   {

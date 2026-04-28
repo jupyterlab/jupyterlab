@@ -128,10 +128,12 @@
     "stylelint-config-recommended": "^13.0.0",
     "stylelint-config-standard": "^34.0.0",
     "stylelint-csstree-validator": "^3.0.0",
+    "stylelint-declaration-strict-value": "^1.11.1",
     "stylelint-prettier": "^4.0.0",
     "typescript-eslint": "^8.0.0"
   },
   "devDependencies": {
+    "@jupyter/eslint-plugin": "0.0.5",
     "lerna": "^7.1.4",
     "typedoc": "~0.27.4",
     "typedoc-plugin-mdn-links": "^4.0.4"
