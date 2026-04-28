@@ -286,7 +286,7 @@ app.contextMenu.addItem({
 ```{raw} html
 <div
   class="jp-plugin-playground-embed"
-  data-playground-hide="all"
+  data-playground-hide="menu,statusbar"
   data-playground-query="path=extension-examples/context-menu/src/index.ts"
   data-playground-title="Extension examples context menu interactive example"
   data-playground-description="Extension examples: context-menu."
