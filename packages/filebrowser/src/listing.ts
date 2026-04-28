@@ -800,7 +800,7 @@ export class DirListing extends Widget {
   /**
    * Move focus to selected item, or to the first item if no item is selected.
    */
-  focusContent(): void {
+  private _focusContent(): void {
     const items = this._sortedItems;
     if (items.length === 0) {
       this._focusItem(0);
@@ -821,6 +821,13 @@ export class DirListing extends Widget {
     }
 
     this._selectItem(index, false, true);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._focusContent();
   }
 
   /**

@@ -424,17 +424,13 @@ export class FileBrowser extends SidePanel {
 
   /**
    * Focus listing content, or trailing breadcrumb when listing is empty.
-   *
-   * Uses `DirListing.focusContent()` to focus the selected row when present,
-   * otherwise the first row.
    */
   private _focusListingContentOrCrumb(): void {
     if (this.listing.sortedItems().next().done ?? false) {
       this.crumbs.focusLastCrumb();
       return;
     }
-
-    this.listing.focusContent();
+    this.listing.activate();
   }
 
   /**
