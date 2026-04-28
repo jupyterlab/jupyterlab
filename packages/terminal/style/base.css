@@ -12,6 +12,13 @@
   padding: 8px;
 }
 
+.jp-Terminal-body .xterm-viewport:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--jp-brand-color1);
+  outline-offset: -2px;
+}
+
 [data-term-theme='inherit'] .xterm .xterm-screen canvas {
   border: var(--jp-border-width) solid var(--jp-layout-color0);
 }
