@@ -100,12 +100,12 @@ export class FileBrowser extends SidePanel {
       onPathEdited: () => {
         // Wait a frame so listing updates are reflected before focusing.
         requestAnimationFrame(() => {
-          this._focusFirstListingItem();
+          this._focusListingContentOrCrumb();
         });
       },
       onPathActivated: () => {
         requestAnimationFrame(() => {
-          this._focusFirstListingItem();
+          this._focusListingContentOrCrumb();
         });
       }
     });
@@ -423,22 +423,18 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
-   * Move focus to the first listing item (or trailing breadcrumb when empty).
+   * Focus listing content, or trailing breadcrumb when listing is empty.
+   *
+   * Uses `DirListing.focusContent()` to focus the selected row when present,
+   * otherwise the first row.
    */
-  private _focusFirstListingItem(): void {
+  private _focusListingContentOrCrumb(): void {
     if (this.listing.sortedItems().next().done ?? false) {
       this.crumbs.focusLastCrumb();
       return;
     }
 
-    const listing = this.listing as DirListing & {
-      focusContent?: () => void;
-    };
-    if (listing.focusContent) {
-      listing.focusContent();
-      return;
-    }
-    listing.node.focus();
+    this.listing.focusContent();
   }
 
   /**
