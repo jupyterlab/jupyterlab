@@ -53,7 +53,7 @@
 /*
  * Lumino
  */
-
+/* stylelint-disable declaration-property-value-allowed-list */
 .lm-ScrollBar[data-orientation='horizontal'] {
   min-height: 16px;
   max-height: 16px;
@@ -114,6 +114,7 @@
   border-top: 1px solid #a0a0a0;
   border-bottom: 1px solid #a0a0a0;
 }
+/* stylelint-enable declaration-property-value-allowed-list */
 
 .lm-ScrollBar[data-orientation='horizontal']
   .lm-ScrollBar-button[data-action='decrement'] {

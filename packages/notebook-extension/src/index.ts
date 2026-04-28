@@ -2519,6 +2519,11 @@ function addCommands(
         cell
           .getHeadings()
           .then(() => {
+            // Heading parsing is async; avoid restoring an outdated collapse
+            // state if the heading has been expanded in the meantime.
+            if (cell.isDisposed || !cell.headingCollapsed) {
+              return;
+            }
             NotebookActions.setHeadingCollapse(cell, true, notebook);
           })
           .catch(error => {
