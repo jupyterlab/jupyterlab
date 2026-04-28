@@ -3,53 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
 
 const BREADCRUMB_SELECTOR = '.jp-BreadCrumbs';
 const SETTING_ID = '@jupyterlab/filebrowser-extension:browser';
 
 test.use({ tmpPath: 'test-breadcrumbs' });
-
-/**
- * Dispatch the `filebrowser:open-path` command and wait for the
- * breadcrumbs to reflect the new path.
- *
- * The path is first resolved through the contents API directly so
- * that, if the underlying directory is not yet visible to the server
- * or to the file browser model, the failure surfaces as a test error
- * rather than as a modal opened by `showErrorMessage` inside the
- * command — which would otherwise hang the call for the full test
- * timeout (issue #18806).
- */
-async function openDirectoryByCommand(
-  page: IJupyterLabPageFixture,
-  dirPath: string
-): Promise<void> {
-  await page.locator(BREADCRUMB_SELECTOR).waitFor();
-
-  await page.evaluate(async p => {
-    await window.jupyterapp.serviceManager.contents.get(p, {
-      content: false
-    });
-  }, dirPath);
-
-  await page.evaluate(async p => {
-    await window.jupyterapp.commands.execute('filebrowser:open-path', {
-      path: p
-    });
-  }, dirPath);
-
-  const lastSegment = dirPath
-    .split('/')
-    .filter(segment => segment.length > 0)
-    .pop();
-  if (lastSegment) {
-    await page
-      .locator(`${BREADCRUMB_SELECTOR} >> text=${lastSegment}`)
-      .waitFor();
-  }
-}
 
 test.describe('Adaptive Breadcrumbs Snapshots', () => {
   test.beforeAll(async ({ request, tmpPath }) => {
@@ -73,9 +32,6 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Set a wide viewport to accommodate sidebar expansion
     await page.setViewportSize({ width: 1600, height: 720 });
 
-    // Wait for file browser to stabilize
-    await page.locator(BREADCRUMB_SELECTOR).waitFor();
-
     // Configure Breadcrumbs Settings
     await page.evaluate(async pluginId => {
       const settingsManager = window.jupyterapp.serviceManager.settings;
@@ -89,7 +45,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     }, SETTING_ID);
 
     // Navigate to the target directory and wait for the breadcrumbs to settle
-    await openDirectoryByCommand(page, `${tmpPath}/${path}`);
+    await page.filebrowser.openDirectoryByCommand(`${tmpPath}/${path}`);
 
     // Widen sidebar
     await page.sidebar.setWidth(800);
@@ -112,7 +68,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await page.contents.createDirectory(`${tmpPath}/gamma`);
 
     // Navigate into one of them so the breadcrumb path is non-empty
-    await openDirectoryByCommand(page, `${tmpPath}/alpha`);
+    await page.filebrowser.openDirectoryByCommand(`${tmpPath}/alpha`);
 
     // Click on the empty space of the breadcrumb bar to enter edit mode
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
