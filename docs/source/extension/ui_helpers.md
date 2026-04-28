@@ -143,18 +143,18 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 
-import { FileDialog, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { FileDialog, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
 import { Widget } from '@lumino/widgets';
 
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'ui-helpers-demo:plugin',
   autoStart: true,
-  requires: [ICommandPalette, IFileBrowserFactory],
+  requires: [ICommandPalette, IDefaultFileBrowser],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
-    browserFactory: IFileBrowserFactory
+    defaultBrowser: IDefaultFileBrowser
   ) => {
     const dialogCommand = 'ui-helpers-demo:dialog';
     const inputCommand = 'ui-helpers-demo:input';
@@ -189,7 +189,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const runOpenFilesDialog = async () => {
       const result = await FileDialog.getOpenFiles({
-        manager: browserFactory.defaultBrowser.model.manager
+        manager: defaultBrowser.model.manager
       });
       if (result.button.accept) {
         Notification.info(`Selected ${result.value.length} item(s).`, {
@@ -200,7 +200,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const runOpenFolderDialog = async () => {
       const result = await FileDialog.getExistingDirectory({
-        manager: browserFactory.defaultBrowser.model.manager
+        manager: defaultBrowser.model.manager
       });
       if (result.button.accept) {
         Notification.info(`Selected folder: ${String(result.value)}`, {
@@ -383,9 +383,9 @@ if (result.button.accept) {
 
 :::{note}
 The document manager can be obtained in a plugin by
-requesting {ts:variable}`filebrowser.IFileBrowserFactory` token.
+requesting {ts:variable}`filebrowser.IDefaultFileBrowser` token.
 The `manager` will be accessed through
-`factory.defaultBrowser.model.manager`.
+`defaultBrowser.model.manager`.
 :::
 
 ## Notifications
