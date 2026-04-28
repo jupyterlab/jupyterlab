@@ -821,6 +821,14 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     cell
       .getHeadings()
       .then(() => {
+        // Heading parsing is async; ignore stale callbacks that no longer match
+        // the current collapsed state.
+        if (
+          cell.isDisposed ||
+          (cell instanceof MarkdownCell && cell.headingCollapsed !== collapsed)
+        ) {
+          return;
+        }
         NotebookActions.setHeadingCollapse(cell, collapsed, this);
         this._cellCollapsed.emit(cell);
       })

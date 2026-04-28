@@ -843,6 +843,59 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#headingCollapsedChanged', () => {
+      it('should ignore stale async heading collapse callbacks', async () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'markdown',
+              source: '# Heading 1',
+              metadata: {}
+            },
+            {
+              cell_type: 'code',
+              source: 'print("hello")',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        const child = widget.widgets[1];
+
+        // Ensure heading metadata is parsed before controlling callback timing.
+        await heading.getHeadings();
+
+        let resolvePending: (() => void) | null = null;
+        const pending = new Promise<void>(resolve => {
+          resolvePending = resolve;
+        });
+        const getHeadingsSpy = jest
+          .spyOn(heading, 'getHeadings')
+          .mockImplementationOnce(async () => {
+            await pending;
+            return [];
+          });
+
+        heading.headingCollapsed = true;
+        heading.headingCollapsed = false;
+
+        resolvePending!();
+        await framePromise();
+        await framePromise();
+
+        expect(heading.headingCollapsed).toBe(false);
+        expect(child.isHidden).toBe(false);
+        getHeadingsSpy.mockRestore();
+      });
+    });
+
     describe('#select()', () => {
       it('should select a cell widget', () => {
         const widget = createActiveWidget();
