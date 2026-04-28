@@ -700,15 +700,22 @@ export class JupyterLabPage implements IJupyterLabPage {
    * Wait for the application to be started
    */
   protected waitForAppStarted = async (): Promise<void> => {
-    return this.waitForCondition(() =>
-      this.page.evaluate(async () => {
-        if (typeof window.jupyterapp === 'object') {
-          // Wait for plugins to be loaded
-          await window.jupyterapp.started;
-          return true;
-        }
-        return false;
-      })
+    // Allow up to 60s for plugin activation: the default
+    // `Utils.waitForCondition` timeout of 15s is occasionally
+    // exceeded on contended CI runners during JupyterLab's
+    // plugin-heavy boot, surfacing as a generic "Timed out
+    // waiting for condition" failure during test setup.
+    return this.waitForCondition(
+      () =>
+        this.page.evaluate(async () => {
+          if (typeof window.jupyterapp === 'object') {
+            // Wait for plugins to be loaded
+            await window.jupyterapp.started;
+            return true;
+          }
+          return false;
+        }),
+      60000
     );
   };
 
