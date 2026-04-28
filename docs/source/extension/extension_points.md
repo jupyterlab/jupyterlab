@@ -221,7 +221,7 @@ export default plugin;
 ```
 
 ```{raw} html
-<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/command-palette/src/index.ts">
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="path=extension-examples/command-palette/src/index.ts">
   <p class="jp-plugin-playground-description">
     Extension examples: command-palette.
   </p>
@@ -312,7 +312,7 @@ app.contextMenu.addItem({
 ```
 
 ```{raw} html
-<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/context-menu/src/index.ts">
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="path=extension-examples/context-menu/src/index.ts">
   <p class="jp-plugin-playground-description">
     Extension examples: context-menu.
   </p>
@@ -512,7 +512,7 @@ In addition to providing a command ID, you also provide a category in which to p
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
 
 ```{raw} html
-<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/launcher/src/index.ts">
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="path=extension-examples/launcher/src/index.ts">
   <p class="jp-plugin-playground-description">
     Extension examples: launcher.
   </p>
