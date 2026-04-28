@@ -220,6 +220,34 @@ export default plugin;
 </div>
 ```
 
+```{raw} html
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/command-palette/src/index.ts">
+  <p class="jp-plugin-playground-description">
+    Extension examples: command-palette.
+  </p>
+  <div class="jp-plugin-playground-actions">
+    <button type="button" class="jp-plugin-playground-load">
+      Load Interactive Example
+    </button>
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
+      JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
+      Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="jp-plugin-playground-frame" hidden>
+    <iframe
+      class="jp-plugin-playground-iframe"
+      title="Extension examples command palette interactive example"
+      loading="lazy"
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+    ></iframe>
+  </div>
+</div>
+```
+
 (context-menu)=
 
 ## Context Menu
@@ -281,6 +309,34 @@ app.contextMenu.addItem({
   command: commandID,
   selector: '.jp-Notebook'
 });
+```
+
+```{raw} html
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/context-menu/src/index.ts">
+  <p class="jp-plugin-playground-description">
+    Extension examples: context-menu.
+  </p>
+  <div class="jp-plugin-playground-actions">
+    <button type="button" class="jp-plugin-playground-load">
+      Load Interactive Example
+    </button>
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
+      JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
+      Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="jp-plugin-playground-frame" hidden>
+    <iframe
+      class="jp-plugin-playground-iframe"
+      title="Extension examples context menu interactive example"
+      loading="lazy"
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+    ></iframe>
+  </div>
+</div>
 ```
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
@@ -454,6 +510,34 @@ launcher.add({
 
 In addition to providing a command ID, you also provide a category in which to put your item,
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
+
+```{raw} html
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/launcher/src/index.ts">
+  <p class="jp-plugin-playground-description">
+    Extension examples: launcher.
+  </p>
+  <div class="jp-plugin-playground-actions">
+    <button type="button" class="jp-plugin-playground-load">
+      Load Interactive Example
+    </button>
+    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
+      JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
+      Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="jp-plugin-playground-frame" hidden>
+    <iframe
+      class="jp-plugin-playground-iframe"
+      title="Extension examples launcher interactive example"
+      loading="lazy"
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+    ></iframe>
+  </div>
+</div>
+```
 
 (shell)=
 

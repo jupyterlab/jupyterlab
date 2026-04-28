@@ -203,9 +203,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
         manager: defaultBrowser.model.manager
       });
       if (result.button.accept) {
-        Notification.info(`Selected folder: ${String(result.value)}`, {
-          autoClose: 3000
-        });
+        const selectedPaths = result.value.map(item => item.path);
+        const message =
+          selectedPaths.length === 1
+            ? `Selected folder: ${selectedPaths[0]}`
+            : `Selected folders: ${selectedPaths.join(', ')}`;
+        Notification.info(message, { autoClose: 3000 });
       }
     };
 
