@@ -432,10 +432,10 @@ export class FileBrowser extends SidePanel {
     }
 
     const listing = this.listing as DirListing & {
-      focusFirstItem?: () => void;
+      focusContent?: () => void;
     };
-    if (listing.focusFirstItem) {
-      listing.focusFirstItem();
+    if (listing.focusContent) {
+      listing.focusContent();
       return;
     }
     listing.node.focus();

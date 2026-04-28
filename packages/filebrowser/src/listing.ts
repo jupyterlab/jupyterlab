@@ -798,15 +798,29 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Move focus to the first row's name cell, or to the listing root if empty.
+   * Move focus to selected item, or to the first item if no item is selected.
    */
-  focusFirstItem(): void {
+  focusContent(): void {
     const items = this._sortedItems;
     if (items.length === 0) {
       this._focusItem(0);
       return;
     }
-    this._selectItem(0, false, true);
+
+    let index =
+      this._focusPath !== ''
+        ? ArrayExt.findFirstIndex(
+            items,
+            value => value.path === this._focusPath
+          )
+        : -1;
+
+    // Fallbacks if path is missing/not found.
+    if (index === -1) {
+      index = Math.min(Math.max(this._focusIndex, 0), items.length - 1);
+    }
+
+    this._selectItem(index, false, true);
   }
 
   /**
@@ -2373,11 +2387,14 @@ export class DirListing extends Widget {
       // Focus the top node if the folder is empty and therefore there are no
       // items inside the folder to focus.
       this._focusIndex = 0;
+      this._focusPath = '';
       this.node.focus();
       return;
     }
-    this._focusIndex = index;
-    const node = items[index];
+    const clampedIndex = Math.min(Math.max(index, 0), items.length - 1);
+    this._focusIndex = clampedIndex;
+    this._focusPath = this._sortedItems[clampedIndex]?.path ?? '';
+    const node = items[clampedIndex];
     const nameNode = this.renderer.getNameNode(node);
     if (nameNode) {
       // Make the filename text node focusable so that it receives keyboard
@@ -2804,6 +2821,7 @@ export class DirListing extends Widget {
   private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
+  private _focusPath = '';
   private _modifiedStyle: Time.HumanStyle = 'short';
   private _createdStyle: Time.HumanStyle = 'short';
   private _allUploaded = new Signal<DirListing, void>(this);
