@@ -52,7 +52,7 @@ You can also launch the playground on Binder:
 
 ```{raw} html
 <!-- Plugin Playground source loaded from jupyterlab/jupyterlab_apod@cffae6a4049af97436f0c19a0dae65a574f74390 src/index.ts -->
-<div class="jp-plugin-playground-embed" data-playground-query="fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts">
+<div class="jp-plugin-playground-embed" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts">
   <p class="jp-plugin-playground-description">
     Interactive example for the final APOD tutorial state.
   </p>
@@ -1171,9 +1171,9 @@ learning, here are some suggestions about what to try next:
 
 <!-- Plugin Playground links pinned to jupyterlab/jupyterlab_apod commit refs used in each tutorial step. -->
 
-[apod-playground-00]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts
-[apod-playground-01]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts
-[apod-playground-02]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts
-[apod-playground-03]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/572572da88a780711470fcf29d9520979837b2ce/src/index.ts
-[apod-playground-04]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts
-[apod-playground-05]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://github.com/jupyterlab/jupyterlab_apod/blob/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts
+[apod-playground-00]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts
+[apod-playground-01]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts
+[apod-playground-02]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts
+[apod-playground-03]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/572572da88a780711470fcf29d9520979837b2ce/src/index.ts
+[apod-playground-04]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts
+[apod-playground-05]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts

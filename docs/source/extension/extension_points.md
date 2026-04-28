@@ -193,7 +193,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
 export default plugin;
 </script>
-<div class="jp-plugin-playground-embed" data-playground-mode="simple" data-playground-hide="all" data-playground-source-id="jp-plugin-playground-source-extension-points" data-playground-file-name="index.ts">
+<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-source-id="jp-plugin-playground-source-extension-points" data-playground-file-name="index.ts">
   <p class="jp-plugin-playground-description">
     Interactive command registry + command palette example.
   </p>

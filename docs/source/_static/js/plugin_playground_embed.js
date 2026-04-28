@@ -140,13 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return url.toString();
   };
 
-  const applyPlaygroundMode = (source, mode) => {
-    if (mode === 'simple') {
-      return source.replace('/lite/lab/', '/lite/edit/');
-    }
-    return source;
-  };
-
   const getPlaygroundToken = async embed => {
     const sourceId = embed.dataset.playgroundSourceId;
     if (!sourceId) {
@@ -194,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const getIframeSource = (embed, defaultSource, query, token) => {
     let source = defaultSource;
-    source = applyPlaygroundMode(source, embed.dataset.playgroundMode);
     source = applyPlaygroundQuery(source, query);
     source = applyPlaygroundToken(source, token);
 
