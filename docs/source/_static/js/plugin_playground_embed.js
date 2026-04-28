@@ -4,6 +4,10 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const PLAYGROUND_LAB_URL =
+    'https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html';
+  const PLAYGROUND_NOTEBOOK_URL =
+    'https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html';
   const LOADED_LABEL = 'Unload Interactive Example';
   const PLAYGROUND_PARAM = 'plugin';
   const HIDE_QUERY_PARAM = 'hide';
@@ -140,6 +144,128 @@ document.addEventListener('DOMContentLoaded', () => {
     return url.toString();
   };
 
+  const createExternalLinkIcon = () => {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-external-link';
+    icon.setAttribute('aria-hidden', 'true');
+    return icon;
+  };
+
+  const ensureActionLink = (actions, options) => {
+    const {
+      selector,
+      className,
+      href,
+      label,
+      title,
+      ariaLabel,
+      target = '_blank',
+      rel = 'noopener noreferrer'
+    } = options;
+    let link = actions.querySelector(selector);
+    if (!(link instanceof HTMLAnchorElement)) {
+      link = document.createElement('a');
+      if (className) {
+        link.className = className;
+      }
+      actions.appendChild(link);
+    }
+    link.href = href;
+    link.target = target;
+    link.rel = rel;
+    link.title = title;
+    if (ariaLabel) {
+      link.setAttribute('aria-label', ariaLabel);
+    }
+    link.textContent = `${label} `;
+    link.appendChild(createExternalLinkIcon());
+    return link;
+  };
+
+  const ensureEmbedSkeleton = embed => {
+    const descriptionText = embed.dataset.playgroundDescription || '';
+    if (
+      descriptionText &&
+      !embed.querySelector('.jp-plugin-playground-description')
+    ) {
+      const description = document.createElement('p');
+      description.className = 'jp-plugin-playground-description';
+      description.textContent = descriptionText;
+      embed.appendChild(description);
+    }
+
+    let actions = embed.querySelector('.jp-plugin-playground-actions');
+    if (!(actions instanceof HTMLElement)) {
+      actions = document.createElement('div');
+      actions.className = 'jp-plugin-playground-actions';
+      embed.appendChild(actions);
+    }
+
+    let loadButton = actions.querySelector('.jp-plugin-playground-load');
+    if (!(loadButton instanceof HTMLButtonElement)) {
+      loadButton = document.createElement('button');
+      loadButton.type = 'button';
+      loadButton.className = 'jp-plugin-playground-load';
+      loadButton.textContent = 'Load Interactive Example';
+      actions.insertBefore(loadButton, actions.firstChild);
+    }
+
+    const labHref = embed.dataset.playgroundLabHref || PLAYGROUND_LAB_URL;
+    const notebookHref =
+      embed.dataset.playgroundNotebookHref || PLAYGROUND_NOTEBOOK_URL;
+
+    ensureActionLink(actions, {
+      selector: '.jp-plugin-playground-open',
+      className: 'jp-plugin-playground-open',
+      href: labHref,
+      label: 'JupyterLab',
+      title: 'Open full JupyterLab view in a new tab'
+    });
+
+    const fallbackNotebookLink = Array.from(actions.querySelectorAll('a')).find(
+      link => !link.classList.contains('jp-plugin-playground-open')
+    );
+    if (
+      fallbackNotebookLink instanceof HTMLAnchorElement &&
+      !fallbackNotebookLink.classList.contains('jp-plugin-playground-notebook')
+    ) {
+      fallbackNotebookLink.classList.add('jp-plugin-playground-notebook');
+    }
+
+    ensureActionLink(actions, {
+      selector: '.jp-plugin-playground-notebook',
+      className: 'jp-plugin-playground-notebook',
+      href: notebookHref,
+      label: 'Notebook v7',
+      title: 'Open lightweight Notebook v7 view in a new tab'
+    });
+
+    let frame = embed.querySelector('.jp-plugin-playground-frame');
+    if (!(frame instanceof HTMLElement)) {
+      frame = document.createElement('div');
+      frame.className = 'jp-plugin-playground-frame';
+      frame.hidden = true;
+      embed.appendChild(frame);
+    }
+
+    let iframe = frame.querySelector('.jp-plugin-playground-iframe');
+    if (!(iframe instanceof HTMLIFrameElement)) {
+      iframe = document.createElement('iframe');
+      iframe.className = 'jp-plugin-playground-iframe';
+      frame.appendChild(iframe);
+    }
+
+    iframe.title =
+      embed.dataset.playgroundTitle ||
+      iframe.title ||
+      'Plugin playground example';
+    iframe.loading = 'lazy';
+    iframe.referrerPolicy = 'no-referrer';
+    iframe.allow = 'clipboard-read; clipboard-write';
+
+    return { loadButton, frame, iframe };
+  };
+
   const getPlaygroundToken = async embed => {
     const sourceId = embed.dataset.playgroundSourceId;
     if (!sourceId) {
@@ -215,13 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
       continue;
     }
 
-    const loadButton = embed.querySelector('.jp-plugin-playground-load');
+    const { loadButton, frame, iframe } = ensureEmbedSkeleton(embed);
     const openLink = embed.querySelector('.jp-plugin-playground-open');
-    const frame = embed.querySelector('.jp-plugin-playground-frame');
-    const iframe = embed.querySelector('.jp-plugin-playground-iframe');
 
     if (
-      !(loadButton instanceof HTMLButtonElement) ||
       !(openLink instanceof HTMLAnchorElement) ||
       !(frame instanceof HTMLElement) ||
       !(iframe instanceof HTMLIFrameElement)

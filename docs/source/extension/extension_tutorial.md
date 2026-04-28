@@ -52,31 +52,12 @@ You can also launch the playground on Binder:
 
 ```{raw} html
 <!-- Plugin Playground source loaded from jupyterlab/jupyterlab_apod@cffae6a4049af97436f0c19a0dae65a574f74390 src/index.ts -->
-<div class="jp-plugin-playground-embed" data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts">
-  <p class="jp-plugin-playground-description">
-    Interactive example for the final APOD tutorial state.
-  </p>
-  <div class="jp-plugin-playground-actions">
-    <button type="button" class="jp-plugin-playground-load">
-      Load Interactive Example
-    </button>
-    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
-      JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
-    </a>
-    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
-      Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
-    </a>
-  </div>
-  <div class="jp-plugin-playground-frame" hidden>
-    <iframe
-      class="jp-plugin-playground-iframe"
-      title="JupyterLab extension tutorial interactive example"
-      loading="lazy"
-      referrerpolicy="no-referrer"
-      allow="clipboard-read; clipboard-write"
-    ></iframe>
-  </div>
-</div>
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts"
+  data-playground-title="JupyterLab extension tutorial interactive example"
+  data-playground-description="Interactive example for the final APOD tutorial state."
+></div>
 ```
 
 Sound like fun? Excellent. Here we go!

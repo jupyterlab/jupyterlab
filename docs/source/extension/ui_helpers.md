@@ -311,43 +311,22 @@ const plugin: JupyterFrontEndPlugin<void> = {
     palette.addItem({ command: openFileDialogCommand, category: 'User Interface Helpers' });
     palette.addItem({ command: openFolderDialogCommand, category: 'User Interface Helpers' });
 
-    void app.restored
-      .then(async () => {
-        await app.commands.execute(openPanelCommand);
-      })
-      .catch(() => {
-        /* no-op */
-      });
+    void app.restored.then(() => {
+      void app.commands.execute(openPanelCommand);
+    });
   }
 };
 
 export default plugin;
 </script>
-<div class="jp-plugin-playground-embed" data-playground-hide="all" data-playground-source-id="jp-plugin-playground-source-ui-helpers" data-playground-file-name="index.ts">
-  <p class="jp-plugin-playground-description">
-    Interactive dialogs + notifications example.
-  </p>
-  <div class="jp-plugin-playground-actions">
-    <button type="button" class="jp-plugin-playground-load">
-      Load Interactive Example
-    </button>
-    <a class="jp-plugin-playground-open" href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html" target="_blank" rel="noopener noreferrer" title="Open full JupyterLab view in a new tab">
-      JupyterLab <i class="fa fa-external-link" aria-hidden="true"></i>
-    </a>
-    <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/tree/index.html" target="_blank" rel="noopener noreferrer" title="Open lightweight Notebook v7 view in a new tab">
-      Notebook v7 <i class="fa fa-external-link" aria-hidden="true"></i>
-    </a>
-  </div>
-  <div class="jp-plugin-playground-frame" hidden>
-    <iframe
-      class="jp-plugin-playground-iframe"
-      title="User interface helpers interactive example"
-      loading="lazy"
-      referrerpolicy="no-referrer"
-      allow="clipboard-read; clipboard-write"
-    ></iframe>
-  </div>
-</div>
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-source-id="jp-plugin-playground-source-ui-helpers"
+  data-playground-file-name="index.ts"
+  data-playground-title="User interface helpers interactive example"
+  data-playground-description="Interactive dialogs + notifications example."
+></div>
 ```
 
 ### File Dialogs
