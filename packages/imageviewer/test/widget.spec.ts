@@ -128,6 +128,22 @@ describe('ImageViewer', () => {
     });
   });
 
+  describe('#zoomIn() and #zoomOut()', () => {
+    it('should apply the same zoom steps as the palette commands', () => {
+      expect(widget.scale).toBe(1);
+      widget.zoomIn();
+      expect(widget.scale).toBe(2);
+      widget.zoomIn();
+      expect(widget.scale).toBe(2.5);
+      widget.zoomOut();
+      expect(widget.scale).toBe(2);
+      widget.zoomOut();
+      expect(widget.scale).toBe(1.5);
+      widget.zoomOut();
+      expect(widget.scale).toBe(1);
+    });
+  });
+
   describe('#dispose()', () => {
     it('should dispose of the resources used by the widget', () => {
       expect(widget.isDisposed).toBe(false);

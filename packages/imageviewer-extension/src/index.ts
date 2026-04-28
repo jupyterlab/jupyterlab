@@ -304,7 +304,7 @@ function addCommands(
     const widget = tracker.currentWidget?.content;
 
     if (widget) {
-      widget.scale = widget.scale > 1 ? widget.scale + 0.5 : widget.scale * 2;
+      widget.zoomIn();
     }
   }
 
@@ -312,7 +312,7 @@ function addCommands(
     const widget = tracker.currentWidget?.content;
 
     if (widget) {
-      widget.scale = widget.scale > 1 ? widget.scale - 0.5 : widget.scale / 2;
+      widget.zoomOut();
     }
   }
 

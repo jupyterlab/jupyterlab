@@ -36,8 +36,38 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this.addClass(IMAGE_CLASS);
     this.addClass('jp-zoom-target');
 
+    const imagePanel = document.createElement('div');
+    imagePanel.className = 'jp-ImageViewer-imagePanel';
+
     this._img = document.createElement('img');
-    this.node.appendChild(this._img);
+    imagePanel.appendChild(this._img);
+    this.node.appendChild(imagePanel);
+
+    const zoomBar = document.createElement('div');
+    zoomBar.className = 'jp-ImageViewer-zoomBar';
+    const zoomOutBtn = document.createElement('button');
+    zoomOutBtn.type = 'button';
+    zoomOutBtn.className = 'jp-Button jp-mod-minimal jp-mod-small jp-ImageViewer-zoomOut';
+    zoomOutBtn.textContent = '-';
+    zoomOutBtn.title = 'Zoom out';
+    zoomOutBtn.setAttribute('aria-label', 'Zoom out');
+    zoomOutBtn.addEventListener('click', (e: MouseEvent) => {
+      e.stopPropagation();
+      this.zoomOut();
+    });
+    const zoomInBtn = document.createElement('button');
+    zoomInBtn.type = 'button';
+    zoomInBtn.className = 'jp-Button jp-mod-minimal jp-mod-small jp-ImageViewer-zoomIn';
+    zoomInBtn.textContent = '+';
+    zoomInBtn.title = 'Zoom in';
+    zoomInBtn.setAttribute('aria-label', 'Zoom in');
+    zoomInBtn.addEventListener('click', (e: MouseEvent) => {
+      e.stopPropagation();
+      this.zoomIn();
+    });
+    zoomBar.appendChild(zoomOutBtn);
+    zoomBar.appendChild(zoomInBtn);
+    this.node.appendChild(zoomBar);
 
     this._onTitleChanged();
     context.pathChanged.connect(this._onTitleChanged, this);
@@ -100,6 +130,22 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     }
     this._colorinversion = value;
     this._updateStyle();
+  }
+
+  /**
+   * Zoom in (same behavior as the `imageviewer:zoom-in` command).
+   */
+  zoomIn(): void {
+    const s = this._scale;
+    this.scale = s > 1 ? s + 0.5 : s * 2;
+  }
+
+  /**
+   * Zoom out (same behavior as the `imageviewer:zoom-out` command).
+   */
+  zoomOut(): void {
+    const s = this._scale;
+    this.scale = s > 1 ? s - 0.5 : s / 2;
   }
 
   /**
@@ -204,10 +250,8 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
    */
   private _updateStyle(): void {
     const [a, b, c, d] = this._matrix;
-    const [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
-    const transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${
-      tX < 0 ? -100 : 0
-    }%, ${tY < 0 ? -100 : 0}%) `;
+    // Transform origin is center (CSS); matrix applies rotate/flip around center.
+    const transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0)`;
     this._img.style.transform = `scale(${this._scale}) ${transform}`;
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
@@ -255,16 +299,6 @@ namespace Private {
       a21 * b11 + a22 * b21,
       a21 * b12 + a22 * b22
     ];
-  }
-
-  /**
-   * Multiply a 2x2 matrix and a 2x1 vector.
-   */
-  export function prodVec(
-    [a11, a12, a21, a22]: number[],
-    [b1, b2]: number[]
-  ): number[] {
-    return [a11 * b1 + a12 * b2, a21 * b1 + a22 * b2];
   }
 
   /**
