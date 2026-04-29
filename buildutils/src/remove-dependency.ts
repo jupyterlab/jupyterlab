@@ -47,4 +47,4 @@ function handlePackage(packagePath: string): void {
 }
 
 // Update the core jupyterlab build dependencies.
-utils.run('jlpm run integrity');
+utils.run('jlpm integrity');

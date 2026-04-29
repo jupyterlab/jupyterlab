@@ -39,7 +39,7 @@ commander
 
     if (!options.skipPublish) {
       if (!options.skipBuild) {
-        utils.run('jlpm run build:all');
+        utils.run('jlpm build:all');
       }
 
       if (!options.dryRun) {

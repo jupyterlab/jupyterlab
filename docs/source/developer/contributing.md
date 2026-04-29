@@ -421,11 +421,11 @@ Then use the following steps:
 git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
 pip install -e ".[dev,test]"
-jlpm install
-jlpm run build  # Build the dev mode assets
+jlpm
+jlpm build  # Build the dev mode assets
 
 # Build the core mode assets
-jlpm run build:core
+jlpm build:core
 
 # Build the app dir assets
 jupyter lab build
@@ -447,11 +447,7 @@ for instructions.
   will fail. You may wish to build in a conda environment, or make an
   alias.
 - The `jlpm` command is a JupyterLab-provided, locked version of the
-  [yarn](https://classic.yarnpkg.com/en/) package manager. If you have
-  `yarn` installed already, you can use the `yarn` command when
-  developing, and it will use the local version of `yarn` in
-  `jupyterlab/yarn.js` when run in the repository or a built
-  application directory.
+  `yarn` package manager from `jupyter-builder`
 - If you decide to use the `jlpm` command and encounter the
   `jlpm: command not found` error, try adding the user-level bin
   directory to your `PATH` environment variable. You already
@@ -472,7 +468,7 @@ for instructions.
   activation above; this will tie the installation to the
   `sys.prefix` location of your environment, without writing anything
   in your user-wide settings area (which are visible to all your envs):
-- You can run `jlpm run build:dev:prod` to build more accurate
+- You can run `jlpm build:dev:prod` to build more accurate
   sourcemaps that show the original Typescript code when debugging.
   However, it takes a bit longer to build the sources, so is used only
   to build for production by default.
@@ -506,7 +502,7 @@ jupyter lab --dev-mode --watch
 ### Build and Run the Tests
 
 ```bash
-jlpm run build:testutils
+jlpm build:testutils
 jlpm test
 ```
 
@@ -515,7 +511,7 @@ appropriate package folder:
 
 ```bash
 cd packages/notebook
-jlpm run build:test
+jlpm build:test
 jlpm test --runInBand
 ```
 
@@ -594,7 +590,7 @@ The tests are located in the subfolder `galata/test/benchmark`. And they can be
 executed with the following command:
 
 ```bash
-jlpm run test:benchmark
+jlpm test:benchmark
 ```
 
 A special report will be generated in the folder `benchmark-results` that will contain 4 files:
@@ -605,7 +601,7 @@ A special report will be generated in the folder `benchmark-results` that will c
 - `lab-benchmark.vl.json`: The [Vega-Lite](https://vega.github.io/vega-lite) description used to produce the PNG file.
 
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
-created using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
+created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
 ### Benchmark parameters
 
@@ -768,7 +764,7 @@ With:
 To install and build the examples in the `examples` directory:
 
 ```bash
-jlpm run build:examples
+jlpm build:examples
 ```
 
 To run a specific example, change to the examples directory (i.e.
@@ -794,7 +790,7 @@ while debugging.
 
 When running a test, the packages will be available at the top level
 (e.g. `application/src`), and the current set of test files available
-under `/src`. Note: it is recommended to use `jlpm run watch` in the
+under `/src`. Note: it is recommended to use `jlpm watch` in the
 test folder while debugging test options. See
 [above](#build-and-run-the-tests) for more info.
 
@@ -824,14 +820,14 @@ git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
 pip install -e .
 jlpm
-jlpm run build:packages
+jlpm build:packages
 ```
 
 **Rebuild**
 
 ```bash
-jlpm run clean
-jlpm run build:packages
+jlpm clean
+jlpm build:packages
 ```
 
 ## Writing Documentation
@@ -868,7 +864,7 @@ And then go to <http://localhost:8000/> in your browser.
 The JupyterLab API reference documentation can be built separately using `jlpm`:
 
 ```bash
-jlpm run docs
+jlpm docs
 ```
 
 ### Writing Style
@@ -978,7 +974,7 @@ server version 4.3 or later is installed.
 When you make a change to JupyterLab npm package source files, run:
 
 ```bash
-jlpm run build
+jlpm build
 ```
 
 to build the changes, and then refresh your browser to see the changes.
@@ -993,11 +989,11 @@ jupyter lab --dev-mode --watch
 
 There is a range of build utilities for maintaining the repository. To
 get a suggested version for a library use
-`jlpm run get:dependency foo`. To update the version of a library
-across the repo use `jlpm run update:dependency foo ^latest`. To
-remove an unwanted dependency use `jlpm run remove:dependency foo`.
+`jlpm get:dependency foo`. To update the version of a library
+across the repo use `jlpm update:dependency foo ^latest`. To
+remove an unwanted dependency use `jlpm remove:dependency foo`.
 
-The key utility is `jlpm run integrity`, which ensures the integrity
+The key utility is `jlpm integrity`, which ensures the integrity
 of the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
@@ -1010,11 +1006,11 @@ TypeScript in the repository at once, instead of 50+ individual builds.
 
 The integrity script also allows you to automatically add a dependency
 for a package by importing from it in the TypeScript file, and then
-running: `jlpm run integrity` from the repo root.
+running: `jlpm integrity` from the repo root.
 
 We also have scripts for creating and removing packages in
-`packages/`, `jlpm run create:package` and
-`jlpm run remove:package`. When creating a package, if it is meant to
+`packages/`, `jlpm create:package` and
+`jlpm remove:package`. When creating a package, if it is meant to
 be included in the core bundle, add the
 `jupyterlab: { coreDependency: true }` metadata to the
 `package.json`. Packages with `extension` or `mimeExtension`
@@ -1036,7 +1032,7 @@ them out against your copy of JupyterLab, you can easily do so using the
    - navigate to top level of your JupyterLab repo, then run
      `jlpm link <path-to-external-repo> --all`
 
-3\. You can then (re)build JupyterLab (eg `jlpm run build`) and your
+3\. You can then (re)build JupyterLab (eg `jlpm build`) and your
 changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the `unlink`
@@ -1047,7 +1043,7 @@ command:
      `jlpm unlink <path-to-external-repo> --all`
 
 2. Reinstall original version of the external package in JupyterLab
-   - run `jlpm install --check-files`
+   - run `jlpm --check-files`
 
 3\. You can then (re)build JupyterLab and everything should be back to
 default.

@@ -275,7 +275,7 @@ These lines:
 
 Now do the actual final release:
 
-- [ ] Run `jlpm run bumpversion release` to switch to final release
+- [ ] Run `jlpm bumpversion release` to switch to final release
 - [ ] Push the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
@@ -287,7 +287,7 @@ Now do the actual final release:
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
-- [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
+- [ ] Run `jlpm bumpversion minor` to bump to alpha for the next alpha release
 - [ ] Put the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
@@ -403,7 +403,7 @@ shasum -a 256 dist/*.tar.gz
 - Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given, or no packages for a Python-only patch release):
 
 ```bash
-jlpm run patch:release package-folder-name
+jlpm patch:release package-folder-name
 ```
 
 - Push the resulting commit and tag

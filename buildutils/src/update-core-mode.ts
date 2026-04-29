@@ -48,7 +48,7 @@ function updateCoreMode(skipAssets: boolean = false): void {
   const staging = './jupyterlab/staging';
 
   // Ensure a clean staging directory.
-  const keep = ['yarn.js', '.yarnrc.yml'];
+  const keep = ['.yarnrc.yml'];
   fs.readdirSync(staging).forEach(name => {
     if (keep.indexOf(name) === -1) {
       fs.removeSync(path.join(staging, name));
@@ -104,7 +104,7 @@ function updateCoreMode(skipAssets: boolean = false): void {
   utils.run('jlpm', { cwd: staging });
 
   // Build the core assets.
-  utils.run('jlpm run build:prod:release', { cwd: staging });
+  utils.run('jlpm build:prod:release', { cwd: staging });
 
   // Run integrity
   utils.run('jlpm integrity');

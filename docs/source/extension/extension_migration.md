@@ -446,7 +446,7 @@ nodeLinker: node-modules
 .yarn/
 ```
 
-- Run `jlpm install`
+- Run `jlpm`
   This will reset your `yarn.lock` content as its format has changed.
 
 :::{note}
@@ -1021,13 +1021,13 @@ index 6f1562f..3fcdf37 100644
 -    "build": "tsc",
 -    "build:labextension": "npm run clean:labextension && mkdirp myextension/labextension && cd myextension/labextension && npm pack ../..",
 -    "clean": "rimraf lib tsconfig.tsbuildinfo",
-+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
-+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
++    "build": "jlpm build:lib && jlpm build:labextension:dev",
++    "build:prod": "jlpm build:lib && jlpm build:labextension",
 +    "build:lib": "tsc",
 +    "build:labextension": "jupyter-builder build .",
 +    "build:labextension:dev": "jupyter-builder build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
-+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
++    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
    "clean:labextension": "rimraf myextension/labextension",
    "eslint": "eslint . --ext .ts,.tsx --fix",
    "eslint:check": "eslint . --ext .ts,.tsx",
@@ -1065,7 +1065,7 @@ It hides away internal dependencies such as `webpack`, and produces the assets t
 
 Extension developers do not need to interact with `@jupyterlab/builder` directly, but instead can use the
 `jupyter-builder build` command. This command is run automatically as part of the `build` script
-(`jlpm run build`).
+(`jlpm build`).
 
 For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`
 

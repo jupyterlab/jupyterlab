@@ -67,7 +67,7 @@
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
-    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest && jlpm install",
+    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest && jlpm",
     "docs": "typedoc --options typedoc.js && python scripts/ensure_typedoc_links.py",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --cache --fix .",

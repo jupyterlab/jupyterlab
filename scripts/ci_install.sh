@@ -8,7 +8,7 @@ set -o pipefail
 # use a single global cache dir
 export YARN_ENABLE_GLOBAL_CACHE=1
 
-# display verbose output for pkg builds run during `jlpm install`
+# display verbose output for pkg builds run during `jlpm`
 export YARN_ENABLE_INLINE_BUILDS=1
 
 
