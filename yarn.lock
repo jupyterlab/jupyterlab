@@ -3910,6 +3910,7 @@ __metadata:
     "@jupyterlab/docregistry": ^4.6.0-alpha.4
     "@jupyterlab/imageviewer": ^4.6.0-alpha.4
     "@jupyterlab/translation": ^4.6.0-alpha.4
+    "@jupyterlab/ui-components": ^4.6.0-alpha.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown

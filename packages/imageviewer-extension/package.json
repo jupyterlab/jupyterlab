@@ -41,7 +41,8 @@
     "@jupyterlab/apputils": "^4.7.0-alpha.4",
     "@jupyterlab/docregistry": "^4.6.0-alpha.4",
     "@jupyterlab/imageviewer": "^4.6.0-alpha.4",
-    "@jupyterlab/translation": "^4.6.0-alpha.4"
+    "@jupyterlab/translation": "^4.6.0-alpha.4",
+    "@jupyterlab/ui-components": "^4.6.0-alpha.4"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
