@@ -2064,6 +2064,8 @@ function activateNotebookHandler(
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
 
+    widget.content.node.setAttribute('data-trust-command', CommandIDs.trust);
+
     // Set up the title icon
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
@@ -2909,12 +2911,17 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
         const { context, content } = current;
-        return NotebookActions.trust(content).then(() => context.save());
+        const trustResult = await NotebookActions.trust(content);
+        if (trustResult.trusted) {
+          await context.save();
+        }
+        return trustResult;
       }
+      return { trusted: false };
     },
     isEnabled,
     describedBy: {

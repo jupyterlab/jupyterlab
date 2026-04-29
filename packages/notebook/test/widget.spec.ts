@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CommandLinker } from '@jupyterlab/apputils';
 import type { Cell } from '@jupyterlab/cells';
 import {
   CodeCell,
@@ -18,11 +19,13 @@ import {
   StaticNotebook
 } from '@jupyterlab/notebook';
 import {
+  dismissDialog,
   framePromise,
   JupyterServer,
   signalToPromise,
   sleep
 } from '@jupyterlab/testing';
+import { CommandRegistry } from '@lumino/commands';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -318,6 +321,206 @@ describe('@jupyter/notebook', () => {
         const child = widget.widgets[0] as CodeCell;
         expect(child.syncEditable).toBe(false);
         expect(child.readOnly).toBe(true);
+      });
+
+      it('should treat a markdown-only notebook as untrusted for command linker', async () => {
+        let called = false;
+        const command = 'notebook:test-command-link-md-only';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const disposable = commands.addCommand(command, {
+          execute: () => {
+            called = true;
+          }
+        });
+        const model = new NotebookModel();
+        model.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '[run](notebook.ipynb)'
+        });
+        model.cells.get(0).trusted = true; // trusted markdown cell — still no code cells
+        const widget = new StaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({
+            markdownParser: {
+              render: async () => '<a href="notebook.ipynb">run</a>'
+            },
+            resolver: {
+              resolveUrl: async (url: string) => url,
+              getDownloadUrl: async (url: string) => url,
+              isLocal: () => true
+            },
+            linkHandler: {
+              handleLink: (node: HTMLElement, path: string, id?: string) => {
+                linker.connectNode(node, command, { path, id });
+              }
+            },
+            trustHandler: {
+              markTrusted: (node: HTMLElement) => {
+                linker.markTrusted(node);
+              },
+              unmarkTrusted: (node: HTMLElement) => {
+                linker.unmarkTrusted(node);
+              }
+            }
+          })
+        });
+
+        try {
+          widget.model = model;
+          Widget.attach(widget, document.body);
+          await framePromise();
+
+          const anchor = widget.node.querySelector('a') as HTMLAnchorElement;
+          expect(anchor).toBeTruthy();
+
+          simulate(anchor, 'click');
+          await Promise.resolve();
+          await Promise.resolve();
+
+          expect(called).toBe(false);
+        } finally {
+          await dismissDialog();
+          widget.dispose();
+          linker.dispose();
+          disposable.dispose();
+        }
+      });
+
+      it('should not execute command-linked rendered markdown in an untrusted notebook', async () => {
+        let called = false;
+        const command = 'notebook:test-command-link-untrusted';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const disposable = commands.addCommand(command, {
+          execute: () => {
+            called = true;
+          }
+        });
+        const model = new NotebookModel();
+        model.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '[run](notebook.ipynb)'
+        });
+        model.sharedModel.insertCell(1, {
+          cell_type: 'code',
+          source: ''
+        });
+        // code cell is NOT trusted
+        const widget = new StaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({
+            markdownParser: {
+              render: async () => '<a href="notebook.ipynb">run</a>'
+            },
+            resolver: {
+              resolveUrl: async (url: string) => url,
+              getDownloadUrl: async (url: string) => url,
+              isLocal: () => true
+            },
+            linkHandler: {
+              handleLink: (node: HTMLElement, path: string, id?: string) => {
+                linker.connectNode(node, command, { path, id });
+              }
+            },
+            trustHandler: {
+              markTrusted: (node: HTMLElement) => {
+                linker.markTrusted(node);
+              },
+              unmarkTrusted: (node: HTMLElement) => {
+                linker.unmarkTrusted(node);
+              }
+            }
+          })
+        });
+
+        try {
+          widget.model = model;
+          Widget.attach(widget, document.body);
+          await framePromise();
+
+          const anchor = widget.node.querySelector('a') as HTMLAnchorElement;
+          expect(anchor).toBeTruthy();
+
+          simulate(anchor, 'click');
+          await Promise.resolve();
+          await Promise.resolve();
+
+          expect(called).toBe(false);
+        } finally {
+          await dismissDialog();
+          widget.dispose();
+          linker.dispose();
+          disposable.dispose();
+        }
+      });
+
+      it('should execute command-linked rendered markdown in a trusted notebook', async () => {
+        let called = false;
+        const command = 'notebook:test-command-link-trusted';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const disposable = commands.addCommand(command, {
+          execute: () => {
+            called = true;
+          }
+        });
+        const model = new NotebookModel();
+        model.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '[run](notebook.ipynb)'
+        });
+        model.sharedModel.insertCell(1, {
+          cell_type: 'code',
+          source: ''
+        });
+        model.cells.get(1).trusted = true; // code cell is trusted → notebook is trusted
+        const widget = new StaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({
+            markdownParser: {
+              render: async () => '<a href="notebook.ipynb">run</a>'
+            },
+            resolver: {
+              resolveUrl: async (url: string) => url,
+              getDownloadUrl: async (url: string) => url,
+              isLocal: () => true
+            },
+            linkHandler: {
+              handleLink: (node: HTMLElement, path: string, id?: string) => {
+                linker.connectNode(node, command, { path, id });
+              }
+            },
+            trustHandler: {
+              markTrusted: (node: HTMLElement) => {
+                linker.markTrusted(node);
+              },
+              unmarkTrusted: (node: HTMLElement) => {
+                linker.unmarkTrusted(node);
+              }
+            }
+          })
+        });
+
+        try {
+          widget.model = model;
+          Widget.attach(widget, document.body);
+          await framePromise();
+
+          const anchor = widget.node.querySelector('a') as HTMLAnchorElement;
+          expect(anchor).toBeTruthy();
+
+          simulate(anchor, 'click');
+          await Promise.resolve();
+          await Promise.resolve();
+
+          expect(called).toBe(true);
+        } finally {
+          await dismissDialog();
+          widget.dispose();
+          linker.dispose();
+          disposable.dispose();
+        }
       });
 
       describe('`cells.changed` signal', () => {

@@ -614,6 +614,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     for (const cell of cells) {
       this._insertCell(++index, cell);
     }
+    this._syncMarkdownCellTrust();
     newValue.cells.changed.connect(this._onCellsChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -675,6 +676,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this.addHeader();
     }
 
+    this._syncMarkdownCellTrust();
     this.update();
   }
 
@@ -697,10 +699,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       default:
         widget = this._createRawCell(cell as IRawCellModel);
     }
+    cell.stateChanged.connect(this._onCellStateChanged, this);
     widget.inViewportChanged.connect(this._onCellInViewportChanged, this);
     widget.addClass(NB_CELL_CLASS);
 
     ArrayExt.insert(this.cellsArray, index, widget);
+    this._syncMarkdownCellTrust(widget);
     this.onCellInserted(index, widget);
 
     this._scheduleCellRenderOnIdle();
@@ -803,10 +807,58 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
    */
   private _removeCell(index: number): void {
     const widget = this.cellsArray[index];
+    widget.model.stateChanged.disconnect(this._onCellStateChanged, this);
     widget.parent = null;
     ArrayExt.removeAt(this.cellsArray, index);
     this.onCellRemoved(index, widget);
     widget.dispose();
+  }
+
+  private _shouldTrustMarkdown(): boolean {
+    // Note: this returns false in a notebook without trsuted code cells;
+    // This is intended since only Code cells carry trust status on disk.
+    if (!this._notebookModel) {
+      return false;
+    }
+    let hasCodeCell = false;
+    for (const cell of this._notebookModel.cells) {
+      if (cell.type === 'code') {
+        hasCodeCell = true;
+        if (!cell.trusted) {
+          return false;
+        }
+      }
+    }
+    return hasCodeCell;
+  }
+
+  private _syncMarkdownCellTrust(cell?: Cell): void {
+    const trusted = this._shouldTrustMarkdown();
+    const trustHandler = this.rendermime.trustHandler;
+    if (!trustHandler) {
+      return;
+    }
+
+    const cells = cell ? [cell] : this.widgets;
+    for (const widget of cells) {
+      if (!(widget instanceof MarkdownCell)) {
+        continue;
+      }
+      if (trusted) {
+        trustHandler.markTrusted(widget.node);
+      } else {
+        trustHandler.unmarkTrusted(widget.node);
+      }
+    }
+  }
+
+  private _onCellStateChanged(
+    model: ICellModel,
+    args: IChangedArgs<any>
+  ): void {
+    if (args.name === 'trusted') {
+      this._syncMarkdownCellTrust();
+    }
   }
 
   /**
