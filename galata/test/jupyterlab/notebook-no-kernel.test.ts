@@ -8,7 +8,7 @@ test.describe('Notebook No Kernel', () => {
   test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
 
   test.beforeEach(async ({ page }) => {
-    await page.notebook.createNew(NOTEBOOK_NAME, { kernel: null });
+    await page.notebook.createNew(NOTEBOOK_NAME);
     await page.notebook.save();
     await page.notebook.close();
     await page.kernel.shutdownAll();
