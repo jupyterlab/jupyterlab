@@ -312,6 +312,17 @@ const open: JupyterFrontEndPlugin<void> = {
       return widget;
     }
 
+    // CVE-2026-40171 / GHSA-rch3-82jr-f9w9
+    function isUrlSafe(url: string): boolean {
+      try {
+        const parsed = new URL(url, window.location.href);
+        const protocol = parsed.protocol.toLowerCase();
+        return ['http:', 'https:', 'mailto:'].includes(protocol);
+      } catch {
+        return false;
+      }
+    }
+
     commands.addCommand(CommandIDs.open, {
       label: args =>
         (args['text'] as string) ??
@@ -340,6 +351,11 @@ const open: JupyterFrontEndPlugin<void> = {
         const url = args['url'] as string;
         const text = args['text'] as string;
         const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
+
+        if (!isUrlSafe(url)) {
+          console.warn(`Blocked unsafe URL: ${url}`);
+          return;
+        }
 
         // If help resource will generate a mixed content error, load externally.
         if (
