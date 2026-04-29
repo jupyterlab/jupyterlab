@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig } from '@jupyterlab/coreutils';
 
 describe('@jupyterlab/coreutils', () => {
   describe('PageConfig', () => {
@@ -98,6 +98,14 @@ describe('@jupyterlab/coreutils', () => {
           expect(url).toEqual(`${shareUrl}/lab/tree${path}`);
         });
       });
+    });
+  });
+
+  describe('compareVersions', () => {
+    it('should correctly order versions', () => {
+      expect(compareVersions([3, 99, 0], [4, 0, 0])).toBeLessThan(0);
+      expect(compareVersions([4, 0, 0], [4, 0, 0])).toBe(0);
+      expect(compareVersions([5, 10, 1], [5, 9, 99])).toBeGreaterThan(0);
     });
   });
 });

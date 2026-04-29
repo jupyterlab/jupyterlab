@@ -35,7 +35,7 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, compareVersions } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -666,8 +666,9 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         const serverVersion = PageConfig.getNotebookVersion();
         const supportsHTMLSanitizationOption =
-          serverVersion < [4, 0, 0] /* Jupyter Server only */ &&
-          serverVersion >= [2, 99, 0]; // TODO update this when the flag is supported on a release
+          compareVersions(serverVersion, [4, 0, 0]) <
+            0 /* Jupyter Server only */ &&
+          compareVersions(serverVersion, [2, 99, 0]) >= 0; // TODO update this when the flag is supported on a release
 
         let sanitizeHtml = false;
 
