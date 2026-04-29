@@ -19,7 +19,7 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
@@ -171,7 +171,7 @@ class PyPIExtensionManager(ExtensionManager):
         """Extension manager metadata."""
         return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
-    async def is_install_allowed(self, name: str, version: str | None = None) -> bool:
+    async def is_install_allowed(self, name: str, version: Union[str, None] = None) -> bool:
         try:
             canonicalize_name(name, validate=True)
             if version is not None:
@@ -188,7 +188,7 @@ class PyPIExtensionManager(ExtensionManager):
             self.log.warning(f"Installation denied by allowlist/blocklist for {name}")
         return allowed
 
-    async def get_latest_version(self, pkg: str) -> str | None:
+    async def get_latest_version(self, pkg: str) -> Union[str, None]:
         """Return the latest available version for a given extension.
 
         Args:
