@@ -550,7 +550,7 @@ class ExtensionManager(PluginManager):
         else:
             return normalized in normalized_cache
 
-    async def is_install_allowed(self, name: str, _version: str | None = None) -> bool:
+    async def is_install_allowed(self, name: str, _version: Union[str, None] = None) -> bool:
         return await self._is_allowed_by_listing(name)
 
     async def _get_installed_extensions(
