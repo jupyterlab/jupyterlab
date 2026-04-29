@@ -18,11 +18,13 @@ import {
 import {
   Clipboard,
   createToolbarFactory,
+  Dialog,
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
   Notification,
   setToolbar,
+  showDialog,
   showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -39,6 +41,7 @@ import {
   IDefaultFileBrowserRenderer,
   IFileBrowserCommands,
   IFileBrowserFactory,
+  PathDialogInput,
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
@@ -1387,11 +1390,20 @@ function addCommands(
       } else {
         path =
           (
-            await InputDialog.getText({
-              label: trans.__('Path'),
-              placeholder: '/path/relative/to/jlab/root',
+            await showDialog<string>({
               title: trans.__('Open Path'),
-              okLabel: trans.__('Open')
+              body: new PathDialogInput({
+                contentsGetter: browser.model.manager.services.contents,
+                label: trans.__('Path'),
+                placeholder: '/path/relative/to/jlab/root',
+                itemFilter: () => true,
+                translator
+              }),
+              buttons: [
+                Dialog.cancelButton(),
+                Dialog.okButton({ label: trans.__('Open') })
+              ],
+              focusNodeSelector: 'input'
             })
           ).value ?? undefined;
       }
