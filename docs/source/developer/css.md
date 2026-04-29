@@ -230,7 +230,7 @@ intended to be used for adding context menu items and keyboard shortcuts.
 - `jp-mod-in-leading-whitespace`: applied to editors that have a selection within the beginning whitespace of a line
 - `jp-mod-at-line-beginning`: applied to editors that can host a completer and have a selection within the beginning whitespace of a line
 - `jp-mod-tooltip`: applied to the body when a tooltip exists on the page
-- `jp-mod-trusted`: applied to widgets that include trusted content; do *not* use this as source of truth about trust status
+- `jp-mod-trusted`: applied to widgets that include trusted content; do _not_ use this as source of truth about trust status
 
 **CSS selectors that target data attributes**
 
