@@ -178,7 +178,7 @@ jobs:
           mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
           BENCHMARK_EXIT_CODE=0
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          if [[ -z "${TEST_PATTERN}" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
             BENCHMARK_EXIT_CODE=$?
