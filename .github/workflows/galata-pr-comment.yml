@@ -54,8 +54,14 @@ jobs:
               badgeTitle = 'All tests UI tests passed';
             }
 
+            const reportUrlWithFilter = failing > 0
+              ? `${reportUrl}#?q=s%3Afailed`
+              : flaky > 0
+              ? `${reportUrl}#?q=s%3Aflaky`
+              : reportUrl;
+
             const badgeUrl = `https://img.shields.io/badge/UI_tests-${badgeStatus}-${badgeColor}`;
-            const reportBadge = `[![UI tests report](${badgeUrl} '${badgeTitle}')](${reportUrl})`;
+            const reportBadge = `[![UI tests report](${badgeUrl} '${badgeTitle}')](${reportUrlWithFilter})`;
             const reportLine = `${reportLinePrefix}${reportBadge}`;
 
             const { data: comments } = await github.rest.issues.listComments({
