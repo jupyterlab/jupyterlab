@@ -144,7 +144,7 @@ export class CommandLinker implements IDisposable {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'click':
-        this._evtClick(event as MouseEvent);
+        this._evtClick(event as MouseEvent).catch(console.warn);
         break;
       default:
         return;
