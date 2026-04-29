@@ -1425,9 +1425,6 @@ function addCommands(
         }
         return commands.execute('docmanager:open', { path });
       } catch (reason) {
-        if (args?.silent) {
-          throw reason;
-        }
         if (reason.response && reason.response.status === 404) {
           reason.message = trans.__('Could not find path: %1', path);
         }
@@ -1445,14 +1442,6 @@ function addCommands(
           dontShowBrowser: {
             type: 'boolean',
             description: trans.__('Whether to avoid showing the file browser')
-          },
-          silent: {
-            type: 'boolean',
-            description: trans.__(
-              'Whether to throw on error instead of opening a modal dialog. ' +
-                'Useful for programmatic callers (e.g. tests) that need to ' +
-                'surface failures without blocking on user interaction.'
-            )
           }
         }
       }

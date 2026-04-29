@@ -2570,10 +2570,6 @@
         "dontShowBrowser": {
           "type": "boolean",
           "description": "Whether to avoid showing the file browser"
-        },
-        "silent": {
-          "type": "boolean",
-          "description": "Whether to throw on error instead of opening a modal dialog. Useful for programmatic callers (e.g. tests) that need to surface failures without blocking on user interaction."
         }
       }
     }

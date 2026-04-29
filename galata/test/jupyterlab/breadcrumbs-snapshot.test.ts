@@ -32,6 +32,9 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Set a wide viewport to accommodate sidebar expansion
     await page.setViewportSize({ width: 1600, height: 720 });
 
+    // Wait for file browser to stabilize
+    await page.locator(BREADCRUMB_SELECTOR).waitFor();
+
     // Configure Breadcrumbs Settings
     await page.evaluate(async pluginId => {
       const settingsManager = window.jupyterapp.serviceManager.settings;
@@ -45,7 +48,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     }, SETTING_ID);
 
     // Navigate to the target directory and wait for the breadcrumbs to settle
-    await page.filebrowser.openDirectoryByCommand(`${tmpPath}/${path}`);
+    await page.filebrowser.openDirectory(`${tmpPath}/${path}`);
 
     // Widen sidebar
     await page.sidebar.setWidth(800);
@@ -68,7 +71,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await page.contents.createDirectory(`${tmpPath}/gamma`);
 
     // Navigate into one of them so the breadcrumb path is non-empty
-    await page.filebrowser.openDirectoryByCommand(`${tmpPath}/alpha`);
+    await page.filebrowser.openDirectory(`${tmpPath}/alpha`);
 
     // Click on the empty space of the breadcrumb bar to enter edit mode
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
