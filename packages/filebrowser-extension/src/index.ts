@@ -637,13 +637,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       },
       execute: () => {
         labShell.activateById(browser.id);
-        // Defer so the shell can attach/show the widget before focusing.
-        requestAnimationFrame(() => {
-          const browserTab = document.querySelector<HTMLElement>(
-            `.jp-SideBar .lm-TabBar-tab.${FILE_BROWSER_TAB_CLASS}`
-          );
-          browserTab?.focus();
-        });
       }
     });
 
