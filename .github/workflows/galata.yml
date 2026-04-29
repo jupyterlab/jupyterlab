@@ -201,6 +201,7 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Download aggregate blob artifact
+        if: ${{ github.run_attempt > 1 }}
         continue-on-error: true
         uses: actions/download-artifact@v7
         with:
