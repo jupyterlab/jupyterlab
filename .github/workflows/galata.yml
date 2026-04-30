@@ -9,6 +9,17 @@ on:
     # Run every 6 hours to establish a baseline for flaky tests
     - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      test_pattern:
+        description: Playwright test name pattern to match (passed to --grep)
+        required: false
+        default: ''
+        type: string
+      repeat_each:
+        description: Number of times to repeat each matching test (passed to --repeat-each)
+        required: false
+        default: 1
+        type: number
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
@@ -138,15 +149,36 @@ jobs:
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
+        env:
+          TEST_PATTERN: ${{ github.event.inputs.test_pattern || '' }}
+          REPEAT_EACH: ${{ github.event.inputs.repeat_each || 1 }}
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
-          jlpm run test --project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }}
+          MAX_REPEAT_EACH=50
+          if ! [[ "${REPEAT_EACH}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Invalid repeat_each: '${REPEAT_EACH}'. Expected a positive integer."
+            exit 1
+          fi
+          if (( REPEAT_EACH > MAX_REPEAT_EACH )); then
+            echo "Invalid repeat_each: '${REPEAT_EACH}'. Maximum allowed value is ${MAX_REPEAT_EACH}."
+            exit 1
+          fi
+
+          TEST_ARGS=(--project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }})
+          if [[ -n "${TEST_PATTERN}" ]]; then
+            TEST_ARGS+=(--grep "${TEST_PATTERN}")
+          fi
+          if [[ "${REPEAT_EACH}" != "1" ]]; then
+            TEST_ARGS+=(--repeat-each "${REPEAT_EACH}")
+          fi
+
+          jlpm run test "${TEST_ARGS[@]}"
           TEST_EXIT_CODE=$?
           mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
           BENCHMARK_EXIT_CODE=0
-          if [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+          if [[ -z "${TEST_PATTERN}" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
             BENCHMARK_EXIT_CODE=$?
@@ -185,6 +217,8 @@ jobs:
     if: ${{ !cancelled() }}
     needs: test
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout lockfile
         uses: actions/checkout@v6
@@ -201,6 +235,7 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Download aggregate blob artifact
+        if: ${{ github.run_attempt > 1 }}
         continue-on-error: true
         uses: actions/download-artifact@v7
         with:
@@ -243,8 +278,22 @@ jobs:
           echo "Prepared $COUNT blob report chunks for Playwright merge."
 
       - name: Merge Playwright reports
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
         run: |
-          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,github ./artifacts/final/
+          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,json,github ./artifacts/final/
+
+      - name: Extract failing and flaky counts
+        id: test-counts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('merged-report.json', 'utf8'));
+            const failing = Number(report?.stats?.unexpected ?? 0);
+            const flaky = Number(report?.stats?.flaky ?? 0);
+            core.setOutput('failing', String(failing));
+            core.setOutput('flaky', String(flaky));
 
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
@@ -268,6 +317,27 @@ jobs:
       - name: Add report link to job summary
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Save PR comment data
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            fs.writeFileSync('pr-comment-data.json', JSON.stringify({
+              prNumber: context.payload.pull_request.number,
+              reportUrl: '${{ steps.upload-report.outputs.artifact-url }}',
+              failing: ${{ steps.test-counts.outputs.failing || 0 }},
+              flaky: ${{ steps.test-counts.outputs.flaky || 0 }},
+            }));
+
+      - name: Upload PR comment data
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: galata-pr-comment-data
+          path: pr-comment-data.json
+          retention-days: 1
 
       - name: Merge and upload test results
         if: ${{ !cancelled() }}

@@ -145,6 +145,81 @@ Your command `label` function can then check the `args` it is provided for `isPa
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+:::{note}
+Try this section in a browser playground:
+
+1. Click **Load Interactive Example**.
+2. In the playground editor toolbar (or command palette), run `Load Current File As Extension`.
+3. A notification appears; click **Open Command Palette**, then run `Extension Points Demo Command` from category `Common Extension Points`.
+   :::
+
+```{raw} html
+<script type="text/plain" id="jp-plugin-playground-source-extension-points">
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+import { ICommandPalette } from '@jupyterlab/apputils';
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'extension-points-command-demo:plugin',
+  autoStart: true,
+  requires: [ICommandPalette],
+  activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
+    const commandID = 'extension-points-command-demo:toggle';
+    let toggled = false;
+
+    app.commands.addCommand(commandID, {
+      label: 'Extension Points Demo Command',
+      caption: 'Added from the interactive docs example',
+      isToggled: () => toggled,
+      execute: () => {
+        toggled = !toggled;
+      }
+    });
+
+    palette.addItem({
+      command: commandID,
+      category: 'Common Extension Points'
+    });
+
+    void app.commands.execute('apputils:notify', {
+      message: 'The example is ready. To see the command open Command Palette.',
+      type: 'success',
+      options: {
+        autoClose: false,
+        actions: [
+          {
+            label: 'Open Command Palette',
+            commandId: 'apputils:activate-command-palette',
+            displayType: 'accent'
+          }
+        ]
+      }
+    });
+  }
+};
+
+export default plugin;
+</script>
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-source-id="jp-plugin-playground-source-extension-points"
+  data-playground-file-name="index.ts"
+  data-playground-title="Common extension points interactive example"
+  data-playground-description="Interactive command registry + command palette example."
+></div>
+```
+
+```{raw} html
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/command-palette/src/index.ts"
+  data-playground-title="Extension examples command palette interactive example"
+  data-playground-description="Extension examples: command-palette."
+></div>
+```
+
 (context-menu)=
 
 ## Context Menu
@@ -206,6 +281,16 @@ app.contextMenu.addItem({
   command: commandID,
   selector: '.jp-Notebook'
 });
+```
+
+```{raw} html
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="menu,statusbar"
+  data-playground-query="path=extension-examples/context-menu/src/index.ts"
+  data-playground-title="Extension examples context menu interactive example"
+  data-playground-description="Extension examples: context-menu."
+></div>
 ```
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
@@ -379,6 +464,16 @@ launcher.add({
 
 In addition to providing a command ID, you also provide a category in which to put your item,
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
+
+```{raw} html
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-query="path=extension-examples/launcher/src/index.ts"
+  data-playground-title="Extension examples launcher interactive example"
+  data-playground-description="Extension examples: launcher."
+></div>
+```
 
 (shell)=
 

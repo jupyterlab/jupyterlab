@@ -42,6 +42,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@jupyter/builder": "^0.0.8",
     "@rspack/cli": "^0.5.1",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",

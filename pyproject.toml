@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.21.1", "jupyter-builder>=0.0.6"]
+requires = ["hatchling>=1.21.1", "jupyter-builder>=0.0.8"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter-builder>=0.0.6",
+    "jupyter-builder>=0.0.8",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
