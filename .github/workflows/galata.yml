@@ -185,6 +185,8 @@ jobs:
     if: ${{ !cancelled() }}
     needs: test
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout lockfile
         uses: actions/checkout@v6
@@ -244,8 +246,22 @@ jobs:
           echo "Prepared $COUNT blob report chunks for Playwright merge."
 
       - name: Merge Playwright reports
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
         run: |
-          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,github ./artifacts/final/
+          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,json,github ./artifacts/final/
+
+      - name: Extract failing and flaky counts
+        id: test-counts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('merged-report.json', 'utf8'));
+            const failing = Number(report?.stats?.unexpected ?? 0);
+            const flaky = Number(report?.stats?.flaky ?? 0);
+            core.setOutput('failing', String(failing));
+            core.setOutput('flaky', String(flaky));
 
       - name: Upload merged reports
         uses: actions/upload-artifact@v6
@@ -269,6 +285,27 @@ jobs:
       - name: Add report link to job summary
         run: |
           echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Save PR comment data
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            fs.writeFileSync('pr-comment-data.json', JSON.stringify({
+              prNumber: context.payload.pull_request.number,
+              reportUrl: '${{ steps.upload-report.outputs.artifact-url }}',
+              failing: ${{ steps.test-counts.outputs.failing || 0 }},
+              flaky: ${{ steps.test-counts.outputs.flaky || 0 }},
+            }));
+
+      - name: Upload PR comment data
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: galata-pr-comment-data
+          path: pr-comment-data.json
+          retention-days: 1
 
       - name: Merge and upload test results
         if: ${{ !cancelled() }}
