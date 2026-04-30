@@ -181,6 +181,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - run: |
+          pip install -vv --group builder
           jlpm
           jlpm build:packages
           jlpm docs
