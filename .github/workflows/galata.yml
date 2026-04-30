@@ -143,7 +143,7 @@ jobs:
         run: |
           set -ex
           cd core/galata
-          jlpm run build
+          jlpm build
 
       - name: Wait for JupyterLab
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
@@ -173,14 +173,14 @@ jobs:
             TEST_ARGS+=(--repeat-each "${REPEAT_EACH}")
           fi
 
-          jlpm run test "${TEST_ARGS[@]}"
+          jlpm test "${TEST_ARGS[@]}"
           TEST_EXIT_CODE=$?
           mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
           BENCHMARK_EXIT_CODE=0
           if [[ -z "${TEST_PATTERN}" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
-            BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+            BENCHMARK_NUMBER_SAMPLES=1 jlpm test:benchmark
             BENCHMARK_EXIT_CODE=$?
             mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           fi
