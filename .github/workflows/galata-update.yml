@@ -25,6 +25,8 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Install dependencies
         run: |
@@ -83,13 +85,16 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Install dependencies
+        env:
+          OPTIONAL_DEPENDENCIES: "docs-screenshots"
         run: |
           set -ex
-          # Note: any changes to dependency pins need should
+          # Note: any changes to dependency pins need to
           # be done by updating the [docs-screenshots] group.
-          pip install .[docs-screenshots]
           bash ./scripts/ci_install.sh
 
           # Build dev-mode

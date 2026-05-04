@@ -27,8 +27,9 @@ git config --global user.name foo
 git config --global user.email foo@bar.com
 
 # Install and enable the server extension
-pip install -q --upgrade pip --user
+pip install -q --upgrade pip uv
 pip --version
+uv --version
 
 if [[ -z "${OPTIONAL_DEPENDENCIES+x}" ]]; then
     # undefined - use default dev,test
@@ -40,9 +41,10 @@ else
     # defined and non-empty
     SPEC=".[${OPTIONAL_DEPENDENCIES}]"
 fi
+# Keep OPTIONAL_DEPENDENCIES handling in sync with scripts/ci_install.ps1.
 
 # Show a verbose install if the install fails, for debugging
-pip install -e "${SPEC}" || pip install -v -e "${SPEC}"
+uv pip install --system -e "${SPEC}" || uv pip install --verbose --system -e "${SPEC}"
 
 node -p process.versions
 jlpm config
@@ -51,12 +53,12 @@ if [[ $GROUP != js-services ]]; then
     # Tests run much faster in ipykernel 6, so use that except for
     # ikernel.spec.ts in js-services, which tests subshell compatibility in
     # ipykernel 7.
-    pip install "ipykernel<7"
+    uv pip install --system "ipykernel<7"
 fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
-    pip install build
+    uv pip install --system build
     python -m build .
 
     # Remove NodeJS, twice to take care of system and locally installed node versions.

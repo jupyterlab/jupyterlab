@@ -32,6 +32,7 @@ window.galataip = window.galata;
 
 const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
   id: PLUGIN_ID_GALATA_HELPERS,
+  description: 'Galata in-page extension helpers.',
   autoStart: true,
   activate: (app: JupyterFrontEnd): IGalataHelpers => {
     return Object.freeze({

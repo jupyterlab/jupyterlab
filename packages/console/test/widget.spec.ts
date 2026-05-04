@@ -221,6 +221,25 @@ describe('console/widget', () => {
         await widget.inject(code);
         expect(widget.cells.length).toBeGreaterThan(0);
       });
+
+      it('should hide code input when hideCodeInput is true', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        // Set config to hide input
+        widget.setConfig({ hideCodeInput: true });
+
+        // Inject some code
+        const testCode = 'print(1 + 1)';
+        await widget.inject(testCode);
+
+        // Check the input is not visible in the executed cells
+        for (const cell of widget.cells) {
+          expect(cell.inputArea!.node.classList.contains('lm-mod-hidden')).toBe(
+            true
+          );
+        }
+      });
     });
 
     describe('#insertLinebreak()', () => {

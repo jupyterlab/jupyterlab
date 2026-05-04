@@ -368,6 +368,11 @@ export namespace IRenderMime {
     linkHandler: ILinkHandler | null;
 
     /**
+     * An optional trust handler.
+     */
+    trustHandler?: ITrustHandler | null;
+
+    /**
      * The LaTeX typesetter.
      */
     latexTypesetter: ILatexTypesetter | null;
@@ -426,6 +431,11 @@ export namespace IRenderMime {
      * @returns Whether to allow name and id properties.
      */
     readonly allowNamedProperties?: boolean;
+
+    /**
+     * @returns Whether to allow command linker attributes.
+     */
+    readonly allowCommandLinker?: boolean;
   }
 
   /**
@@ -442,6 +452,7 @@ export namespace IRenderMime {
      * @param id an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
+
     /**
      * Add the path handler to the node.
      *
@@ -459,6 +470,21 @@ export namespace IRenderMime {
       scope: 'kernel' | 'server',
       id?: string
     ): void;
+  }
+
+  /**
+   * An object that handles trust boundaries for rendered content.
+   */
+  export interface ITrustHandler {
+    /**
+     * Mark a trusted DOM boundary.
+     */
+    markTrusted(node: HTMLElement): void;
+
+    /**
+     * Remove a trusted DOM boundary previously set by `markTrusted`.
+     */
+    unmarkTrusted(node: HTMLElement): void;
   }
 
   export interface IResolvedLocation {
