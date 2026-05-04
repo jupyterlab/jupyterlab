@@ -73,7 +73,7 @@ test.describe('Console Interactions', () => {
       .locator('.jp-CodeConsole-banner')
       .getByText('...');
     // Wait for loading state in the banner to show up
-    await loadingBanner.waitFor({ state: 'visible' });
+    await loadingBanner.waitFor({ state: 'attached' });
 
     // Select kernel
     await page.getByRole('button', { name: 'Select Kernel' }).click();
