@@ -36,20 +36,14 @@ import {
 } from '@jupyterlab/property-inspector';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IStatusBar } from '@jupyterlab/statusbar';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { ContextMenuSvg } from '@jupyterlab/ui-components';
-import {
-  buildIcon,
-  jupyterIcon,
-  RankedMenu,
-  Switch
-} from '@jupyterlab/ui-components';
+import { buildIcon, jupyterIcon, RankedMenu } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import type { DockLayout, DockPanel } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
@@ -1513,6 +1507,15 @@ const shell: JupyterFrontEndPlugin<ILabShell> = {
         settings.changed.connect(() => {
           (app.shell as LabShell).updateConfig(settings.composite);
         });
+
+        // Apply startMode only once after the application is restored.
+        void app.restored.then(() => {
+          const startMode = settings.get('startMode').composite as string;
+          if (startMode) {
+            (app.shell as LabShell).mode =
+              startMode === 'single' ? 'single-document' : 'multiple-document';
+          }
+        });
       });
     }
     return app.shell;
@@ -1640,84 +1643,6 @@ const jupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The simple interface mode switch in the status bar.
- */
-const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:mode-switch',
-  description: 'Adds the interface mode switch',
-  requires: [ILabShell, ITranslator],
-  optional: [IStatusBar, ISettingRegistry],
-  activate: (
-    app: JupyterFrontEnd,
-    labShell: ILabShell,
-    translator: ITranslator,
-    statusBar: IStatusBar | null,
-    settingRegistry: ISettingRegistry | null
-  ) => {
-    if (statusBar === null) {
-      // Bail early
-      return;
-    }
-    const trans = translator.load('jupyterlab');
-    const modeSwitch = new Switch();
-    modeSwitch.id = 'jp-single-document-mode';
-
-    modeSwitch.valueChanged.connect((_, args) => {
-      labShell.mode = args.newValue ? 'single-document' : 'multiple-document';
-    });
-    labShell.modeChanged.connect((_, mode) => {
-      modeSwitch.value = mode === 'single-document';
-    });
-
-    if (settingRegistry) {
-      const loadSettings = settingRegistry.load(shell.id);
-      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-        const startMode = settings.get('startMode').composite as string;
-        if (startMode) {
-          labShell.mode =
-            startMode === 'single' ? 'single-document' : 'multiple-document';
-        }
-      };
-
-      Promise.all([loadSettings, app.restored])
-        .then(([settings]) => {
-          updateSettings(settings);
-        })
-        .catch((reason: Error) => {
-          console.error(reason.message);
-        });
-    }
-
-    // Show the current file browser shortcut in its title.
-    const updateModeSwitchTitle = () => {
-      const binding = app.commands.keyBindings.find(
-        b => b.command === 'application:toggle-mode'
-      );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        modeSwitch.caption = trans.__('Simple Interface (%1)', ks);
-      } else {
-        modeSwitch.caption = trans.__('Simple Interface');
-      }
-    };
-    updateModeSwitchTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateModeSwitchTitle();
-    });
-
-    modeSwitch.label = trans.__('Simple');
-
-    statusBar.registerStatusItem(modeSwitchPlugin.id, {
-      priority: 1,
-      item: modeSwitch,
-      align: 'left',
-      rank: -1
-    });
-  },
-  autoStart: true
-};
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1733,7 +1658,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shell,
   status,
   info,
-  modeSwitchPlugin,
   paths,
   propertyInspector,
   jupyterLogo,

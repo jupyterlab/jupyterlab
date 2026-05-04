@@ -1357,7 +1357,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.goUp, {
-    label: 'go up',
+    label: trans.__('Go Up'),
     execute: async () => {
       const browserForPath = Private.getBrowserForPath('', browser, factory);
       if (!browserForPath) {

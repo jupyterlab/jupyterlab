@@ -108,7 +108,7 @@
   "resolutions": {
     "@types/react": "^18.0.26",
     "lodash": "^4.17.23",
-    "lodash-es": "^4.17.23",
+    "lodash-es": "^4.18.1",
     "marked": "^17.0.4",
     "prettier": "^3.8.1",
     "react": "^18.2.0",
@@ -128,11 +128,12 @@
     "stylelint-config-recommended": "^13.0.0",
     "stylelint-config-standard": "^34.0.0",
     "stylelint-csstree-validator": "^3.0.0",
+    "stylelint-declaration-strict-value": "^1.11.1",
     "stylelint-prettier": "^4.0.0",
     "typescript-eslint": "^8.0.0"
   },
   "devDependencies": {
-    "@jupyter/eslint-plugin": "0.0.3",
+    "@jupyter/eslint-plugin": "0.0.5",
     "lerna": "^7.1.4",
     "typedoc": "~0.27.4",
     "typedoc-plugin-mdn-links": "^4.0.4"

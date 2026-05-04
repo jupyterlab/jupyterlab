@@ -2331,12 +2331,12 @@ export namespace NotebookActions {
   export function trust(
     notebook: Notebook,
     translator?: ITranslator
-  ): Promise<void> {
+  ): Promise<{ trusted: boolean }> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
     if (!notebook.model) {
-      return Promise.resolve();
+      return Promise.resolve({ trusted: false });
     }
     // Do nothing if already trusted.
 
@@ -2368,7 +2368,7 @@ export namespace NotebookActions {
       return showDialog({
         body: trans.__('Notebook is already trusted'),
         buttons: [Dialog.okButton()]
-      }).then(() => undefined);
+      }).then(() => ({ trusted: true }));
     }
 
     return showDialog({
@@ -2388,7 +2388,9 @@ export namespace NotebookActions {
             cell.trusted = true;
           }
         }
+        return { trusted: true };
       }
+      return { trusted: false };
     });
   }
 

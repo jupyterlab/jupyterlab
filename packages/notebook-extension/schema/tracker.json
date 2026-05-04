@@ -316,14 +316,12 @@
         "rank": 20
       },
       {
-        "command": "notebook:enable-output-scrolling",
+        "command": "notebook:toggle-output-scrolling",
+        "args": {
+          "isMenu": true
+        },
         "selector": ".jp-Notebook",
         "rank": 21
-      },
-      {
-        "command": "notebook:disable-output-scrolling",
-        "selector": ".jp-Notebook",
-        "rank": 22
       },
       {
         "type": "separator",

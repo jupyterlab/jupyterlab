@@ -31,6 +31,7 @@ export abstract class RenderedCommon
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
+    this.trustHandler = options.trustHandler ?? null;
     this.translator = options.translator ?? nullTranslator;
     this.latexTypesetter = options.latexTypesetter;
     this.markdownParser = options.markdownParser ?? null;
@@ -56,6 +57,11 @@ export abstract class RenderedCommon
    * The link handler.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The trust handler.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
 
   /**
    * The latexTypesetter.
@@ -102,6 +108,11 @@ export abstract class RenderedCommon
 
     // Toggle the trusted class on the widget.
     this.toggleClass('jp-mod-trusted', model.trusted);
+    if (model.trusted) {
+      this.trustHandler?.markTrusted(this.node);
+    } else {
+      this.trustHandler?.unmarkTrusted(this.node);
+    }
 
     // Render the actual content.
     await this.render(model);
