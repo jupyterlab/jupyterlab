@@ -2308,7 +2308,7 @@ namespace Private {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       } else if (data.collapsed) {
-        this._sideBar.currentTitle = null;
+        this.collapse();
       }
       if (!data.visible) {
         this.hide();
@@ -2406,10 +2406,14 @@ namespace Private {
         // In 'side' mode wrapper visibility tracks the stack panel.
         this._area.setHidden(this._stackedPanel.isHidden);
       } else {
-        // In 'top'/'bottom' mode the stack panel is always visible when there
-        // are items, so the wrapper visibility tracks the activity bar (no
-        // tabs means nothing to show) and the user-collapse flag.
-        this._area.setHidden(this._isCollapsedByUser || this._sideBar.isHidden);
+        // In 'top'/'bottom' mode the wrapper hides only when the user has
+        // explicitly collapsed the side area or there are no widgets at all.
+        // Toggling the activity bar visibility ('Show Left/Right Activity Bar')
+        // hides only the bar — the stack panel and selected widget stay
+        // visible inside the wrapper, matching the 'side' mode semantic.
+        this._area.setHidden(
+          this._isCollapsedByUser || this._sideBar.titles.length === 0
+        );
       }
       this._updated.emit();
     }

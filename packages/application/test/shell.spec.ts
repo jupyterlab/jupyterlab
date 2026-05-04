@@ -419,6 +419,44 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#activityBarPosition', () => {
+    it('should hide the left side area after rehydrating with a collapsed state in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const handler = (shell as any)._leftHandler;
+      handler.rehydrate({
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(true);
+      expect(widget.isVisible).toBe(false);
+    });
+
+    it('should keep the left side area visible when toggling the activity bar visibility in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+      expect(widget.isVisible).toBe(true);
+
+      shell.toggleSideTabBarVisibility('left');
+      const handler = (shell as any)._leftHandler;
+      expect(shell.isSideTabBarVisible('left')).toBe(false);
+      expect(handler.area.isHidden).toBe(false);
+      expect(widget.isVisible).toBe(true);
+
+      shell.toggleSideTabBarVisibility('left');
+      expect(shell.isSideTabBarVisible('left')).toBe(true);
+      expect(widget.isVisible).toBe(true);
+    });
+  });
+
   describe('#saveLayout', () => {
     it('should save the layout of the shell', () => {
       const foo = new Widget();
