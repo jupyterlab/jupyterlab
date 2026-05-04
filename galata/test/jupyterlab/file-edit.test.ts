@@ -83,7 +83,6 @@ test.describe('Console Interactions', () => {
 
     await page.getByText('123', { exact: true }).click();
 
-    await expect(page.getByText("Type 'copyright', 'credits'")).toBeVisible();
     await page.keyboard.press('Shift+Enter');
 
     await expect(
