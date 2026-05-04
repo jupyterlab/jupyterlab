@@ -1325,11 +1325,8 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
     settingRegistry
       .load(shell.id)
       .then(settings => {
-        // Apply the activity bar position before restoring the layout so the
-        // shell is in its final configuration before any rehydration runs.
-        // The shell plugin also wires this through `updateConfig`; the call
-        // is idempotent (the handler's position setter is a no-op when the
-        // value matches) so it is safe to run twice.
+        // Apply the activity bar position before restoring the layout, since
+        // side area rehydration depends on the current position.
         labShell.updateConfig({
           activityBarPosition: settings.get('activityBarPosition')
             .composite as ILabShell.SideBarPosition
