@@ -102,9 +102,7 @@ _JupyterLab Shell_ section. The available values are:
 - `bottom`: both activity bars are moved to the bottom of their respective area
 
 ```js
-{
-  "activityBarPosition": "top"
-}
+"activityBarPosition": "top"
 ```
 
 The same options are also available interactively from the
