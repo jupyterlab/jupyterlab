@@ -329,8 +329,37 @@
                   "rank": 50
                 },
                 {
+                  "type": "submenu",
+                  "rank": 51,
+                  "submenu": {
+                    "id": "jp-mainmenu-view-appearance-activity-bar-position",
+                    "label": "Activity Bar Position",
+                    "items": [
+                      {
+                        "command": "application:set-activity-bar-position",
+                        "args": { "position": "side" },
+                        "rank": 0
+                      },
+                      {
+                        "command": "application:set-activity-bar-position",
+                        "args": { "position": "top" },
+                        "rank": 1
+                      },
+                      {
+                        "command": "application:set-activity-bar-position",
+                        "args": { "position": "bottom" },
+                        "rank": 2
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "separator",
+                  "rank": 52
+                },
+                {
                   "command": "application:reset-layout",
-                  "rank": 51
+                  "rank": 53
                 }
               ]
             }

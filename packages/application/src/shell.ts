@@ -135,7 +135,27 @@ export namespace ILabShell {
      * Set to `false` for a more compact layout.
      */
     dockPanelPadding?: boolean;
+
+    /**
+     * Position of the side activity bars.
+     *
+     * The default is `'side'`, which keeps each activity bar on the natural
+     * side of its area (left for the left area, right for the right area).
+     * `'top'` and `'bottom'` move both activity bars to the top or bottom of
+     * their respective area, displaying the tabs horizontally.
+     */
+    activityBarPosition?: SideBarPosition;
   }
+
+  /**
+   * Position of a side activity bar within its area.
+   *
+   * `'side'` keeps the activity bar on the natural side of the area
+   * (left for the left area, right for the right area).
+   * `'top'` and `'bottom'` move the activity bar to the top or bottom
+   * of the side area, displaying the tabs horizontally.
+   */
+  export type SideBarPosition = 'side' | 'top' | 'bottom';
 
   /**
    * Widget position
@@ -368,8 +388,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const downPanel = (this._downPanel = new TabPanelSvg({
       tabsMovable: true
     }));
-    const leftHandler = (this._leftHandler = new Private.SideBarHandler());
-    const rightHandler = (this._rightHandler = new Private.SideBarHandler());
+    const leftHandler = (this._leftHandler = new Private.SideBarHandler({
+      side: 'left',
+      host: hboxPanel
+    }));
+    const rightHandler = (this._rightHandler = new Private.SideBarHandler({
+      side: 'right',
+      host: hboxPanel
+    }));
     const rootLayout = new BoxLayout();
 
     headerPanel.id = 'jp-header-panel';
@@ -386,11 +412,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     leftHandler.sideBar.addClass('jp-mod-left');
     leftHandler.sideBar.node.setAttribute('role', 'complementary');
     leftHandler.stackedPanel.id = 'jp-left-stack';
+    leftHandler.area.id = 'jp-left-area';
+    leftHandler.area.addClass('jp-SideArea');
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
     rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.stackedPanel.id = 'jp-right-stack';
+    rightHandler.area.id = 'jp-right-area';
+    rightHandler.area.addClass('jp-SideArea');
 
     dockPanel.node.setAttribute('role', 'main');
 
@@ -405,10 +435,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hsplitPanel.orientation = 'horizontal';
     bottomPanel.direction = 'bottom-to-top';
 
-    SplitPanel.setStretch(leftHandler.stackedPanel, 0);
+    SplitPanel.setStretch(leftHandler.area, 0);
     SplitPanel.setStretch(downPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
-    SplitPanel.setStretch(rightHandler.stackedPanel, 0);
+    SplitPanel.setStretch(rightHandler.area, 0);
 
     BoxPanel.setStretch(leftHandler.sideBar, 0);
     BoxPanel.setStretch(hsplitPanel, 1);
@@ -416,9 +446,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     SplitPanel.setStretch(vsplitPanel, 1);
 
-    hsplitPanel.addWidget(leftHandler.stackedPanel);
+    hsplitPanel.addWidget(leftHandler.area);
     hsplitPanel.addWidget(dockPanel);
-    hsplitPanel.addWidget(rightHandler.stackedPanel);
+    hsplitPanel.addWidget(rightHandler.area);
 
     vsplitPanel.addWidget(hsplitPanel);
     vsplitPanel.addWidget(downPanel);
@@ -1395,6 +1425,29 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
       this._dockPanel.fit();
     }
+
+    if (config.activityBarPosition !== undefined) {
+      this._setActivityBarPosition('left', config.activityBarPosition);
+      this._setActivityBarPosition('right', config.activityBarPosition);
+    }
+  }
+
+  /**
+   * Move the activity bar of a side area to a new position.
+   *
+   * @param side The side area to update.
+   * @param position The new position of the activity bar.
+   */
+  private _setActivityBarPosition(
+    side: 'left' | 'right',
+    position: ILabShell.SideBarPosition
+  ): void {
+    const handler = side === 'left' ? this._leftHandler : this._rightHandler;
+    if (handler.position === position) {
+      return;
+    }
+    handler.position = position;
+    this._onLayoutModified();
   }
 
   /**
@@ -1988,7 +2041,9 @@ namespace Private {
     /**
      * Construct a new side bar handler.
      */
-    constructor() {
+    constructor(options: SideBarHandler.IOptions) {
+      this._side = options.side;
+      this._host = options.host;
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
@@ -1996,6 +2051,13 @@ namespace Private {
         orientation: 'vertical'
       });
       this._stackedPanel = new StackedPanel();
+      this._area = new BoxPanel({ direction: 'top-to-bottom', spacing: 0 });
+      // The stacked panel always lives inside the area wrapper. It is the
+      // only stretchable child so the activity bar (when inside the wrapper)
+      // takes only its natural size at the top or bottom.
+      BoxPanel.setStretch(this._stackedPanel, 1);
+      BoxPanel.setStretch(this._sideBar, 0);
+      this._area.addWidget(this._stackedPanel);
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
@@ -2029,6 +2091,73 @@ namespace Private {
     }
 
     /**
+     * Get the wrapper panel for this side area.
+     *
+     * The wrapper always contains the stacked panel. When the activity bar is
+     * positioned inside the area (top or bottom), it is also a child of this
+     * wrapper. The wrapper is what gets added to the main horizontal split.
+     */
+    get area(): BoxPanel {
+      return this._area;
+    }
+
+    /**
+     * Get the current position of the activity bar.
+     */
+    get position(): ILabShell.SideBarPosition {
+      return this._position;
+    }
+
+    /**
+     * Set the position of the activity bar relative to the area.
+     *
+     * In `'side'` mode the activity bar is reattached to the host panel
+     * (e.g. the shell's hboxPanel) on its natural side. In `'top'` or
+     * `'bottom'` mode the activity bar is reparented inside the area wrapper
+     * above or below the stacked panel and laid out horizontally.
+     */
+    set position(value: ILabShell.SideBarPosition) {
+      if (this._position === value) {
+        return;
+      }
+      this._position = value;
+
+      // The user-collapse flag only has meaning in horizontal mode and should
+      // not carry over from a prior interaction in a different mode.
+      this._isCollapsedByUser = false;
+
+      // Detach the activity bar from its current parent before reattaching
+      // it to the new one (host or area wrapper).
+      this._sideBar.parent = null;
+
+      // Update the orientation and the side-position class on the activity
+      // bar. The icon/label rotation depends on these classes.
+      const isLeft = this._side === 'left';
+      this._sideBar.orientation = value === 'side' ? 'vertical' : 'horizontal';
+      this._sideBar.toggleClass('jp-mod-left', isLeft && value === 'side');
+      this._sideBar.toggleClass('jp-mod-right', !isLeft && value === 'side');
+      this._sideBar.toggleClass('jp-mod-top', value === 'top');
+      this._sideBar.toggleClass('jp-mod-bottom', value === 'bottom');
+
+      // In 'side' mode, clicking the active tab collapses the area (the
+      // activity bar stays as a thin strip). That collapse UX makes no sense
+      // when the activity bar is at the top or bottom — clicking would just
+      // leave an empty horizontal strip — so disable deselection there.
+      this._sideBar.allowDeselect = value === 'side';
+
+      if (value === 'side') {
+        const index = isLeft ? 0 : this._host.widgets.length;
+        this._host.insertWidget(index, this._sideBar);
+      } else if (value === 'top') {
+        this._area.insertWidget(0, this._sideBar);
+      } else {
+        this._area.addWidget(this._sideBar);
+      }
+
+      this._refreshVisibility();
+    }
+
+    /**
      * Signal fires when the stack panel or the sidebar changes
      */
     get updated(): ISignal<SideBarHandler, void> {
@@ -2054,13 +2183,19 @@ namespace Private {
      *
      * #### Notes
      * This will open the most recently used tab, or the first tab
-     * if there is no most recently used.
+     * if there is no most recently used. In `'top'` or `'bottom'` mode it
+     * also re-shows the wrapper area if a previous `collapse()` call hid it.
      */
     expand(): void {
+      this._isCollapsedByUser = false;
       const previous =
         this._lastCurrent || (this._items.length > 0 && this._items[0].widget);
       if (previous) {
         this.activate(previous.id);
+      } else {
+        // No tab to activate, but we still need to reflect the cleared
+        // collapse flag (relevant in 'top'/'bottom' mode).
+        this._refreshVisibility();
       }
     }
 
@@ -2072,6 +2207,7 @@ namespace Private {
     activate(id: string): void {
       const widget = this._findWidgetByID(id);
       if (widget) {
+        this._isCollapsedByUser = false;
         this._sideBar.currentTitle = widget.title;
         widget.activate();
       }
@@ -2086,9 +2222,16 @@ namespace Private {
 
     /**
      * Collapse the sidebar so no items are expanded.
+     *
+     * #### Notes
+     * In `'side'` mode this only deselects the active tab, leaving the
+     * activity bar visible. In `'top'` or `'bottom'` mode it also hides the
+     * wrapper area entirely so the column can reclaim its space.
      */
     collapse(): void {
+      this._isCollapsedByUser = true;
       this._sideBar.currentTitle = null;
+      this._refreshVisibility();
     }
 
     /**
@@ -2164,9 +2307,8 @@ namespace Private {
     rehydrate(data: ILabShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
-      }
-      if (data.collapsed) {
-        this.collapse();
+      } else if (data.collapsed) {
+        this._sideBar.currentTitle = null;
       }
       if (!data.visible) {
         this.hide();
@@ -2205,6 +2347,7 @@ namespace Private {
      */
     show(): void {
       this._isHiddenByUser = false;
+      this._isCollapsedByUser = false;
       this._refreshVisibility();
     }
 
@@ -2246,6 +2389,21 @@ namespace Private {
       this._sideBar.setHidden(
         this._isHiddenByUser || this._sideBar.titles.length === 0
       );
+      // Hide the wrapper area so the parent split panel can reclaim its
+      // allocated width when no contents would be visible.
+      if (this._position === 'side') {
+        // In 'side' mode the activity bar lives outside the wrapper, so the
+        // wrapper visibility tracks the stack panel.
+        this._area.setHidden(this._stackedPanel.isHidden);
+      } else {
+        // In 'top' or 'bottom' mode the activity bar lives inside the
+        // wrapper. Hide the wrapper when the user has explicitly collapsed
+        // the area, or when none of its children would be visible.
+        this._area.setHidden(
+          this._isCollapsedByUser ||
+            (this._sideBar.isHidden && this._stackedPanel.isHidden)
+        );
+      }
       this._updated.emit();
     }
 
@@ -2295,11 +2453,39 @@ namespace Private {
     }
 
     private _isHiddenByUser = false;
+    private _isCollapsedByUser = false;
     private _items = new Array<Private.IRankItem>();
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
+    private _area: BoxPanel;
+    private _host: BoxPanel;
     private _lastCurrent: Widget | null;
+    private _side: 'left' | 'right';
+    private _position: ILabShell.SideBarPosition = 'side';
     private _updated: Signal<SideBarHandler, void> = new Signal(this);
+  }
+
+  /**
+   * The namespace for the `SideBarHandler` statics.
+   */
+  export namespace SideBarHandler {
+    /**
+     * The options used to create a `SideBarHandler`.
+     */
+    export interface IOptions {
+      /**
+       * The natural side of the area (`'left'` or `'right'`). The activity
+       * bar lives on this side when the position is `'side'`.
+       */
+      side: 'left' | 'right';
+
+      /**
+       * The host panel that owns the activity bar in `'side'` mode. The
+       * handler reattaches the bar to this host on transitions back to
+       * `'side'` so the shell does not need to manage that reparenting.
+       */
+      host: BoxPanel;
+    }
   }
 
   export class SkipLinkWidget extends Widget {
