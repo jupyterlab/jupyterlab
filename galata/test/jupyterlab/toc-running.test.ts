@@ -71,7 +71,9 @@ test.describe('ToC Running indicator', () => {
 
     const executed = page.notebook.runCell(5);
 
-    await tocPanel.locator('[title="Title 1"][data-running="1"]').waitFor();
+    await expect(
+      tocPanel.getByTitle('Title 1', { exact: true })
+    ).toHaveAttribute('data-running', '1');
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'

@@ -27,7 +27,7 @@ export namespace galata {
   /**
    * Default user settings:
    * - Deactivate cursor blinking to avoid noise in screenshots
-   * - Fix fonts to ensure consitent screenshots
+   * - Fix fonts to ensure consistent screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
