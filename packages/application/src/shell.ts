@@ -2385,24 +2385,31 @@ namespace Private {
      * Refresh the visibility of the side bar and stacked panel.
      */
     private _refreshVisibility(): void {
-      this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+      if (this._position === 'side') {
+        // In 'side' mode the activity bar lives outside the wrapper and the
+        // wrapper holds only the stack panel. Hiding the stack panel when no
+        // widget is current collapses the area down to the activity bar.
+        this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+      } else {
+        // In 'top'/'bottom' mode the activity bar lives inside the wrapper
+        // alongside the stack panel. The stack panel stays visible (and
+        // stretches as an empty area when no widget is current) so the
+        // activity bar stays anchored at the top or bottom of the wrapper.
+        this._stackedPanel.setHidden(this._items.length === 0);
+      }
       this._sideBar.setHidden(
         this._isHiddenByUser || this._sideBar.titles.length === 0
       );
       // Hide the wrapper area so the parent split panel can reclaim its
       // allocated width when no contents would be visible.
       if (this._position === 'side') {
-        // In 'side' mode the activity bar lives outside the wrapper, so the
-        // wrapper visibility tracks the stack panel.
+        // In 'side' mode wrapper visibility tracks the stack panel.
         this._area.setHidden(this._stackedPanel.isHidden);
       } else {
-        // In 'top' or 'bottom' mode the activity bar lives inside the
-        // wrapper. Hide the wrapper when the user has explicitly collapsed
-        // the area, or when none of its children would be visible.
-        this._area.setHidden(
-          this._isCollapsedByUser ||
-            (this._sideBar.isHidden && this._stackedPanel.isHidden)
-        );
+        // In 'top'/'bottom' mode the stack panel is always visible when there
+        // are items, so the wrapper visibility tracks the activity bar (no
+        // tabs means nothing to show) and the user-collapse flag.
+        this._area.setHidden(this._isCollapsedByUser || this._sideBar.isHidden);
       }
       this._updated.emit();
     }
