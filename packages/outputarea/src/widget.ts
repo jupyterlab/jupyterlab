@@ -1473,9 +1473,9 @@ namespace Private {
         const body = iframe.contentDocument!.body;
 
         // Adjust the iframe height automatically
-        iframe.style.height = `${body.scrollHeight}px`;
+        iframe.style.height = `${body.getBoundingClientRect().height}px`;
         iframe.heightChangeObserver = new ResizeObserver(() => {
-          iframe.style.height = `${body.scrollHeight}px`;
+          iframe.style.height = `${body.getBoundingClientRect().height}px`;
         });
         iframe.heightChangeObserver.observe(body);
       });
