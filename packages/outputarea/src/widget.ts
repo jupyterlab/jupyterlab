@@ -474,7 +474,7 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
     if (this._promptOverlay) {
-      const overlay = new PromptOverlay(() => {
+      const overlay = new OutputPromptOverlay(() => {
         this._toggleScrolling.emit();
       });
       panel.addWidget(overlay);
@@ -798,7 +798,7 @@ export class OutputArea extends Widget {
     panel.addWidget(prompt);
 
     if (this._promptOverlay) {
-      const overlay = new PromptOverlay(() => {
+      const overlay = new OutputPromptOverlay(() => {
         this._toggleScrolling.emit();
       });
       panel.addWidget(overlay);
@@ -1045,7 +1045,7 @@ export class OutputPrompt extends Widget implements IOutputPrompt {
   private _executionCount: nbformat.ExecutionCount = null;
 }
 
-export class PromptOverlay extends Widget {
+export class OutputPromptOverlay extends Widget {
   /*
    * Create a prompt overlay widget.
    */
