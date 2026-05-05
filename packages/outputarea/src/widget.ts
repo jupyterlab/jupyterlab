@@ -476,7 +476,7 @@ export class OutputArea extends Widget {
     if (this._promptOverlay) {
       const overlay = new PromptOverlay(() => {
         this._toggleScrolling.emit();
-      });;
+      });
       panel.addWidget(overlay);
     }
 
