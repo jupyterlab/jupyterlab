@@ -91,8 +91,9 @@ The above example will result in the following changes:
 
 The side activity bars (left and right) display the tabs of the widgets attached
 to the corresponding side area. By default, each activity bar is rendered
-vertically on the natural side of its area. You can move them to the top or
-bottom of their area to display the tabs horizontally.
+vertically on the natural side of its area (left for the left area, right for
+the right area). You can move them to the top or bottom of their area to
+display the tabs horizontally.
 
 The position is controlled by the `activityBarPosition` setting in the
 _JupyterLab Shell_ section. The available values are:
