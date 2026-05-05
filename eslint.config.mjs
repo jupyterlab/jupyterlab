@@ -475,9 +475,9 @@ export default defineConfig([
         },
         {
           selector:
-            "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure']",
+            "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure'] > ObjectExpression > Property[key.name='mode'][value.value='serial']",
           message:
-            "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for betteer performance and to allow updating all snapshots at once."
+            "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
       ]
     }
