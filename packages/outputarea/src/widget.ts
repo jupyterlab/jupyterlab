@@ -828,6 +828,7 @@ export class OutputArea extends Widget {
    * output area.
    */
   private _maxNumberOutputs: number;
+  private _promptOverlay: boolean;
   private _minHeightTimeout: number | null = null;
   private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
