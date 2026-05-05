@@ -364,19 +364,6 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Add overlay allowing to toggle scrolling.
-   */
-  private _createPromptOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = OUTPUT_PROMPT_OVERLAY;
-    overlay.addEventListener('click', () => {
-      this._toggleScrolling.emit();
-    });
-
-    return overlay;
-  }
-
-  /**
    * Update indices in _displayIdMap in response to element remove from model items
    *
    * @param startIndex - The index of first element removed
@@ -487,8 +474,10 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
     if (this._promptOverlay) {
-      const promptOverlay = this._createPromptOverlay();
-      panel.addWidget(promptOverlay);
+      const overlay = new PromptOverlay(() => {
+        this._toggleScrolling.emit();
+      });;
+      panel.addWidget(overlay);
     }
 
     // Indicate that input is pending
@@ -809,8 +798,10 @@ export class OutputArea extends Widget {
     panel.addWidget(prompt);
 
     if (this._promptOverlay) {
-      const promptOverlay = this._createPromptOverlay();
-      panel.addWidget(promptOverlay);
+      const overlay = new PromptOverlay(() => {
+        this._toggleScrolling.emit();
+      });
+      panel.addWidget(overlay);
     }
 
     output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
@@ -1052,6 +1043,26 @@ export class OutputPrompt extends Widget implements IOutputPrompt {
   }
 
   private _executionCount: nbformat.ExecutionCount = null;
+}
+
+export class PromptOverlay extends Widget {
+  /*
+   * Create a prompt overlay widget.
+   */
+  constructor(private toggleScrolling: () => void) {
+    super();
+    this.addClass(OUTPUT_PROMPT_OVERLAY);
+    this._setupNode();
+  }
+
+  /**
+   * Set up DOM node behavior.
+   */
+  private _setupNode(): void {
+    this.node.addEventListener('click', () => {
+      this.toggleScrolling();
+    });
+  }
 }
 
 /** ****************************************************************************
