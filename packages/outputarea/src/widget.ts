@@ -109,6 +109,7 @@ export class OutputArea extends Widget {
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
+    this._promptOverlay = options.promptOverlay;
 
     const model = (this.model = options.model);
     for (
@@ -132,9 +133,9 @@ export class OutputArea extends Widget {
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
-    if (options.promptOverlay) {
-      this._addPromptOverlay();
-    }
+    requestAnimationFrame(() => {
+      this._initialize.emit();
+    });
   }
 
   /**
@@ -365,17 +366,14 @@ export class OutputArea extends Widget {
   /**
    * Add overlay allowing to toggle scrolling.
    */
-  private _addPromptOverlay() {
+  private _createPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
     overlay.addEventListener('click', () => {
       this._toggleScrolling.emit();
     });
-    this.node.appendChild(overlay);
 
-    requestAnimationFrame(() => {
-      this._initialize.emit();
-    });
+    return overlay;
   }
 
   /**
@@ -488,6 +486,10 @@ export class OutputArea extends Widget {
     const prompt = factory.createOutputPrompt();
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
+    if (this._promptOverlay) {
+      const promptOverlay = this._createPromptOverlay();
+      panel.addWidget(promptOverlay);
+    }
 
     // Indicate that input is pending
     this._pendingInput = true;
@@ -805,6 +807,11 @@ export class OutputArea extends Widget {
     prompt.executionCount = executionCount;
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
+
+    if (this._promptOverlay) {
+      const promptOverlay = this._createPromptOverlay();
+      panel.addWidget(promptOverlay);
+    }
 
     output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(output);
