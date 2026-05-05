@@ -100,8 +100,7 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata-extension': [
     '@fontsource/dejavu-mono',
-    '@fontsource/dejavu-sans',
-    '@fontsource/ubuntu'
+    '@fontsource/dejavu-sans'
   ],
   '@jupyterlab/markedparser-extension': [
     // only (but always) imported asynchronously

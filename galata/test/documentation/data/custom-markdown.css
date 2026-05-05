@@ -8,7 +8,7 @@ Distributed under the terms of the Modified BSD License.
 /* Headings */
 h1,
 h2 {
-  font-family: Ubuntu, sans-serif;
+  font-family: 'DejaVu Mono', sans-serif;
   font-weight: bold;
   text-shadow: 2px 2px 4px #000;
 }
@@ -40,7 +40,7 @@ blockquote {
 /* Lists */
 ul,
 ol {
-  font-family: Ubuntu, sans-serif;
+  font-family: 'DejaVu Mono', sans-serif;
   font-size: 18px;
   color: #333;
   margin-bottom: 24px;
