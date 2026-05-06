@@ -119,9 +119,9 @@
   float: left;
   width: 0%;
   height: 100%;
-  font-size: 12px;
+  font-size: calc(var(--jp-ui-font-size1) * 12 / 13);
   line-height: 14px;
-  color: #fff;
+  color: var(--jp-ui-inverse-font-color0);
   text-align: center;
   animation: jp-Statusbar-ExecutionTime-progress-bar 2s linear infinite;
 }
