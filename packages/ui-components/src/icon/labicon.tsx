@@ -347,7 +347,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       container = document.createElement(tag);
     }
 
-    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
+    const svgElement = Private.cloneSvgElement(this.svgElement);
     if (!container) {
       if (label) {
         console.warn();
@@ -488,12 +488,18 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const Tag = tag ?? React.Fragment;
 
         // ensure that svg html is valid
-        if (!(this.svgInnerHTML && this.svgReactAttrs)) {
+        if (!this.svgElement) {
           // bail if failing silently
           return <></>;
         }
 
-        const svgProps = { ...this.svgReactAttrs };
+        const svgElement = Private.cloneSvgElement(this.svgElement);
+        const svgReactAttrs = getReactAttrs(svgElement, {
+          ignore: ['data-icon-id']
+        });
+        const svgInnerHTML = svgElement.innerHTML;
+
+        const svgProps = { ...svgReactAttrs };
         if (!tag) {
           Object.assign(svgProps, {
             className:
@@ -508,9 +514,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const svgComponent = (
           <svg
             {...svgProps}
-            {...this.svgReactAttrs}
-            dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
-            ref={ref}
+            {...svgReactAttrs}
+            dangerouslySetInnerHTML={{ __html: svgInnerHTML }}
+            ref={ref as React.Ref<SVGSVGElement>}
           />
         );
 
@@ -767,6 +773,14 @@ export namespace LabIcon {
 }
 
 namespace Private {
+  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^'" )]+)\1\s*\)/g;
+
+  export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
+    const clone = svgElement.cloneNode(true) as HTMLElement;
+    uniquifySvgIds(clone);
+    return clone;
+  }
+
   export function blankElement({
     className = '',
     container,
@@ -882,6 +896,89 @@ namespace Private {
       const titleNode = document.createElement('title');
       titleNode.textContent = title;
       svgNode.appendChild(titleNode);
+    }
+  }
+
+  function uniquifySvgIds(svgNode: HTMLElement): void {
+    const idNodes = Array.from(svgNode.querySelectorAll('[id]'));
+    if (svgNode.hasAttribute('id')) {
+      idNodes.unshift(svgNode);
+    }
+    if (!idNodes.length) {
+      return;
+    }
+
+    const suffix = UUID.uuid4();
+    const idMap = new Map<string, string>();
+
+    idNodes.forEach(node => {
+      const id = node.getAttribute('id');
+      if (!id) {
+        return;
+      }
+
+      const mapped = idMap.get(id) ?? `${id}-${suffix}`;
+      idMap.set(id, mapped);
+      node.setAttribute('id', mapped);
+    });
+
+    rewriteIdReferences(svgNode, idMap);
+    svgNode.querySelectorAll('*').forEach(node => {
+      rewriteIdReferences(node, idMap);
+    });
+  }
+
+  function rewriteIdReferences(
+    node: Element,
+    idMap: Map<string, string>
+  ): void {
+    Array.from(node.attributes).forEach(attr => {
+      let nextValue = attr.value.replace(
+        URL_ID_REFERENCE,
+        (full, quote, id) => {
+          const mapped = idMap.get(id);
+          return mapped ? `url(${quote}#${mapped}${quote})` : full;
+        }
+      );
+
+      if (
+        (attr.name === 'href' || attr.name === 'xlink:href') &&
+        nextValue.startsWith('#')
+      ) {
+        const mapped = idMap.get(nextValue.slice(1));
+        if (mapped) {
+          nextValue = `#${mapped}`;
+        }
+      }
+
+      if (attr.name === 'aria-labelledby' || attr.name === 'aria-describedby') {
+        nextValue = nextValue
+          .split(/\s+/)
+          .map(id => idMap.get(id) ?? id)
+          .join(' ');
+      }
+
+      if (nextValue !== attr.value) {
+        node.setAttribute(attr.name, nextValue);
+      }
+    });
+    if (node.tagName.toLowerCase() === 'style') {
+      const styleText = node.textContent;
+      if (styleText === null) {
+        return;
+      }
+
+      const nextStyleText = styleText.replace(
+        URL_ID_REFERENCE,
+        (full, quote, id) => {
+          const mapped = idMap.get(id);
+          return mapped ? `url(${quote}#${mapped}${quote})` : full;
+        }
+      );
+
+      if (nextStyleText !== styleText) {
+        node.textContent = nextStyleText;
+      }
     }
   }
 
