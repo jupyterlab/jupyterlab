@@ -7,7 +7,7 @@
  * It is a simplification of https://github.com/yjs/y-codemirror.next
  * licensed under MIT License by Kevin Jahns
  */
-import type { ChangeSpec, Extension, SelectionRange } from '@codemirror/state';
+import type { Extension, SelectionRange } from '@codemirror/state';
 import { Annotation, EditorSelection, Facet } from '@codemirror/state';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import { ViewPlugin } from '@codemirror/view';
@@ -196,7 +196,8 @@ export const ySync = ViewPlugin.fromClass(
       this._observer = (event: YTextEvent, tr: Transaction) => {
         if (tr.origin !== this.conf) {
           const delta = event.delta;
-          const changes: ChangeSpec[] = [];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const changes: any[] = [];
           let pos = 0;
           for (let i = 0; i < delta.length; i++) {
             const d = delta[i];
