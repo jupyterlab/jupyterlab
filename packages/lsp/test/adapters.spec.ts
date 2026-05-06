@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+
 import { LabShell } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -51,6 +52,7 @@ const sessions = {
   }
   /* eslint-enable  */
 };
+/* eslint-disable @typescript-eslint/no-explicit-any */
 spy.mockImplementation((status, method, setting) => {
   return Promise.resolve({
     ok: true,

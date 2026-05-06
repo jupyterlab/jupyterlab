@@ -255,7 +255,7 @@ export default defineConfig([
       ],
 
       '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
