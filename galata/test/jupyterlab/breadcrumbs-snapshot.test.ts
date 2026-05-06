@@ -65,13 +65,26 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     page,
     tmpPath
   }) => {
+    // Wait for the file browser to settle before doing anything else.
+    await page.locator(BREADCRUMB_SELECTOR).waitFor();
+
     // Create a few sibling directories so the completion menu has entries
     await page.contents.createDirectory(`${tmpPath}/alpha`);
     await page.contents.createDirectory(`${tmpPath}/beta`);
     await page.contents.createDirectory(`${tmpPath}/gamma`);
 
+    // Refresh the file browser so its directory listing picks up the
+    // freshly created siblings. Without this, `openDirectory`'s walk
+    // through `tmpPath` can race with the listing fetch and time out
+    // waiting for `alpha` to appear (issue #18806).
+    await page.filebrowser.refresh();
+
     // Navigate into one of them so the breadcrumb path is non-empty
     await page.filebrowser.openDirectory(`${tmpPath}/alpha`);
+
+    // Wait for the breadcrumbs to reflect the navigated path before
+    // attempting to interact with the breadcrumb area.
+    await page.locator(`${BREADCRUMB_SELECTOR} >> text=alpha`).waitFor();
 
     // Click on the empty space of the breadcrumb bar to enter edit mode
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
