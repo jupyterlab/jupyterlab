@@ -2403,8 +2403,8 @@ __metadata:
     "@jupyterlab/workspaces-extension": ~4.6.0-alpha.5
     "@module-federation/runtime-tools": ^2.0.0
     "@rsdoctor/rspack-plugin": ^1.3.12
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     chokidar: ^3.4.0
     duplicate-package-checker-webpack-plugin: ^3.0.0
     fs-extra: ^10.1.0
@@ -2575,7 +2575,7 @@ __metadata:
     "@lumino/virtualdom": ^2.0.4
     "@lumino/widgets": ^2.7.5
     "@module-federation/runtime-tools": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/core": ^2.0.2
     "@types/fs-extra": ^9.0.1
     "@types/glob": ^7.1.1
     "@types/node": ^20.14.8
@@ -3272,8 +3272,8 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.5
     "@jupyterlab/translation-extension": ^4.6.0-alpha.5
     "@jupyterlab/ui-components-extension": ^4.6.0-alpha.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3303,8 +3303,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.5
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3329,8 +3329,8 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.5
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     rimraf: ~5.0.5
     style-loader: ~3.3.1
@@ -3384,7 +3384,7 @@ __metadata:
     "@jupyterlab/translation-extension": ^4.6.0-alpha.5
     "@jupyterlab/ui-components-extension": ^4.6.0-alpha.5
     "@jupyterlab/vega5-extension": ^4.6.0-alpha.5
-    "@rspack/cli": ^2.0.0
+    "@rspack/cli": ^2.0.2
     copy-webpack-plugin: ^11.0.0
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3443,8 +3443,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.5
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3478,8 +3478,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.5
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -3495,8 +3495,8 @@ __metadata:
     "@jupyterlab/coreutils": ^6.6.0-alpha.5
     "@jupyterlab/services": ^7.6.0-alpha.5
     "@lumino/coreutils": ^2.2.2
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
@@ -3510,8 +3510,8 @@ __metadata:
     "@jupyterlab/outputarea": ^4.6.0-alpha.5
     "@jupyterlab/rendermime": ^4.6.0-alpha.5
     "@jupyterlab/services": ^7.6.0-alpha.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
@@ -3528,7 +3528,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.5
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^2.0.0
+    "@rspack/cli": ^2.0.2
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.9.3
@@ -3546,8 +3546,8 @@ __metadata:
     "@jupyterlab/terminal": ^4.6.0-alpha.5
     "@jupyterlab/theme-light-extension": ^4.6.0-alpha.5
     "@lumino/widgets": ^2.7.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
@@ -4448,8 +4448,8 @@ __metadata:
     "@jupyterlab/notebook": ^4.6.0-alpha.5
     "@jupyterlab/outputarea": ^4.6.0-alpha.5
     "@jupyterlab/rendermime": ^4.6.0-alpha.5
-    "@rspack/cli": ^2.0.0
-    "@rspack/core": ^2.0.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
     null-loader: ^4.0.0
     rimraf: ~5.0.5
@@ -4832,7 +4832,7 @@ __metadata:
     "@lumino/polling": ^2.1.5
     "@lumino/properties": ^2.0.4
     "@lumino/signaling": ^2.1.5
-    "@rspack/cli": ^2.0.0
+    "@rspack/cli": ^2.0.2
     "@types/jest": ^29.2.0
     "@types/ws": ^8.5.3
     jest: ^29.2.0
@@ -6471,51 +6471,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-arm64@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-darwin-arm64@npm:2.0.0"
+"@rspack/binding-darwin-arm64@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-darwin-arm64@npm:2.0.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-x64@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-darwin-x64@npm:2.0.0"
+"@rspack/binding-darwin-x64@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-darwin-x64@npm:2.0.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-gnu@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-linux-arm64-gnu@npm:2.0.0"
+"@rspack/binding-linux-arm64-gnu@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-linux-arm64-gnu@npm:2.0.2"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-musl@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-linux-arm64-musl@npm:2.0.0"
+"@rspack/binding-linux-arm64-musl@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-linux-arm64-musl@npm:2.0.2"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-gnu@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-linux-x64-gnu@npm:2.0.0"
+"@rspack/binding-linux-x64-gnu@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-linux-x64-gnu@npm:2.0.2"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-musl@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-linux-x64-musl@npm:2.0.0"
+"@rspack/binding-linux-x64-musl@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-linux-x64-musl@npm:2.0.2"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-wasm32-wasi@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-wasm32-wasi@npm:2.0.0"
+"@rspack/binding-wasm32-wasi@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-wasm32-wasi@npm:2.0.2"
   dependencies:
     "@emnapi/core": 1.10.0
     "@emnapi/runtime": 1.10.0
@@ -6524,41 +6524,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-arm64-msvc@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-win32-arm64-msvc@npm:2.0.0"
+"@rspack/binding-win32-arm64-msvc@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-win32-arm64-msvc@npm:2.0.2"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-ia32-msvc@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-win32-ia32-msvc@npm:2.0.0"
+"@rspack/binding-win32-ia32-msvc@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-win32-ia32-msvc@npm:2.0.2"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-x64-msvc@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding-win32-x64-msvc@npm:2.0.0"
+"@rspack/binding-win32-x64-msvc@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding-win32-x64-msvc@npm:2.0.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/binding@npm:2.0.0"
+"@rspack/binding@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/binding@npm:2.0.2"
   dependencies:
-    "@rspack/binding-darwin-arm64": 2.0.0
-    "@rspack/binding-darwin-x64": 2.0.0
-    "@rspack/binding-linux-arm64-gnu": 2.0.0
-    "@rspack/binding-linux-arm64-musl": 2.0.0
-    "@rspack/binding-linux-x64-gnu": 2.0.0
-    "@rspack/binding-linux-x64-musl": 2.0.0
-    "@rspack/binding-wasm32-wasi": 2.0.0
-    "@rspack/binding-win32-arm64-msvc": 2.0.0
-    "@rspack/binding-win32-ia32-msvc": 2.0.0
-    "@rspack/binding-win32-x64-msvc": 2.0.0
+    "@rspack/binding-darwin-arm64": 2.0.2
+    "@rspack/binding-darwin-x64": 2.0.2
+    "@rspack/binding-linux-arm64-gnu": 2.0.2
+    "@rspack/binding-linux-arm64-musl": 2.0.2
+    "@rspack/binding-linux-x64-gnu": 2.0.2
+    "@rspack/binding-linux-x64-musl": 2.0.2
+    "@rspack/binding-wasm32-wasi": 2.0.2
+    "@rspack/binding-win32-arm64-msvc": 2.0.2
+    "@rspack/binding-win32-ia32-msvc": 2.0.2
+    "@rspack/binding-win32-x64-msvc": 2.0.2
   dependenciesMeta:
     "@rspack/binding-darwin-arm64":
       optional: true
@@ -6580,13 +6580,13 @@ __metadata:
       optional: true
     "@rspack/binding-win32-x64-msvc":
       optional: true
-  checksum: 0014ed5db604ff71c7bf316e4b3be11850c15a46bf2402c2f4284fa64ef5a163d4830a65da3ba3c385ab2e7f29451328c80e4442bfa887b123f141e6e996d6ac
+  checksum: 2f78df9c7a54bf60dadab6dc1552c68bb1a18f17ef55c22f627987ebd6e8db439f8f430e71e0f8b14510bc4bfbbb5ac2246d3bd03da6a3d1103728662ed98715
   languageName: node
   linkType: hard
 
-"@rspack/cli@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/cli@npm:2.0.0"
+"@rspack/cli@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/cli@npm:2.0.2"
   peerDependencies:
     "@rspack/core": ^2.0.0-0
     "@rspack/dev-server": ^2.0.0-0
@@ -6595,15 +6595,15 @@ __metadata:
       optional: true
   bin:
     rspack: bin/rspack.js
-  checksum: 900e9a04fbe8cbf84b78960b0975ea21798d23f7fa5be82c195c2953822571814da5d2ee70767b179225faf2d0d12497716a3eeb4854c36fa6148991969ba7b2
+  checksum: c459f1b1b012bc368941a2c1b54e2585c5da34e90c097a95eb55824e7f32e225e4e54a1d779bf46bc1eafadce86216b743412fd040ef5bb220b0d6a1013d51d9
   languageName: node
   linkType: hard
 
-"@rspack/core@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@rspack/core@npm:2.0.0"
+"@rspack/core@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@rspack/core@npm:2.0.2"
   dependencies:
-    "@rspack/binding": 2.0.0
+    "@rspack/binding": 2.0.2
   peerDependencies:
     "@module-federation/runtime-tools": ^0.24.1 || ^2.0.0
     "@swc/helpers": ">=0.5.1"
@@ -6612,7 +6612,7 @@ __metadata:
       optional: true
     "@swc/helpers":
       optional: true
-  checksum: 29843d2992f08301b4551e26aa987718cf4b8aa3e2ce9578ee03d1725086f58e37a6d53aa2bb137bf1cc6fac4b5af301970678561528fb4fc485fc9c1f34be41
+  checksum: 0082aa0e87bc62df277e985a26977e5d80ff96fadc6de20dfafc82deb58d6d6aada25c9f22c35a779b8d6ed147e7ac1d7d26e9b3b5407b0ff672b5e5c62bdf0b
   languageName: node
   linkType: hard
 
