@@ -329,13 +329,24 @@ export class Dialog<T> extends Widget {
     }
     super.onCloseRequest(msg);
   }
+
   /**
    * Handle the `'input'` event for dialog's children.
    *
    * @param event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
-    this._hasValidationErrors = !!this.node.querySelector(':invalid');
+    this._checkValidation();
+  }
+
+  /**
+   * Check that every input in the dialog is valid.
+   * It looks for :invalid pseudo class of inputs, or .jp-mod-error class.
+   */
+  protected _checkValidation(): void {
+    this._hasValidationErrors =
+      !!this.node.querySelector(':invalid') ||
+      !!this.node.querySelector('.jp-mod-error');
     for (let i = 0; i < this._buttons.length; i++) {
       if (this._buttons[i].accept) {
         this._buttonNodes[i].disabled = this._hasValidationErrors;
@@ -375,16 +386,15 @@ export class Dialog<T> extends Widget {
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    switch (event.keyCode) {
-      case 27: // Escape.
+    switch (event.key) {
+      case 'Escape':
         event.stopPropagation();
         event.preventDefault();
         if (this._hasClose) {
           this.reject();
         }
         break;
-      case 37: {
-        // Left arrow
+      case 'ArrowLeft': {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
@@ -402,8 +412,7 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 39: {
-        // Right arrow
+      case 'ArrowRight': {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
@@ -421,8 +430,7 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 9: {
-        // Tab.
+      case 'Tab': {
         // Handle a tab on the last button.
         const node = this._buttonNodes[this._buttons.length - 1];
         if (document.activeElement === node && !event.shiftKey) {
@@ -432,8 +440,7 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 13: {
-        // Enter.
+      case 'Enter': {
         event.stopPropagation();
         event.preventDefault();
 
@@ -464,7 +471,7 @@ export class Dialog<T> extends Widget {
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      this._buttonNodes[this._defaultButton]?.focus();
+      (this._primary ?? this._buttonNodes[this._defaultButton])?.focus();
     }
   }
 

@@ -141,6 +141,13 @@ test.describe('Completer', () => {
       );
       await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
 
+      // For the token completion specifically we need to wait for CodeMirror
+      // to actually generate the tokens. This corresponds to the editor having
+      // syntax highlighting already painted over.
+      // `int` will have `cm-builtin` class once highlighting was applied.
+      const cell = await page.notebook.getCellLocator(0);
+      await cell!.locator('.cm-builtin').waitFor();
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });

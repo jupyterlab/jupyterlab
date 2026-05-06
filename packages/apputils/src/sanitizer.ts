@@ -598,6 +598,13 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * @returns Whether to allow command linker attributes.
+   */
+  get allowCommandLinker(): boolean {
+    return this._allowCommandLinker;
+  }
+
+  /**
    * Set the allowed schemes
    *
    * @param scheme Allowed schemes.
@@ -627,8 +634,19 @@ export class Sanitizer implements IRenderMime.ISanitizer {
     this._options = this._generateOptions();
   }
 
+  /**
+   * Set whether to allow command linker attributes.
+   *
+   * @param allowCommandLinker Whether to allow command linker attributes.
+   */
+  setAllowCommandLinker(allowCommandLinker: boolean): void {
+    this._allowCommandLinker = allowCommandLinker;
+    this._options = this._generateOptions();
+  }
+
   private _autolink: boolean = true;
   private _allowNamedProperties: boolean = false;
+  private _allowCommandLinker: boolean = true;
   private _customAllowedSchemes: string[] | undefined;
   private _options: sanitize.IOptions;
   private _generateOptions = (): sanitize.IOptions => {
@@ -800,8 +818,9 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         br: ['clear'],
         button: [
           'accesskey',
-          'data-commandlinker-args',
-          'data-commandlinker-command',
+          ...(this._allowCommandLinker
+            ? ['data-commandlinker-args', 'data-commandlinker-command']
+            : []),
           'disabled',
           ...(this._allowNamedProperties ? ['name'] : []),
           'tabindex',

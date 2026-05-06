@@ -100,6 +100,16 @@
     }
   },
   {
+    "id": "application:reset-widget-zoom",
+    "label": "Reset Widget Zoom",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:set-mode",
     "label": "Set the layout `mode`.",
     "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
@@ -275,6 +285,26 @@
         "side",
         "index"
       ]
+    }
+  },
+  {
+    "id": "application:zoom-in-widget",
+    "label": "Zoom In Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:zoom-out-widget",
+    "label": "Zoom Out Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -943,7 +973,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable",
     "shortcuts": [
       "Alt A"
     ],
@@ -2284,7 +2314,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query to pre-fill in the extension manager"
+        }
+      }
     }
   },
   {
@@ -2436,6 +2471,16 @@
     }
   },
   {
+    "id": "filebrowser:edit-path",
+    "label": "Edit File Browser Path",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
@@ -2456,7 +2501,7 @@
   },
   {
     "id": "filebrowser:go-up",
-    "label": "go up",
+    "label": "Go Up",
     "caption": "",
     "shortcuts": [
       "Backspace"
@@ -2579,16 +2624,6 @@
     }
   },
   {
-    "id": "filebrowser:search",
-    "label": "Search on File Names",
-    "caption": "",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
     "id": "filebrowser:select-all",
     "label": "Select All",
     "caption": "",
@@ -2613,6 +2648,16 @@
   {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "filebrowser:toggle-date-created",
+    "label": "Show Date Created Column",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3405,9 +3450,7 @@
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3422,9 +3465,7 @@
     "id": "inspector:open",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3447,7 +3488,9 @@
     "id": "inspector:toggle",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl I"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -3462,6 +3505,16 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "jupyterlab-translation:install-languages",
+    "label": "Install more languages…",
+    "caption": "Search for language packs in the Extension Manager",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -3701,6 +3754,16 @@
       "required": [
         "path"
       ]
+    }
+  },
+  {
+    "id": "markdownviewer:trust",
+    "label": "Trust Markdown Preview",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -4900,6 +4963,21 @@
     }
   },
   {
+    "id": "notebook:toggle-output-scrolling",
+    "label": "Toggle Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:toggle-render-side-by-side-current",
     "label": "Render Side-by-Side",
     "caption": "",
@@ -5480,6 +5558,16 @@
       "required": [
         "name"
       ]
+    }
+  },
+  {
+    "id": "terminal:open-folder-in-terminal",
+    "label": "Open in Terminal",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {

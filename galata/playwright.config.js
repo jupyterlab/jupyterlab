@@ -6,7 +6,7 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 module.exports = {
   ...baseConfig,
   reporter: process.env.CI
-    ? [['blob']]
+    ? [['blob'], ['json', { outputFile: 'test-results/report.json' }]]
     : [['list'], ['html', { open: 'on-failure' }]],
   projects: [
     {

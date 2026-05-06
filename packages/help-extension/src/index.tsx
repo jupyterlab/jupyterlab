@@ -312,6 +312,17 @@ const open: JupyterFrontEndPlugin<void> = {
       return widget;
     }
 
+    // CVE-2026-40171 / GHSA-rch3-82jr-f9w9
+    function isUrlSafe(url: string): boolean {
+      try {
+        const parsed = new URL(url, window.location.href);
+        const protocol = parsed.protocol.toLowerCase();
+        return ['http:', 'https:', 'mailto:'].includes(protocol);
+      } catch {
+        return false;
+      }
+    }
+
     commands.addCommand(CommandIDs.open, {
       label: args =>
         (args['text'] as string) ??
@@ -340,6 +351,11 @@ const open: JupyterFrontEndPlugin<void> = {
         const url = args['url'] as string;
         const text = args['text'] as string;
         const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
+
+        if (!isUrlSafe(url)) {
+          console.warn(`Blocked unsafe URL: ${url}`);
+          return;
+        }
 
         // If help resource will generate a mixed content error, load externally.
         if (
@@ -496,6 +512,12 @@ const resources: JupyterFrontEndPlugin<void> = {
             spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           commands.addCommand(bannerCommand, {
             label: trans.__('About the %1 Kernel', kernelName),
+            describedBy: {
+              args: {
+                type: 'object',
+                properties: {}
+              }
+            },
             isVisible: isEnabled,
             isEnabled,
             execute: () => {
@@ -530,6 +552,12 @@ const resources: JupyterFrontEndPlugin<void> = {
           (kernelInfo.help_links || []).forEach(link => {
             const commandId = `help-menu-${name}:${link.text}`;
             commands.addCommand(commandId, {
+              describedBy: {
+                args: {
+                  type: 'object',
+                  properties: {}
+                }
+              },
               label: commands.label(CommandIDs.open, link),
               isVisible: isEnabled,
               isEnabled,
