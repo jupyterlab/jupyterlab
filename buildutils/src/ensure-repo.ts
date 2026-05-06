@@ -98,6 +98,10 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/galata-extension': [
+    '@fontsource/dejavu-mono',
+    '@fontsource/dejavu-sans'
+  ],
   '@jupyterlab/markedparser-extension': [
     // only (but always) imported asynchronously
     'marked-gfm-heading-id',
@@ -171,7 +175,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/apputils',
     '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    '@jupyterlab/terminal'
   ],
   '@jupyterlab/galata-extension': [
     '@jupyterlab/application',
@@ -179,7 +184,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/cells',
     '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    '@jupyterlab/terminal'
   ],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/lsp': ['codemirror'],
