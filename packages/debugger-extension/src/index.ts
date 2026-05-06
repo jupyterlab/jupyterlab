@@ -1006,7 +1006,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       });
       editorWrapper.disposed.connect(() => editorHandler.dispose());
 
-      /* Open a read only editor in the main area */
+      // Open a read only editor in the main area //
       debuggerSources.open({
         label: PathExt.basename(path),
         caption: path,

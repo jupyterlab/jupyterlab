@@ -64,7 +64,14 @@ export class DebuggerSources implements IDebugger.ISources {
     widget.title.closable = true;
     widget.title.caption = caption;
     widget.title.icon = textEditorIcon;
-    this._shell.add(widget, 'main', { type: 'Debugger Sources' });
+    // Define notebook widget as reference
+    const notebookWidget = this._shell.currentWidget;
+    this._shell.add(widget, 'main', {
+      type: 'Debugger Sources',
+      mode: 'split-right',
+      ref: notebookWidget?.node.id ?? undefined
+    });
+
     void this._readOnlyEditorTracker.add(widget);
   }
 
