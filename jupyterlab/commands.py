@@ -43,7 +43,7 @@ from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
+from jupyter_builder.jupyterlab_semver import Range, gt, gte, lt, lte, make_semver
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
