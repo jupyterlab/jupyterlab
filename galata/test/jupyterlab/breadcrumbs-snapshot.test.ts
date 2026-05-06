@@ -33,10 +33,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
       `${BREADCRUMB_SELECTOR} >> text=${tmpPath}`
     );
     const errorDialog = page.locator('.jp-Dialog:has-text("Cannot open")');
-    await breadcrumbItem
-      .or(errorDialog)
-      .first()
-      .waitFor({ state: 'visible' });
+    await breadcrumbItem.or(errorDialog).first().waitFor({ state: 'visible' });
 
     if ((await errorDialog.count()) > 0) {
       await errorDialog.getByRole('button', { name: 'Close' }).click();
@@ -108,7 +105,10 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
 
     const suggestions = page.locator('.jp-PathNavigator-suggestions');
     await suggestions.waitFor({ state: 'visible' });
-    await suggestions.locator('li').first().waitFor();
+    // Wait for all three sibling entries (alpha/beta/gamma) to render
+    // before screenshotting; otherwise the screenshot can race with the
+    // suggestions populating and produce a flaky pixel diff.
+    await expect(suggestions.locator('li')).toHaveCount(3);
 
     // Capture the whole file browser so the absolutely-positioned
     // suggestions dropdown is included in the screenshot.
