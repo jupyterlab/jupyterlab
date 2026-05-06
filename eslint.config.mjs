@@ -472,6 +472,12 @@ export default defineConfig([
             "CallExpression[callee.property.name='screenshot'] > ObjectExpression > Property[key.name='path']",
           message:
             "Do not pass 'path' to screenshot(). Save the result of toMatchSnapshot() or use expect() assertions instead."
+        },
+        {
+          selector:
+            "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure'] > ObjectExpression > Property[key.name='mode'][value.value='serial']",
+          message:
+            "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
       ]
     }
