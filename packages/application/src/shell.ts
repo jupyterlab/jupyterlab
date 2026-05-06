@@ -144,7 +144,7 @@ export namespace ILabShell {
      * `'top'` and `'bottom'` move both activity bars to the top or bottom of
      * their respective area, displaying the tabs horizontally.
      */
-    activityBarPosition?: SideBarPosition;
+    activityBarPosition?: ActivityBarPosition;
   }
 
   /**
@@ -155,7 +155,7 @@ export namespace ILabShell {
    * `'top'` and `'bottom'` move the activity bar to the top or bottom
    * of the side area, displaying the tabs horizontally.
    */
-  export type SideBarPosition = 'side' | 'top' | 'bottom';
+  export type ActivityBarPosition = 'side' | 'top' | 'bottom';
 
   /**
    * Widget position
@@ -414,6 +414,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     leftHandler.stackedPanel.id = 'jp-left-stack';
     leftHandler.area.id = 'jp-left-area';
     leftHandler.area.addClass('jp-SideArea');
+    leftHandler.area.node.setAttribute('data-side', 'left');
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
@@ -421,6 +422,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     rightHandler.stackedPanel.id = 'jp-right-stack';
     rightHandler.area.id = 'jp-right-area';
     rightHandler.area.addClass('jp-SideArea');
+    rightHandler.area.node.setAttribute('data-side', 'right');
 
     dockPanel.node.setAttribute('role', 'main');
 
@@ -1440,7 +1442,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _setActivityBarPosition(
     side: 'left' | 'right',
-    position: ILabShell.SideBarPosition
+    position: ILabShell.ActivityBarPosition
   ): void {
     const handler = side === 'left' ? this._leftHandler : this._rightHandler;
     if (handler.position === position) {
@@ -2050,6 +2052,9 @@ namespace Private {
         allowDeselect: true,
         orientation: 'vertical'
       });
+      // Mirror the initial position on the bar via `data-side`. The setter
+      // keeps it in sync on subsequent transitions.
+      this._sideBar.node.setAttribute('data-side', this._side);
       this._stackedPanel = new StackedPanel();
       this._area = new BoxPanel({ direction: 'top-to-bottom', spacing: 0 });
       // The stacked panel always lives inside the area wrapper. It is the
@@ -2104,7 +2109,7 @@ namespace Private {
     /**
      * Get the current position of the activity bar.
      */
-    get position(): ILabShell.SideBarPosition {
+    get position(): ILabShell.ActivityBarPosition {
       return this._position;
     }
 
@@ -2116,7 +2121,7 @@ namespace Private {
      * `'bottom'` mode the activity bar is reparented inside the area wrapper
      * above or below the stacked panel and laid out horizontally.
      */
-    set position(value: ILabShell.SideBarPosition) {
+    set position(value: ILabShell.ActivityBarPosition) {
       if (this._position === value) {
         return;
       }
@@ -2130,14 +2135,18 @@ namespace Private {
       // it to the new one (host or area wrapper).
       this._sideBar.parent = null;
 
-      // Update the orientation and the side-position class on the activity
-      // bar. The icon/label rotation depends on these classes.
+      // Update the orientation and the position-related attributes on the
+      // activity bar. The icon/label rotation depends on these.
       const isLeft = this._side === 'left';
       this._sideBar.orientation = value === 'side' ? 'vertical' : 'horizontal';
+      // Keep `jp-mod-left`/`jp-mod-right` for backward compatibility with
+      // existing themes that target those classes.
       this._sideBar.toggleClass('jp-mod-left', isLeft && value === 'side');
       this._sideBar.toggleClass('jp-mod-right', !isLeft && value === 'side');
-      this._sideBar.toggleClass('jp-mod-top', value === 'top');
-      this._sideBar.toggleClass('jp-mod-bottom', value === 'bottom');
+      // `data-side` mirrors the `data-orientation` attribute set by Lumino
+      // and is the canonical hook for new CSS rules.
+      const dataSide = value === 'side' ? (isLeft ? 'left' : 'right') : value;
+      this._sideBar.node.setAttribute('data-side', dataSide);
 
       // In 'side' mode, clicking the active tab collapses the area (the
       // activity bar stays as a thin strip). That collapse UX makes no sense
@@ -2472,7 +2481,7 @@ namespace Private {
     private _host: BoxPanel;
     private _lastCurrent: Widget | null;
     private _side: 'left' | 'right';
-    private _position: ILabShell.SideBarPosition = 'side';
+    private _position: ILabShell.ActivityBarPosition = 'side';
     private _updated: Signal<SideBarHandler, void> = new Signal(this);
   }
 

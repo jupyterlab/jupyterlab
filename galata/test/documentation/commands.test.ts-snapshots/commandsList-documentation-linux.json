@@ -119,10 +119,19 @@
       "properties": {
         "position": {
           "type": "string",
-          "enum": [
-            "side",
-            "top",
-            "bottom"
+          "oneOf": [
+            {
+              "const": "side",
+              "title": "Side"
+            },
+            {
+              "const": "top",
+              "title": "Top"
+            },
+            {
+              "const": "bottom",
+              "title": "Bottom"
+            }
           ],
           "description": "The activity bar position"
         },

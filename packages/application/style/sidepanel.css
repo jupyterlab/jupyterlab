@@ -10,6 +10,14 @@
 :root {
   --jp-private-sidebar-tab-width: 32px;
   --jp-private-sidebar-tab-horizontal-height: 28px;
+  --jp-private-sidebar-tab-horizontal-padding: 16px;
+
+  /* Icon (20px, see `.jp-SideBar-tabIcon`) plus the horizontal padding on
+     both sides — the floor below which a horizontal tab would clip its
+     icon. */
+  --jp-private-sidebar-tab-horizontal-min-width: calc(
+    20px + 2 * var(--jp-private-sidebar-tab-horizontal-padding)
+  );
 }
 
 /*-----------------------------------------------------------------------------
@@ -62,6 +70,19 @@
   list-style-type: none;
   height: 100%;
   width: 100%;
+
+  /* When there are more tabs than the bar can fit, the content scrolls
+     horizontally. The scrollbar itself is hidden because a visible bar in
+     such a thin strip is too distracting; users reach overflowing tabs via
+     trackpad swipe, shift + mouse wheel, or keyboard navigation. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar {
+  display: none;
 }
 
 .jp-SideBar[data-orientation='vertical'] .lm-TabBar-tab {
@@ -73,13 +94,17 @@
 }
 
 .jp-SideBar[data-orientation='horizontal'] .lm-TabBar-tab {
-  padding: 0 16px;
+  padding: 0 var(--jp-private-sidebar-tab-horizontal-padding);
   border: none;
   overflow: visible;
   flex-direction: row;
   align-items: center;
   position: relative;
-  min-width: var(--jp-private-sidebar-tab-width);
+
+  /* Stop tabs from shrinking small enough to clip the icon. Once the bar
+     can no longer fit them all the overflow scroll on `.lm-TabBar-content`
+     takes over. */
+  min-width: var(--jp-private-sidebar-tab-horizontal-min-width);
 }
 
 .jp-SideBar .lm-TabBar-tab:focus-visible {
@@ -238,21 +263,21 @@
 
 /* Top / Bottom (horizontal activity bar) */
 
-.jp-SideBar.lm-TabBar.jp-mod-top .lm-TabBar-content,
-.jp-SideBar.lm-TabBar.jp-mod-bottom .lm-TabBar-content {
+.jp-SideBar.lm-TabBar[data-side='top'] .lm-TabBar-content,
+.jp-SideBar.lm-TabBar[data-side='bottom'] .lm-TabBar-content {
   align-items: stretch;
 }
 
-.jp-SideBar.lm-TabBar.jp-mod-top {
+.jp-SideBar.lm-TabBar[data-side='top'] {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
-.jp-SideBar.lm-TabBar.jp-mod-bottom {
+.jp-SideBar.lm-TabBar[data-side='bottom'] {
   border-top: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
-.jp-SideBar.lm-TabBar.jp-mod-top .lm-TabBar-tab.lm-mod-current::after,
-.jp-SideBar.lm-TabBar.jp-mod-bottom .lm-TabBar-tab.lm-mod-current::after {
+.jp-SideBar.lm-TabBar[data-side='top'] .lm-TabBar-tab.lm-mod-current::after,
+.jp-SideBar.lm-TabBar[data-side='bottom'] .lm-TabBar-tab.lm-mod-current::after {
   /* Reset side-mode override; use the default tab borders. */
   display: none;
 }
@@ -263,13 +288,19 @@
   /* The side area wrapper holds the activity bar (when in top/bottom mode)
      and the stacked panel. */
   background: var(--jp-layout-color1);
+
+  /* Floor the side area width so the user cannot accidentally drag the
+     splitter to zero and lose the area. The same value already applies to
+     the stack panel children in 'side' mode; setting it here also covers
+     'top'/'bottom' mode where the wrapper holds the activity bar too. */
+  min-width: var(--jp-sidebar-min-width);
 }
 
-#jp-left-area {
+.jp-SideArea[data-side='left'] {
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-#jp-right-area {
+.jp-SideArea[data-side='right'] {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
 

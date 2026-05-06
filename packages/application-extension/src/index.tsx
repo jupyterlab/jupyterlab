@@ -912,19 +912,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     }
 
     let zoomOnWheel = false;
-    let activityBarPosition: ILabShell.SideBarPosition = 'side';
+    let activityBarPosition: ILabShell.ActivityBarPosition = 'side';
 
     settingRegistry
       .load('@jupyterlab/application-extension:shell')
       .then(settings => {
         zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
         activityBarPosition = settings.get('activityBarPosition')
-          .composite as ILabShell.SideBarPosition;
+          .composite as ILabShell.ActivityBarPosition;
 
         settings.changed.connect(() => {
           zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
           const newPosition = settings.get('activityBarPosition')
-            .composite as ILabShell.SideBarPosition;
+            .composite as ILabShell.ActivityBarPosition;
           if (newPosition !== activityBarPosition) {
             activityBarPosition = newPosition;
             commands.notifyCommandChanged(CommandIDs.setActivityBarPosition);
@@ -958,7 +958,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               properties: {
                 position: {
                   type: 'string',
-                  enum: ['side', 'top', 'bottom'],
+                  oneOf: [
+                    { const: 'side', title: trans.__('Side') },
+                    { const: 'top', title: trans.__('Top') },
+                    { const: 'bottom', title: trans.__('Bottom') }
+                  ],
                   description: trans.__('The activity bar position')
                 },
                 isPalette: {
@@ -1329,7 +1333,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
         // side area rehydration depends on the current position.
         labShell.updateConfig({
           activityBarPosition: settings.get('activityBarPosition')
-            .composite as ILabShell.SideBarPosition
+            .composite as ILabShell.ActivityBarPosition
         });
 
         // Add a layer of customization to support app shell mode
