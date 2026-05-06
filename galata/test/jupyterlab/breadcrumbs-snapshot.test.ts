@@ -21,6 +21,30 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await contents.deleteDirectory(tmpPath);
   });
 
+  // The page fixture's `autoGoto` navigates to `tree/${tmpPath}`, which
+  // internally executes `filebrowser:open-path`. Occasionally that command
+  // races the contents API, cannot resolve `tmpPath`, and surfaces a
+  // "Cannot open" error dialog while leaving the file browser at root
+  // (#18806). Wait for either the breadcrumb to settle on `tmpPath` or
+  // the error dialog to appear; if the dialog is up, dismiss it and
+  // navigate manually so each test starts in a known state.
+  test.beforeEach(async ({ page, tmpPath }) => {
+    const breadcrumbItem = page.locator(
+      `${BREADCRUMB_SELECTOR} >> text=${tmpPath}`
+    );
+    const errorDialog = page.locator('.jp-Dialog:has-text("Cannot open")');
+    await breadcrumbItem
+      .or(errorDialog)
+      .first()
+      .waitFor({ state: 'visible' });
+
+    if ((await errorDialog.count()) > 0) {
+      await errorDialog.getByRole('button', { name: 'Close' }).click();
+      await errorDialog.waitFor({ state: 'hidden' });
+      await page.filebrowser.openDirectory(tmpPath);
+    }
+  });
+
   test('should render correctly with wide sidebar', async ({
     page,
     tmpPath
@@ -31,9 +55,6 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
 
     // Set a wide viewport to accommodate sidebar expansion
     await page.setViewportSize({ width: 1600, height: 720 });
-
-    // Wait for file browser to stabilize
-    await page.locator(BREADCRUMB_SELECTOR).waitFor();
 
     // Configure Breadcrumbs Settings
     await page.evaluate(async pluginId => {
@@ -65,26 +86,13 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     page,
     tmpPath
   }) => {
-    // Wait for the file browser to settle before doing anything else.
-    await page.locator(BREADCRUMB_SELECTOR).waitFor();
-
     // Create a few sibling directories so the completion menu has entries
     await page.contents.createDirectory(`${tmpPath}/alpha`);
     await page.contents.createDirectory(`${tmpPath}/beta`);
     await page.contents.createDirectory(`${tmpPath}/gamma`);
 
-    // Refresh the file browser so its directory listing picks up the
-    // freshly created siblings. Without this, `openDirectory`'s walk
-    // through `tmpPath` can race with the listing fetch and time out
-    // waiting for `alpha` to appear (issue #18806).
-    await page.filebrowser.refresh();
-
     // Navigate into one of them so the breadcrumb path is non-empty
     await page.filebrowser.openDirectory(`${tmpPath}/alpha`);
-
-    // Wait for the breadcrumbs to reflect the navigated path before
-    // attempting to interact with the breadcrumb area.
-    await page.locator(`${BREADCRUMB_SELECTOR} >> text=alpha`).waitFor();
 
     // Click on the empty space of the breadcrumb bar to enter edit mode
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
