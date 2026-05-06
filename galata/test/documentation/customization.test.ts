@@ -312,12 +312,16 @@ test.describe('Activity bar at top', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
     await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
-    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+
+    await page.sidebar.openTab('jp-property-inspector');
+
+    // Wait for kernel to settle on idle
     await page
       .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
       .waitFor();
-
-    await page.sidebar.openTab('jp-property-inspector');
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+      .waitFor();
 
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-activity-bar-top.png'
@@ -352,12 +356,16 @@ test.describe('Activity bar at bottom', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
     await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
-    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+
+    await page.sidebar.openTab('jp-property-inspector');
+
+    // Wait for kernel to settle on idle
     await page
       .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
       .waitFor();
-
-    await page.sidebar.openTab('jp-property-inspector');
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+      .waitFor();
 
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-activity-bar-bottom.png'
