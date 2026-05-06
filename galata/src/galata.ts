@@ -26,12 +26,20 @@ import { JupyterLabPage } from './jupyterlabpage';
 export namespace galata {
   /**
    * Default user settings:
-   * - Deactivate codemirror cursor blinking to avoid noise in screenshots
+   * - Deactivate cursor blinking to avoid noise in screenshots
+   * - Fix fonts to ensure consistent screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
       checkForUpdates: false,
       fetchNews: 'false'
+    },
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
     },
     '@jupyterlab/fileeditor-extension:plugin': {},
     '@jupyterlab/notebook-extension:tracker': {},
@@ -41,17 +49,19 @@ export namespace galata {
       }
     },
     '@jupyterlab/terminal-extension:plugin': {
-      cursorBlink: false
+      cursorBlink: false,
+      fontFamily: '"DejaVu Mono"'
     },
     '@jupyterlab/apputils-extension:themes': {
       overrides: {
+        'code-font-family': '"DejaVu Mono"',
         // DejaVu Sans (system on Ubuntu) does not support Chinese, so
         // we fall back to Noto Simplified Chinese (for tests where only
         // a few Chinese characters are shown). For tests where the whole
         // UI is meant to be displayed in a non-Latin script, drop the
         // "system-ui" part so that `font-display: swap` is respected.
-        'content-font-family': 'system-ui, "Noto Sans SC Variable"',
-        'ui-font-family': 'system-ui, "Noto Sans SC Variable"'
+        'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
+        'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
       }
     }
   };

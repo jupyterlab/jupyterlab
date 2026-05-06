@@ -37,12 +37,12 @@ The completed extension, showing the [Astronomy Picture of the Day for 24 Jul 20
 :::{note}
 Prefer trying the tutorial in the browser first?
 
-- [Step 0: Template baseline][apod-playground-00]
-- [Step 1: Show a panel][apod-playground-01]
-- [Step 2: Show an image][apod-playground-02]
-- [Step 3: Style and attribution][apod-playground-03]
-- [Step 4: Refactor and refresh][apod-playground-04]
-- [Step 5: Restore panel state (final tutorial state)][apod-playground-05]
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts&hide=all&fromURLToFolder=step-0">Step 0: Template baseline</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all&fromURLToFolder=step-1">Step 1: Show a panel</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts&hide=all&fromURLToFolder=step-2">Step 2: Show an image</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/572572da88a780711470fcf29d9520979837b2ce/src/index.ts&hide=all&fromURLToFolder=step-3">Step 3: Style and attribution</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts&hide=all&fromURLToFolder=step-4">Step 4: Refactor and refresh</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&hide=all&fromURLToFolder=step-5">Step 5: Restore panel state (final tutorial state)</a>
 
 After opening a step, run `Load Current File As Extension` from the editor toolbar (or command palette).
 You can also launch the playground on Binder:
@@ -55,7 +55,7 @@ You can also launch the playground on Binder:
 <div
   class="jp-plugin-playground-embed"
   data-playground-hide="all"
-  data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts"
+  data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&fromURLToFolder=step-5"
   data-playground-title="JupyterLab extension tutorial interactive example"
   data-playground-description="Interactive example for the final APOD tutorial state."
 ></div>
@@ -186,7 +186,7 @@ git add .
 git commit -m 'Seed apod project from extension template'
 ```
 
-You can also open this seed state in [Plugin Playground][apod-playground-00].
+You can also open this seed state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts&hide=all&fromURLToFolder=step-0">Plugin Playground</a>.
 
 :::{note}
 This step is not technically necessary, but it is good practice to
@@ -462,7 +462,7 @@ The in-progress extension, showing a blank panel.
 If your widget is not behaving, compare your code with the reference
 project state at the [01-show-a-panel
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-01-show-a-panel).
-You can also open this state in [Plugin Playground][apod-playground-01].
+You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all&fromURLToFolder=step-1">Plugin Playground</a>.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -599,7 +599,7 @@ If you don't see a image at all, compare your code with the
 [02-show-an-image
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-02-show-an-image)
 in the reference project. You can also open this state in
-[Plugin Playground][apod-playground-02]. When it's working, make another git
+<a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts&hide=all&fromURLToFolder=step-2">Plugin Playground</a>. When it's working, make another git
 commit.
 
 ```bash
@@ -713,7 +713,7 @@ of the image.
 If anything is not working correctly, compare your code with the reference project
 [03-style-and-attribute
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-03-style-and-attribute).
-You can also open this state in [Plugin Playground][apod-playground-03].
+You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/572572da88a780711470fcf29d9520979837b2ce/src/index.ts&hide=all&fromURLToFolder=step-3">Plugin Playground</a>.
 When everything is working as expected, make another commit.
 
 ```bash
@@ -892,7 +892,7 @@ image.
 If anything is not working correctly, compare your code with the
 [04-refactor-and-refresh
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-04-refactor-and-refresh).
-You can also open this state in [Plugin Playground][apod-playground-04]
+You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts&hide=all&fromURLToFolder=step-4">Plugin Playground</a>
 to debug. Once it is working properly, commit it.
 
 ```bash
@@ -1039,7 +1039,7 @@ The completed extension, showing the [Astronomy Picture of the Day for 24 Jul 20
 
 Refer to the [05-restore-panel-state
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-05-restore-panel-state)
-or open this state in [Plugin Playground][apod-playground-05]
+or open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&hide=all&fromURLToFolder=step-5">Plugin Playground</a>
 if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
@@ -1150,12 +1150,3 @@ learning, here are some suggestions about what to try next:
 - Add a setting for the user to put in their [API key](https://api.nasa.gov/#authentication) so they can make many more requests per hour than the demo key allows.
 - Push your extension git repository to GitHub.
 - Learn how to write {ref}`other kinds of extensions <developer-extensions>`.
-
-<!-- Plugin Playground links pinned to jupyterlab/jupyterlab_apod commit refs used in each tutorial step. -->
-
-[apod-playground-00]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts&hide=all
-[apod-playground-01]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all
-[apod-playground-02]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts&hide=all
-[apod-playground-03]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/572572da88a780711470fcf29d9520979837b2ce/src/index.ts&hide=all
-[apod-playground-04]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts&hide=all
-[apod-playground-05]: https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&hide=all

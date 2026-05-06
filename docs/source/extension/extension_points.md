@@ -214,7 +214,7 @@ export default plugin;
 <div
   class="jp-plugin-playground-embed"
   data-playground-hide="all"
-  data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/extension-examples/0ff7dc53f876a2ad9388eb71c188156a572014fc/command-palette/src/index.ts"
+  data-playground-query="path=extension-examples/command-palette/src/index.ts"
   data-playground-title="Extension examples command palette interactive example"
   data-playground-description="Extension examples: command-palette."
 ></div>
