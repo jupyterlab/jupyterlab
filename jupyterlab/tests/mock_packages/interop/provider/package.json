@@ -1,9 +1,9 @@
 {
   "name": "@jupyterlab/mock-provider",
-  "version": "4.6.0-alpha.4",
+  "version": "4.6.0-alpha.5",
   "private": true,
   "dependencies": {
-    "@jupyterlab/mock-token": "^4.6.0-alpha.4"
+    "@jupyterlab/mock-token": "^4.6.0-alpha.5"
   },
   "devDependencies": {
     "@jupyter/builder": "^0.0.8"

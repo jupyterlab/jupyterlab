@@ -536,6 +536,22 @@ class ExtensionManager(PluginManager):
 
         self._listings_cache = {r["name"]: r for r in rules}
 
+    async def _is_allowed_by_listing(self, name: str) -> bool:
+        """Return whether the listing policy permits installing this extension."""
+        if self._listing_fetch is None:
+            return True
+        if self._listings_cache is None:
+            await self._fetch_listings()
+        normalized = self._normalize_name(name)
+        normalized_cache = {self._normalize_name(k) for k in self._listings_cache}
+        if self._listings_block_mode:
+            return normalized not in normalized_cache
+        else:
+            return normalized in normalized_cache
+
+    async def is_install_allowed(self, name: str, _version: str | None = None) -> bool:
+        return await self._is_allowed_by_listing(name)
+
     async def _get_installed_extensions(
         self, get_latest_version=True
     ) -> dict[str, ExtensionPackage]:
