@@ -10,6 +10,7 @@
 :root {
   --jp-private-sidebar-tab-width: 32px;
   --jp-private-sidebar-tab-horizontal-height: 28px;
+  --jp-private-sidebar-tab-horizontal-scrollbar-height: 4px;
   --jp-private-sidebar-tab-horizontal-padding: 16px;
 
   /* Icon (20px, see `.jp-SideBar-tabIcon`) + horizontal padding on both
@@ -45,10 +46,14 @@
 
 .jp-SideBar.lm-TabBar[data-orientation='horizontal'] {
   min-height: calc(
-    var(--jp-private-sidebar-tab-horizontal-height) + var(--jp-border-width)
+    var(--jp-private-sidebar-tab-horizontal-height) +
+      var(--jp-private-sidebar-tab-horizontal-scrollbar-height) +
+      var(--jp-border-width)
   );
   max-height: calc(
-    var(--jp-private-sidebar-tab-horizontal-height) + var(--jp-border-width)
+    var(--jp-private-sidebar-tab-horizontal-height) +
+      var(--jp-private-sidebar-tab-horizontal-scrollbar-height) +
+      var(--jp-border-width)
   );
 }
 
@@ -70,17 +75,34 @@
   height: 100%;
   width: 100%;
 
-  /* Scroll horizontally on overflow, but hide the scrollbar — too thin a
-     strip for a visible bar. Overflowing tabs are reached via swipe,
-     shift + wheel, or keyboard. */
+  /* Scroll horizontally on overflow with the same tiny scrollbar styling used
+     elsewhere in the application. Reserve the gutter to avoid shifting tabs
+     when the scrollbar appears. */
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none;
+  scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
 .jp-SideBar[data-orientation='horizontal']
-  .lm-TabBar-content::-webkit-scrollbar {
-  display: none;
+  .lm-TabBar-content::-webkit-scrollbar,
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar-corner {
+  background-color: transparent;
+  height: var(--jp-private-sidebar-tab-horizontal-scrollbar-height);
+  width: var(--jp-private-sidebar-tab-horizontal-scrollbar-height);
+}
+
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar-thumb {
+  background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
+}
+
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar-track:horizontal {
+  border-left: 0 solid transparent;
+  border-right: 0 solid transparent;
 }
 
 .jp-SideBar[data-orientation='vertical'] .lm-TabBar-tab {
