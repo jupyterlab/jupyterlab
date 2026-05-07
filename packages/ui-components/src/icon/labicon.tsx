@@ -775,6 +775,19 @@ export namespace LabIcon {
 
 namespace Private {
   const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^'" )]+)\1\s*\)/g;
+  const URL_ID_CANDIDATE = 'url(';
+  const REFERENCE_URL_ATTRIBUTES = new Set([
+    'clip-path',
+    'fill',
+    'stroke',
+    'filter',
+    'mask',
+    'marker-start',
+    'marker-mid',
+    'marker-end',
+    'style'
+  ]);
+  let idSuffixCounter = 0;
 
   export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
     const clone = svgElement.cloneNode(true) as HTMLElement;
@@ -901,30 +914,35 @@ namespace Private {
   }
 
   function uniquifySvgIds(svgNode: HTMLElement): void {
-    const idNodes = Array.from(svgNode.querySelectorAll('[id]'));
-    if (svgNode.hasAttribute('id')) {
-      idNodes.unshift(svgNode);
-    }
-    if (!idNodes.length) {
-      return;
-    }
-
-    const suffix = UUID.uuid4();
     const idMap = new Map<string, string>();
+    idSuffixCounter =
+      idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
+    const suffix = idSuffixCounter.toString(36);
+    let hasId = false;
 
-    idNodes.forEach(node => {
+    walkSvgElements(svgNode, node => {
+      if (!node.hasAttribute('id')) {
+        return;
+      }
       const id = node.getAttribute('id');
       if (!id) {
         return;
       }
-
-      const mapped = idMap.get(id) ?? `${id}-${suffix}`;
-      idMap.set(id, mapped);
+      hasId = true;
+      let mapped = idMap.get(id);
+      if (!mapped) {
+        mapped = `${id}-${suffix}`;
+        idMap.set(id, mapped);
+      }
       node.setAttribute('id', mapped);
     });
 
+    if (!hasId) {
+      return;
+    }
+
     rewriteIdReferences(svgNode, idMap);
-    svgNode.querySelectorAll('*').forEach(node => {
+    walkSvgElements(svgNode, node => {
       rewriteIdReferences(node, idMap);
     });
   }
@@ -933,39 +951,60 @@ namespace Private {
     node: Element,
     idMap: Map<string, string>
   ): void {
-    Array.from(node.attributes).forEach(attr => {
-      let nextValue = attr.value.replace(
-        URL_ID_REFERENCE,
-        (full, quote, id) => {
-          const mapped = idMap.get(id);
-          return mapped ? `url(${quote}#${mapped}${quote})` : full;
+    const attrs = node.attributes;
+    for (let i = 0; i < attrs.length; i++) {
+      const attr = attrs[i];
+      const name = attr.name;
+      const value = attr.value;
+
+      if (name === 'href' || name === 'xlink:href') {
+        if (value.startsWith('#')) {
+          const mapped = idMap.get(value.slice(1));
+          if (mapped) {
+            node.setAttribute(name, `#${mapped}`);
+          }
         }
-      );
+        continue;
+      }
+
+      if (name === 'aria-labelledby' || name === 'aria-describedby') {
+        if (value.includes(' ')) {
+          const nextValue = value
+            .split(/\s+/)
+            .map(id => idMap.get(id) ?? id)
+            .join(' ');
+          if (nextValue !== value) {
+            node.setAttribute(name, nextValue);
+          }
+        } else {
+          const mapped = idMap.get(value);
+          if (mapped) {
+            node.setAttribute(name, mapped);
+          }
+        }
+        continue;
+      }
 
       if (
-        (attr.name === 'href' || attr.name === 'xlink:href') &&
-        nextValue.startsWith('#')
+        !REFERENCE_URL_ATTRIBUTES.has(name) ||
+        !value.includes(URL_ID_CANDIDATE)
       ) {
-        const mapped = idMap.get(nextValue.slice(1));
-        if (mapped) {
-          nextValue = `#${mapped}`;
-        }
+        continue;
       }
 
-      if (attr.name === 'aria-labelledby' || attr.name === 'aria-describedby') {
-        nextValue = nextValue
-          .split(/\s+/)
-          .map(id => idMap.get(id) ?? id)
-          .join(' ');
-      }
+      const nextValue = value.replace(URL_ID_REFERENCE, (full, quote, id) => {
+        const mapped = idMap.get(id);
+        return mapped ? `url(${quote}#${mapped}${quote})` : full;
+      });
 
-      if (nextValue !== attr.value) {
-        node.setAttribute(attr.name, nextValue);
+      if (nextValue !== value) {
+        node.setAttribute(name, nextValue);
       }
-    });
+    }
+
     if (node.tagName.toLowerCase() === 'style') {
       const styleText = node.textContent;
-      if (styleText === null) {
+      if (!styleText || !styleText.includes(URL_ID_CANDIDATE)) {
         return;
       }
 
@@ -980,6 +1019,20 @@ namespace Private {
       if (nextStyleText !== styleText) {
         node.textContent = nextStyleText;
       }
+    }
+  }
+
+  function walkSvgElements(
+    svgNode: HTMLElement,
+    onElement: (node: Element) => void
+  ): void {
+    onElement(svgNode);
+
+    const walker = document.createTreeWalker(svgNode, NodeFilter.SHOW_ELEMENT);
+    let node = walker.nextNode();
+    while (node) {
+      onElement(node as Element);
+      node = walker.nextNode();
     }
   }
 
