@@ -207,7 +207,6 @@
   },
   "devDependencies": {
     "@jupyter/builder": "^0.0.8",
-    "@jupyterlab/builder": "^4.6.0-alpha.5",
     "@jupyterlab/buildutils": "^4.6.0-alpha.5",
     "@module-federation/runtime-tools": "^2.0.0",
     "@rsdoctor/rspack-plugin": "^1.3.12",
@@ -466,7 +465,6 @@
       "@jupyterlab/video-extension": "../packages/video-extension",
       "@jupyterlab/workspaces": "../packages/workspaces",
       "@jupyterlab/workspaces-extension": "../packages/workspaces-extension",
-      "@jupyterlab/builder": "../builder",
       "@jupyterlab/buildutils": "../buildutils",
       "@jupyterlab/template": "../buildutils/template",
       "@jupyterlab/galata": "../galata",
