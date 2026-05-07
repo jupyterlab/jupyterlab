@@ -448,6 +448,24 @@ export default defineConfig([
       '**/*.spec.ts',
       '**/*.spec.tsx',
       '**/test/**/*.ts',
+      '**/test/**/*.tsx',
+      '**/tests/**/*.ts',
+      '**/tests/**/*.tsx',
+      'testutils/**/*.ts',
+      'testutils/**/*.tsx',
+      'galata/test/**/*.ts',
+      'galata/test/**/*.tsx'
+    ],
+
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
+  },
+  {
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**/*.ts',
       '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',

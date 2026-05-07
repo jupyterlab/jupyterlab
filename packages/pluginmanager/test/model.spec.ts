@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Token } from '@lumino/coreutils';
 import { simulate } from 'simulate-event';
 import type { JupyterLab } from '@jupyterlab/application';

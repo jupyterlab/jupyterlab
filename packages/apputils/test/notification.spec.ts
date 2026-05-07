@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Notification } from '@jupyterlab/apputils';
 import type { ReadonlyJSONValue } from '@lumino/coreutils';

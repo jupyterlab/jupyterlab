@@ -30,7 +30,6 @@ const sessions = {
   }
   /* eslint-enable  */
 };
-/* eslint-disable @typescript-eslint/no-explicit-any */
 spy.mockImplementation((status, method, setting) => {
   return Promise.resolve({
     ok: true,

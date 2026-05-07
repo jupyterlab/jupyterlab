@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommandRegistry } from '@lumino/commands';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { ILatexTypesetter } from '@jupyterlab/rendermime';

@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { MarkdownCell } from '@jupyterlab/cells';
 import { CodeCell } from '@jupyterlab/cells';
