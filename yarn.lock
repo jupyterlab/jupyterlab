@@ -2433,7 +2433,6 @@ __metadata:
     "@jupyterlab/application-extension": ~4.6.0-alpha.5
     "@jupyterlab/apputils-extension": ~4.6.0-alpha.5
     "@jupyterlab/audio-extension": ~4.6.0-alpha.5
-    "@jupyterlab/builder": ^4.6.0-alpha.5
     "@jupyterlab/buildutils": ^4.6.0-alpha.5
     "@jupyterlab/cell-toolbar-extension": ~4.6.0-alpha.5
     "@jupyterlab/celltags-extension": ~4.6.0-alpha.5
@@ -2637,50 +2636,6 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
-  languageName: unknown
-  linkType: soft
-
-"@jupyterlab/builder@^4.6.0-alpha.5, @jupyterlab/builder@workspace:builder":
-  version: 0.0.0-use.local
-  resolution: "@jupyterlab/builder@workspace:builder"
-  dependencies:
-    "@lumino/algorithm": ^2.0.4
-    "@lumino/application": ^2.4.8
-    "@lumino/commands": ^2.3.3
-    "@lumino/coreutils": ^2.2.2
-    "@lumino/disposable": ^2.1.5
-    "@lumino/domutils": ^2.0.4
-    "@lumino/dragdrop": ^2.1.8
-    "@lumino/messaging": ^2.0.4
-    "@lumino/properties": ^2.0.4
-    "@lumino/signaling": ^2.1.5
-    "@lumino/virtualdom": ^2.0.4
-    "@lumino/widgets": ^2.7.5
-    "@rspack/core": ^1.7.8
-    "@types/fs-extra": ^9.0.1
-    "@types/glob": ^7.1.1
-    "@types/node": ^20.14.8
-    "@types/supports-color": ^5.3.0
-    "@types/watchpack": ^2.4.4
-    ajv: ^8.12.0
-    commander: ^9.4.1
-    css-loader: ^6.7.1
-    duplicate-package-checker-webpack-plugin: ^3.0.0
-    fs-extra: ^10.1.0
-    glob: ~7.1.6
-    license-webpack-plugin: ^4.0.2
-    mini-svg-data-uri: ^1.4.4
-    path-browserify: ^1.0.0
-    process: ^0.11.10
-    rimraf: ~5.0.5
-    source-map-loader: ~1.0.2
-    style-loader: ~3.3.1
-    supports-color: ^7.2.0
-    typescript: ~5.9.3
-    webpack-merge: ^5.8.0
-    worker-loader: ^3.0.2
-  bin:
-    build-labextension: ./lib/build-labextension.js
   languageName: unknown
   linkType: soft
 
@@ -7721,7 +7676,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/graceful-fs@npm:*, @types/graceful-fs@npm:^4.1.3":
+"@types/graceful-fs@npm:^4.1.3":
   version: 4.1.9
   resolution: "@types/graceful-fs@npm:4.1.9"
   dependencies:
@@ -8104,13 +8059,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/supports-color@npm:^5.3.0":
-  version: 5.3.0
-  resolution: "@types/supports-color@npm:5.3.0"
-  checksum: abb7d12804402c4f59bf2d9d32800d1fc2b6a1003cb2459fc843e9fa128d24b5a62e6e7cd3d5cdaadcdf9c0af36208a12c9dff4fa9f90de0565f545457a93736
-  languageName: node
-  linkType: hard
-
 "@types/tapable@npm:2.2.7":
   version: 2.2.7
   resolution: "@types/tapable@npm:2.2.7"
@@ -8161,16 +8109,6 @@ __metadata:
   version: 1.4.8
   resolution: "@types/url-parse@npm:1.4.8"
   checksum: 44a5e96ed4b579c43750f3578bfa9165f97a359c3b2a85ee126e9c16db964f6ea105e152afd3d1adbd15850a8b812043215f3820112177bb4255a60b432dbd85
-  languageName: node
-  linkType: hard
-
-"@types/watchpack@npm:^2.4.4":
-  version: 2.4.5
-  resolution: "@types/watchpack@npm:2.4.5"
-  dependencies:
-    "@types/graceful-fs": "*"
-    "@types/node": "*"
-  checksum: 8314198f659fe0f024466f0b07cdbe2409264e5f532d75552303de52fcda88c94e6a21d49a527a4ddfe7e599a9a13a0b0ac5e3523edf9fe7ae49943ed0295774
   languageName: node
   linkType: hard
 
