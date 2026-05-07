@@ -115,7 +115,7 @@
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
-    "@jupyter/ydoc": ">=4.0.0-a0",
+    "@jupyter/ydoc": "4.0.0-a1",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-jest": "^28.0.0",

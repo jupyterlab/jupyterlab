@@ -57,7 +57,7 @@
     "@codemirror/search": "^6.6.0",
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.14",
-    "@jupyter/ydoc": "^4.0.0-a0",
+    "@jupyter/ydoc": "4.0.0-a1",
     "@jupyterlab/codeeditor": "^4.6.0-alpha.5",
     "@jupyterlab/coreutils": "^6.6.0-alpha.5",
     "@jupyterlab/documentsearch": "^4.6.0-alpha.5",

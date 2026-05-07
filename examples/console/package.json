@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@jupyter/web-components": "^0.16.6",
-    "@jupyter/ydoc": "^4.0.0-a0",
+    "@jupyter/ydoc": "4.0.0-a1",
     "@jupyterlab/application": "^4.6.0-alpha.5",
     "@jupyterlab/codemirror": "^4.6.0-alpha.5",
     "@jupyterlab/console": "^4.6.0-alpha.5",
