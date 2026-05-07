@@ -2191,8 +2191,6 @@ export class Notebook extends StaticNotebook {
     // Make sure we have a valid active cell.
     // eslint-disable-next-line no-self-assign
     this.activeCellIndex = this.activeCellIndex;
-    // After resetting selection, re-select collapsed section if needed
-    this._selectCollapsedSection(this.activeCell);
     this.update();
   }
 
@@ -2228,7 +2226,6 @@ export class Notebook extends StaticNotebook {
 
     // Move the active cell. We do this before the collapsing shortcut below.
     this.activeCellIndex = index;
-    this._selectCollapsedSection(this.widgets[index]);
 
     // Make sure the index is valid, according to the rules for setting and clipping the
     // active cell index. This may change the index.
@@ -2310,6 +2307,7 @@ export class Notebook extends StaticNotebook {
       this._selectionChanged.emit(void 0);
     }
   }
+
   /**
    * Get the head and anchor of a contiguous cell selection.
    *
