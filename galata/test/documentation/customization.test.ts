@@ -302,23 +302,8 @@ test.describe('Activity bar at top', () => {
     });
 
     await page.sidebar.setWidth();
-    await page.sidebar.setWidth(271, 'right');
-
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
-    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
-
     await page.sidebar.openTab('jp-property-inspector');
-
-    // Wait for kernel to settle on idle
-    await page
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
-    await page
-      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
-      .waitFor();
+    await page.sidebar.setWidth(271, 'right');
 
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-activity-bar-top.png'
@@ -346,23 +331,8 @@ test.describe('Activity bar at bottom', () => {
     });
 
     await page.sidebar.setWidth();
-    await page.sidebar.setWidth(271, 'right');
-
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
-    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
-
     await page.sidebar.openTab('jp-property-inspector');
-
-    // Wait for kernel to settle on idle
-    await page
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
-    await page
-      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
-      .waitFor();
+    await page.sidebar.setWidth(271, 'right');
 
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-activity-bar-bottom.png'
