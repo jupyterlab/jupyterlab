@@ -1201,6 +1201,33 @@ describe('@jupyter/notebook', () => {
         widget.deselectAll();
         expect(selected(widget)).toEqual([]);
       });
+
+      it('should re-select children of active collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 1;
+        heading.headingCollapsed = true;
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[1]);
+        widget.deselectAll();
+        expect(selected(widget)).toEqual([0, 1]);
+      });
     });
 
     describe('#extendContiguousSelectionTo()', () => {
