@@ -1,0 +1,95 @@
+name: Update PR comment with UI test report
+
+on:
+  workflow_run:
+    workflows: ["UI Tests"]
+    types: [completed]
+
+jobs:
+  update-preview-comment:
+    name: Add report link to preview comment
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download PR comment data
+        uses: actions/download-artifact@v4
+        with:
+          name: galata-pr-comment-data
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Update binder preview comment
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { prNumber, reportUrl, failing, flaky } = JSON.parse(
+              fs.readFileSync('pr-comment-data.json', 'utf8')
+            );
+
+            if (!prNumber || !reportUrl) {
+              console.warn('Missing PR number or report URL; skipping preview comment update.');
+              return;
+            }
+
+            const reportLinePrefix = 'View the integration tests report in the browser: ';
+
+            let badgeStatus;
+            let badgeColor;
+            let badgeTitle;
+            if (failing > 0) {
+              badgeStatus = `${failing}_failing`;
+              badgeColor = 'red';
+              badgeTitle = `${failing} failing UI tests`;
+            } else if (flaky > 0) {
+              badgeStatus = `${flaky}_flaky`;
+              badgeColor = 'orange';
+              badgeTitle = `${flaky} flaky UI tests`;
+            } else {
+              badgeStatus = 'All_passing';
+              badgeColor = 'success';
+              badgeTitle = 'All tests UI tests passed';
+            }
+
+            const reportUrlWithFilter = failing > 0
+              ? `${reportUrl}#?q=s%3Afailed`
+              : flaky > 0
+              ? `${reportUrl}#?q=s%3Aflaky`
+              : reportUrl;
+
+            const badgeUrl = `https://img.shields.io/badge/UI_tests-${badgeStatus}-${badgeColor}`;
+            const reportBadge = `[![UI tests report](${badgeUrl} '${badgeTitle}')](${reportUrlWithFilter})`;
+            const reportLine = `${reportLinePrefix}${reportBadge}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            const binderComment = comments
+              .slice()
+              .reverse()
+              .find(comment => comment.body.includes("![Binder]("));
+            if (!binderComment) {
+              return;
+            }
+
+            const existingReportLine = binderComment.body
+              .split('\n')
+              .find(line => line.startsWith(reportLinePrefix));
+            const updatedBody =
+              existingReportLine === undefined
+                ? `${binderComment.body.trimEnd()}\n\n${reportLine}`
+                : binderComment.body.replace(existingReportLine, reportLine);
+
+            if (binderComment.body.trim() !== updatedBody.trim()) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: binderComment.id,
+                body: updatedBody
+              });
+            }

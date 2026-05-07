@@ -40,6 +40,7 @@ Before we get started, here are some resources for hands-on practice or more in-
 Learn how to write JupyterLab extensions with these guides:
 
 - {ref}`extension-tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
+- [JupyterLab Plugin Playground (JupyterLite)](https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/): Prototype and test extension ideas directly in the browser.
 - {ref}`Making Extensions Compatible with Multiple Applications Tutorial <multiple-ui-extensions>`
   A tutorial for making extensions that work in both JupyterLab, Jupyter Notebook 7+ and more
 - The [JupyterLab Extension Examples Repository](https://github.com/jupyterlab/extension-examples): A short tutorial series to learn how to develop extensions for JupyterLab by example.
@@ -281,7 +282,7 @@ activated before the application is set. As a consequence, the first parameter o
 
 A source extension is a JavaScript (npm) package that exports one or more plugins. All JupyterLab extensions are developed as source extensions (for example, prebuilt extensions are built from source extensions).
 
-A source extension has metadata in the `jupyterlab` field of its `package.json` file. The [JSON schema](https://github.com/jupyterlab/jupyterlab/blob/main/builder/metadata_schema.json) for the metadata is distributed in the `@jupyterlab/builder` package.
+A source extension has metadata in the `jupyterlab` field of its `package.json` file. The [JSON schema](https://github.com/jupyterlab/jupyter-builder/blob/main/src/metadata_schema.json) for the metadata is distributed in the `@jupyter/builder` package.
 
 We will talk about each `jupyterlab` metadata field in `package.json` for source extensions below.
 
@@ -586,7 +587,7 @@ module.exports = {
 };
 ```
 
-This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyterlab/blob/main/builder/src/extensionConfig.ts)
+This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyter-builder/blob/main/src/extensionConfig.ts)
 when building the prebuilt extension.
 
 (prebuilt-dev-workflow)=
