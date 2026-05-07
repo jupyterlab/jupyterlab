@@ -425,13 +425,7 @@ close the notebook without saving it.`,
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name === 'dirty') {
-          this.triggerStateChange({
-            name: 'dirty',
-            oldValue: undefined,
-            newValue: this.dirty
-          });
-        } else if (value.oldValue !== value.newValue) {
+        if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
