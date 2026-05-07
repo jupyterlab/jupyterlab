@@ -412,7 +412,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     leftHandler.sideBar.addClass('jp-mod-left');
     leftHandler.sideBar.node.setAttribute('role', 'complementary');
     leftHandler.stackedPanel.id = 'jp-left-stack';
-    leftHandler.area.id = 'jp-left-area';
     leftHandler.area.addClass('jp-SideArea');
     leftHandler.area.node.setAttribute('data-side', 'left');
 
@@ -420,7 +419,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     rightHandler.sideBar.addClass('jp-mod-right');
     rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.stackedPanel.id = 'jp-right-stack';
-    rightHandler.area.id = 'jp-right-area';
     rightHandler.area.addClass('jp-SideArea');
     rightHandler.area.node.setAttribute('data-side', 'right');
 

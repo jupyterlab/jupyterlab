@@ -12,9 +12,8 @@
   --jp-private-sidebar-tab-horizontal-height: 28px;
   --jp-private-sidebar-tab-horizontal-padding: 16px;
 
-  /* Icon (20px, see `.jp-SideBar-tabIcon`) plus the horizontal padding on
-     both sides — the floor below which a horizontal tab would clip its
-     icon. */
+  /* Icon (20px, see `.jp-SideBar-tabIcon`) + horizontal padding on both
+     sides — below this a horizontal tab clips its icon. */
   --jp-private-sidebar-tab-horizontal-min-width: calc(
     20px + 2 * var(--jp-private-sidebar-tab-horizontal-padding)
   );
@@ -71,10 +70,9 @@
   height: 100%;
   width: 100%;
 
-  /* When there are more tabs than the bar can fit, the content scrolls
-     horizontally. The scrollbar itself is hidden because a visible bar in
-     such a thin strip is too distracting; users reach overflowing tabs via
-     trackpad swipe, shift + mouse wheel, or keyboard navigation. */
+  /* Scroll horizontally on overflow, but hide the scrollbar — too thin a
+     strip for a visible bar. Overflowing tabs are reached via swipe,
+     shift + wheel, or keyboard. */
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -101,9 +99,8 @@
   align-items: center;
   position: relative;
 
-  /* Stop tabs from shrinking small enough to clip the icon. Once the bar
-     can no longer fit them all the overflow scroll on `.lm-TabBar-content`
-     takes over. */
+  /* Floor at icon + padding so tabs can't shrink to clip the icon;
+     beyond that, overflow scroll on `.lm-TabBar-content` takes over. */
   min-width: var(--jp-private-sidebar-tab-horizontal-min-width);
 }
 
@@ -289,10 +286,9 @@
      and the stacked panel. */
   background: var(--jp-layout-color1);
 
-  /* Floor the side area width so the user cannot accidentally drag the
-     splitter to zero and lose the area. The same value already applies to
-     the stack panel children in 'side' mode; setting it here also covers
-     'top'/'bottom' mode where the wrapper holds the activity bar too. */
+  /* Floor so the splitter can't be dragged to zero and lose the area.
+     The stack panel children already enforce this in 'side' mode; setting
+     it on the wrapper also covers 'top'/'bottom'. */
   min-width: var(--jp-sidebar-min-width);
 }
 
