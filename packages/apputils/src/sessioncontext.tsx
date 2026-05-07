@@ -803,7 +803,9 @@ export class SessionContext implements ISessionContext {
    * @returns A promise that resolves with whether to ask the user to select a kernel.
    *
    * #### Notes
-   * If a server session exists on the current path, we will connect to it.
+   * If a server session exists on the current path, we will connect to it
+   * unless opening explicitly without a kernel (`shouldStart === false`
+   * without a preferred kernel `id`).
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -835,16 +837,22 @@ export class SessionContext implements ISessionContext {
     const manager = this.sessionManager;
     await manager.ready;
     await manager.refreshRunning();
-    const model = find(manager.running(), item => {
-      return item.path === this._path;
-    });
-    if (model) {
-      try {
-        const session = manager.connectTo({ model });
-        this._handleNewSession(session);
-      } catch (err) {
-        void this._handleSessionError(err);
-        return Promise.reject(err);
+    const preference = this.kernelPreference;
+    const shouldConnectToPathSession =
+      preference.shouldStart !== false || !!preference.id;
+
+    if (shouldConnectToPathSession) {
+      const model = find(manager.running(), item => {
+        return item.path === this._path;
+      });
+      if (model) {
+        try {
+          const session = manager.connectTo({ model });
+          this._handleNewSession(session);
+        } catch (err) {
+          void this._handleSessionError(err);
+          return Promise.reject(err);
+        }
       }
     }
 
