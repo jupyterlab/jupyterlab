@@ -255,7 +255,7 @@ export default defineConfig([
       ],
 
       '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
@@ -448,6 +448,24 @@ export default defineConfig([
       '**/*.spec.ts',
       '**/*.spec.tsx',
       '**/test/**/*.ts',
+      '**/test/**/*.tsx',
+      '**/tests/**/*.ts',
+      '**/tests/**/*.tsx',
+      'testutils/**/*.ts',
+      'testutils/**/*.tsx',
+      'galata/test/**/*.ts',
+      'galata/test/**/*.tsx'
+    ],
+
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
+  },
+  {
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**/*.ts',
       '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',
@@ -472,6 +490,12 @@ export default defineConfig([
             "CallExpression[callee.property.name='screenshot'] > ObjectExpression > Property[key.name='path']",
           message:
             "Do not pass 'path' to screenshot(). Save the result of toMatchSnapshot() or use expect() assertions instead."
+        },
+        {
+          selector:
+            "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure'] > ObjectExpression > Property[key.name='mode'][value.value='serial']",
+          message:
+            "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
       ]
     }
