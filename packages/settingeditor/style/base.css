@@ -298,6 +298,7 @@
 }
 
 .jp-SettingsImport-title {
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   font-size: 1rem;
   font-weight: bold;
   padding: 10px 15px;

@@ -2263,6 +2263,22 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
       });
 
+      it('should be undoable', () => {
+        widget.activeCell!.model.sharedModel.setSource('# foo');
+        expect(widget.activeCell!.model.type).toBe('code');
+        NotebookActions.setMarkdownHeader(widget, 3);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          '### foo'
+        );
+        expect(widget.activeCell!.model.type).toBe('markdown');
+        const index = widget.activeCellIndex;
+        NotebookActions.undo(widget);
+        // TODO: find a way to avoid index drift on undo
+        widget.activeCellIndex = index;
+        expect(widget.activeCell!.model.type).toBe('code');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('# foo');
+      });
+
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
         expect(
@@ -2306,7 +2322,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: true });
         expect(cell.trusted).toBe(true);
       });
 
@@ -2317,13 +2333,15 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await dismissDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: false });
         expect(cell.trusted).not.toBe(true);
       });
 
       it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
-        await expect(NotebookActions.trust(widget)).resolves.not.toThrow();
+        await expect(NotebookActions.trust(widget)).resolves.toEqual({
+          trusted: false
+        });
       });
 
       it('should show a dialog if all cells are trusted', async () => {
@@ -2336,7 +2354,7 @@ describe('@jupyterlab/notebook', () => {
         }
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await expect(promise).resolves.not.toThrow();
+        await expect(promise).resolves.toEqual({ trusted: true });
       });
     });
   });

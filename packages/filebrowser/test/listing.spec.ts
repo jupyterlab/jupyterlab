@@ -189,14 +189,12 @@ describe('filebrowser/listing', () => {
         const goUpSpy = jest.spyOn(dirListing as any, 'goUp');
         const editNode = dirListing['_editNode'];
         simulate(editNode, 'keydown', {
-          key: 'Backspace',
-          keyCode: 8
+          key: 'Backspace'
         });
         // Can input node's value be changed with simulated key events?
         editNode.value = 'new_name.txt';
         simulate(editNode, 'keydown', {
-          key: 'Enter',
-          keyCode: 13
+          key: 'Enter'
         });
         const newName = await newNamePromise;
         expect(newName).toBe('new_name.txt');
@@ -211,8 +209,7 @@ describe('filebrowser/listing', () => {
         // Give it a name that should put it at the bottom
         editNode.value = 'z.txt';
         simulate(editNode, 'keydown', {
-          key: 'Enter',
-          keyCode: 13
+          key: 'Enter'
         });
         await newNamePromise;
         const sortedItems = [...dirListing.sortedItems()];
@@ -228,8 +225,7 @@ describe('filebrowser/listing', () => {
         const newNamePromise = dirListing.rename();
         const editNode = dirListing['_editNode'];
         simulate(editNode, 'keydown', {
-          key: 'Escape',
-          keyCode: 27
+          key: 'Escape'
         });
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
@@ -435,8 +431,7 @@ describe('filebrowser/listing', () => {
         const itemNode = dirListing['_items'][2];
         const nameNode = dirListing['_renderer'].getNameNode(itemNode);
         simulate(nameNode, 'keydown', {
-          key: 'Enter',
-          keyCode: 13
+          key: 'Enter'
         });
         expect(handleOpenSpy).toHaveBeenCalledTimes(2);
         const sortedItems = [...dirListing.sortedItems()];
@@ -473,8 +468,7 @@ describe('filebrowser/listing', () => {
           dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
           'keydown',
           {
-            key: 'ArrowDown',
-            keyCode: 40
+            key: 'ArrowDown'
           }
         );
         await signalToPromise(dirListing.updated);
@@ -490,8 +484,7 @@ describe('filebrowser/listing', () => {
           dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
           'keydown',
           {
-            key: 'ArrowDown',
-            keyCode: 40
+            key: 'ArrowDown'
           }
         );
         await signalToPromise(dirListing.updated);
@@ -515,7 +508,6 @@ describe('filebrowser/listing', () => {
             'keydown',
             {
               key: 'ArrowDown',
-              keyCode: 40,
               shiftKey: true
             }
           );
@@ -541,7 +533,6 @@ describe('filebrowser/listing', () => {
           await signalToPromise(dirListing.updated);
           simulate(dirListing.node, 'keydown', {
             key: 'ArrowDown',
-            keyCode: 40,
             shiftKey: true
           });
           await signalToPromise(dirListing.updated);

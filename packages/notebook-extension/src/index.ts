@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module notebook-extension
@@ -66,6 +67,7 @@ import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { Notebook } from '@jupyterlab/notebook';
 import {
+  CellCounterStatus,
   CommandEditStatus,
   ExecutionIndicator,
   INotebookCellExecutor,
@@ -312,6 +314,8 @@ namespace CommandIDs {
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
+  export const toggleOutputScrolling = 'notebook:toggle-output-scrolling';
+
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
   export const replaceSelection = 'notebook:replace-selection';
@@ -390,11 +394,11 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
 };
 
 /**
- * The notebook cell factory provider.
+ * The notebook and cell factory provider.
  */
 const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
-  description: 'Provides the notebook cell factory.',
+  description: 'Provides the notebook and cell factory.',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -456,6 +460,50 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
       item,
       align: 'right',
       rank: 4,
+      isActive: () =>
+        !!shell.currentWidget &&
+        !!tracker.currentWidget &&
+        shell.currentWidget === tracker.currentWidget
+    });
+  }
+};
+
+/**
+ * A plugin providing a current cell/total cells status item.
+ */
+export const cellCounterItem: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-counter-status',
+  description: 'Adds a notebook cell counter status widget.',
+  autoStart: true,
+  requires: [INotebookTracker, ITranslator],
+  optional: [IStatusBar],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    translator: ITranslator,
+    statusBar: IStatusBar | null
+  ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
+
+    const { shell } = app;
+    const item = new CellCounterStatus({ translator });
+
+    const updateNotebook = () => {
+      const current = tracker.currentWidget;
+      item.model.notebook = current && current.content;
+    };
+
+    tracker.currentChanged.connect(updateNotebook);
+    updateNotebook();
+
+    statusBar.registerStatusItem(cellCounterItem.id, {
+      priority: 1,
+      item,
+      align: 'right',
+      rank: 2.5,
       isActive: () =>
         !!shell.currentWidget &&
         !!tracker.currentWidget &&
@@ -691,7 +739,8 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
       formatList.forEach(function (key) {
-        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+        const capCaseKey = trans.__(formattedKey);
         const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
         let args = {
           format: key,
@@ -1027,7 +1076,8 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
             value => value.const === key
           ).length > 0;
         if (!mimetypeExists) {
-          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          const altOption = trans.__(formattedKey);
           const option = formatLabels[key] ? formatLabels[key] : altOption;
           const mimeTypeValue = response[key].output_mimetype;
 
@@ -1203,6 +1253,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   executionIndicator,
   exportPlugin,
   tools,
+  cellCounterItem,
   commandEditItem,
   notebookTrustItem,
   widgetFactoryPlugin,
@@ -2014,6 +2065,8 @@ function activateNotebookHandler(
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
 
+    widget.content.node.setAttribute('data-trust-command', CommandIDs.trust);
+
     // Set up the title icon
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
@@ -2426,6 +2479,25 @@ function getCurrent(
   return widget;
 }
 
+// Whether all selected code cells have output scrolling enabled.
+function isOutputScrollingEnabled(notebook: Notebook): boolean {
+  if (!notebook.model || !notebook.activeCell) {
+    return false;
+  }
+
+  let hasCodeCell = false;
+  for (const cell of notebook.widgets) {
+    if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
+      hasCodeCell = true;
+      if (!(cell as CodeCell).outputsScrolled) {
+        return false;
+      }
+    }
+  }
+
+  return hasCodeCell;
+}
+
 /**
  * Add the notebook commands to the application's command registry.
  */
@@ -2450,6 +2522,11 @@ function addCommands(
         cell
           .getHeadings()
           .then(() => {
+            // Heading parsing is async; avoid restoring an outdated collapse
+            // state if the heading has been expanded in the meantime.
+            if (cell.isDisposed || !cell.headingCollapsed) {
+              return;
+            }
             NotebookActions.setHeadingCollapse(cell, true, notebook);
           })
           .catch(error => {
@@ -2835,12 +2912,17 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
         const { context, content } = current;
-        return NotebookActions.trust(content).then(() => context.save());
+        const trustResult = await NotebookActions.trust(content);
+        if (trustResult.trusted) {
+          await context.save();
+        }
+        return trustResult;
       }
+      return { trusted: false };
     },
     isEnabled,
     describedBy: {
@@ -4409,6 +4491,43 @@ function addCommands(
       }
     }
   });
+  commands.addCommand(CommandIDs.toggleOutputScrolling, {
+    label: args =>
+      args['isMenu'] || args['isPalette']
+        ? trans.__('Enable Scrolling for Outputs')
+        : trans.__('Toggle Scrolling for Outputs'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        if (isOutputScrollingEnabled(current.content)) {
+          return NotebookActions.disableOutputScrolling(current.content);
+        }
+
+        return NotebookActions.enableOutputScrolling(current.content);
+      }
+    },
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        return isOutputScrollingEnabled(current.content);
+      } else {
+        return false;
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          isMenu: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from a menu')
+          }
+        }
+      }
+    }
+  });
   commands.addCommand(CommandIDs.selectLastRunCell, {
     label: trans.__('Select current running or last run cell'),
     execute: args => {
@@ -4977,7 +5096,7 @@ namespace Private {
       this._index = options.index !== undefined ? options.index : -1;
       this._cell = options.cell || null;
       this.id = `LinkedOutputView-${UUID.uuid4()}`;
-      this.title.label = 'Output View';
+      this.title.label = trans.__('Output View');
       this.title.icon = notebookIcon;
       this.title.caption = this._notebook.title.label
         ? trans.__('For Notebook: %1', this._notebook.title.label)

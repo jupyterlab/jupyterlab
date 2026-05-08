@@ -95,8 +95,10 @@ The execution stops where the breakpoint is set:
 
 ### Explore the code state
 
-Exploring the code state is done with the debugger sidebar. It shows a variable explorer,
-a list of breakpoints, a source preview and the possibility to navigate the call stack.
+You can explore the code state with the debugger sidebar. It shows a variable explorer,
+a list of breakpoints, a list of kernel sources and enables navigating the call stack.
+
+The sidebar may also include a source preview if "Show Sources in Main Area" setting is turned off.
 
 ```{image} ../images/debugger-sidebar.png
 
@@ -129,11 +131,23 @@ they will be shown in the list of breakpoints:
 
 **Source**
 
-The source panel shows the source of the current file being debugged:
+By default the source of the current file being debugged will show up in the
+main area in a read-only editor view. The auto-opened source view widget
+will auto-close when the debugger steps into another file,
+or when the debugging session ends.
 
-```{image} ../images/debugger-source.png
+```{image} ../images/debugger-open-module.png
 
 ```
 
-If the source corresponds to a cell that has been deleted, clicking on the
-_Open in Main Area_ button will open a read-only view of the source.
+If you would like to keep the source view open for longer, you can manually
+open it by clicking on the file in the "Kernel Sources" panel as manually
+opened files will not auto-close.
+
+If you prefer the source to show up in the sidebar instead, you can
+turn off the "Show Sources in Main Area" setting in the Settings Editor
+which will make it display as another panel:
+
+```{image} ../images/debugger-with-source-panel.png
+
+```

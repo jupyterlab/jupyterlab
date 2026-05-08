@@ -120,6 +120,16 @@
     }
   },
   {
+    "id": "application:reset-widget-zoom",
+    "label": "Reset Widget Zoom",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:set-mode",
     "label": "Set the layout `mode`.",
     "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
@@ -295,6 +305,26 @@
         "side",
         "index"
       ]
+    }
+  },
+  {
+    "id": "application:zoom-in-widget",
+    "label": "Zoom In Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:zoom-out-widget",
+    "label": "Zoom Out Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -2306,8 +2336,8 @@
       "type": "object",
       "properties": {
         "query": {
-          "description": "Search query to pre-fill in the extension manager",
-          "type": "string"
+          "type": "string",
+          "description": "Search query to pre-fill in the extension manager"
         }
       }
     }
@@ -2461,6 +2491,16 @@
     }
   },
   {
+    "id": "filebrowser:edit-path",
+    "label": "Edit File Browser Path",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
@@ -2481,7 +2521,7 @@
   },
   {
     "id": "filebrowser:go-up",
-    "label": "go up",
+    "label": "Go Up",
     "caption": "",
     "shortcuts": [
       "Backspace"
@@ -3430,9 +3470,7 @@
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3447,9 +3485,7 @@
     "id": "inspector:open",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3472,7 +3508,9 @@
     "id": "inspector:toggle",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl I"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -3736,6 +3774,16 @@
       "required": [
         "path"
       ]
+    }
+  },
+  {
+    "id": "markdownviewer:trust",
+    "label": "Trust Markdown Preview",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -4932,6 +4980,21 @@
     "args": {
       "type": "object",
       "properties": {}
+    }
+  },
+  {
+    "id": "notebook:toggle-output-scrolling",
+    "label": "Toggle Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu"
+        }
+      }
     }
   },
   {

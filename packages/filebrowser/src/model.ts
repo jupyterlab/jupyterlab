@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
@@ -812,6 +813,13 @@ export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
     return this._includeHiddenFiles
       ? super.items()
       : filter(super.items(), value => !value.name.startsWith('.'));
+  }
+
+  /**
+   * Whether hidden files are currently included.
+   */
+  get includeHiddenFiles(): boolean {
+    return this._includeHiddenFiles;
   }
 
   /**
