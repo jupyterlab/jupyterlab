@@ -28,8 +28,7 @@ const MOVE_STATE_KEY = 'section-mover:layout';
 /**
  * Shape of the persisted state.
  * Keyed by target panel ID; each entry records ordered sections, their
- * absolute index in the destination accordion (which may include non-moved
- * widgets such as the file browser's main panel), and whether each was
+ * absolute index in the destination accordion, and whether each was
  * collapsed when the state was saved.
  */
 interface IMoveSectionsState {
@@ -47,7 +46,7 @@ namespace CommandIDs {
 }
 
 /**
- * Generic plugin that moves sections between any registered source sidebar
+ * Plugin that moves sections between any registered source sidebar
  * and target panel. Sources and targets announce themselves via
  * IMovableSectionRegistry.
  */
@@ -76,7 +75,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       { sourceId: string; sectionId: string }
     >();
 
-    // hosted widget → provenance info
     const widgetToInfo = new Map<
       Widget,
       {
@@ -87,13 +85,10 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
     >();
 
-    // hosted accordion title → widget (for context-menu lookup)
+    // For context-menu lookup
     const hostedTitleToWidget = new WeakMap<HTMLElement, Widget>();
 
-    // targets that already have drag-reorder set up
     const dragSetupDone = new Set<string>();
-
-    // pending restorations: sourceId → Map<sectionId, { targetId, collapsed, index }>
     const pendingSections = new Map<
       string,
       Map<string, { targetId: string; collapsed: boolean; index?: number }>
@@ -108,10 +103,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       },
       true
     );
-
-    // ------------------------------------------------------------------ //
-    // Save state                                                           //
-    // ------------------------------------------------------------------ //
 
     const saveState = async (): Promise<void> => {
       if (!stateDB) {
@@ -139,7 +130,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           })
           .filter((e): e is NonNullable<typeof e> => e !== null);
         // Apply in saved accordion order so insertWidget on restore lands in
-        // the right spot relative to non-moved widgets (e.g. mainPanel).
+        // the right spot relative to non-moved widgets.
         sections.sort(
           (a, b) =>
             (a.index ?? Number.MAX_SAFE_INTEGER) -
@@ -154,10 +145,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         state as unknown as ReadonlyPartialJSONValue
       );
     };
-
-    // ------------------------------------------------------------------ //
-    // Drag-to-reorder                                                      //
-    // ------------------------------------------------------------------ //
 
     const addDragHandle = (widget: Widget, accordion: AccordionPanel): void => {
       const idx = Array.from(accordion.widgets).indexOf(widget);
@@ -279,9 +266,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       });
     };
 
-    // ------------------------------------------------------------------ //
-    // Core move operations                                                 //
-    // ------------------------------------------------------------------ //
+    // Core move operations
 
     const applyMoveToTarget = (
       widget: Widget,
@@ -406,9 +391,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       void saveState();
     };
 
-    // ------------------------------------------------------------------ //
-    // Source / target wiring                                               //
-    // ------------------------------------------------------------------ //
+    // Source / target wiring
 
     const setupSource = (
       sourceId: string,
@@ -458,10 +441,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         setupAccordionDrag(panel.accordionPanel, targetId);
       }
     };
-
-    // ------------------------------------------------------------------ //
-    // Commands                                                             //
-    // ------------------------------------------------------------------ //
 
     app.commands.addCommand(CommandIDs.moveSectionTo, {
       label: (args: ReadonlyPartialJSONObject) =>
@@ -585,9 +564,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       rank: 10
     });
 
-    // ------------------------------------------------------------------ //
-    // Bootstrap from registry                                              //
-    // ------------------------------------------------------------------ //
+    // Bootstrap from registry
 
     for (const [id, { sidebar }] of registry.getSources()) {
       setupSource(id, sidebar);
@@ -603,9 +580,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       setupTarget(id, label, panel);
     });
 
-    // ------------------------------------------------------------------ //
-    // State restoration                                                    //
-    // ------------------------------------------------------------------ //
+    // State restoration
 
     if (stateDB) {
       void stateDB.fetch(MOVE_STATE_KEY).then(value => {
