@@ -228,18 +228,14 @@
 .jp-DirListing-headerItem.jp-id-created,
 .jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
-  /* stylelint-disable */
   container-type: inline-size;
-  /* stylelint-enable */
 }
 
 /**
- * Use container queries (not yet supported by our version of stylelint)
- * to display either a small or large header for the date and file size columns.
+ * Use container queries to display either a small or large header
+ * for the date and file size columns.
  */
-/* stylelint-disable */
 @container (max-width: 100px) {
-  /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
@@ -259,9 +255,7 @@
   }
 }
 
-/* stylelint-disable */
 @container (min-width: 100px) {
-  /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
