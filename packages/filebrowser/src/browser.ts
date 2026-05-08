@@ -19,7 +19,7 @@ import {
 } from '@jupyterlab/ui-components';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { AccordionPanel, Panel, SplitPanel } from '@lumino/widgets';
+import { AccordionPanel, Panel } from '@lumino/widgets';
 import type { Widget } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
@@ -35,6 +35,13 @@ const FILE_BROWSER_CLASS = 'jp-FileBrowser';
  * The class name added to file browser panel (gather filter, breadcrumbs and listing).
  */
 const FILE_BROWSER_PANEL_CLASS = 'jp-FileBrowser-Panel';
+
+/**
+ * The class name added to the lazily-created accordion that hosts mainPanel
+ * and any moved-in sections. Lets CSS give it `flex: 1 1 auto` so it fills
+ * the SidePanel content wrapper.
+ */
+const FILE_BROWSER_ACCORDION_CLASS = 'jp-FileBrowser-accordion';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -644,103 +651,63 @@ export class FileBrowser
     }
   }
 
-  /**
-   * Add a widget to the bottom area of the file browser.
-   *
-   * On first call, this wraps the file browser content in a vertical
-   * SplitPanel with a resizable handle. Subsequent calls add widgets
-   * to the bottom AccordionPanel.
-   *
-   * @param widget - The widget to add to the bottom area.
-   */
-  addBottomWidget(widget: Widget): void {
-    if (!this._splitPanel) {
-      this._splitPanel = new SplitPanel({
-        orientation: 'vertical',
-        spacing: 1
-      });
-      this._splitPanel.addClass('jp-FileBrowser-splitPanel');
-
-      this._bottomPanel = new AccordionPanel({
-        layout: AccordionToolbar.createLayout({})
-      });
-      this._bottomPanel.addClass('jp-FileBrowser-bottomPanel');
-
-      // Reparent mainPanel into the SplitPanel
-      this._splitPanel.addWidget(this.mainPanel);
-      this._splitPanel.addWidget(this._bottomPanel);
-
-      // Add SplitPanel to the SidePanel content
-      this.content.addWidget(this._splitPanel);
-
-      this._splitPanel.setRelativeSizes([0.7, 0.3]);
-    }
-
-    this._bottomPanel!.addWidget(widget);
-  }
-
-  /**
-   * Remove a widget from the bottom area of the file browser.
-   *
-   * If the bottom area becomes empty, the SplitPanel is unwrapped
-   * and the file browser returns to its normal layout.
-   *
-   * @param widget - The widget to remove from the bottom area.
-   */
-  removeBottomWidget(widget: Widget): void {
-    if (!this._bottomPanel) {
-      return;
-    }
-    widget.parent = null;
-
-    if (this._bottomPanel.widgets.length === 0) {
-      // Unwrap: move mainPanel back to content directly
-      this.content.addWidget(this.mainPanel);
-      this._splitPanel!.dispose();
-      this._splitPanel = null;
-      this._bottomPanel = null;
-    }
-  }
-
-  /**
-   * The widgets in the bottom area, if any.
-   */
-  get bottomWidgets(): ReadonlyArray<Widget> {
-    return this._bottomPanel?.widgets ?? [];
-  }
-
   // IIMovableSectionDestination implementation
 
   addSection(widget: Widget): void {
-    this.addBottomWidget(widget);
+    if (!this._accordion) {
+      const accordion = new AccordionPanel({
+        layout: AccordionToolbar.createLayout({})
+      });
+      accordion.addClass(FILE_BROWSER_ACCORDION_CLASS);
+      // Move mainPanel into the accordion, then add the new section.
+      accordion.addWidget(this.mainPanel);
+      accordion.addWidget(widget);
+      this._accordion = accordion;
+      this.content.addWidget(accordion);
+    } else {
+      this._accordion.addWidget(widget);
+    }
     this._sectionChanged.emit();
   }
 
   removeSectionWidget(widget: Widget): void {
-    this.removeBottomWidget(widget);
+    if (!this._accordion || widget.parent !== this._accordion) {
+      return;
+    }
+    widget.parent = null;
+    // If only mainPanel is left, exit accordion mode and put mainPanel
+    // back as a direct child of the content wrapper.
+    if (
+      this._accordion.widgets.length === 1 &&
+      this._accordion.widgets[0] === this.mainPanel
+    ) {
+      if (this.mainPanel.isHidden) {
+        this.mainPanel.show();
+      }
+      this.content.addWidget(this.mainPanel);
+      this._accordion.dispose();
+      this._accordion = null;
+    }
     this._sectionChanged.emit();
   }
 
+  /**
+   * Sections currently hosted by the file browser, excluding `mainPanel`.
+   * Empty when no sections have been moved in.
+   */
   get sections(): ReadonlyArray<Widget> {
-    return this.bottomWidgets;
+    if (!this._accordion) {
+      return [];
+    }
+    return this._accordion.widgets.filter(w => w !== this.mainPanel);
   }
 
+  /**
+   * The accordion panel hosting the file listing and any moved-in sections,
+   * or `null` while no sections have been moved in.
+   */
   get accordionPanel(): AccordionPanel | null {
-    return this._bottomPanel;
-  }
-
-  /**
-   * The split panel used for the bottom area, if active.
-   */
-  get splitPanel(): SplitPanel | null {
-    return this._splitPanel;
-  }
-
-  /**
-   * The bottom accordion panel, if active.
-   */
-  get bottomPanel(): AccordionPanel | null {
-    return this._bottomPanel;
+    return this._accordion;
   }
 
   /**
@@ -782,8 +749,7 @@ export class FileBrowser
   private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
   private _sectionChanged = new Signal<this, void>(this);
-  private _splitPanel: SplitPanel | null = null;
-  private _bottomPanel: AccordionPanel | null = null;
+  private _accordion: AccordionPanel | null = null;
 }
 
 /**

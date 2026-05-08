@@ -73,7 +73,7 @@ import {
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import type { ContextMenu } from '@lumino/widgets';
+import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -433,33 +433,42 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       );
     }
 
-    // Persist and restore the split panel divider position independently of
-    // the generic move plugin. The split panel is created lazily on first
-    // section add, so we wire it up via sectionChanged.
+    // Persist and restore the relative sizes of the file-browser accordion
+    // sections (file listing + any moved-in sections). The accordion is
+    // created lazily when the first section is moved in, so we wire up
+    // size persistence the first time it appears.
     if (stateDB) {
-      const SPLIT_KEY = 'filebrowser:section-split-sizes';
-      let splitConnected = false;
+      const SIZES_KEY = 'filebrowser:section-sizes';
+      let wiredAccordion: AccordionPanel | null = null;
 
-      const saveSplitSizes = async () => {
-        if (defaultBrowser.splitPanel) {
-          await stateDB.save(
-            SPLIT_KEY,
-            defaultBrowser.splitPanel.relativeSizes() as unknown as ReadonlyPartialJSONValue
-          );
+      const wireAccordion = () => {
+        const accordion = defaultBrowser.accordionPanel;
+        if (!accordion || wiredAccordion === accordion) {
+          return;
         }
+        wiredAccordion = accordion;
+        const saveSizes = async () => {
+          await stateDB.save(
+            SIZES_KEY,
+            accordion.relativeSizes() as unknown as ReadonlyPartialJSONValue
+          );
+        };
+        accordion.handleMoved.connect(saveSizes);
+        void stateDB.fetch(SIZES_KEY).then(value => {
+          if (Array.isArray(value)) {
+            accordion.setRelativeSizes(value as number[]);
+          }
+        });
       };
 
       defaultBrowser.sectionChanged.connect(() => {
-        if (!splitConnected && defaultBrowser.splitPanel) {
-          splitConnected = true;
-          defaultBrowser.splitPanel.handleMoved.connect(saveSplitSizes);
-          void stateDB.fetch(SPLIT_KEY).then(value => {
-            if (value && defaultBrowser.splitPanel) {
-              defaultBrowser.splitPanel.setRelativeSizes(value as number[]);
-            }
-          });
+        wireAccordion();
+        if (wiredAccordion) {
+          void stateDB.save(
+            SIZES_KEY,
+            wiredAccordion.relativeSizes() as unknown as ReadonlyPartialJSONValue
+          );
         }
-        void saveSplitSizes();
       });
     }
 
