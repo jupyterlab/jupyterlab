@@ -23,9 +23,6 @@
       "path": "../docregistry"
     },
     {
-      "path": "../filebrowser"
-    },
-    {
       "path": "../rendermime-interfaces"
     },
     {
