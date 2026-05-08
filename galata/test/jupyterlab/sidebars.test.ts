@@ -350,12 +350,12 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 test.describe('Running Sessions - Move Sections to File Browser', () => {
   const RUNNING_SECTION_TITLE_SELECTOR =
     '#jp-running-sessions .jp-AccordionPanel-title';
-  const BOTTOM_SECTION_TITLE_SELECTOR =
-    '.jp-FileBrowser-bottomPanel .jp-AccordionPanel-title';
+  const HOSTED_SECTION_TITLE_SELECTOR =
+    '.jp-FileBrowser-accordion .jp-hosted-section';
   const MOVE_TO_FB_COMMAND_SELECTOR =
-    '.lm-Menu-content .lm-Menu-item[data-command="running:move-section-to-filebrowser"]';
-  const MOVE_BACK_TO_RUNNING_SESSIONS_OPTION_SELECTOR =
-    '.lm-Menu-content .lm-Menu-item[data-command="running:move-section-back-from-filebrowser"]';
+    '.lm-Menu-content .lm-Menu-item[data-command="apputils:move-section-to"]';
+  const MOVE_BACK_COMMAND_SELECTOR =
+    '.lm-Menu-content .lm-Menu-item[data-command="apputils:move-section-back"]';
 
   test.use({
     tmpPath: 'running-sessions-filebrowser-test'
@@ -379,41 +379,53 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
       .locator(RUNNING_SECTION_TITLE_SELECTOR)
       .filter({ hasText: 'Open Tabs' });
     await openTabsRunningTitle.click({ button: 'right' });
-    await page.locator(MOVE_TO_FB_COMMAND_SELECTOR).click();
+    await page
+      .locator(MOVE_TO_FB_COMMAND_SELECTOR)
+      .filter({ hasText: 'File Browser' })
+      .click();
 
     // Move "Terminals" to the file browser
     const terminalsRunningTitle = page
       .locator(RUNNING_SECTION_TITLE_SELECTOR)
       .filter({ hasText: 'Terminals' });
     await terminalsRunningTitle.click({ button: 'right' });
-    await page.locator(MOVE_TO_FB_COMMAND_SELECTOR).click();
+    await page
+      .locator(MOVE_TO_FB_COMMAND_SELECTOR)
+      .filter({ hasText: 'File Browser' })
+      .click();
 
-    // Switch to the file browser and verify both sections are in the bottom panel
+    // Switch to the file browser and verify both sections are hosted there
     await page.sidebar.openTab('filebrowser');
-    const openTabsBottomTitle = page
-      .locator(BOTTOM_SECTION_TITLE_SELECTOR)
+    const openTabsHostedTitle = page
+      .locator(HOSTED_SECTION_TITLE_SELECTOR)
       .filter({ hasText: 'Open Tabs' });
-    const terminalsBottomTitle = page
-      .locator(BOTTOM_SECTION_TITLE_SELECTOR)
+    const terminalsHostedTitle = page
+      .locator(HOSTED_SECTION_TITLE_SELECTOR)
       .filter({ hasText: 'Terminals' });
-    await expect(openTabsBottomTitle).toBeVisible();
-    await expect(terminalsBottomTitle).toBeVisible();
+    await expect(openTabsHostedTitle).toBeVisible();
+    await expect(terminalsHostedTitle).toBeVisible();
 
-    // Screenshot with both sections visible in the bottom panel
+    // Screenshot with both sections visible in the file browser accordion
     const leftPanel = page.sidebar.getContentPanelLocator('left');
     expect(await leftPanel.screenshot()).toMatchSnapshot(
       'filebrowser-with-moved-sections.png'
     );
 
     // Move "Open Tabs" back via context menu
-    await openTabsBottomTitle.click({ button: 'right' });
-    await page.locator(MOVE_BACK_TO_RUNNING_SESSIONS_OPTION_SELECTOR).click();
-    await expect(openTabsBottomTitle).not.toBeVisible();
+    await openTabsHostedTitle.click({ button: 'right' });
+    await page
+      .locator(MOVE_BACK_COMMAND_SELECTOR)
+      .filter({ hasText: 'Running Sessions' })
+      .click();
+    await expect(openTabsHostedTitle).not.toBeVisible();
 
     // Move "Terminals" back via context menu
-    await terminalsBottomTitle.click({ button: 'right' });
-    await page.locator(MOVE_BACK_TO_RUNNING_SESSIONS_OPTION_SELECTOR).click();
-    await expect(terminalsBottomTitle).not.toBeVisible();
+    await terminalsHostedTitle.click({ button: 'right' });
+    await page
+      .locator(MOVE_BACK_COMMAND_SELECTOR)
+      .filter({ hasText: 'Running Sessions' })
+      .click();
+    await expect(terminalsHostedTitle).not.toBeVisible();
 
     // Both sections should be back in running sessions
     await page.sidebar.openTab('jp-running-sessions');
