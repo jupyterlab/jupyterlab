@@ -120,6 +120,7 @@
     "eslint-plugin-jest": "^28.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-tsdoc": "^0.5.2",
     "prettier": "^3.8.1",
     "stylelint": "^15.10.1",
     "stylelint-config-prettier": "^9.0.3",

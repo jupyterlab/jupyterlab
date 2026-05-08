@@ -8,6 +8,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
+import tsdocPlugin from 'eslint-plugin-tsdoc';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import jupyterPlugin from '@jupyter/eslint-plugin';
@@ -201,7 +202,8 @@ export default defineConfig([
       '@typescript-eslint': tseslint.plugin,
       jest: jestPlugin,
       react: reactPlugin,
-      jupyter: jupyterPlugin
+      jupyter: jupyterPlugin,
+      tsdoc: tsdocPlugin
     },
 
     languageOptions: {
@@ -234,6 +236,7 @@ export default defineConfig([
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-untranslated-string': 'error',
+      'tsdoc/syntax': 'warn',
       '@typescript-eslint/naming-convention': [
         'error',
         {

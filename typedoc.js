@@ -83,6 +83,7 @@ const entryPoints = packages
 module.exports = {
   entryPoints,
   entryPointStrategy: 'packages',
+  treatValidationWarningsAsErrors: process.env.CI === 'true',
   includeVersion: false,
   externalSymbolLinkMappings: {
     '@codemirror/language': {
