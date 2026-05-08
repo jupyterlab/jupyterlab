@@ -457,7 +457,7 @@ export interface IMovableSectionSource {
 
   /**
    * Fired when a new section becomes available in this sidebar.
-   * The generic move plugin uses this to attach context-menu CSS and to
+   * The Move plugin uses this to attach context-menu CSS and to
    * restore state for sections that arrive after the plugin activates.
    */
   readonly sectionAdded: ISignal<this, ISectionEntry>;
@@ -467,7 +467,7 @@ export interface IMovableSectionSource {
  * Panel that can receive sections from other sidebars.
  * Target panels (e.g. File Browser) implement this.
  */
-export interface IIMovableSectionDestination {
+export interface IMovableSectionDestination {
   /**
    * Add a section widget to this panel.
    */
@@ -510,7 +510,7 @@ export interface IMovableSectionRegistry {
   registerTarget(
     id: string,
     label: string,
-    panel: IIMovableSectionDestination
+    panel: IMovableSectionDestination
   ): void;
 
   /**
@@ -526,7 +526,7 @@ export interface IMovableSectionRegistry {
    */
   getTargets(): ReadonlyMap<
     string,
-    { label: string; panel: IIMovableSectionDestination }
+    { label: string; panel: IMovableSectionDestination }
   >;
 
   /**
@@ -542,7 +542,7 @@ export interface IMovableSectionRegistry {
    */
   readonly targetPanelRegistered: ISignal<
     IMovableSectionRegistry,
-    { id: string; label: string; panel: IIMovableSectionDestination }
+    { id: string; label: string; panel: IMovableSectionDestination }
   >;
 }
 

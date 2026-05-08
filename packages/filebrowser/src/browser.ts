@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import type { IIMovableSectionDestination } from '@jupyterlab/apputils';
+import type { IMovableSectionDestination } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
@@ -77,7 +77,7 @@ const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
  */
 export class FileBrowser
   extends SidePanel
-  implements IIMovableSectionDestination
+  implements IMovableSectionDestination
 {
   /**
    * Construct a new file browser.
@@ -651,7 +651,7 @@ export class FileBrowser
     }
   }
 
-  // IIMovableSectionDestination implementation
+  // IMovableSectionDestination implementation
 
   addSection(widget: Widget): void {
     if (!this._accordion) {

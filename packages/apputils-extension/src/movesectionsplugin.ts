@@ -8,7 +8,7 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  type IIMovableSectionDestination,
+  type IMovableSectionDestination,
   IMovableSectionRegistry,
   type IMovableSectionSource
 } from '@jupyterlab/apputils';
@@ -274,7 +274,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       sectionId: string,
       sourceLabel: string,
       targetId: string,
-      targetPanel: IIMovableSectionDestination,
+      targetPanel: IMovableSectionDestination,
       collapsed = false,
       index?: number
     ): void => {
@@ -428,7 +428,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     const setupTarget = (
       targetId: string,
       targetLabel: string,
-      panel: IIMovableSectionDestination
+      panel: IMovableSectionDestination
     ): void => {
       app.contextMenu.addItem({
         command: CommandIDs.moveSectionTo,

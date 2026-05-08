@@ -3,7 +3,7 @@
 
 import { Signal } from '@lumino/signaling';
 import type {
-  IIMovableSectionDestination,
+  IMovableSectionDestination,
   IMovableSectionRegistry,
   IMovableSectionSource
 } from './tokens';
@@ -19,7 +19,7 @@ export class MovableSectionRegistry implements IMovableSectionRegistry {
   >();
   private readonly _targets = new Map<
     string,
-    { label: string; panel: IIMovableSectionDestination }
+    { label: string; panel: IMovableSectionDestination }
   >();
   private readonly _sourcePanelRegistered = new Signal<
     this,
@@ -27,7 +27,7 @@ export class MovableSectionRegistry implements IMovableSectionRegistry {
   >(this);
   private readonly _targetPanelRegistered = new Signal<
     this,
-    { id: string; label: string; panel: IIMovableSectionDestination }
+    { id: string; label: string; panel: IMovableSectionDestination }
   >(this);
 
   get sourcePanelRegistered(): Signal<
@@ -39,7 +39,7 @@ export class MovableSectionRegistry implements IMovableSectionRegistry {
 
   get targetPanelRegistered(): Signal<
     this,
-    { id: string; label: string; panel: IIMovableSectionDestination }
+    { id: string; label: string; panel: IMovableSectionDestination }
   > {
     return this._targetPanelRegistered;
   }
@@ -56,7 +56,7 @@ export class MovableSectionRegistry implements IMovableSectionRegistry {
   registerTarget(
     id: string,
     label: string,
-    panel: IIMovableSectionDestination
+    panel: IMovableSectionDestination
   ): void {
     this._targets.set(id, { label, panel });
     this._targetPanelRegistered.emit({ id, label, panel });
@@ -71,7 +71,7 @@ export class MovableSectionRegistry implements IMovableSectionRegistry {
 
   getTargets(): ReadonlyMap<
     string,
-    { label: string; panel: IIMovableSectionDestination }
+    { label: string; panel: IMovableSectionDestination }
   > {
     return this._targets;
   }
