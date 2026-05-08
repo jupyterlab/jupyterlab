@@ -491,8 +491,7 @@ export interface IMovableSectionDestination {
 }
 
 /**
- * Registry where source and target panels register themselves,
- * enabling generic section-moving commands without hard-coded coupling.
+ * Registry where source and target panels register themselves
  */
 export interface IMovableSectionRegistry {
   /**
