@@ -11,9 +11,6 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
-// Use serial mode to avoid flaky screenshots
-test.describe.configure({ mode: 'serial' });
-
 test.describe('Overview', () => {
   test('Overview', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page, filterContent);

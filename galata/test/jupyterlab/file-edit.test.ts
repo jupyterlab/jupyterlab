@@ -68,15 +68,21 @@ test.describe('Console Interactions', () => {
     });
 
     await page.getByText('Create Console for Editor').click();
+
+    const loadingBanner = page
+      .locator('.jp-CodeConsole-banner')
+      .getByText('...');
+    // Wait for loading state in the banner to show up
+    await loadingBanner.waitFor({ state: 'attached' });
+
+    // Select kernel
     await page.getByRole('button', { name: 'Select Kernel' }).click();
 
-    await page
-      .getByText("Type 'copyright', 'credits'")
-      .waitFor({ state: 'visible' });
+    // Wait for banner to disappear once fully loaded
+    await loadingBanner.waitFor({ state: 'detached' });
 
     await page.getByText('123', { exact: true }).click();
 
-    await expect(page.getByText("Type 'copyright', 'credits'")).toBeVisible();
     await page.keyboard.press('Shift+Enter');
 
     await expect(
