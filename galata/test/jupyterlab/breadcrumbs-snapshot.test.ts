@@ -83,13 +83,18 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     page,
     tmpPath
   }) => {
+    // Use a sub-directory unique to this test so the completion list
+    // is not affected by directories created by other tests sharing
+    // `tmpPath` (in particular the wide-sidebar test's `dir1`).
+    const siblingsRoot = `${tmpPath}/completion-menu`;
+
     // Create a few sibling directories so the completion menu has entries
-    await page.contents.createDirectory(`${tmpPath}/alpha`);
-    await page.contents.createDirectory(`${tmpPath}/beta`);
-    await page.contents.createDirectory(`${tmpPath}/gamma`);
+    await page.contents.createDirectory(`${siblingsRoot}/alpha`);
+    await page.contents.createDirectory(`${siblingsRoot}/beta`);
+    await page.contents.createDirectory(`${siblingsRoot}/gamma`);
 
     // Navigate into one of them so the breadcrumb path is non-empty
-    await page.filebrowser.openDirectory(`${tmpPath}/alpha`);
+    await page.filebrowser.openDirectory(`${siblingsRoot}/alpha`);
 
     // Click on the empty space of the breadcrumb bar to enter edit mode
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
@@ -101,7 +106,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await input.waitFor({ state: 'visible' });
 
     // Clear and type the parent path to show all sibling directories
-    await input.fill(`${tmpPath}/`);
+    await input.fill(`${siblingsRoot}/`);
 
     const suggestions = page.locator('.jp-PathNavigator-suggestions');
     await suggestions.waitFor({ state: 'visible' });

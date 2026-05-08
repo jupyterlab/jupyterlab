@@ -362,9 +362,14 @@ export const test: TestType<
       helpers: IJupyterLabPage
     ): Promise<void> => {
       await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+      // Allow up to 60s for the Launcher tab to become active: the
+      // default `Utils.waitForCondition` timeout of 15s is
+      // occasionally exceeded on contended CI runners between
+      // workspace reset and the Launcher rendering
+      // (see jupyterlab/jupyterlab#18806).
       await helpers.waitForCondition(() => {
         return helpers.activity.isTabActive('Launcher');
-      });
+      }, 60000);
       // Oddly current tab is not always set to active
       if (!(await helpers.isInSimpleMode())) {
         await helpers.activity.activateTab('Launcher');
