@@ -78,6 +78,7 @@ docs = [
     "sphinx>=1.8,<8.2.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
+    "shellcheck-py",
     "pytest",
     "pytest-jupyter",
     "pytest-check-links",
@@ -117,6 +118,7 @@ test = [
 dev = [
     "build",
     "pre-commit",
+    "shellcheck-py",
     "pytest-cov",
     "coverage",
     "hatch",
