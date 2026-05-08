@@ -15,7 +15,6 @@
   },
   "devDependencies": {
     "@jupyter/builder": "^0.0.8",
-    "@jupyterlab/builder": "^4.0.0-alpha.21",
     "rimraf": "~3.0.0"
   },
   "jupyterlab": {

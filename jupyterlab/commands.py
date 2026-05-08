@@ -27,6 +27,7 @@ from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
 from jupyter_builder.jlpm import YARN_PATH
+from jupyter_builder.jupyterlab_semver import Range, gt, gte, lt, lte, make_semver
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
@@ -43,7 +44,6 @@ from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

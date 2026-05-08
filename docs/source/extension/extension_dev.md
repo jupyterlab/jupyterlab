@@ -282,7 +282,7 @@ activated before the application is set. As a consequence, the first parameter o
 
 A source extension is a JavaScript (npm) package that exports one or more plugins. All JupyterLab extensions are developed as source extensions (for example, prebuilt extensions are built from source extensions).
 
-A source extension has metadata in the `jupyterlab` field of its `package.json` file. The [JSON schema](https://github.com/jupyterlab/jupyterlab/blob/main/builder/metadata_schema.json) for the metadata is distributed in the `@jupyterlab/builder` package.
+A source extension has metadata in the `jupyterlab` field of its `package.json` file. The [JSON schema](https://github.com/jupyterlab/jupyter-builder/blob/main/src/metadata_schema.json) for the metadata is distributed in the `@jupyter/builder` package.
 
 We will talk about each `jupyterlab` metadata field in `package.json` for source extensions below.
 
@@ -587,7 +587,7 @@ module.exports = {
 };
 ```
 
-This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyterlab/blob/main/builder/src/extensionConfig.ts)
+This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyter-builder/blob/main/src/extensionConfig.ts)
 when building the prebuilt extension.
 
 (prebuilt-dev-workflow)=
