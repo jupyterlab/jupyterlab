@@ -360,8 +360,12 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
     tmpPath: 'running-sessions-filebrowser-test'
   });
 
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadContent('hello', 'text', `${tmpPath}/test.txt`);
+  });
+
   test.beforeEach(async ({ page, tmpPath }) => {
-    await page.contents.uploadContent('hello', 'text', `${tmpPath}/test.txt`);
     await page.filebrowser.openDirectory(tmpPath);
   });
 
