@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import type { ISectionPanelTarget } from '@jupyterlab/apputils';
+import type { IIMovableSectionDestination } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
@@ -68,7 +68,10 @@ const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
  * and presents itself as a flat list of files and directories with
  * breadcrumbs.
  */
-export class FileBrowser extends SidePanel implements ISectionPanelTarget {
+export class FileBrowser
+  extends SidePanel
+  implements IIMovableSectionDestination
+{
   /**
    * Construct a new file browser.
    *
@@ -706,7 +709,7 @@ export class FileBrowser extends SidePanel implements ISectionPanelTarget {
     return this._bottomPanel?.widgets ?? [];
   }
 
-  // ISectionPanelTarget implementation
+  // IIMovableSectionDestination implementation
 
   addSection(widget: Widget): void {
     this.addBottomWidget(widget);

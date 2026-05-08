@@ -8,9 +8,9 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  type IIMovableSectionDestination,
   IMovableSectionRegistry,
-  type ISectionPanelTarget,
-  type ISidebarWithSections
+  type IMovableSectionSource
 } from '@jupyterlab/apputils';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
@@ -275,7 +275,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       sectionId: string,
       sourceLabel: string,
       targetId: string,
-      targetPanel: ISectionPanelTarget,
+      targetPanel: IIMovableSectionDestination,
       collapsed = false
     ): void => {
       // Capture hidden state before reparenting
@@ -387,7 +387,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
     const setupSource = (
       sourceId: string,
-      source: ISidebarWithSections
+      source: IMovableSectionSource
     ): void => {
       for (const section of source.getSections()) {
         section.titleNode.classList.add('jp-movable-section');
@@ -420,7 +420,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     const setupTarget = (
       targetId: string,
       targetLabel: string,
-      panel: ISectionPanelTarget
+      panel: IIMovableSectionDestination
     ): void => {
       app.contextMenu.addItem({
         command: CommandIDs.moveSectionTo,
@@ -460,6 +460,11 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         if (!titleEl) {
           return false;
         }
+        // A title currently hosting a moved-in section is not a valid source —
+        // it should only offer "Move back".
+        if (titleEl.classList.contains('jp-hosted-section')) {
+          return false;
+        }
         const sectionInfo = titleToSection.get(titleEl);
         if (!sectionInfo) {
           return false;
@@ -486,7 +491,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         const titleEl = lastContextEl.closest(
           '.jp-movable-section'
         ) as HTMLElement | null;
-        if (!titleEl) {
+        if (!titleEl || titleEl.classList.contains('jp-hosted-section')) {
           return;
         }
         const sectionInfo = titleToSection.get(titleEl);

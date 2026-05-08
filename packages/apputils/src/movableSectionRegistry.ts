@@ -3,9 +3,9 @@
 
 import { Signal } from '@lumino/signaling';
 import type {
+  IIMovableSectionDestination,
   IMovableSectionRegistry,
-  ISectionPanelTarget,
-  ISidebarWithSections
+  IMovableSectionSource
 } from './tokens';
 
 /**
@@ -15,31 +15,31 @@ import type {
 export class MovableSectionRegistry implements IMovableSectionRegistry {
   private readonly _sources = new Map<
     string,
-    { label: string; sidebar: ISidebarWithSections }
+    { label: string; sidebar: IMovableSectionSource }
   >();
   private readonly _targets = new Map<
     string,
-    { label: string; panel: ISectionPanelTarget }
+    { label: string; panel: IIMovableSectionDestination }
   >();
   private readonly _sourcePanelRegistered = new Signal<
     this,
-    { id: string; label: string; sidebar: ISidebarWithSections }
+    { id: string; label: string; sidebar: IMovableSectionSource }
   >(this);
   private readonly _targetPanelRegistered = new Signal<
     this,
-    { id: string; label: string; panel: ISectionPanelTarget }
+    { id: string; label: string; panel: IIMovableSectionDestination }
   >(this);
 
   get sourcePanelRegistered(): Signal<
     this,
-    { id: string; label: string; sidebar: ISidebarWithSections }
+    { id: string; label: string; sidebar: IMovableSectionSource }
   > {
     return this._sourcePanelRegistered;
   }
 
   get targetPanelRegistered(): Signal<
     this,
-    { id: string; label: string; panel: ISectionPanelTarget }
+    { id: string; label: string; panel: IIMovableSectionDestination }
   > {
     return this._targetPanelRegistered;
   }
@@ -47,27 +47,31 @@ export class MovableSectionRegistry implements IMovableSectionRegistry {
   registerSource(
     id: string,
     label: string,
-    sidebar: ISidebarWithSections
+    sidebar: IMovableSectionSource
   ): void {
     this._sources.set(id, { label, sidebar });
     this._sourcePanelRegistered.emit({ id, label, sidebar });
   }
 
-  registerTarget(id: string, label: string, panel: ISectionPanelTarget): void {
+  registerTarget(
+    id: string,
+    label: string,
+    panel: IIMovableSectionDestination
+  ): void {
     this._targets.set(id, { label, panel });
     this._targetPanelRegistered.emit({ id, label, panel });
   }
 
   getSources(): ReadonlyMap<
     string,
-    { label: string; sidebar: ISidebarWithSections }
+    { label: string; sidebar: IMovableSectionSource }
   > {
     return this._sources;
   }
 
   getTargets(): ReadonlyMap<
     string,
-    { label: string; panel: ISectionPanelTarget }
+    { label: string; panel: IIMovableSectionDestination }
   > {
     return this._targets;
   }

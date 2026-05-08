@@ -433,7 +433,7 @@ export interface ISectionEntry {
  * Sidebar panel that exposes moveable sections.
  * Source panels (e.g. Running Sessions) implement this.
  */
-export interface ISidebarWithSections {
+export interface IMovableSectionSource {
   /**
    * Return the currently-available sections with their title DOM nodes.
    */
@@ -467,7 +467,7 @@ export interface ISidebarWithSections {
  * Panel that can receive sections from other sidebars.
  * Target panels (e.g. File Browser) implement this.
  */
-export interface ISectionPanelTarget {
+export interface IIMovableSectionDestination {
   /**
    * Add a section widget to this panel.
    */
@@ -501,20 +501,24 @@ export interface IMovableSectionRegistry {
   registerSource(
     id: string,
     label: string,
-    sidebar: ISidebarWithSections
+    sidebar: IMovableSectionSource
   ): void;
 
   /**
    * Register a panel as a target that can receive sections.
    */
-  registerTarget(id: string, label: string, panel: ISectionPanelTarget): void;
+  registerTarget(
+    id: string,
+    label: string,
+    panel: IIMovableSectionDestination
+  ): void;
 
   /**
    * Get all registered source sidebars.
    */
   getSources(): ReadonlyMap<
     string,
-    { label: string; sidebar: ISidebarWithSections }
+    { label: string; sidebar: IMovableSectionSource }
   >;
 
   /**
@@ -522,7 +526,7 @@ export interface IMovableSectionRegistry {
    */
   getTargets(): ReadonlyMap<
     string,
-    { label: string; panel: ISectionPanelTarget }
+    { label: string; panel: IIMovableSectionDestination }
   >;
 
   /**
@@ -530,7 +534,7 @@ export interface IMovableSectionRegistry {
    */
   readonly sourcePanelRegistered: ISignal<
     IMovableSectionRegistry,
-    { id: string; label: string; sidebar: ISidebarWithSections }
+    { id: string; label: string; sidebar: IMovableSectionSource }
   >;
 
   /**
@@ -538,7 +542,7 @@ export interface IMovableSectionRegistry {
    */
   readonly targetPanelRegistered: ISignal<
     IMovableSectionRegistry,
-    { id: string; label: string; panel: ISectionPanelTarget }
+    { id: string; label: string; panel: IIMovableSectionDestination }
   >;
 }
 

@@ -512,7 +512,7 @@
 
 .jp-movable-section-dragHandle::before {
   content: '⠿';
-  font-size: 12px;
+  font-size: var(--jp-ui-font-size1);
   line-height: 1;
   color: var(--jp-ui-font-color1);
 }

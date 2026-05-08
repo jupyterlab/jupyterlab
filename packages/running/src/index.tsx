@@ -7,7 +7,10 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import type { ISectionEntry, ISidebarWithSections } from '@jupyterlab/apputils';
+import type {
+  IMovableSectionSource,
+  ISectionEntry
+} from '@jupyterlab/apputils';
 import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -770,7 +773,7 @@ namespace Section {
 /**
  * The interface exposing the running sessions sidebar widget properties.
  */
-export interface IRunningSessionSidebar extends ISidebarWithSections {
+export interface IRunningSessionSidebar extends IMovableSectionSource {
   /**
    * The toolbar of the running sidebar.
    */
@@ -828,7 +831,7 @@ export class RunningSessions
     super.dispose();
   }
 
-  // ISidebarWithSections implementation
+  // IMovableSectionSource implementation
 
   /**
    * Remove a section by manager name and return the widget.
