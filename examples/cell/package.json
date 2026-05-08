@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@jupyter/web-components": "^0.16.6",
-    "@jupyter/ydoc": "4.0.0-a1",
+    "@jupyter/ydoc": "4.0.0-a2",
     "@jupyterlab/application": "^4.6.0-alpha.5",
     "@jupyterlab/apputils": "^4.7.0-alpha.5",
     "@jupyterlab/cells": "^4.6.0-alpha.5",
