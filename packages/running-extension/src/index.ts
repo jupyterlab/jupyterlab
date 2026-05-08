@@ -106,9 +106,14 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
       trans.__('Running Sessions section')
     );
 
+    // Let the application restorer track the running panel for restoration of
+    // application state (e.g. setting the running panel as the current side bar
+    // widget).
     if (restorer) {
       restorer.add(running, 'running-sessions');
     }
+    // Rank has been chosen somewhat arbitrarily to give priority to the running
+    // sessions widget in the sidebar.
     app.shell.add(running, 'left', { rank: 200, type: 'Sessions and Tabs' });
 
     app.commands.addCommand(CommandIDs.showPanel, {
