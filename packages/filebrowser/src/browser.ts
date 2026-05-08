@@ -38,8 +38,7 @@ const FILE_BROWSER_PANEL_CLASS = 'jp-FileBrowser-Panel';
 
 /**
  * The class name added to the lazily-created accordion that hosts mainPanel
- * and any moved-in sections. Lets CSS give it `flex: 1 1 auto` so it fills
- * the SidePanel content wrapper.
+ * and any moved-in sections.
  */
 const FILE_BROWSER_ACCORDION_CLASS = 'jp-FileBrowser-accordion';
 

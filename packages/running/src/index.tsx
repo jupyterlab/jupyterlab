@@ -927,8 +927,6 @@ export class RunningSessions
 
   /**
    * Signal emitted when a section is added to this sidebar.
-   * The generic move plugin uses this to attach context-menu markers and to
-   * fulfil pending state restorations.
    */
   get sectionAdded(): ISignal<this, ISectionEntry> {
     return this._sectionAdded;
