@@ -483,12 +483,6 @@
 | FileBrowser movable sections
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-accordion {
-  flex: 1 1 auto;
-  position: relative;
-  min-height: 0;
-}
-
 .jp-movable-section-dragHandle {
   display: inline-flex;
   align-items: center;
