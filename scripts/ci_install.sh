@@ -78,7 +78,10 @@ if [[ $GROUP == nonode ]]; then
         sudo rm -rf "${NODE_BIN}"
     fi
 
-    if command -v node; then
+    hash -r
+
+    NODE_BIN="$(command -v node || true)"
+    if [[ -n "${NODE_BIN}" && -x "${NODE_BIN}" ]]; then
         echo "Node should be unavailable for nonode checks"
         exit 1
     fi
