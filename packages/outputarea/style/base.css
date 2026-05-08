@@ -10,9 +10,7 @@
 
 .jp-OutputArea {
   overflow-y: auto;
-  /* stylelint-disable */
   anchor-scope: --jp-output-area;
-  /* stylelint-enable */
 }
 
 .jp-OutputArea-child {
@@ -20,9 +18,7 @@
   flex-direction: row;
   width: 100%;
   overflow: hidden;
-  /* stylelint-disable */
   anchor-name: --jp-output-area;
-  /* stylelint-enable */
 }
 
 .jp-OutputPrompt {
@@ -70,10 +66,8 @@
 
 .jp-OutputArea-promptOverlay {
   position: absolute;
-  /* stylelint-disable */
   top: anchor(--jp-output-area top);
   bottom: anchor(--jp-output-area bottom);
-  /* stylelint-enable */
   width: var(--jp-cell-prompt-width);
   opacity: 0.5;
   display: flex;
