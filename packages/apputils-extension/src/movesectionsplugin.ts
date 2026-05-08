@@ -27,13 +27,16 @@ const MOVE_STATE_KEY = 'section-mover:layout';
 
 /**
  * Shape of the persisted state.
- * Keyed by target panel ID; each entry records ordered sections and whether
- * each was collapsed when the state was saved.
+ * Keyed by target panel ID; each entry records ordered sections, their
+ * absolute index in the destination accordion (which may include non-moved
+ * widgets such as the file browser's main panel), and whether each was
+ * collapsed when the state was saved.
  */
 interface IMoveSectionsState {
   [targetId: string]: Array<{
     sourceId: string;
     sectionId: string;
+    index?: number;
     collapsed?: true;
   }>;
 }
@@ -90,10 +93,10 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     // targets that already have drag-reorder set up
     const dragSetupDone = new Set<string>();
 
-    // pending restorations: sourceId → Map<sectionId, { targetId, collapsed }>
+    // pending restorations: sourceId → Map<sectionId, { targetId, collapsed, index }>
     const pendingSections = new Map<
       string,
-      Map<string, { targetId: string; collapsed: boolean }>
+      Map<string, { targetId: string; collapsed: boolean; index?: number }>
     >();
 
     // Capture last right-clicked element before the context menu opens
@@ -116,6 +119,8 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
       const state: IMoveSectionsState = {};
       for (const [targetId, { panel }] of registry.getTargets()) {
+        const accordion = panel.accordionPanel;
+        const allWidgets = accordion ? Array.from(accordion.widgets) : [];
         const sections = panel.sections
           .map(w => {
             const info = widgetToInfo.get(w);
@@ -124,13 +129,22 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
             }
             // Detect collapsed state: widget content is hidden when collapsed
             const isCollapsed = w.isHidden;
+            const index = allWidgets.indexOf(w);
             return {
               sourceId: info.sourceId,
               sectionId: info.sectionId,
+              ...(index >= 0 ? { index } : {}),
               ...(isCollapsed ? { collapsed: true as const } : {})
             };
           })
           .filter((e): e is NonNullable<typeof e> => e !== null);
+        // Apply in saved accordion order so insertWidget on restore lands in
+        // the right spot relative to non-moved widgets (e.g. mainPanel).
+        sections.sort(
+          (a, b) =>
+            (a.index ?? Number.MAX_SAFE_INTEGER) -
+            (b.index ?? Number.MAX_SAFE_INTEGER)
+        );
         if (sections.length > 0) {
           state[targetId] = sections;
         }
@@ -276,7 +290,8 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       sourceLabel: string,
       targetId: string,
       targetPanel: IIMovableSectionDestination,
-      collapsed = false
+      collapsed = false,
+      index?: number
     ): void => {
       // Capture hidden state before reparenting
       const wasHidden = widget.isHidden;
@@ -286,6 +301,14 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
 
       const accordion = targetPanel.accordionPanel;
       if (accordion) {
+        if (typeof index === 'number') {
+          const total = accordion.widgets.length;
+          const target = Math.max(0, Math.min(index, total - 1));
+          if (accordion.widgets[target] !== widget) {
+            accordion.insertWidget(target, widget);
+          }
+        }
+
         if (!dragSetupDone.has(targetId)) {
           setupAccordionDrag(accordion, targetId);
         }
@@ -317,7 +340,8 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       sourceId: string,
       sectionId: string,
       targetId: string,
-      collapsed = false
+      collapsed = false,
+      index?: number
     ): boolean => {
       const sourceEntry = registry.getSources().get(sourceId);
       const targetEntry = registry.getTargets().get(targetId);
@@ -335,7 +359,8 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         sourceEntry.label,
         targetId,
         targetEntry.panel,
-        collapsed
+        collapsed,
+        index
       );
       void saveState();
       return true;
@@ -407,12 +432,12 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         // Fulfill any pending state restoration for this section
         const pending = pendingSections.get(sourceId);
         if (pending?.has(section.id)) {
-          const { targetId, collapsed } = pending.get(section.id)!;
+          const { targetId, collapsed, index } = pending.get(section.id)!;
           pending.delete(section.id);
           if (pending.size === 0) {
             pendingSections.delete(sourceId);
           }
-          moveSection(sourceId, section.id, targetId, collapsed);
+          moveSection(sourceId, section.id, targetId, collapsed, index);
         }
       });
     };
@@ -590,17 +615,25 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         const state = value as IMoveSectionsState;
 
         for (const [targetId, sections] of Object.entries(state)) {
-          for (const { sourceId, sectionId, collapsed } of sections) {
+          for (const { sourceId, sectionId, collapsed, index } of sections) {
             if (
-              !moveSection(sourceId, sectionId, targetId, collapsed ?? false)
+              !moveSection(
+                sourceId,
+                sectionId,
+                targetId,
+                collapsed ?? false,
+                index
+              )
             ) {
               // Section not yet available — wait for sectionAdded signal
               if (!pendingSections.has(sourceId)) {
                 pendingSections.set(sourceId, new Map());
               }
-              pendingSections
-                .get(sourceId)!
-                .set(sectionId, { targetId, collapsed: collapsed ?? false });
+              pendingSections.get(sourceId)!.set(sectionId, {
+                targetId,
+                collapsed: collapsed ?? false,
+                index
+              });
             }
           }
         }
