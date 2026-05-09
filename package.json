@@ -120,6 +120,7 @@
     "eslint-plugin-jest": "^28.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react": "^7.37.0",
+    "jsonc-eslint-parser": "^3.1.0",
     "prettier": "^3.8.1",
     "stylelint": "16.12.0",
     "stylelint-config-recommended": "^14.0.1",
@@ -130,7 +131,7 @@
     "typescript-eslint": "^8.0.0"
   },
   "devDependencies": {
-    "@jupyter/eslint-plugin": "0.0.5",
+    "@jupyter/eslint-plugin": "^1.0.0",
     "lerna": "^7.1.4",
     "typedoc": "~0.27.4",
     "typedoc-plugin-mdn-links": "^4.0.4"
