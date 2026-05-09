@@ -621,34 +621,48 @@ export class SettingRegistry implements ISettingRegistry {
    * Save a plugin in the registry.
    */
   private async _save(plugin: string): Promise<void> {
-    const plugins = this.plugins;
+    const previousSave = this._saveQueue.get(plugin) ?? Promise.resolve();
+    const savePlugin = async (): Promise<void> => {
+      const plugins = this.plugins;
 
-    if (!(plugin in plugins)) {
-      throw new Error(`${plugin} does not exist in setting registry.`);
-    }
+      if (!(plugin in plugins)) {
+        throw new Error(`${plugin} does not exist in setting registry.`);
+      }
 
-    try {
-      await this._validate(plugins[plugin]);
-    } catch (errors) {
-      console.warn(`${plugin} validation errors:`, errors);
-      throw new Error(`${plugin} failed to validate; check console.`);
-    }
-    await this.connector.save(plugin, plugins[plugin].raw);
+      try {
+        await this._validate(plugins[plugin]);
+      } catch (errors) {
+        console.warn(`${plugin} validation errors:`, errors);
+        throw new Error(`${plugin} failed to validate; check console.`);
+      }
+      await this.connector.save(plugin, plugins[plugin].raw);
 
-    // Fetch and reload the data to guarantee server and client are in sync.
-    const fetched = await this.connector.fetch(plugin);
-    if (fetched === undefined) {
-      throw [
-        {
-          instancePath: '',
-          keyword: 'id',
-          message: `Could not fetch settings for ${plugin}.`,
-          schemaPath: ''
-        } as ISchemaValidator.IError
-      ];
-    }
-    await this._load(await this._transform('fetch', fetched));
-    this._pluginChanged.emit(plugin);
+      // Fetch and reload the data to guarantee server and client are in sync.
+      const fetched = await this.connector.fetch(plugin);
+      if (fetched === undefined) {
+        throw [
+          {
+            instancePath: '',
+            keyword: 'id',
+            message: `Could not fetch settings for ${plugin}.`,
+            schemaPath: ''
+          } as ISchemaValidator.IError
+        ];
+      }
+      await this._load(await this._transform('fetch', fetched));
+      this._pluginChanged.emit(plugin);
+    };
+
+    // Continue save queue even if the previous request failed.
+    const queuedSave = previousSave.then(savePlugin, savePlugin);
+
+    this._saveQueue.set(plugin, queuedSave);
+
+    return queuedSave.finally(() => {
+      if (this._saveQueue.get(plugin) === queuedSave) {
+        this._saveQueue.delete(plugin);
+      }
+    });
   }
 
   /**
@@ -708,6 +722,7 @@ export class SettingRegistry implements ISettingRegistry {
 
   private _pluginChanged = new Signal<this, string>(this);
   private _ready = Promise.resolve();
+  private _saveQueue = new Map<string, Promise<void>>();
   private _transformers: {
     [plugin: string]: {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
