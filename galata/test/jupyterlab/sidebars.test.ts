@@ -350,7 +350,8 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 test.describe('Running Sessions - Move Sections to File Browser', () => {
   const RUNNING_SECTION_TITLE_SELECTOR =
     '#jp-running-sessions .jp-AccordionPanel-title';
-  const HOSTED_SECTION_TITLE_SELECTOR = '.jp-hosted-section';
+  const HOSTED_SECTION_TITLE_SELECTOR =
+    '.jp-FileBrowser-accordion .jp-hosted-section';
   const MOVE_TO_FB_COMMAND_SELECTOR =
     '.lm-Menu-content .lm-Menu-item[data-command="apputils:move-section-to"]';
   const MOVE_BACK_COMMAND_SELECTOR =
@@ -366,6 +367,7 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
   });
 
   test.beforeEach(async ({ page, tmpPath }) => {
+    await galata.Mock.freezeContentLastModified(page);
     await page.filebrowser.openDirectory(tmpPath);
   });
 
