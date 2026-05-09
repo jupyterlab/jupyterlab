@@ -139,7 +139,10 @@ test('File Browser has no unused rules', async ({ page }) => {
       // only added after resizing
       'jp-DirListing-narrow',
       // used in "open file" dialog containing a file browser
-      '.jp-Open-Dialog'
+      '.jp-Open-Dialog',
+      // used for movable sections in file browser, not visible
+      // when no sections are moved
+      'jp-FileBrowser-accordion'
     ]
   });
   expect(unusedRules.length).toEqual(0);
