@@ -229,14 +229,18 @@ jobs:
 
           jlpm test "${TEST_ARGS[@]}"
           TEST_EXIT_CODE=$?
-          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+          if [[ -f test-results/report.json ]]; then
+            mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+          fi
 
           BENCHMARK_EXIT_CODE=0
           if [[ -z "${TEST_PATTERN}" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm test:benchmark
             BENCHMARK_EXIT_CODE=$?
-            mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+            if [[ -f test-results/report.json ]]; then
+              mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+            fi
           fi
 
           MODIFIED_TESTS_EXIT_CODE=0
@@ -267,7 +271,7 @@ jobs:
             if (( ${#MODIFIED_TEST_FILES[@]} > 0 )); then
               echo "Running modified tests with video recording enabled:"
               printf '  - %s\n' "${MODIFIED_TEST_FILES[@]}"
-              MODIFIED_TEST_ARGS=(--project ${{ matrix.project }})
+              MODIFIED_TEST_ARGS=(--project=${{ matrix.project }})
               MODIFIED_TEST_ARGS+=("${MODIFIED_TEST_FILES[@]}")
               PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report-modified \
                 jlpm run test -c playwright-video.config.js "${MODIFIED_TEST_ARGS[@]}"
