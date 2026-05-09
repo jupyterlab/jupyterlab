@@ -2473,6 +2473,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!this.placeholder && !this.isDisposed) {
       this.renderCollapseButtons(widget);
       this.inputArea!.renderInput(widget);
+      this._updateEditModePlaceholderText();
     }
   }
 
@@ -2509,7 +2510,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const base = super.getEditorOptions() ?? {};
     base.extensions = [
       ...(base.extensions ?? []),
-      editorPlaceholder(this._editModePlaceholder),
+      editorPlaceholder(''),
       EditorView.updateListener.of(update => {
         if (update.focusChanged || update.docChanged) {
           this._updateEditModePlaceholderText();
@@ -2589,6 +2590,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * For standalone cells, always show it when the editor is visible.
    */
   private _shouldShowEditModePlaceholder(): boolean {
+    if (this._rendered) {
+      return false;
+    }
     const notebook = this.node.closest('.jp-Notebook');
     if (!notebook) {
       return true;

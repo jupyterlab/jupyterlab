@@ -1049,7 +1049,9 @@ describe('cells/widget', () => {
         widget.initializeState();
         Widget.attach(widget, document.body);
         await framePromise();
-        expect(widget.node.textContent).toBe('this is empty');
+        const renderedPlaceholder =
+          widget.node.querySelector('.jp-MarkdownOutput');
+        expect(renderedPlaceholder?.textContent).toBe('this is empty');
       });
 
       it('should show the default placeholder in command mode', async () => {
