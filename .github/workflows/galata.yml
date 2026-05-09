@@ -29,6 +29,9 @@ jobs:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
     strategy:
       fail-fast: false
       matrix:
@@ -70,6 +73,52 @@ jobs:
         with:
           path: core
           persist-credentials: false
+
+      - name: Collect modified Galata test files
+        if: ${{ github.event_name == 'pull_request' }}
+        id: modified-tests
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100
+            });
+
+            const byProject = {
+              documentation: [],
+              galata: [],
+              jupyterlab: []
+            };
+
+            for (const file of files) {
+              // Removed test files cannot be replayed.
+              if (file.status === 'removed') {
+                continue;
+              }
+              const filename = file.filename;
+              if (!/^galata\/test\/.*\.(test|spec)\.ts$/.test(filename)) {
+                continue;
+              }
+              const galataPath = filename.replace(/^galata\//, '');
+              if (filename.startsWith('galata/test/documentation/')) {
+                byProject.documentation.push(galataPath);
+              } else if (filename.startsWith('galata/test/galata/')) {
+                byProject.galata.push(galataPath);
+              } else if (filename.startsWith('galata/test/jupyterlab/')) {
+                byProject.jupyterlab.push(galataPath);
+              }
+            }
+
+            core.info(
+              `Modified test files: documentation=${byProject.documentation.length}, galata=${byProject.galata.length}, jupyterlab=${byProject.jupyterlab.length}`
+            );
+
+            core.setOutput('documentation', JSON.stringify(byProject.documentation));
+            core.setOutput('galata', JSON.stringify(byProject.galata));
+            core.setOutput('jupyterlab', JSON.stringify(byProject.jupyterlab));
 
       - name: Checkout demo project
         if: ${{ matrix.project == 'documentation' }}
@@ -154,6 +203,9 @@ jobs:
         env:
           TEST_PATTERN: ${{ github.event.inputs.test_pattern || '' }}
           REPEAT_EACH: ${{ github.event.inputs.repeat_each || 1 }}
+          MODIFIED_DOC_TESTS: ${{ steps.modified-tests.outputs.documentation || '[]' }}
+          MODIFIED_GALATA_TESTS: ${{ steps.modified-tests.outputs.galata || '[]' }}
+          MODIFIED_JUPYTERLAB_TESTS: ${{ steps.modified-tests.outputs.jupyterlab || '[]' }}
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
@@ -187,8 +239,49 @@ jobs:
             mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           fi
 
+          MODIFIED_TESTS_EXIT_CODE=0
+          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+            MODIFIED_TESTS_JSON='[]'
+            case "${{ matrix.project }}" in
+              documentation)
+                MODIFIED_TESTS_JSON="${MODIFIED_DOC_TESTS}"
+                ;;
+              galata)
+                MODIFIED_TESTS_JSON="${MODIFIED_GALATA_TESTS}"
+                ;;
+              jupyterlab)
+                MODIFIED_TESTS_JSON="${MODIFIED_JUPYTERLAB_TESTS}"
+                ;;
+            esac
+
+            MODIFIED_TEST_FILES=()
+            while IFS= read -r file; do
+              if [[ -n "${file}" ]]; then
+                MODIFIED_TEST_FILES+=("${file}")
+              fi
+            done < <(
+              MODIFIED_TESTS_JSON="${MODIFIED_TESTS_JSON}" \
+                node -e 'const files = JSON.parse(process.env.MODIFIED_TESTS_JSON || "[]"); for (const file of files) { console.log(file); }'
+            )
+
+            if (( ${#MODIFIED_TEST_FILES[@]} > 0 )); then
+              echo "Running modified tests with video recording enabled:"
+              printf '  - %s\n' "${MODIFIED_TEST_FILES[@]}"
+              MODIFIED_TEST_ARGS=(--project ${{ matrix.project }})
+              MODIFIED_TEST_ARGS+=("${MODIFIED_TEST_FILES[@]}")
+              PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report-modified \
+                jlpm run test -c playwright-video.config.js "${MODIFIED_TEST_ARGS[@]}"
+              MODIFIED_TESTS_EXIT_CODE=$?
+              if [[ -f test-results/report.json ]]; then
+                mv test-results/report.json test-results/modified-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+              fi
+            else
+              echo "No modified test files to replay for project ${{ matrix.project }}."
+            fi
+          fi
+
           # mark as failing
-          if [[ $TEST_EXIT_CODE -ne 0 ]] || [[ $BENCHMARK_EXIT_CODE -ne 0 ]]; then
+          if [[ $TEST_EXIT_CODE -ne 0 ]] || [[ $BENCHMARK_EXIT_CODE -ne 0 ]] || [[ $MODIFIED_TESTS_EXIT_CODE -ne 0 ]]; then
             exit 1
           fi
 
@@ -205,7 +298,9 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
-          path: core/galata/blob-report
+          path: |
+            core/galata/blob-report
+            core/galata/blob-report-modified
           retention-days: 1
           compression-level: 1
 
