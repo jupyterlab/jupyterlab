@@ -5,7 +5,7 @@
 
 import { Extension } from '@codemirror/state';
 
-import { EditorView } from '@codemirror/view';
+import { placeholder as editorPlaceholder, EditorView } from '@codemirror/view';
 
 import { ElementExt } from '@lumino/domutils';
 
@@ -2154,6 +2154,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       options.showEditorForReadOnlyMarkdown ??
       MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
 
+    this._cachedHeadingText = this.model.sharedModel.getSource();
+    this._emptyPlaceholder =
+      options.emptyPlaceholder ??
+      trans.__('Double-click (or press Enter) to edit');
+    this._editModePlaceholder = trans.__(
+      'You can use Markdown and LaTeX: $ α^2 $'
+    );
+
     // Defer setting placeholder as the renderer must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
 
@@ -2178,10 +2186,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
-
-    this._cachedHeadingText = this.model.sharedModel.getSource();
-    this._emptyPlaceholder =
-      options.emptyPlaceholder ?? trans.__('Double-click (or enter) to edit');
   }
 
   /**
@@ -2479,6 +2483,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this.removeClass(RENDERED_CLASS);
     if (!this.placeholder && !this.isDisposed) {
       this.inputArea!.showEditor();
+      this._updateEditModePlaceholderText();
       // if this is going to be a heading, place the cursor accordingly
       let numHashAtStart = (this.model.sharedModel
         .getSource()
@@ -2493,6 +2498,25 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         );
       }
     }
+  }
+
+  /**
+   * Get the editor options at initialization.
+   *
+   * @returns Editor options
+   */
+  protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
+    const base = super.getEditorOptions() ?? {};
+    base.extensions = [
+      ...(base.extensions ?? []),
+      editorPlaceholder(this._editModePlaceholder),
+      EditorView.updateListener.of(update => {
+        if (update.focusChanged || update.docChanged) {
+          this._updateEditModePlaceholderText();
+        }
+      })
+    ];
+    return base;
   }
 
   /*
@@ -2558,6 +2582,42 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
+   * Whether the markdown edit placeholder should be shown.
+   *
+   * #### Notes
+   * In notebook context, tie the placeholder visibility to edit mode.
+   * For standalone cells, always show it when the editor is visible.
+   */
+  private _shouldShowEditModePlaceholder(): boolean {
+    const notebook = this.node.closest('.jp-Notebook');
+    if (!notebook) {
+      return true;
+    }
+    return (
+      notebook.classList.contains('jp-mod-editMode') &&
+      this.node.classList.contains('jp-mod-active')
+    );
+  }
+
+  /**
+   * Synchronize markdown edit placeholder text to notebook mode/focus.
+   */
+  private _updateEditModePlaceholderText(): void {
+    if (this.placeholder || this.isDisposed) {
+      return;
+    }
+    const placeholder = this.editorWidget?.node.querySelector(
+      '.cm-placeholder'
+    ) as HTMLElement | null;
+    if (!placeholder) {
+      return;
+    }
+    placeholder.textContent = this._shouldShowEditModePlaceholder()
+      ? this._editModePlaceholder
+      : '';
+  }
+
+  /**
    * Clone the cell, using the same model.
    */
   clone(): MarkdownCell {
@@ -2589,6 +2649,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
+  private _editModePlaceholder: string;
 }
 
 /**

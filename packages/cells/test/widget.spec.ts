@@ -1051,6 +1051,72 @@ describe('cells/widget', () => {
         await framePromise();
         expect(widget.node.textContent).toBe('this is empty');
       });
+
+      it('should show the default placeholder in command mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const renderedPlaceholder =
+          widget.node.querySelector('.jp-MarkdownOutput');
+        expect(renderedPlaceholder?.textContent).toBe(
+          'Double-click (or press Enter) to edit'
+        );
+      });
+
+      it('should show markdown help placeholder in edit mode', async () => {
+        const model = new MarkdownCellModel();
+        const host = document.createElement('div');
+        host.classList.add('jp-Notebook', 'jp-mod-editMode');
+        document.body.appendChild(host);
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, host);
+        widget.addClass('jp-mod-active');
+        widget.rendered = false;
+        await signalToPromise(widget.renderedChanged);
+        widget.editor!.focus();
+        await framePromise();
+        const placeholder = widget.node.querySelector('.cm-placeholder');
+        expect(placeholder?.textContent).toBe(
+          'You can use Markdown and LaTeX: $ α^2 $'
+        );
+        host.remove();
+      });
+
+      it('should hide markdown help placeholder in command mode', async () => {
+        const model = new MarkdownCellModel();
+        const host = document.createElement('div');
+        host.classList.add('jp-Notebook', 'jp-mod-commandMode');
+        document.body.appendChild(host);
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, host);
+        widget.addClass('jp-mod-active');
+        widget.rendered = false;
+        await signalToPromise(widget.renderedChanged);
+        widget.editor!.focus();
+        await framePromise();
+        const placeholder = widget.node.querySelector('.cm-placeholder');
+        expect(placeholder?.textContent).toBe('');
+        host.remove();
+      });
     });
 
     describe('#getEditorOptions()', () => {
