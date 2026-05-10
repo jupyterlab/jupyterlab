@@ -8,11 +8,136 @@ name: Enforce PR label
 on:
   pull_request_target:
     types: [labeled, unlabeled, opened, edited, synchronize]
+
 jobs:
   enforce-label:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: read
     steps:
       - name: enforce-triage-label
-        uses: jupyterlab/maintainer-tools/.github/actions/enforce-label@v1
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const required = ['bug', 'enhancement', 'feature', 'maintenance', 'documentation', 'dependencies'];
+            const botUsers = ['pre-commit-ci[bot]', 'dependabot[bot]'];
+
+            // https://docs.github.com/en/rest/reference/issues#get-an-issue
+            const response = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            let found = false;
+            response.data.labels.forEach(label => {
+              if (required.includes(label.name)) {
+                found = true;
+                console.log(`Found matching label "${label.name}"!`);
+              }
+            });
+
+            if (!found) {
+              // Try to automatically add maintenance label for known bot users
+              try {
+                if (botUsers.indexOf(response.data.user.login) !== -1) {
+                  // https://docs.github.com/en/rest/reference/issues#add-labels-to-an-issue
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['maintenance']
+                  });
+                  console.log('Auto-added "maintenance" label for bot user');
+                  return;
+                }
+
+                // Auto-add enhancement label for package changes
+                const prFiles = await github.rest.pulls.listFiles({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  per_page: 100
+                });
+
+                const hasPackageChanges = prFiles.data.some(file =>
+                  file.filename.startsWith('packages/')
+                );
+
+                if (hasPackageChanges) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['enhancement']
+                  });
+                  console.log('Auto-added "enhancement" label for package changes');
+                  return;
+                }
+
+                // Auto-add maintenance label for CI/build changes
+                const hasMaintenanceChanges = prFiles.data.some(file =>
+                  file.filename.startsWith('.github/') ||
+                  file.filename.startsWith('buildutils/') ||
+                  file.filename.endsWith('.py') ||
+                  file.filename.endsWith('.cfg') ||
+                  file.filename.endsWith('.yaml') ||
+                  file.filename.endsWith('.yml')
+                );
+
+                if (hasMaintenanceChanges) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['maintenance']
+                  });
+                  console.log('Auto-added "maintenance" label for CI/build changes');
+                  return;
+                }
+
+                // Auto-add documentation label for doc changes
+                const hasDocChanges = prFiles.data.some(file =>
+                  file.filename.startsWith('docs/') ||
+                  file.filename.endsWith('.md')
+                );
+
+                if (hasDocChanges) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['documentation']
+                  });
+                  console.log('Auto-added "documentation" label for doc changes');
+                  return;
+                }
+
+                // Auto-add dependencies label for dependency file changes
+                const hasDependencyChanges = prFiles.data.some(file =>
+                  file.filename === 'package.json' ||
+                  file.filename === 'yarn.lock' ||
+                  file.filename.startsWith('requirements')
+                );
+
+                if (hasDependencyChanges) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: ['dependencies']
+                  });
+                  console.log('Auto-added "dependencies" label for dependency changes');
+                  return;
+                }
+
+              } catch (e) {
+                console.error('Error auto-labeling:', e);
+              }
+
+              console.error('Select at least one triage label:');
+              console.error(required);
+              core.setFailed('PR must have at least one triage label: ' + required.join(', '));
+            }
