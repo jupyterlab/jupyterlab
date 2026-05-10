@@ -107,7 +107,7 @@ export class ContextMenuSvg extends ContextMenu implements IDisposable {
   private _addDocumentListener(): void {
     if (!this._documentListener) {
       this._documentListener = this._handleDocumentMouseDown.bind(this);
-      document.addEventListener('mousedown', this._documentListener, true);
+      document.addEventListener('mousedown', this._documentListener as EventListener, true);
     }
   }
 
@@ -115,8 +115,9 @@ export class ContextMenuSvg extends ContextMenu implements IDisposable {
    * Remove document-level mousedown listener.
    */
   private _removeDocumentListener(): void {
-    if (this._documentListener) {
-      document.removeEventListener('mousedown', this._documentListener, true);
+    const listener = this._documentListener;
+    if (listener) {
+      document.removeEventListener('mousedown', listener as EventListener, true);
       this._documentListener = null;
     }
   }
