@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -16,6 +14,7 @@ import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { ArrayExt } from '@lumino/algorithm';
 
 import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 
 import type { DebugProtocol } from '@vscode/debugprotocol';
 
@@ -270,19 +269,21 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
     [variable.name]
   );
 
-  const disableMimeRenderer = useMemo(
-    () =>
+  const disableMimeRenderer = useMemo(() => {
+    const frameId = service.model.callstack.frame?.id;
+    const args: ReadonlyJSONObject =
+      frameId === undefined
+        ? { name: variable.name }
+        : { name: variable.name, frameID: frameId };
+    return (
       !service.model.hasRichVariableRendering ||
-      !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
-        name: variable.name,
-        frameID: service.model.callstack.frame?.id
-      } as any),
-    [
-      service.model.hasRichVariableRendering,
-      variable.name,
-      service.model.callstack.frame?.id
-    ]
-  );
+      !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, args)
+    );
+  }, [
+    service.model.hasRichVariableRendering,
+    variable.name,
+    service.model.callstack.frame?.id
+  ]);
 
   const fetchChildren = useCallback(async () => {
     if (expandable && !variables) {
@@ -315,11 +316,13 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
   );
 
   const renderVariable = useCallback(() => {
+    const frameId = service.model.callstack.frame?.id;
+    const args: ReadonlyJSONObject =
+      frameId === undefined
+        ? { name: variable.name }
+        : { name: variable.name, frameID: frameId };
     commands
-      .execute(Debugger.CommandIDs.renderMimeVariable, {
-        name: variable.name,
-        frameID: service.model.callstack.frame?.id
-      } as any)
+      .execute(Debugger.CommandIDs.renderMimeVariable, args)
       .catch(reason => {
         console.error(`Failed to render variable ${variable?.name}`, reason);
       });

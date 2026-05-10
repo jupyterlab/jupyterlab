@@ -1,16 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module example-simple-list
  */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
-  PageConfig.getBaseUrl(),
-  'example/'
-);
+(
+  window as Window & { __webpack_public_path__: string }
+).__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';

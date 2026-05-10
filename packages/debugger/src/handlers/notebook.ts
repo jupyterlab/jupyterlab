@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
@@ -93,7 +91,7 @@ export class NotebookHandler implements IDisposable {
    * Handle a notebook cells changed event.
    */
   private _onCellsChanged(
-    cells?: any,
+    cells?: IObservableList<ICellModel>,
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this._notebookPanel.content.widgets.forEach(cell =>

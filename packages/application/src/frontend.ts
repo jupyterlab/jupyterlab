@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
@@ -223,7 +221,7 @@ export namespace JupyterFrontEnd {
    */
   export interface IOptions<
     T extends IShell = IShell,
-    U = any
+    U = unknown
   > extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.

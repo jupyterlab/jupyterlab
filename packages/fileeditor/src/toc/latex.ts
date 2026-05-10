@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type {
   DocumentRegistry,
   IDocumentWidget
@@ -125,7 +123,11 @@ export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
     const isApplicable = super.isApplicable(widget);
 
     if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
+      const mime = (
+        widget as Widget & {
+          content?: { model?: { mimeType?: string } };
+        }
+      ).content?.model?.mimeType;
       return mime && (mime === 'text/x-latex' || mime === 'text/x-stex');
     }
     return false;

@@ -2,8 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -177,7 +175,7 @@ export class PluginEditor extends Widget {
    * Handle layout state changes that need to be saved.
    */
   private _onStateChanged(): void {
-    (this.stateChanged as Signal<any, void>).emit(undefined);
+    (this.stateChanged as Signal<this, void>).emit(undefined);
   }
 
   protected translator: ITranslator;

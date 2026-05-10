@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module mermaid-extension
@@ -75,7 +74,7 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
     // capture the version of mermaid used
     const version = manager.getMermaidVersion();
     const mermaidMetadata = {
-      ...((model.metadata[MERMAID_MIME_TYPE] as Record<string, any>) || {}),
+      ...((model.metadata[MERMAID_MIME_TYPE] as Record<string, unknown>) || {}),
       version
     };
     const metadata = {

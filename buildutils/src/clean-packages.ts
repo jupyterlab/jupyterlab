@@ -2,12 +2,16 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as glob from 'glob';
 import { exitOnUncaughtException, readJSONFile } from './utils';
+
+interface IPackageData {
+  scripts?: {
+    clean?: string;
+  };
+}
 
 exitOnUncaughtException();
 
@@ -42,7 +46,7 @@ for (let i = 0; i < packageConfig.length; i++) {
 function handlePackage(packagePath: string): void {
   // Read in the package.json.
   const packageJSONPath = path.join(packagePath, 'package.json');
-  let data: any;
+  let data: IPackageData;
   try {
     data = require(packageJSONPath);
   } catch (e) {

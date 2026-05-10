@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { Time } from '@jupyterlab/coreutils';
 import type {
@@ -70,7 +68,7 @@ export class DocumentWidgetManager implements IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  get stateChanged(): ISignal<DocumentWidgetManager, IChangedArgs<any>> {
+  get stateChanged(): ISignal<DocumentWidgetManager, IChangedArgs<unknown>> {
     return this._stateChanged;
   }
 
@@ -551,9 +549,10 @@ export class DocumentWidgetManager implements IDisposable {
   private _activateRequested = new Signal<this, string>(this);
   private _confirmClosingTab = false;
   private _isDisposed = false;
-  private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
-    this
-  );
+  private _stateChanged = new Signal<
+    DocumentWidgetManager,
+    IChangedArgs<unknown>
+  >(this);
   private _recentsManager: IRecentsManager | null;
   private _dialogs: IDocumentManagerDialogs | null;
 }

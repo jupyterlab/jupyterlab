@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
@@ -22,8 +20,12 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
+    const codemirrorMode = info.codemirror_mode as
+      | string
+      | IEditorLanguageRegistry.IEditorLanguage
+      | undefined;
     const mode = this.languages.findBest(
-      (info.codemirror_mode as any) || {
+      codemirrorMode || {
         mimetype: info.mimetype,
         name: info.name,
         ext: [ext.split('.').slice(-1)[0]]

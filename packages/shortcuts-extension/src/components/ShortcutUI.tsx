@@ -2,10 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { PartialJSONValue, ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
 import { NewShortcutItem } from './NewShortcutItem';
@@ -285,7 +283,7 @@ export class ShortcutUI
         });
       }
     }
-    await settings.set('shortcuts', newUserShortcuts as any);
+    await settings.set('shortcuts', newUserShortcuts as PartialJSONValue);
     await this._refreshShortcutList();
   }
 
@@ -313,7 +311,7 @@ export class ShortcutUI
       shortcut.args = options.args;
     });
 
-    await settings.set('shortcuts', userShortcuts as any);
+    await settings.set('shortcuts', userShortcuts as PartialJSONValue);
     await this._refreshShortcutList();
     return true;
   };

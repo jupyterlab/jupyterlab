@@ -2,8 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   deleteLine,
   toggleBlockComment,
@@ -178,7 +176,9 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       }
 
       // Check for file editor
-      const fileEditorWidget = currentWidget as any;
+      const fileEditorWidget = currentWidget as typeof currentWidget & {
+        content?: { editor?: { focus: () => void } };
+      };
       if (
         fileEditorWidget &&
         fileEditorWidget.content &&

@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   Button,
@@ -43,7 +41,7 @@ function getExtensionGitHubUser(entry: IEntry) {
 /**
  * VDOM for visualizing an extension entry.
  */
-function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
+function ListEntry(props: ListEntry.IProperties): React.ReactElement {
   const { canFetch, entry, supportInstallation, trans } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
@@ -238,7 +236,7 @@ namespace ListEntry {
 /**
  * List view widget for extensions
  */
-function ListView(props: ListView.IProperties): React.ReactElement<any> {
+function ListView(props: ListView.IProperties): React.ReactElement {
   const { canFetch, performAction, supportInstallation, trans } = props;
 
   return (

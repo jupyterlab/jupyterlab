@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module markedparser-extension
@@ -298,7 +297,7 @@ namespace Private {
     return headings;
   }
 
-  function containsHeadingTag(raw: any) {
+  function containsHeadingTag(raw: string): boolean {
     return HEADING_TAG_REGEX.test(raw);
   }
 

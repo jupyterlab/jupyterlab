@@ -3,11 +3,16 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as path from 'path';
 import * as utils from './utils';
 import packageJson from 'package-json';
+
+interface IPackageData {
+  name: string;
+  version: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
@@ -28,7 +33,7 @@ export async function getDependency(name: string): Promise<string> {
   utils.getLernaPaths().forEach(pkgRoot => {
     // Read in the package.json.
     const packagePath = path.join(pkgRoot, 'package.json');
-    let data: any;
+    let data: IPackageData;
     try {
       data = utils.readJSONFile(packagePath);
     } catch (e) {

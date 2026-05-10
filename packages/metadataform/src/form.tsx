@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module metadataform
@@ -42,7 +41,7 @@ export class FormWidget extends ReactWidget {
       <FormComponent
         validator={validatorAjv8}
         schema={this._props.properties as JSONSchema7}
-        formData={this._props.formData as Record<string, any>}
+        formData={this._props.formData as ReadonlyPartialJSONObject}
         formContext={formContext}
         uiSchema={this._props.uiSchema}
         liveValidate

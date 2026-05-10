@@ -2,8 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as path from 'path';
 import * as utils from './utils';
 import packageJson from 'package-json';
@@ -37,7 +35,7 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
 
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
-  let data: any;
+  let data: { name: string; private?: boolean };
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
@@ -78,8 +76,8 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
   return cmds;
 }
 
-function flatten(a: any[]) {
-  return a.reduce((acc, val) => acc.concat(val), []);
+function flatten<T>(a: T[][]): T[] {
+  return a.reduce((acc, val) => acc.concat(val), [] as T[]);
 }
 
 commander
@@ -90,7 +88,7 @@ points to the latest prerelease after it.`
   )
   .option('--lerna', 'Update dist-tags in all lerna packages')
   .option('--path [path]', 'Path to package or monorepo to update')
-  .action(async (args: any) => {
+  .action(async (args: { path?: string; lerna?: boolean }) => {
     const basePath = path.resolve(args.path || '.');
     let cmds: string[][] = [];
     let paths: string[] = [];

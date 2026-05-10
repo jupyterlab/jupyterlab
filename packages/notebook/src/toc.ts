@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { CodeCell, ICellModel } from '@jupyterlab/cells';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
 import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
@@ -62,6 +60,16 @@ export interface INotebookHeading extends TableOfContents.IHeading {
    * Type of heading
    */
   type: Cell.HeadingType;
+
+  /**
+   * Raw markdown heading text.
+   */
+  raw?: string;
+
+  /**
+   * Heading id from rendered HTML heading.
+   */
+  id?: string;
 }
 
 /**
@@ -806,17 +814,15 @@ export async function getIdForHeading(
   sanitizer: IRenderMime.ISanitizer
 ) {
   let elementId: string | null = null;
-  if (heading.type === Cell.HeadingType.Markdown) {
+  if (heading.type === Cell.HeadingType.Markdown && heading.raw) {
     elementId = await TableOfContentsUtils.Markdown.getHeadingId(
       parser,
-      // Type from TableOfContentsUtils.Markdown.IMarkdownHeading
-      (heading as any).raw,
+      heading.raw,
       heading.level,
       sanitizer
     );
-  } else if (heading.type === Cell.HeadingType.HTML) {
-    // Type from TableOfContentsUtils.IHTMLHeading
-    elementId = (heading as any).id;
+  } else if (heading.type === Cell.HeadingType.HTML && heading.id) {
+    elementId = heading.id;
   }
   return elementId;
 }

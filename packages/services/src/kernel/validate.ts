@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type * as KernelMessage from './messages';
 
 import type { IModel } from './restapi';
@@ -17,7 +15,7 @@ const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
-const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
+const IOPUB_CONTENT_FIELDS: { [key: string]: unknown } = {
   stream: { name: 'string', text: 'string' },
   display_data: { data: 'object', metadata: 'object' },
   execute_input: { code: 'string', execution_count: 'number' },

@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -82,11 +80,11 @@ export class FileBrowserModel implements IDisposable {
     services.contents.fileChanged.connect(this.onFileChanged, this);
     services.sessions.runningChanged.connect(this.onRunningChanged, this);
 
-    this._unloadEventListener = (e: Event) => {
+    this._unloadEventListener = (e: BeforeUnloadEvent) => {
       if (this._uploads.length > 0) {
         const confirmationMessage = this._trans.__('Files still uploading');
 
-        (e as any).returnValue = confirmationMessage;
+        e.returnValue = confirmationMessage;
         return confirmationMessage;
       }
     };
@@ -729,7 +727,7 @@ export class FileBrowserModel implements IDisposable {
   private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel | null>>(
     this
   );
-  private _unloadEventListener: (e: Event) => string | undefined;
+  private _unloadEventListener: (e: BeforeUnloadEvent) => string | undefined;
   private _poll: Poll;
 }
 

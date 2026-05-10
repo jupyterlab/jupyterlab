@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { LanguageDescription } from '@codemirror/language';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
+const webpackWindow = window as Window & { __webpack_public_path__: string };
+webpackWindow.__webpack_public_path__ = URLExt.join(
   PageConfig.getBaseUrl(),
   'example/'
 );
@@ -147,7 +147,16 @@ function createApp(manager: ServiceManager.IManager): void {
     load: async () => {
       const m = await import('@codemirror/lang-markdown');
       return m.markdown({
-        codeLanguages: (info: string) => languages.findBest(info) as any
+        codeLanguages: (info: string) => {
+          const language = languages.findBest(info);
+          if (!language) {
+            return null;
+          }
+          if (language instanceof LanguageDescription) {
+            return language;
+          }
+          return LanguageDescription.of(language);
+        }
       });
     }
   });

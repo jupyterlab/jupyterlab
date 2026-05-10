@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
@@ -40,9 +38,9 @@ export async function requestTranslationsAPI<T>(
     throw new ServerConnection.NetworkError(error);
   }
 
-  let data: any = await response.text();
+  let data: unknown = await response.text();
 
-  if (data.length > 0) {
+  if (typeof data === 'string' && data.length > 0) {
     try {
       data = JSON.parse(data);
     } catch (error) {
@@ -51,8 +49,12 @@ export async function requestTranslationsAPI<T>(
   }
 
   if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message || data);
+    const message =
+      typeof data === 'object' && data !== null && 'message' in data
+        ? (data as { message?: unknown }).message
+        : data;
+    throw new ServerConnection.ResponseError(response, message);
   }
 
-  return data;
+  return data as T;
 }

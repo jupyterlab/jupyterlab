@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Locator, Page } from '@playwright/test';
 import type { IPluginNameToInterfaceMap } from '../extension';
@@ -153,7 +151,10 @@ export class SidebarHelper {
         const currentLayout = (await settingRegistry.get(
           SHELL_ID,
           'layout'
-        )) as any;
+        )) as {
+          single: Record<string, unknown>;
+          multiple: Record<string, unknown>;
+        };
         await settingRegistry.set(SHELL_ID, 'layout', {
           single: { ...currentLayout.single, ...sidebars },
           multiple: { ...currentLayout.multiple, ...sidebars }

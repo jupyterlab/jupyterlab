@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { CommandRegistry } from '@lumino/commands';
 import {
   BasicKeyHandler,
@@ -13,6 +11,7 @@ import {
 } from '@lumino/datagrid';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
 
 import type { IThemeManager } from '@jupyterlab/apputils';
@@ -102,7 +101,7 @@ export class Grid extends Panel {
    *
    * @param message - The `after-attach` message.
    */
-  protected onAfterAttach(message: any): void {
+  protected onAfterAttach(message: Message): void {
     super.onAfterAttach(message);
     this._updateStyles();
   }
@@ -208,7 +207,11 @@ export class GridModel extends DataModel {
    * @param row The datagrid row
    * @param column The datagrid column
    */
-  data(region: DataModel.CellRegion, row: number, column: number): any {
+  data(
+    region: DataModel.CellRegion,
+    row: number,
+    column: number
+  ): DataModel.CellData {
     if (region === 'row-header') {
       return this._data.name[row];
     }

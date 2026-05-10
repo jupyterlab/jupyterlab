@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import type { IYText } from '@jupyter/ydoc';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
@@ -115,13 +114,15 @@ export namespace NBTestUtils {
       });
     extensions.addExtension({
       name: 'binding',
-      factory: ({ model }) =>
-        EditorExtensionRegistry.createImmutableExtension(
+      factory: ({ model }) => {
+        const sharedModel = model.sharedModel as IYText;
+        return EditorExtensionRegistry.createImmutableExtension(
           ybinding({
-            ytext: (model.sharedModel as any).ysource,
-            undoManager: (model.sharedModel as any).undoManager ?? undefined
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
           })
-        )
+        );
+      }
     });
     const factoryService = new CodeMirrorEditorFactory({
       languages,

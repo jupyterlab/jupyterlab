@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ISessionContext } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type {
@@ -192,7 +190,7 @@ export interface IDocumentManager extends IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  readonly stateChanged: ISignal<IDocumentManager, IChangedArgs<any>>;
+  readonly stateChanged: ISignal<IDocumentManager, IChangedArgs<unknown>>;
 
   /**
    * Clone a widget.

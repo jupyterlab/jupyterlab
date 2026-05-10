@@ -3,10 +3,14 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as path from 'path';
 import * as utils from './utils';
+
+interface IPackageData {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
 
 // Make sure we have required command line arguments.
 if (process.argv.length !== 3) {
@@ -29,7 +33,7 @@ handlePackage(path.resolve('.'));
 function handlePackage(packagePath: string): void {
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
-  let data: any;
+  let data: IPackageData;
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
@@ -38,8 +42,12 @@ function handlePackage(packagePath: string): void {
   }
 
   // Update dependencies as appropriate.
-  for (const dtype of ['dependencies', 'devDependencies']) {
-    const deps = data[dtype] || {};
+  const dependencyTypes: Array<'dependencies' | 'devDependencies'> = [
+    'dependencies',
+    'devDependencies'
+  ];
+  for (const dependencyType of dependencyTypes) {
+    const deps = data[dependencyType] || {};
     delete deps[name];
   }
 

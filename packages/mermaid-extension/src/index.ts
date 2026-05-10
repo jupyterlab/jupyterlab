@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * @packageDocumentation
  * @module mermaid-extension
@@ -80,7 +78,7 @@ const contextCommands: JupyterFrontEndPlugin<void> = {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
     app.commands.addCommand(CommandIDs.copySource, {
       label: trans.__('Mermaid Copy Diagram Source'),
-      execute: async (args?: any) => {
+      execute: async () => {
         const node = app.contextMenuHitTest(isMermaid);
         if (!node) {
           return;

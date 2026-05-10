@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
 import type {
@@ -80,7 +78,15 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       }
       if (hasKeyword) {
         // Index 0 contains the spaces, index 1 is the keyword group
-        const [start] = (hasKeyword as any).indices[1];
+        const keywordIndices = (
+          hasKeyword as RegExpExecArray & {
+            indices?: Array<[number, number]>;
+          }
+        ).indices?.[1];
+        if (!keywordIndices) {
+          continue;
+        }
+        const [start] = keywordIndices;
         if (indent === 1 && start > 0) {
           indent = start;
         }
@@ -123,7 +129,11 @@ export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
     const isApplicable = super.isApplicable(widget);
 
     if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
+      const mime = (
+        widget as Widget & {
+          content?: { model?: { mimeType?: string } };
+        }
+      ).content?.model?.mimeType;
       return (
         mime &&
         (mime === 'application/x-python-code' || mime === 'text/x-python')

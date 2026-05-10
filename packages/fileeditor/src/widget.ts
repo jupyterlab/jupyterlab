@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type {
   CodeEditor,
   IEditorMimeTypeService,
@@ -201,7 +199,7 @@ export namespace FileEditor {
   /**
    * File editor default configuration.
    */
-  export const defaultEditorConfig: Record<string, any> = {
+  export const defaultEditorConfig: Record<string, unknown> = {
     lineNumbers: true,
     scrollPastEnd: true
   };

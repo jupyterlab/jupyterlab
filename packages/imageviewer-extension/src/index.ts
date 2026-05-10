@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module imageviewer-extension
@@ -97,7 +96,7 @@ function activate(
   const namespace = 'image-widget';
 
   function onWidgetCreated(
-    sender: any,
+    sender: unknown,
     widget: IDocumentWidget<ImageViewer, DocumentRegistry.IModel>
   ) {
     // Notify the widget tracker if restore data needs to update.

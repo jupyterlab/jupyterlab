@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -98,7 +96,7 @@ export namespace Contents {
     /**
      * The optional file content.
      */
-    readonly content: any;
+    readonly content: unknown;
 
     /**
      * The chunk of the file upload.

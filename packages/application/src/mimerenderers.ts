@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IWidgetTracker } from '@jupyterlab/apputils';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import type { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
@@ -33,7 +31,7 @@ export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterFrontEndPlugin<void | IMimeDocumentTracker, any, any>[] {
+): JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] {
   const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
@@ -44,7 +42,9 @@ export function createRendermimePlugins(
 
     // Handle CommonJS exports.
     if (!mod.hasOwnProperty('__esModule')) {
-      data = mod as any;
+      data = mod as unknown as
+        | IRenderMime.IExtension
+        | ReadonlyArray<IRenderMime.IExtension>;
     }
     if (!Array.isArray(data)) {
       data = [data] as ReadonlyArray<IRenderMime.IExtension>;

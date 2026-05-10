@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -15,6 +14,14 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { Workspace } from '@jupyterlab/services';
 import { WORKSPACE_ITEM_CLASS } from './commands';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
+
+interface IWorkspaceLayoutRestorerData {
+  main?: {
+    dock?: {
+      widgets?: unknown[];
+    };
+  };
+}
 
 /**
  * The extension populating sidebar with workspaces list.
@@ -71,8 +78,11 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         return trans.__(
           '%1 workspace with %2 tabs, last modified on %3',
           this._workspace.metadata.id,
-          (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
-            ?.widgets?.length,
+          (
+            this._workspace.data[
+              'layout-restorer:data'
+            ] as IWorkspaceLayoutRestorerData
+          )?.main?.dock?.widgets?.length,
           this._workspace.metadata['last_modified']
         );
       }

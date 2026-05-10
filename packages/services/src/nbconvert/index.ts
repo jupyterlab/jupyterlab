@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '../serverconnection';
@@ -162,7 +160,7 @@ export namespace NbConvert {
     /**
      * Additional options for the exporter.
      */
-    exporterOptions?: { [key: string]: any };
+    exporterOptions?: { [key: string]: unknown };
   }
 
   /**

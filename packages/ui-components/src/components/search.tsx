@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -228,7 +227,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
     <Search
       role="search"
       className="jp-FilterBox"
-      ref={props.inputRef as React.Ref<any>}
+      ref={props.inputRef as unknown as React.Ref<HTMLElement>}
       value={filter}
       onChange={handleChange}
       onInput={handleChange}
