@@ -31,6 +31,9 @@ export class ContextMenuSvg extends ContextMenu implements IDisposable {
 
     // override the vanilla .menu
     this.menu = new MenuSvg(options);
+
+    // Listen for menu close to remove our document listener
+    this.menu.aboutToClose.connect(this._onMenuClose, this);
   }
 
   readonly menu: MenuSvg;
@@ -58,6 +61,8 @@ export class ContextMenuSvg extends ContextMenu implements IDisposable {
     }
 
     this._isDisposed = true;
+    this.menu.aboutToClose.disconnect(this._onMenuClose, this);
+    this._removeDocumentListener();
     this.menu.dispose();
     Signal.disconnectSender(this);
   }
@@ -82,14 +87,57 @@ export class ContextMenuSvg extends ContextMenu implements IDisposable {
     const hasItems = super.open(event);
     if (hasItems) {
       this._opened.emit();
+      // Add document listener to close menu on mousedown anywhere
+      // This handles cases where preventDefault() is called on the event
+      this._addDocumentListener();
     }
     return hasItems;
+  }
+
+  /**
+   * Handle menu about to close event.
+   */
+  private _onMenuClose(): void {
+    this._removeDocumentListener();
+  }
+
+  /**
+   * Add document-level mousedown listener to close menu.
+   */
+  private _addDocumentListener(): void {
+    if (!this._documentListener) {
+      this._documentListener = this._handleDocumentMouseDown.bind(this);
+      document.addEventListener('mousedown', this._documentListener, true);
+    }
+  }
+
+  /**
+   * Remove document-level mousedown listener.
+   */
+  private _removeDocumentListener(): void {
+    if (this._documentListener) {
+      document.removeEventListener('mousedown', this._documentListener, true);
+      this._documentListener = null;
+    }
+  }
+
+  /**
+   * Handle document mousedown to close menu when clicking outside.
+   */
+  private _handleDocumentMouseDown(event: MouseEvent): void {
+    // Check if the click is outside the menu
+    const menuNode = this.menu.node;
+    if (!menuNode.contains(event.target as Node)) {
+      // Close the menu
+      this.menu.close();
+    }
   }
 
   protected _isDisposed = false;
   protected _opened: Signal<ContextMenu, void> = new Signal<ContextMenu, void>(
     this
   );
+  private _documentListener: ((event: MouseEvent) => void) | null = null;
 }
 
 /**
