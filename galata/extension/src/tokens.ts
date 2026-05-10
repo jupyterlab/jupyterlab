@@ -3,8 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  * Copyright (c) Bloomberg Finance LP.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';
 import type {
@@ -53,7 +51,7 @@ export interface IGalataHelpers {
   /**
    * JupyterLab dialogs tracker.
    */
-  readonly dialogs: WidgetTracker<Dialog<any>>;
+  readonly dialogs: WidgetTracker<Dialog<unknown>>;
   /**
    * JupyterLab notifications manager.
    */
@@ -170,7 +168,10 @@ export interface IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  off(
+    event: 'dialog',
+    listener: (dialog: Dialog<unknown> | null) => void
+  ): void;
   /**
    * Disconnect a listener to new or updated Jupyter notification events.
    *
@@ -188,7 +189,7 @@ export interface IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  on(event: 'dialog', listener: (dialog: Dialog<unknown> | null) => void): void;
 
   /**
    * Connect a listener to new or updated Jupyter notification events.
@@ -207,7 +208,10 @@ export interface IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  once(
+    event: 'dialog',
+    listener: (dialog: Dialog<unknown> | null) => void
+  ): void;
 
   /**
    * Connect a listener to the next new or updated Jupyter notification event.

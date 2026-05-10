@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -388,7 +387,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   private _disposed = new Signal<this, void>(this);
   private _messageReceived = new Signal<this, Terminal.IMessage>(this);
   private _name: string;
-  private _reconnectTimeout: any = null;
+  private _reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private _ws: WebSocket | null = null;
   private _noOp = () => {
     /* no-op */

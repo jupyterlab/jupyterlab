@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module rendermime-interfaces
@@ -161,8 +160,8 @@ export namespace IRenderMime {
      * Interface for generic renderer.
      */
     export interface IRenderer {
-      readonly render: (container: HTMLElement, options?: any) => void;
-      readonly unrender?: (container: HTMLElement, options?: any) => void;
+      readonly render: (container: HTMLElement, options?: unknown) => void;
+      readonly unrender?: (container: HTMLElement, options?: unknown) => void;
     }
 
     /**
@@ -614,7 +613,7 @@ export namespace IRenderMime {
      *
      * @returns A translated string if found, or the original string.
      */
-    __(msgid: string, ...args: any[]): string;
+    __(msgid: string, ...args: unknown[]): string;
     /**
      * Alias for `ngettext` (translate accounting for plural forms)
      * @param msgid message for singular
@@ -624,7 +623,12 @@ export namespace IRenderMime {
      *
      * @returns A translated string if found, or the original string.
      */
-    _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string;
+    _n(
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: unknown[]
+    ): string;
     /**
      * Alias for `pgettext` (translate in given context)
      * @param msgctxt context
@@ -633,7 +637,7 @@ export namespace IRenderMime {
      *
      * @returns A translated string if found, or the original string.
      */
-    _p(msgctxt: string, msgid: string, ...args: any[]): string;
+    _p(msgctxt: string, msgid: string, ...args: unknown[]): string;
     /**
      * Alias for `npgettext` (translate accounting for plural forms in given context)
      * @param msgctxt context
@@ -649,7 +653,7 @@ export namespace IRenderMime {
       msgid: string,
       msgid_plural: string,
       n: number,
-      ...args: any[]
+      ...args: unknown[]
     ): string;
     /**
      * Look up the message id in the catalog and return the corresponding message string.
@@ -660,7 +664,7 @@ export namespace IRenderMime {
      *
      * @returns A translated string if found, or the original string.
      */
-    gettext(msgid: string, ...args: any[]): string;
+    gettext(msgid: string, ...args: unknown[]): string;
     /**
      * Do a plural-forms lookup of a message id. msgid is used as the message id for
      * purposes of lookup in the catalog, while n is used to determine which plural form
@@ -678,7 +682,7 @@ export namespace IRenderMime {
       msgid: string,
       msgid_plural: string,
       n: number,
-      ...args: any[]
+      ...args: unknown[]
     ): string;
     /**
      * Look up the context and message id in the catalog and return the corresponding
@@ -690,7 +694,7 @@ export namespace IRenderMime {
      *
      * @returns A translated string if found, or the original string.
      */
-    pgettext(msgctxt: string, msgid: string, ...args: any[]): string;
+    pgettext(msgctxt: string, msgid: string, ...args: unknown[]): string;
     /**
      * Do a plural-forms lookup of a message id. msgid is used as the message id for
      * purposes of lookup in the catalog, while n is used to determine which plural
@@ -710,7 +714,7 @@ export namespace IRenderMime {
       msgid: string,
       msgid_plural: string,
       n: number,
-      ...args: any[]
+      ...args: unknown[]
     ): string;
 
     /**
@@ -734,7 +738,7 @@ export namespace IRenderMime {
       msgid: string,
       msgid_plural: string,
       n: number,
-      ...args: any[]
+      ...args: unknown[]
     ): string;
   };
 

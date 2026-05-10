@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module docmanager-extension
@@ -329,7 +328,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
 
         const onStateChanged = (
           sender: IDocumentManager,
-          change: IChangedArgs<any>
+          change: IChangedArgs<unknown>
         ): void => {
           if (
             [
@@ -620,7 +619,7 @@ const dialogsPlugin: JupyterFrontEndPlugin<IDocumentManagerDialogs> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   manager,
   docManagerPlugin,
   contextsPlugin,
@@ -644,7 +643,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
+    fileChanged: ISignal<unknown, Omit<Contents.IModel, 'content'>>
   ): Widget {
     return addCommandToolbarButtonClass(
       ReactWidget.create(
@@ -1545,7 +1544,10 @@ function handleContext(
   context: DocumentRegistry.Context
 ): void {
   let disposable: IDisposable | null = null;
-  const onStateChanged = (sender: any, args: IChangedArgs<any>) => {
+  const onStateChanged = (
+    sender: DocumentRegistry.IModel,
+    args: IChangedArgs<unknown>
+  ) => {
     if (args.name === 'dirty') {
       if (args.newValue === true) {
         if (!disposable) {

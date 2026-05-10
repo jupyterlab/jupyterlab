@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -29,7 +28,13 @@ import { KernelSpecAPIClient } from '../kernelspec/restapi';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 // Stub for requirejs.
-declare let requirejs: any;
+declare const requirejs:
+  | ((
+      modules: string[],
+      onLoad: (module: Record<string, unknown>) => void,
+      onError: (error: unknown) => void
+    ) => void)
+  | undefined;
 
 export const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
@@ -404,7 +409,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _sendKernelShellControl<
     REQUEST extends KernelMessage.IShellControlMessage,
     REPLY extends KernelMessage.IShellControlMessage,
-    KFH extends new (...params: any[]) => KernelFutureHandler<REQUEST, REPLY>,
+    KFH extends new (
+      ...params: unknown[]
+    ) => KernelFutureHandler<REQUEST, REPLY>,
     T extends KernelMessage.IMessage
   >(
     ctor: KFH,
@@ -673,16 +680,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Kernels sometimes do not include a status field on kernel_info_reply
     // messages, so set a default for now.
     // See https://github.com/jupyterlab/jupyterlab/issues/6760
-    if (reply.content.status === undefined) {
-      (reply.content as any).status = 'ok';
-    }
+    const replyContent = {
+      ...reply.content,
+      status: reply.content.status ?? 'ok'
+    } as KernelMessage.IInfoReply;
 
-    if (reply.content.status !== 'ok') {
+    if (replyContent.status !== 'ok') {
       this._info.reject('Kernel info reply errored');
       return reply;
     }
 
-    this._info.resolve(reply.content);
+    this._info.resolve(replyContent);
 
     this._kernelSession = reply.header.session;
 
@@ -1195,9 +1203,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       // We've seen it before, update existing outputs with same display_id
       // by handling display_data as update_display_data.
       const updateMsg: KernelMessage.IMessage = {
-        header: JSONExt.deepCopy(
-          msg.header as unknown as JSONObject
-        ) as unknown as KernelMessage.IHeader,
+        header: {
+          ...(JSONExt.deepCopy(
+            msg.header as unknown as JSONObject
+          ) as unknown as KernelMessage.IHeader),
+          msg_type: 'update_display_data'
+        },
         parent_header: JSONExt.deepCopy(
           msg.parent_header as unknown as JSONObject
         ) as unknown as KernelMessage.IHeader,
@@ -1206,7 +1217,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
         channel: msg.channel,
         buffers: msg.buffers ? msg.buffers.slice() : []
       };
-      (updateMsg.header as any).msg_type = 'update_display_data';
 
       await Promise.all(
         parentIds.map(async parentId => {
@@ -1853,7 +1863,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
-  private _reconnectTimeout: any = null;
+  private _reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private _supportedProtocols: string[] = Object.values(
     KernelMessage.supportedKernelWebSocketProtocols
   );
@@ -1948,8 +1958,8 @@ namespace Private {
   export function loadObject(
     name: string,
     moduleName: string | undefined,
-    registry?: { [key: string]: any }
-  ): Promise<any> {
+    registry?: Record<string, unknown>
+  ): Promise<unknown> {
     return new Promise((resolve, reject) => {
       // Try loading the module using require.js
       if (moduleName) {
@@ -1958,7 +1968,7 @@ namespace Private {
         }
         requirejs(
           [moduleName],
-          (mod: any) => {
+          (mod: Record<string, unknown>) => {
             if (mod[name] === void 0) {
               const msg = `Object '${name}' not found in module '${moduleName}'`;
               reject(new Error(msg));
@@ -1969,7 +1979,7 @@ namespace Private {
           reject
         );
       } else {
-        if (registry?.[name]) {
+        if (registry && Object.prototype.hasOwnProperty.call(registry, name)) {
           resolve(registry[name]);
         } else {
           reject(new Error(`Object '${name}' not found in registry`));

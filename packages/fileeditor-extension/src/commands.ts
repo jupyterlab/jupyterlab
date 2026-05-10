@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectAll } from '@codemirror/commands';
 import { findNext, gotoLine } from '@codemirror/search';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
@@ -131,7 +130,28 @@ export const FACTORY = 'Editor';
  * for use by the File Editor extension or other Editor extensions.
  */
 export namespace Commands {
-  let config: Record<string, any> = {};
+  interface IEditorConfig extends Record<string, unknown> {
+    autoClosingBrackets?: boolean;
+    customStyles?: {
+      fontSize?: number;
+      [key: string]: unknown;
+    };
+    indentUnit?: string | number;
+    lineNumbers?: boolean;
+    lineWrap?: boolean;
+    matchBrackets?: boolean;
+    theme?: string;
+  }
+
+  interface IOpenCodeViewerArgs {
+    content: string;
+    extension?: string;
+    label?: string;
+    mimeType?: string;
+    widgetId?: string;
+  }
+
+  let config: IEditorConfig = {};
   let scrollPastEnd = true;
 
   /**
@@ -175,8 +195,7 @@ export namespace Commands {
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry
   ): void {
-    config =
-      (settings.get('editorConfig').composite as Record<string, any>) ?? {};
+    config = (settings.get('editorConfig').composite as IEditorConfig) ?? {};
     scrollPastEnd = settings.get('scrollPastEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
@@ -1688,13 +1707,9 @@ export namespace Commands {
     tracker: WidgetTracker<MainAreaWidget<CodeViewerWidget>>,
     trans: TranslationBundle
   ): void {
-    const openCodeViewer = async (args: {
-      content: string;
-      label?: string;
-      mimeType?: string;
-      extension?: string;
-      widgetId?: string;
-    }): Promise<CodeViewerWidget> => {
+    const openCodeViewer = async (
+      args: IOpenCodeViewerArgs
+    ): Promise<CodeViewerWidget> => {
       const func = editorServices.factoryService.newDocumentEditor;
       const factory: CodeEditor.Factory = options => {
         return func(options);
@@ -1733,8 +1748,8 @@ export namespace Commands {
 
     app.commands.addCommand(CommandIDs.openCodeViewer, {
       label: trans.__('Open Code Viewer'),
-      execute: (args: any) => {
-        return openCodeViewer(args);
+      execute: args => {
+        return openCodeViewer(args as unknown as IOpenCodeViewerArgs);
       },
       describedBy: {
         args: {

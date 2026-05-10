@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Sanitizer } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -1297,7 +1296,7 @@ export namespace Completer {
       li: HTMLLIElement,
       matchNode: HTMLElement,
       typesExist: boolean,
-      type: any,
+      type: string,
       orderedTypes: string[],
       icon?: LabIcon
     ): HTMLLIElement {

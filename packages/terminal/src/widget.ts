@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -763,6 +762,11 @@ namespace Private {
  * Utility functions for creating a Terminal widget
  */
 namespace Private {
+  interface IRendererModule {
+    WebglAddon?: typeof WebglAddon;
+    CanvasAddon?: typeof CanvasAddon;
+  }
+
   let supportWebGL: boolean = false;
   let Xterm_: typeof Xterm;
   let FitAddon_: typeof FitAddon;
@@ -826,8 +830,14 @@ namespace Private {
         ]);
       Xterm_ = xterm_.Terminal;
       FitAddon_ = fitAddon_.FitAddon;
-      Renderer_ =
-        (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
+      const rendererModule = renderer_ as IRendererModule;
+      if (supportWebGL && rendererModule.WebglAddon) {
+        Renderer_ = rendererModule.WebglAddon;
+      } else if (rendererModule.CanvasAddon) {
+        Renderer_ = rendererModule.CanvasAddon;
+      } else {
+        throw new Error('Failed to load an XTerm renderer addon.');
+      }
       WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
       SearchAddon_ = searchAddon_.SearchAddon;
     }

@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
@@ -30,7 +29,7 @@ export namespace galata {
    * - Deactivate cursor blinking to avoid noise in screenshots
    * - Fix fonts to ensure consistent screenshots
    */
-  export const DEFAULT_SETTINGS: Record<string, any> = {
+  export const DEFAULT_SETTINGS: Record<string, unknown> = {
     '@jupyterlab/apputils-extension:notification': {
       checkForUpdates: false,
       fetchNews: 'false'
@@ -67,7 +66,7 @@ export namespace galata {
     }
   };
 
-  export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
+  export const DEFAULT_DOCUMENTATION_STATE: Record<string, unknown> = {
     data: {
       'layout-restorer:data': {
         relativeSizes: [0, 1, 0]
@@ -233,7 +232,7 @@ export namespace galata {
     };
 
     // Proxy playwright page object
-    return new Proxy(jlabPage, handler) as any;
+    return new Proxy(jlabPage, handler) as IJupyterLabPageFixture;
   }
 
   export async function initTestPage(
@@ -263,7 +262,9 @@ export namespace galata {
     // Add server mocks
     if (mockConfig) {
       const config: Record<string, JSONObject> =
-        typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as any) : {};
+        typeof mockConfig !== 'boolean'
+          ? (mockConfig as Record<string, JSONObject>)
+          : {};
       await Mock.mockConfig(page, config);
     }
 
@@ -283,7 +284,7 @@ export namespace galata {
     };
     if (mockState) {
       if (typeof mockState !== 'boolean') {
-        workspace.data = { ...mockState } as any;
+        workspace.data = { ...mockState } as Workspace.IWorkspace['data'];
       }
       // State will be stored in-memory (after loading the initial version from disk)
       await Mock.mockState(page, workspace);
@@ -301,7 +302,7 @@ export namespace galata {
     };
     if (mockUser) {
       if (typeof mockUser !== 'boolean') {
-        user = { ...mockUser } as any;
+        user = { ...user, ...mockUser } as User.IUser;
       }
       // The user will be stored in-memory
       await Mock.mockUser(page, user);
@@ -640,7 +641,7 @@ export namespace galata {
      */
     export async function freezeContentLastModified(
       page: Page,
-      filter?: <T = any>(directoryList: T[]) => T[]
+      filter?: <T = unknown>(directoryList: T[]) => T[]
     ): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
@@ -683,7 +684,9 @@ export namespace galata {
               }
               const now = Date.now();
               const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
-              for (const entry of data['content'] as any[]) {
+              for (const entry of data['content'] as Array<
+                Record<string, unknown>
+              >) {
                 // Mutate the list in-place
                 entry['last_modified'] = aDayAgo;
               }
@@ -875,11 +878,11 @@ export namespace galata {
      * @throws ResponseDisposedError if response was disposed
      * @throws Error if parsing fails for other reasons
      */
-    async function handleJsonResponse(
+    async function handleJsonResponse<T = unknown>(
       response: Awaited<ReturnType<APIRequestContext['fetch']>>
-    ): Promise<any> {
+    ): Promise<T> {
       try {
-        return await response.json();
+        return (await response.json()) as T;
       } catch (error) {
         // Check if this is a disposal error
         const isDisposalError =
@@ -902,7 +905,7 @@ export namespace galata {
      */
     export async function mockRunners(
       page: Page,
-      runners: Map<string, any>,
+      runners: Map<string, unknown>,
       type: 'kernels' | 'sessions' | 'terminals',
       kernels?: Map<string, Kernel.IModel>
     ): Promise<void> {
@@ -1004,9 +1007,9 @@ export namespace galata {
                 }
                 break;
               }
-              let data: any[];
+              let data: unknown[];
               try {
-                data = (await handleJsonResponse(response)) as any[];
+                data = await handleJsonResponse<unknown[]>(response);
               } catch (error) {
                 if (
                   error instanceof ResponseDisposedError &&
@@ -1065,9 +1068,10 @@ export namespace galata {
               }
               break;
             }
-            let data: any;
+            let data: Record<string, unknown>;
             try {
-              data = await handleJsonResponse(response);
+              data =
+                await handleJsonResponse<Record<string, unknown>>(response);
             } catch (error) {
               if (
                 error instanceof ResponseDisposedError &&
@@ -1081,8 +1085,16 @@ export namespace galata {
             // Update stored runners
             runners.set(type === 'terminals' ? data.name : data.id, data);
             // Update kernels
-            if (kernels && type === 'sessions' && data.kernel.id) {
-              kernels.set(data.kernel.id, data.kernel);
+            if (
+              kernels &&
+              type === 'sessions' &&
+              'kernel' in data &&
+              data.kernel &&
+              typeof data.kernel === 'object' &&
+              'id' in data.kernel &&
+              typeof data.kernel.id === 'string'
+            ) {
+              kernels.set(data.kernel.id, data.kernel as Kernel.IModel);
             }
 
             if (!page.isClosed() && !isClosed) {
@@ -1112,9 +1124,10 @@ export namespace galata {
               }
               break;
             }
-            let data: any;
+            let data: Record<string, unknown>;
             try {
-              data = await handleJsonResponse(response);
+              data =
+                await handleJsonResponse<Record<string, unknown>>(response);
             } catch (error) {
               if (
                 error instanceof ResponseDisposedError &&
@@ -1128,15 +1141,23 @@ export namespace galata {
             const id = type === 'terminals' ? data.name : data.id;
             runners.set(id, data);
             // Update kernels
-            if (kernels && type === 'sessions' && data.kernel.id) {
-              kernels.set(data.kernel.id, data.kernel);
+            if (
+              kernels &&
+              type === 'sessions' &&
+              'kernel' in data &&
+              data.kernel &&
+              typeof data.kernel === 'object' &&
+              'id' in data.kernel &&
+              typeof data.kernel.id === 'string'
+            ) {
+              kernels.set(data.kernel.id, data.kernel as Kernel.IModel);
             }
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
                 status: type === 'terminals' ? 200 : 201,
                 body: JSON.stringify(data),
                 contentType: 'application/json',
-                headers: response.headers as any
+                headers: Object.fromEntries(response.headers.entries())
               });
             }
             break;
@@ -1205,7 +1226,7 @@ export namespace galata {
     export async function mockSettings(
       page: Page,
       settings: ISettingRegistry.IPlugin[],
-      mockedSettings: Record<string, any>
+      mockedSettings: Record<string, unknown>
     ): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;

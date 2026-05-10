@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -22,6 +21,7 @@ import * as React from 'react';
 import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
+import type { RawEditor } from './raweditor';
 
 /**
  * The ratio panes in the setting editor.
@@ -122,7 +122,7 @@ export class JsonSettingEditor extends SplitPanel {
   /**
    * Emits when the commands passed in at instantiation change.
    */
-  get commandsChanged(): ISignal<any, string[]> {
+  get commandsChanged(): ISignal<RawEditor, string[]> {
     return this._editor.raw.commandsChanged;
   }
 
@@ -322,7 +322,7 @@ export class JsonSettingEditor extends SplitPanel {
   private _saving = false;
   private _state: JsonSettingEditor.ILayoutState =
     JSONExt.deepCopy(DEFAULT_LAYOUT);
-  private _when: Promise<any>;
+  private _when: Promise<unknown>;
 }
 
 /**
@@ -381,7 +381,7 @@ export namespace JsonSettingEditor {
     /**
      * The point after which the editor should restore its state.
      */
-    when?: Promise<any> | Array<Promise<any>>;
+    when?: Promise<unknown> | Array<Promise<unknown>>;
 
     /**
      * The application language translator.

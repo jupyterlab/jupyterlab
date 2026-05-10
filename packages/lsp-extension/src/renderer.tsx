@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -11,7 +10,7 @@ import React, { useRef, useState } from 'react';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
-type TDict = { [key: string]: any };
+type TDict = Record<string, unknown>;
 
 interface ISettingPropertyMap {
   [key: string]: ISettingProperty;
@@ -28,7 +27,7 @@ interface ISettingProperty {
   /**
    * Value of setting property
    */
-  value: any;
+  value: unknown;
 }
 const SETTING_NAME = 'languageServers';
 const SERVER_SETTINGS = 'configuration';
@@ -47,7 +46,7 @@ interface ISettingFormProps {
   /**
    * Callback to update the setting item.
    */
-  updateSetting: Debouncer<void, any, [hash: string, newSetting: TDict]>;
+  updateSetting: Debouncer<void, unknown, [hash: string, newSetting: TDict]>;
 
   /**
    * Hash to differentiate the setting fields.
@@ -76,6 +75,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     serverName,
     ...otherSettings
   } = props.settings;
+  const serverSettingsData = (serverSettings ?? {}) as Record<string, unknown>;
 
   const [currentServerName, setCurrentServerName] =
     useState<string>(serverName);
@@ -93,7 +93,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   };
 
   const serverSettingWithType: ISettingPropertyMap = {};
-  Object.entries(serverSettings).forEach(([key, value]) => {
+  Object.entries(serverSettingsData).forEach(([key, value]) => {
     const newProps: ISettingProperty = {
       property: key,
       type: typeof value as 'string' | 'number' | 'boolean',
@@ -124,12 +124,12 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
    */
   const onOtherSettingsChange = (
     property: string,
-    value: any,
+    value: unknown,
     type: string
   ) => {
     let settingValue = value;
     if (type === 'number') {
-      settingValue = parseFloat(value);
+      settingValue = parseFloat(String(value));
     }
     const newProps = {
       ...otherSettingsComposite,
@@ -202,7 +202,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   };
   const debouncedSetProperty = new Debouncer<
     void,
-    any,
+    unknown,
     [hash: string, property: ISettingProperty]
   >(setProperty);
   const textInputId = useRef<string>(
@@ -320,13 +320,17 @@ function PropertyFrom(props: {
   hash: string;
   property: ISettingProperty;
   removeProperty: (hash: string) => void;
-  setProperty: Debouncer<void, any, [hash: string, property: ISettingProperty]>;
+  setProperty: Debouncer<
+    void,
+    unknown,
+    [hash: string, property: ISettingProperty]
+  >;
   trans: TranslationBundle;
 }): JSX.Element {
   const [state, setState] = useState<{
     property: string;
     type: 'boolean' | 'string' | 'number';
-    value: any;
+    value: unknown;
   }>({ ...props.property });
   const TYPE_MAP = { string: 'text', number: 'number', boolean: 'checkbox' };
 
@@ -341,12 +345,12 @@ function PropertyFrom(props: {
   };
 
   const changeValue = (
-    newValue: any,
+    newValue: unknown,
     type: 'string' | 'boolean' | 'number'
   ) => {
     let value = newValue;
     if (type === 'number') {
-      value = parseFloat(newValue);
+      value = parseFloat(String(newValue));
     }
     const newState = { ...state, value };
     props.setProperty.invoke(props.hash, newState).catch(console.error);
@@ -396,8 +400,12 @@ function PropertyFrom(props: {
           type={TYPE_MAP[state.type]}
           required={false}
           placeholder={props.trans.__('Property value')}
-          value={state.type !== 'boolean' ? state.value : undefined}
-          checked={state.type === 'boolean' ? state.value : undefined}
+          value={
+            state.type !== 'boolean'
+              ? ((state.value ?? '') as string | number)
+              : undefined
+          }
+          checked={state.type === 'boolean' ? Boolean(state.value) : undefined}
           onChange={
             state.type !== 'boolean'
               ? e => changeValue(e.target.value, state.type)
@@ -611,7 +619,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
 
   private _debouncedUpdateSetting: Debouncer<
     void,
-    any,
+    unknown,
     [hash: string, newSetting: TDict]
   >;
 }

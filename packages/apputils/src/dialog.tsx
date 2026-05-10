@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -554,12 +553,12 @@ export namespace Dialog {
   /**
    * The body input types.
    */
-  export type Body<T> = IBodyWidget<T> | React.ReactElement<any> | string;
+  export type Body<T> = IBodyWidget<T> | React.ReactElement | string;
 
   /**
    * The header input types.
    */
-  export type Header = React.ReactElement<any> | string;
+  export type Header = React.ReactElement | string;
 
   /**
    * A widget used as a dialog body.
@@ -652,7 +651,7 @@ export namespace Dialog {
     /**
      * Error message
      */
-    message: string | React.ReactElement<any>;
+    message: string | React.ReactElement;
   }
 
   /**
@@ -742,7 +741,7 @@ export namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(body: Body<any>): Widget;
+    createBody<T>(body: Body<T>): Widget;
 
     /**
      * Create the footer of the dialog.
@@ -928,7 +927,7 @@ export namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(value: Body<any>): Widget {
+    createBody<T>(value: Body<T>): Widget {
       const styleReactWidget = (widget: ReactWidget) => {
         if (widget.renderPromise !== undefined) {
           widget.renderPromise
@@ -1118,7 +1117,7 @@ export namespace Dialog {
   /**
    * The dialog widget tracker.
    */
-  export const tracker = new WidgetTracker<Dialog<any>>({
+  export const tracker = new WidgetTracker<Dialog<unknown>>({
     namespace: '@jupyterlab/apputils:Dialog'
   });
 }
@@ -1130,7 +1129,7 @@ namespace Private {
   /**
    * The queue for launching dialogs.
    */
-  export const launchQueue: Promise<Dialog.IResult<any>>[] = [];
+  export const launchQueue: Promise<Dialog.IResult<unknown>>[] = [];
 
   export const errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 

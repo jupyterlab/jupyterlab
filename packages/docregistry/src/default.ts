@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -46,7 +45,7 @@ export class DocumentModel
   /**
    * A signal emitted when the document state changes.
    */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+  get stateChanged(): ISignal<this, IChangedArgs<unknown>> {
     return this._stateChanged;
   }
 
@@ -155,7 +154,7 @@ export class DocumentModel
   /**
    * Trigger a state change signal.
    */
-  protected triggerStateChange(args: IChangedArgs<any>): void {
+  protected triggerStateChange(args: IChangedArgs<unknown>): void {
     this._stateChanged.emit(args);
   }
 
@@ -197,7 +196,7 @@ export class DocumentModel
   private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<unknown>>(this);
   private _collaborationEnabled: boolean;
 }
 
@@ -638,7 +637,7 @@ export class DocumentWidget<
    */
   private _onModelStateChanged(
     sender: DocumentRegistry.IModel,
-    args: IChangedArgs<any>
+    args: IChangedArgs<unknown>
   ): void {
     if (args.name === 'dirty') {
       this._handleDirtyState();

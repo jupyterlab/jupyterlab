@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* global RequestInit */
 
@@ -574,7 +573,7 @@ export class ListModel extends VDomModel {
    *
    * @param pending A promise that resolves when the action is completed.
    */
-  protected addPendingAction(pending: Promise<any>): void {
+  protected addPendingAction(pending: Promise<unknown>): void {
     // Add to pending actions collection
     this._pendingActions.push(pending);
 
@@ -626,7 +625,7 @@ export class ListModel extends VDomModel {
 
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
-  private _pendingActions: Promise<any>[] = [];
+  private _pendingActions: Promise<unknown>[] = [];
   private _debouncedSearch: Debouncer<void, void>;
 }
 
@@ -672,7 +671,7 @@ namespace Private {
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
-    queryArgs: { [k: string]: any } = {},
+    queryArgs: Record<string, unknown> = {},
     init: RequestInit = {},
     serverSettings?: ServerConnection.ISettings
   ): Promise<[T, { [key: string]: string }]> {
@@ -694,9 +693,9 @@ namespace Private {
       throw new ServerConnection.NetworkError(error);
     }
 
-    let data: any = await response.text();
+    let data: unknown = await response.text();
 
-    if (data.length > 0) {
+    if (typeof data === 'string' && data.length > 0) {
       try {
         data = JSON.parse(data);
       } catch (error) {
@@ -705,7 +704,14 @@ namespace Private {
     }
 
     if (!response.ok) {
-      throw new ServerConnection.ResponseError(response, data.message || data);
+      const message =
+        typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        (data as { message?: unknown }).message
+          ? (data as { message?: unknown }).message
+          : data;
+      throw new ServerConnection.ResponseError(response, message);
     }
 
     const link = response.headers.get('Link') ?? '';
@@ -715,6 +721,6 @@ namespace Private {
     while ((match = LINK_PARSER.exec(link)) !== null) {
       links[match[2]] = match[1];
     }
-    return [data, links];
+    return [data as T, links];
   }
 }

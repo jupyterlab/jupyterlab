@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import { createDefaultFactory } from '@jupyterlab/apputils';
 import type {
@@ -531,7 +530,7 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     commands: CommandRegistry,
     toolbarFactory?: (
       widget: Widget,
-      commandArgs?: Record<string, any>
+      commandArgs?: Record<string, unknown>
     ) => IObservableList<ToolbarRegistry.IToolbarItem>
   ) {
     this._commands = commands;
@@ -544,10 +543,10 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
 
   protected get defaultToolbarFactory(): (
     widget: Widget,
-    commandArgs?: Record<string, any>
+    commandArgs?: Record<string, unknown>
   ) => IObservableList<ToolbarRegistry.IToolbarItem> {
     const itemFactory = this.createItemFactory(this._commands);
-    return (widget: Widget, commandArgs?: Record<string, any>) =>
+    return (widget: Widget, commandArgs?: Record<string, unknown>) =>
       new ObservableList({
         values: defaultToolbarItems.map(item => {
           const itemWithArgs = commandArgs
@@ -603,7 +602,7 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   private _commands: CommandRegistry;
   private _toolbarFactory: (
     widget: Widget,
-    commandArgs?: Record<string, any>
+    commandArgs?: Record<string, unknown>
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
   private _tracker: CellToolbarTracker;
 }

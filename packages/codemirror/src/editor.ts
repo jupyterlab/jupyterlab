@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
@@ -210,14 +209,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Record<string, any>): void {
+  setOptions(options: Record<string, unknown>): void {
     this._configurator.setOptions(options);
   }
 
   /**
    * Set a base config options for the editor.
    */
-  setBaseOptions(options: Record<string, any>): void {
+  setBaseOptions(options: Record<string, unknown>): void {
     this._configurator.setBaseOptions(options);
   }
 
@@ -592,9 +591,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
   protected onConfigChanged(
     configurator: IExtensionsHandler,
-    changes: Record<string, any>
+    changes: Record<string, unknown>
   ): void {
-    const definedChanges = Object.keys(changes).reduce<Record<string, any>>(
+    const definedChanges = Object.keys(changes).reduce<Record<string, unknown>>(
       (agg, key) => {
         if (changes[key] != undefined) {
           agg[key] = changes[key];

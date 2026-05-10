@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -784,7 +783,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'single-document': ILabShell.IUserLayout;
     'multiple-document': ILabShell.IUserLayout;
   } {
-    return JSONExt.deepCopy(this._userLayout as any);
+    return {
+      'single-document': JSONExt.deepCopy(
+        this._userLayout['single-document']
+      ) as ILabShell.IUserLayout,
+      'multiple-document': JSONExt.deepCopy(
+        this._userLayout['multiple-document']
+      ) as ILabShell.IUserLayout
+    };
   }
 
   /**
@@ -1726,7 +1732,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the dock area active widget.
    */
   private _onActiveChanged(
-    sender: any,
+    sender: FocusTracker<Widget>,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {
@@ -1745,7 +1751,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the dock area current widget.
    */
   private _onCurrentChanged(
-    sender: any,
+    sender: FocusTracker<Widget>,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {

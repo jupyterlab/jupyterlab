@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
@@ -72,29 +71,32 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     const optionURLs = (options.paths && options.paths.urls) || {};
     const optionDirs = (options.paths && options.paths.directories) || {};
 
+    const defaultURLValues = defaultURLs as Record<string, string | undefined>;
+    const optionURLValues = optionURLs as Record<string, string | undefined>;
+    const defaultDirectoryValues = defaultDirs as Record<string, string>;
+    const optionDirectoryValues = optionDirs as Record<string, string>;
     this._paths = {
-      urls: Object.keys(defaultURLs).reduce((acc, key) => {
-        if (key in optionURLs) {
-          const value = (optionURLs as any)[key];
-          (acc as any)[key] = value;
+      urls: Object.keys(defaultURLValues).reduce<
+        Record<string, string | undefined>
+      >((acc, key) => {
+        if (key in optionURLValues) {
+          acc[key] = optionURLValues[key];
         } else {
-          (acc as any)[key] = (defaultURLs as any)[key];
+          acc[key] = defaultURLValues[key];
         }
         return acc;
-      }, {}),
-      directories: Object.keys(JupyterLab.defaultPaths.directories).reduce(
-        (acc, key) => {
-          if (key in optionDirs) {
-            const value = (optionDirs as any)[key];
-            (acc as any)[key] = value;
-          } else {
-            (acc as any)[key] = (defaultDirs as any)[key];
-          }
-          return acc;
-        },
-        {}
-      )
-    } as JupyterFrontEnd.IPaths;
+      }, {}) as JupyterFrontEnd.IPaths['urls'],
+      directories: Object.keys(defaultDirectoryValues).reduce<
+        Record<string, string>
+      >((acc, key) => {
+        if (key in optionDirectoryValues) {
+          acc[key] = optionDirectoryValues[key];
+        } else {
+          acc[key] = defaultDirectoryValues[key];
+        }
+        return acc;
+      }, {}) as JupyterFrontEnd.IPaths['directories']
+    };
 
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
@@ -173,8 +175,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
   registerPluginModule(mod: JupyterLab.IPluginModule): void {
     let data = mod.default;
     // Handle commonjs exports.
-    if (!mod.hasOwnProperty('__esModule')) {
-      data = mod as any;
+    if (!Object.prototype.hasOwnProperty.call(mod, '__esModule')) {
+      data = mod as unknown as JupyterLab.IPluginModule['default'];
     }
     if (!Array.isArray(data)) {
       data = [data];
@@ -480,7 +482,7 @@ export namespace JupyterLab {
    * A read-only subset of the `Token`.
    */
   export interface IToken extends Readonly<
-    Pick<Token<any>, 'name' | 'description'>
+    Pick<Token<unknown>, 'name' | 'description'>
   > {
     // no-op
   }
@@ -574,8 +576,8 @@ export namespace JupyterLab {
      * The default export.
      */
     default:
-      | JupyterFrontEndPlugin<any, any, any>
-      | JupyterFrontEndPlugin<any, any, any>[];
+      | JupyterFrontEndPlugin<unknown, unknown, unknown>
+      | JupyterFrontEndPlugin<unknown, unknown, unknown>[];
   }
 }
 

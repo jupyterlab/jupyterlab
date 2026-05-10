@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
@@ -948,7 +947,7 @@ export class Settings
   /**
    * Handle plugin changes in the setting registry.
    */
-  private _onPluginChanged(sender: any, plugin: string): void {
+  private _onPluginChanged(sender: ISettingRegistry, plugin: string): void {
     if (plugin === this.plugin.id) {
       this._changed.emit(undefined);
     }
@@ -1084,9 +1083,7 @@ export namespace SettingRegistry {
                 ...items[refIndex],
                 ...item,
                 submenu: reconcileMenus(
-                  items[refIndex].submenu
-                    ? [items[refIndex].submenu as any]
-                    : null,
+                  items[refIndex].submenu ? [items[refIndex].submenu] : null,
                   [item.submenu],
                   warn,
                   addNewItems
@@ -1510,8 +1507,7 @@ namespace Private {
     definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
     required = root
-      ? schema.required instanceof Array &&
-        schema.required?.includes(root as any)
+      ? schema.required instanceof Array && schema.required?.includes(root)
       : required;
     schema = (root ? schema.properties?.[root] : schema) || {};
 
@@ -1527,7 +1523,7 @@ namespace Private {
           undefined,
           definitions,
           schema.required instanceof Array &&
-            schema.required?.includes(property as any)
+            schema.required?.includes(property)
         );
       }
 

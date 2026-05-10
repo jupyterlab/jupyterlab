@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module application-extension
@@ -1213,9 +1212,10 @@ const dirty: JupyterFrontEndPlugin<void> = {
     // attribute needs to set in addition to a return value being returned.
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
-    window.addEventListener('beforeunload', event => {
+    window.addEventListener('beforeunload', (event: BeforeUnloadEvent) => {
       if (app.status.isDirty) {
-        return ((event as any).returnValue = message);
+        event.returnValue = message;
+        return message;
       }
     });
   }
@@ -1251,7 +1251,10 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
       .load(shell.id)
       .then(settings => {
         // Add a layer of customization to support app shell mode
-        const customizedLayout = settings.composite['layout'] as any;
+        const customizedLayout = settings.composite['layout'] as {
+          single?: ILabShell.IUserLayout;
+          multiple?: ILabShell.IUserLayout;
+        };
 
         // Restore the layout.
         void labShell
@@ -1284,7 +1287,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
           {
             single: labShell.userLayout['single-document'],
             multiple: labShell.userLayout['multiple-document']
-          } as any
+          }
         )
       ) {
         const result = await showDialog({
@@ -1646,7 +1649,7 @@ const jupyterLogo: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   contextMenuPlugin,
   dirty,
   main,
@@ -1726,7 +1729,8 @@ namespace Private {
       // to define their default value.
       schema.properties!.contextMenu.default = SettingRegistry.reconcileItems(
         pluginDefaults,
-        schema.properties!.contextMenu.default as any[],
+        schema.properties!.contextMenu
+          .default as ISettingRegistry.IContextMenuItem[],
         true
       )!
         // flatten one level
@@ -1794,7 +1798,8 @@ namespace Private {
     };
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
-      (settings.composite.contextMenu as any) ?? [];
+      (settings.composite.contextMenu as ISettingRegistry.IContextMenuItem[]) ??
+      [];
 
     // Create menu item for non-disabled element
     SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
@@ -1812,7 +1817,9 @@ namespace Private {
     settings.changed.connect(() => {
       // As extension may change the context menu through API,
       // prompt the user to reload if the menu has been updated.
-      const newItems = (settings.composite.contextMenu as any) ?? [];
+      const newItems =
+        (settings.composite
+          .contextMenu as ISettingRegistry.IContextMenuItem[]) ?? [];
       if (!JSONExt.deepEqual(contextItems, newItems)) {
         void displayInformation(trans);
       }
@@ -1926,7 +1933,7 @@ namespace Private {
             .set('layout', {
               single: newLayout['single-document'],
               multiple: newLayout['multiple-document']
-            } as any)
+            } as ReadonlyPartialJSONValue)
             .catch(reason => {
               console.error(
                 'Failed to save user layout customization.',

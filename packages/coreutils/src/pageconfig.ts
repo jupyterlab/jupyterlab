@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { JSONExt } from '@lumino/coreutils';
 import minimist from 'minimist';
 import { URLExt } from './url';
@@ -9,8 +7,10 @@ import { URLExt } from './url';
 /**
  * Declare stubs for the node variables.
  */
-declare let process: any;
-declare let require: any;
+declare let process:
+  | { argv?: string[]; env?: { [key: string]: string | undefined } }
+  | undefined;
+declare let require: (id: string) => unknown;
 
 /**
  * The namespace for `PageConfig` functions.
@@ -56,7 +56,9 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
-        const path: any = require('path');
+        const path = require('path') as {
+          resolve: (...parts: string[]) => string;
+        };
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
           fullPath = path.resolve(cli['jupyter-config-data']);

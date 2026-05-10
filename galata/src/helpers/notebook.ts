@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
@@ -410,15 +409,21 @@ export class NotebookHelper {
           ? undefined
           : ({
               onBeforeScroll: async () => {
-                await (window as any)[`${callbackName}_onBeforeScroll`]();
+                const callbackWindow = window as Window &
+                  Record<string, () => Promise<void>>;
+                await callbackWindow[`${callbackName}_onBeforeScroll`]();
               },
 
               onAfterScroll: async () => {
-                await (window as any)[`${callbackName}_onAfterScroll`]();
+                const callbackWindow = window as Window &
+                  Record<string, () => Promise<void>>;
+                await callbackWindow[`${callbackName}_onAfterScroll`]();
               },
 
               onAfterCellRun: async (cellIndex: number) => {
-                await (window as any)[`${callbackName}_onAfterCellRun`](
+                const callbackWindow = window as Window &
+                  Record<string, (cellIndex: number) => Promise<void>>;
+                await callbackWindow[`${callbackName}_onAfterCellRun`](
                   cellIndex
                 );
               }
@@ -1180,7 +1185,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const clickPosition: any = { x: 15, y: 5 };
+    const clickPosition = { x: 15, y: 5 };
 
     await startCell.click({ position: clickPosition });
 
@@ -1371,7 +1376,7 @@ export class NotebookHelper {
       await select.selectOption(cellType);
     } else {
       await selectInput.evaluate((el, cellType) => {
-        (el as any).value = cellType;
+        (el as HTMLElement & { value?: string }).value = cellType;
       }, cellType);
     }
 

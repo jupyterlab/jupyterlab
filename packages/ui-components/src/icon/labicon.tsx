@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
@@ -408,7 +407,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgInnerHTML;
   }
 
-  protected get svgReactAttrs(): any | null {
+  protected get svgReactAttrs(): Record<string, string | null> | null {
     if (this._svgReactAttrs === undefined) {
       if (this.svgElement === null) {
         // the svg element resolved to null, mark this null too
@@ -649,7 +648,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    */
   protected _svgElement: HTMLElement | null | undefined = undefined;
   protected _svgInnerHTML: string | null | undefined = undefined;
-  protected _svgReactAttrs: any | null | undefined = undefined;
+  protected _svgReactAttrs: Record<string, string | null> | null | undefined =
+    undefined;
 }
 
 /**

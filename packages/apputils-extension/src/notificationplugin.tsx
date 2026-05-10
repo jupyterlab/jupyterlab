@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   JupyterFrontEnd,
@@ -85,6 +84,35 @@ namespace CommandIDs {
  * Half spacing between subitems in a status item.
  */
 const HALF_SPACING = 4;
+
+type NotificationActionCommandOptions = Omit<
+  Notification.IAction,
+  'callback'
+> & {
+  commandId: string;
+  args?: ReadonlyJSONObject;
+};
+
+interface INotificationCommandOptions extends Omit<
+  Notification.IOptions<ReadonlyJSONValue>,
+  'actions'
+> {
+  actions?: NotificationActionCommandOptions[] | null;
+}
+
+interface INotifyCommandArgs {
+  message: string;
+  type?: Notification.TypeOptions;
+  options?: INotificationCommandOptions;
+}
+
+interface IUpdateCommandArgs extends INotifyCommandArgs {
+  id: string;
+}
+
+interface IDismissCommandArgs {
+  id: string;
+}
 
 /**
  * Notification center properties
@@ -465,34 +493,15 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: args => {
-        const { message, type } = args as any;
-        const options = (args.options as any) ?? {};
+        const {
+          message,
+          type,
+          options = {}
+        } = args as unknown as INotifyCommandArgs;
 
         return Notification.manager.notify(message, type ?? 'default', {
           ...options,
-          actions: options.actions
-            ? options.actions.map(
-                (
-                  action: Omit<Notification.IAction, 'callback'> & {
-                    commandId: string;
-                    args?: ReadonlyJSONObject;
-                  }
-                ) => {
-                  return {
-                    ...action,
-                    callback: () => {
-                      app.commands
-                        .execute(action.commandId, action.args)
-                        .catch(r => {
-                          console.error(
-                            `Failed to executed '${action.commandId}':\n${r}`
-                          );
-                        });
-                    }
-                  } as Notification.IAction;
-                }
-              )
-            : null
+          actions: Private.toActions(options.actions, app)
         });
       }
     });
@@ -568,36 +577,19 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: args => {
-        const { id, message, type, ...options } = args as any;
+        const {
+          id,
+          message,
+          type,
+          options = {}
+        } = args as unknown as IUpdateCommandArgs;
 
         return Notification.manager.update({
           id,
           message,
           type: type ?? 'default',
           ...options,
-          actions: options.actions
-            ? options.actions.map(
-                (
-                  action: Omit<Notification.IAction, 'callback'> & {
-                    commandId: string;
-                    args?: ReadonlyJSONObject;
-                  }
-                ) => {
-                  return {
-                    ...action,
-                    callback: () => {
-                      app.commands
-                        .execute(action.commandId, action.args)
-                        .catch(r => {
-                          console.error(
-                            `Failed to executed '${action.commandId}':\n${r}`
-                          );
-                        });
-                    }
-                  } as Notification.IAction;
-                }
-              )
-            : null
+          actions: Private.toActions(options.actions, app)
         });
       }
     });
@@ -617,7 +609,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: args => {
-        const { id } = args as any;
+        const { id } = args as unknown as IDismissCommandArgs;
 
         Notification.manager.dismiss(id);
       }
@@ -987,7 +979,7 @@ namespace Private {
    */
   function ToastButton({ action, closeToast }: IToastButtonProps): JSX.Element {
     const clickHandler = (event: React.MouseEvent): void => {
-      action.callback(event as any);
+      action.callback(event.nativeEvent);
       if (!event.defaultPrevented) {
         closeToast();
       }
@@ -1069,15 +1061,15 @@ namespace Private {
   ): Promise<Id> {
     const { actions, autoClose, data } = options;
     const t = await toast();
-    const toastOptions = {
+    const toastOptions: ToastOptions<ReadonlyJSONValue> = {
       autoClose:
         autoClose ?? (actions && actions.length > 0 ? false : undefined),
-      data: data as any,
+      data: data as ReadonlyJSONValue | undefined,
       className: `jp-Notification-Toast-${type}`,
       toastId,
-      type: type === 'in-progress' ? null : type,
+      type: type === 'in-progress' ? 'default' : type,
       isLoading: type === 'in-progress'
-    } as any;
+    };
 
     return t(
       ({ closeToast }: { closeToast?: () => void }) =>
@@ -1091,5 +1083,23 @@ namespace Private {
         ),
       toastOptions
     );
+  }
+
+  export function toActions(
+    actions: NotificationActionCommandOptions[] | null | undefined,
+    app: JupyterFrontEnd
+  ): Notification.IAction[] | null {
+    if (!actions) {
+      return null;
+    }
+
+    return actions.map(action => ({
+      ...action,
+      callback: () => {
+        app.commands.execute(action.commandId, action.args).catch(r => {
+          console.error(`Failed to executed '${action.commandId}':\n${r}`);
+        });
+      }
+    }));
   }
 }

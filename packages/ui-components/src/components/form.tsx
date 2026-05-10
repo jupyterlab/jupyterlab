@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Button } from '@jupyter/react-components';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -239,7 +238,7 @@ export interface ILabCustomizerOptions<P>
   >;
 }
 
-function customizeForLab<P = any>(
+function customizeForLab<P = unknown>(
   options: ILabCustomizerOptions<P>
 ): React.FunctionComponent<P> {
   const {
@@ -448,7 +447,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
     component: props => {
       const trans = (props.translator ?? nullTranslator).load('jupyterlab');
       let isModified = false;
-      let defaultValue: any;
+      let defaultValue: unknown;
       const {
         formData,
         schema,
@@ -589,9 +588,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                 <div className="jp-FormGroup-default">
                   {trans.__(
                     'Default: %1',
-                    defaultValue !== null
-                      ? defaultValue.toLocaleString()
-                      : 'null'
+                    defaultValue !== null ? String(defaultValue) : 'null'
                   )}
                 </div>
               )}
@@ -614,7 +611,7 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
   /**
    *
    */
-  onChange: (e: IChangeEvent<T>) => any;
+  onChange: (e: IChangeEvent<T>) => void;
   /**
    *
    */
@@ -683,7 +680,15 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     ObjectFieldTemplate: objectTemplate
   };
 
+  const normalizedFormContext = formContext as
+    | Record<string, unknown>
+    | undefined;
+
   return (
-    <Form templates={templates} formContext={formContext as any} {...others} />
+    <Form
+      templates={templates}
+      formContext={normalizedFormContext}
+      {...others}
+    />
   );
 }

@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CommandRegistry } from '@lumino/commands';
 import type {
@@ -68,7 +67,7 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
    * tested for. For example, some back-ends may return a copy of the item of
    * type `T` being removed while others may return no content.
    */
-  remove(id: V): Promise<any>;
+  remove(id: V): Promise<unknown>;
 
   /**
    * Save a value using the data connector.
@@ -85,7 +84,7 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
    * tested for. For example, some back-ends may return a copy of the item of
    * type `T` being saved while others may return no content.
    */
-  save(id: V, value: U): Promise<any>;
+  save(id: V, value: U): Promise<unknown>;
 }
 
 /**
@@ -166,12 +165,12 @@ export interface IObjectPool<
  *
  * @typeparam U - The type of object held by the restorable collection.
  *
- * @typeparam V - The `restored` promise resolution type. Defaults to `any`.
+ * @typeparam V - The `restored` promise resolution type. Defaults to `unknown`.
  */
 export interface IRestorer<
   T extends IRestorable<U> = IRestorable<IObservableDisposable>,
   U extends IObservableDisposable = IObservableDisposable,
-  V = any
+  V = unknown
 > {
   /**
    * Restore the objects in a given restorable collection.
@@ -180,7 +179,7 @@ export interface IRestorer<
    *
    * @param options - The configuration options that describe restoration.
    *
-   * @returns A promise that settles when restored with `any` results.
+   * @returns A promise that settles when restored with `unknown` results.
    *
    */
   restore(restorable: T, options: IRestorable.IOptions<U>): Promise<V>;
@@ -219,7 +218,7 @@ export namespace IRestorer {
     /**
      * The point after which it is safe to restore state.
      */
-    when?: Promise<any> | Array<Promise<any>>;
+    when?: Promise<unknown> | Array<Promise<unknown>>;
   }
 }
 
@@ -228,15 +227,15 @@ export namespace IRestorer {
  *
  * @typeparam T - The type of object held by the restorable collection.
  *
- * @typeparam U - The `restored` promise resolution type. Defaults to `any`.
+ * @typeparam U - The `restored` promise resolution type. Defaults to `unknown`.
  */
-export interface IRestorable<T extends IObservableDisposable, U = any> {
+export interface IRestorable<T extends IObservableDisposable, U = unknown> {
   /**
    * Restore the objects in this restorable collection.
    *
    * @param options - The configuration options that describe restoration.
    *
-   * @returns A promise that settles when restored with `any` results.
+   * @returns A promise that settles when restored with `unknown` results.
    *
    */
   restore(options: IRestorable.IOptions<T>): Promise<U>;

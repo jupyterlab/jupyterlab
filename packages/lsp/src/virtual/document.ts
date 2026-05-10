@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDisposable } from '@lumino/disposable';
 import type { IDocumentInfo } from '../ws-connection/types';
@@ -453,8 +452,8 @@ export class VirtualDocument implements IDisposable {
     // just to be sure - if anything is accessed after disposal (it should not) we
     // will get altered by errors in the console AND this will limit memory leaks
 
-    this.documentInfo = null as any;
-    this.lineBlocks = null as any;
+    this.documentInfo = null as unknown as IDocumentInfo;
+    this.lineBlocks = null as unknown as Array<string>;
 
     Signal.clearData(this);
   }

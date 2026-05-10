@@ -2,21 +2,20 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IPlugin, Token } from '@lumino/coreutils';
 import { PluginRegistry } from '@lumino/coreutils';
 
 const PLUGIN_ACTIVATION_TIMEOUT = 5000;
 
-export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
+export class JupyterPluginRegistry<T = unknown> extends PluginRegistry<T> {
   constructor(options?: JupyterPluginRegistry.IOptions) {
     super(options);
     this._expectedActivationTime =
       options?.expectedActivationTime ?? PLUGIN_ACTIVATION_TIMEOUT;
   }
 
-  registerPlugin(plugin: IPlugin<T, any>): void {
+  registerPlugin(plugin: IPlugin<T, unknown>): void {
     this._pluginData.set(plugin.id, plugin);
     return super.registerPlugin(plugin);
   }
@@ -63,8 +62,8 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
       if (otherId === id) continue;
 
       const isDependant = otherPlugin.requires
-        ?.filter((token: Token<any>) => !!token)
-        .some((token: Token<any>) => token.name === tokenName);
+        ?.filter((token: Token<unknown>) => !!token)
+        .some((token: Token<unknown>) => token.name === tokenName);
 
       if (isDependant) {
         dependentCount++;
@@ -74,7 +73,7 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
     return dependentCount;
   }
 
-  private _pluginData: Map<string, IPlugin<T, any>> = new Map();
+  private _pluginData: Map<string, IPlugin<T, unknown>> = new Map();
   private _expectedActivationTime: number;
 }
 

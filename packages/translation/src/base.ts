@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Gettext } from './gettext';
 import type { ITranslator, TranslationBundle } from './tokens';
@@ -28,15 +27,20 @@ export class NullTranslator implements ITranslator {
  * A language bundle that returns the same input strings.
  */
 class NullLanguageBundle {
-  __(msgid: string, ...args: any[]): string {
+  __(msgid: string, ...args: unknown[]): string {
     return this.gettext(msgid, ...args);
   }
 
-  _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string {
+  _n(
+    msgid: string,
+    msgid_plural: string,
+    n: number,
+    ...args: unknown[]
+  ): string {
     return this.ngettext(msgid, msgid_plural, n, ...args);
   }
 
-  _p(msgctxt: string, msgid: string, ...args: any[]): string {
+  _p(msgctxt: string, msgid: string, ...args: unknown[]): string {
     return this.pgettext(msgctxt, msgid, ...args);
   }
 
@@ -45,12 +49,12 @@ class NullLanguageBundle {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return this.npgettext(msgctxt, msgid, msgid_plural, n, ...args);
   }
 
-  gettext(msgid: string, ...args: any[]): string {
+  gettext(msgid: string, ...args: unknown[]): string {
     return Gettext.strfmt(msgid, ...args);
   }
 
@@ -58,12 +62,12 @@ class NullLanguageBundle {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return Gettext.strfmt(n == 1 ? msgid : msgid_plural, ...[n].concat(args));
   }
 
-  pgettext(msgctxt: string, msgid: string, ...args: any[]): string {
+  pgettext(msgctxt: string, msgid: string, ...args: unknown[]): string {
     return Gettext.strfmt(msgid, ...args);
   }
 
@@ -72,7 +76,7 @@ class NullLanguageBundle {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return this.ngettext(msgid, msgid_plural, n, ...args);
   }
@@ -83,7 +87,7 @@ class NullLanguageBundle {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return this.ngettext(msgid, msgid_plural, n, ...args);
   }

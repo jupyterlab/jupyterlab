@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { URLExt } from '@jupyterlab/coreutils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -392,8 +390,10 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const definitions = this._settings.schema.definitions as any;
-    const overidesSchema = definitions.cssOverrides.properties;
+    const definitions = this._settings.schema.definitions as {
+      cssOverrides?: { properties?: Record<string, unknown> };
+    };
+    const overidesSchema = definitions.cssOverrides?.properties ?? {};
 
     Object.keys(overidesSchema).forEach(key => {
       // Map each override key to its corresponding CSS property for
@@ -580,7 +580,7 @@ export class ThemeManager implements IThemeManager {
   /**
    * Handle a theme error.
    */
-  private _onError(reason: any): void {
+  private _onError(reason: unknown): void {
     void showDialog({
       title: this._trans.__('Error Loading Theme'),
       body: String(reason),

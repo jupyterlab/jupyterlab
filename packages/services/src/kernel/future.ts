@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import type * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 
-declare let setImmediate: any;
+declare const setImmediate: (callback: () => void) => number;
 
 /**
  * Implementation of a kernel future.

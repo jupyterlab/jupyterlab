@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { WidgetTracker } from '@jupyterlab/apputils';
@@ -734,7 +733,8 @@ export class OutputArea extends Widget {
     const model = this.model;
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
-    const transient = ((msg.content as any).transient || {}) as JSONObject;
+    const transient =
+      (msg.content as { transient?: JSONObject }).transient ?? {};
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
@@ -795,14 +795,18 @@ export class OutputArea extends Widget {
     if (!payload || !payload.length) {
       return;
     }
-    const pages = payload.filter((i: any) => (i as any).source === 'page');
+    const pages = payload.filter(item => item['source'] === 'page');
     if (!pages.length) {
       return;
     }
-    const page = JSON.parse(JSON.stringify(pages[0]));
+    const page = pages[0];
+    const data = page['data'];
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      return;
+    }
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data: data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -1143,9 +1147,13 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = (history.slice(0, ixpos) as any).findLastIndex(
-        substrFound
-      );
+      let ixFound = -1;
+      for (let i = ixpos - 1; i >= 0; i--) {
+        if (substrFound(history[i])) {
+          ixFound = i;
+          break;
+        }
+      }
       if (ixFound !== -1) {
         // wrap ix to negative
         return ixFound - len;

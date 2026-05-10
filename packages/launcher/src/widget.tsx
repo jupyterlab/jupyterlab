@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -104,7 +103,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): React.ReactElement<any> | null {
+  protected render(): React.ReactElement | null {
     // Bail if there is no model.
     if (!this.model) {
       return null;
@@ -134,8 +133,8 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
     }
 
     // Variable to help create sections
-    const sections: React.ReactElement<any>[] = [];
-    let section: React.ReactElement<any>;
+    const sections: React.ReactElement[] = [];
+    let section: React.ReactElement;
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
@@ -251,7 +250,7 @@ function Card(
   commands: CommandRegistry,
   trans: TranslationBundle,
   launcherCallback: (widget: Widget) => void
-): React.ReactElement<any> {
+): React.ReactElement {
   // Get some properties of the command
   const command = item.command;
   const args = { ...item.args, cwd: launcher.cwd };

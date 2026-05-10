@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import mergeWith from 'lodash.mergewith';
@@ -45,7 +44,7 @@ export function untilReady(
  * Convert dotted path into dictionary.
  */
 export function expandDottedPaths(obj: ReadonlyJSONObject): ReadonlyJSONObject {
-  const settings: any = [];
+  const settings: ReadonlyJSONObject[] = [];
   for (let key in obj) {
     const parsed = expandPath(key.split('.'), obj[key]);
     settings.push(parsed);
@@ -64,20 +63,20 @@ export const expandPath = (
   path: string[],
   value: ReadonlyJSONValue
 ): ReadonlyJSONObject => {
-  const obj: any = Object.create(null);
+  const obj: Record<string, unknown> = Object.create(null);
 
   let curr = obj;
-  path.forEach((prop: string, i: any) => {
+  path.forEach((prop: string, i: number) => {
     curr[prop] = Object.create(null);
 
     if (i === path.length - 1) {
       curr[prop] = value;
     } else {
-      curr = curr[prop];
+      curr = curr[prop] as Record<string, unknown>;
     }
   });
 
-  return obj;
+  return obj as unknown as ReadonlyJSONObject;
 };
 
 /**
@@ -85,7 +84,7 @@ export const expandPath = (
  */
 export class DefaultMap<K, V> extends Map<K, V> {
   constructor(
-    private defaultFactory: (...args: any[]) => V,
+    private defaultFactory: (...args: unknown[]) => V,
     entries?: ReadonlyArray<readonly [K, V]> | null
   ) {
     super(entries);
@@ -95,11 +94,11 @@ export class DefaultMap<K, V> extends Map<K, V> {
     return this.getOrCreate(k);
   }
 
-  getOrCreate(k: K, ...args: any[]): V {
+  getOrCreate(k: K, ...args: unknown[]): V {
     if (this.has(k)) {
       return super.get(k)!;
     } else {
-      let v = this.defaultFactory(k, ...args);
+      const v = this.defaultFactory(k, ...args);
       this.set(k, v);
       return v;
     }

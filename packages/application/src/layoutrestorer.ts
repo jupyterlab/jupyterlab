@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { WidgetTracker } from '@jupyterlab/apputils';
 import type { IDataConnector, IRestorer } from '@jupyterlab/statedb';
@@ -50,7 +49,7 @@ export interface ILayoutRestorer extends IRestorer {
   restore<T extends Widget>(
     tracker: WidgetTracker<T>,
     options: IRestorer.IOptions<T>
-  ): Promise<any>;
+  ): Promise<void>;
 }
 
 /**
@@ -217,7 +216,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         leftArea,
         rightArea,
         relativeSizes: relativeSizes || null,
-        topArea: (top as any) ?? null
+        topArea: top ?? null
       };
     } catch (error) {
       return blank;
@@ -234,7 +233,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   async restore(
     tracker: WidgetTracker,
     options: IRestorer.IOptions<Widget>
-  ): Promise<any> {
+  ): Promise<void> {
     if (this._firstDone) {
       throw new Error('restore() must be called before `first` has resolved.');
     }
@@ -546,10 +545,10 @@ export class LayoutRestorer implements ILayoutRestorer {
   private _connector: IDataConnector<ReadonlyPartialJSONValue>;
   private _deferred = new Array<WidgetTracker>();
   private _deferredMainArea?: Private.IMainArea | null = null;
-  private _first: Promise<any>;
+  private _first: Promise<void>;
   private _firstDone = false;
   private _promisesDone = false;
-  private _promises: Promise<any>[] = [];
+  private _promises: Promise<void>[] = [];
   private _restored = new PromiseDelegate<void>();
   private _registry: CommandRegistry;
   private _trackers = new Set<string>();
@@ -576,7 +575,7 @@ export namespace LayoutRestorer {
      * #### Notes
      * This promise should equal the JupyterLab application `started` notifier.
      */
-    first: Promise<any>;
+    first: Promise<void>;
 
     /**
      * The application command registry.
@@ -832,13 +831,14 @@ namespace Private {
 
     // Because this data is saved to a foreign data source, its type safety is
     // not guaranteed when it is retrieved, so exhaustive checks are necessary.
-    const type = ((area as any).type as string) || 'unknown';
-    if (type === 'unknown' || (type !== 'tab-area' && type !== 'split-area')) {
+    const areaType = area['type'];
+    if (areaType !== 'tab-area' && areaType !== 'split-area') {
+      const type = typeof areaType === 'string' ? areaType : 'unknown';
       console.warn(`Attempted to deserialize unknown type: ${type}`);
       return null;
     }
 
-    if (type === 'tab-area') {
+    if (areaType === 'tab-area') {
       const { currentIndex, widgets } = area as ITabArea;
       const hydrated: ILabShell.AreaConfig = {
         type: 'tab-area',
@@ -892,12 +892,16 @@ namespace Private {
       return null;
     }
 
-    const name = (area as any).current || null;
-    const dock = (area as any).dock || null;
+    const current = area['current'];
+    const name = typeof current === 'string' ? current : null;
+    const dock = area['dock'];
 
     return {
       currentWidget: (name && names.has(name) && names.get(name)) || null,
-      dock: dock ? { main: deserializeArea(dock, names) } : null
+      dock:
+        dock && JSONExt.isObject(dock)
+          ? { main: deserializeArea(dock, names) }
+          : null
     };
   }
 }
