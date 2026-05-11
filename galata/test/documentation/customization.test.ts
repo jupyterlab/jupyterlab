@@ -334,7 +334,7 @@ test.describe('Customized', () => {
       await page.locator('#jp-main-content-panel').screenshot()
     ).toMatchSnapshot('move-file-browser-main-area.png');
 
-    await moveWidgetToArea(page, 'jp-running-sessions', 'Move to Bottom Panel');
+    await moveWidgetToArea(page, 'jp-running-sessions', 'Move to Down Area');
 
     const runningDownTab = page.locator(
       '#jp-down-stack .lm-TabBar-tab[data-id="jp-running-sessions"]'

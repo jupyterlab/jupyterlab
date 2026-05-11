@@ -556,7 +556,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleDownArea, {
-        label: trans.__('Show Bottom Panel'),
+        label: trans.__('Show Down Area'),
         describedBy: {
           args: {
             type: 'object',
@@ -1874,7 +1874,7 @@ const moveWidgetPlugin: JupyterFrontEndPlugin<void> = {
           case 'right':
             return trans.__('Move to Right Sidebar');
           case 'down':
-            return trans.__('Move to Bottom Panel');
+            return trans.__('Move to Down Area');
         }
       },
       describedBy: {

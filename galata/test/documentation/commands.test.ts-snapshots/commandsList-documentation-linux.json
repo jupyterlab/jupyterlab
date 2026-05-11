@@ -231,7 +231,7 @@
   },
   {
     "id": "application:toggle-down-area",
-    "label": "Show Bottom Panel",
+    "label": "Show Down Area",
     "caption": "",
     "shortcuts": [],
     "args": {
