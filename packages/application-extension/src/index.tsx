@@ -1779,21 +1779,22 @@ const jupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The widget mover plugin to allow moving widgets between different areas.
+ * The Move Widget plugin to allow moving widgets between different areas.
  */
-const widgetMover: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:widget-mover',
+const moveWidgetPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:move-widget',
   description:
     'Adds commands and context menu items to move widgets between areas.',
   autoStart: true,
-  requires: [ILabShell, ITranslator],
+  requires: [ILabShell],
+  optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
     labShell: ILabShell,
-    translator: ITranslator
+    translator: ITranslator | null
   ) => {
     const { commands } = app;
-    const trans = translator.load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const areas = ['main', 'left', 'right', 'down'] as const;
     type MovableWidgetArea = (typeof areas)[number];
     const isMovableWidgetArea = (area: unknown): area is MovableWidgetArea => {
@@ -1942,7 +1943,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   propertyInspector,
   jupyterLogo,
   topbar,
-  widgetMover
+  moveWidgetPlugin
 ];
 
 export default plugins;

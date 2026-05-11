@@ -707,7 +707,7 @@ describe('LabShell', () => {
       shell.add(widget, 'left', { type: 'Foo', rank: 100 });
       expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual(['foo']);
 
-      // Simulate the widgetMover plugin: transient move via add() that
+      // Simulate the Move Widget plugin: transient move via add() that
       // should not touch type-based settings.
       shell.add(widget, 'main');
       expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual(['foo']);

@@ -1,6 +1,6 @@
 {
-  "title": "Widget Mover",
-  "description": "Widget mover settings.",
+  "title": "Move Widget",
+  "description": "Move Widget settings.",
   "jupyter.lab.menus": {
     "context": [
       {
