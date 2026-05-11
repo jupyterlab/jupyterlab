@@ -383,7 +383,17 @@
     "context": [
       {
         "command": "application:close",
-        "selector": ".lm-TabBar-tab.lm-mod-closable[data-id]",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
+        "rank": 4
+      },
+      {
+        "command": "application:close",
+        "selector": ".jp-SideBar .lm-TabBar-tab.lm-mod-closable[data-id]",
+        "rank": 4
+      },
+      {
+        "command": "application:close",
+        "selector": "#jp-down-stack .lm-TabBar-tab.lm-mod-closable[data-id]",
         "rank": 4
       },
       {
