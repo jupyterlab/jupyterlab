@@ -2448,15 +2448,15 @@ namespace Private {
         });
       }
 
-      if (data.currentWidget) {
-        this.activate(data.currentWidget.id);
-      } else if (data.collapsed) {
-        this.collapse();
-      }
       if (data.visible) {
         this.show();
       } else {
         this.hide();
+      }
+      if (data.currentWidget) {
+        this.activate(data.currentWidget.id);
+      } else if (data.collapsed) {
+        this.collapse();
       }
       if (data.widgetStates) {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {

@@ -151,7 +151,6 @@ Activity bar positioned at the top of each side area
 Activity bar positioned at the bottom of each side area
 :::
 
-
 (toolbars-customization)=
 
 ## Toolbars
