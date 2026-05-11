@@ -3,6 +3,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as path from 'path';
 import * as utils from './utils';
@@ -258,9 +259,9 @@ commander.on('--help', function () {
 Examples
 --------
 
-  Update the package 'webpack' to a specific version range:
+  Update the package 'mypackage' to a specific version range:
 
-      update-dependency webpack ^4.0.0
+      update-dependency mypackage ^4.0.0
 
   Update all packages to the latest version, with a caret.
   Only update if the update is substantial:

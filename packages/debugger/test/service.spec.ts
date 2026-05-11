@@ -1,11 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { KernelSpec, Session } from '@jupyterlab/services';
 import {
   KernelManager,
-  KernelSpec,
   KernelSpecManager,
-  Session,
   SessionManager
 } from '@jupyterlab/services';
 
@@ -22,11 +21,19 @@ import { JSONExt, UUID } from '@lumino/coreutils';
 
 import { Debugger } from '../src/debugger';
 
-import { IDebugger } from '../src/tokens';
+import type { IDebugger } from '../src/tokens';
 
 import { handleRequest, KERNELSPECS } from './utils';
 import { DebuggerDisplayRegistry } from '../src';
 import { SessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+import type { IYText } from '@jupyter/ydoc';
 
 /**
  * A Test class to mock a KernelSpecManager
@@ -69,7 +76,14 @@ describe('Debugging support', () => {
     await specsManager.refreshSpecs();
     config = new Debugger.Config();
     displayRegistry = new DebuggerDisplayRegistry();
-    service = new Debugger.Service({ displayRegistry, specsManager, config });
+    const editorServices = getEditorServices();
+    const mimeTypeService = editorServices.mimeTypeService;
+    service = new Debugger.Service({
+      displayRegistry,
+      specsManager,
+      config,
+      mimeTypeService
+    });
   });
 
   afterAll(async () => {
@@ -113,7 +127,14 @@ describe('DebuggerService', () => {
     config = new Debugger.Config();
     session = new Debugger.Session({ connection, config });
     displayRegistry = new DebuggerDisplayRegistry();
-    service = new Debugger.Service({ displayRegistry, specsManager, config });
+    const editorServices = getEditorServices();
+    const mimeTypeService = editorServices.mimeTypeService;
+    service = new Debugger.Service({
+      displayRegistry,
+      specsManager,
+      config,
+      mimeTypeService
+    });
   });
 
   afterEach(async () => {
@@ -324,3 +345,30 @@ describe('DebuggerService', () => {
     });
   });
 });
+
+function getEditorServices() {
+  const languages = new EditorLanguageRegistry();
+
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(lang => ['Python'].includes(lang.name))
+    .forEach(lang => {
+      languages.addLanguage(lang);
+    });
+  const extensions = new EditorExtensionRegistry();
+  EditorExtensionRegistry.getDefaultExtensions()
+    .filter(ext => ['lineNumbers'].includes(ext.name))
+    .forEach(ext => extensions.addExtension(ext));
+  extensions.addExtension({
+    name: 'binding',
+    factory: ({ model }) => {
+      const m = model.sharedModel as IYText;
+      return EditorExtensionRegistry.createImmutableExtension(
+        ybinding({ ytext: m.ysource, undoManager: m.undoManager ?? undefined })
+      );
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const editorServices = { factoryService, mimeTypeService };
+  return editorServices;
+}

@@ -2,22 +2,21 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { IDataConnector, IRestorer } from '@jupyterlab/statedb';
-import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type { IDataConnector, IRestorer } from '@jupyterlab/statedb';
+import type { CommandRegistry } from '@lumino/commands';
+import type {
   JSONObject,
   PartialJSONObject,
-  PromiseDelegate,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { DockPanel, Widget } from '@lumino/widgets';
-import { ILabShell } from './shell';
+import type { DockPanel, Widget } from '@lumino/widgets';
+import type { ILabShell } from './shell';
 
 /**
  * The layout restorer token.

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { CommandRegistry } from '@lumino/commands';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
-import { ILatexTypesetter } from '@jupyterlab/rendermime';
+import type { ILatexTypesetter } from '@jupyterlab/rendermime';
 import plugin from '@jupyterlab/mathjax-extension';
 
 describe('@jupyterlab/mathjax-extension', () => {

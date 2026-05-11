@@ -59,10 +59,10 @@ def main():
             run_test(self.serverapp, run_browser)
             super().initialize_settings()
 
-        def _jupyter_server_extension_points():
-            return [{"module": __name__, "app": App}]
+    def _jupyter_server_extension_points():
+        return [{"module": __name__, "app": App}]
 
-        mod._jupyter_server_extension_points = _jupyter_server_extension_points
+    mod._jupyter_server_extension_points = _jupyter_server_extension_points
 
     App.__name__ = example_dir.name.capitalize() + "Test"
     App.launch_instance()
@@ -77,7 +77,9 @@ async def run_browser(url):
             target.mkdir(parents=True, exist_ok=True)
         await run_async_process(["npm", "init", "-y"], cwd=str(target))
         await run_async_process(["npm", "install", "-D", "@playwright/test@^1"], cwd=str(target))
-        await run_async_process(["npx", "playwright", "install", "chromium"], cwd=str(target))
+        await run_async_process(
+            ["npx", "playwright", "install", "--only-shell", "chromium"], cwd=str(target)
+        )
     test_target = target / TEST_FILE.name
 
     # Copy test file

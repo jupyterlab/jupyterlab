@@ -10,9 +10,6 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
-// Use serial mode to avoid flaky screenshots
-test.describe.configure({ mode: 'serial' });
-
 test.describe('Default', () => {
   test('should use default layout', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page, filterContent);
@@ -230,6 +227,9 @@ test.describe('Customized', () => {
     await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
 
     expect(
       await page
@@ -279,5 +279,63 @@ test.describe('Customized', () => {
     expect(
       await page.screenshot({ clip: { x: 0, y: 0, width: 500, height: 500 } })
     ).toMatchSnapshot('customized-context-menu.png');
+  });
+});
+
+test.describe('Activity bar at top', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:shell': {
+        activityBarPosition: 'top'
+      }
+    }
+  });
+
+  test('should display the activity bar at the top', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
+
+    await page.sidebar.setWidth();
+    await page.sidebar.openTab('jp-property-inspector');
+    await page.sidebar.setWidth(271, 'right');
+
+    expect(await page.screenshot()).toMatchSnapshot(
+      'customized-activity-bar-top.png'
+    );
+  });
+});
+
+test.describe('Activity bar at bottom', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:shell': {
+        activityBarPosition: 'bottom'
+      }
+    }
+  });
+
+  test('should display the activity bar at the bottom', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
+
+    await page.sidebar.setWidth();
+    await page.sidebar.openTab('jp-property-inspector');
+    await page.sidebar.setWidth(271, 'right');
+
+    expect(await page.screenshot()).toMatchSnapshot(
+      'customized-activity-bar-bottom.png'
+    );
   });
 });

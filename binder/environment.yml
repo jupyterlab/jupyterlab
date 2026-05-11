@@ -51,9 +51,12 @@ dependencies:
   - matplotlib-base
   - notebook >=7.0.4
   - numpy
-  - vega_datasets
+  - altair
   - xeus-python
   # extra conda stuff
   - jsonschema-with-format-nongpl
   - jupyter-collaboration >= 2.0.1
   - jupyter_events >=0.7.0
+  # language packs
+  - jupyterlab-language-pack-fr-fr
+  - jupyterlab-language-pack-zh-cn

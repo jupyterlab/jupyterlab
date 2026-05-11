@@ -85,9 +85,51 @@ The above example will result in the following changes:
 (After Change) Customized terminal position in "multiple" (default) mode
 :::
 
+(activity-bar-position-customization)=
+
+## Activity Bar Position
+
+The side activity bars (left and right) display the tabs of the widgets attached
+to the corresponding side area. By default, each activity bar is rendered
+vertically on the natural side of its area (left for the left area, right for
+the right area). You can move them to the top or bottom of their area to
+display the tabs horizontally.
+
+The position is controlled by the `activityBarPosition` setting in the
+_JupyterLab Shell_ section. The available values are:
+
+- `side` (default): each activity bar stays on the natural side of its area
+- `top`: both activity bars are moved to the top of their respective area
+- `bottom`: both activity bars are moved to the bottom of their respective area
+
+```js
+"activityBarPosition": "top"
+```
+
+The same options are also available interactively from the
+_View_ → _Appearance_ → _Activity Bar Position_ menu.
+
+The screenshots below illustrate the `top` and `bottom` positions:
+
+:::{figure} ../images/customized-activity-bar-top.png
+:alt: Activity bar positioned at the top of each side area
+
+Activity bar positioned at the top of each side area
+:::
+
+:::{figure} ../images/customized-activity-bar-bottom.png
+:alt: Activity bar positioned at the bottom of each side area
+
+Activity bar positioned at the bottom of each side area
+:::
+
 (toolbars-customization)=
 
 ## Toolbars
+
+In addition to the toolbars attached to individual widgets, JupyterLab provides
+a TopBar extension point that allows extensions to add items to the application
+top bar area.
 
 Lots of toolbars are customizable. Here is a mapping of the customizable toolbars
 and the associated setting.
@@ -215,13 +257,11 @@ Customized menu bar
 The menu are identified by the following ids:
 
 - File menu: `jp-mainmenu-file`
-
   - New file submenu: `jp-mainmenu-file-new`
 
 - Edit menu: `jp-mainmenu-edit`
 
 - View menu: `jp-mainmenu-view`
-
   - Appearance submenu: `jp-mainmenu-view-appearance`
 
 - Run menu: `jp-mainmenu-run`

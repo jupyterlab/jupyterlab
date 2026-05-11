@@ -10,8 +10,7 @@ import { classes } from '../utils';
 /**
  * InputGroup component properties
  */
-export interface IInputGroupProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface IInputGroupProps extends React.InputHTMLAttributes<HTMLInputElement> {
   /**
    * Pass a ref to the input element
    */
