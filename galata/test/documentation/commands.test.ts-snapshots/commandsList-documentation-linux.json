@@ -110,6 +110,42 @@
     }
   },
   {
+    "id": "application:set-activity-bar-position",
+    "label": "Set Activity Bar Position",
+    "caption": "Position of the side activity bars (side, top, or bottom).",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "side",
+              "title": "Side"
+            },
+            {
+              "const": "top",
+              "title": "Top"
+            },
+            {
+              "const": "bottom",
+              "title": "Bottom"
+            }
+          ],
+          "description": "The activity bar position"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "position"
+      ]
+    }
+  },
+  {
     "id": "application:set-mode",
     "label": "Set the layout `mode`.",
     "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",

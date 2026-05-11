@@ -281,3 +281,61 @@ test.describe('Customized', () => {
     ).toMatchSnapshot('customized-context-menu.png');
   });
 });
+
+test.describe('Activity bar at top', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:shell': {
+        activityBarPosition: 'top'
+      }
+    }
+  });
+
+  test('should display the activity bar at the top', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
+
+    await page.sidebar.setWidth();
+    await page.sidebar.openTab('jp-property-inspector');
+    await page.sidebar.setWidth(271, 'right');
+
+    expect(await page.screenshot()).toMatchSnapshot(
+      'customized-activity-bar-top.png'
+    );
+  });
+});
+
+test.describe('Activity bar at bottom', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:shell': {
+        activityBarPosition: 'bottom'
+      }
+    }
+  });
+
+  test('should display the activity bar at the bottom', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await page.goto();
+    await page.addStyleTag({
+      content: `.jp-LabShell.jp-mod-devMode {
+        border-top: none;
+      }`
+    });
+
+    await page.sidebar.setWidth();
+    await page.sidebar.openTab('jp-property-inspector');
+    await page.sidebar.setWidth(271, 'right');
+
+    expect(await page.screenshot()).toMatchSnapshot(
+      'customized-activity-bar-bottom.png'
+    );
+  });
+});
