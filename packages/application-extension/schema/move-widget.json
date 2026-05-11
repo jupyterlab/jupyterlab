@@ -6,7 +6,7 @@
       {
         "type": "submenu",
         "selector": ".lm-TabBar-tab[data-id]",
-        "rank": 500,
+        "rank": 510,
         "submenu": {
           "id": "jp-contextmenu-move-widget",
           "label": "Move Widget To",
