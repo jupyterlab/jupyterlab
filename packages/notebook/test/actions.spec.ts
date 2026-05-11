@@ -21,6 +21,7 @@ import {
 import type { Stdin } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ISharedCodeCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
@@ -2058,45 +2059,119 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).toBe(count - 1);
       });
 
-      it('should reset execution state to idle after undoing a merge', () => {
+      it('should undo a merge after split', () => {
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
-        const initialSource = 'line1\nline2';
-        cell.model.sharedModel.setSource(initialSource);
-        // Simulate running cell
-        cell.model.sharedModel.executionState = 'running';
-        // Split the first cell
+        cell.model.sharedModel.setSource('foo\nbar');
+
         const editor = cell.editor as CodeEditor.IEditor;
-        widget.activeCellIndex = 0;
-        editor.setCursorPosition(editor.getPositionAt(6)!); // Split after 'line1'
+        editor.setCursorPosition(editor.getPositionAt(4)!); // Split after 'foo\n'
         NotebookActions.splitCell(widget);
-        const firstSplitCell = widget.widgets[0] as CodeCell;
-        const secondSplitCell = widget.widgets[1] as CodeCell;
-        expect(firstSplitCell.model.sharedModel.getSource()).toBe('line1');
-        expect(secondSplitCell.model.sharedModel.getSource()).toBe('line2');
-        expect(firstSplitCell.model.sharedModel.executionState).toBe('idle');
-        expect(secondSplitCell.model.sharedModel.executionState).toBe(
-          'running'
-        );
-        // Merge cells
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+        const count = widget.widgets.length;
+
+        // Separate undo capture - otherwise we would need to wait 500ms
+        // for timeout to prevent split and merge from being combined into a single entry
+        (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
         widget.activeCellIndex = 0;
         NotebookActions.mergeCells(widget, false, false);
-        const mergedCell = widget.widgets[0] as CodeCell;
-        expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
-        expect(mergedCell.model.sharedModel.executionState).toBe('idle');
-        // Undo the merge (which splits the cells again)
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(
+          'foo\nbar'
+        );
+
         NotebookActions.undo(widget);
-        const firstCellAfterUndo = widget.widgets[0] as CodeCell;
-        const secondCellAfterUndo = widget.widgets[1] as CodeCell;
-        expect(firstCellAfterUndo.model.sharedModel.getSource()).toBe('line1');
-        expect(secondCellAfterUndo.model.sharedModel.getSource()).toBe('line2');
-        expect(firstCellAfterUndo.model.sharedModel.executionState).toBe(
-          'idle'
-        );
-        expect(secondCellAfterUndo.model.sharedModel.executionState).toBe(
-          'idle'
-        );
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
       });
+
+      it.each([
+        { interrupt: true, secondCellExpectedState: 'idle' as const },
+        { interrupt: false, secondCellExpectedState: 'running' as const }
+      ])(
+        'should preserve execution state after undoing a merge (interrupt: $interrupt)',
+        async ({
+          interrupt,
+          secondCellExpectedState
+        }: {
+          interrupt: boolean;
+          secondCellExpectedState: 'idle' | 'running';
+        }) => {
+          const cell = widget.widgets[0] as CodeCell;
+          widget.activeCellIndex = 0;
+          const initialSource = 'import time\ntime.sleep(10)';
+          cell.model.sharedModel.setSource(initialSource);
+
+          const running = new Promise<void>(resolve => {
+            cell.model.sharedModel.changed.connect((_, change) => {
+              if (change.executionStateChange?.newValue === 'running') {
+                resolve();
+              }
+            });
+          });
+          const runPromise = NotebookActions.run(widget, ipySessionContext);
+          await running;
+
+          // Split the first cell
+          const editor = cell.editor as CodeEditor.IEditor;
+          widget.activeCellIndex = 0;
+          editor.setCursorPosition(editor.getPositionAt(12)!); // Split after 'import time\n'
+          NotebookActions.splitCell(widget);
+          const firstSplitCell = widget.widgets[0] as CodeCell;
+          const secondSplitCell = widget.widgets[1] as CodeCell;
+          expect(firstSplitCell.model.sharedModel.getSource()).toBe(
+            'import time'
+          );
+          expect(secondSplitCell.model.sharedModel.getSource()).toBe(
+            'time.sleep(10)'
+          );
+          expect(firstSplitCell.model.sharedModel.executionState).toBe('idle');
+          expect(secondSplitCell.model.sharedModel.executionState).toBe(
+            'running'
+          );
+
+          // Separate undo capture - otherwise we would need to wait 500ms
+          // for timeout to prevent split and merge from being combined into a single entry
+          (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+          // Merge cells
+          widget.activeCellIndex = 0;
+          NotebookActions.mergeCells(widget, false, false);
+          const mergedCell = widget.widgets[0] as CodeCell;
+          expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
+
+          const kernel = ipySessionContext.session?.kernel;
+          expect(kernel).toBeTruthy();
+
+          if (interrupt) {
+            const statusChanged = signalToPromise(kernel!.statusChanged);
+            await kernel!.interrupt();
+            await statusChanged;
+            await runPromise.catch(() => false);
+            expect(mergedCell.model.sharedModel.executionState).toBe('idle');
+          }
+
+          // Undo the merge (which splits the cells again)
+          NotebookActions.undo(widget);
+          const firstCellModelAfterUndo = (widget.widgets[0] as CodeCell).model
+            .sharedModel;
+          const secondCellModelAfterUndo = (widget.widgets[1] as CodeCell).model
+            .sharedModel;
+          expect(firstCellModelAfterUndo.getSource()).toBe('import time');
+          expect(secondCellModelAfterUndo.getSource()).toBe('time.sleep(10)');
+          expect(firstCellModelAfterUndo.executionState).toBe('idle');
+          expect(secondCellModelAfterUndo.executionState).toBe(
+            secondCellExpectedState
+          );
+
+          if (!interrupt) {
+            await kernel!.interrupt();
+            await runPromise.catch(() => false);
+          }
+        }
+      );
     });
 
     describe('#redo()', () => {
