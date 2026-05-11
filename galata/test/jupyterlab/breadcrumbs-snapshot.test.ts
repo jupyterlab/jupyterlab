@@ -96,10 +96,13 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Navigate into one of them so the breadcrumb path is non-empty
     await page.filebrowser.openDirectory(`${siblingsRoot}/alpha`);
 
-    // Click on the empty space of the breadcrumb bar to enter edit mode
-    const crumbs = page.locator(BREADCRUMB_SELECTOR);
-    const box = (await crumbs.boundingBox())!;
-    await crumbs.click({ position: { x: box.width - 10, y: box.height / 2 } });
+    // Enter breadcrumb edit mode via the dedicated command. This is
+    // more reliable than clicking on the breadcrumb background at a
+    // fixed offset, which can race with item layout and accidentally
+    // hit a crumb (triggering navigation rather than edit mode).
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('filebrowser:edit-path');
+    });
 
     // Wait for the path input and suggestions to appear
     const input = page.locator('.jp-PathNavigator > input');
