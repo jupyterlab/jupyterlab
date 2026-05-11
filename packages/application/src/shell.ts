@@ -1318,10 +1318,39 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       const collapsed = downArea.collapsed ?? !size;
 
       const widgetIds = widgets?.map(widget => widget.id) ?? [];
+      const otherAreaWidgetIds = new Set<string>();
+      const collectMainWidgetIds = (
+        area?: ILabShell.AreaConfig | null
+      ): void => {
+        if (!area) {
+          return;
+        }
+        if (area.type === 'tab-area') {
+          area.widgets.forEach(widget => {
+            otherAreaWidgetIds.add(widget.id);
+          });
+          return;
+        }
+        area.children.forEach(collectMainWidgetIds);
+      };
+      collectMainWidgetIds(mainArea?.dock?.main);
+      leftArea?.widgets?.forEach(widget => {
+        otherAreaWidgetIds.add(widget.id);
+      });
+      rightArea?.widgets?.forEach(widget => {
+        otherAreaWidgetIds.add(widget.id);
+      });
+
       // Remove absent widgets
       this._downPanel.tabBar.titles
         .filter(title => !widgetIds.includes(title.owner.id))
-        .map(title => title.owner.close());
+        .forEach(title => {
+          if (otherAreaWidgetIds.has(title.owner.id)) {
+            title.owner.parent = null;
+          } else {
+            title.owner.close();
+          }
+        });
       // Add new widgets
       const titleIds = this._downPanel.tabBar.titles.map(
         title => title.owner.id
@@ -2168,6 +2197,7 @@ namespace Private {
       this._stackedPanel.hide();
       this._lastCurrent = null;
       this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._sideBar.tabCloseRequested.connect(this._onTabCloseRequested, this);
       this._sideBar.tabActivateRequested.connect(
         this._onTabActivateRequested,
         this
@@ -2598,6 +2628,16 @@ namespace Private {
       args: TabBar.ITabActivateRequestedArgs<Widget>
     ): void {
       args.title.owner.activate();
+    }
+
+    /**
+     * Handle a `tabCloseRequested` signal from the sidebar.
+     */
+    private _onTabCloseRequested(
+      sender: TabBar<Widget>,
+      args: TabBar.ITabCloseRequestedArgs<Widget>
+    ): void {
+      args.title.owner.close();
     }
 
     /*

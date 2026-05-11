@@ -164,6 +164,21 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       execute: () => void 0
     });
 
+    const findWidgetById = (id: string): Widget | null => {
+      if (labShell) {
+        for (const area of ['main', 'left', 'right', 'down'] as const) {
+          const widget = find(
+            labShell.widgets(area),
+            widget => widget.id === id
+          );
+          if (widget) {
+            return widget;
+          }
+        }
+      }
+      return find(shell.widgets('main'), widget => widget.id === id) ?? null;
+    };
+
     // Returns the widget associated with the most recent contextmenu event.
     const contextMenuWidget = (): Widget | null => {
       const test = (node: HTMLElement) => !!node.dataset.id;
@@ -174,10 +189,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return shell.currentWidget;
       }
 
-      return (
-        find(shell.widgets('main'), widget => widget.id === node.dataset.id) ||
-        shell.currentWidget
-      );
+      const id = node.dataset.id;
+      return id ? findWidgetById(id) : null;
     };
 
     // Closes an array of widgets.
