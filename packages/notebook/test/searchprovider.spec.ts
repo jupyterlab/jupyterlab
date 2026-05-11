@@ -581,6 +581,84 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#isCurrentMatchInOutput', () => {
+      it('should return false when output filter is disabled', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('print("test")');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test']
+        });
+
+        await provider.startQuery(/test/, { output: false });
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+
+      it('should return true when current match is in output', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('print("code")');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['outputtest']
+        });
+
+        await provider.startQuery(/outputtest/, { output: true });
+        // The match should be in the output area
+        expect(provider.isCurrentMatchInOutput).toBe(true);
+        await provider.endQuery();
+      });
+
+      it('should return false when current match is in code', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('test');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['output']
+        });
+
+        await provider.startQuery(/test/, { output: true });
+        // Debug: Let's see what the current state is
+        console.log(
+          'Current provider index:',
+          (provider as any)._currentProviderIndex
+        );
+        console.log(
+          'Current provider:',
+          (provider as any)._searchProviders[
+            (provider as any)._currentProviderIndex
+          ]
+        );
+        console.log(
+          'Provider currentProviderIndex:',
+          (provider as any)._searchProviders[
+            (provider as any)._currentProviderIndex
+          ]?.currentProviderIndex
+        );
+
+        // The match should be in the code area, not output
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+
+      it('should return false when there is no current match', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('code');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['output']
+        });
+
+        await provider.startQuery(/notfound/, { output: true });
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+    });
+
     describe('#getSelectionState()', () => {
       it('should reflect cell selection state in command mode', async () => {
         panel.content.mode = 'command';
@@ -627,6 +705,146 @@ describe('@jupyterlab/notebook', () => {
         ]);
         state = provider.getSelectionState();
         expect(state).toBe('single');
+      });
+    });
+
+    describe('#isCurrentMatchInOutput', () => {
+      it('should return false when output filter is disabled', async () => {
+        // Clear existing content
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'test content'
+        });
+
+        const codeCell = panel.model!.cells.get(0) as CodeCellModel;
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test output']
+        });
+
+        // Search without output filter - should find match in code only
+        await provider.startQuery(/test/, undefined);
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+
+      it('should return true when current match is in output', async () => {
+        // Clear existing content
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'xyz' // No match in code
+        });
+
+        const codeCell = panel.model!.cells.get(0) as CodeCellModel;
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test output']
+        });
+
+        // Search with output filter - should find match in output only
+        await provider.startQuery(/test/, { output: true });
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.isCurrentMatchInOutput).toBe(true);
+        await provider.endQuery();
+      });
+
+      it('should return true when output filter is enabled and match exists', async () => {
+        // Clear existing content
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'test content'
+        });
+
+        const codeCell = panel.model!.cells.get(0) as CodeCellModel;
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['outputtest']
+        });
+
+        // Search with output filter - current implementation returns true when output filter is enabled
+        await provider.startQuery(/outputtest/, { output: true });
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.isCurrentMatchInOutput).toBe(true);
+        await provider.endQuery();
+      });
+
+      describe('isCurrentMatchNonReplaceable', () => {
+        it('should return true when match is in output', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+
+          const codeCell = testPanel.model!.cells.get(0) as CodeCellModel;
+          codeCell.outputs.add({
+            name: 'stdout',
+            output_type: 'stream',
+            text: ['test output']
+          });
+
+          await testProvider.startQuery(/test/, { output: true });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(true);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
+
+        it('should return true when notebook is read-only', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+
+          // Make notebook read-only
+          testPanel.model!.readOnly = true;
+
+          await testProvider.startQuery(/content/, { output: false });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(true);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
+
+        it('should return false when match is in editable content and notebook is not read-only', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+
+          // Ensure notebook is not read-only
+          testPanel.model!.readOnly = false;
+
+          await testProvider.startQuery(/content/, { output: false });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(false);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
+
+        it('should return true when both output match and read-only', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+
+          // Make notebook read-only
+          testPanel.model!.readOnly = true;
+
+          const codeCell = testPanel.model!.cells.get(0) as CodeCellModel;
+          codeCell.outputs.add({
+            name: 'stdout',
+            output_type: 'stream',
+            text: ['test output']
+          });
+
+          await testProvider.startQuery(/test/, { output: true });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(true);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
       });
     });
   });
