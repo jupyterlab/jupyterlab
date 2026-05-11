@@ -12,8 +12,9 @@ import {
   showDialog,
   SystemClipboard
 } from '@jupyterlab/apputils';
-import type { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
+import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
 import {
+  CodeCell,
   CodeCellModel,
   isMarkdownCellModel,
   isRawCellModel,
@@ -22,8 +23,9 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import type { KernelMessage } from '@jupyterlab/services';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
 import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
@@ -443,17 +445,35 @@ export namespace NotebookActions {
           : undefined
     };
 
-    // Keep this logic outside of transact to avoid them on undo
-    toDelete.forEach(index => {
-      const cellToDelete = cells.get(index);
-      if (cellToDelete.type === 'code') {
-        (cellToDelete as ICodeCellModel).sharedModel.executionState = 'idle';
+    // Detach kernel futures from cells about to be deleted so OutputArea.dispose()
+    // does not terminate them - they stay live in kernel._futures for reconnection
+    // after undo. Handlers are cleared by detachFuture() so the future no
+    // longer holds references to the (soon-to-be-disposed) output area.
+    const storedExecutions: Private.IStoredCellExecution[] = [];
+    [active, ...toDelete].forEach(index => {
+      const cell = notebook.widgets[index];
+      if (!(cell instanceof CodeCell)) {
+        return;
       }
+      const future = cell.outputArea.detachFuture();
+      if (!future) {
+        return;
+      }
+      let done = false;
+      future.done.then(
+        () => {
+          done = true;
+        },
+        () => {
+          done = true;
+        }
+      );
+      storedExecutions.push({
+        cellId: cell.model.id,
+        future,
+        isDone: () => done
+      });
     });
-    const activeCell = cells.get(active);
-    if (activeCell.type === 'code') {
-      (activeCell as ICodeCellModel).sharedModel.executionState = 'idle';
-    }
 
     // Make the changes while preserving history.
     model.sharedModel.transact(() => {
@@ -465,6 +485,14 @@ export namespace NotebookActions {
           model.sharedModel.deleteCell(index);
         });
     });
+
+    // Store execution context in the undo stack item so undo() can restore state.
+    if (storedExecutions.length > 0) {
+      const undoManager = (model.sharedModel as YNotebook).undoManager;
+      const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+    }
+
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
     if (primary instanceof MarkdownCell) {
@@ -1594,7 +1622,39 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     notebook.mode = 'command';
+
+    // Capture execution context from the stack item being popped.
+    let storedExecutions: Private.IStoredCellExecution[] | undefined;
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const onStackItemPopped = ({
+      stackItem
+    }: {
+      stackItem: { meta: Map<unknown, unknown> };
+    }) => {
+      storedExecutions = stackItem.meta.get(Private.CELL_EXECUTION_META_KEY) as
+        | Private.IStoredCellExecution[]
+        | undefined;
+    };
+    undoManager.on('stack-item-popped', onStackItemPopped);
     notebook.model.sharedModel.undo();
+    undoManager.off('stack-item-popped', onStackItemPopped);
+
+    // Restore execution state on resurrected cell widgets.
+    storedExecutions?.forEach(({ cellId, future, isDone }) => {
+      const cell = notebook.widgets.find(w => w.model.id === cellId);
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      if (isDone()) {
+        // Execution finished or was interrupted before undo — ensure state is idle.
+        cell.model.executionState = 'idle';
+        return;
+      }
+      // Still running - reconnect the future so the cell receives remaining
+      // output and stdin requests (e.g. input()), and tracks the idle transition.
+      cell.outputArea.future = future;
+    });
+
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2468,6 +2528,18 @@ export function setCellExecutor(executor: INotebookCellExecutor): void {
  * A namespace for private data.
  */
 namespace Private {
+  /** Key used to store cell execution state in Y.js undo stack item metadata. */
+  export const CELL_EXECUTION_META_KEY = Symbol('cellExecutionState');
+
+  export interface IStoredCellExecution {
+    cellId: string;
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+    isDone: () => boolean;
+  }
+
   /**
    * Notebook cell executor
    */

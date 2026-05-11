@@ -288,6 +288,30 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * Detach the kernel future from this output area without disposing it.
+   *
+   * Clears the message handlers on the future so this output area can be
+   * safely disposed without terminating the in-flight execution. The returned
+   * future can be re-attached to a new output area via the `future` setter.
+   *
+   * Returns `null` if no future is currently attached.
+   */
+  detachFuture(): Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
+    const future = this._future;
+    if (!future) {
+      return null;
+    }
+    future.onIOPub = () => undefined;
+    future.onReply = () => undefined;
+    future.onStdin = () => undefined;
+    this._future = null!;
+    return future;
+  }
+
+  /**
    * Follow changes on the model state.
    */
   protected onModelChanged(
