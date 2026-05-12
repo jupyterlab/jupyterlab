@@ -304,7 +304,7 @@ export class OutputArea extends Widget {
    *
    * Clears the message handlers on the future so this output area can be
    * safely disposed without terminating the in-flight execution. The returned
-   * future can be re-attached to a new output area via the `future` setter.
+   * future can be re-attached to a new output area via `reattachFuture` method.
    *
    * Returns `null` if no future is currently attached.
    */
@@ -323,6 +323,12 @@ export class OutputArea extends Widget {
     return future;
   }
 
+  /**
+   * Reattach the kernel future, without clearing the existing output model.
+   *
+   * This is useful when a cell gets deleted by a user but user later decides
+   * to undo the deletion, as it allows to keep the output data flowing.
+   */
   reattachFuture(
     future: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,

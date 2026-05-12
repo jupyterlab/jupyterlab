@@ -1644,6 +1644,22 @@ export namespace NotebookActions {
       for (const msg of buffered) {
         void future.onIOPub(msg);
       }
+      // The original execute() call targeted the old cell widget, so it will
+      // not update executionCount/executionState on this resurrected cell.
+      // Drive the idle transition here instead.
+      const cellRef = cell;
+      void future.done.then(
+        reply => {
+          if (!cellRef.isDisposed) {
+            cellRef.model.executionCount = reply.content.execution_count;
+          }
+        },
+        () => {
+          if (!cellRef.isDisposed) {
+            cellRef.model.executionState = 'idle';
+          }
+        }
+      );
     });
 
     notebook.deselectAll();
