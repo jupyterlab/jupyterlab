@@ -23,6 +23,7 @@ import type {
 
 import type { IOutputAreaModel } from '@jupyterlab/outputarea';
 import { OutputAreaModel } from '@jupyterlab/outputarea';
+import type { IOutputModel } from '@jupyterlab/rendermime';
 
 import type {
   CellChange,
@@ -635,6 +636,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.sharedModel.changed.connect(this._onSharedModelChanged, this);
     this._outputs.changed.connect(this.onGenericChange, this);
     this._outputs.changed.connect(this.onOutputsChange, this);
+    // Stream outputs added as initial values don't fire 'add' events (list.changed
+    // isn't connected during OutputAreaModel construction), so onOutputsChange never
+    // runs for them and their streamText.changed listener is never set up.
+    // Connect those listeners now so stream appends propagate back to Y.js.
+    for (let i = 0; i < this._outputs.length; i++) {
+      const output = this._outputs.get(i);
+      if (output.type === 'stream') {
+        this._connectStreamListener(output, i);
+      }
+    }
   }
 
   /**
@@ -749,6 +760,36 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Connect the streamText.changed listener that propagates stream text
+   * appends from the in-memory OutputAreaModel back to Y.js.
+   *
+   * Must be called outside any globalModelDBMutex block so the connection is
+   * established even for outputs that were part of the initial cell state.
+   */
+  private _connectStreamListener(output: IOutputModel, index: number): void {
+    output.streamText!.changed.connect(
+      (
+        _sender: IObservableString,
+        textEvent: IObservableString.IChangedArgs
+      ) => {
+        if (
+          textEvent.options !== undefined &&
+          (textEvent.options as { [key: string]: any })['silent']
+        ) {
+          return;
+        }
+        const codeCell = this.sharedModel as YCodeCell;
+        if (textEvent.type === 'remove') {
+          codeCell.removeStreamOutput(index, textEvent.start, 'silent-change');
+        } else {
+          codeCell.appendStreamOutput(index, textEvent.value, 'silent-change');
+        }
+      },
+      this
+    );
+  }
+
+  /**
    * Handle a change to the cell outputs modelDB and reflect it in the shared model.
    */
   protected onOutputsChange(
@@ -756,42 +797,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     event: IOutputAreaModel.ChangedArgs
   ): void {
     const codeCell = this.sharedModel as YCodeCell;
+    // Connect stream text listeners outside the mutex so the connection is
+    // established even when this handler is called re-entrantly from within
+    // _onSharedModelChanged's globalModelDBMutex block (which happens when
+    // a cell is initialized from Y.js data after a move or undo). Without
+    // this, stream text appended after a move is never synced back to Y.js,
+    // causing a subsequent move to lose those outputs (stale toJSON).
+    if (event.type === 'add') {
+      for (const output of event.newValues) {
+        if (output.type === 'stream') {
+          this._connectStreamListener(output, event.newIndex);
+        }
+      }
+    }
     globalModelDBMutex(() => {
       // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (event.type) {
         case 'add': {
-          for (const output of event.newValues) {
-            if (output.type === 'stream') {
-              output.streamText!.changed.connect(
-                (
-                  sender: IObservableString,
-                  textEvent: IObservableString.IChangedArgs
-                ) => {
-                  if (
-                    textEvent.options !== undefined &&
-                    (textEvent.options as { [key: string]: any })['silent']
-                  ) {
-                    return;
-                  }
-                  const codeCell = this.sharedModel as YCodeCell;
-                  if (textEvent.type === 'remove') {
-                    codeCell.removeStreamOutput(
-                      event.newIndex,
-                      textEvent.start,
-                      'silent-change'
-                    );
-                  } else {
-                    codeCell.appendStreamOutput(
-                      event.newIndex,
-                      textEvent.value,
-                      'silent-change'
-                    );
-                  }
-                },
-                this
-              );
-            }
-          }
           const outputs = event.newValues.map(output => output.toJSON());
           codeCell.updateOutputs(
             event.newIndex,

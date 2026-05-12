@@ -3237,7 +3237,7 @@ export class Notebook extends StaticNotebook {
       }
 
       // Move the cells one by one
-      this.moveCell(fromIndex, toIndex, toMove.length);
+      NotebookActions.moveCells(this, fromIndex, toIndex, toMove.length);
     } else {
       // Handle the case where we are copying cells between
       // notebooks.

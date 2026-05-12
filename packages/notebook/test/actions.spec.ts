@@ -1686,6 +1686,96 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.model!.cells.get(0).sharedModel.getSource()).toBe(source);
       });
+
+      it('should preserve execution state and output for a running cell', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for at least one output to arrive before moving.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        // Wait for one more print to go to buffer - reproduces an issue where
+        // content streamed while the cell was being moved would be lost.
+        await sleep(1500);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.id).toBe(cellId);
+
+        // Cell should still be running with partial output.
+        const output = cellAfterMove.outputArea.model.get(0);
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterMove.model.executionState).toBe('running');
+        expect(cellAfterMove.model.executionCount).toBe(null);
+
+        // Wait for execution to complete.
+        const inIdleState = waitForExecutionState(cellAfterMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterMove.model.executionState).toBe('idle');
+        expect(cellAfterMove.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should not lose outputs received after first move when moving a second time', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for first output before first move.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterFirstMove = widget.widgets[1] as CodeCell;
+
+        // Wait for another output to arrive while at the moved position.
+        await sleep(1500);
+        const outputAfterFirstMove = cellAfterFirstMove.outputArea.model.get(0)
+          .data[STDOUT_TYPE] as string;
+        // Verify at least one extra print arrived after the first move.
+        expect(outputAfterFirstMove.length).toBeGreaterThan('0\n'.length);
+
+        // Move a second time.
+        NotebookActions.moveDown(widget);
+        const cellAfterSecondMove = widget.widgets[2] as CodeCell;
+        expect(cellAfterSecondMove.model.id).toBe(cellId);
+
+        // Outputs received after the first move must survive the second move.
+        const output = cellAfterSecondMove.outputArea.model.get(0);
+        expect(output.data[STDOUT_TYPE]).toBe(outputAfterFirstMove);
+
+        // Wait for execution to complete.
+        const inIdleState = waitForExecutionState(cellAfterSecondMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterSecondMove.model.executionState).toBe('idle');
+        expect(cellAfterSecondMove.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#copy()', () => {

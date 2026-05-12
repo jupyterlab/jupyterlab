@@ -603,13 +603,62 @@ export namespace NotebookActions {
       lastIndex = notebook.model.cells.length;
     }
 
-    if (shift > 0) {
-      notebook.moveCell(firstIndex, lastIndex, lastIndex - firstIndex);
-    } else {
-      notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
-    }
+    const toIndex = shift > 0 ? lastIndex : firstIndex + shift;
+    moveCells(notebook, firstIndex, toIndex, lastIndex - firstIndex);
 
     void Private.handleState(notebook, state, true);
+  }
+
+  /**
+   * Move cells while preserving in-flight kernel futures.
+   *
+   * The underlying `jupyter-ydoc` `moveCells` implementation currently
+   * serializes cells to JSON and recreates them via a delete + insert
+   * transaction, which disposes any active kernel futures attached to the
+   * old widgets. This wrapper detaches futures before the move and
+   * reattaches them to the new widgets afterwards, and stores them in the
+   * undo stack so that undoing the move also restores execution state.
+   *
+   * @param notebook - The target notebook.
+   * @param from - Index of the first cell to move.
+   * @param to - Target index (as passed to `notebook.moveCell`).
+   * @param n - Number of cells to move.
+   */
+  export function moveCells(
+    notebook: Notebook,
+    from: number,
+    to: number,
+    n = 1
+  ): void {
+    if (!notebook.model) {
+      return;
+    }
+    // moveCells serializes cells to JSON and recreates widgets (delete+insert),
+    // which would dispose any in-flight futures. Capture them first.
+    const storedExecutions: Private.IStoredCellExecution[] = [];
+    notebook.widgets.slice(from, from + n).forEach(child => {
+      if (!(child instanceof CodeCell)) {
+        return;
+      }
+      const stored = Private.captureExecution(child);
+      if (stored) {
+        storedExecutions.push(stored);
+      }
+    });
+
+    notebook.moveCell(from, to, n);
+
+    // Immediately reconnect futures to the newly created widgets.
+    for (const stored of storedExecutions) {
+      Private.restoreExecution(notebook, stored);
+    }
+
+    // Store in the undo stack so that undoing the move can also restore state.
+    if (storedExecutions.length > 0) {
+      const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+      const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+    }
   }
 
   /**
@@ -1609,9 +1658,35 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     notebook.mode = 'command';
 
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+
+    // For cells that will be MOVED by the undo (i.e. they still exist in the
+    // notebook at their current position), pre-capture their futures now before
+    // sharedModel.undo() destroys those widgets. This prevents OutputArea.dispose()
+    // from cancelling the future during the Y.js delete+insert that implements the move.
+    const topItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+    const pendingExecutions = topItem?.meta.get(
+      Private.CELL_EXECUTION_META_KEY
+    ) as Private.IStoredCellExecution[] | undefined;
+    const preCaptured = new Map<string, Private.IStoredCellExecution>();
+    pendingExecutions?.forEach(stored => {
+      const cell = notebook.widgets.find(w => w.model.id === stored.cellId);
+      if (!(cell instanceof CodeCell)) {
+        return; // cell was deleted (not moved) — handled via stored future below
+      }
+      // Cell still present → move undo. Fresh capture protects the future.
+      preCaptured.set(
+        stored.cellId,
+        Private.captureExecution(cell) ?? {
+          ...stored,
+          isDone: () => true,
+          buffered: []
+        }
+      );
+    });
+
     // Capture execution context from the stack item being popped.
     let storedExecutions: Private.IStoredCellExecution[] | undefined;
-    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
     const onStackItemPopped = ({
       stackItem
     }: {
@@ -1625,40 +1700,13 @@ export namespace NotebookActions {
     notebook.model.sharedModel.undo();
     undoManager.off('stack-item-popped', onStackItemPopped);
 
-    // Restore execution state on resurrected cell widgets.
-    storedExecutions?.forEach(({ cellId, future, isDone, buffered }) => {
-      const cell = notebook.widgets.find(w => w.model.id === cellId);
-      if (!(cell instanceof CodeCell)) {
-        return;
-      }
-      if (isDone()) {
-        // Execution finished or was interrupted before undo - ensure state is idle.
-        cell.model.executionState = 'idle';
-        return;
-      }
-      // Still running - reconnect the future so the cell receives remaining
-      // output and stdin requests (e.g. input()), and tracks the idle transition.
-      cell.outputArea.reattachFuture(future);
-      // Replay any IOPub messages that arrived while the future was detached.
-      // After reattachFuture, future.onIOPub routes to the new output area.
-      for (const msg of buffered) {
-        void future.onIOPub(msg);
-      }
-      // The original execute() call targeted the old cell widget, so it will
-      // not update executionCount/executionState on this resurrected cell.
-      // Drive the idle transition here instead.
-      const cellRef = cell;
-      void future.done.then(
-        reply => {
-          if (!cellRef.isDisposed) {
-            cellRef.model.executionCount = reply.content.execution_count;
-          }
-        },
-        () => {
-          if (!cellRef.isDisposed) {
-            cellRef.model.executionState = 'idle';
-          }
-        }
+    // Restore execution state on resurrected/moved cell widgets.
+    // For move-undo: use freshly pre-captured data (stored data is stale).
+    // For delete-undo: stored data has the futures captured at deletion time.
+    storedExecutions?.forEach(stored => {
+      Private.restoreExecution(
+        notebook,
+        preCaptured.get(stored.cellId) ?? stored
       );
     });
 
@@ -2571,6 +2619,45 @@ namespace Private {
       buffered.push(msg);
     };
     return { cellId: cell.model.id, future, isDone: () => done, buffered };
+  }
+
+  /**
+   * Reconnect a captured execution to the cell widget that now holds the model.
+   *
+   * Handles both the "still running" and "already finished" cases.
+   */
+  export function restoreExecution(
+    notebook: Notebook,
+    { cellId, future, isDone, buffered }: IStoredCellExecution
+  ): void {
+    const cell = notebook.widgets.find(w => w.model.id === cellId);
+    if (!(cell instanceof CodeCell)) {
+      return;
+    }
+    if (isDone()) {
+      cell.model.executionState = 'idle';
+      return;
+    }
+    cell.outputArea.reattachFuture(future);
+    // executionState is ephemeral and not serialized to JSON, so the recreated
+    // cell widget starts as 'idle'. Restore it to 'running' explicitly.
+    cell.model.executionState = 'running';
+    for (const msg of buffered) {
+      void future.onIOPub(msg);
+    }
+    const cellRef = cell;
+    void future.done.then(
+      reply => {
+        if (!cellRef.isDisposed) {
+          cellRef.model.executionCount = reply.content.execution_count;
+        }
+      },
+      () => {
+        if (!cellRef.isDisposed) {
+          cellRef.model.executionState = 'idle';
+        }
+      }
+    );
   }
 
   /**
