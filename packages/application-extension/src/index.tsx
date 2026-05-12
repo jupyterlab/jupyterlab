@@ -77,6 +77,9 @@ namespace CommandIDs {
 
   export const closeAll: string = 'application:close-all';
 
+  export const setActivityBarPosition: string =
+    'application:set-activity-bar-position';
+
   export const setMode: string = 'application:set-mode';
 
   export const showPropertyPanel: string = 'property-inspector:show-panel';
@@ -910,18 +913,95 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     }
 
     let zoomOnWheel = false;
+    let activityBarPosition: ILabShell.ActivityBarPosition = 'side';
 
     settingRegistry
       .load('@jupyterlab/application-extension:shell')
       .then(settings => {
         zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+        activityBarPosition = settings.get('activityBarPosition')
+          .composite as ILabShell.ActivityBarPosition;
 
         settings.changed.connect(() => {
           zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+          const newPosition = settings.get('activityBarPosition')
+            .composite as ILabShell.ActivityBarPosition;
+          if (newPosition !== activityBarPosition) {
+            activityBarPosition = newPosition;
+            commands.notifyCommandChanged(CommandIDs.setActivityBarPosition);
+          }
         });
+
+        commands.addCommand(CommandIDs.setActivityBarPosition, {
+          label: args => {
+            const position = args['position'] as string;
+            const displayName =
+              position === 'side'
+                ? trans.__('Side')
+                : position === 'top'
+                  ? trans.__('Top')
+                  : position === 'bottom'
+                    ? trans.__('Bottom')
+                    : '';
+            if (!displayName) {
+              return trans.__('Set Activity Bar Position');
+            }
+            return args['isPalette']
+              ? trans.__('Activity Bar Position: %1', displayName)
+              : displayName;
+          },
+          caption: trans.__(
+            'Position of the side activity bars (side, top, or bottom).'
+          ),
+          describedBy: {
+            args: {
+              type: 'object',
+              properties: {
+                position: {
+                  type: 'string',
+                  oneOf: [
+                    { const: 'side', title: trans.__('Side') },
+                    { const: 'top', title: trans.__('Top') },
+                    { const: 'bottom', title: trans.__('Bottom') }
+                  ],
+                  description: trans.__('The activity bar position')
+                },
+                isPalette: {
+                  type: 'boolean',
+                  description: trans.__(
+                    'Whether the command is being called from the palette'
+                  )
+                }
+              },
+              required: ['position']
+            }
+          },
+          isToggled: args => args['position'] === activityBarPosition,
+          execute: args => {
+            const position = args['position'] as string;
+            if (
+              position !== 'side' &&
+              position !== 'top' &&
+              position !== 'bottom'
+            ) {
+              throw new Error(`Unsupported activity bar position: ${position}`);
+            }
+            return settings.set('activityBarPosition', position);
+          }
+        });
+
+        if (palette) {
+          (['side', 'top', 'bottom'] as const).forEach(position => {
+            palette.addItem({
+              command: CommandIDs.setActivityBarPosition,
+              category,
+              args: { position, isPalette: true }
+            });
+          });
+        }
       })
       .catch(reason => {
-        console.error('Failed to load zoomOnWheel setting.', reason);
+        console.error('Failed to load shell settings.', reason);
       });
 
     // since event.ctrlKey can be true when ctrl key is not physically held,
@@ -1250,6 +1330,13 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
     settingRegistry
       .load(shell.id)
       .then(settings => {
+        // Apply the activity bar position before restoring the layout, since
+        // side area rehydration depends on the current position.
+        labShell.updateConfig({
+          activityBarPosition: settings.get('activityBarPosition')
+            .composite as ILabShell.ActivityBarPosition
+        });
+
         // Add a layer of customization to support app shell mode
         const customizedLayout = settings.composite['layout'] as any;
 

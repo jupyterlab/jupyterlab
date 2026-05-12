@@ -419,6 +419,151 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#activityBarPosition', () => {
+    it('should hide the left side area after rehydrating with a collapsed state in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const handler = (shell as any)._leftHandler;
+      handler.rehydrate({
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(true);
+      expect(widget.isVisible).toBe(false);
+    });
+
+    it('should restore the active widget when rehydrating in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const handler = (shell as any)._leftHandler;
+      handler.rehydrate({
+        collapsed: false,
+        currentWidget: widget,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(false);
+      expect(widget.isVisible).toBe(true);
+    });
+
+    it('should keep the left side area visible when toggling the activity bar visibility in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+      expect(widget.isVisible).toBe(true);
+
+      shell.toggleSideTabBarVisibility('left');
+      const handler = (shell as any)._leftHandler;
+      expect(shell.isSideTabBarVisible('left')).toBe(false);
+      expect(handler.area.isHidden).toBe(false);
+      expect(widget.isVisible).toBe(true);
+
+      shell.toggleSideTabBarVisibility('left');
+      expect(shell.isSideTabBarVisible('left')).toBe(true);
+      expect(widget.isVisible).toBe(true);
+    });
+
+    it('should report the collapsed state via leftCollapsed in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+      expect(shell.leftCollapsed).toBe(false);
+
+      shell.collapseLeft();
+      expect(shell.leftCollapsed).toBe(true);
+
+      shell.expandLeft();
+      expect(shell.leftCollapsed).toBe(false);
+    });
+
+    it('should reflect the position via the data-side attribute on the bar', () => {
+      const handler = (shell as any)._leftHandler;
+      const sideBar = handler.sideBar;
+      expect(sideBar.node.getAttribute('data-side')).toBe('left');
+
+      shell.updateConfig({ activityBarPosition: 'top' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('top');
+
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('bottom');
+
+      shell.updateConfig({ activityBarPosition: 'side' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('left');
+    });
+
+    it('should support transitioning between positions', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+
+      shell.updateConfig({ activityBarPosition: 'top' });
+      expect(widget.isVisible).toBe(true);
+
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      expect(widget.isVisible).toBe(true);
+
+      shell.updateConfig({ activityBarPosition: 'side' });
+      expect(widget.isVisible).toBe(true);
+    });
+
+    it('should hide the right side area after rehydrating with a collapsed state in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+      const handler = (shell as any)._rightHandler;
+      handler.rehydrate({
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(true);
+      expect(widget.isVisible).toBe(false);
+    });
+
+    it('should reflect the position via the data-side attribute on the right bar', () => {
+      const handler = (shell as any)._rightHandler;
+      const sideBar = handler.sideBar;
+      expect(sideBar.node.getAttribute('data-side')).toBe('right');
+
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('bottom');
+
+      shell.updateConfig({ activityBarPosition: 'side' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('right');
+    });
+
+    it('should report the collapsed state via rightCollapsed in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+      shell.activateById('foo');
+      expect(shell.rightCollapsed).toBe(false);
+
+      shell.collapseRight();
+      expect(shell.rightCollapsed).toBe(true);
+
+      shell.expandRight();
+      expect(shell.rightCollapsed).toBe(false);
+    });
+  });
+
   describe('#saveLayout', () => {
     it('should save the layout of the shell', () => {
       const foo = new Widget();
