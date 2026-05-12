@@ -2508,9 +2508,16 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
     const base = super.getEditorOptions() ?? {};
+    const editModePlaceholder = (_view: EditorView): HTMLElement => {
+      const placeholder = document.createElement('span');
+      placeholder.textContent = this._shouldShowEditModePlaceholder()
+        ? this._editModePlaceholder
+        : '';
+      return placeholder;
+    };
     base.extensions = [
       ...(base.extensions ?? []),
-      editorPlaceholder(''),
+      editorPlaceholder(editModePlaceholder),
       EditorView.updateListener.of(update => {
         if (update.focusChanged || update.docChanged) {
           this._updateEditModePlaceholderText();
