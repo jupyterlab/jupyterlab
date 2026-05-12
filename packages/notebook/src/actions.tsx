@@ -455,24 +455,10 @@ export namespace NotebookActions {
       if (!(cell instanceof CodeCell)) {
         return;
       }
-      const future = cell.outputArea.detachFuture();
-      if (!future) {
-        return;
+      const stored = Private.captureExecution(cell);
+      if (stored) {
+        storedExecutions.push(stored);
       }
-      let done = false;
-      future.done.then(
-        () => {
-          done = true;
-        },
-        () => {
-          done = true;
-        }
-      );
-      storedExecutions.push({
-        cellId: cell.model.id,
-        future,
-        isDone: () => done
-      });
     });
 
     // Make the changes while preserving history.
@@ -1640,19 +1626,24 @@ export namespace NotebookActions {
     undoManager.off('stack-item-popped', onStackItemPopped);
 
     // Restore execution state on resurrected cell widgets.
-    storedExecutions?.forEach(({ cellId, future, isDone }) => {
+    storedExecutions?.forEach(({ cellId, future, isDone, buffered }) => {
       const cell = notebook.widgets.find(w => w.model.id === cellId);
       if (!(cell instanceof CodeCell)) {
         return;
       }
       if (isDone()) {
-        // Execution finished or was interrupted before undo — ensure state is idle.
+        // Execution finished or was interrupted before undo - ensure state is idle.
         cell.model.executionState = 'idle';
         return;
       }
       // Still running - reconnect the future so the cell receives remaining
       // output and stdin requests (e.g. input()), and tracks the idle transition.
       cell.outputArea.reattachFuture(future);
+      // Replay any IOPub messages that arrived while the future was detached.
+      // After reattachFuture, future.onIOPub routes to the new output area.
+      for (const msg of buffered) {
+        void future.onIOPub(msg);
+      }
     });
 
     notebook.deselectAll();
@@ -2538,6 +2529,37 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >;
     isDone: () => boolean;
+    /** IOPub messages that arrived while the future was detached. */
+    buffered: KernelMessage.IIOPubMessage[];
+  }
+
+  /**
+   * Detach the kernel future from a code cell, buffering any IOPub messages
+   * that arrive while it is detached so they can be replayed on reattach.
+   *
+   * Returns null if the cell has no active future.
+   */
+  export function captureExecution(
+    cell: CodeCell
+  ): IStoredCellExecution | null {
+    const future = cell.outputArea.detachFuture();
+    if (!future) {
+      return null;
+    }
+    let done = false;
+    future.done.then(
+      () => {
+        done = true;
+      },
+      () => {
+        done = true;
+      }
+    );
+    const buffered: KernelMessage.IIOPubMessage[] = [];
+    future.onIOPub = msg => {
+      buffered.push(msg);
+    };
+    return { cellId: cell.model.id, future, isDone: () => done, buffered };
   }
 
   /**
@@ -2987,26 +3009,10 @@ namespace Private {
           newSource = Private.setMarkdownHeader(newSource, headingLevel);
         }
         // Detach future before the transaction so dispose() does not cancel it.
-        let storedExecution: Private.IStoredCellExecution | undefined;
-        if (child instanceof CodeCell) {
-          const future = child.outputArea.detachFuture();
-          if (future) {
-            let done = false;
-            future.done.then(
-              () => {
-                done = true;
-              },
-              () => {
-                done = true;
-              }
-            );
-            storedExecution = {
-              cellId: child.model.id,
-              future,
-              isDone: () => done
-            };
-          }
-        }
+        const storedExecution =
+          child instanceof CodeCell
+            ? Private.captureExecution(child)
+            : undefined;
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
@@ -3092,24 +3098,10 @@ namespace Private {
         if (!(cell instanceof CodeCell)) {
           return;
         }
-        const future = cell.outputArea.detachFuture();
-        if (!future) {
-          return;
+        const stored = Private.captureExecution(cell);
+        if (stored) {
+          storedExecutions.push(stored);
         }
-        let done = false;
-        future.done.then(
-          () => {
-            done = true;
-          },
-          () => {
-            done = true;
-          }
-        );
-        storedExecutions.push({
-          cellId: cell.model.id,
-          future,
-          isDone: () => done
-        });
       });
 
       // Delete the cells as one undo event.
