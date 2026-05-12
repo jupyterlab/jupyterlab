@@ -1652,7 +1652,7 @@ export namespace NotebookActions {
       }
       // Still running - reconnect the future so the cell receives remaining
       // output and stdin requests (e.g. input()), and tracks the idle transition.
-      cell.outputArea.future = future;
+      cell.outputArea.reattachFuture(future);
     });
 
     notebook.deselectAll();
@@ -2986,6 +2986,27 @@ namespace Private {
         if (headingLevel !== undefined) {
           newSource = Private.setMarkdownHeader(newSource, headingLevel);
         }
+        // Detach future before the transaction so dispose() does not cancel it.
+        let storedExecution: Private.IStoredCellExecution | undefined;
+        if (child instanceof CodeCell) {
+          const future = child.outputArea.detachFuture();
+          if (future) {
+            let done = false;
+            future.done.then(
+              () => {
+                done = true;
+              },
+              () => {
+                done = true;
+              }
+            );
+            storedExecution = {
+              cellId: child.model.id,
+              future,
+              isDone: () => done
+            };
+          }
+        }
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
@@ -3007,6 +3028,14 @@ namespace Private {
               raw.attachments as nbformat.IAttachments;
           }
         });
+        if (storedExecution) {
+          const undoManager = (notebookSharedModel as YNotebook).undoManager;
+          const lastItem =
+            undoManager.undoStack[undoManager.undoStack.length - 1];
+          lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, [
+            storedExecution
+          ]);
+        }
       } else if (value === 'markdown' && headingLevel !== undefined) {
         notebookSharedModel.transact(() => {
           child.model.sharedModel.setSource(
@@ -3056,6 +3085,33 @@ namespace Private {
 
     // If cells are not deletable, we may not have anything to delete.
     if (toDelete.length > 0) {
+      // Detach futures before the transaction so dispose() does not cancel them.
+      const storedExecutions: Private.IStoredCellExecution[] = [];
+      toDelete.forEach(index => {
+        const cell = notebook.widgets[index];
+        if (!(cell instanceof CodeCell)) {
+          return;
+        }
+        const future = cell.outputArea.detachFuture();
+        if (!future) {
+          return;
+        }
+        let done = false;
+        future.done.then(
+          () => {
+            done = true;
+          },
+          () => {
+            done = true;
+          }
+        );
+        storedExecutions.push({
+          cellId: cell.model.id,
+          future,
+          isDone: () => done
+        });
+      });
+
       // Delete the cells as one undo event.
       sharedModel.transact(() => {
         // Delete cells in reverse order to maintain the correct indices.
@@ -3079,6 +3135,12 @@ namespace Private {
           });
         }
       });
+      if (storedExecutions.length > 0) {
+        const undoManager = (sharedModel as YNotebook).undoManager;
+        const lastItem =
+          undoManager.undoStack[undoManager.undoStack.length - 1];
+        lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      }
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
       // Note: The activeCellIndex is clamped to the available cells,

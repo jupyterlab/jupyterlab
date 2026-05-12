@@ -192,6 +192,16 @@ export class OutputArea extends Widget {
       KernelMessage.IExecuteReplyMsg
     >
   ) {
+    this._setFuture(value, true);
+  }
+
+  private _setFuture(
+    value: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >,
+    clear: boolean
+  ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       throw Error('Model is disposed');
@@ -213,14 +223,16 @@ export class OutputArea extends Widget {
         // even if caught on the `done` promise level before.
       });
 
-    this.model.clear();
+    if (clear) {
+      this.model.clear();
 
-    // Make sure there were no input widgets.
-    if (this.widgets.length) {
-      this._clear();
-      this.outputLengthChanged.emit(
-        Math.min(this.model.length, this._maxNumberOutputs)
-      );
+      // Make sure there were no input widgets.
+      if (this.widgets.length) {
+        this._clear();
+        this.outputLengthChanged.emit(
+          Math.min(this.model.length, this._maxNumberOutputs)
+        );
+      }
     }
 
     // Handle published messages.
@@ -309,6 +321,15 @@ export class OutputArea extends Widget {
     future.onStdin = () => undefined;
     this._future = null!;
     return future;
+  }
+
+  reattachFuture(
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >
+  ) {
+    this._setFuture(future, false);
   }
 
   /**
