@@ -67,6 +67,12 @@
       ],
       "default": "side"
     },
+    "optimizeResize": {
+      "type": "boolean",
+      "title": "Optimize panel resize",
+      "description": "Freeze panel dimensions during handle drag to improve resize performance when panels contain heavy DOM content.",
+      "default": true
+    },
     "zoomOnWheel": {
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",

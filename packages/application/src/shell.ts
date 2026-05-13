@@ -9,7 +9,6 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
-  DockPanelSvg,
   LabIcon,
   TabBarSvg,
   tabIcon,
@@ -36,6 +35,7 @@ import {
 } from '@lumino/widgets';
 import type { JupyterFrontEnd } from './frontend';
 import type { LayoutRestorer } from './layoutrestorer';
+import { OptimizedDockPanelSvg } from './dockpanel';
 
 /**
  * The class name added to AppShell instances.
@@ -136,6 +136,14 @@ export namespace ILabShell {
      * Set to `false` for a more compact layout.
      */
     dockPanelPadding?: boolean;
+
+    /**
+     * Whether to freeze panel dimensions during handle drag to improve resize
+     * performance when panels contain heavy DOM content.
+     *
+     * The default is `true`.
+     */
+    optimizeResize?: boolean;
 
     /**
      * Position of the side activity bars.
@@ -379,7 +387,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel =
       new Private.RestorableSplitPanel());
-    const dockPanel = (this._dockPanel = new DockPanelSvg({
+    const dockPanel = (this._dockPanel = new OptimizedDockPanelSvg({
       hiddenMode: Widget.HiddenMode.Display
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -1427,6 +1435,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._dockPanel.fit();
     }
 
+    if (config.optimizeResize !== undefined) {
+      this._dockPanel.optimizeResize = config.optimizeResize;
+    }
+
     if (config.activityBarPosition !== undefined) {
       this._setActivityBarPosition('left', config.activityBarPosition);
       this._setActivityBarPosition('right', config.activityBarPosition);
@@ -1894,7 +1906,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     ILabShell.ICurrentPathChangedArgs
   >(this);
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
-  private _dockPanel: DockPanel;
+  private _dockPanel: OptimizedDockPanelSvg;
   private _downPanel: TabPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
