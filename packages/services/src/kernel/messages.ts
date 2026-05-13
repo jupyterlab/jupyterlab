@@ -775,9 +775,11 @@ export interface IReplyErrorContent {
 /**
  * Reply content indicating an aborted request.
  *
- * The status value is `'aborted'`; the `'abort'` spelling that appears in
- * parts of the messaging documentation is a typo, see
+ * The status value emitted by kernels is `'aborted'`; the `'abort'` spelling
+ * that appears in parts of the messaging documentation is a typo, see
  * [jupyter_client#1063](https://github.com/jupyter/jupyter_client/issues/1063#issuecomment-3050583217).
+ * Both spellings are kept in the union so that downstream consumers already
+ * typed against `'abort'` continue to compile.
  *
  * This status is
  * [deprecated](https://jupyter-client.readthedocs.io/en/latest/messaging.html#request-reply)
@@ -786,7 +788,7 @@ export interface IReplyErrorContent {
  * emit it on interrupt.
  */
 export interface IReplyAbortContent {
-  status: 'aborted';
+  status: 'abort' | 'aborted';
 }
 
 /**
