@@ -85,6 +85,8 @@ The above example will result in the following changes:
 (After Change) Customized terminal position in "multiple" (default) mode
 :::
 
+(move-open-widgets)=
+
 ### Move open widgets
 
 You can also move an open widget directly from its tab context menu. Right-click

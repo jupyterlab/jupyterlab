@@ -101,7 +101,7 @@ The column that allows to switch between tabs is called Activity Bar in JupyterL
 The sidebars can be collapsed or expanded by selecting "Show Left Sidebar"
 or "Show Right Sidebar" in the View menu or by clicking on the active sidebar tab:
 
-The location of tabs can be moved between the left sidebar, the right sidebar,
+The tabs can be moved between the left sidebar, the right sidebar,
 the {ref}`main work area <main-area>`, and the down area from the
 {ref}`context menu <context-menus-rightclick>`.
 

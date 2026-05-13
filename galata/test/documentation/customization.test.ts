@@ -315,7 +315,7 @@ test.describe('Customized', () => {
 
     await openMoveWidgetMenu(page, 'filebrowser');
 
-    expect(
+    expect.soft(
       await page.screenshot({ clip: await getVisibleMenusClip(page) })
     ).toMatchSnapshot('move-widget-submenu.png');
 
@@ -330,7 +330,7 @@ test.describe('Customized', () => {
       page.locator('#jp-main-dock-panel #filebrowser')
     ).toBeVisible();
 
-    expect(
+    expect.soft(
       await page.locator('#jp-main-content-panel').screenshot()
     ).toMatchSnapshot('move-file-browser-main-area.png');
 
