@@ -315,9 +315,9 @@ test.describe('Customized', () => {
 
     await openMoveWidgetMenu(page, 'filebrowser');
 
-    expect.soft(
-      await page.screenshot({ clip: await getVisibleMenusClip(page) })
-    ).toMatchSnapshot('move-widget-submenu.png');
+    expect
+      .soft(await page.screenshot({ clip: await getVisibleMenusClip(page) }))
+      .toMatchSnapshot('move-widget-submenu.png');
 
     await selectMoveWidgetMenuItem(page, 'Move to Main Area');
 
@@ -330,9 +330,9 @@ test.describe('Customized', () => {
       page.locator('#jp-main-dock-panel #filebrowser')
     ).toBeVisible();
 
-    expect.soft(
-      await page.locator('#jp-main-content-panel').screenshot()
-    ).toMatchSnapshot('move-file-browser-main-area.png');
+    expect
+      .soft(await page.locator('#jp-main-content-panel').screenshot())
+      .toMatchSnapshot('move-file-browser-main-area.png');
 
     await moveWidgetToArea(page, 'jp-running-sessions', 'Move to Down Area');
 
