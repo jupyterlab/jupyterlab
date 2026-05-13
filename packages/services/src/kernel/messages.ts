@@ -775,18 +775,18 @@ export interface IReplyErrorContent {
 /**
  * Reply content indicating an aborted request.
  *
- * For the general request/reply contract, `'abort'` is
- * [deprecated](https://jupyter-client.readthedocs.io/en/latest/messaging.html#request-reply)
- * since message spec 5.1 and kernels should send an `'error'` reply instead.
+ * The status value is `'aborted'`; the `'abort'` spelling that appears in
+ * parts of the messaging documentation is a typo, see
+ * [jupyter_client#1063](https://github.com/jupyter/jupyter_client/issues/1063#issuecomment-3050583217).
  *
- * For `execute_reply` specifically, the
- * [spec](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execution-results)
- * defines `'aborted'` as the status sent by kernels (e.g. `ipykernel` emits
- * `'aborted'` on interrupt). Both spellings are accepted here so the type
- * matches what kernels actually send on the wire.
+ * This status is
+ * [deprecated](https://jupyter-client.readthedocs.io/en/latest/messaging.html#request-reply)
+ * since message spec 5.1 — kernels are encouraged to send an `'error'` reply
+ * instead — but it remains valid and some kernels (e.g. `ipykernel`) still
+ * emit it on interrupt.
  */
 export interface IReplyAbortContent {
-  status: 'abort' | 'aborted';
+  status: 'aborted';
 }
 
 /**
