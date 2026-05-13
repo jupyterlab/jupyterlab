@@ -14,7 +14,7 @@
 
 .jp-mod-refreshing
   .jp-ToolbarButtonComponent[data-command='filebrowser:refresh']
-  svg {
+  > svg {
   animation: jp-refresh-spin 1s linear infinite;
   transform-origin: 50% 50%;
   display: block;
