@@ -15,9 +15,9 @@
     "hiddenMode": {
       "type": "string",
       "title": "Hidden mode of main panel widgets",
-      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge. Similar performance gains are seen with `contentVisibility` which is only available in Chromium-based browsers.",
+      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge. Using `contentVisibility` improves performance on browsers that support it.",
       "enum": ["display", "scale", "contentVisibility"],
-      "default": "display"
+      "default": "contentVisibility"
     },
     "startMode": {
       "enum": ["", "single", "multiple"],
