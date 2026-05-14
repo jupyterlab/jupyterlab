@@ -90,6 +90,34 @@
     }
   },
   {
+    "id": "application:move-widget",
+    "label": "Move Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "area": {
+          "type": "string",
+          "enum": [
+            "main",
+            "left",
+            "right",
+            "down"
+          ],
+          "description": "The target area to move the widget to"
+        },
+        "id": {
+          "type": "string",
+          "description": "The widget ID to move. Defaults to the context menu target."
+        }
+      },
+      "required": [
+        "area"
+      ]
+    }
+  },
+  {
     "id": "application:reset-layout",
     "label": "Reset Default Layout",
     "caption": "",
@@ -97,6 +125,52 @@
     "args": {
       "type": "object",
       "properties": {}
+    }
+  },
+  {
+    "id": "application:reset-widget-zoom",
+    "label": "Reset Widget Zoom",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:set-activity-bar-position",
+    "label": "Set Activity Bar Position",
+    "caption": "Position of the side activity bars (side, top, or bottom).",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "side",
+              "title": "Side"
+            },
+            {
+              "const": "top",
+              "title": "Top"
+            },
+            {
+              "const": "bottom",
+              "title": "Bottom"
+            }
+          ],
+          "description": "The activity bar position"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "position"
+      ]
     }
   },
   {
@@ -148,6 +222,16 @@
   {
     "id": "application:toggle-context-menu",
     "label": "Enable Context Menu",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:toggle-down-area",
+    "label": "Show Down Area",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -275,6 +359,26 @@
         "side",
         "index"
       ]
+    }
+  },
+  {
+    "id": "application:zoom-in-widget",
+    "label": "Zoom In Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "application:zoom-out-widget",
+    "label": "Zoom Out Active Widget",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -2286,8 +2390,8 @@
       "type": "object",
       "properties": {
         "query": {
-          "description": "Search query to pre-fill in the extension manager",
-          "type": "string"
+          "type": "string",
+          "description": "Search query to pre-fill in the extension manager"
         }
       }
     }
@@ -2441,6 +2545,16 @@
     }
   },
   {
+    "id": "filebrowser:edit-path",
+    "label": "Edit File Browser Path",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
@@ -2461,7 +2575,7 @@
   },
   {
     "id": "filebrowser:go-up",
-    "label": "go up",
+    "label": "Go Up",
     "caption": "",
     "shortcuts": [
       "Backspace"
@@ -3410,9 +3524,7 @@
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3427,9 +3539,7 @@
     "id": "inspector:open",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [
-      "Ctrl I"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {
@@ -3452,7 +3562,9 @@
     "id": "inspector:toggle",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl I"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -3716,6 +3828,16 @@
       "required": [
         "path"
       ]
+    }
+  },
+  {
+    "id": "markdownviewer:trust",
+    "label": "Trust Markdown Preview",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -4912,6 +5034,21 @@
     "args": {
       "type": "object",
       "properties": {}
+    }
+  },
+  {
+    "id": "notebook:toggle-output-scrolling",
+    "label": "Toggle Scrolling for Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu"
+        }
+      }
     }
   },
   {

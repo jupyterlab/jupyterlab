@@ -18,7 +18,7 @@
 }
 
 .jp-SpinnerContent {
-  font-size: 10px;
+  font-size: calc(var(--jp-ui-font-size1) * 10 / 13);
   margin: 50px auto;
   text-indent: -9999em;
   width: 3em;

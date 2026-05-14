@@ -94,6 +94,8 @@ export class HTMLViewer
     });
     this.translator = options.translator || nullTranslator;
     this.content.addClass(CSS_CLASS);
+
+    this.content.node.querySelector('iframe')?.classList.add('jp-zoom-target');
     void this.context.ready.then(() => {
       this.update();
       // Throttle the rendering rate of the widget.
