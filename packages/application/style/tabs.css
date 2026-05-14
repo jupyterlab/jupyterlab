@@ -187,6 +187,6 @@
 #jp-main-vsplit-panel > .lm-SplitPanel-handle::after,
 #jp-main-split-panel > .lm-SplitPanel-handle::after,
 #jp-main-content-panel > .lm-SplitPanel-handle::after,
-.lm-DockPanel-handle::after {
+.lm-DockPanel-handle {
   background: var(--jp-layout-color3);
 }
