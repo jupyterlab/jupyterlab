@@ -56,6 +56,17 @@
       "description": "Whether to show padding around the main dock panel area. Disable for a more compact layout.",
       "default": true
     },
+    "activityBarPosition": {
+      "type": "string",
+      "title": "Activity bar position",
+      "description": "Position of the side activity bars. `side` keeps each activity bar on the natural side of its area. `top` or `bottom` moves both activity bars to the top or bottom of their respective area, displaying the tabs horizontally.",
+      "oneOf": [
+        { "const": "side", "title": "Side" },
+        { "const": "top", "title": "Top" },
+        { "const": "bottom", "title": "Bottom" }
+      ],
+      "default": "side"
+    },
     "zoomOnWheel": {
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",

@@ -147,12 +147,18 @@ export namespace LabIconStyle {
   const builtinSheets: { [k in IBuiltin]: ISheet } = {
     breadCrumb: {
       container: {
+        borderRadius: 'var(--jp-border-radius)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: 'inline-flex',
+        verticalAlign: 'middle',
+        height: '20px',
+        width: '20px',
+        lineHeight: 1,
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
-          '&:first-child svg': {
-            bottom: '1px',
-            marginLeft: '0px',
-            position: 'relative'
+          '&:focus-visible': {
+            outline: '2px solid var(--jp-brand-color1)'
           },
           '&:hover': {
             backgroundColor: 'var(--jp-layout-color2)'
@@ -166,8 +172,7 @@ export namespace LabIconStyle {
       element: {
         borderRadius: 'var(--jp-border-radius)',
         cursor: 'pointer',
-        margin: '0px 2px',
-        padding: '0px 2px',
+        display: 'block',
         height: '16px',
         width: '16px',
         verticalAlign: 'middle'

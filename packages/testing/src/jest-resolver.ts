@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // ws workaround suggested in https://github.com/websockets/ws/issues/2171#issuecomment-1792147402
 // Mentioned solution license is:
