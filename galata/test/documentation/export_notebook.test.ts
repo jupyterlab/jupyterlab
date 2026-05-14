@@ -70,7 +70,7 @@ test.describe('Export Notebook', () => {
     await page.getByText('(σ, β, ρ)').waitFor();
 
     expect(
-      await page.screenshot({ clip: { y: 5, x: 283, width: 997, height: 400 } })
+      await page.screenshot({ clip: { y: 5, x: 283, width: 997, height: 480 } })
     ).toMatchSnapshot('exporting_slide_type.png');
   });
 });

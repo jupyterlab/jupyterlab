@@ -2,17 +2,17 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module settingeditor-extension
  */
 
-import {
-  ILabStatus,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
   ICommandPalette,
@@ -34,7 +34,10 @@ import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
 } from '@jupyterlab/settingeditor/lib/tokens';
-import { JsonSettingEditor, SettingsEditor } from '@jupyterlab/settingeditor';
+import type {
+  JsonSettingEditor,
+  SettingsEditor
+} from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -46,7 +49,7 @@ import {
   settingsIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 import {
   ImportSettingsDialogBodyWidget,
   ImportSettingsWidget

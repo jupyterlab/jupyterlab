@@ -43,6 +43,11 @@
       "selector": "body"
     },
     {
+      "command": "application:toggle-down-area",
+      "keys": [""],
+      "selector": "body"
+    },
+    {
       "command": "application:toggle-presentation-mode",
       "keys": [""],
       "selector": "body"
@@ -321,16 +326,49 @@
                   }
                 },
                 {
-                  "command": "application:toggle-header",
+                  "command": "application:toggle-down-area",
                   "rank": 15
+                },
+                {
+                  "command": "application:toggle-header",
+                  "rank": 16
                 },
                 {
                   "type": "separator",
                   "rank": 50
                 },
                 {
+                  "type": "submenu",
+                  "rank": 51,
+                  "submenu": {
+                    "id": "jp-mainmenu-view-appearance-activity-bar-position",
+                    "label": "Activity Bar Position",
+                    "items": [
+                      {
+                        "command": "application:set-activity-bar-position",
+                        "args": { "position": "side" },
+                        "rank": 0
+                      },
+                      {
+                        "command": "application:set-activity-bar-position",
+                        "args": { "position": "top" },
+                        "rank": 1
+                      },
+                      {
+                        "command": "application:set-activity-bar-position",
+                        "args": { "position": "bottom" },
+                        "rank": 2
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "separator",
+                  "rank": 52
+                },
+                {
                   "command": "application:reset-layout",
-                  "rank": 51
+                  "rank": 53
                 }
               ]
             }
@@ -349,6 +387,16 @@
         "rank": 4
       },
       {
+        "command": "application:close",
+        "selector": ".jp-SideBar .lm-TabBar-tab.lm-mod-closable[data-id]",
+        "rank": 4
+      },
+      {
+        "command": "application:close",
+        "selector": "#jp-down-stack .lm-TabBar-tab.lm-mod-closable[data-id]",
+        "rank": 4
+      },
+      {
         "command": "application:close-other-tabs",
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
         "rank": 4
@@ -362,6 +410,37 @@
         "command": "application:close-right-tabs",
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
         "rank": 5
+      },
+      {
+        "type": "submenu",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
+        "rank": 5,
+        "submenu": {
+          "id": "jp-mainmenu-view-split-tab-submenu",
+          "label": "Split Tab",
+          "items": [
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "left" },
+              "rank": 1
+            },
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "right" },
+              "rank": 2
+            },
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "top" },
+              "rank": 3
+            },
+            {
+              "command": "application:split-tab",
+              "args": { "direction": "bottom" },
+              "rank": 4
+            }
+          ]
+        }
       },
       {
         "command": "__internal:context-menu-info",

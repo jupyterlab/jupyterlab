@@ -13,10 +13,11 @@ import {
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { IDebugger } from '../../tokens';
-import { IRenderMime } from '@jupyterlab/rendermime';
+import type { IDebugger } from '../../tokens';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 
 /**
  * The class for each source row.
