@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '../serverconnection';
-import { Session } from '.';
+import type { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
 import { updateLegacySessionModel, validateModel } from './validate';
-import { ISessionAPIClient } from './session';
+import type { ISessionAPIClient } from './session';
 
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;

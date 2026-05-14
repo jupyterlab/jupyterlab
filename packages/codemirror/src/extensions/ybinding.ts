@@ -7,14 +7,10 @@
  * It is a simplification of https://github.com/yjs/y-codemirror.next
  * licensed under MIT License by Kevin Jahns
  */
-import {
-  Annotation,
-  EditorSelection,
-  Extension,
-  Facet,
-  SelectionRange
-} from '@codemirror/state';
-import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import type { Extension, SelectionRange } from '@codemirror/state';
+import { Annotation, EditorSelection, Facet } from '@codemirror/state';
+import type { EditorView, ViewUpdate } from '@codemirror/view';
+import { ViewPlugin } from '@codemirror/view';
 import {
   yUndoManager,
   YUndoManagerConfig,
@@ -133,7 +129,7 @@ export class YSyncConfig {
   /**
    * @param rpos
    */
-  fromYPos(rpos: RelativePosition | Record<string, any>) {
+  fromYPos(rpos: RelativePosition | Position) {
     const pos = createAbsolutePositionFromRelativePosition(
       createRelativePositionFromJSON(rpos),
       this.ytext.doc!
@@ -200,6 +196,7 @@ export const ySync = ViewPlugin.fromClass(
       this._observer = (event: YTextEvent, tr: Transaction) => {
         if (tr.origin !== this.conf) {
           const delta = event.delta;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const changes: any[] = [];
           let pos = 0;
           for (let i = 0; i < delta.length; i++) {

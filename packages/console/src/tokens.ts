@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { type ISessionContext, IWidgetTracker } from '@jupyterlab/apputils';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
+import { type ISessionContext } from '@jupyterlab/apputils';
 import type { CodeCell } from '@jupyterlab/cells';
 import { Token } from '@lumino/coreutils';
-import { ConsolePanel } from './panel';
+import type { ConsolePanel } from './panel';
 
 /**
  * The console tracker token.

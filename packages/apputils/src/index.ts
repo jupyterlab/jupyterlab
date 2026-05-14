@@ -5,7 +5,7 @@
  * @module apputils
  */
 import { Toolbar as UIToolbar } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**

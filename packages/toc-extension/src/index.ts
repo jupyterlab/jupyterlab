@@ -1,16 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module toc-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITableOfContentsRegistry,
@@ -74,6 +74,10 @@ async function activateTOC(
   // Create the ToC widget:
   const toc = new TableOfContentsPanel(translator ?? undefined);
   toc.title.icon = tocIcon;
+  toc.title.dataset = {
+    ...toc.title.dataset,
+    jpTabLabel: trans.__('Table of Contents')
+  };
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
   toc.node.setAttribute('role', 'region');

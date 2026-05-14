@@ -3,8 +3,16 @@
 
 var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
+var chromiumArgs = [
+  // Ensures that subpixel font rendering in Chrome is the same on CI as locally
+  '--disable-lcd-text'
+];
+
 module.exports = {
   ...baseConfig,
+  reporter: process.env.CI
+    ? [['blob'], ['json', { outputFile: 'test-results/report.json' }]]
+    : [['list'], ['html', { open: 'on-failure' }]],
   projects: [
     {
       name: 'documentation',
@@ -16,14 +24,20 @@ module.exports = {
       use: {
         launchOptions: {
           // Force slow motion
-          slowMo: 30
+          slowMo: 30,
+          args: chromiumArgs
         }
       }
     },
     {
       name: 'galata',
       testMatch: 'test/galata/**',
-      testIgnore: '**/.ipynb_checkpoints/**'
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
     },
     {
       name: 'jupyterlab',
@@ -32,6 +46,9 @@ module.exports = {
       use: {
         contextOptions: {
           permissions: ['clipboard-read', 'clipboard-write']
+        },
+        launchOptions: {
+          args: chromiumArgs
         }
       }
     },
@@ -53,5 +70,7 @@ module.exports = {
   // Switch to 'always' to keep raw assets for all tests
   preserveOutput: 'failures-only', // Breaks HTML report if use.video == 'on'
   // Try one retry as some tests are flaky
-  retries: process.env.CI ? 1 : 0
+  retries: process.env.CI ? 1 : 0,
+  // For equal spread across shards
+  fullyParallel: true
 };

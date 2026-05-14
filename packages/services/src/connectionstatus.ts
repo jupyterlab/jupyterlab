@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IConnectionStatus } from './tokens';
+import type { IConnectionStatus } from './tokens';
 
 /**
  * Application connection status

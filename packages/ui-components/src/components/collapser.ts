@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title } from '@lumino/widgets';
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { caretDownIcon } from '../icon';
 

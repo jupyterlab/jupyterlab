@@ -2,14 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import { Page } from '@playwright/test';
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
-import { ObservableJSON } from '@jupyterlab/observables';
+import type { Page } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import type { ObservableJSON } from '@jupyterlab/observables';
 
 const nbFile = 'code_notebook.ipynb';
 test.use({
@@ -29,11 +25,6 @@ test.beforeAll(async ({ request, tmpPath }) => {
     path.resolve(__dirname, `./notebooks/${nbFile}`),
     `${tmpPath}/${nbFile}`
   );
-});
-
-test.afterAll(async ({ request, tmpPath }) => {
-  const contents = galata.newContentsHelper(request);
-  await contents.deleteDirectory(tmpPath);
 });
 
 /**
@@ -512,13 +503,16 @@ test.describe('Notebook level and cell type metadata', () => {
 
     // There should be 2 fields displayed.
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot('metadata-level.png');
+    expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['cell-metadata']).toBeUndefined();
     let nbMetadata = await getNotebookMetadata(page);
     expect(nbMetadata['nb-nested']).toBeUndefined();
+
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     // Fill the first level nested metadata.
     await formGroup.locator('input').first().fill('Cell input');
@@ -552,18 +546,18 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Create a raw cell and select it.
     await page.notebook.addCell('raw', 'Raw cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Select the code cell again to retrieve full form.
     await page.notebook.selectCells(0);
