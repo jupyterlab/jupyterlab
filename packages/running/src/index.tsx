@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module running
@@ -609,9 +610,7 @@ class Section extends PanelWithToolbar {
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
-      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
-        !enabled ? ' jp-mod-disabled' : ''
-      }`,
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${!enabled ? ' jp-mod-disabled' : ''}`,
       enabled,
       onClick: onShutdown.bind(this)
     });

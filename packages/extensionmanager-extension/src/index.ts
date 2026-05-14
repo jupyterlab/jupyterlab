@@ -53,6 +53,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
       const v = new ExtensionsPanel({ model, translator: translator! });
       v.id = 'extensionmanager.main-view';
       v.title.icon = extensionIcon;
+      v.title.dataset = {
+        ...v.title.dataset,
+        jpTabLabel: trans.__('Extension Manager')
+      };
       v.title.caption = trans.__('Extension Manager');
       v.node.setAttribute('role', 'region');
       v.node.setAttribute('aria-label', trans.__('Extension Manager section'));
@@ -126,16 +130,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('Extension Manager'),
-      execute: () => {
+      execute: (args: { query?: string }) => {
         if (view) {
           shell.activateById(view.id);
+          if (args.query !== undefined) {
+            view.setQuery(args.query);
+          }
         }
       },
       isVisible: () => model.isEnabled,
       describedBy: {
         args: {
           type: 'object',
-          properties: {}
+          properties: {
+            query: {
+              type: 'string',
+              description: trans.__(
+                'Search query to pre-fill in the extension manager'
+              )
+            }
+          }
         }
       }
     });

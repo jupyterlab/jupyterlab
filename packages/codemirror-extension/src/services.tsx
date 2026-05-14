@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { LanguageSupport, StreamLanguage } from '@codemirror/language';
 import type { IYText } from '@jupyter/ydoc';
@@ -53,7 +54,8 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
 
     // Register default languages
     for (const language of EditorLanguageRegistry.getDefaultLanguages(
-      translator
+      translator,
+      (info: string) => languages.findBest(info)
     )) {
       languages.addLanguage(language);
     }

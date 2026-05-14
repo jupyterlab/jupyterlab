@@ -14,8 +14,9 @@ import { ObservableMap } from './observablemap';
 /**
  * An observable JSON value.
  */
-export interface IObservableJSON
-  extends IObservableMap<ReadonlyPartialJSONValue | undefined> {
+export interface IObservableJSON extends IObservableMap<
+  ReadonlyPartialJSONValue | undefined
+> {
   /**
    * Serialize the model to JSON.
    */

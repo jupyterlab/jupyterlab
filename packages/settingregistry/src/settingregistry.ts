@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
@@ -411,7 +412,7 @@ export class SettingRegistry implements ISettingRegistry {
     await this._ready;
 
     const fetched = await this.connector.fetch(plugin);
-    const plugins = this.plugins; // eslint-disable-line
+    const plugins = this.plugins;
     const registry = this; // eslint-disable-line
 
     if (fetched === undefined) {

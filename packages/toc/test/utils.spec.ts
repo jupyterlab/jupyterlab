@@ -107,9 +107,7 @@ describe('TableOfContentsUtils', () => {
 
         const headings = TableOfContentsUtils.filterHeadings(
           TableOfContentsUtils.getHTMLHeadings(src),
-          {
-            maximalDepth
-          }
+          { maximalDepth }
         );
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
@@ -123,9 +121,7 @@ describe('TableOfContentsUtils', () => {
 
         const headings = TableOfContentsUtils.filterHeadings(
           TableOfContentsUtils.getHTMLHeadings(src),
-          {
-            numberHeaders
-          }
+          { numberHeaders }
         );
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberHeaders ? '0.0.1. ' : '');

@@ -9,8 +9,9 @@ import type { FileEditor, FileEditorFactory } from './widget';
 /**
  * A class that tracks editor widgets.
  */
-export interface IEditorTracker
-  extends IWidgetTracker<IDocumentWidget<FileEditor>> {}
+export interface IEditorTracker extends IWidgetTracker<
+  IDocumentWidget<FileEditor>
+> {}
 
 /**
  * The editor tracker token.

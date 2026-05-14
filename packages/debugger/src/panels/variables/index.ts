@@ -142,6 +142,7 @@ export class Variables extends PanelWithToolbar {
  */
 export const convertType = (variable: IDebugger.IVariable): string | number => {
   const { type, value } = variable;
+  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (type) {
     case 'int':
       return parseInt(value, 10);

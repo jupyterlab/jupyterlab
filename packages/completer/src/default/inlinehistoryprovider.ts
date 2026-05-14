@@ -16,9 +16,7 @@ import { historyIcon } from '@jupyterlab/ui-components';
 /**
  * An example inline completion provider using history to populate suggestions.
  */
-export class HistoryInlineCompletionProvider
-  implements IInlineCompletionProvider
-{
+export class HistoryInlineCompletionProvider implements IInlineCompletionProvider {
   readonly identifier = '@jupyterlab/inline-completer:history';
 
   constructor(protected options: HistoryInlineCompletionProvider.IOptions) {

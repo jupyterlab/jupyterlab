@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CodeCell, ICellModel } from '@jupyterlab/cells';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
@@ -678,7 +679,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         );
 
         const attribute =
-          this.sanitizer.allowNamedProperties ?? false
+          (this.sanitizer.allowNamedProperties ?? false)
             ? 'id'
             : 'data-jupyter-id';
         const selector = elementId

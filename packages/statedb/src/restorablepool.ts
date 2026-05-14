@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
@@ -14,8 +15,8 @@ import type { IObjectPool, IRestorable } from './interfaces';
  * @typeparam T - The type of object being tracked.
  */
 export class RestorablePool<
-    T extends IObservableDisposable = IObservableDisposable
-  >
+  T extends IObservableDisposable = IObservableDisposable
+>
   implements IObjectPool<T>, IRestorable<T>
 {
   /**

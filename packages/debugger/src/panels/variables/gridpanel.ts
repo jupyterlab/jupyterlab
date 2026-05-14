@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CommandRegistry } from '@lumino/commands';
 import {
@@ -342,7 +343,10 @@ namespace Private {
     node = palette.querySelector('.jp-mod-selection');
     const selectionFillColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-text');
-    const textColor = getComputedStyle(node!).color;
+    const textStyle = getComputedStyle(node!);
+    const textColor = textStyle.color;
+    const fontFamily = textStyle.fontFamily;
+    const fontSize = textStyle.fontSize;
     document.body.removeChild(palette);
     return {
       style: {
@@ -356,7 +360,7 @@ namespace Private {
         selectionFillColor
       },
       textRenderer: new TextRenderer({
-        font: '12px sans-serif',
+        font: `${fontSize} ${fontFamily}`,
         textColor,
         backgroundColor: '',
         verticalAlignment: 'center',

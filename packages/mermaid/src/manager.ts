@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type MermaidType from 'mermaid';
 import type MermaidElkType from '@mermaid-js/layout-elk';
@@ -226,7 +227,7 @@ export class MermaidManager implements IMermaidManager {
     // add accessible caption, with fallback to raw mermaid source
     if (info.accessibleDescription) {
       const caption = document.createElement('figcaption');
-      caption.className = 'sr-only';
+      caption.className = 'jp-sr-only';
       caption.textContent = info.accessibleDescription;
       figure.appendChild(caption);
     }

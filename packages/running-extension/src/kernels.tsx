@@ -250,8 +250,8 @@ export async function addKernelRunningSessionManager(
       args.type === 'console'
         ? consoleIcon
         : args.type === 'notebook'
-        ? notebookIcon
-        : undefined,
+          ? notebookIcon
+          : undefined,
     isEnabled: ({ path, type }) => !!type || path !== undefined,
     label: ({ name, path }) =>
       (name as string) ||
@@ -398,7 +398,10 @@ namespace Private {
   type DocumentWidgetWithKernelItem = Omit<
     IRunningSessions.IRunningItem,
     'label'
-  > & { label(): ReactNode; name(): string };
+  > & {
+    label(): ReactNode;
+    name(): string;
+  };
 
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
@@ -441,8 +444,8 @@ namespace Private {
               type === 'console'
                 ? consoleIcon
                 : type === 'notebook'
-                ? notebookIcon
-                : jupyterIcon,
+                  ? notebookIcon
+                  : jupyterIcon,
             label: () => {
               if (this._mode === 'tree') {
                 return name;

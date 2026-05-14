@@ -2,6 +2,7 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
     "composite": true,
     "declaration": true,
     "esModuleInterop": true,
@@ -23,8 +24,10 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strictBuiltinIteratorReturn": true,
     "strictNullChecks": true,
     "useUnknownInCatchVariables": true,
+    "noImplicitThis": true,
     "target": "ES2018",
     "types": []
   }
