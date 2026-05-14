@@ -9,7 +9,7 @@ import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import PromiseDelegate from '@lumino/coreutils'; 
+import PromiseDelegate from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as renderers from './renderers';
