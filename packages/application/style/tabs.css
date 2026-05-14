@@ -23,6 +23,7 @@
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
+  background: var(--jp-layout-color3);
 }
 
 .lm-DockPanel-tabBar[data-orientation='horizontal'],
@@ -181,4 +182,11 @@
   min-width: var(--jp-private-horizontal-tab-width);
   padding: 0 10px;
   transform: translateX(-40%) translateY(-58%);
+}
+
+#jp-main-vsplit-panel > .lm-SplitPanel-handle::after,
+#jp-main-split-panel > .lm-SplitPanel-handle::after,
+#jp-main-content-panel > .lm-SplitPanel-handle::after,
+.lm-DockPanel-handle::after {
+  background: var(--jp-layout-color3);
 }
