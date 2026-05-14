@@ -1,17 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Kernel, KernelMessage } from '../kernel';
+import type { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '..';
 
-import * as Session from './session';
+import type * as Session from './session';
 
 import { UUID } from '@lumino/coreutils';
 
-import { DeepPartial, SessionAPIClient } from './restapi';
+import type { DeepPartial } from './restapi';
+import { SessionAPIClient } from './restapi';
 
 /**
  * Session object for accessing the session REST api. The session

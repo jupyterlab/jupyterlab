@@ -136,6 +136,10 @@
   color: inherit;
 }
 
+.jp-Completer-item.jp-mod-active .jp-Completer-typeExtended {
+  color: var(--jp-ui-font-color0);
+}
+
 .jp-Completer-type[data-color-index='0'] {
   background: var(--jp-completer-type-background0, transparent);
 }

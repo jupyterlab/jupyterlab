@@ -3,7 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { addSemanticCommand, JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import { addSemanticCommand } from '@jupyterlab/application';
 import { SemanticCommand } from '@jupyterlab/apputils';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';

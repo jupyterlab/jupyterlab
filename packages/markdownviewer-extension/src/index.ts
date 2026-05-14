@@ -5,22 +5,22 @@
  * @module markdownviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
-  MarkdownDocument,
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownViewerTableOfContentsFactory
 } from '@jupyterlab/markdownviewer';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
-  IRenderMime,
   IRenderMimeRegistry,
   markdownRendererFactory
 } from '@jupyterlab/rendermime';
@@ -34,6 +34,7 @@ import { ITranslator } from '@jupyterlab/translation';
 namespace CommandIDs {
   export const markdownPreview = 'markdownviewer:open';
   export const markdownEditor = 'markdownviewer:edit';
+  export const trust = 'markdownviewer:trust';
 }
 
 /**
@@ -133,6 +134,8 @@ function activate(
     });
     // Handle the settings of new widgets.
     updateWidget(widget.content);
+    // Set data-trust-command attribute
+    widget.content.node.setAttribute('data-trust-command', CommandIDs.trust);
     void tracker.add(widget);
   });
   docRegistry.addWidgetFactory(factory);
@@ -199,6 +202,25 @@ function activate(
       );
     },
     label: trans.__('Show Markdown Editor'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.trust, {
+    label: trans.__('Trust Markdown Preview'),
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (widget) {
+        widget.content.node.classList.add('jp-mod-trusted');
+        app.commandLinker.markTrusted(widget.content.node);
+        return { trusted: true };
+      }
+      return { trusted: false };
+    },
     describedBy: {
       args: {
         type: 'object',

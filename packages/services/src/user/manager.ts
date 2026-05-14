@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { BaseManager } from '../basemanager';
-import { ServerConnection } from '../serverconnection';
-import * as User from './user';
+import type { ServerConnection } from '../serverconnection';
+import type * as User from './user';
 import { UserAPIClient } from './restapi';
 
 /**

@@ -17,6 +17,11 @@
         "command": "terminal:refresh",
         "selector": ".jp-Terminal",
         "rank": 3
+      },
+      {
+        "command": "terminal:open-folder-in-terminal",
+        "selector": ".jp-DirListing-item[data-isdir=\"true\"]",
+        "rank": 2
       }
     ]
   },
@@ -53,7 +58,7 @@
       "title": "Font family",
       "description": "The font family used to render text.",
       "$ref": "#/definitions/fontFamily",
-      "default": "monospace"
+      "default": "ui-monospace, monospace"
     },
     "fontSize": {
       "title": "Font size",

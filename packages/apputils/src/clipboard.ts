@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { MimeData } from '@lumino/coreutils';
 
@@ -12,8 +13,6 @@ export type ClipboardData = string | MimeData;
 export namespace Clipboard {
   /**
    * Get the application clipboard instance.
-   *
-   * @deprecated To use `SystemClipboard.getInstance` for copy/cut/paste cells.
    */
   export function getInstance(): MimeData {
     return Private.instance;

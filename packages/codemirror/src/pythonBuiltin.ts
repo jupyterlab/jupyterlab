@@ -3,16 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Language, syntaxTree } from '@codemirror/language';
+import type { Language } from '@codemirror/language';
+import { syntaxTree } from '@codemirror/language';
 import { RangeSetBuilder } from '@codemirror/state';
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  ViewPlugin,
-  ViewUpdate
-} from '@codemirror/view';
-import { NodeProp, SyntaxNodeRef, Tree } from '@lezer/common';
+import type { DecorationSet, EditorView, ViewUpdate } from '@codemirror/view';
+import { Decoration, ViewPlugin } from '@codemirror/view';
+import type { SyntaxNodeRef, Tree } from '@lezer/common';
+import { NodeProp } from '@lezer/common';
 
 export class PythonBuiltin {
   decorations: DecorationSet;

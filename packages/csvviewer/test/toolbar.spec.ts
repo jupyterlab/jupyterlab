@@ -3,7 +3,8 @@
 
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
-import { CSVDelimiter, CSVViewer } from '../src';
+import type { CSVViewer } from '../src';
+import { CSVDelimiter } from '../src';
 
 const DELIMITERS = [',', ';', '\t'];
 

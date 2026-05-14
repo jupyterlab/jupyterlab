@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONPrimitive } from '@lumino/coreutils';
+import type { JSONPrimitive } from '@lumino/coreutils';
 
-import { IObservableDisposable } from '@lumino/disposable';
+import type { IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import type { ServerConnection } from '..';
 
-import { IManager as IBaseManager } from '../basemanager';
+import type { IManager as IBaseManager } from '../basemanager';
 
 import { IModel, isAvailable } from './restapi';
 export { IModel, isAvailable };
