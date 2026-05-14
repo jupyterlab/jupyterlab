@@ -408,6 +408,10 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       trans.__('File Browser Section')
     );
     defaultBrowser.title.icon = folderIcon;
+    defaultBrowser.title.dataset = {
+      ...defaultBrowser.title.dataset,
+      jpTabLabel: trans.__('File Browser')
+    };
 
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
@@ -1664,13 +1668,21 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.refresh, {
-    execute: args => {
+    execute: async () => {
       const widget = tracker.currentWidget;
 
-      if (widget) {
-        return widget.model.refresh();
+      if (!widget) {
+        return;
+      }
+
+      widget.node.classList.add('jp-mod-refreshing');
+      try {
+        await widget.model.refresh();
+      } finally {
+        widget.node.classList.remove('jp-mod-refreshing');
       }
     },
+
     icon: refreshIcon.bindprops({ stylesheet: 'menuItem' }),
     caption: trans.__('Refresh the file browser.'),
     label: trans.__('Refresh File List'),
