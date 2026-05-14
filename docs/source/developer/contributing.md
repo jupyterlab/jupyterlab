@@ -653,7 +653,6 @@ Main reasons for UI test failures are:
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) for the failing tests. In order
    to do that, you can post a comment on your PR with the following content:
-
    - `please update galata snapshots`: A bot will push a new commit to your PR updating galata
      test snapshots.
    - `please update documentation snapshots`: A bot will push a new commit to your PR updating
@@ -1034,7 +1033,6 @@ them out against your copy of JupyterLab, you can easily do so using the
 1. Make your changes and then build the external package
 
 2. Link JupyterLab to modded package
-
    - navigate to top level of your JupyterLab repo, then run
      `jlpm link <path-to-external-repo> --all`
 
@@ -1045,12 +1043,10 @@ To restore JupyterLab to its original state, you use the `unlink`
 command:
 
 1. Unlink JupyterLab and modded package
-
    - navigate to top level of your JupyterLab repo, then run
      `jlpm unlink <path-to-external-repo> --all`
 
 2. Reinstall original version of the external package in JupyterLab
-
    - run `jlpm install --check-files`
 
 3\. You can then (re)build JupyterLab and everything should be back to
@@ -1097,7 +1093,6 @@ preparing them:
 
 - If taking a png screenshot, use the Firefox or Chrome developer tools
   to do the following:
-
   - set the browser viewport to 1280x720 pixels
   - set the device pixel ratio to 1:1 (i.e., non-hidpi, non-retina)
   - screenshot the entire _viewport_ using the browser developer

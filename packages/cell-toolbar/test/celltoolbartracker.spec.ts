@@ -126,6 +126,7 @@ function testToolbarFactory() {
 describe('@jupyterlab/cell-toolbar', () => {
   describe('CellBarExtension', () => {
     let commands: CommandRegistry;
+    // eslint-disable-next-line no-unassigned-vars
     let panel: NotebookPanel | undefined;
     let extension: CellBarExtension;
 

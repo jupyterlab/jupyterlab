@@ -430,9 +430,7 @@ describe('@jupyterlab/completer', () => {
         expect(spy).toHaveBeenCalledTimes(1);
         expect(spy).toHaveBeenLastCalledWith(
           false,
-          {
-            sourceChange: [{ retain: 4 }, { insert: 'a' }]
-          } as SourceChange,
+          { sourceChange: [{ retain: 4 }, { insert: 'a' }] } as SourceChange,
           context
         );
         spy.mockRestore();

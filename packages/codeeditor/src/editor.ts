@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Extension } from '@codemirror/state';
 import type { ISharedText } from '@jupyter/ydoc';
@@ -56,8 +57,10 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate
-    extends Pick<DOMRectReadOnly, 'left' | 'right' | 'top' | 'bottom'> {}
+  export interface ICoordinate extends Pick<
+    DOMRectReadOnly,
+    'left' | 'right' | 'top' | 'bottom'
+  > {}
 
   /**
    * A range.

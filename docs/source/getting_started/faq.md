@@ -47,7 +47,7 @@ Why are `id` and `name` attributes removed from Markdown?
 > \- Use headings in Markdown cells to create anchor points safely.
 > \- Optionally, enable the "Allow named properties" setting in **Settings** -> **Settings Editor** -> **Sanitizer** (not recommended for untrusted sources).
 
-How Jupyterlab handles anchor navigation?
+How JupyterLab handles anchor navigation?
 
 > During sanitization, the id attributes of the DOM elements are replaced with `data-jupyter-id` attributes.
 > When resolving an URL, if a fragment exists (e.g. `#my-id`), it will find and scroll to the element with the corresponding `data-jupyter-id`.

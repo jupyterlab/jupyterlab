@@ -50,6 +50,9 @@ test.describe('General Tests', () => {
     await page.menu.clickMenuItem(
       'Settings>Theme>Synchronize with System Settings'
     );
+    // Wait for a short time to increase the chance that
+    // the setting was already saved on the backend.
+    await page.waitForTimeout(100);
     await page.reload();
     expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');
   });

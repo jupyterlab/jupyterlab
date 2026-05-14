@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -195,9 +196,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.error(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       this._reconnectTimeout = setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;
@@ -316,11 +315,18 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     });
   };
 
-  private _onWSClose = (event: CloseEvent) => {
-    console.warn(`Terminal websocket closed: ${event.code}`);
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent) => {
+    console.warn(`Terminal websocket closed: ${evt.code}`);
+
+    if (this.isDisposed) {
+      return;
     }
+
+    if (evt.code === 1000 || evt.code === 1001) {
+      return;
+    }
+
+    this._reconnect();
   };
 
   /**

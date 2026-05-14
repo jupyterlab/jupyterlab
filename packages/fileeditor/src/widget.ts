@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   CodeEditor,
@@ -307,11 +308,10 @@ export namespace FileEditorFactory {
   /**
    * The interface for a file editor widget factory.
    */
-  export interface IFactory
-    extends DocumentRegistry.IWidgetFactory<
-      IDocumentWidget<FileEditor>,
-      DocumentRegistry.ICodeModel
-    > {
+  export interface IFactory extends DocumentRegistry.IWidgetFactory<
+    IDocumentWidget<FileEditor>,
+    DocumentRegistry.ICodeModel
+  > {
     // no extra options.
   }
 }

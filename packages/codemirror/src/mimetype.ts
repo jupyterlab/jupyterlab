@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -31,7 +32,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     return mode
       ? typeof mode.mime === 'string'
         ? mode.mime
-        : mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 
@@ -54,7 +55,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     return mode
       ? typeof mode.mime === 'string'
         ? mode.mime
-        : mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 }

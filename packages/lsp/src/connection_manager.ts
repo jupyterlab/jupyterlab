@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import type { ISignal } from '@lumino/signaling';
@@ -31,9 +32,7 @@ import type * as protocol from 'vscode-languageserver-protocol';
  * (see JupyterLabWidgetAdapter). Using id_path instead of uri led to documents being overwritten
  * as two identical id_paths could be created for two different notebooks.
  */
-export class DocumentConnectionManager
-  implements ILSPDocumentConnectionManager
-{
+export class DocumentConnectionManager implements ILSPDocumentConnectionManager {
   constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
     this.documents = new Map();

@@ -333,8 +333,9 @@ export namespace MimeDocumentFactory {
   /**
    * The options used to initialize a MimeDocumentFactory.
    */
-  export interface IOptions<T extends MimeDocument>
-    extends DocumentRegistry.IWidgetFactoryOptions<T> {
+  export interface IOptions<
+    T extends MimeDocument
+  > extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /**
      * The primary file type associated with the document.
      */

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -1857,9 +1858,7 @@ namespace Private {
 
     const body = document.createElement('div');
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${
-      sessionContext.name
-    }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name}"`;
     body.appendChild(text);
 
     const select = document.createElement('select');

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -329,8 +330,7 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U>
-{
+> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -560,9 +560,9 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * A document widget implementation.
  */
 export class DocumentWidget<
-    T extends Widget = Widget,
-    U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-  >
+  T extends Widget = Widget,
+  U extends DocumentRegistry.IModel = DocumentRegistry.IModel
+>
   extends MainAreaWidget<T>
   implements IDocumentWidget<T, U>
 {

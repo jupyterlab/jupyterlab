@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   IConfigurableExtension,
@@ -101,8 +102,10 @@ export namespace EditorAdapter {
     extensions: ILSPEditorExtensionFactory[];
   }
 
-  export interface ILSPEditorExtensionFactory
-    extends Omit<IEditorExtensionFactory<any>, 'factory'> {
+  export interface ILSPEditorExtensionFactory extends Omit<
+    IEditorExtensionFactory<any>,
+    'factory'
+  > {
     /**
      * Extension factory.
      *
