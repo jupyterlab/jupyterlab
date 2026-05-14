@@ -93,6 +93,10 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
     const trans = translator.load('jupyterlab');
     const running = new RunningSessions(manager, translator, state);
     running.id = 'jp-running-sessions';
+    running.title.dataset = {
+      ...running.title.dataset,
+      jpTabLabel: trans.__('Sessions and Tabs')
+    };
     running.title.caption = trans.__('Running Terminals and Kernels');
     running.title.icon = runningIcon;
     running.node.setAttribute('role', 'region');

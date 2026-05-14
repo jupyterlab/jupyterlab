@@ -74,6 +74,7 @@ test.describe('ToC Running indicator', () => {
     await expect(
       tocPanel.getByTitle('Title 1', { exact: true })
     ).toHaveAttribute('data-running', '1');
+
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'
     );

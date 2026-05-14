@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module apputils-extension
@@ -48,11 +49,20 @@ import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
+import type { Kernel } from '@jupyterlab/services';
+import { IKernelManager } from '@jupyterlab/services';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
  */
 const SPLASH_RECOVER_TIMEOUT = 12000;
+
+/**
+ * Pattern matching the `reset` query parameter in a URL.
+ * Matches bare `?reset`, `?reset=<value>`, and `&reset` variants,
+ * including URLs where `reset` is followed by a hash fragment.
+ */
+const RESET_QUERY_PATTERN = /(\?reset|\&reset)(=[^&#]*)?($|&|#)/;
 
 /**
  * The command IDs used by the apputils plugin.
@@ -107,13 +117,9 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   description: 'Restores the command palette.',
   autoStart: true,
-  requires: [ILayoutRestorer, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    restorer: ILayoutRestorer,
-    translator: ITranslator
-  ) => {
-    Palette.restore(app, restorer, translator);
+  requires: [ILayoutRestorer],
+  activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer) => {
+    Palette.restore(app, restorer);
   }
 };
 
@@ -158,7 +164,8 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path;
 
         // Reset the workspace on load.
-        query['reset'] = '';
+        // Use a non-empty value so that auth proxies do not strip the parameter.
+        query['reset'] = '1';
 
         const url = path + URLExt.objectToQueryString(query) + (hash || '');
         router.navigate(url, { hard: true });
@@ -649,7 +656,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     router.register({
       command: CommandIDs.resetOnLoad,
-      pattern: /(\?reset|\&reset)($|&)/,
+      pattern: RESET_QUERY_PATTERN,
       rank: 20 // High priority: 20:100.
     });
 
@@ -836,6 +843,8 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
       const autolink = setting.get('autolink').composite as boolean;
       const allowNamedProperties = setting.get('allowNamedProperties')
         .composite as boolean;
+      const allowCommandLinker = setting.get('allowCommandLinker')
+        .composite as boolean;
 
       if (allowedSchemes) {
         sanitizer.setAllowedSchemes(allowedSchemes);
@@ -843,6 +852,7 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
 
       sanitizer.setAutolink(autolink);
       sanitizer.setAllowNamedProperties(allowNamedProperties);
+      sanitizer.setAllowCommandLinker(allowCommandLinker);
     };
 
     // Wait for the application to be restored and
@@ -872,8 +882,27 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
   description: 'Reserves the name for kernel settings.',
   autoStart: true,
   requires: [ISettingRegistry],
-  activate: (_app: JupyterFrontEnd, settingRegistry: ISettingRegistry) => {
+  optional: [IKernelManager],
+  activate: async (
+    _app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    kernelManager: Kernel.IManager | null
+  ) => {
     void settingRegistry.load(kernelSettings.id);
+    // override Kernel Info's timeout setting
+    if (kernelManager === null || !('kernelInfoTimeout' in kernelManager)) {
+      console.warn(
+        `The kernel manager does not support the kernelInfoTimeout property.`
+      );
+    } else {
+      const settings = await settingRegistry.load(kernelSettings.id);
+      const patchKernelInfoTimeout = () => {
+        kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
+          .composite as number;
+      };
+      patchKernelInfoTimeout();
+      settings.changed.connect(patchKernelInfoTimeout);
+    }
   }
 };
 

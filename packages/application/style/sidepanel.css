@@ -9,6 +9,15 @@
 
 :root {
   --jp-private-sidebar-tab-width: 32px;
+  --jp-private-sidebar-tab-horizontal-height: 28px;
+  --jp-private-sidebar-tab-horizontal-scrollbar-height: 4px;
+  --jp-private-sidebar-tab-horizontal-padding: 16px;
+
+  /* Icon (20px, see `.jp-SideBar-tabIcon`) + horizontal padding on both
+     sides — below this a horizontal tab clips its icon. */
+  --jp-private-sidebar-tab-horizontal-min-width: calc(
+    20px + 2 * var(--jp-private-sidebar-tab-horizontal-padding)
+  );
 }
 
 /*-----------------------------------------------------------------------------
@@ -29,13 +38,26 @@
   overflow: visible;
 }
 
-.jp-SideBar.lm-TabBar {
+.jp-SideBar.lm-TabBar[data-orientation='vertical'] {
   min-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
   max-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
   display: block;
 }
 
-.jp-SideBar .lm-TabBar-content {
+.jp-SideBar.lm-TabBar[data-orientation='horizontal'] {
+  min-height: calc(
+    var(--jp-private-sidebar-tab-horizontal-height) +
+      var(--jp-private-sidebar-tab-horizontal-scrollbar-height) +
+      var(--jp-border-width)
+  );
+  max-height: calc(
+    var(--jp-private-sidebar-tab-horizontal-height) +
+      var(--jp-private-sidebar-tab-horizontal-scrollbar-height) +
+      var(--jp-border-width)
+  );
+}
+
+.jp-SideBar[data-orientation='vertical'] .lm-TabBar-content {
   margin: 0;
   padding: 0;
   display: flex;
@@ -44,12 +66,64 @@
   height: var(--jp-private-sidebar-tab-width);
 }
 
-.jp-SideBar .lm-TabBar-tab {
+.jp-SideBar[data-orientation='horizontal'] .lm-TabBar-content {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+  height: 100%;
+  width: 100%;
+
+  /* Scroll horizontally on overflow with the same tiny scrollbar styling used
+     elsewhere in the application. Reserve the gutter to avoid shifting tabs
+     when the scrollbar appears. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar,
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar-corner {
+  background-color: transparent;
+  height: var(--jp-private-sidebar-tab-horizontal-scrollbar-height);
+  width: var(--jp-private-sidebar-tab-horizontal-scrollbar-height);
+}
+
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar-thumb {
+  background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
+}
+
+.jp-SideBar[data-orientation='horizontal']
+  .lm-TabBar-content::-webkit-scrollbar-track:horizontal {
+  border-left: 0 solid transparent;
+  border-right: 0 solid transparent;
+}
+
+.jp-SideBar[data-orientation='vertical'] .lm-TabBar-tab {
   padding: 16px 0;
   border: none;
   overflow: visible;
   flex-direction: column;
   position: relative;
+}
+
+.jp-SideBar[data-orientation='horizontal'] .lm-TabBar-tab {
+  padding: 0 var(--jp-private-sidebar-tab-horizontal-padding);
+  border: none;
+  overflow: visible;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+
+  /* Floor at icon + padding so tabs can't shrink to clip the icon;
+     beyond that, overflow scroll on `.lm-TabBar-content` takes over. */
+  min-width: var(--jp-private-sidebar-tab-horizontal-min-width);
 }
 
 .jp-SideBar .lm-TabBar-tab:focus-visible {
@@ -84,8 +158,12 @@
   background-position: center;
 }
 
-.jp-SideBar .lm-TabBar-tabLabel {
+.jp-SideBar[data-orientation='vertical'] .lm-TabBar-tabLabel {
   line-height: var(--jp-private-sidebar-tab-width);
+}
+
+.jp-SideBar[data-orientation='horizontal'] .lm-TabBar-tabLabel {
+  line-height: var(--jp-private-sidebar-tab-horizontal-height);
 }
 
 .jp-SideBar .lm-TabBar-tab:hover:not(.lm-mod-current),
@@ -108,23 +186,53 @@
 
 /* stylelint-disable selector-max-class */
 
-.jp-SideBar.lm-TabBar .lm-TabBar-tab + .lm-TabBar-tab {
+.jp-SideBar.lm-TabBar[data-orientation='vertical']
+  .lm-TabBar-tab
+  + .lm-TabBar-tab {
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
 
-.jp-SideBar.lm-TabBar .lm-TabBar-tab.lm-mod-current + .lm-TabBar-tab {
+.jp-SideBar.lm-TabBar[data-orientation='vertical']
+  .lm-TabBar-tab.lm-mod-current
+  + .lm-TabBar-tab {
   border-top: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
-.jp-SideBar.lm-TabBar .lm-TabBar-tab + .lm-TabBar-tab.lm-mod-current {
+.jp-SideBar.lm-TabBar[data-orientation='vertical']
+  .lm-TabBar-tab
+  + .lm-TabBar-tab.lm-mod-current {
   border-top: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
-.jp-SideBar.lm-TabBar .lm-TabBar-tab.lm-mod-current:last-child {
+.jp-SideBar.lm-TabBar[data-orientation='vertical']
+  .lm-TabBar-tab.lm-mod-current:last-child {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
-.jp-SideBar.lm-TabBar .lm-TabBar-tabLabel {
+.jp-SideBar.lm-TabBar[data-orientation='horizontal']
+  .lm-TabBar-tab
+  + .lm-TabBar-tab {
+  border-left: var(--jp-border-width) solid var(--jp-layout-color2);
+}
+
+.jp-SideBar.lm-TabBar[data-orientation='horizontal']
+  .lm-TabBar-tab.lm-mod-current
+  + .lm-TabBar-tab {
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.lm-TabBar[data-orientation='horizontal']
+  .lm-TabBar-tab
+  + .lm-TabBar-tab.lm-mod-current {
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.lm-TabBar[data-orientation='horizontal']
+  .lm-TabBar-tab.lm-mod-current:last-child {
+  border-right: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.lm-TabBar[data-orientation='vertical'] .lm-TabBar-tabLabel {
   writing-mode: vertical-rl;
 }
 
@@ -172,6 +280,48 @@
   border-left: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
+/* Top / Bottom (horizontal activity bar) */
+
+.jp-SideBar.lm-TabBar[data-side='top'] .lm-TabBar-content,
+.jp-SideBar.lm-TabBar[data-side='bottom'] .lm-TabBar-content {
+  align-items: stretch;
+}
+
+.jp-SideBar.lm-TabBar[data-side='top'] {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.lm-TabBar[data-side='bottom'] {
+  border-top: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.lm-TabBar[data-side='top'] .lm-TabBar-tab.lm-mod-current::after,
+.jp-SideBar.lm-TabBar[data-side='bottom'] .lm-TabBar-tab.lm-mod-current::after {
+  /* Reset side-mode override; use the default tab borders. */
+  display: none;
+}
+
+/* Side area wrapper */
+
+.jp-SideArea {
+  /* The side area wrapper holds the activity bar (when in top/bottom mode)
+     and the stacked panel. */
+  background: var(--jp-layout-color1);
+
+  /* Floor so the splitter can't be dragged to zero and lose the area.
+     The stack panel children already enforce this in 'side' mode; setting
+     it on the wrapper also covers 'top'/'bottom'. */
+  min-width: var(--jp-sidebar-min-width);
+}
+
+.jp-SideArea[data-side='left'] {
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.jp-SideArea[data-side='right'] {
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
 /* Down */
 
 /* Borders */
@@ -205,14 +355,6 @@
 #jp-right-stack > .lm-Widget {
   min-width: var(--jp-sidebar-min-width);
   background-color: var(--jp-layout-color1);
-}
-
-#jp-right-stack {
-  border-left: var(--jp-border-width) solid var(--jp-border-color1);
-}
-
-#jp-left-stack {
-  border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 #jp-down-stack > .lm-TabPanel-stackedPanel {
