@@ -17,7 +17,6 @@ import type {
   ServiceManagerPlugin,
   Session,
   Setting,
-  Terminal,
   User,
   Workspace
 } from '@jupyterlab/services';
@@ -52,6 +51,7 @@ import {
   ServiceManager,
   SessionManager,
   SettingManager,
+  Terminal,
   TerminalManager,
   UserManager,
   WorkspaceManager
