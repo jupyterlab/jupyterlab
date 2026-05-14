@@ -5,12 +5,11 @@
  * @module running-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
 import {
   IRunningSessionManagers,
@@ -94,6 +93,10 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
     const trans = translator.load('jupyterlab');
     const running = new RunningSessions(manager, translator, state);
     running.id = 'jp-running-sessions';
+    running.title.dataset = {
+      ...running.title.dataset,
+      jpTabLabel: trans.__('Sessions and Tabs')
+    };
     running.title.caption = trans.__('Running Terminals and Kernels');
     running.title.icon = runningIcon;
     running.node.setAttribute('role', 'region');
@@ -114,6 +117,12 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
 
     app.commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('Sessions and Tabs'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         app.shell.activateById(running.id);
       }
@@ -177,7 +186,13 @@ const searchPlugin: JupyterFrontEndPlugin<void> = {
         dialog.addClass('jp-SearchableSessions-modal');
         return dialog.launch();
       },
-      label: trans.__('Search Tabs and Running Sessions')
+      label: trans.__('Search Tabs and Running Sessions'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     if (palette) {
       palette.addItem({

@@ -19,6 +19,7 @@ from jupyterlab_server import (
     WorkspaceImportApp,
     WorkspaceListApp,
 )
+from jupyterlab_server.config import get_static_page_config
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Type, Unicode, default
 
@@ -133,9 +134,8 @@ Explicitly setting `dev-build` to `False` will ensure that the `production`
 build is used in all circumstances.
 
 - `minimize`: This option controls whether your JS bundle is minified
-during the Webpack build, which helps to improve JupyterLab's overall
-performance. However, the minifier plugin used by Webpack is very memory
-intensive, so turning it off may help the build finish successfully in
+during the Rspack build, which helps to improve JupyterLab's overall
+performance. Turning this off may help the build finish successfully in
 low-memory environments.
 """
 
@@ -729,6 +729,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         # Set config for Jupyterlab
         page_config = self.serverapp.web_app.settings.setdefault("page_config_data", {})
+        page_config.update(get_static_page_config(logger=self.log, level="all"))
+
         page_config.setdefault("buildAvailable", not self.core_mode and not self.dev_mode)
         page_config.setdefault("buildCheck", not self.core_mode and not self.dev_mode)
         page_config["devMode"] = self.dev_mode
@@ -736,6 +738,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
+        if hasattr(self.serverapp.contents_manager, "delete_to_trash"):
+            page_config["delete_to_trash"] = self.serverapp.contents_manager.delete_to_trash
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config["notebookVersion"] = json.dumps(jpserver_version_info)
@@ -812,7 +816,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 self.log.error(
                     "Simultaneous LabServerApp.blocked_extensions_uris and LabServerApp.allowed_extensions_uris is not supported. Please define only one of those."
                 )
-                import sys
+                import sys  # noqa: PLC0415
 
                 sys.exit(-1)
 

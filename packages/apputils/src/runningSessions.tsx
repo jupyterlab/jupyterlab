@@ -1,25 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   ServiceManager,
   Session,
   SessionManager,
   Terminal,
   TerminalManager
 } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   kernelIcon,
   terminalIcon,
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import React, { KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React from 'react';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 
 /**
@@ -37,26 +35,29 @@ const HALF_SPACING = 4;
 function RunningSessionsComponent(
   props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> {
+  const showKernels = props.showKernels ?? true;
+  const showTerminals = props.showTerminals ?? props.terminals > 0;
   return (
     <GroupItem
+      role="button"
       tabIndex={0}
       spacing={HALF_SPACING}
       onClick={props.handleClick}
       onKeyDown={props.handleKeyDown}
       style={{ cursor: 'pointer' }}
     >
-      {props.terminals > 0 ? (
+      {showTerminals ? (
         <GroupItem spacing={HALF_SPACING}>
           <TextItem source={props.terminals} />
           <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
         </GroupItem>
-      ) : (
-        <div></div>
-      )}
-      <GroupItem spacing={HALF_SPACING}>
-        <TextItem source={props.sessions} />
-        <kernelIcon.react verticalAlign="middle" stylesheet="statusBar" />
-      </GroupItem>
+      ) : null}
+      {showKernels ? (
+        <GroupItem spacing={HALF_SPACING}>
+          <TextItem source={props.sessions} />
+          <kernelIcon.react verticalAlign="middle" stylesheet="statusBar" />
+        </GroupItem>
+      ) : null}
     </GroupItem>
   );
 }
@@ -89,6 +90,18 @@ namespace RunningSessionsComponent {
      * The number of active terminal sessions.
      */
     terminals: number;
+
+    /**
+     * Whether to show kernels, true by default.
+     */
+    showKernels?: boolean;
+
+    /**
+     * Whether to show terminals.
+     *
+     * The default is true if one or more terminals are open, false otherwise.
+     */
+    showTerminals?: boolean;
   }
 }
 
@@ -105,6 +118,8 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     this._handleClick = opts.onClick;
     this._handleKeyDown = opts.onKeyDown;
     this.translator = opts.translator || nullTranslator;
+    this._showKernels = opts.showKernels;
+    this._showTerminals = opts.showTerminals;
     this._trans = this.translator.load('jupyterlab');
 
     this._serviceManager.sessions.runningChanged.connect(
@@ -146,6 +161,8 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
         terminals={this.model.terminals}
         handleClick={this._handleClick}
         handleKeyDown={this._handleKeyDown}
+        showKernels={this._showKernels}
+        showTerminals={this._showTerminals}
       />
     );
   }
@@ -191,6 +208,8 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   private _handleClick: () => void;
   private _handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
   private _serviceManager: ServiceManager.IManager;
+  private _showKernels?: boolean;
+  private _showTerminals?: boolean;
 }
 
 /**
@@ -260,5 +279,17 @@ export namespace RunningSessions {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Whether to show kernels, true by default.
+     */
+    showKernels?: boolean;
+
+    /**
+     * Whether to show terminals.
+     *
+     * The default is true if one or more terminals are open, false otherwise.
+     */
+    showTerminals?: boolean;
   }
 }

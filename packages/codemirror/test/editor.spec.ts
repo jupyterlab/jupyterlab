@@ -3,20 +3,18 @@
 
 import { YFile } from '@jupyter/ydoc';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import {
   CodeMirrorEditor,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
-  IEditorExtensionRegistry,
-  IEditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 import { sleep } from '@jupyterlab/testutils';
 import { generate, simulate } from 'simulate-event';
-
-const UP_ARROW = 38;
-
-const DOWN_ARROW = 40;
 
 class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
@@ -93,7 +91,7 @@ describe('CodeMirrorEditor', () => {
   describe('#edgeRequested', () => {
     it('should emit a signal when the top edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
-      const event = generate('keydown', { keyCode: UP_ARROW });
+      const event = generate('keydown', { key: 'ArrowUp' });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
@@ -105,7 +103,7 @@ describe('CodeMirrorEditor', () => {
 
     it('should emit a signal when the bottom edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
-      const event = generate('keydown', { keyCode: DOWN_ARROW });
+      const event = generate('keydown', { key: 'ArrowDown' });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
@@ -444,7 +442,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#onKeydown()', () => {
     it('should run when there is a keydown event on the editor', () => {
-      const event = generate('keydown', { keyCode: UP_ARROW });
+      const event = generate('keydown', { key: 'ArrowUp' });
       expect(editor.methods).toEqual(expect.not.arrayContaining(['onKeydown']));
       editor.editor.contentDOM.dispatchEvent(event);
       expect(editor.methods).toEqual(expect.arrayContaining(['onKeydown']));
@@ -478,6 +476,17 @@ describe('CodeMirrorEditor', () => {
         type: 'import',
         offset: 0,
         value: 'import'
+      });
+    });
+    it('should return token of parent when erronous leaf is found', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('a = "/home');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokenAt(10)).toStrictEqual({
+        offset: 4,
+        type: 'String',
+        value: '"/home'
       });
     });
   });

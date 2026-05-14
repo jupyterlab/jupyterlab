@@ -1,13 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
-  ISessionContext,
-  SessionContextDialogs
+  SessionContextDialogs,
+  SystemClipboard
 } from '@jupyterlab/apputils';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
-import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
@@ -15,9 +18,15 @@ import {
   EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
-import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-import { INotebookContent } from '@jupyterlab/nbformat';
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context } from '@jupyterlab/docregistry';
+import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
+import type { INotebookContent } from '@jupyterlab/nbformat';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import {
+  RenderMimeRegistry,
+  standardRendererFactories
+} from '@jupyterlab/rendermime';
 import {
   DEFAULT_OUTPUTS as TEST_OUTPUTS,
   defaultRenderMime as testRenderMime
@@ -26,7 +35,8 @@ import { ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import * as defaultContent from './default.json';
-import { INotebookModel, NotebookModel } from './model';
+import type { INotebookModel } from './model';
+import { NotebookModel } from './model';
 import { NotebookModelFactory } from './modelfactory';
 import { NotebookPanel } from './panel';
 import { Notebook, StaticNotebook } from './widget';
@@ -140,6 +150,8 @@ export namespace NBTestUtils {
 
   export const clipboard = Clipboard.getInstance();
 
+  export const systemClipboard = SystemClipboard.getInstance();
+
   /**
    * Create a base cell content factory.
    */
@@ -182,13 +194,19 @@ export namespace NBTestUtils {
    * Create a notebook widget.
    */
   export function createNotebook(sessionContext?: ISessionContext): Notebook {
+    const parser: IMarkdownParser = createMarkdownParser(
+      new EditorLanguageRegistry()
+    );
     let history = sessionContext
       ? {
           kernelHistory: new NotebookHistory({ sessionContext: sessionContext })
         }
       : {};
     return new Notebook({
-      rendermime: defaultRenderMime(),
+      rendermime: new RenderMimeRegistry({
+        markdownParser: parser,
+        initialFactories: standardRendererFactories
+      }),
       contentFactory: createNotebookFactory(),
       mimeTypeService,
       notebookConfig: {

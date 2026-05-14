@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { removeMath, replaceMath } from './latex';
 
@@ -16,7 +17,7 @@ import { removeMath, replaceMath } from './latex';
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderHTML(options: renderHTML.IOptions): Promise<void> {
+export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // Unpack the options.
   let {
     host,
@@ -37,7 +38,7 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // Bail early if the source is empty.
   if (!source) {
     host.textContent = '';
-    return Promise.resolve(undefined);
+    return;
   }
 
   // Sanitize the source if it is not trusted. This removes all
@@ -78,22 +79,26 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
   }
 
   // Handle default behavior of nodes.
-  Private.handleDefaults(host, resolver);
+  Private.handleDefaults(host);
 
-  // Patch the urls if a resolver is available.
-  let promise: Promise<void>;
-  if (resolver) {
-    promise = Private.handleUrls(host, resolver, linkHandler);
+  if (shouldTypeset && latexTypesetter) {
+    const maybePromise = latexTypesetter.typeset(host);
+    if (maybePromise instanceof Promise) {
+      // Harden anchors to contain secure target/rel attributes.
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      hardenAnchorLinks(host, resolver);
+    }
   } else {
-    promise = Promise.resolve(undefined);
+    hardenAnchorLinks(host, resolver);
   }
 
-  // Return the final rendered promise.
-  return promise.then(() => {
-    if (shouldTypeset && latexTypesetter) {
-      latexTypesetter.typeset(host);
-    }
-  });
+  // Patch the urls if a resolver is available.
+  if (resolver) {
+    await Private.handleUrls(host, resolver, linkHandler);
+  }
 }
 
 /**
@@ -158,7 +163,7 @@ export namespace renderHTML {
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderImage(
+export async function renderImage(
   options: renderImage.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
@@ -194,9 +199,6 @@ export function renderImage(
 
   // Add the image to the host.
   host.appendChild(img);
-
-  // Return the rendered promise.
-  return Promise.resolve(undefined);
 }
 
 /**
@@ -251,22 +253,27 @@ export namespace renderImage {
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderLatex(
+export async function renderLatex(
   options: renderLatex.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, shouldTypeset, latexTypesetter } = options;
+  const { host, source, shouldTypeset, latexTypesetter, resolver } = options;
 
   // Set the source on the node.
   host.textContent = source;
 
   // Typeset the node if needed.
   if (shouldTypeset && latexTypesetter) {
-    latexTypesetter.typeset(host);
+    const maybePromise = latexTypesetter.typeset(host);
+    if (maybePromise instanceof Promise) {
+      // Harden anchors to contain secure target/rel attributes.
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      hardenAnchorLinks(host, resolver);
+    }
   }
-
-  // Return the rendered promise.
-  return Promise.resolve(undefined);
 }
 
 /**
@@ -296,6 +303,11 @@ export namespace renderLatex {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * An optional url resolver.
+     */
+    resolver?: IRenderMime.IResolver | null;
   }
 }
 
@@ -341,7 +353,7 @@ export async function renderMarkdown(
   });
 
   // Apply ids to the header nodes.
-  Private.headerAnchors(host);
+  Private.headerAnchors(host, options.sanitizer.allowNamedProperties ?? false);
 }
 
 /**
@@ -421,21 +433,23 @@ export namespace renderMarkdown {
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
+export async function renderSVG(
+  options: renderSVG.IRenderOptions
+): Promise<void> {
   // Unpack the options.
   let { host, source, trusted, unconfined } = options;
 
   // Clear the content if there is no source.
   if (!source) {
     host.textContent = '';
-    return Promise.resolve(undefined);
+    return;
   }
 
   // Display a message if the source is not trusted.
   if (!trusted) {
     host.textContent =
       'Cannot display an untrusted SVG. Maybe you need to run the cell?';
-    return Promise.resolve(undefined);
+    return;
   }
 
   // Add missing SVG namespace (if actually missing)
@@ -452,7 +466,6 @@ export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
   if (unconfined === true) {
     host.classList.add('jp-mod-unconfined');
   }
-  return Promise.resolve();
 }
 
 /**
@@ -662,6 +675,7 @@ function autolink(
 
     while (null != (match = regex.exec(content))) {
       const stringBeforeMatch = content.substring(currentIndex, match.index);
+
       if (stringBeforeMatch) {
         linkify(stringBeforeMatch, regexIndex + 1);
       }
@@ -804,14 +818,13 @@ function* alignedNodes<T extends Node, U extends Node>(
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderText(options: renderText.IRenderOptions): Promise<void> {
+export async function renderText(
+  options: renderText.IRenderOptions
+): Promise<void> {
   renderTextual(options, {
     checkWeb: true,
     checkPaths: false
   });
-
-  // Return the rendered promise.
-  return Promise.resolve(undefined);
 }
 
 /**
@@ -1205,7 +1218,7 @@ function getApplicableLinkCache(
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderError(
+export async function renderError(
   options: renderError.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
@@ -1217,15 +1230,9 @@ export function renderError(
   });
 
   // Patch the paths if a resolver is available.
-  let promise: Promise<void>;
   if (resolver) {
-    promise = Private.handlePaths(host, resolver, linkHandler);
-  } else {
-    promise = Promise.resolve(undefined);
+    await Private.handlePaths(host, resolver, linkHandler);
   }
-
-  // Return the rendered promise.
-  return promise;
 }
 
 /**
@@ -1325,6 +1332,38 @@ export namespace renderError {
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+}
+
+/**
+ * Harden anchor links.
+ */
+export function hardenAnchorLinks(
+  node: HTMLElement,
+  resolver?: IRenderMime.IResolver | null
+): void {
+  // Handle anchor elements.
+  const anchors = node.getElementsByTagName('a');
+  for (let i = 0; i < anchors.length; i++) {
+    const el = anchors[i];
+    // skip when processing a elements inside svg
+    // which are of type SVGAnimatedString
+    if (!(el instanceof HTMLAnchorElement)) {
+      continue;
+    }
+    const path = el.href;
+    const isLocal =
+      resolver && resolver.isLocal
+        ? resolver.isLocal(path)
+        : URLExt.isLocal(path);
+    // set target attribute if not already present
+    if (!el.target) {
+      el.target = isLocal ? '_self' : '_blank';
+    }
+    // set rel as 'noopener' for non-local anchors
+    if (!isLocal) {
+      el.rel = 'noopener';
+    }
   }
 }
 
@@ -1705,34 +1744,7 @@ namespace Private {
   /**
    * Handle the default behavior of nodes.
    */
-  export function handleDefaults(
-    node: HTMLElement,
-    resolver?: IRenderMime.IResolver | null
-  ): void {
-    // Handle anchor elements.
-    const anchors = node.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      const el = anchors[i];
-      // skip when processing a elements inside svg
-      // which are of type SVGAnimatedString
-      if (!(el instanceof HTMLAnchorElement)) {
-        continue;
-      }
-      const path = el.href;
-      const isLocal =
-        resolver && resolver.isLocal
-          ? resolver.isLocal(path)
-          : URLExt.isLocal(path);
-      // set target attribute if not already present
-      if (!el.target) {
-        el.target = isLocal ? '_self' : '_blank';
-      }
-      // set rel as 'noopener' for non-local anchors
-      if (!isLocal) {
-        el.rel = 'noopener';
-      }
-    }
-
+  export function handleDefaults(node: HTMLElement): void {
     // Handle image elements.
     const imgs = node.getElementsByTagName('img');
     for (let i = 0; i < imgs.length; i++) {
@@ -1753,13 +1765,12 @@ namespace Private {
    *
    * @returns a promise fulfilled when the relative urls have been resolved.
    */
-  export function handleUrls(
+  export async function handleUrls(
     node: HTMLElement,
     resolver: IRenderMime.IResolver,
     linkHandler: IRenderMime.ILinkHandler | null
-  ): Promise<void> {
-    // Set up an array to collect promises.
-    const promises: Promise<void>[] = [];
+  ): Promise<unknown> {
+    const promises = [];
 
     // Handle HTML Elements with src attributes.
     const nodes = node.querySelectorAll('*[src]');
@@ -1779,12 +1790,11 @@ namespace Private {
       promises.push(handleAttr(links[i], 'href', resolver));
     }
 
-    // Wait on all promises.
-    return Promise.all(promises).then(() => undefined);
+    return Promise.all(promises);
   }
 
   /**
-   * Resolve the paths in `<a>` elements `data` attributes.
+   * Resolve the paths in `<a>` elements that have a `data-path` attribute.
    *
    * @param node - The head html element.
    *
@@ -1798,28 +1808,37 @@ namespace Private {
     node: HTMLElement,
     resolver: IRenderMime.IResolver,
     linkHandler: IRenderMime.ILinkHandler | null
-  ): Promise<void> {
-    // Handle anchor elements.
-    const anchors = node.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      await handlePathAnchor(anchors[i], resolver, linkHandler);
-    }
+  ): Promise<unknown> {
+    const anchors: HTMLAnchorElement[] = Array.from(
+      node.querySelectorAll('a[data-path]')
+    );
+    return Promise.all(
+      anchors.map(anchor => handlePathAnchor(anchor, resolver, linkHandler))
+    );
   }
 
   /**
    * Apply ids to headers.
    */
-  export function headerAnchors(node: HTMLElement): void {
+  export function headerAnchors(
+    node: HTMLElement,
+    allowNamedProperties: boolean
+  ): void {
     const headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     for (const headerType of headerNames) {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = renderMarkdown.createHeaderId(header);
+        const headerId = renderMarkdown.createHeaderId(header);
+        if (allowNamedProperties) {
+          header.id = headerId;
+        } else {
+          header.setAttribute('data-jupyter-id', headerId);
+        }
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
-        anchor.href = '#' + header.id;
+        anchor.href = '#' + headerId;
         anchor.classList.add('jp-InternalAnchorLink');
         header.appendChild(anchor);
       }
@@ -1842,7 +1861,10 @@ namespace Private {
       return;
     }
     try {
-      const urlPath = await resolver.resolveUrl(source);
+      const urlPath = await resolver.resolveUrl(source, {
+        attribute: name,
+        tag: node.localName as IRenderMime.IResolveUrlContext['tag']
+      });
       let url = await resolver.getDownloadUrl(urlPath);
       if (URLExt.parse(url).protocol !== 'data:') {
         // Bust caching for local src attrs.
@@ -1861,7 +1883,7 @@ namespace Private {
   /**
    * Handle an anchor node.
    */
-  function handleAnchor(
+  async function handleAnchor(
     anchor: HTMLAnchorElement,
     resolver: IRenderMime.IResolver,
     linkHandler: IRenderMime.ILinkHandler | null
@@ -1869,27 +1891,41 @@ namespace Private {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href') || '';
+    if (!href) {
+      return;
+    }
+    const hash = anchor.hash;
+    if (hash && hash === href) {
+      anchor.target = '_self';
+      anchor.addEventListener('click', (event: MouseEvent) => {
+        const id = hash.slice(1);
+        const escapedId = CSS.escape(id);
+        const doc = anchor.ownerDocument;
+        const el =
+          doc.querySelector(`[data-jupyter-id="${escapedId}"]`) ||
+          doc.querySelector(`#${escapedId}`);
+        if (el) {
+          event.preventDefault();
+          el.scrollIntoView();
+        }
+      });
+      return;
+    }
     const isLocal = resolver.isLocal
       ? resolver.isLocal(href)
       : URLExt.isLocal(href);
     // Bail if it is not a file-like url.
-    if (!href || !isLocal) {
-      return Promise.resolve(undefined);
+    if (!isLocal) {
+      return;
     }
     // Remove the hash until we can handle it.
-    const hash = anchor.hash;
     if (hash) {
-      // Handle internal link in the file.
-      if (hash === href) {
-        anchor.target = '_self';
-        return Promise.resolve(undefined);
-      }
       // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
     // Get the appropriate file path.
     return resolver
-      .resolveUrl(href)
+      .resolveUrl(href, { attribute: 'href', tag: 'a' })
       .then(urlPath => {
         // decode encoded url from url to api path
         const path = decodeURIComponent(urlPath);
@@ -1941,7 +1977,7 @@ namespace Private {
       !linkHandler.handlePath
     ) {
       anchor.replaceWith(...anchor.childNodes);
-      return Promise.resolve(undefined);
+      return;
     }
     try {
       // Find given path
@@ -1950,7 +1986,7 @@ namespace Private {
       if (!resolution) {
         // Bail if the file does not exist
         console.log('Path resolution bailing: does not exist');
-        return Promise.resolve(undefined);
+        return;
       }
 
       // Handle the click override.
@@ -1970,6 +2006,7 @@ namespace Private {
       anchor.href = '#linking-failed-see-console';
     }
   }
+
   const ANSI_COLORS = [
     'ansi-black',
     'ansi-red',
@@ -2145,6 +2182,7 @@ namespace Private {
 
       while (numbers.length) {
         const n = numbers.shift();
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (n) {
           case 0:
             fg = bg = [];

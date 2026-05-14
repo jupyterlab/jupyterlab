@@ -4,13 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
   ReactWidget,
@@ -19,8 +19,9 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -87,12 +88,14 @@ export class HTMLViewer
     super({
       ...options,
       content: new IFrame({
-        sandbox: ['allow-same-origin'],
+        sandbox: Private.common,
         loading: 'lazy'
       })
     });
     this.translator = options.translator || nullTranslator;
     this.content.addClass(CSS_CLASS);
+
+    this.content.node.querySelector('iframe')?.classList.add('jp-zoom-target');
     void this.context.ready.then(() => {
       this.update();
       // Throttle the rendering rate of the widget.
@@ -116,9 +119,9 @@ export class HTMLViewer
       return;
     }
     if (value) {
-      this.content.sandbox = Private.trusted;
+      this.content.sandbox = [...Private.common, ...Private.trusted];
     } else {
-      this.content.sandbox = Private.untrusted;
+      this.content.sandbox = [...Private.common, ...Private.untrusted];
     }
     this.update(); // Force a refresh.
     this._trustedChanged.emit(value);
@@ -305,6 +308,11 @@ export namespace ToolbarItems {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Sandbox exceptions for all HTML.
+   */
+  export const common: IFrame.SandboxExceptions[] = ['allow-same-origin'];
+
   /**
    * Sandbox exceptions for untrusted HTML.
    */

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(
@@ -32,15 +33,12 @@ import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationManager
-} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator, TranslationManager } from '@jupyterlab/translation';
 
 import { addIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
-const LANG = 'en';
+const LANG = 'default';
 
 async function main(): Promise<void> {
   // init translator

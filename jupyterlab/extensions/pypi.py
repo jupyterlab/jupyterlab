@@ -12,6 +12,7 @@ import re
 import sys
 import tempfile
 import xmlrpc.client
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
@@ -19,14 +20,17 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import httpx
 import tornado
 from async_lru import alru_cache
-from packaging.version import Version
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.utils import InvalidName, canonicalize_name
+from packaging.version import InvalidVersion, Version
+from packaging.version import parse as parse_version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab._version import __version__
@@ -87,6 +91,31 @@ if http_proxy_url:
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
+def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
+    """Check if the current Python version satisfies the requires_python specifier.
+
+    Args:
+        requires_python: The requires_python specifier string from PyPI (e.g., ">=3.10")
+
+    Returns:
+        (compatible, explanation)
+        compatible: True if compatible or if requires_python is None/empty, False otherwise.
+        explanation: A string explaining the mismatch if incompatible, otherwise None.
+    """
+    if not requires_python:
+        return True, None
+    try:
+        current_version_str = sys.version.split()[0]
+        current_version = Version(current_version_str)
+        specifier = SpecifierSet(requires_python)
+        if current_version in specifier:
+            return True, None
+        return False, f"Requires Python {requires_python} but detected Python {current_version}"
+    except (InvalidSpecifier, InvalidVersion):
+        # If parsing fails, assume compatible to avoid false negatives
+        return True, None
+
+
 async def _fetch_package_metadata(
     client: httpx.AsyncClient,
     name: str,
@@ -112,11 +141,48 @@ async def _fetch_package_metadata(
                 "package_url",
                 "project_url",
                 "project_urls",
+                "requires_python",
                 "summary",
             ]
         }
     else:
         return {}
+
+
+# Known language packs from https://github.com/jupyterlab/language-packs
+# These are not tagged with the prebuilt extension classifier on PyPI,
+# so they are listed explicitly.
+LANGUAGE_PACKS = (
+    "jupyterlab-language-pack-ar-SA",
+    "jupyterlab-language-pack-ca-ES",
+    "jupyterlab-language-pack-cs-CZ",
+    "jupyterlab-language-pack-da-DK",
+    "jupyterlab-language-pack-de-DE",
+    "jupyterlab-language-pack-el-GR",
+    "jupyterlab-language-pack-es-ES",
+    "jupyterlab-language-pack-et-EE",
+    "jupyterlab-language-pack-fi-FI",
+    "jupyterlab-language-pack-fr-FR",
+    "jupyterlab-language-pack-he-IL",
+    "jupyterlab-language-pack-hu-HU",
+    "jupyterlab-language-pack-hy-AM",
+    "jupyterlab-language-pack-id-ID",
+    "jupyterlab-language-pack-it-IT",
+    "jupyterlab-language-pack-ja-JP",
+    "jupyterlab-language-pack-ko-KR",
+    "jupyterlab-language-pack-lt-LT",
+    "jupyterlab-language-pack-nl-NL",
+    "jupyterlab-language-pack-no-NO",
+    "jupyterlab-language-pack-pl-PL",
+    "jupyterlab-language-pack-pt-BR",
+    "jupyterlab-language-pack-ro-RO",
+    "jupyterlab-language-pack-ru-RU",
+    "jupyterlab-language-pack-tr-TR",
+    "jupyterlab-language-pack-uk-UA",
+    "jupyterlab-language-pack-vi-VN",
+    "jupyterlab-language-pack-zh-CN",
+    "jupyterlab-language-pack-zh-TW",
+)
 
 
 class PyPIExtensionManager(ExtensionManager):
@@ -140,9 +206,9 @@ class PyPIExtensionManager(ExtensionManager):
 
     def __init__(
         self,
-        app_options: Optional[dict] = None,
-        ext_options: Optional[dict] = None,
-        parent: Optional[config.Configurable] = None,
+        app_options: dict | None = None,
+        ext_options: dict | None = None,
+        parent: config.Configurable | None = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
         self._httpx_client = httpx.AsyncClient(**_httpx_client_args)
@@ -169,7 +235,24 @@ class PyPIExtensionManager(ExtensionManager):
         """Extension manager metadata."""
         return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
-    async def get_latest_version(self, pkg: str) -> Optional[str]:
+    async def is_install_allowed(self, name: str, version: str | None = None) -> bool:
+        try:
+            canonicalize_name(name, validate=True)
+            if version is not None:
+                parse_version(version)
+        except InvalidName:
+            self.log.warning(f"Invalid extension name: {name!r}")
+            return False
+        except InvalidVersion:
+            self.log.warning(f"Version {version!r} does not comply with PEP 440")
+            return False
+
+        allowed = await self._is_allowed_by_listing(name)
+        if not allowed:
+            self.log.warning(f"Installation denied by allowlist/blocklist for {name}")
+        return allowed
+
+    async def get_latest_version(self, pkg: str) -> str | None:
         """Return the latest available version for a given extension.
 
         Args:
@@ -253,16 +336,17 @@ class PyPIExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], int | None]:
         """List the available extensions.
 
         Note:
             This will list the packages based on the classifier
                 Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
 
-            Then it filters it with the query
-
-            We do not try to check if they are compatible (version wise)
+            Then it filters it with the query and sorts by organization priority:
+            1. Project Jupyter (@jupyter)
+            2. JupyterLab Community (@jupyterlab-contrib)
+            3. Others
 
         Args:
             query: The search extension query
@@ -275,20 +359,13 @@ class PyPIExtensionManager(ExtensionManager):
         matches = await self.__get_all_extensions()
 
         extensions = {}
+        all_matches = []
 
-        counter = -1
-        min_index = (page - 1) * per_page
-        max_index = page * per_page
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
-            counter += 1
-            if counter < min_index or counter >= max_index:
-                continue
-
             _, latest_version = list(group)[-1]
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
-
             package_urls = data.get("project_urls") or {}
 
             source_url = package_urls.get("Source Code")
@@ -305,21 +382,73 @@ class PyPIExtensionManager(ExtensionManager):
                 or bug_tracker_url
             )
 
-            extensions[normalized_name] = ExtensionPackage(
+            # Check Python version compatibility
+            requires_python = data.get("requires_python")
+            python_compatible, version_explanation = _check_python_version_compatible(
+                requires_python
+            )
+
+            description = data.get("summary")
+            if version_explanation:
+                if description:
+                    description += f" ({version_explanation})"
+                else:
+                    description = version_explanation
+
+            extension = ExtensionPackage(
                 name=normalized_name,
-                description=data.get("summary"),
+                description=description,
                 homepage_url=best_guess_home_url,
                 author=data.get("author"),
                 license=data.get("license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
+                allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
                 package_manager_url=data.get("package_url"),
                 repository_url=source_url,
             )
 
-        return extensions, math.ceil((counter + 1) / per_page)
+            # Determine organization priority
+            priority = 3  # Default priority for other packages
+            urls_to_check = [
+                str(url).lower() for url in [source_url, homepage_url, best_guess_home_url] if url
+            ]
+            exclude = [
+                "https://github.com/jupyterlab/jupyterlab_apod",
+                "https://github.com/jupyterlab/extension-examples",
+            ]
+
+            for url in urls_to_check:
+                if url in exclude:
+                    priority = 4
+                    break
+                if any(
+                    org in url
+                    for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
+                ):
+                    priority = 1
+                    break
+                elif "github.com/jupyterlab-contrib/" in url:
+                    priority = 2
+                    break
+
+            all_matches.append((priority, extension))
+
+        sorted_matches = sorted(all_matches, key=lambda x: (x[0], x[1].name))
+
+        # Apply pagination
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        page_matches = sorted_matches[start_idx:end_idx]
+
+        for _, extension in page_matches:
+            extensions[extension.name] = extension
+
+        total_pages = math.ceil(len(sorted_matches) / per_page)
+
+        return extensions, total_pages
 
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
@@ -331,6 +460,26 @@ class PyPIExtensionManager(ExtensionManager):
                 self._rpc_client.browse,
                 ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
             )
+
+            # Also include known language packs.  They are not tagged with the
+            # prebuilt extension classifier so we fetch their latest versions
+            # from the JSON API instead.
+            extension_names = {p[0] for p in self.__all_packages_cache}
+            packs_to_fetch = [name for name in LANGUAGE_PACKS if name not in extension_names]
+            language_pack_results = await asyncio.gather(
+                *(self.get_latest_version(name) for name in packs_to_fetch),
+                return_exceptions=True,
+            )
+            for name, result in zip(packs_to_fetch, language_pack_results, strict=True):
+                if isinstance(result, Exception):
+                    self.log.info(
+                        "Failed to fetch latest version for language pack %s: %s",
+                        name,
+                        result,
+                    )
+                elif result is not None:
+                    self.__all_packages_cache.append((name, result))
+
             self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
 
         return self.__all_packages_cache
@@ -349,6 +498,10 @@ class PyPIExtensionManager(ExtensionManager):
         Returns:
             The action result
         """
+        if not self.is_install_allowed(name, version):
+            # is_install_allowed will log the reason
+            return ActionResult(status="error", message="install is not allowed")
+
         current_loop = tornado.ioloop.IOLoop.current()
         with (
             tempfile.TemporaryDirectory() as ve_dir,
@@ -455,7 +608,7 @@ class PyPIExtensionManager(ExtensionManager):
 
                 return ActionResult(status="ok", needs_restart=follow_ups)
             else:
-                self.log.error(f"Failed to installed {filename}: code {result.returncode}\n{error}")
+                self.log.error(f"Failed to install {name}: code {result.returncode}\n{error}")
                 return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:

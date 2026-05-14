@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
-import { ITranslator } from '@jupyterlab/translation';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { FieldProps } from '@rjsf/utils';
+import type { INotebookTracker } from '@jupyterlab/notebook';
+import { NotebookTools } from '@jupyterlab/notebook';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 const CELL_METADATA_EDITOR_CLASS = 'jp-CellMetadataEditor';
 const NOTEBOOK_METADATA_EDITOR_CLASS = 'jp-NotebookMetadataEditor';
@@ -60,10 +61,17 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
-    if (this.editor.source) {
-      this._tracker.activeCell?.model.sharedModel.setMetadata(
-        this.editor.source.toJSON()
-      );
+    const activeCell = this._tracker.activeCell?.model.sharedModel;
+    if (activeCell && this.editor.source) {
+      const metadataKeys = Object.keys(activeCell.metadata ?? {});
+      const source = this.editor.source.toJSON() ?? {};
+
+      activeCell.transact(() => {
+        // Iterate over all existing metadata keys and delete each one.
+        // This ensures that any keys not present in the new metadata are removed.
+        metadataKeys.forEach(key => activeCell.deleteMetadata(key));
+        activeCell.setMetadata(source);
+      });
     }
   }
 

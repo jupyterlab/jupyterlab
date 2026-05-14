@@ -2,22 +2,21 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { IDataConnector, IRestorer } from '@jupyterlab/statedb';
-import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type { IDataConnector, IRestorer } from '@jupyterlab/statedb';
+import type { CommandRegistry } from '@lumino/commands';
+import type {
   JSONObject,
   PartialJSONObject,
-  PromiseDelegate,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { DockPanel, Widget } from '@lumino/widgets';
-import { ILabShell } from './shell';
+import type { DockPanel, Widget } from '@lumino/widgets';
+import type { ILabShell } from './shell';
 
 /**
  * The layout restorer token.
@@ -184,7 +183,6 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     try {
       const [data] = await Promise.all([layout, this.restored]);
-
       if (!data) {
         return blank;
       }
@@ -337,6 +335,19 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.main = this.isDeferred
       ? this._deferredMainArea
       : this._dehydrateMainArea(layout.mainArea);
+
+    // Update only the current widget in the db when restoration is deferred.
+    // Useful for providing the tab title in doc mode.
+    if (this.isDeferred) {
+      const currentWidget = layout.mainArea?.currentWidget;
+      if (currentWidget) {
+        const widgetName = Private.nameProperty.get(currentWidget);
+        dehydrated.main = {
+          ...dehydrated.main,
+          current: widgetName || undefined
+        };
+      }
+    }
     dehydrated.down = this._dehydrateDownArea(layout.downArea);
     dehydrated.left = this._dehydrateSideArea(layout.leftArea);
     dehydrated.right = this._dehydrateSideArea(layout.rightArea);
@@ -388,6 +399,10 @@ export class LayoutRestorer implements ILayoutRestorer {
       size: area.size
     };
 
+    if (area.collapsed !== undefined) {
+      dehydrated.collapsed = area.collapsed;
+    }
+
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -431,6 +446,9 @@ export class LayoutRestorer implements ILayoutRestorer {
           )
           .filter(widget => !!widget);
     return {
+      ...(typeof area.collapsed === 'boolean'
+        ? { collapsed: area.collapsed }
+        : {}),
       currentWidget: currentWidget!,
       size: area.size ?? 0.0,
       widgets: widgets as Widget[] | null
@@ -727,6 +745,11 @@ namespace Private {
    * The restorable description of the down area in the user interface
    */
   export interface IDownArea extends PartialJSONObject {
+    /**
+     * Whether the down area is collapsed.
+     */
+    collapsed?: boolean | null;
+
     /**
      * The current widget that has application focus.
      */

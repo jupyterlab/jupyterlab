@@ -23,10 +23,11 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
+from jupyter_builder.jlpm import YARN_PATH
+from jupyter_builder.jupyterlab_semver import Range, gt, gte, lt, lte, make_semver
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
@@ -43,12 +44,13 @@ from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.jlpmapp import HERE, YARN_PATH
-from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
-# The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+HERE = os.path.dirname(os.path.abspath(__file__))
 
+# The regex for expecting the rspack output.
+# TODO: check if we can just keep the theme.css regex like is commented below
+# RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
 
 # The repo root directory
 REPO_ROOT = osp.abspath(osp.join(HERE, ".."))
@@ -176,6 +178,20 @@ def get_app_dir():
         and osp.exists("/usr/local/share/jupyter/lab")
     ):
         app_dir = "/usr/local/share/jupyter/lab"
+
+    # Check for a path relative to the site-packages directory, e.g.,
+    # `<prefix>/lib/python3.13/site-packages/jupyterlab/../../../..` This is
+    # useful for cases where the the `jupyterlab` module is outside the current
+    # Python environment, which can occur via various Python path manipulations.
+    elif not osp.exists(app_dir):
+        maybe_app_dir = pjoin(
+            osp.dirname(osp.dirname(osp.dirname(osp.dirname(HERE)))),
+            "share",
+            "jupyter",
+            "lab",
+        )
+        if osp.exists(maybe_app_dir):
+            app_dir = maybe_app_dir
 
     # We must resolve the path to get the canonical case of the path for
     # case-sensitive systems
@@ -314,12 +330,12 @@ def watch_dev(logger=None):
 
     package_procs = watch_packages(logger)
 
-    # Run webpack watch and wait for compilation.
+    # Run rspack watch and wait for compilation.
     wp_proc = WatchHelper(
         ["node", YARN_PATH, "run", "watch"],
         cwd=DEV_DIR,
         logger=logger,
-        startup_regex=WEBPACK_EXPECT,
+        startup_regex=RSPACK_EXPECT,
     )
 
     return [*package_procs, wp_proc]
@@ -768,7 +784,7 @@ class _AppHandler:
         proc = WatchHelper(
             ["node", YARN_PATH, "run", "watch"],
             cwd=pjoin(self.app_dir, "staging"),
-            startup_regex=WEBPACK_EXPECT,
+            startup_regex=RSPACK_EXPECT,
             logger=self.logger,
         )
         return [proc]
@@ -906,7 +922,7 @@ class _AppHandler:
             if pkg in local or pkg in linked:
                 continue
             if old_deps[pkg] != dep:
-                msg = f"{pkg} changed from {old_deps[pkg]} to {new_deps[pkg]}"
+                msg = f"{pkg} changed from {old_deps[pkg]} to {dep}"
                 messages.append(msg)
 
         # Look for updated local extensions.
@@ -1180,7 +1196,12 @@ class _AppHandler:
         # copy disabled onto lockedExtensions, ensuring the mapping format
         disabled = page_config.get("disabledExtensions", {})
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
+
+        # Short circuit if disabled is empty
+        if not disabled:
+            return False
+
         page_config["lockedExtensions"] = disabled
         write_page_config(page_config, level=level)
         return True
@@ -1310,13 +1331,13 @@ class _AppHandler:
         # handle disabledExtensions specified as a list (jupyterlab_server < 2.10)
         # see https://github.com/jupyterlab/jupyterlab_server/pull/192 for more info
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
 
         info["disabled"] = disabled
 
         locked = page_config.get("lockedExtensions", {})
         if isinstance(locked, list):
-            locked = {extension: True for extension in locked}
+            locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
         disabled_core = []
@@ -1434,6 +1455,15 @@ class _AppHandler:
 
         # Handle splicing of packages
         if splice_source:
+            # Get devDependencies from the source_dir package.json
+            source_pkg_path = pjoin(source_dir, "package.json")
+            with open(source_pkg_path) as fid:
+                source_data = json.load(fid)
+            data["devDependencies"] = source_data["devDependencies"]
+
+            # Handle potential changes in the scripts sections
+            data["scripts"] = source_data["scripts"]
+
             # Splice workspace tree as linked dependencies
             for path in glob(pjoin(REPO_ROOT, "packages", "*", "package.json")):
                 local_path = osp.dirname(osp.abspath(path))
@@ -1444,11 +1474,6 @@ class _AppHandler:
                     jlab["linkedPackages"][name] = local_path
                 if name in data["resolutions"]:
                     data["resolutions"][name] = local_path
-
-            # splice the builder as well
-            local_path = osp.abspath(pjoin(REPO_ROOT, "builder"))
-            data["devDependencies"]["@jupyterlab/builder"] = local_path
-            target = osp.join(staging, "node_modules", "@jupyterlab", "builder")
 
             # Remove node_modules so it gets re-populated
             node_modules = pjoin(staging, "node_modules")
@@ -1738,7 +1763,7 @@ class _AppHandler:
 
         error_accumulator = {}
 
-        ext_dirs = {p: False for p in self.labextensions_path}
+        ext_dirs = dict.fromkeys(self.labextensions_path, False)
         for value in info["federated_extensions"].values():
             ext_dirs[value["ext_dir"]] = True
 
@@ -2398,7 +2423,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[frozenset[str]] = None
+    locked_plugins: frozenset[str] | None = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:

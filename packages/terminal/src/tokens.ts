@@ -1,16 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
-import { Terminal } from '@jupyterlab/services';
+import type { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
+import type { Terminal } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * A class that tracks editor widgets.
  */
-export interface ITerminalTracker
-  extends IWidgetTracker<MainAreaWidget<ITerminal.ITerminal>> {}
+export interface ITerminalTracker extends IWidgetTracker<
+  MainAreaWidget<ITerminal.ITerminal>
+> {}
 
 /**
  * The editor tracker token.
@@ -62,6 +64,17 @@ export namespace ITerminal {
      * Get selected text from terminal.
      */
     getSelection(): string | null;
+
+    /**
+     * A signal emitted when the terminal theme changes, this includes the when the lab theme
+     * changes if the terminal theme is 'inherit'.
+     */
+    themeChanged: ISignal<this, void>;
+
+    /**
+     * A signal emitted when users should be reminded how to leave terminal focus.
+     */
+    escapeHintRequested: ISignal<this, void>;
   }
   /**
    * Options for the terminal widget.
@@ -170,5 +183,6 @@ export namespace ITerminal {
     cursorAccent: string;
     selectionBackground: string;
     selectionInactiveBackground: string;
+    activeMatchBackground: string;
   }
 }

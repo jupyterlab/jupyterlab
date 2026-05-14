@@ -15,7 +15,9 @@
   --jp-icon-add-above: url('icons/toolbar/add-above.svg');
   --jp-icon-add-below: url('icons/toolbar/add-below.svg');
   --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-audio: url('icons/filetype/audio.svg');
   --jp-icon-bell: url('icons/statusbar/bell.svg');
+  --jp-icon-breakpoint: url('icons/debugger/breakpoint.svg');
   --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
@@ -108,6 +110,7 @@
   --jp-icon-running: url('icons/sidebar/running.svg');
   --jp-icon-save: url('icons/toolbar/save.svg');
   --jp-icon-search: url('icons/toolbar/search.svg');
+  --jp-icon-selected-breakpoint: url('icons/debugger/selected-breakpoint.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
   --jp-icon-share: url('icons/sidebar/share.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
@@ -128,6 +131,7 @@
   --jp-icon-users: url('icons/sidebar/users.svg');
   --jp-icon-variable: url('icons/debugger/variable.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
+  --jp-icon-video: url('icons/filetype/video.svg');
   --jp-icon-view-breakpoint: url('icons/debugger/view-breakpoint.svg');
   --jp-icon-word: url('icons/search/word.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
@@ -147,8 +151,16 @@
   background-image: var(--jp-icon-add);
 }
 
+.jp-AudioIcon {
+  background-image: var(--jp-icon-audio);
+}
+
 .jp-BellIcon {
   background-image: var(--jp-icon-bell);
+}
+
+.jp-BreakpointIcon {
+  background-image: var(--jp-icon-breakpoint);
 }
 
 .jp-BugDotIcon {
@@ -519,6 +531,10 @@
   background-image: var(--jp-icon-search);
 }
 
+.jp-SelectedBreakpointIcon {
+  background-image: var(--jp-icon-selected-breakpoint);
+}
+
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);
 }
@@ -597,6 +613,10 @@
 
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
+}
+
+.jp-VideoIcon {
+  background-image: var(--jp-icon-video);
 }
 
 .jp-ViewBreakpointIcon {

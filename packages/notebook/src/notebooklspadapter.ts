@@ -1,26 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import type { SessionContext } from '@jupyterlab/apputils';
+import type { Cell, ICellModel } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import {
+import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition,
-  untilReady,
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import { Session } from '@jupyterlab/services';
+import { untilReady, VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Session } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 
-import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
-import { CellList } from './celllist';
+import type { NotebookPanel } from './panel';
+import type { Notebook } from './widget';
+import type { CellList } from './celllist';
 
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
@@ -70,7 +68,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       mimeType = languageMetadata.mimetype;
     }
     return Array.isArray(mimeType)
-      ? mimeType[0] ?? IEditorMimeTypeService.defaultMimeType
+      ? (mimeType[0] ?? IEditorMimeTypeService.defaultMimeType)
       : mimeType;
   }
 
@@ -201,7 +199,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
         this.reloadConnection();
       } else {
         console.log(
-          'Keeping old LSP connection as the new kernel uses the same langauge'
+          'Keeping old LSP connection as the new kernel uses the same language'
         );
       }
     } catch (err) {
@@ -299,7 +297,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       cellsAdded.length ||
       change.type === 'set' ||
       change.type === 'move' ||
-      change.type === 'remove'
+      change.type === 'remove' ||
+      change.type === 'clear'
     ) {
       // in contrast to the file editor document which can be only changed by the modification of the editor content,
       // the notebook document can also get modified by a change in the number or arrangement of editors themselves;

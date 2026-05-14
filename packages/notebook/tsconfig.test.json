@@ -27,6 +27,9 @@
       "path": "../lsp"
     },
     {
+      "path": "../markedparser-extension"
+    },
+    {
       "path": "../nbformat"
     },
     {

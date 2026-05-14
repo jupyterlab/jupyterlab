@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Text } from '@jupyterlab/coreutils';
 
@@ -14,8 +15,8 @@ function _classes(
       c && typeof c === 'object'
         ? Object.keys(c).map(key => !!c[key] && key)
         : typeof c === 'string'
-        ? c.split(/\s+/)
-        : []
+          ? c.split(/\s+/)
+          : []
     )
     .reduce((flattened, c) => flattened.concat(c), [] as string[])
     .filter(c => !!c) as string[];
@@ -80,7 +81,7 @@ export function getReactAttrs(
     .reduce<{ [key: string]: string | null }>((d, name) => {
       if (name === 'style' || ignore.includes(name)) {
         void 0;
-      } else if (name.startsWith('data')) {
+      } else if (name.startsWith('data') || name.startsWith('aria')) {
         d[name] = elem.getAttribute(name);
       } else {
         d[Text.camelCase(name)] = elem.getAttribute(name);

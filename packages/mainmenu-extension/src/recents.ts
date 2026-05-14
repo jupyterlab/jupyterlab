@@ -3,19 +3,20 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { PathExt } from '@jupyterlab/coreutils';
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { IRecentsManager, RecentDocument } from '@jupyterlab/docmanager';
+import type { RecentDocument } from '@jupyterlab/docmanager';
+import { IRecentsManager } from '@jupyterlab/docmanager';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFileBrowserCommands } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { Menu } from '@lumino/widgets';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:recents';
 
@@ -192,7 +193,18 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       isEnabled: args =>
-        recentsManager.recentlyOpened.includes(args.recent as RecentDocument)
+        recentsManager.recentlyOpened.includes(args.recent as RecentDocument),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            recent: {
+              type: 'object',
+              description: trans.__('Recent document to open')
+            }
+          }
+        }
+      }
     });
 
     app.commands.addCommand(CommandIDs.reopenLast, {
@@ -220,7 +232,13 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
       isEnabled: () => {
         return recentsManager.recentlyClosed.length !== 0;
       },
-      caption: trans.__('Reopen recently closed file or notebook.')
+      caption: trans.__('Reopen recently closed file or notebook.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     // Menu

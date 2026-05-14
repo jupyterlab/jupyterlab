@@ -149,6 +149,7 @@
 
 .jp-LauncherCard[data-category='Console'] .jp-LauncherCard-noKernelIcon {
   /* This color is copied from the console icon. */
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   color: #0288d1;
 }
 

@@ -1,12 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* global RequestInit */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';
@@ -422,7 +425,7 @@ export class ListModel extends VDomModel {
       const [extensions] = await Private.requestAPI<IEntry[]>({
         refresh: force ? 1 : 0
       });
-      this._installed = extensions.sort(Private.comparator);
+      this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
       this.installedError = reason.toString();
     } finally {
@@ -466,9 +469,9 @@ export class ListModel extends VDomModel {
       }
 
       const installedNames = this._installed.map(pkg => pkg.name);
-      this._lastSearchResult = extensions
-        .filter(pkg => !installedNames.includes(pkg.name))
-        .sort(Private.comparator);
+      this._lastSearchResult = extensions.filter(
+        pkg => !installedNames.includes(pkg.name)
+      );
     } catch (reason) {
       this.searchError = reason.toString();
     } finally {
@@ -578,7 +581,7 @@ export class ListModel extends VDomModel {
     // Ensure action is removed when resolved
     const remove = () => {
       const i = this._pendingActions.indexOf(pending);
-      this._pendingActions.splice(i, 1);
+      void this._pendingActions.splice(i, 1);
       this.stateChanged.emit(undefined);
     };
     pending.then(remove, remove);
@@ -649,14 +652,13 @@ export namespace ListModel {
  */
 namespace Private {
   /**
-   * A comparator function that sorts allowedExtensions orgs to the top.
+   * A comparator function that sorts installed extensions.
+   *
+   * In past it used to sort allowedExtensions orgs to the top,
+   * which needs to be restored (or documentation updated).
    */
-  export function comparator(a: IEntry, b: IEntry): number {
-    if (a.name === b.name) {
-      return 0;
-    } else {
-      return a.name > b.name ? 1 : -1;
-    }
+  export function installedComparator(a: IEntry, b: IEntry): number {
+    return a.name.localeCompare(b.name);
   }
 
   const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;
@@ -666,14 +668,16 @@ namespace Private {
    *
    * @param queryArgs Query arguments
    * @param init Initial values for the request
+   * @param serverSettings The server settings to use for the request
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
     queryArgs: { [k: string]: any } = {},
-    init: RequestInit = {}
+    init: RequestInit = {},
+    serverSettings?: ServerConnection.ISettings
   ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
-    const settings = ServerConnection.makeSettings();
+    const settings = serverSettings ?? ServerConnection.makeSettings();
     const requestUrl = URLExt.join(
       settings.baseUrl,
       EXTENSION_API_PATH // API Namespace

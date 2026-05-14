@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type MermaidType from 'mermaid';
 import type MermaidElkType from '@mermaid-js/layout-elk';
@@ -8,11 +9,11 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { LruCache } from '@jupyterlab/coreutils';
 
-import { IThemeManager } from '@jupyterlab/apputils';
+import type { IThemeManager } from '@jupyterlab/apputils';
 
+import type { IMermaidManager } from './tokens';
 import {
   DETAILS_CLASS,
-  IMermaidManager,
   MERMAID_CLASS,
   MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,
@@ -226,7 +227,7 @@ export class MermaidManager implements IMermaidManager {
     // add accessible caption, with fallback to raw mermaid source
     if (info.accessibleDescription) {
       const caption = document.createElement('figcaption');
-      caption.className = 'sr-only';
+      caption.className = 'jp-sr-only';
       caption.textContent = info.accessibleDescription;
       figure.appendChild(caption);
     }
@@ -352,6 +353,7 @@ namespace Private {
     let promises: Promise<any>[] = [];
 
     for (const match of [...text.matchAll(RE_DEFAULT_RENDERER)]) {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch ((match && match[2]) || null) {
         case 'elk':
           promises.push(Private.ensureMermaidElk());

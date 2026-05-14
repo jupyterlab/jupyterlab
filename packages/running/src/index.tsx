@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module running
@@ -7,12 +8,10 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore, LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
   closeIcon,
   collapseAllIcon,
@@ -20,25 +19,25 @@ import {
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
-  IScore,
-  LabIcon,
   PanelWithToolbar,
   ReactWidget,
   refreshIcon,
   SidePanel,
   tableRowsIcon,
-  Toolbar,
   ToolbarButton,
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode, useCallback, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { isValidElement, useCallback, useRef } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -490,31 +489,8 @@ class ListWidget extends ReactWidget {
     );
   }
 
-  /**
-   * Check if the widget or any of it's parents is hidden.
-   *
-   * Checking parents is necessary as lumino does not propagate visibility
-   * changes from parents down to children (although it does notify parents
-   * about changes to children visibility).
-   */
-  private _isAnyHidden() {
-    let isHidden = this.isHidden;
-    if (isHidden) {
-      return isHidden;
-    }
-    let parent: Widget | null = this.parent;
-    while (parent != null) {
-      if (parent.isHidden) {
-        isHidden = true;
-        break;
-      }
-      parent = parent.parent;
-    }
-    return isHidden;
-  }
-
   private _emitUpdate() {
-    if (this._isAnyHidden()) {
+    if (!this.isVisible) {
       return;
     }
     this._update.emit();
@@ -634,9 +610,7 @@ class Section extends PanelWithToolbar {
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
-      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
-        !enabled ? ' jp-mod-disabled' : ''
-      }`,
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${!enabled ? ' jp-mod-disabled' : ''}`,
       enabled,
       onClick: onShutdown.bind(this)
     });
@@ -689,6 +663,10 @@ class Section extends PanelWithToolbar {
       );
     }
     this.toolbar.addClass('jp-RunningSessions-toolbar');
+    this._toolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('%1 toolbar', this.title.label)
+    );
   }
 
   private _onListChanged(): void {

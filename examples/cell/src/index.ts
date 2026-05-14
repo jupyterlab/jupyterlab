@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(
@@ -52,7 +53,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 

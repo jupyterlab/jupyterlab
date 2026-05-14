@@ -26,6 +26,7 @@ stringmd5() {
             num=$(( 0x$(echo "$1" | command "${cmd}" | cut -d ' ' -f 1 | head -c 15) ))
             [[ $num -lt 0 ]] && num=$((num * -1))
             echo $num
+            break
         fi
     done
 }
@@ -33,6 +34,12 @@ stringmd5() {
 ROOT_DIR_MD5=$(stringmd5 $ROOT_DIR)
 IMAGE_TAG="jupyterlab_dev:$ROOT_DIR_MD5"
 DEV_CONTAINER="jupyterlab_dev_container_$ROOT_DIR_MD5"
+
+DOCKER_MAJOR_VERSION=$(docker version --format '{{.Server.Version}}' | cut -d '.' -f 1)
+if [[ "$DOCKER_MAJOR_VERSION" -lt 23 ]]; then
+    echo "Docker major version must be 23 or higher. Current version: $DOCKER_MAJOR_VERSION"
+    exit 1
+fi
 
 build_image () {
     docker build  --build-arg NEW_MAMBA_USER_ID=$USER_ID --build-arg NEW_MAMBA_USER_GID=$GID $ROOT_DIR -f $SCRIPT_DIR/Dockerfile -t $IMAGE_TAG
@@ -46,15 +53,15 @@ if [[ $CMD == 'build' ]]; then
     echo "Building docker image"
     build_image
 
-    elif [[ $CMD == 'clean' ]]; then
+elif [[ $CMD == 'clean' ]]; then
     # Stop the dev container if it's running
     stop_contaniner
     docker rmi $IMAGE_TAG --force
 
-    elif [[ $CMD == 'stop' ]]; then
+elif [[ $CMD == 'stop' ]]; then
     stop_contaniner
 
-    elif [[ $CMD == 'dev' || $CMD == 'dev-detach' || $CMD == 'shell' || $CMD == '' ]]; then
+elif [[ $CMD == 'dev' || $CMD == 'dev-detach' || $CMD == 'shell' || $CMD == '' ]]; then
     if test -z "$(docker images -q $IMAGE_TAG)"; then
         echo "Image does not exist, start building!"
         build_image

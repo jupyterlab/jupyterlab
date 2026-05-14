@@ -2,8 +2,9 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Extension } from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
 
 import { EditorView } from '@codemirror/view';
 
@@ -11,68 +12,66 @@ import { ElementExt } from '@lumino/domutils';
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
-import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils } from '@jupyterlab/apputils';
 
-import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { DirListing } from '@jupyterlab/filebrowser';
+import type { DirListing } from '@jupyterlab/filebrowser';
 
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 
+import type { IOutputPrompt, IStdin } from '@jupyterlab/outputarea';
 import {
-  IOutputPrompt,
-  IStdin,
   OutputArea,
   OutputPrompt,
   SimplifiedOutputArea,
   Stdin
 } from '@jupyterlab/outputarea';
 
-import {
-  imageRendererFactory,
-  IRenderMime,
-  IRenderMimeRegistry,
-  MimeModel
-} from '@jupyterlab/rendermime';
+import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { imageRendererFactory, MimeModel } from '@jupyterlab/rendermime';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { IMapChange } from '@jupyter/ydoc';
+import type { IMapChange } from '@jupyter/ydoc';
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { addIcon, collapseIcon, expandIcon } from '@jupyterlab/ui-components';
 
-import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { some } from '@lumino/algorithm';
 
-import { Drag } from '@lumino/dragdrop';
+import type { Drag } from '@lumino/dragdrop';
 
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 
 import { Debouncer } from '@lumino/polling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
-import {
-  CellFooter,
-  CellHeader,
-  ICellFooter,
-  ICellHeader
-} from './headerfooter';
+import type { ICellFooter, ICellHeader } from './headerfooter';
+import { CellFooter, CellHeader } from './headerfooter';
 
-import { IInputPrompt, InputArea, InputPrompt } from './inputarea';
+import type { IInputPrompt } from './inputarea';
+import { InputArea, InputPrompt } from './inputarea';
 
-import {
+import type {
   CellModel,
   IAttachmentsCellModel,
   ICellModel,
@@ -167,11 +166,6 @@ const RAW_CELL_CLASS = 'jp-RawCell';
 const RENDERED_CLASS = 'jp-mod-rendered';
 
 const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
-
-/**
- * The text applied to an empty markdown cell.
- */
-const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
 
 /**
  * The timeout to wait for change activity to have ceased before rendering.
@@ -319,11 +313,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Cell headings
+   *
+   * @deprecated Use the asynchronous {@link getHeadings} method instead.
+   * This getter only returns the last cached value.
    */
   get headings(): Cell.IHeading[] {
     return new Array<Cell.IHeading>();
   }
 
+  /**
+   * Async Cell headings
+   *
+   */
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
+    return [];
+  }
   /**
    * Get the model used by the cell.
    */
@@ -501,10 +506,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Whether to sync the collapse state to the cell model.
    */
-  get syncCollapse(): boolean {
+  get syncCollapse(): boolean | undefined {
     return this._syncCollapse;
   }
-  set syncCollapse(value: boolean) {
+  set syncCollapse(value: boolean | undefined) {
     if (this._syncCollapse === value) {
       return;
     }
@@ -517,10 +522,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Whether to sync the editable state to the cell model.
    */
-  get syncEditable(): boolean {
+  get syncEditable(): boolean | undefined {
     return this._syncEditable;
   }
-  set syncEditable(value: boolean) {
+  set syncEditable(value: boolean | undefined) {
     if (this._syncEditable === value) {
       return;
     }
@@ -766,8 +771,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
   }, 0);
-  private _syncCollapse = false;
-  private _syncEditable = false;
+  private _syncCollapse: boolean | undefined = undefined;
+  private _syncEditable: boolean | undefined = undefined;
 }
 
 /**
@@ -878,8 +883,7 @@ export namespace Cell {
    * widgets.
    */
   export interface IContentFactory
-    extends OutputArea.IContentFactory,
-      InputArea.IContentFactory {
+    extends OutputArea.IContentFactory, InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */
@@ -1291,6 +1295,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
       const headings: Cell.IHeading[] = [];
 
@@ -1328,10 +1336,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
+          const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
+            m.data[mdType] as string,
+            this._rendermime.markdownParser
+          );
+
           headings.push(
-            ...TableOfContentsUtils.Markdown.getHeadings(
-              m.data[mdType] as string
-            ).map(heading => {
+            ...mdHeading.map(heading => {
               return {
                 ...heading,
                 outputIndex: j,
@@ -1341,7 +1352,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
           );
         }
       }
-
       this._headingsCache = headings;
     }
 
@@ -1519,10 +1529,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Whether to sync the scrolled state to the cell model.
    */
-  get syncScrolled(): boolean {
+  get syncScrolled(): boolean | undefined {
     return this._syncScrolled;
   }
-  set syncScrolled(value: boolean) {
+  set syncScrolled(value: boolean | undefined) {
     if (this._syncScrolled === value) {
       return;
     }
@@ -1704,7 +1714,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputWrapper: Widget | null = null;
   private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
-  private _syncScrolled = false;
+  private _syncScrolled: boolean | undefined = undefined;
   private _lastOnCaretMovedHandler: () => void;
   private _lastTarget: HTMLElement | null = null;
   private _lastOutputHeight = '';
@@ -1739,13 +1749,9 @@ export namespace CodeCell {
     const model = cell.model;
     const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
-      model.sharedModel.transact(
-        () => {
-          model.clearExecution();
-        },
-        false,
-        'silent-change'
-      );
+      model.sharedModel.transact(() => {
+        model.clearExecution();
+      }, false);
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
@@ -1783,6 +1789,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
           let label: string;
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (msg.header.msg_type) {
             case 'status':
               label = `status.${
@@ -2170,6 +2177,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
+
+    this._cachedHeadingText = this.model.sharedModel.getSource();
+    this._emptyPlaceholder =
+      options.emptyPlaceholder ?? trans.__('Type Markdown and LaTeX: $ α^2 $');
   }
 
   /**
@@ -2193,14 +2204,28 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  /**
+   * Parses and returns the list of Markdown headings in the cell.
+   *
+   * @returns A promise that resolves to an array of cell headings.
+   *
+   * @remarks
+   * This method caches the result after the first call to avoid redundant parsing.
+   **/
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      // Use table of content algorithm for consistency
-      const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.sharedModel.getSource()
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+        this.model.sharedModel.getSource(),
+        this._rendermime.markdownParser
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
+      this._headingResolved = true;
+      this.renderCollapseButtons();
     }
 
     return [...this._headingsCache!];
@@ -2411,7 +2436,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected onContentChanged(): void {
     super.onContentChanged();
-    this._headingsCache = null;
+    const model = this.model;
+    const text = model && model.sharedModel.getSource();
+    // Do not set headingCache to null, if the text has not changed.
+    if (text !== this._cachedHeadingText) {
+      this._cachedHeadingText = text;
+      this._headingsCache = null;
+      this._headingResolved = false;
+    }
   }
 
   /**
@@ -2419,7 +2451,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * and for collapsed heading cells render the "expand hidden cells"
    * button.
    */
-  protected renderCollapseButtons(widget: Widget): void {
+  protected renderCollapseButtons(widget?: Widget): void {
     this.node.classList.toggle(
       MARKDOWN_HEADING_COLLAPSED,
       this._headingCollapsed
@@ -2514,7 +2546,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     const model = this.model;
     const text =
-      (model && model.sharedModel.getSource()) || DEFAULT_MARKDOWN_TEXT;
+      (model && model.sharedModel.getSource()) || this._emptyPlaceholder;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -2538,6 +2570,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  get headingsResolved(): boolean {
+    return this._headingResolved;
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _headingCollapsed: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
@@ -2549,6 +2585,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
   private _showEditorForReadOnlyMarkdown = true;
+  private _cachedHeadingText = '';
+  private _headingResolved: boolean = false;
+  private _emptyPlaceholder: string;
 }
 
 /**
@@ -2568,6 +2607,11 @@ export namespace MarkdownCell {
      * Show editor for read-only Markdown cells.
      */
     showEditorForReadOnlyMarkdown?: boolean;
+
+    /**
+     * Placeholder shown for empty Markdown cells when rendered.
+     */
+    emptyPlaceholder?: string;
   }
 
   /**

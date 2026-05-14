@@ -102,19 +102,24 @@
         "rank": 14
       },
       {
-        "command": "filebrowser:toggle-file-size",
+        "command": "filebrowser:toggle-date-created",
         "selector": ".jp-DirListing-header",
         "rank": 15
       },
       {
-        "command": "filebrowser:toggle-file-checkboxes",
+        "command": "filebrowser:toggle-file-size",
         "selector": ".jp-DirListing-header",
         "rank": 16
       },
       {
-        "command": "filebrowser:toggle-sort-notebooks-first",
+        "command": "filebrowser:toggle-file-checkboxes",
         "selector": ".jp-DirListing-header",
         "rank": 17
+      },
+      {
+        "command": "filebrowser:toggle-sort-notebooks-first",
+        "selector": ".jp-DirListing-header",
+        "rank": 18
       },
       {
         "command": "filebrowser:share-main",
@@ -180,6 +185,11 @@
       "command": "filebrowser:duplicate",
       "keys": ["Accel D"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:select-all",
+      "keys": ["Accel A"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {
@@ -206,6 +216,12 @@
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
       "default": true
+    },
+    "showDateCreatedColumn": {
+      "type": "boolean",
+      "title": "Show date created column",
+      "description": "Whether to show the date created column",
+      "default": false
     },
     "showFileSizeColumn": {
       "type": "boolean",
@@ -237,10 +253,65 @@
       "description": "Whether to group the notebooks away from files",
       "default": false
     },
+    "sortFileNamesNaturally": {
+      "type": "boolean",
+      "title": "Sort file names naturally",
+      "description": "When sorting by name, use natural order (e.g. file2 before file10). When disabled, use lexicographic order (e.g. file10 before file2).",
+      "default": true
+    },
     "singleClickNavigation": {
       "type": "boolean",
       "title": "Navigate files and directories with single click",
       "description": "Whether to allow single click selection on file browser items",
+      "default": false
+    },
+    "autoOpenUploads": {
+      "type": "boolean",
+      "title": "Auto-open uploads",
+      "description": "Automatically open uploaded notebooks and supported files",
+      "default": true
+    },
+    "maxAutoOpenSizeMB": {
+      "type": "number",
+      "title": "Max auto-open size",
+      "description": "Maximum file size (MB) to auto-open files on upload",
+      "default": 50
+    },
+    "allowFileUploads": {
+      "type": "boolean",
+      "title": "Allow file uploads",
+      "description": "Whether to allow uploading files",
+      "default": true
+    },
+    "breadcrumbs": {
+      "title": "Breadcrumbs",
+      "description": "Settings related to breadcrumbs display and behavior.",
+      "type": "object",
+      "default": {
+        "minimumLeftItems": 0,
+        "minimumRightItems": 2
+      },
+      "properties": {
+        "minimumLeftItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs left items",
+          "description": "Minimum number of directory items to display on the left side of the breadcrumbs ellipsis",
+          "default": 0,
+          "minimum": 0
+        },
+        "minimumRightItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs right items",
+          "description": "Minimum number of directory items to display on the right side of the breadcrumbs ellipsis",
+          "default": 2,
+          "minimum": 0
+        }
+      }
+    },
+    "showFileFilter": {
+      "type": "boolean",
+      "title": "Show Filter Bar by Default",
+      "description": "Show the filter bar by default in the file browser.",
       "default": false
     }
   },

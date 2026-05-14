@@ -2,16 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import {
+import type {
   IObservableList,
-  IObservableString,
-  ObservableList
+  IObservableString
 } from '@jupyterlab/observables';
-import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { ObservableList } from '@jupyterlab/observables';
+import type { IOutputModel } from '@jupyterlab/rendermime';
+import { OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The model for an output area.
@@ -447,6 +449,13 @@ export class OutputAreaModel implements IOutputAreaModel {
           item.changed.disconnect(this._onGenericChange, this);
         });
         break;
+      case 'move':
+        break;
+      case 'clear':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
     }
     this._changed.emit(args);
   }
@@ -556,9 +565,7 @@ namespace Private {
     let idx1: number = -1;
     let lastEnd: number = 0;
     const regex = /[\n\b\r]/;
-    // TODO: once we upgrade eslint to 9.1.0 we can toggle `allExceptWhileTrue`
-    // option and remove the ignore rule below.
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       idx1 = indexOfAny(newText, regex, lastEnd);
 
@@ -569,11 +576,11 @@ namespace Private {
       );
       text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
       lastEnd = idx1 + 1;
+      idx0 += prefix.length;
 
       if (idx1 === -1) {
         break;
       }
-      idx0 += prefix.length;
 
       const newChar = newText[idx1];
       if (newChar === '\b') {
@@ -605,6 +612,16 @@ namespace Private {
     return { text, index: idx0 };
   }
 
+  /**
+   * Reallocate the string to prevent memory leak,
+   * workaround for issue in Chrome and Firefox:
+   * - https://issues.chromium.org/issues/41480525
+   * - https://bugzilla.mozilla.org/show_bug.cgi?id=727615
+   */
+  function unleakString(s: string) {
+    return JSON.parse(JSON.stringify(s));
+  }
+
   /*
    * Concatenate a string to an observable string, handling backspaces.
    */
@@ -627,12 +644,12 @@ namespace Private {
         }
       } else if (idx === curText.text.length) {
         if (idx !== text.length) {
-          curText.insert(curText.text.length, text.slice(idx));
+          curText.insert(curText.text.length, unleakString(text.slice(idx)));
           done = true;
         }
       } else if (text[idx] !== curText.text[idx]) {
         curText.remove(idx, curText.text.length);
-        curText.insert(idx, text.slice(idx));
+        curText.insert(idx, unleakString(text.slice(idx)));
         done = true;
       } else {
         idx++;

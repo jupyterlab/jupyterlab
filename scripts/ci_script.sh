@@ -12,6 +12,20 @@ export YARN_ENABLE_GLOBAL_CACHE=1
 # display verbose output for pkg builds run during `jlpm install`
 export YARN_ENABLE_INLINE_BUILDS=1
 
+# Helper function to wait for a condition with timeout
+# Usage: wait_for_condition TIMEOUT_SECONDS COMMAND [ARGS...]
+wait_for_condition() {
+    local timeout=$1
+    shift
+    for i in $(seq 1 $timeout); do
+        if "$@"; then
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+
 
 if [[ $GROUP != nonode ]]; then
     python -c "from jupyterlab.commands import build_check; build_check()"
@@ -26,7 +40,7 @@ if [[ $GROUP == python ]]; then
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
 
     # Run the python tests
-    python -m pytest
+    python -m pytest -n 3
 fi
 
 
@@ -64,6 +78,7 @@ if [[ $GROUP == integrity ]]; then
     # output of `yarn-berry-deduplicate`
     jlpm install
     if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
+        git status
         git diff
         exit 1
     fi
@@ -115,6 +130,7 @@ if [[ $GROUP == integrity3 ]]; then
     # with the other checks
     git config --global user.email "you@example.com"
     git config --global user.name "CI"
+    git config --global core.hooksPath /dev/null
     git stash
     git checkout -b commit_${BUILD_SOURCEVERSION}
     git clean -df
@@ -145,6 +161,7 @@ fi
 if [[ $GROUP == release_test ]]; then
     # bump the version
     git checkout -b test HEAD
+    git config --global core.hooksPath /dev/null
     jlpm bumpversion next --force
 
     # Use verdaccio during publish
@@ -226,22 +243,22 @@ if [[ $GROUP == usage ]]; then
     cat $USER_PAGE_CONFIG | grep "\"@jupyterlab/notebook-extension\": false"
 
     # Test with a prebuilt install
-    jupyter labextension develop extension --debug
-    jupyter labextension build extension
+    jupyter-builder develop extension --debug
+    jupyter-builder build extension
 
     # Test develop script with hyphens and underscores in the module name
     python -m pip install -e test-hyphens
-    jupyter labextension develop test-hyphens --overwrite --debug
+    jupyter-builder develop test-hyphens --overwrite --debug
     python -m pip install -e test_no_hyphens
-    jupyter labextension develop test_no_hyphens --overwrite --debug
+    jupyter-builder develop test_no_hyphens --overwrite --debug
     python -m pip install -e test-hyphens-underscore
-    jupyter labextension develop test-hyphens-underscore --overwrite --debug
+    jupyter-builder develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
-    jupyter labextension build extension --static-url /foo/
-    jupyter labextension build extension --core-path ../../../examples/federated/core_package
+    jupyter-builder build extension --static-url /foo/
+    jupyter-builder build extension --core-package-file ../../../examples/federated/core_package/package.json
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
@@ -249,7 +266,15 @@ if [[ $GROUP == usage ]]; then
     # check the federated extension is still listed after jupyter labextension uninstall
     cat labextensions | grep -q "mock-extension"
     # build it again without a static-url to avoid causing errors
-    jupyter labextension build extension
+    jupyter-builder build extension
+
+    # Test with a service manager extension
+    python -m pip install -e service-manager-extension
+    jupyter-builder develop service-manager-extension --overwrite --debug
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-service-manager-extension.*enabled.*OK"
+    python -m jupyterlab.browser_check
+
     popd
 
     jupyter lab workspaces export > workspace.json --debug
@@ -327,15 +352,26 @@ if [[ $GROUP == usage2 ]]; then
     $TEST_INSTALL_PATH/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser &
+    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
+    if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
+        echo "Server started successfully"
+    else
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    fi
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Check the labhubapp
+    # Test that the labhubapp fails to start if jupyterhub is not installed
+    # and provides a helpful error message.
+    ($TEST_INSTALL_PATH/bin/jupyter-labhub 2>&1 || true) | tee labhub.log
+    grep -q "JupyterHub is not installed" labhub.log || exit 1
+    # Install jupyterhub and test that the labhubapp starts successfully.
     $TEST_INSTALL_PATH/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
     $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
@@ -393,7 +429,7 @@ if [[ $GROUP == interop ]]; then
     jupyter labextension link . --no-build
     popd
     pushd provider
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     pushd consumer
@@ -417,7 +453,7 @@ if [[ $GROUP == interop ]]; then
     jupyter labextension install .
     popd
     pushd consumer
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
@@ -441,7 +477,7 @@ if [[ $GROUP == interop ]]; then
     # Need to install source first because it would get ignored
     # if installed after
     jupyter labextension install .
-    jupyter labextension build .
+    jupyter-builder build .
     python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
@@ -458,13 +494,19 @@ if [[ $GROUP == nonode ]]; then
     ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
 
     # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
+    ./test_install/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
+    if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
+        echo "Server started successfully"
+    else
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    fi
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Make sure we can install the tarball
     virtualenv -p $(which python3) test_sdist

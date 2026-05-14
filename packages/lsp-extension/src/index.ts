@@ -1,41 +1,41 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module lsp-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
   LabShell
 } from '@jupyterlab/application';
+import type {
+  ILSPConnection,
+  LanguageServersExperimental,
+  TLanguageServerConfigurations,
+  TLanguageServerId
+} from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
   DocumentConnectionManager,
   FeatureManager,
   ILSPCodeExtractorsManager,
-  ILSPConnection,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
   IWidgetLSPAdapterTracker,
   LanguageServerManager,
-  LanguageServersExperimental,
   TextForeignCodeExtractor,
-  TLanguageServerConfigurations,
-  TLanguageServerId,
   WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import type { IRunningSessions } from '@jupyterlab/running';
+import { IRunningSessionManagers } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import {
-  IFormRenderer,
-  IFormRendererRegistry,
-  LabIcon,
-  pythonIcon
-} from '@jupyterlab/ui-components';
-import { PartialJSONObject } from '@lumino/coreutils';
+import type { IFormRenderer, LabIcon } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry, pythonIcon } from '@jupyterlab/ui-components';
+import type { PartialJSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 
 import { renderServerSetting } from './renderer';
@@ -71,8 +71,10 @@ const settingsPlugin: JupyterFrontEndPlugin<void> = {
 
 const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
   {
-    id: ILSPCodeExtractorsManager.name,
+    id: '@jupyterlab/lsp-extension:code-extractor-manager',
+    autoStart: true,
     description: 'Provides the code extractor manager.',
+    provides: ILSPCodeExtractorsManager,
     activate: app => {
       const extractorManager = new CodeExtractorsManager();
 
@@ -91,9 +93,7 @@ const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManage
       });
       extractorManager.register(rawCellExtractor, null);
       return extractorManager;
-    },
-    provides: ILSPCodeExtractorsManager,
-    autoStart: true
+    }
   };
 
 /**

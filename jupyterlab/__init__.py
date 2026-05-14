@@ -17,6 +17,6 @@ def _jupyter_server_extension_paths():
 
 
 def _jupyter_server_extension_points():
-    from .labapp import LabApp
+    from .labapp import LabApp  # noqa: PLC0415
 
     return [{"module": "jupyterlab", "app": LabApp}]
