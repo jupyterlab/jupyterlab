@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 from jupyter_builder.federated_extensions import (
     build_labextension as _build_labextension,
 )
