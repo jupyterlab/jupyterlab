@@ -798,6 +798,39 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Move focus to selected item, or to the first item if no item is selected.
+   */
+  private _focusContent(): void {
+    const items = this._sortedItems;
+    if (items.length === 0) {
+      this._focusItem(0);
+      return;
+    }
+
+    let index =
+      this._focusPath !== ''
+        ? ArrayExt.findFirstIndex(
+            items,
+            value => value.path === this._focusPath
+          )
+        : -1;
+
+    // Fallbacks if path is missing/not found.
+    if (index === -1) {
+      index = Math.min(Math.max(this._focusIndex, 0), items.length - 1);
+    }
+
+    this._selectItem(index, false, true);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._focusContent();
+  }
+
+  /**
    * Select an item by name.
    *
    * @param name - The name of the item to select.
@@ -1869,9 +1902,8 @@ export class DirListing extends Widget {
       return;
     }
 
-    switch (event.keyCode) {
-      case 13: {
-        // Enter
+    switch (event.key) {
+      case 'Enter': {
         // Do nothing if any modifier keys are pressed.
         if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
           return;
@@ -1883,16 +1915,14 @@ export class DirListing extends Widget {
         }
         return;
       }
-      case 38:
-        // Up arrow
+      case 'ArrowUp':
         this._handleArrowY(event, -1);
         return;
-      case 40:
-        // Down arrow
+      case 'ArrowDown':
         this._handleArrowY(event, 1);
         return;
-      case 32: {
-        // Space
+      case ' ':
+      case 'Spacebar': {
         if (event.ctrlKey) {
           // Follow the Windows and Ubuntu convention: you must press `ctrl` +
           // `space` in order to toggle whether an item is selected.
@@ -1947,7 +1977,7 @@ export class DirListing extends Widget {
       // Don't gobble up the space key on the check-all checkbox (which the
       // browser treats as a click event).
       !(
-        (event.key === ' ' || event.keyCode === 32) &&
+        (event.key === ' ' || event.key === 'Spacebar') &&
         (event.target as HTMLInputElement).type === 'checkbox'
       )
     ) {
@@ -2364,11 +2394,14 @@ export class DirListing extends Widget {
       // Focus the top node if the folder is empty and therefore there are no
       // items inside the folder to focus.
       this._focusIndex = 0;
+      this._focusPath = '';
       this.node.focus();
       return;
     }
-    this._focusIndex = index;
-    const node = items[index];
+    const clampedIndex = Math.min(Math.max(index, 0), items.length - 1);
+    this._focusIndex = clampedIndex;
+    this._focusPath = this._sortedItems[clampedIndex]?.path ?? '';
+    const node = items[clampedIndex];
     const nameNode = this.renderer.getNameNode(node);
     if (nameNode) {
       // Make the filename text node focusable so that it receives keyboard
@@ -2795,6 +2828,7 @@ export class DirListing extends Widget {
   private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
+  private _focusPath = '';
   private _modifiedStyle: Time.HumanStyle = 'short';
   private _createdStyle: Time.HumanStyle = 'short';
   private _allUploaded = new Signal<DirListing, void>(this);
@@ -3925,13 +3959,13 @@ namespace Private {
         resolve(edit.value);
       };
       edit.onkeydown = (event: KeyboardEvent) => {
-        switch (event.keyCode) {
-          case 13: // Enter
+        switch (event.key) {
+          case 'Enter':
             event.stopPropagation();
             event.preventDefault();
             edit.blur();
             break;
-          case 27: // Escape
+          case 'Escape':
             event.stopPropagation();
             event.preventDefault();
             edit.value = original;

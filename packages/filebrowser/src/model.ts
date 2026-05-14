@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { shouldOverwrite } from '@jupyterlab/docmanager';
 import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
@@ -443,8 +444,9 @@ export class FileBrowserModel implements IDisposable {
     // instead of Jupyter Notebook.
     const serverVersion = PageConfig.getNotebookVersion();
     const supportsChunked =
-      serverVersion < [4, 0, 0] /* Jupyter Server */ ||
-      serverVersion >= [5, 1, 0]; /* Jupyter Notebook >= 5.1.0 */
+      compareVersions(serverVersion, [4, 0, 0]) < 0 /* Jupyter Server */ ||
+      compareVersions(serverVersion, [5, 1, 0]) >=
+        0; /* Jupyter Notebook >= 5.1.0 */
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {
@@ -812,6 +814,13 @@ export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
     return this._includeHiddenFiles
       ? super.items()
       : filter(super.items(), value => !value.name.startsWith('.'));
+  }
+
+  /**
+   * Whether hidden files are currently included.
+   */
+  get includeHiddenFiles(): boolean {
+    return this._includeHiddenFiles;
   }
 
   /**

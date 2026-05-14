@@ -562,25 +562,23 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   }
 
   private _onSearchKeydown(event: React.KeyboardEvent) {
-    if (event.keyCode === 13) {
-      // Enter pressed
+    if (event.key === 'Enter') {
       event.stopPropagation();
       event.preventDefault();
       if (event.ctrlKey) {
         const textarea = event.target as HTMLTextAreaElement;
         this._insertNewLine(textarea);
         this.props.onSearchChanged(textarea.value);
+      } else if (event.shiftKey) {
+        this.props.onHighlightPrevious();
       } else {
-        event.shiftKey
-          ? this.props.onHighlightPrevious()
-          : this.props.onHighlightNext();
+        this.props.onHighlightNext();
       }
     }
   }
 
   private _onReplaceKeydown(event: React.KeyboardEvent) {
-    if (event.keyCode === 13) {
-      // Enter pressed
+    if (event.key === 'Enter') {
       event.stopPropagation();
       event.preventDefault();
       if (event.ctrlKey) {
