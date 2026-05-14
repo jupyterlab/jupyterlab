@@ -17,6 +17,10 @@
             "rank": 10
           },
           {
+            "command": "documentsearch:startWithReplace",
+            "rank": 10
+          },
+          {
             "command": "documentsearch:highlightNext",
             "rank": 10
           },
@@ -36,6 +40,11 @@
     {
       "command": "documentsearch:start",
       "keys": ["Accel F"],
+      "selector": ".jp-mod-searchable"
+    },
+    {
+      "command": "documentsearch:startWithReplace",
+      "keys": ["Accel H"],
       "selector": ".jp-mod-searchable"
     },
     {

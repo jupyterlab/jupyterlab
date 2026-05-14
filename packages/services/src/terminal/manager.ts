@@ -3,11 +3,12 @@
 
 import { Poll } from '@lumino/polling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
+import type * as Terminal from './terminal';
 import { BaseManager } from '../basemanager';
 import { TerminalAPIClient } from './restapi';
 import { TerminalConnection } from './default';

@@ -4,11 +4,12 @@
 /* global WeakRef */
 
 import { ArrayExt } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { VirtualElement } from '@lumino/virtualdom';
+import type { VirtualElement } from '@lumino/virtualdom';
 import { Menu } from '@lumino/widgets';
 
 /**

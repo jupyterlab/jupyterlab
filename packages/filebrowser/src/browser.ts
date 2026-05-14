@@ -3,22 +3,25 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Contents, ServerConnection } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore } from '@jupyterlab/ui-components';
 import {
   FilenameSearcher,
-  IScore,
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
-import { FilterFileBrowserModel } from './model';
+import type { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to file browsers.
@@ -91,7 +94,21 @@ export class FileBrowser extends SidePanel {
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
     this.mainPanel.title.label = this._trans.__('File Browser');
 
-    this.crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs = new BreadCrumbs({
+      model,
+      translator,
+      onPathEdited: () => {
+        // Wait a frame so listing updates are reflected before focusing.
+        requestAnimationFrame(() => {
+          this._focusListingContentOrCrumb();
+        });
+      },
+      onPathActivated: () => {
+        requestAnimationFrame(() => {
+          this._focusListingContentOrCrumb();
+        });
+      }
+    });
     this.crumbs.addClass(CRUMBS_CLASS);
 
     // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
@@ -213,6 +230,29 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Enter breadcrumb edit mode, showing the path input.
+   */
+  editPath(): void {
+    this.crumbs.enterEditMode();
+  }
+
+  /**
+   * Whether to show the date created column
+   */
+  get showDateCreatedColumn(): boolean {
+    return this._showDateCreatedColumn;
+  }
+
+  set showDateCreatedColumn(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('date_created', value);
+      this._showDateCreatedColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Whether to show the file size column
    */
   get showFileSizeColumn(): boolean {
@@ -315,6 +355,23 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to sort file names naturally.
+   * Default is true; set to false for lexicographic order.
+   */
+  get sortFileNamesNaturally(): boolean {
+    return this._sortFileNamesNaturally;
+  }
+
+  set sortFileNamesNaturally(value: boolean) {
+    if (this.listing.setSortFileNamesNaturally) {
+      this.listing.setSortFileNamesNaturally(value);
+      this._sortFileNamesNaturally = value;
+    } else {
+      console.warn('Listing does not support natural file name sorting');
+    }
+  }
+
+  /**
    * Whether to allow single click files and directories
    */
   get singleClickNavigation(): boolean {
@@ -374,6 +431,17 @@ export class FileBrowser extends SidePanel {
 
   clearSelectedItems(): void {
     this.listing.clearSelectedItems();
+  }
+
+  /**
+   * Focus listing content, or trailing breadcrumb when listing is empty.
+   */
+  private _focusListingContentOrCrumb(): void {
+    if (this.listing.sortedItems().next().done ?? false) {
+      this.crumbs.focusLastCrumb();
+      return;
+    }
+    this.listing.activate();
   }
 
   /**
@@ -604,11 +672,13 @@ export class FileBrowser extends SidePanel {
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
+  private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
   private _fileSizeDisplayUnit: 'decimal' | 'binary' = 'decimal';
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
 }

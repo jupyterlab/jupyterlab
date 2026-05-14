@@ -7,11 +7,8 @@
  * @module translation-extension
  */
 
-import {
-  ILabShell,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { ILabShell, JupyterFrontEnd } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -124,6 +121,34 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         )?.submenu
       : null;
 
+    // Add command to install language packs via the Extension Manager
+    const installCommand = 'jupyterlab-translation:install-languages';
+    commands.addCommand(installCommand, {
+      label: trans.__('Install more languages…'),
+      caption: trans.__('Search for language packs in the Extension Manager'),
+      isEnabled: () =>
+        commands.hasCommand('extensionmanager:show-panel') &&
+        commands.isVisible('extensionmanager:show-panel'),
+      execute: () => {
+        return commands.execute('extensionmanager:show-panel', {
+          query: 'jupyterlab-language-pack'
+        });
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    if (palette) {
+      palette.addItem({
+        category: trans.__('Display Languages'),
+        command: installCommand
+      });
+    }
+
     // Get list of available locales
     translatorConnector
       .fetch()
@@ -196,6 +221,17 @@ const langMenu: JupyterFrontEndPlugin<void> = {
       })
       .catch(reason => {
         console.error(`Available locales errored!\n${reason}`);
+      })
+      .finally(() => {
+        if (languagesMenu) {
+          if (languagesMenu.items.length > 0) {
+            languagesMenu.addItem({ type: 'separator' });
+          }
+          languagesMenu.addItem({
+            command: installCommand,
+            args: {}
+          });
+        }
       });
   }
 };

@@ -1,12 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Gettext } from './gettext';
-import {
-  DEFAULT_LANGUAGE_CODE,
-  ITranslator,
-  TranslationBundle
-} from './tokens';
+import type { ITranslator, TranslationBundle } from './tokens';
+import { DEFAULT_LANGUAGE_CODE } from './tokens';
 
 /**
  * A translator that loads a dummy language bundle that returns the same input

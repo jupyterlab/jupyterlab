@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Popup } from '@jupyterlab/statusbar';
+import { showPopup, TextItem } from '@jupyterlab/statusbar';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import { Menu } from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import React from 'react';
 
 /**

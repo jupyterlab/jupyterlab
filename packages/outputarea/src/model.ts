@@ -2,16 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import {
+import type {
   IObservableList,
-  IObservableString,
-  ObservableList
+  IObservableString
 } from '@jupyterlab/observables';
-import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { ObservableList } from '@jupyterlab/observables';
+import type { IOutputModel } from '@jupyterlab/rendermime';
+import { OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The model for an output area.
@@ -563,9 +565,7 @@ namespace Private {
     let idx1: number = -1;
     let lastEnd: number = 0;
     const regex = /[\n\b\r]/;
-    // TODO: once we upgrade eslint to 9.1.0 we can toggle `allExceptWhileTrue`
-    // option and remove the ignore rule below.
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       idx1 = indexOfAny(newText, regex, lastEnd);
 
