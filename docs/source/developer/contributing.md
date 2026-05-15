@@ -654,7 +654,7 @@ Main reasons for UI test failures are:
    fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
    In order to do that, you can post a comment on your PR with the following content:
    - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
-     generated in the most recent run of CI from your branch.
+     generated in the most recent run of CI from your branch. Test
 
    Maintainers can also use the following commands:
    - `please update galata snapshots`: A bot will regenerate galata snapshots
