@@ -51,3 +51,59 @@
 .jp-CSVViewer-grid {
   flex: 1 1 auto;
 }
+
+/*
+ * The data grid renders its own Lumino scrollbar as a real DOM element.
+ * The global `.lm-ScrollBar` rules use hardcoded light colors, so the
+ * scrollbar stays bright in dark themes (issue #18797). Re-theme it,
+ * scoped to the CSV grid. Fallbacks reproduce the previous hardcoded
+ * values so themes that do not define the scrollbar variables (the
+ * default light theme) are visually unchanged; dark and dark high
+ * contrast themes now pick up their `--jp-scrollbar-*` variables.
+ */
+.jp-CSVViewer-grid .lm-ScrollBar-track,
+.jp-CSVViewer-grid .lm-ScrollBar-button {
+  background-color: var(--jp-scrollbar-background-color, #f0f0f0);
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar-button:hover {
+  background-color: var(--jp-scrollbar-background-color, #dadada);
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar-button.lm-mod-active {
+  background-color: var(--jp-scrollbar-background-color, #cdcdcd);
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar-thumb {
+  background: rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205));
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar-thumb:hover {
+  background: rgb(var(--jp-scrollbar-thumb-color, 186, 186, 186));
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar-thumb.lm-mod-active {
+  background: rgb(var(--jp-scrollbar-thumb-color, 160, 160, 160));
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar[data-orientation='horizontal'] {
+  border-top: 1px solid var(--jp-border-color1);
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar[data-orientation='vertical'] {
+  border-left: 1px solid var(--jp-border-color1);
+}
+
+.jp-CSVViewer-grid
+  .lm-ScrollBar[data-orientation='horizontal']
+  .lm-ScrollBar-thumb {
+  border-left: 1px solid var(--jp-border-color1);
+  border-right: 1px solid var(--jp-border-color1);
+}
+
+.jp-CSVViewer-grid
+  .lm-ScrollBar[data-orientation='vertical']
+  .lm-ScrollBar-thumb {
+  border-top: 1px solid var(--jp-border-color1);
+  border-bottom: 1px solid var(--jp-border-color1);
+}
