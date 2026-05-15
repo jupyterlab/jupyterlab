@@ -666,6 +666,23 @@ Main reasons for UI test failures are:
 For more information on UI Testing, please read the [UI Testing developer documentation](https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md)
 and [Playwright documentation](https://playwright.dev/docs/intro).
 
+#### Configure merge driver to reduce snapshot drift friction
+
+If you find yourself frequently resolving merge conflicts due to snapshots being
+updated on both your branch and changing on the `main` branch, you may wish
+to configure git to automatically resolve the `png` conflicts with:
+
+```bash
+git config merge.ours.driver true
+```
+
+Next time when merging the `main` branch you won't be prompted to manually resolve
+the conflicts of the binary files and instead the copy from your branch will be
+used for the merge. This copy will most likely still require regenerating, but
+this setup saves time for manually confirming which copy to use for merge.
+
+This is made possible by the driver rule present in `.gitattributes` file.
+
 ### Good Practices for Integration tests
 
 Here are some good practices to follow when writing integration tests:
