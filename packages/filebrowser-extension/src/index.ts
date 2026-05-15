@@ -288,6 +288,9 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             .composite as boolean;
           browser.model.filterDirectories = filterDirectories;
           browser.model.useFuzzyFilter = useFuzzyFilter;
+          browser.clearFilterOnNavigation = settings.get(
+            'clearFilterOnNavigation'
+          ).composite as boolean;
         }
         settings.changed.connect(onSettingsChanged);
         onSettingsChanged(settings);
