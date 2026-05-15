@@ -666,7 +666,7 @@ Main reasons for UI test failures are:
 For more information on UI Testing, please read the [UI Testing developer documentation](https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md)
 and [Playwright documentation](https://playwright.dev/docs/intro).
 
-#### Configure merge driver to reduce snapshot drift friction
+### Configure merge driver to reduce snapshot drift friction
 
 If you find yourself frequently resolving merge conflicts due to snapshots being
 updated on both your branch and changing on the `main` branch, you may wish
