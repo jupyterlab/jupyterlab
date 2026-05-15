@@ -445,7 +445,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
       .forEach(oldSvgElement => {
         if (this.svgElement) {
-          oldSvgElement.replaceWith(this.svgElement.cloneNode(true));
+          oldSvgElement.replaceWith(Private.cloneSvgElement(this.svgElement));
         }
       });
 
