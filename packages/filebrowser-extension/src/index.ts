@@ -274,9 +274,6 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           allowFileUploads: true
         };
 
-        browser.showFileFilter = settings.get('showFileFilter')
-          .composite as boolean;
-
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
@@ -293,6 +290,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             .composite as boolean;
           browser.model.filterDirectories = filterDirectories;
           browser.model.useFuzzyFilter = useFuzzyFilter;
+          browser.showFileFilter = settings.get('showFileFilter')
+            .composite as boolean;
         }
         settings.changed.connect(onSettingsChanged);
         onSettingsChanged(settings);
