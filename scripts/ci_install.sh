@@ -67,18 +67,17 @@ if [[ $GROUP == nonode ]]; then
     uv pip install --system build
     python -m build .
 
-    # Remove NodeJS, twice to take care of system and locally installed node versions.
-    NODE_BIN="$(command -v node || true)"
-    if [[ -n "${NODE_BIN}" ]]; then
-        sudo rm -rf "${NODE_BIN}"
-    fi
-
-    NODE_BIN="$(command -v node || true)"
-    if [[ -n "${NODE_BIN}" ]]; then
-        sudo rm -rf "${NODE_BIN}"
-    fi
-
+    # Remove NodeJS from PATH entries. There may be multiple binaries
+    # (for example system and local installs), so rehash between removals.
     hash -r
+    for _ in 1 2 3; do
+        NODE_BIN="$(command -v node || true)"
+        if [[ -z "${NODE_BIN}" || ! -x "${NODE_BIN}" ]]; then
+            break
+        fi
+        sudo rm -f "${NODE_BIN}"
+        hash -r
+    done
 
     NODE_BIN="$(command -v node || true)"
     if [[ -n "${NODE_BIN}" && -x "${NODE_BIN}" ]]; then

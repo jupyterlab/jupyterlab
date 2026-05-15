@@ -5,4 +5,14 @@
 
 set -euo pipefail
 
-shellcheck --severity=warning scripts/*.sh docker/start.sh packages/ui-components/docs/build.sh
+SH_FILES=()
+while IFS= read -r file; do
+    SH_FILES+=("${file}")
+done < <(git ls-files '*.sh')
+
+if [[ ${#SH_FILES[@]} -eq 0 ]]; then
+    echo "No shell scripts found"
+    exit 0
+fi
+
+shellcheck --severity=warning "${SH_FILES[@]}"
