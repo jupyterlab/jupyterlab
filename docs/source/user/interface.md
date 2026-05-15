@@ -217,8 +217,11 @@ The browser’s native context menu can be accessed by holding down
 
 As in the classic Notebook, you can navigate the user interface through keyboard
 shortcuts. You can find and customize the current list of keyboard shortcuts by
-selecting the Advanced Settings Editor item in the Settings menu, then selecting
-Keyboard Shortcuts in the Settings tab.
+selecting Settings Editor in the Settings menu, then selecting Keyboard Shortcuts.
+The Keyboard Shortcuts settings editor lets you search for commands, use **Add**
+to assign a shortcut to an existing command, or use the **+** button to create a
+shortcut for another command. For advanced edits, you can also open the JSON
+settings editor and update the Keyboard Shortcuts user preferences directly.
 
 ```{raw} html
 <div class="jp-youtube-video">
