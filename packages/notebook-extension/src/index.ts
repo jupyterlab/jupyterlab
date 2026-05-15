@@ -3691,7 +3691,7 @@ function addCommands(
         );
       }
     },
-    isEnabled: args => {
+    isVisible: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (!current) {
         return false;
