@@ -226,6 +226,24 @@ Keyboard Shortcuts in the Settings tab.
 </div>
 ```
 
+Custom shortcuts are stored in the Keyboard Shortcuts user preferences as a
+list of shortcut definitions. Each definition includes the command identifier,
+the key combination, and a CSS selector that determines when the shortcut is
+active. For example, to create a shortcut for **New Console for Notebook**, add
+an entry for the `notebook:create-console` command:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "notebook:create-console",
+      "keys": ["Accel ."],
+      "selector": ".jp-Notebook:focus"
+    }
+  ]
+}
+```
+
 To define a custom keyboard shortcut which runs more than one command, add a keyboard shortcut
 for `apputils:run-all-enabled` command in Keyboard Shortcuts advanced settings. The commands you
 wish to run are passed in the `args` argument as a list of strings:
