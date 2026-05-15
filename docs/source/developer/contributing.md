@@ -653,7 +653,7 @@ Main reasons for UI test failures are:
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
    In order to do that, you can post a comment on your PR with the following content:
-   - `bot please open PR to update snapshots` - A bot will open a PR updating snapshots
+   - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
      generated in the most recent run of CI from your branch.
 
    Maintainers can also use the following commands:
