@@ -2360,7 +2360,7 @@
     "label": "Redo",
     "caption": "",
     "shortcuts": [
-      "Ctrl Shift Z"
+      "Ctrl Y"
     ],
     "args": {
       "type": "object",
