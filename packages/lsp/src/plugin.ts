@@ -11,7 +11,7 @@
 /**
  * Enable or disable the language server services.
  */
-export type Activate = 'off' | 'on';
+export type Activate = Off;
 /**
  * When multiple servers match specific document/language, the server with the highest rank will be used
  */
@@ -19,7 +19,7 @@ export type RankOfTheServer = number;
 /**
  * Whether to ask server to send logs with execution trace (for debugging). Accepted values are: "off", "messages", "verbose". Servers are allowed to ignore this request.
  */
-export type AskServersToSendTraceNotifications = 'off' | 'messages' | 'verbose';
+export type AskServersToSendTraceNotifications = Off1;
 /**
  * Enable or disable the logging feature of the language servers.
  */
@@ -33,6 +33,9 @@ export interface LanguageServersExperimental {
   languageServers?: LanguageServer;
   setTrace?: AskServersToSendTraceNotifications;
   logAllCommunication?: LogCommunication;
+  [k: string]: any;
+}
+export interface Off {
   [k: string]: any;
 }
 /**
@@ -57,5 +60,8 @@ export interface LanguageServer1 {
  * Configuration to be sent to language server over LSP when initialized: see the specific language server's documentation for more
  */
 export interface LanguageServerConfigurations {
+  [k: string]: any;
+}
+export interface Off1 {
   [k: string]: any;
 }
