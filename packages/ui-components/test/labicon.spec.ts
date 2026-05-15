@@ -62,6 +62,22 @@ describe('@jupyterlab/ui-components', () => {
         return { clipPathId, clipPathRef };
       }
 
+      function getStyleGradientData(svg: Element): {
+        gradientId: string;
+        styleText: string;
+      } {
+        const gradientId = svg
+          .querySelector('linearGradient')
+          ?.getAttribute('id');
+        const styleText = svg.querySelector('style')?.textContent;
+
+        if (!gradientId || !styleText) {
+          throw new Error('Style-based gradient test fixture did not render');
+        }
+
+        return { gradientId, styleText };
+      }
+
       it('should create unique ids for each .element() render', () => {
         const firstSvg = fooIcon.element({ tag: null });
         const secondSvg = fooIcon.element({ tag: null });
@@ -69,32 +85,19 @@ describe('@jupyterlab/ui-components', () => {
         const second = getIconIdData(secondSvg);
         const firstStyleSvg = styleGradientIcon.element({ tag: null });
         const secondStyleSvg = styleGradientIcon.element({ tag: null });
-        const firstGradientId = firstStyleSvg
-          .querySelector('linearGradient')
-          ?.getAttribute('id');
-        const secondGradientId = secondStyleSvg
-          .querySelector('linearGradient')
-          ?.getAttribute('id');
-        const firstStyleText =
-          firstStyleSvg.querySelector('style')?.textContent;
-        const secondStyleText =
-          secondStyleSvg.querySelector('style')?.textContent;
+        const firstStyle = getStyleGradientData(firstStyleSvg);
+        const secondStyle = getStyleGradientData(secondStyleSvg);
 
         expect(first.clipPathId).not.toEqual(second.clipPathId);
         expect(first.clipPathRef).toEqual(`url(#${first.clipPathId})`);
         expect(second.clipPathRef).toEqual(`url(#${second.clipPathId})`);
-        if (
-          !firstGradientId ||
-          !secondGradientId ||
-          !firstStyleText ||
-          !secondStyleText
-        ) {
-          throw new Error('Style-based gradient test fixture did not render');
-        }
-
-        expect(firstGradientId).not.toEqual(secondGradientId);
-        expect(firstStyleText).toContain(`url(#${firstGradientId})`);
-        expect(secondStyleText).toContain(`url(#${secondGradientId})`);
+        expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
+        expect(firstStyle.styleText).toContain(
+          `url(#${firstStyle.gradientId})`
+        );
+        expect(secondStyle.styleText).toContain(
+          `url(#${secondStyle.gradientId})`
+        );
       });
 
       it('should create unique ids for each React render', () => {
@@ -122,6 +125,44 @@ describe('@jupyterlab/ui-components', () => {
         expect(first.clipPathId).not.toEqual(second.clipPathId);
         expect(first.clipPathRef).toEqual(`url(#${first.clipPathId})`);
         expect(second.clipPathRef).toEqual(`url(#${second.clipPathId})`);
+      });
+
+      it('should keep unique ids when replacing rendered elements after svgstr updates', () => {
+        const updateIcon = new LabIcon({
+          name: 'test-ui-components:style-gradient-update',
+          svgstr: styleGradientSvgstr
+        });
+        const firstContainer = document.createElement('div');
+        const secondContainer = document.createElement('div');
+        document.body.appendChild(firstContainer);
+        document.body.appendChild(secondContainer);
+
+        try {
+          updateIcon.element({ container: firstContainer });
+          updateIcon.element({ container: secondContainer });
+
+          updateIcon.svgstr = styleGradientSvgstr;
+
+          const firstUpdatedSvg = firstContainer.querySelector('svg');
+          const secondUpdatedSvg = secondContainer.querySelector('svg');
+          if (!firstUpdatedSvg || !secondUpdatedSvg) {
+            throw new Error('Updated icon render did not produce svg markup');
+          }
+
+          const firstStyle = getStyleGradientData(firstUpdatedSvg);
+          const secondStyle = getStyleGradientData(secondUpdatedSvg);
+
+          expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
+          expect(firstStyle.styleText).toContain(
+            `url(#${firstStyle.gradientId})`
+          );
+          expect(secondStyle.styleText).toContain(
+            `url(#${secondStyle.gradientId})`
+          );
+        } finally {
+          firstContainer.remove();
+          secondContainer.remove();
+        }
       });
     });
   });
