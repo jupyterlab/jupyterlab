@@ -5,4 +5,5 @@ pixi.lock linguist-language=YAML linguist-generated=true
 # (we always need to "resolve" conflicts and then regenerate
 # the snapshots anyways, so the initial "resolution"
 # does not really matter)
-*.png merge=ours
+galata/**/*.png merge=ours
+examples/**/*.png merge=ours
