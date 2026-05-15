@@ -4,7 +4,7 @@
 
 import { MimeData } from '@lumino/coreutils';
 import { Dialog, showDialog } from './dialog';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 
 // 'string' is allowed so as to make it non-breaking for any 1.x releases
 export type ClipboardData = string | MimeData;
