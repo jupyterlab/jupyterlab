@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module notebook-extension
@@ -35,7 +36,7 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -664,11 +665,32 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         const { context } = current;
 
+        const serverVersion = PageConfig.getNotebookVersion();
+        const supportsHTMLSanitizationOption =
+          compareVersions(serverVersion, [4, 0, 0]) <
+            0 /* Jupyter Server only */ &&
+          compareVersions(serverVersion, [2, 18, 0]) >= 0;
+
+        let sanitizeHtml = false;
+
+        if (args['format'] === 'html' && supportsHTMLSanitizationOption) {
+          const result = await InputDialog.getBoolean({
+            title: trans.__('Export as HTML'),
+            label: trans.__('Sanitize HTML output'),
+            value: true
+          });
+          if (!result.button.accept) {
+            return;
+          }
+          sanitizeHtml = result.value ?? false;
+        }
+
         const exportOptions: NbConvert.IExportOptions = {
           format: args['format'] as string,
           path: current.context.path,
           exporterOptions: {
-            download: true
+            download: true,
+            sanitizeHtml
           }
         };
 
@@ -1305,6 +1327,10 @@ function activateNotebookTools(
     return true;
   };
   notebookTools.title.icon = buildIcon;
+  notebookTools.title.dataset = {
+    ...notebookTools.title.dataset,
+    jpTabLabel: trans.__('Notebook Tools')
+  };
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
 

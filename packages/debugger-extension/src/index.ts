@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module debugger-extension
@@ -1336,6 +1337,10 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
 
+    sidebar.title.dataset = {
+      ...sidebar.title.dataset,
+      jpTabLabel: trans.__('Debugger')
+    };
     sidebar.title.caption = trans.__('Debugger');
 
     shell.add(sidebar, 'right', { type: 'Debugger' });
