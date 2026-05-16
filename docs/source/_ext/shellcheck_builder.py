@@ -125,7 +125,16 @@ class ShellcheckBuilder(Builder):
             raise SphinxError(msg)
 
         output = proc.stdout.strip()
-        return json.loads(output) if output else []
+        if not output:
+            return []
+
+        parsed = json.loads(output)
+        if isinstance(parsed, dict):
+            comments = parsed.get("comments")
+            return comments if isinstance(comments, list) else []
+        if isinstance(parsed, list):
+            return parsed
+        return []
 
     def _script_from_node(self, node: nodes.literal_block) -> str:
         lines = node.astext().splitlines()
