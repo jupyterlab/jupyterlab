@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module pdf-extension
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
@@ -67,7 +68,8 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       // upon unhiding a PDF. But triggering a refresh of the URL makes it
       // find it again. No idea what the reason for this is.
       if (Private.IS_FIREFOX) {
-        this._object.data = this._object.data; // eslint-disable-line
+        // eslint-disable-next-line no-self-assign
+        this._object.data = this._object.data;
       }
       return Promise.resolve(void 0);
     }
@@ -183,7 +185,7 @@ namespace Private {
     sliceSize: number = 512
   ): Blob {
     const byteCharacters = atob(b64Data);
-    const byteArrays: Uint8Array[] = [];
+    const byteArrays: Uint8Array<ArrayBuffer>[] = [];
 
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
       const slice = byteCharacters.slice(offset, offset + sliceSize);

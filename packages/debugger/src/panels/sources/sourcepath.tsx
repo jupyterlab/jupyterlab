@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { UseSignal } from '@jupyterlab/ui-components';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import React from 'react';
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 /**
  * A React component to display the path to a source.

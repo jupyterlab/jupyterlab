@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as KernelMessage from './messages';
+import type * as KernelMessage from './messages';
 
-import { IModel } from './restapi';
+import type { IModel } from './restapi';
 
 import { validateProperty } from '../validate';
 

@@ -2,19 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser,
+  IRenderMime
+} from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
-  IMarkdownParser,
-  IRenderMime,
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
   svgRendererFactory,
   textRendererFactory
 } from '@jupyterlab/rendermime';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 function createModel(
@@ -243,6 +246,46 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         expect(w.node.textContent).toBe(source);
       });
+
+      it('should mark trusted renderer boundary', async () => {
+        const source = 'sumlimits_{i=0}^{infty} \\frac{1}{n^2}';
+        const f = latexRendererFactory;
+        const mimeType = 'text/latex';
+        const model = createModel(mimeType, source, true);
+        const markTrusted = jest.fn<void, [HTMLElement]>();
+        const unmarkTrusted = jest.fn<void, [HTMLElement]>();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          trustHandler: {
+            markTrusted,
+            unmarkTrusted
+          }
+        });
+
+        await w.renderModel(model);
+        expect(markTrusted).toHaveBeenCalledWith(w.node);
+      });
+
+      it('should not mark untrusted renderer boundary', async () => {
+        const source = 'sumlimits_{i=0}^{infty} \\frac{1}{n^2}';
+        const f = latexRendererFactory;
+        const mimeType = 'text/latex';
+        const model = createModel(mimeType, source, false);
+        const markTrusted = jest.fn<void, [HTMLElement]>();
+        const unmarkTrusted = jest.fn<void, [HTMLElement]>();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          trustHandler: {
+            markTrusted,
+            unmarkTrusted
+          }
+        });
+
+        await w.renderModel(model);
+        expect(markTrusted).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -293,7 +336,11 @@ describe('rendermime/factories', () => {
 
       beforeAll(() => {
         markdownParser = {
-          render: (content: string): Promise<string> => Promise.resolve(content)
+          render: (content: string): Promise<string> =>
+            Promise.resolve(content),
+          getHeadingTokens: (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 
@@ -406,6 +453,38 @@ describe('rendermime/factories', () => {
         expect(anchor.target).toBe('_self');
         expect(anchor.className).toContain('jp-InternalAnchorLink');
         expect(anchor.textContent).toBe('¶');
+        Widget.detach(w);
+      });
+
+      it('should scroll to data-jupyter-id element on anchor click', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = '<a href="#my-heading">link</a>';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser: { render: content => content },
+          resolver: {
+            resolveUrl: async (url: string) => url,
+            getDownloadUrl: async (url: string) => url,
+            isLocal: () => true
+          }
+        });
+        await w.renderModel(model);
+        Widget.attach(w, document.body);
+
+        const target = document.createElement('h2');
+        target.setAttribute('data-jupyter-id', 'my-heading');
+        w.node.appendChild(target);
+
+        const anchor = w.node.querySelector('a') as HTMLAnchorElement;
+        const scrollMock = jest.fn();
+        target.scrollIntoView = scrollMock;
+
+        anchor.click();
+
+        expect(scrollMock).toHaveBeenCalled();
         Widget.detach(w);
       });
 
@@ -529,6 +608,94 @@ describe('rendermime/factories', () => {
           '<a href="https://jupyter.org" target="_blank" rel="noopener">link</a>'
         );
         w.dispose();
+      });
+
+      it('should execute command when local link is clicked in untrusted content', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = '<a href="notebook.ipynb">open notebook</a>';
+        const model = createModel(mimeType, source, false);
+        const execute = jest.fn();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser,
+          resolver: {
+            resolveUrl: async (url: string) => url,
+            getDownloadUrl: async (url: string) => url,
+            isLocal: () => true
+          },
+          linkHandler: {
+            handleLink: (node: HTMLElement, path: string, id?: string) => {
+              node.addEventListener('click', (event: MouseEvent) => {
+                event.preventDefault();
+                execute('rendermime:handle-local-link', { path, id });
+              });
+            }
+          }
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        const anchor = w.node.querySelector('a') as HTMLAnchorElement;
+        anchor.click();
+        expect(execute).toHaveBeenCalledWith('rendermime:handle-local-link', {
+          path: 'notebook.ipynb',
+          id: ''
+        });
+        w.dispose();
+      });
+
+      it('should mark trusted renderer boundary', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, '<p>trusted</p>', true);
+        const markTrusted = jest.fn<void, [HTMLElement]>();
+        const unmarkTrusted = jest.fn<void, [HTMLElement]>();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser,
+          trustHandler: { markTrusted, unmarkTrusted }
+        });
+        await w.renderModel(model);
+        expect(markTrusted).toHaveBeenCalledWith(w.node);
+      });
+
+      it('should not mark untrusted renderer boundary', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, '<p>untrusted</p>', false);
+        const markTrusted = jest.fn<void, [HTMLElement]>();
+        const unmarkTrusted = jest.fn<void, [HTMLElement]>();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser,
+          trustHandler: { markTrusted, unmarkTrusted }
+        });
+        await w.renderModel(model);
+        expect(markTrusted).not.toHaveBeenCalled();
+      });
+
+      it('should unmark trusted boundary when re-rendered as untrusted', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const trustedModel = createModel(mimeType, '<p>trusted</p>', true);
+        const untrustedModel = createModel(mimeType, '<p>untrusted</p>', false);
+        const markTrusted = jest.fn<void, [HTMLElement]>();
+        const unmarkTrusted = jest.fn<void, [HTMLElement]>();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser,
+          trustHandler: { markTrusted, unmarkTrusted }
+        });
+        await w.renderModel(trustedModel);
+        expect(markTrusted).toHaveBeenCalledWith(w.node);
+        expect(unmarkTrusted).not.toHaveBeenCalled();
+        await w.renderModel(untrustedModel);
+        expect(unmarkTrusted).toHaveBeenCalledWith(w.node);
+        expect(w.hasClass('jp-mod-trusted')).toBe(false);
       });
     });
   });
@@ -1059,6 +1226,50 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe(
           '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
         );
+      });
+
+      it('should execute command when kernel-scoped path link is clicked in untrusted content', async () => {
+        const f = errorRendererFactory;
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const source = '<a data-path="kernel_file.py">open source</a>';
+        const model = createModel(mimeType, source, false);
+        const execute = jest.fn();
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          resolver: {
+            resolveUrl: async (url: string) => url,
+            getDownloadUrl: async (url: string) => url,
+            isLocal: () => true,
+            resolvePath: async () => ({
+              scope: 'kernel' as const,
+              path: 'kernel_file.py'
+            })
+          },
+          linkHandler: {
+            handlePath: (
+              node: HTMLElement,
+              path: string,
+              scope: 'kernel' | 'server',
+              id?: string
+            ) => {
+              node.addEventListener('click', (event: MouseEvent) => {
+                event.preventDefault();
+                execute('rendermime:handle-local-link', { path, id, scope });
+              });
+            }
+          }
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        const anchor = w.node.querySelector('a') as HTMLAnchorElement;
+        anchor.click();
+        expect(execute).toHaveBeenCalledWith('rendermime:handle-local-link', {
+          path: 'kernel_file.py',
+          id: '',
+          scope: 'kernel'
+        });
+        w.dispose();
       });
     });
   });

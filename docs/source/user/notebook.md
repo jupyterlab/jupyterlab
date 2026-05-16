@@ -62,6 +62,28 @@ the classic Jupyter Notebook. The keyboard shortcuts of the classic
 Notebook continue to work (with command and edit mode). However, a
 number of new things are possible with notebooks in JupyterLab.
 
+## Edit Mode vs Command Mode
+
+JupyterLab notebooks operate in two primary modes: **Edit Mode** and **Command Mode**.
+
+**Edit Mode**
+
+- Used to edit the contents of a cell.
+- Activated by pressing {kbd}`Enter` on a selected cell.
+- A blue cell border indicates Edit Mode.
+- Keyboard input affects the cell contents.
+
+**Command Mode**
+
+- Used to perform notebook-level actions such as running cells, adding cells, or changing cell types.
+- Activated by pressing {kbd}`Esc` when not editing text.
+- A gray cell border indicates Command Mode.
+- Keyboard shortcuts act on entire cells rather than their contents.
+
+Pressing {kbd}`Esc` exits Edit Mode, while pressing {kbd}`Enter` enters Edit Mode on the selected cell.
+
+## Working with Cells
+
 (drag-drop)=
 
 Drag and drop cells to rearrange your notebook:
@@ -215,3 +237,48 @@ implementation details of relevance to advanced users:
    it is unusual to see a notebook with a single untrusted cell, this can occur
    when copy-pasting cells from an untrusted notebook),
 3. only code cells can be trusted; the Markdown cells are always sanitised.
+
+(plotting)=
+
+## Plotting and Visualization
+
+JupyterLab supports data visualization using libraries like matplotlib, plotly, and others.
+
+**Static Plots with IPython Kernel**
+
+For static plots in JupyterLab with IPython kernel, simply import and use your plotting library of choice - no magic commands are needed:
+
+```python
+import matplotlib.pyplot as plt
+
+plt.plot([1, 2, 3, 4])
+plt.ylabel('some numbers')
+plt.show()
+```
+
+```{note}
+Unlike classic Jupyter Notebook, JupyterLab with IPython kernel displays matplotlib plots automatically
+without requiring `%matplotlib inline`.
+```
+
+**Interactive Plots, Widgets or Plotting with Other Kernels**
+
+Interactive plots, widgets, or plotting with other kernels may require additional packages to be installed and sometimes a magic command or other kernel native instructions (please refer to the respective library documentation). Common options include:
+
+**Python:**
+
+- [ipywidgets](https://ipywidgets.readthedocs.io/) - Interactive widgets for Jupyter notebooks
+- [ipympl](https://github.com/matplotlib/ipympl) - Interactive matplotlib backend
+- [plotly](https://plotly.com/python/getting-started/#jupyterlab-support) - Interactive plotting library
+- [bokeh](https://docs.bokeh.org/en/latest/docs/user_guide/output/jupyter.html) - Interactive visualization library
+- [altair](https://altair-viz.github.io/) - Declarative visualization library
+
+**R:**
+
+- [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
+
+(paste-code-cells-without-output)=
+
+## Paste code cells without output
+
+When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.

@@ -5,7 +5,7 @@
 
 import { caretDownEmptyThinIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { IShortcutUI } from '../types';
+import type { IShortcutUI } from '../types';
 
 export interface IShortcutTitleItemProps {
   title: string;

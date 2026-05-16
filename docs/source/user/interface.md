@@ -31,7 +31,13 @@ the layout of the application areas and tabs, etc.
 Workspaces can be saved on the server with
 {ref}`named workspace URLs <url-workspaces>` or
 {ref}`using workspace commands <workspaces-gui>` available in the menu and sidebar.
-To learn more about URLs in Jupyterlab, visit {ref}`urls`.
+To learn more about URLs in JupyterLab, visit {ref}`urls`.
+
+In the user interface, the current workspace can be changed using the workspace
+selector widget located in the top bar.
+
+To enable the workspace selector, use the main menu:
+View → Appearance → Show Workspace Indicator.
 
 (menu-bar)=
 
@@ -95,7 +101,9 @@ The column that allows to switch between tabs is called Activity Bar in JupyterL
 The sidebars can be collapsed or expanded by selecting "Show Left Sidebar"
 or "Show Right Sidebar" in the View menu or by clicking on the active sidebar tab:
 
-The location of tabs can be switched between the left and the right sidebar from the {ref}`context menu <context-menus-rightclick>`.
+The tabs can be moved between the left sidebar, the right sidebar,
+the {ref}`main work area <main-area>`, and the down area from the
+{ref}`context menu <context-menus-rightclick>`.
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -239,6 +247,12 @@ wish to run are passed in the `args` argument as a list of strings:
 
 In this example `docmanager:save` and `application:close` commands are mapped to `Accel T`.
 The commands are run in succession when you use the shortcut.
+
+### Markdown editing shortcuts
+
+When editing markdown cells, you can use {kbd}`Ctrl+B` ({kbd}`Cmd+B` on macOS) to toggle bold formatting.
+Select text in a markdown cell and press {kbd}`Ctrl+B` to wrap it with `**` for bold formatting.
+Pressing {kbd}`Ctrl+B` again on already bold text (text wrapped with `**`) will remove the bold formatting.
 
 (editor-keymaps)=
 

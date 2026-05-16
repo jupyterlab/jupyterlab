@@ -1,19 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   Context,
   DocumentRegistry,
   DocumentWidget,
-  IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { acceptDialog, dangerDialog, dismissDialog } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IMessageHandler } from '@lumino/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { DocumentWidgetManager } from '../src';
 

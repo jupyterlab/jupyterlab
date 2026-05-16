@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@lumino/widgets';
-import { ITableOfContentsTracker, TableOfContents } from './tokens';
+import type { Widget } from '@lumino/widgets';
+import type { ITableOfContentsTracker, TableOfContents } from './tokens';
 
 /**
  * Table of contents tracker

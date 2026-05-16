@@ -78,6 +78,11 @@
   flex-direction: row;
 }
 
+.jp-StatusBar-GroupItem:focus-visible {
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
 .jp-Statusbar-ProgressCircle > svg {
   display: block;
   margin: 0 auto;
@@ -114,9 +119,9 @@
   float: left;
   width: 0%;
   height: 100%;
-  font-size: 12px;
+  font-size: calc(var(--jp-ui-font-size1) * 12 / 13);
   line-height: 14px;
-  color: #fff;
+  color: var(--jp-ui-inverse-font-color0);
   text-align: center;
   animation: jp-Statusbar-ExecutionTime-progress-bar 2s linear infinite;
 }

@@ -22,19 +22,6 @@
   overflow-y: auto;
 }
 
-.jp-DebuggerKernelSource-filterBox {
-  padding: 0;
-  flex: 0 0 auto;
-  margin: 0;
-  position: sticky;
-  top: 0;
-  background-color: var(--jp-layout-color1);
-}
-
-.jp-DebuggerKernelSource-filterBox-hidden {
-  display: none;
-}
-
 .jp-DebuggerKernelSource-source {
   display: flex;
   align-items: center;
@@ -49,4 +36,13 @@
 .jp-DebuggerKernelSource-source > svg {
   height: 16px;
   width: 16px;
+}
+
+.jp-DebuggerKernelSources-header .jp-Toolbar-item[data-jp-item-name='filter'] {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.jp-Debugger-KernelSources-Filter {
+  font-weight: 400;
 }

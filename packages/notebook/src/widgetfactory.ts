@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ITranslator } from '@jupyterlab/translation';
-import { INotebookModel } from './model';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory } from '@jupyterlab/docregistry';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
@@ -112,8 +114,9 @@ export namespace NotebookWidgetFactory {
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
-  export interface IOptions<T extends NotebookPanel>
-    extends DocumentRegistry.IWidgetFactoryOptions<T> {
+  export interface IOptions<
+    T extends NotebookPanel
+  > extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /*
      * A rendermime instance.
      */
@@ -148,8 +151,10 @@ export namespace NotebookWidgetFactory {
   /**
    * The interface for a notebook widget factory.
    */
-  export interface IFactory
-    extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+  export interface IFactory extends DocumentRegistry.IWidgetFactory<
+    NotebookPanel,
+    INotebookModel
+  > {
     /**
      * Whether to automatically start the preferred kernel.
      */
