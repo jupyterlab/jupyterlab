@@ -209,6 +209,10 @@ module.exports = {
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.PanelLayout.html',
       SplitPanel:
         'https://lumino.readthedocs.io/en/latest/api/classes/widgets.SplitPanel-1.html',
+      'SplitLayout.Alignment':
+        'https://lumino.readthedocs.io/en/latest/api/types/widgets.SplitLayout.Alignment.html',
+      'SplitLayout.Orientation':
+        'https://lumino.readthedocs.io/en/latest/api/types/widgets.SplitLayout.Orientation.html',
       TabBar:
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.TabBar-1.html',
       'TabBar.IOptions':
@@ -218,7 +222,9 @@ module.exports = {
       'TabPanel.IOptions':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.TabPanel.IOptions.html',
       Widget:
-        'https://lumino.readthedocs.io/en/latest/api/classes/widgets.Widget-1.html'
+        'https://lumino.readthedocs.io/en/latest/api/classes/widgets.Widget-1.html',
+      'Widget.Flag.IsVisible':
+        'https://lumino.readthedocs.io/widgets/classes/widget.html'
     },
     '@rjsf/utils': {
       FieldProps:
