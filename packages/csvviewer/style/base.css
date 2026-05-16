@@ -66,24 +66,48 @@
   background-color: var(--jp-scrollbar-background-color, #f0f0f0);
 }
 
-.jp-CSVViewer-grid .lm-ScrollBar-button:hover {
-  background-color: var(--jp-scrollbar-background-color, #dadada);
-}
-
-.jp-CSVViewer-grid .lm-ScrollBar-button.lm-mod-active {
-  background-color: var(--jp-scrollbar-background-color, #cdcdcd);
-}
-
 .jp-CSVViewer-grid .lm-ScrollBar-thumb {
   background: rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205));
 }
 
+/*
+ * Hover / active feedback. Blending towards `--jp-ui-font-color1`
+ * (dark in the light theme, light in the dark themes) keeps the
+ * thumb/button visibly more prominent on hover and click in every
+ * theme — in the dark themes the single `--jp-scrollbar-*` value would
+ * otherwise leave hover and active indistinguishable from the resting
+ * state.
+ */
+.jp-CSVViewer-grid .lm-ScrollBar-button:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--jp-scrollbar-background-color, #f0f0f0) 86%,
+    var(--jp-ui-font-color1) 14%
+  );
+}
+
+.jp-CSVViewer-grid .lm-ScrollBar-button.lm-mod-active {
+  background-color: color-mix(
+    in srgb,
+    var(--jp-scrollbar-background-color, #f0f0f0) 74%,
+    var(--jp-ui-font-color1) 26%
+  );
+}
+
 .jp-CSVViewer-grid .lm-ScrollBar-thumb:hover {
-  background: rgb(var(--jp-scrollbar-thumb-color, 186, 186, 186));
+  background: color-mix(
+    in srgb,
+    rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205)) 78%,
+    var(--jp-ui-font-color1) 22%
+  );
 }
 
 .jp-CSVViewer-grid .lm-ScrollBar-thumb.lm-mod-active {
-  background: rgb(var(--jp-scrollbar-thumb-color, 160, 160, 160));
+  background: color-mix(
+    in srgb,
+    rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205)) 62%,
+    var(--jp-ui-font-color1) 38%
+  );
 }
 
 .jp-CSVViewer-grid .lm-ScrollBar[data-orientation='horizontal'] {
