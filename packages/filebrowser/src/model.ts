@@ -4,7 +4,7 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { shouldOverwrite } from '@jupyterlab/docmanager';
 import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
@@ -444,8 +444,9 @@ export class FileBrowserModel implements IDisposable {
     // instead of Jupyter Notebook.
     const serverVersion = PageConfig.getNotebookVersion();
     const supportsChunked =
-      serverVersion < [4, 0, 0] /* Jupyter Server */ ||
-      serverVersion >= [5, 1, 0]; /* Jupyter Notebook >= 5.1.0 */
+      compareVersions(serverVersion, [4, 0, 0]) < 0 /* Jupyter Server */ ||
+      compareVersions(serverVersion, [5, 1, 0]) >=
+        0; /* Jupyter Notebook >= 5.1.0 */
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {

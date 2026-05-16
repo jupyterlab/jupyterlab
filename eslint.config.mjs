@@ -11,6 +11,7 @@ import reactPlugin from 'eslint-plugin-react';
 import tsdocPlugin from 'eslint-plugin-tsdoc';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
+import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 
 // Filter globals to remove any with leading/trailing whitespace
@@ -237,6 +238,7 @@ export default defineConfig([
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-untranslated-string': 'error',
       'tsdoc/syntax': 'warn',
+      'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -501,6 +503,14 @@ export default defineConfig([
             "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
       ]
+    }
+  },
+  {
+    files: ['**/schema/*.json'],
+    languageOptions: { parser: jsoncParser },
+    plugins: { jupyter: jupyterPlugin },
+    rules: {
+      'jupyter/no-schema-enum': 'error'
     }
   },
   prettierPluginRecommended,

@@ -334,3 +334,18 @@ export namespace PageConfig {
     }
   }
 }
+
+/**
+ * Compare two version tuples element-by-element.
+ */
+export function compareVersions(
+  a: [number, number, number],
+  b: [number, number, number]
+): number {
+  for (let index = 0; index < 3; index++) {
+    if (a[index] !== b[index]) {
+      return a[index] - b[index];
+    }
+  }
+  return 0;
+}
