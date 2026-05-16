@@ -2563,10 +2563,7 @@ namespace Private {
       return null;
     }
     let done = false;
-    future.done.then(
-      () => {
-        done = true;
-      },
+    future.done.finally(
       () => {
         done = true;
       }
