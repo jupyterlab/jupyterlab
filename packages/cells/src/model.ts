@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -756,6 +757,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     const codeCell = this.sharedModel as YCodeCell;
     globalModelDBMutex(() => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (event.type) {
         case 'add': {
           for (const output of event.newValues) {

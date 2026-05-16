@@ -48,7 +48,7 @@ describe('@jupyterlab/pluginmanager', () => {
     let optionalUserPlugin: JupyterLab.IPluginInfo;
 
     beforeEach(() => {
-      const token = new Token('A token');
+      const token = new Token('Test:token');
       providerPlugin = {
         id: 'extension:provider-plugin',
         extension: 'extension',

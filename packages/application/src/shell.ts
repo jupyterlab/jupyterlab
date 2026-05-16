@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -62,6 +63,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
 const DEFAULT_RANK = 900;
 
 const ACTIVITY_CLASS = 'jp-Activity';
+
+/**
+ * The default relative size of the down area when it is expanded.
+ */
+const DEFAULT_DOWN_AREA_SIZE = 0.25;
 
 /**
  * The JupyterLab application shell token.
@@ -128,7 +134,34 @@ export namespace ILabShell {
      * `contentVisibility` is only available in Chromium-based browsers.
      */
     hiddenMode: 'display' | 'scale' | 'contentVisibility';
+
+    /**
+     * Whether to show padding around the main dock panel area.
+     *
+     * Set to `false` for a more compact layout.
+     */
+    dockPanelPadding?: boolean;
+
+    /**
+     * Position of the side activity bars.
+     *
+     * The default is `'side'`, which keeps each activity bar on the natural
+     * side of its area (left for the left area, right for the right area).
+     * `'top'` and `'bottom'` move both activity bars to the top or bottom of
+     * their respective area, displaying the tabs horizontally.
+     */
+    activityBarPosition?: ActivityBarPosition;
   }
+
+  /**
+   * Position of a side activity bar within its area.
+   *
+   * `'side'` keeps the activity bar on the natural side of the area
+   * (left for the left area, right for the right area).
+   * `'top'` and `'bottom'` move the activity bar to the top or bottom
+   * of the side area, displaying the tabs horizontally.
+   */
+  export type ActivityBarPosition = 'side' | 'top' | 'bottom';
 
   /**
    * Widget position
@@ -238,6 +271,11 @@ export namespace ILabShell {
   }
 
   export interface IDownArea {
+    /**
+     * A flag denoting whether the down area has been collapsed.
+     */
+    readonly collapsed?: boolean;
+
     /**
      * The current widget that has down area focus.
      */
@@ -361,8 +399,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const downPanel = (this._downPanel = new TabPanelSvg({
       tabsMovable: true
     }));
-    const leftHandler = (this._leftHandler = new Private.SideBarHandler());
-    const rightHandler = (this._rightHandler = new Private.SideBarHandler());
+    const leftHandler = (this._leftHandler = new Private.SideBarHandler({
+      side: 'left',
+      host: hboxPanel
+    }));
+    const rightHandler = (this._rightHandler = new Private.SideBarHandler({
+      side: 'right',
+      host: hboxPanel
+    }));
     const rootLayout = new BoxLayout();
 
     headerPanel.id = 'jp-header-panel';
@@ -379,11 +423,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     leftHandler.sideBar.addClass('jp-mod-left');
     leftHandler.sideBar.node.setAttribute('role', 'complementary');
     leftHandler.stackedPanel.id = 'jp-left-stack';
+    leftHandler.area.addClass('jp-SideArea');
+    leftHandler.area.node.setAttribute('data-side', 'left');
 
     rightHandler.sideBar.addClass(SIDEBAR_CLASS);
     rightHandler.sideBar.addClass('jp-mod-right');
     rightHandler.sideBar.node.setAttribute('role', 'complementary');
     rightHandler.stackedPanel.id = 'jp-right-stack';
+    rightHandler.area.addClass('jp-SideArea');
+    rightHandler.area.node.setAttribute('data-side', 'right');
 
     dockPanel.node.setAttribute('role', 'main');
 
@@ -398,10 +446,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hsplitPanel.orientation = 'horizontal';
     bottomPanel.direction = 'bottom-to-top';
 
-    SplitPanel.setStretch(leftHandler.stackedPanel, 0);
+    SplitPanel.setStretch(leftHandler.area, 0);
     SplitPanel.setStretch(downPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
-    SplitPanel.setStretch(rightHandler.stackedPanel, 0);
+    SplitPanel.setStretch(rightHandler.area, 0);
 
     BoxPanel.setStretch(leftHandler.sideBar, 0);
     BoxPanel.setStretch(hsplitPanel, 1);
@@ -409,9 +457,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     SplitPanel.setStretch(vsplitPanel, 1);
 
-    hsplitPanel.addWidget(leftHandler.stackedPanel);
+    hsplitPanel.addWidget(leftHandler.area);
     hsplitPanel.addWidget(dockPanel);
-    hsplitPanel.addWidget(rightHandler.stackedPanel);
+    hsplitPanel.addWidget(rightHandler.area);
 
     vsplitPanel.addWidget(hsplitPanel);
     vsplitPanel.addWidget(downPanel);
@@ -576,6 +624,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get currentWidget(): Widget | null {
     return this._tracker.currentWidget;
+  }
+
+  /**
+   * Whether the down area is collapsed.
+   */
+  get downCollapsed(): boolean {
+    return this._downPanel.isHidden;
   }
 
   /**
@@ -797,7 +852,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       title => title.owner.id === id
     );
     if (tabIndex >= 0) {
+      const wasHidden = this._downPanel.isHidden;
       this._downPanel.currentIndex = tabIndex;
+      if (wasHidden) {
+        this._showDownPanel();
+        this._onLayoutModified();
+      }
+      this._downPanel.currentWidget?.activate();
       return;
     }
 
@@ -819,6 +880,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * @param area Name of area to activate
    */
   activateArea(area: ILabShell.Area = 'main'): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (area) {
       case 'main':
         {
@@ -974,6 +1036,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           }
         : undefined;
 
+    if (options?.rank !== undefined) {
+      this._sideOptionsCache.set(widget, {
+        ...this._sideOptionsCache.get(widget),
+        rank: options.rank
+      });
+    }
+
     switch (area || 'main') {
       case 'bottom':
         return this._addToBottomArea(widget, options);
@@ -997,13 +1066,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Move a widget type to a new area.
+   * Move a widget to a new area and update the shell user layout.
    *
-   * The type is determined from the `widget.id` and fallback to `widget.id`.
+   * The widget is reparented to `area` immediately. The type used as the
+   * user-layout key is determined from `widget.id`, falling back to
+   * `widget.id` itself.
    *
    * #### Notes
-   * If `mode` is undefined, both mode are updated.
-   * The new layout is now persisted.
+   * If `mode` is undefined, both modes are updated in the user layout.
+   * When `mode` is set, only that mode's user layout is updated, but the
+   * live widget is still reparented regardless of mode.
+   *
+   * The new layout is stored in the shell user layout. Callers are
+   * responsible for persisting it when needed.
    *
    * @param widget Widget to move
    * @param area New area
@@ -1019,12 +1094,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'multiple-document': ILabShell.IUserLayout;
   } {
     const type = this._idTypeMap.get(widget.id) ?? widget.id;
+    const rank = this._sideOptionsCache.get(widget)?.rank;
     for (const m of ['single-document', 'multiple-document'].filter(
       c => !mode || c === mode
     )) {
+      const position = this._userLayout[m as DockPanel.Mode][type];
       this._userLayout[m as DockPanel.Mode][type] = {
-        ...this._userLayout[m as DockPanel.Mode][type],
-        area
+        ...position,
+        area,
+        ...(rank !== undefined
+          ? {
+              options: {
+                ...position?.options,
+                rank
+              }
+            }
+          : {})
       };
     }
 
@@ -1047,6 +1132,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   collapseRight(): void {
     this._rightHandler.collapse();
     this._onLayoutModified();
+  }
+
+  /**
+   * Collapse the down area.
+   */
+  collapseDown(): void {
+    if (!this._downPanel.isHidden) {
+      this._hideDownPanel();
+      this._onLayoutModified();
+    }
   }
 
   /**
@@ -1081,6 +1176,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   expandRight(): void {
     this._rightHandler.expand();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Expand the down area.
+   */
+  expandDown(): void {
+    if (this._downPanel.stackedPanel.widgets.length === 0) {
+      return;
+    }
+
+    this._showDownPanel();
+    this._downPanel.currentWidget?.activate();
     this._onLayoutModified();
   }
 
@@ -1207,12 +1315,42 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Rehydrate the down area
     if (downArea) {
       const { currentWidget, widgets, size } = downArea;
+      const collapsed = downArea.collapsed ?? !size;
 
       const widgetIds = widgets?.map(widget => widget.id) ?? [];
+      const otherAreaWidgetIds = new Set<string>();
+      const collectMainWidgetIds = (
+        area?: ILabShell.AreaConfig | null
+      ): void => {
+        if (!area) {
+          return;
+        }
+        if (area.type === 'tab-area') {
+          area.widgets.forEach(widget => {
+            otherAreaWidgetIds.add(widget.id);
+          });
+          return;
+        }
+        area.children.forEach(collectMainWidgetIds);
+      };
+      collectMainWidgetIds(mainArea?.dock?.main);
+      leftArea?.widgets?.forEach(widget => {
+        otherAreaWidgetIds.add(widget.id);
+      });
+      rightArea?.widgets?.forEach(widget => {
+        otherAreaWidgetIds.add(widget.id);
+      });
+
       // Remove absent widgets
       this._downPanel.tabBar.titles
         .filter(title => !widgetIds.includes(title.owner.id))
-        .map(title => title.owner.close());
+        .forEach(title => {
+          if (otherAreaWidgetIds.has(title.owner.id)) {
+            title.owner.parent = null;
+          } else {
+            title.owner.close();
+          }
+        });
       // Add new widgets
       const titleIds = this._downPanel.tabBar.titles.map(
         title => title.owner.id
@@ -1239,18 +1377,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         const index = this._downPanel.stackedPanel.widgets.findIndex(
           widget => widget.id === currentWidget.id
         );
-        if (index) {
+        if (index >= 0) {
           this._downPanel.currentIndex = index;
-          this._downPanel.currentWidget?.activate();
         }
       }
 
-      if (size && size > 0.0) {
-        this._vsplitPanel.setRelativeSizes([1.0 - size, size]);
+      if (!collapsed && widgets?.length && size && size > 0.0) {
+        this._showDownPanel(size);
+        this._downPanel.currentWidget?.activate();
       } else {
-        // Close all tabs and hide the panel
-        this._downPanel.stackedPanel.widgets.forEach(widget => widget.close());
-        this._downPanel.hide();
+        this._hideDownPanel();
+        if (size && size > 0.0) {
+          // Remember the saved size so a later expand restores the user's
+          // previous height. `_hideDownPanel` seeds `_lastDownAreaSize`
+          // from the current splitter, which at cold startup reflects the
+          // default layout rather than the persisted value.
+          this._lastDownAreaSize = size;
+        }
       }
     }
 
@@ -1301,9 +1444,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
             : this._dockPanel.saveLayout()
       },
       downArea: {
+        collapsed: this.downCollapsed,
         currentWidget: this._downPanel.currentWidget,
         widgets: Array.from(this._downPanel.stackedPanel.widgets),
-        size: this._vsplitPanel.relativeSizes()[1]
+        size:
+          this._downPanel.stackedPanel.widgets.length === 0
+            ? 0
+            : this.downCollapsed
+              ? this._lastDownAreaSize
+              : this._vsplitPanel.relativeSizes()[1]
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
@@ -1373,6 +1522,43 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           break;
       }
     }
+
+    if (config.dockPanelPadding !== undefined) {
+      if (config.dockPanelPadding === false) {
+        this._dockPanel.node.style.setProperty(
+          '--jp-private-dock-panel-padding',
+          '0px'
+        );
+      } else {
+        this._dockPanel.node.style.removeProperty(
+          '--jp-private-dock-panel-padding'
+        );
+      }
+      this._dockPanel.fit();
+    }
+
+    if (config.activityBarPosition !== undefined) {
+      this._setActivityBarPosition('left', config.activityBarPosition);
+      this._setActivityBarPosition('right', config.activityBarPosition);
+    }
+  }
+
+  /**
+   * Move the activity bar of a side area to a new position.
+   *
+   * @param side The side area to update.
+   * @param position The new position of the activity bar.
+   */
+  private _setActivityBarPosition(
+    side: 'left' | 'right',
+    position: ILabShell.ActivityBarPosition
+  ): void {
+    const handler = side === 'left' ? this._leftHandler : this._rightHandler;
+    if (handler.position === position) {
+      return;
+    }
+    handler.position = position;
+    this._onLayoutModified();
   }
 
   /**
@@ -1394,6 +1580,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._menuHandler.panel.children();
       case 'bottom':
         return this._bottomPanel.children();
+      case 'down':
+        return this._downPanel.stackedPanel.children();
       default:
         throw new Error(`Invalid area: ${area}`);
     }
@@ -1412,7 +1600,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
     const inputElement = this._titleHandler.inputElement;
-    inputElement.value = current ? current.title.label : '';
+    inputElement.value = current ? TabBarSvg.titleLabel(current.title) : '';
     inputElement.title = current ? current.title.caption : '';
   }
 
@@ -1652,11 +1840,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
 
     this._downPanel.addWidget(widget);
-    this._onLayoutModified();
 
     if (this._downPanel.isHidden) {
-      this._downPanel.show();
+      this._showDownPanel();
     }
+
+    this._onLayoutModified();
+  }
+
+  private _showDownPanel(size: number = this._lastDownAreaSize): void {
+    const downSize = size > 0.0 ? size : DEFAULT_DOWN_AREA_SIZE;
+    this._lastDownAreaSize = downSize;
+    this._vsplitPanel.setRelativeSizes([
+      Math.max(1.0 - downSize, 0.0),
+      downSize
+    ]);
+    this._downPanel.show();
+  }
+
+  private _hideDownPanel(): void {
+    const size = this._vsplitPanel.relativeSizes()[1];
+    if (size > 0.0) {
+      this._lastDownAreaSize = size;
+    }
+    this._downPanel.hide();
   }
 
   /*
@@ -1742,7 +1949,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _onTabPanelChanged(): void {
     if (this._downPanel.stackedPanel.widgets.length === 0) {
-      this._downPanel.hide();
+      this._hideDownPanel();
     }
     this._onLayoutModified();
   }
@@ -1820,6 +2027,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _dockPanel: DockPanel;
   private _downPanel: TabPanel;
   private _isRestored = false;
+  private _lastDownAreaSize = DEFAULT_DOWN_AREA_SIZE;
   private _layoutModified = new Signal<this, void>(this);
   private _layoutDebouncer = new Debouncer(() => {
     this._layoutModified.emit(undefined);
@@ -1965,18 +2173,31 @@ namespace Private {
     /**
      * Construct a new side bar handler.
      */
-    constructor() {
+    constructor(options: SideBarHandler.IOptions) {
+      this._side = options.side;
+      this._host = options.host;
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true,
         orientation: 'vertical'
       });
+      // Mirror the initial position on the bar via `data-side`. The setter
+      // keeps it in sync on subsequent transitions.
+      this._sideBar.node.setAttribute('data-side', this._side);
       this._stackedPanel = new StackedPanel();
+      this._area = new BoxPanel({ direction: 'top-to-bottom', spacing: 0 });
+      // The stacked panel always lives inside the area wrapper. It is the
+      // only stretchable child so the activity bar (when inside the wrapper)
+      // takes only its natural size at the top or bottom.
+      BoxPanel.setStretch(this._stackedPanel, 1);
+      BoxPanel.setStretch(this._sideBar, 0);
+      this._area.addWidget(this._stackedPanel);
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
       this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._sideBar.tabCloseRequested.connect(this._onTabCloseRequested, this);
       this._sideBar.tabActivateRequested.connect(
         this._onTabActivateRequested,
         this
@@ -2006,6 +2227,77 @@ namespace Private {
     }
 
     /**
+     * Get the wrapper panel for this side area.
+     *
+     * The wrapper always contains the stacked panel. When the activity bar is
+     * positioned inside the area (top or bottom), it is also a child of this
+     * wrapper. The wrapper is what gets added to the main horizontal split.
+     */
+    get area(): BoxPanel {
+      return this._area;
+    }
+
+    /**
+     * Get the current position of the activity bar.
+     */
+    get position(): ILabShell.ActivityBarPosition {
+      return this._position;
+    }
+
+    /**
+     * Set the position of the activity bar relative to the area.
+     *
+     * In `'side'` mode the activity bar is reattached to the host panel
+     * (e.g. the shell's hboxPanel) on its natural side. In `'top'` or
+     * `'bottom'` mode the activity bar is reparented inside the area wrapper
+     * above or below the stacked panel and laid out horizontally.
+     */
+    set position(value: ILabShell.ActivityBarPosition) {
+      if (this._position === value) {
+        return;
+      }
+      this._position = value;
+
+      // The user-collapse flag only has meaning in horizontal mode and should
+      // not carry over from a prior interaction in a different mode.
+      this._isCollapsedByUser = false;
+
+      // Detach the activity bar from its current parent before reattaching
+      // it to the new one (host or area wrapper).
+      this._sideBar.parent = null;
+
+      // Update the orientation and the position-related attributes on the
+      // activity bar. The icon/label rotation depends on these.
+      const isLeft = this._side === 'left';
+      this._sideBar.orientation = value === 'side' ? 'vertical' : 'horizontal';
+      // Keep `jp-mod-left`/`jp-mod-right` for backward compatibility with
+      // existing themes that target those classes.
+      this._sideBar.toggleClass('jp-mod-left', isLeft && value === 'side');
+      this._sideBar.toggleClass('jp-mod-right', !isLeft && value === 'side');
+      // `data-side` mirrors the `data-orientation` attribute set by Lumino
+      // and is the canonical hook for new CSS rules.
+      const dataSide = value === 'side' ? (isLeft ? 'left' : 'right') : value;
+      this._sideBar.node.setAttribute('data-side', dataSide);
+
+      // In 'side' mode, clicking the active tab collapses the area (the
+      // activity bar stays as a thin strip). That collapse UX makes no sense
+      // when the activity bar is at the top or bottom — clicking would just
+      // leave an empty horizontal strip — so disable deselection there.
+      this._sideBar.allowDeselect = value === 'side';
+
+      if (value === 'side') {
+        const index = isLeft ? 0 : this._host.widgets.length;
+        this._host.insertWidget(index, this._sideBar);
+      } else if (value === 'top') {
+        this._area.insertWidget(0, this._sideBar);
+      } else {
+        this._area.addWidget(this._sideBar);
+      }
+
+      this._refreshVisibility();
+    }
+
+    /**
      * Signal fires when the stack panel or the sidebar changes
      */
     get updated(): ISignal<SideBarHandler, void> {
@@ -2031,13 +2323,19 @@ namespace Private {
      *
      * #### Notes
      * This will open the most recently used tab, or the first tab
-     * if there is no most recently used.
+     * if there is no most recently used. In `'top'` or `'bottom'` mode it
+     * also re-shows the wrapper area if a previous `collapse()` call hid it.
      */
     expand(): void {
+      this._isCollapsedByUser = false;
       const previous =
         this._lastCurrent || (this._items.length > 0 && this._items[0].widget);
       if (previous) {
         this.activate(previous.id);
+      } else {
+        // No tab to activate, but we still need to reflect the cleared
+        // collapse flag (relevant in 'top'/'bottom' mode).
+        this._refreshVisibility();
       }
     }
 
@@ -2049,6 +2347,7 @@ namespace Private {
     activate(id: string): void {
       const widget = this._findWidgetByID(id);
       if (widget) {
+        this._isCollapsedByUser = false;
         this._sideBar.currentTitle = widget.title;
         widget.activate();
       }
@@ -2063,9 +2362,16 @@ namespace Private {
 
     /**
      * Collapse the sidebar so no items are expanded.
+     *
+     * #### Notes
+     * In `'side'` mode this only deselects the active tab, leaving the
+     * activity bar visible. In `'top'` or `'bottom'` mode it also hides the
+     * wrapper area entirely so the column can reclaim its space.
      */
     collapse(): void {
+      this._isCollapsedByUser = true;
       this._sideBar.currentTitle = null;
+      this._refreshVisibility();
     }
 
     /**
@@ -2083,7 +2389,7 @@ namespace Private {
       const title = this._sideBar.insertTab(index, widget.title);
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
-      title.dataset = { id: widget.id };
+      title.dataset = { ...title.dataset, id: widget.id };
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
@@ -2139,14 +2445,48 @@ namespace Private {
      * Rehydrate the side bar.
      */
     rehydrate(data: ILabShell.ISideArea): void {
+      if (Array.isArray(data.widgets)) {
+        const widgetIds = data.widgets.map(widget => widget.id);
+        const widgetIdSet = new Set(widgetIds);
+
+        // Add widgets that are in the saved layout but not currently
+        // in the sidebar.
+        const currentIds = this._stackedPanel.widgets.map(widget => widget.id);
+        data.widgets
+          .filter(widget => !currentIds.includes(widget.id))
+          .forEach(widget => {
+            this.addWidget(widget, DEFAULT_RANK);
+          });
+
+        // Merge the saved order into the current sidebar slots so widgets
+        // absent from the saved layout keep their rank-relative positions.
+        let savedIndex = 0;
+        const targetIds = this._stackedPanel.widgets.map(widget =>
+          widgetIdSet.has(widget.id) ? widgetIds[savedIndex++] : widget.id
+        );
+
+        targetIds.forEach((id, targetIndex) => {
+          const currentIndex = this._stackedPanel.widgets.findIndex(
+            widget => widget.id === id
+          );
+          if (currentIndex >= 0 && currentIndex !== targetIndex) {
+            const widget = this._stackedPanel.widgets[currentIndex];
+            ArrayExt.move(this._items, currentIndex, targetIndex);
+            this._stackedPanel.insertWidget(targetIndex, widget);
+            this._sideBar.insertTab(targetIndex, widget.title);
+          }
+        });
+      }
+
+      if (data.visible) {
+        this.show();
+      } else {
+        this.hide();
+      }
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
-      }
-      if (data.collapsed) {
+      } else if (data.collapsed) {
         this.collapse();
-      }
-      if (!data.visible) {
-        this.hide();
       }
       if (data.widgetStates) {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {
@@ -2158,7 +2498,11 @@ namespace Private {
                 typeof expansion === 'boolean' &&
                 w.content instanceof AccordionPanel
               ) {
-                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+                if (expansion) {
+                  w.content.expand(widx);
+                } else {
+                  w.content.collapse(widx);
+                }
               }
             });
             if (state.sizes) {
@@ -2182,6 +2526,7 @@ namespace Private {
      */
     show(): void {
       this._isHiddenByUser = false;
+      this._isCollapsedByUser = false;
       this._refreshVisibility();
     }
 
@@ -2219,10 +2564,36 @@ namespace Private {
      * Refresh the visibility of the side bar and stacked panel.
      */
     private _refreshVisibility(): void {
-      this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+      if (this._position === 'side') {
+        // In 'side' mode the activity bar lives outside the wrapper and the
+        // wrapper holds only the stack panel. Hiding the stack panel when no
+        // widget is current collapses the area down to the activity bar.
+        this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+      } else {
+        // In 'top'/'bottom' mode the activity bar lives inside the wrapper
+        // alongside the stack panel. The stack panel stays visible (and
+        // stretches as an empty area when no widget is current) so the
+        // activity bar stays anchored at the top or bottom of the wrapper.
+        this._stackedPanel.setHidden(this._items.length === 0);
+      }
       this._sideBar.setHidden(
         this._isHiddenByUser || this._sideBar.titles.length === 0
       );
+      // Hide the wrapper area so the parent split panel can reclaim its
+      // allocated width when no contents would be visible.
+      if (this._position === 'side') {
+        // In 'side' mode wrapper visibility tracks the stack panel.
+        this._area.setHidden(this._stackedPanel.isHidden);
+      } else {
+        // In 'top'/'bottom' mode the wrapper hides only when the user has
+        // explicitly collapsed the side area or there are no widgets at all.
+        // Toggling the activity bar visibility ('Show Left/Right Activity Bar')
+        // hides only the bar — the stack panel and selected widget stay
+        // visible inside the wrapper, matching the 'side' mode semantic.
+        this._area.setHidden(
+          this._isCollapsedByUser || this._sideBar.titles.length === 0
+        );
+      }
       this._updated.emit();
     }
 
@@ -2259,6 +2630,16 @@ namespace Private {
       args.title.owner.activate();
     }
 
+    /**
+     * Handle a `tabCloseRequested` signal from the sidebar.
+     */
+    private _onTabCloseRequested(
+      sender: TabBar<Widget>,
+      args: TabBar.ITabCloseRequestedArgs<Widget>
+    ): void {
+      args.title.owner.close();
+    }
+
     /*
      * Handle the `widgetRemoved` signal from the stacked panel.
      */
@@ -2272,11 +2653,39 @@ namespace Private {
     }
 
     private _isHiddenByUser = false;
+    private _isCollapsedByUser = false;
     private _items = new Array<Private.IRankItem>();
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
+    private _area: BoxPanel;
+    private _host: BoxPanel;
     private _lastCurrent: Widget | null;
+    private _side: 'left' | 'right';
+    private _position: ILabShell.ActivityBarPosition = 'side';
     private _updated: Signal<SideBarHandler, void> = new Signal(this);
+  }
+
+  /**
+   * The namespace for the `SideBarHandler` statics.
+   */
+  export namespace SideBarHandler {
+    /**
+     * The options used to create a `SideBarHandler`.
+     */
+    export interface IOptions {
+      /**
+       * The natural side of the area (`'left'` or `'right'`). The activity
+       * bar lives on this side when the position is `'side'`.
+       */
+      side: 'left' | 'right';
+
+      /**
+       * The host panel that owns the activity bar in `'side'` mode. The
+       * handler reattaches the bar to this host on transitions back to
+       * `'side'` so the shell does not need to manage that reparenting.
+       */
+      host: BoxPanel;
+    }
   }
 
   export class SkipLinkWidget extends Widget {
@@ -2388,7 +2797,7 @@ namespace Private {
         if (widget == null) {
           return;
         }
-        const oldName = widget.title.label;
+        const oldName = TabBarSvg.titleLabel(widget.title);
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();

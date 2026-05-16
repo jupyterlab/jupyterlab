@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DOMUtils } from '@jupyterlab/apputils';
 import type {
@@ -175,7 +176,6 @@ export type NotebookMode = 'command' | 'edit';
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
-  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
@@ -615,6 +615,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     for (const cell of cells) {
       this._insertCell(++index, cell);
     }
+    this._syncMarkdownCellTrust();
     newValue.cells.changed.connect(this._onCellsChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -628,6 +629,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     args: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this.removeHeader();
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add': {
         let index = 0;
@@ -675,6 +677,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this.addHeader();
     }
 
+    this._syncMarkdownCellTrust();
     this.update();
   }
 
@@ -697,10 +700,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       default:
         widget = this._createRawCell(cell as IRawCellModel);
     }
+    cell.stateChanged.connect(this._onCellStateChanged, this);
     widget.inViewportChanged.connect(this._onCellInViewportChanged, this);
     widget.addClass(NB_CELL_CLASS);
 
     ArrayExt.insert(this.cellsArray, index, widget);
+    this._syncMarkdownCellTrust(widget);
     this.onCellInserted(index, widget);
 
     this._scheduleCellRenderOnIdle();
@@ -725,9 +730,15 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       translator: this.translator
     };
     const cell = this.contentFactory.createCodeCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
-    cell.syncScrolled = true;
+    if (cell.syncCollapse === undefined) {
+      cell.syncCollapse = true;
+    }
+    if (cell.syncEditable === undefined) {
+      cell.syncEditable = true;
+    }
+    if (cell.syncScrolled === undefined) {
+      cell.syncScrolled = true;
+    }
     cell.outputArea.inputRequested.connect((_, stdin) => {
       this._onInputRequested(cell).catch(reason => {
         console.error('Failed to scroll to cell requesting input.', reason);
@@ -759,8 +770,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
+    if (cell.syncCollapse === undefined) {
+      cell.syncCollapse = true;
+    }
+    if (cell.syncEditable === undefined) {
+      cell.syncEditable = true;
+    }
     // Connect collapsed signal for each markdown cell widget
     cell.headingCollapsedChanged.connect(this._onCellCollapsed, this);
     return cell;
@@ -779,8 +794,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       placeholder: this._notebookConfig.windowingMode !== 'none'
     };
     const cell = this.contentFactory.createRawCell(options);
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
+    if (cell.syncCollapse === undefined) {
+      cell.syncCollapse = true;
+    }
+    if (cell.syncEditable === undefined) {
+      cell.syncEditable = true;
+    }
     return cell;
   }
 
@@ -789,10 +808,58 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
    */
   private _removeCell(index: number): void {
     const widget = this.cellsArray[index];
+    widget.model.stateChanged.disconnect(this._onCellStateChanged, this);
     widget.parent = null;
     ArrayExt.removeAt(this.cellsArray, index);
     this.onCellRemoved(index, widget);
     widget.dispose();
+  }
+
+  private _shouldTrustMarkdown(): boolean {
+    // Note: this returns false in a notebook without trsuted code cells;
+    // This is intended since only Code cells carry trust status on disk.
+    if (!this._notebookModel) {
+      return false;
+    }
+    let hasCodeCell = false;
+    for (const cell of this._notebookModel.cells) {
+      if (cell.type === 'code') {
+        hasCodeCell = true;
+        if (!cell.trusted) {
+          return false;
+        }
+      }
+    }
+    return hasCodeCell;
+  }
+
+  private _syncMarkdownCellTrust(cell?: Cell): void {
+    const trusted = this._shouldTrustMarkdown();
+    const trustHandler = this.rendermime.trustHandler;
+    if (!trustHandler) {
+      return;
+    }
+
+    const cells = cell ? [cell] : this.widgets;
+    for (const widget of cells) {
+      if (!(widget instanceof MarkdownCell)) {
+        continue;
+      }
+      if (trusted) {
+        trustHandler.markTrusted(widget.node);
+      } else {
+        trustHandler.unmarkTrusted(widget.node);
+      }
+    }
+  }
+
+  private _onCellStateChanged(
+    model: ICellModel,
+    args: IChangedArgs<any>
+  ): void {
+    if (args.name === 'trusted') {
+      this._syncMarkdownCellTrust();
+    }
   }
 
   /**
@@ -821,6 +888,14 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     cell
       .getHeadings()
       .then(() => {
+        // Heading parsing is async; ignore stale callbacks that no longer match
+        // the current collapsed state.
+        if (
+          cell.isDisposed ||
+          (cell instanceof MarkdownCell && cell.headingCollapsed !== collapsed)
+        ) {
+          return;
+        }
         NotebookActions.setHeadingCollapse(cell, collapsed, this);
         this._cellCollapsed.emit(cell);
       })
@@ -1635,6 +1710,7 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
     super({
       renderer: {
         createOuter(): HTMLElement {
@@ -1644,7 +1720,7 @@ export class Notebook extends StaticNotebook {
         createViewport(): HTMLElement {
           const el = document.createElement('div');
           el.setAttribute('role', 'feed');
-          el.setAttribute('aria-label', 'Cells');
+          el.setAttribute('aria-label', trans.__('Cells'));
           return el;
         },
 
@@ -2034,7 +2110,8 @@ export class Notebook extends StaticNotebook {
       this._selectionChanged.emit(void 0);
     }
     // Make sure we have a valid active cell.
-    this.activeCellIndex = this.activeCellIndex; // eslint-disable-line
+    // eslint-disable-next-line no-self-assign
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
@@ -2823,7 +2900,9 @@ export class Notebook extends StaticNotebook {
     if (widget && widget.editorWidget?.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
-      event.preventDefault();
+      if (!target.closest('[data-jp-suppress-context-menu]')) {
+        event.preventDefault();
+      }
     }
   }
 
@@ -3011,6 +3090,7 @@ export class Notebook extends StaticNotebook {
     event.stopPropagation();
 
     // If in select mode, update the selection
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (this._mouseMode) {
       case 'select': {
         const target = event.target as HTMLElement;
