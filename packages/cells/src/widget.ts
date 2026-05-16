@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Extension } from '@codemirror/state';
+import { Compartment, Extension } from '@codemirror/state';
 
 import { placeholder as editorPlaceholder, EditorView } from '@codemirror/view';
 
@@ -2473,7 +2473,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!this.placeholder && !this.isDisposed) {
       this.renderCollapseButtons(widget);
       this.inputArea!.renderInput(widget);
-      this._updateEditModePlaceholderText();
     }
   }
 
@@ -2483,8 +2482,19 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   protected showEditor(): void {
     this.removeClass(RENDERED_CLASS);
     if (!this.placeholder && !this.isDisposed) {
+      const notebook = this.node.closest('.jp-Notebook');
+      if (!notebook) {
+        this.setEditorPlaceholderMode('edit');
+      } else {
+        this.setEditorPlaceholderMode(
+          notebook.classList.contains('jp-mod-editMode') &&
+            this.node.classList.contains('jp-mod-active')
+            ? 'edit'
+            : 'command'
+        );
+      }
       this.inputArea!.showEditor();
-      this._updateEditModePlaceholderText();
+      this._updateEditorPlaceholder();
       // if this is going to be a heading, place the cursor accordingly
       let numHashAtStart = (this.model.sharedModel
         .getSource()
@@ -2508,23 +2518,29 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
     const base = super.getEditorOptions() ?? {};
-    const editModePlaceholder = (_view: EditorView): HTMLElement => {
-      const placeholder = document.createElement('span');
-      placeholder.textContent = this._shouldShowEditModePlaceholder()
-        ? this._editModePlaceholder
-        : '';
-      return placeholder;
-    };
     base.extensions = [
       ...(base.extensions ?? []),
-      editorPlaceholder(editModePlaceholder),
+      this._placeholderCompartment.of(
+        editorPlaceholder(this._emptyPlaceholder)
+      ),
       EditorView.updateListener.of(update => {
-        if (update.focusChanged || update.docChanged) {
-          this._updateEditModePlaceholderText();
+        this._placeholderEditorView = update.view;
+        if (update.focusChanged || update.docChanged || update.selectionSet) {
+          this._updateEditorPlaceholder(update.view);
         }
       })
     ];
     return base;
+  }
+
+  /**
+   * Update the markdown editor placeholder for notebook mode.
+   */
+  setEditorPlaceholderMode(mode: 'command' | 'edit'): void {
+    if (this._placeholderMode !== mode) {
+      this._placeholderMode = mode;
+    }
+    this._updateEditorPlaceholder();
   }
 
   /*
@@ -2589,43 +2605,27 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return Promise.resolve();
   }
 
-  /**
-   * Whether the markdown edit placeholder should be shown.
-   *
-   * #### Notes
-   * In notebook context, tie the placeholder visibility to edit mode.
-   * For standalone cells, always show it when the editor is visible.
-   */
-  private _shouldShowEditModePlaceholder(): boolean {
-    if (this._rendered) {
-      return false;
-    }
-    const notebook = this.node.closest('.jp-Notebook');
-    if (!notebook) {
-      return true;
-    }
-    return (
-      notebook.classList.contains('jp-mod-editMode') &&
-      this.node.classList.contains('jp-mod-active')
-    );
-  }
-
-  /**
-   * Synchronize markdown edit placeholder text to notebook mode/focus.
-   */
-  private _updateEditModePlaceholderText(): void {
+  private _updateEditorPlaceholder(view?: EditorView): void {
     if (this.placeholder || this.isDisposed) {
       return;
     }
-    const placeholder = this.editorWidget?.node.querySelector(
-      '.cm-placeholder'
-    ) as HTMLElement | null;
-    if (!placeholder) {
+    const editorView = view ?? this._placeholderEditorView;
+    if (!editorView) {
       return;
     }
-    placeholder.textContent = this._shouldShowEditModePlaceholder()
-      ? this._editModePlaceholder
-      : '';
+    const placeholderText =
+      this._placeholderMode === 'edit'
+        ? this._editModePlaceholder
+        : this._emptyPlaceholder;
+    if (placeholderText === this._activePlaceholderText) {
+      return;
+    }
+    this._activePlaceholderText = placeholderText;
+    editorView.dispatch({
+      effects: this._placeholderCompartment.reconfigure(
+        editorPlaceholder(placeholderText)
+      )
+    });
   }
 
   /**
@@ -2660,6 +2660,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
+  private _placeholderCompartment = new Compartment();
+  private _placeholderMode: 'command' | 'edit' = 'command';
+  private _placeholderEditorView: EditorView | null = null;
+  private _activePlaceholderText: string | null = null;
   private _editModePlaceholder: string;
 }
 

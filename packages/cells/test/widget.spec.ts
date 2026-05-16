@@ -1088,6 +1088,7 @@ describe('cells/widget', () => {
         widget.addClass('jp-mod-active');
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
+        widget.setEditorPlaceholderMode('edit');
         widget.editor!.focus();
         await framePromise();
         const placeholder = widget.node.querySelector('.cm-placeholder');
@@ -1097,7 +1098,7 @@ describe('cells/widget', () => {
         host.remove();
       });
 
-      it('should hide markdown help placeholder in command mode', async () => {
+      it('should show command placeholder text in command mode', async () => {
         const model = new MarkdownCellModel();
         const host = document.createElement('div');
         host.classList.add('jp-Notebook', 'jp-mod-commandMode');
@@ -1113,10 +1114,13 @@ describe('cells/widget', () => {
         widget.addClass('jp-mod-active');
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
+        widget.setEditorPlaceholderMode('command');
         widget.editor!.focus();
         await framePromise();
         const placeholder = widget.node.querySelector('.cm-placeholder');
-        expect(placeholder?.textContent).toBe('');
+        expect(placeholder?.textContent).toBe(
+          'Double-click (or press Enter) to edit'
+        );
         host.remove();
       });
     });

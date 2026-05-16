@@ -2510,6 +2510,12 @@ export class Notebook extends StaticNotebook {
       } else {
         widget.removeClass(SELECTED_CLASS);
       }
+
+      if (widget instanceof MarkdownCell) {
+        widget.setEditorPlaceholderMode(
+          this.mode === 'edit' && widget === activeCell ? 'edit' : 'command'
+        );
+      }
     }
 
     if (activeCell && count > 1) {
