@@ -4,11 +4,8 @@
 |----------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-<<<<<<< mrkdownPlaceholder
-import { Compartment, Extension } from '@codemirror/state';
-=======
+import { Compartment } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
->>>>>>> main
 
 import { placeholder as editorPlaceholder, EditorView } from '@codemirror/view';
 
