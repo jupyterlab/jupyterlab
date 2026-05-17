@@ -11,9 +11,17 @@ export function sleep<T>(
   milliseconds: number = 0,
   value?: T
 ): Promise<T> | Promise<void> {
-  return new Promise<T>((resolve, reject) => {
+  if (arguments.length < 2) {
+    return new Promise<void>(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, milliseconds);
+    });
+  }
+
+  return new Promise<T>(resolve => {
     setTimeout(() => {
-      resolve(value);
+      resolve(value as T);
     }, milliseconds);
   });
 }

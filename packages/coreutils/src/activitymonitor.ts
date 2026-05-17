@@ -61,7 +61,9 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
    * A signal handler for the monitored signal.
    */
   private _onSignalFired(sender: Sender, args: Args): void {
-    clearTimeout(this._timer);
+    if (this._timer !== undefined) {
+      clearTimeout(this._timer);
+    }
     this._sender = sender;
     this._args = args;
     this._timer = setTimeout(() => {
@@ -72,7 +74,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     }, this._timeout);
   }
 
-  private _timer: ReturnType<typeof setTimeout> = -1;
+  private _timer: ReturnType<typeof setTimeout> | undefined;
   private _timeout = -1;
   private _sender: Sender;
   private _args: Args;

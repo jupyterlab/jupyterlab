@@ -61,8 +61,14 @@ export namespace PageConfig {
         };
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
-          fullPath = path.resolve(cli['jupyter-config-data']);
-        } else if ('JUPYTER_CONFIG_DATA' in process.env) {
+          const cliPath = cli['jupyter-config-data'];
+          if (typeof cliPath === 'string') {
+            fullPath = path.resolve(cliPath);
+          }
+        } else if (
+          process.env &&
+          typeof process.env['JUPYTER_CONFIG_DATA'] === 'string'
+        ) {
           fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
         }
         if (fullPath) {
