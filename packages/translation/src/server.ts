@@ -49,10 +49,12 @@ export async function requestTranslationsAPI<T>(
   }
 
   if (!response.ok) {
-    const message =
+    const rawMessage =
       typeof data === 'object' && data !== null && 'message' in data
         ? (data as { message?: unknown }).message
         : data;
+    const message =
+      typeof rawMessage === 'string' ? rawMessage : JSON.stringify(rawMessage);
     throw new ServerConnection.ResponseError(response, message);
   }
 

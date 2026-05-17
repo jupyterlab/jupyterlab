@@ -255,7 +255,11 @@ namespace Private {
       // msg.buffers elements could be either views or ArrayBuffers
       // buffers elements are ArrayBuffers
       const b = origBuffers[i];
-      buffers.push(ArrayBuffer.isView(b) ? b.buffer : b);
+      const view =
+        b instanceof ArrayBuffer
+          ? new Uint8Array(b)
+          : new Uint8Array(b.buffer, b.byteOffset, b.byteLength);
+      buffers.push(view.slice().buffer);
     }
     const nbufs = buffers.length;
     offsets.push(4 * (nbufs + 1));

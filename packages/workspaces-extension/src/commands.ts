@@ -374,7 +374,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           await app.serviceManager.workspaces.fetch(workspaceId);
         const tabs = (
           workspace.data['layout-restorer:data'] as IWorkspaceLayoutRestorerData
-        )?.main?.dock?.widgets?.length;
+        )?.main?.dock?.widgets?.length ?? 0;
 
         const result = await showDialog({
           title: trans.__('Reset Workspace'),
@@ -446,6 +446,11 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
             const fullFile = await contents.get(fileModel.path, {
               content: true
             });
+            if (typeof fullFile.content !== 'string') {
+              throw new Error(
+                `Workspace file "${fileModel.path}" must contain string content`
+              );
+            }
             const workspace = JSON.parse(
               fullFile.content
             ) as unknown as Workspace.IWorkspace;

@@ -64,7 +64,7 @@ class NullLanguageBundle {
     n: number,
     ...args: unknown[]
   ): string {
-    return Gettext.strfmt(n == 1 ? msgid : msgid_plural, ...[n].concat(args));
+    return Gettext.strfmt(n == 1 ? msgid : msgid_plural, n, ...args);
   }
 
   pgettext(msgctxt: string, msgid: string, ...args: unknown[]): string {

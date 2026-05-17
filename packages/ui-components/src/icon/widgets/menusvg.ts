@@ -129,13 +129,12 @@ export class MenuSvg extends Menu {
 }
 
 export namespace MenuSvg {
-  interface IInternalMenu extends Menu {
+  type IInternalMenu = {
     renderer: Menu.IRenderer;
-    _items: Menu.IItem[];
-  }
+  };
 
   export function overrideDefaultRenderer(menu: Menu): void {
-    const internalMenu = menu as IInternalMenu;
+    const internalMenu = menu as unknown as IInternalMenu;
 
     // override renderer, if needed
     if (menu.renderer === Menu.defaultRenderer) {
@@ -154,7 +153,7 @@ export namespace MenuSvg {
     };
 
     // recurse through submenus
-    for (const item of internalMenu._items) {
+    for (const item of menu.items) {
       if (item.submenu) {
         overrideDefaultRenderer(item.submenu);
       }

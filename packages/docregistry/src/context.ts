@@ -21,7 +21,7 @@ import type {
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
-import type { PartialJSONValue } from '@lumino/coreutils';
+import type { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -692,10 +692,10 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        if (contents.content) {
+        if (contents.content !== undefined && contents.content !== null) {
           if (contents.format === 'json') {
-            model.fromJSON(contents.content);
-          } else {
+            model.fromJSON(contents.content as ReadonlyPartialJSONValue);
+          } else if (typeof contents.content === 'string') {
             let content = contents.content;
             // Convert line endings if necessary, marking the file
             // as dirty.
@@ -709,6 +709,8 @@ export class Context<
               this._lineEnding = null;
             }
             model.fromString(content);
+          } else {
+            throw new Error('Invalid file content type');
           }
         }
 

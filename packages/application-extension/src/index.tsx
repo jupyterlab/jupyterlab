@@ -1418,7 +1418,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
           {
             single: labShell.userLayout['single-document'],
             multiple: labShell.userLayout['multiple-document']
-          }
+          } as unknown as ReadonlyPartialJSONValue
         )
       ) {
         const result = await showDialog({

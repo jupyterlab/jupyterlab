@@ -694,7 +694,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     this._kernelSession = reply.header.session;
 
-    const supportedFeatures = reply.content.supported_features;
+    const supportedFeatures = replyContent.supported_features;
     this._supportsSubshells =
       supportedFeatures !== undefined &&
       supportedFeatures.includes('kernel subshells');
@@ -1375,11 +1375,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._comms.set(content.comm_id, comm);
 
     try {
-      const target = await Private.loadObject(
+      const target = (await Private.loadObject(
         content.target_name,
         content.target_module,
         this._targetRegistry
-      );
+      )) as ((
+        comm: Kernel.IComm,
+        msg: KernelMessage.ICommOpenMsg
+      ) => void | PromiseLike<void>);
       await target(comm, msg);
     } catch (e) {
       // Close the comm asynchronously. We cannot block message processing on
@@ -1554,7 +1557,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // If we are not 'connecting', reset any reconnection attempts.
     if (connectionStatus !== 'connecting') {
       this._reconnectAttempt = 0;
-      clearTimeout(this._reconnectTimeout);
+      if (this._reconnectTimeout !== null) {
+        clearTimeout(this._reconnectTimeout);
+        this._reconnectTimeout = null;
+      }
     }
 
     if (this.status !== 'dead') {
@@ -1714,7 +1720,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._errorIfDisposed();
 
     // Clear any existing reconnection attempt
-    clearTimeout(this._reconnectTimeout);
+    if (this._reconnectTimeout !== null) {
+      clearTimeout(this._reconnectTimeout);
+      this._reconnectTimeout = null;
+    }
 
     // Update the connection status and schedule a possible reconnection.
     if (this._reconnectAttempt < this._reconnectLimit) {

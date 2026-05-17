@@ -22,20 +22,24 @@ export function validateSpecModel(data: JSONRecord): ISpecModel {
   validateProperty(specRecord, 'display_name', 'string');
   validateProperty(specRecord, 'argv', 'array');
 
-  let metadata: unknown = null;
-  if (specRecord.hasOwnProperty('metadata')) {
+  let metadata: ISpecModel['metadata'];
+  if (Object.prototype.hasOwnProperty.call(specRecord, 'metadata')) {
     validateProperty(specRecord, 'metadata', 'object');
-    metadata = specRecord.metadata;
+    metadata = specRecord.metadata as ISpecModel['metadata'];
   }
 
-  let env: unknown = null;
-  if (specRecord.hasOwnProperty('env')) {
+  let env: ISpecModel['env'];
+  if (Object.prototype.hasOwnProperty.call(specRecord, 'env')) {
     validateProperty(specRecord, 'env', 'object');
-    env = specRecord.env;
+    env = specRecord.env as ISpecModel['env'];
   }
-  if (specRecord.hasOwnProperty('interrupt_mode')) {
+  let interruptMode: ISpecModel['interrupt_mode'];
+  if (Object.prototype.hasOwnProperty.call(specRecord, 'interrupt_mode')) {
     validateProperty(specRecord, 'interrupt_mode', 'string');
-    env = specRecord.env;
+    const mode = specRecord.interrupt_mode;
+    if (mode === 'message' || mode === 'signal') {
+      interruptMode = mode;
+    }
   }
   return {
     name: data.name as string,
@@ -44,7 +48,8 @@ export function validateSpecModel(data: JSONRecord): ISpecModel {
     display_name: specRecord.display_name as string,
     argv: specRecord.argv as string[],
     metadata,
-    env
+    env,
+    interrupt_mode: interruptMode
   };
 }
 
@@ -52,7 +57,7 @@ export function validateSpecModel(data: JSONRecord): ISpecModel {
  * Validate a `Kernel.ISpecModels` object.
  */
 export function validateSpecModels(data: JSONRecord): ISpecModels {
-  if (!data.hasOwnProperty('kernelspecs')) {
+  if (!Object.prototype.hasOwnProperty.call(data, 'kernelspecs')) {
     throw new Error('No kernelspecs found');
   }
   const rawKernelSpecs = data.kernelspecs;
@@ -62,7 +67,8 @@ export function validateSpecModels(data: JSONRecord): ISpecModels {
   const kernelSpecsRecord = rawKernelSpecs as Record<string, JSONRecord>;
   let keys = Object.keys(kernelSpecsRecord);
   const kernelspecs: { [key: string]: ISpecModel } = Object.create(null);
-  let defaultSpec = data.default;
+  let defaultSpec: string | undefined =
+    typeof data.default === 'string' ? data.default : undefined;
 
   for (let i = 0; i < keys.length; i++) {
     const ks = kernelSpecsRecord[keys[i]];

@@ -15,7 +15,12 @@ import {
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PromiseDelegate,
+  type ReadonlyPartialJSONValue,
+  Token
+} from '@lumino/coreutils';
 import type { IMessageHandler, Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
@@ -832,10 +837,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   } {
     return {
       'single-document': JSONExt.deepCopy(
-        this._userLayout['single-document']
+        this._userLayout['single-document'] as unknown as ReadonlyPartialJSONValue
       ) as ILabShell.IUserLayout,
       'multiple-document': JSONExt.deepCopy(
-        this._userLayout['multiple-document']
+        this._userLayout[
+          'multiple-document'
+        ] as unknown as ReadonlyPartialJSONValue
       ) as ILabShell.IUserLayout
     };
   }

@@ -8,6 +8,7 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import type { FormProps, IChangeEvent } from '@rjsf/core';
 import Form from '@rjsf/core';
@@ -489,7 +490,10 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
           defaultValue !== undefined &&
           !schema.properties &&
           schema.type !== 'array' &&
-          !JSONExt.deepEqual(formData, defaultValue);
+          !JSONExt.deepEqual(
+            formData as ReadonlyPartialJSONValue,
+            defaultValue as ReadonlyPartialJSONValue
+          );
       }
 
       const needsDescription =

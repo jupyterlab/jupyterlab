@@ -654,7 +654,8 @@ class Gettext {
       this._stringsPrefix +
       Gettext.strfmt(
         this.removeContext(messages[plural.plural]),
-        ...[n].concat(args)
+        n,
+        ...args
       )
     );
   }

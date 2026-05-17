@@ -216,7 +216,10 @@ export class LayoutRestorer implements ILayoutRestorer {
         leftArea,
         rightArea,
         relativeSizes: relativeSizes || null,
-        topArea: top ?? null
+        topArea:
+          top && typeof top.simpleVisibility === 'boolean'
+            ? { simpleVisibility: top.simpleVisibility }
+            : null
       };
     } catch (error) {
       return blank;
@@ -267,6 +270,9 @@ export class LayoutRestorer implements ILayoutRestorer {
     });
 
     const first = this._first;
+    const restoreWhen = when
+      ? [first, ...(Array.isArray(when) ? when : [when])]
+      : first;
     if (this._mode == 'multiple-document') {
       const promise = tracker
         .restore({
@@ -275,8 +281,9 @@ export class LayoutRestorer implements ILayoutRestorer {
           connector: this._connector,
           name,
           registry: this._registry,
-          when: when ? [first].concat(when) : first
+          when: restoreWhen
         })
+        .then(() => undefined)
         .catch(error => {
           console.error(error);
         });
@@ -292,7 +299,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       connector: this._connector,
       name,
       registry: this._registry,
-      when: when ? [first].concat(when) : first
+      when: restoreWhen
     });
     this._deferred.push(tracker);
   }
@@ -353,7 +360,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.relativeSizes = layout.relativeSizes;
     dehydrated.top = { ...layout.topArea };
 
-    return this._connector.save(KEY, dehydrated);
+    return this._connector.save(KEY, dehydrated).then(() => undefined);
   }
 
   /**
@@ -912,7 +919,7 @@ namespace Private {
       currentWidget: (name && names.has(name) && names.get(name)) || null,
       dock:
         dock && JSONExt.isObject(dock)
-          ? { main: deserializeArea(dock, names) }
+          ? { main: deserializeArea(dock as JSONObject, names) }
           : null
     };
   }

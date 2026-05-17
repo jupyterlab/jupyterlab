@@ -315,7 +315,10 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
   const files = new Map<string, Map<string, Contents.IModel>>();
   const dummy = new ContentsManager();
   const checkpoints = new Map<string, Contents.ICheckpointModel>();
-  const checkPointContent = new Map<string, string>();
+  const checkPointContent = new Map<
+    string,
+    Contents.IModel['content'] | undefined
+  >();
 
   const baseModel = Private.createFile({ type: 'directory' });
   // create the default drive
@@ -380,8 +383,11 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       }
       const driveName = dummy.driveName(path);
       const localPath = dummy.localPath(path);
-      (files.get(driveName)!.get(localPath) as any).content =
-        checkPointContent.get(path);
+      const model = files.get(driveName)!.get(localPath);
+      if (model) {
+        (model as { content: Contents.IModel['content'] }).content =
+          checkPointContent.get(path) ?? null;
+      }
       return Promise.resolve();
     }),
     getSharedModelFactory: jest.fn(() => {

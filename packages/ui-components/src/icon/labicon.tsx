@@ -752,13 +752,13 @@ export namespace LabIcon {
   /**
    * The type of the svg node ref that can be passed into icon React components
    */
-  export type IReactRef = React.RefObject<SVGElement>;
+  export type IReactRef = React.RefObject<SVGSVGElement>;
 
   /**
    * The properties that can be passed into the React component stored in
    * the .react field of a LabIcon.
    */
-  export type IReactProps = IProps & React.RefAttributes<SVGElement>;
+  export type IReactProps = IProps & React.RefAttributes<SVGSVGElement>;
 
   /**
    * The complete type of the React component stored in the .react

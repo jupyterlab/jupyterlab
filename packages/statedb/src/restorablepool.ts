@@ -16,7 +16,7 @@ import type { IObjectPool, IRestorable } from './interfaces';
 export class RestorablePool<
   T extends IObservableDisposable = IObservableDisposable
 >
-  implements IObjectPool<T>, IRestorable<T, unknown[]>
+  implements IObjectPool<T>, IRestorable<T, void>
 {
   /**
    * Create a new restorable pool.
@@ -237,7 +237,7 @@ export class RestorablePool<
    * multiple restorable pools and, when ready, asks them each to restore their
    * respective objects.
    */
-  async restore(options: IRestorable.IOptions<T>): Promise<unknown[]> {
+  async restore(options: IRestorable.IOptions<T>): Promise<void> {
     if (this._hasRestored) {
       throw new Error('This pool has already been restored.');
     }
@@ -246,14 +246,13 @@ export class RestorablePool<
 
     const { command, connector, registry, when } = options;
     const namespace = this.namespace;
-    const promises = when
-      ? [connector.list(namespace)].concat(when)
-      : [connector.list(namespace)];
+    const whenPromises = when ? (Array.isArray(when) ? when : [when]) : [];
 
     this._restore = options;
 
-    const [saved] = await Promise.all(promises);
-    const values = await Promise.all(
+    const saved = await connector.list(namespace);
+    await Promise.all(whenPromises);
+    await Promise.all(
       saved.ids.map(async (id, index) => {
         const value = saved.values[index];
         const args =
@@ -271,8 +270,7 @@ export class RestorablePool<
           .catch(() => connector.remove(id));
       })
     );
-    this._restored.resolve();
-    return values;
+    this._restored.resolve(void 0);
   }
 
   /**

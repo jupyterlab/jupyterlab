@@ -15,7 +15,9 @@ const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
-const IOPUB_CONTENT_FIELDS: { [key: string]: unknown } = {
+type IOPubFieldSpec = string | [string, unknown[]];
+
+const IOPUB_CONTENT_FIELDS: Record<string, Record<string, IOPubFieldSpec>> = {
   stream: { name: 'string', text: 'string' },
   display_data: { data: 'object', metadata: 'object' },
   execute_input: { code: 'string', execution_count: 'number' },
@@ -79,11 +81,12 @@ function validateIOPubContent(
     const names = Object.keys(fields);
     const content = msg.content;
     for (let i = 0; i < names.length; i++) {
-      let args = fields[names[i]];
-      if (!Array.isArray(args)) {
-        args = [args];
+      const spec = fields[names[i]];
+      if (Array.isArray(spec)) {
+        validateProperty(content, names[i], spec[0], spec[1]);
+      } else {
+        validateProperty(content, names[i], spec);
       }
-      validateProperty(content, names[i], ...args);
     }
   }
 }

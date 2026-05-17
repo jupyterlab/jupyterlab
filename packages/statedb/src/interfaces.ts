@@ -67,7 +67,7 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
    * tested for. For example, some back-ends may return a copy of the item of
    * type `T` being removed while others may return no content.
    */
-  remove(id: V): Promise<unknown>;
+  remove(id: V): Promise<void>;
 
   /**
    * Save a value using the data connector.
@@ -84,7 +84,7 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
    * tested for. For example, some back-ends may return a copy of the item of
    * type `T` being saved while others may return no content.
    */
-  save(id: V, value: U): Promise<unknown>;
+  save(id: V, value: U): Promise<void>;
 }
 
 /**

@@ -576,8 +576,8 @@ export namespace JupyterLab {
      * The default export.
      */
     default:
-      | JupyterFrontEndPlugin<unknown, unknown, unknown>
-      | JupyterFrontEndPlugin<unknown, unknown, unknown>[];
+      | JupyterFrontEndPlugin<unknown, JupyterFrontEnd.IShell, string>
+      | JupyterFrontEndPlugin<unknown, JupyterFrontEnd.IShell, string>[];
   }
 }
 

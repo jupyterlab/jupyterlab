@@ -5,15 +5,19 @@
  * of a given type and among a given set of values.
  */
 export function validateProperty(
-  object: { [key: string]: unknown },
+  object: unknown,
   name: string,
   typeName?: string,
   values: unknown[] = []
 ): void {
-  if (!object.hasOwnProperty(name)) {
+  if (object === null || typeof object !== 'object') {
     throw Error(`Missing property '${name}'`);
   }
-  const value = object[name];
+  const typedObject = object as { [key: string]: unknown };
+  if (!Object.prototype.hasOwnProperty.call(typedObject, name)) {
+    throw Error(`Missing property '${name}'`);
+  }
+  const value = typedObject[name];
 
   if (typeName !== void 0) {
     let valid;

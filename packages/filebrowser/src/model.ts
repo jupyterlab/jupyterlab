@@ -624,9 +624,9 @@ export class FileBrowserModel implements IDisposable {
       mimetype: contents.mimetype,
       format: contents.format
     };
-    this._items = contents.content;
+    this._items = Array.isArray(contents.content) ? contents.content : [];
     this._paths.clear();
-    contents.content.forEach((model: Contents.IModel) => {
+    this._items.forEach((model: Contents.IModel) => {
       this._paths.add(model.path);
     });
   }

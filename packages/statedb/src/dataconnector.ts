@@ -67,7 +67,7 @@ export abstract class DataConnector<
    * #### Notes
    * Subclasses should reimplement if they support a back-end that can remove.
    */
-  async remove(id: V): Promise<unknown> {
+  async remove(id: V): Promise<void> {
     throw new Error('DataConnector#remove method has not been implemented.');
   }
 
@@ -83,7 +83,7 @@ export abstract class DataConnector<
    * #### Notes
    * Subclasses should reimplement if they support a back-end that can save.
    */
-  async save(id: V, value: U): Promise<unknown> {
+  async save(id: V, value: U): Promise<void> {
     throw new Error('DataConnector#save method has not been implemented.');
   }
 }

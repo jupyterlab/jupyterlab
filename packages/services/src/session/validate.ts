@@ -14,14 +14,20 @@ type JSONRecord = {
  * Validate an `Session.IModel` object.
  */
 export function validateModel(
-  data: JSONRecord
+  data: unknown
 ): asserts data is Session.IModel {
-  validateProperty(data, 'id', 'string');
-  validateProperty(data, 'type', 'string');
-  validateProperty(data, 'name', 'string');
-  validateProperty(data, 'path', 'string');
-  validateProperty(data, 'kernel', 'object');
-  validateKernelModel(data.kernel as Session.IModel['kernel']);
+  if (data === null || typeof data !== 'object') {
+    throw new Error('Invalid session model');
+  }
+  const record = data as JSONRecord;
+  validateProperty(record, 'id', 'string');
+  validateProperty(record, 'type', 'string');
+  validateProperty(record, 'name', 'string');
+  validateProperty(record, 'path', 'string');
+  validateProperty(record, 'kernel', 'object');
+  if (record.kernel !== null) {
+    validateKernelModel(record.kernel as NonNullable<Session.IModel['kernel']>);
+  }
 }
 
 /**
