@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JSONObject } from '@lumino/coreutils';
 import { chromium, firefox, webkit } from '@playwright/test';
@@ -83,7 +84,7 @@ export namespace benchmark {
   /**
    * Benchmark test record
    */
-  export interface IRecord extends Record<string, unknown> {
+  export interface IRecord extends Record<string, any> {
     /**
      * Test kind
      */
@@ -289,9 +290,9 @@ interface IMetadata {
    * System information
    */
   systemInformation: {
-    cpu: Record<string, unknown>;
-    mem: Record<string, unknown>;
-    osInfo: Record<string, unknown>;
+    cpu: Record<string, any>;
+    mem: Record<string, any>;
+    osInfo: Record<string, any>;
   };
 }
 
@@ -391,7 +392,7 @@ class BenchmarkReporter implements Reporter {
           .map(raw => {
             const json = JSON.parse(
               raw.body?.toString() ?? '{}'
-            ) as unknown as benchmark.IRecord;
+            ) as any as benchmark.IRecord;
             return { ...json, reference: this._reference };
           })
       );
@@ -473,7 +474,7 @@ class BenchmarkReporter implements Reporter {
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
       const config = this._buildVegaLiteGraph(allData, this._comparison);
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
-      const vegaSpec = vl.compile(config as unknown as vl.TopLevelSpec).spec;
+      const vegaSpec = vl.compile(config as any).spec;
 
       const view = new vega.View(vega.parse(vegaSpec), {
         renderer: 'svg'
@@ -675,19 +676,17 @@ class BenchmarkReporter implements Reporter {
   protected defaultVegaLiteConfigFactory(
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project' = 'snapshot'
-  ): Record<string, unknown> {
+  ): Record<string, any> {
     const config = generateVegaLiteSpec(
       [...new Set(allData.map(d => d.test))],
       comparison == 'snapshot' ? 'reference' : 'project',
       [...new Set(allData.map(d => d.file))]
-    ) as Record<string, unknown> & {
-      data: { values?: Array<IReportRecord> };
-    };
+    );
     config.data.values = allData;
     return config;
   }
 
-  protected async getMetadata(browser?: string): Promise<IMetadata> {
+  protected async getMetadata(browser?: string): Promise<any> {
     const cpus = os.cpus();
     // Collect information in a format compatible with
     // the `systeminformation` package output but only
@@ -758,7 +757,7 @@ class BenchmarkReporter implements Reporter {
   private _buildVegaLiteGraph: (
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
-  ) => Record<string, unknown>;
+  ) => Record<string, any>;
   private _buildTextReport: (
     allData: Array<IReportRecord>
   ) => Promise<[string, string]>;
