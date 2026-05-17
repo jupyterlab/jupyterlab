@@ -29,7 +29,7 @@ import {
 } from '@codemirror/view';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -384,7 +384,12 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
     return { ...this.defaultOptions, ...this._baseConfiguration };
   }
   set baseConfiguration(v: Record<string, unknown>) {
-    if (!JSONExt.deepEqual(v, this._baseConfiguration)) {
+    if (
+      !JSONExt.deepEqual(
+        v as ReadonlyPartialJSONValue,
+        this._baseConfiguration as ReadonlyPartialJSONValue
+      )
+    ) {
       this._baseConfiguration = v;
       for (const handler of this.handlers) {
         handler.setBaseOptions(this.baseConfiguration);
@@ -408,7 +413,9 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
    * Editor configuration JSON schema
    */
   get settingsSchema(): ReadonlyJSONObject {
-    return Object.freeze(JSONExt.deepCopy(this.configurationSchema));
+    return Object.freeze(
+      JSONExt.deepCopy(this.configurationSchema as unknown as ReadonlyPartialJSONValue)
+    ) as ReadonlyJSONObject;
   }
 
   /**
@@ -427,12 +434,12 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
       this.defaultOptions[factory.name] = factory.default;
     }
     if (factory.schema) {
-      this.configurationSchema[factory.name] = {
+      const schema = {
         default: factory.default ?? null,
         ...factory.schema
-      };
-      this.defaultOptions[factory.name] =
-        this.configurationSchema[factory.name].default;
+      } as ReadonlyJSONObject & { default?: unknown };
+      this.configurationSchema[factory.name] = schema;
+      this.defaultOptions[factory.name] = schema.default;
     }
   }
 
@@ -476,7 +483,10 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
     string,
     IEditorExtensionFactory<unknown>
   >();
-  protected configurationSchema: Record<string, unknown> = {};
+  protected configurationSchema: Record<
+    string,
+    ReadonlyJSONObject & { default?: unknown }
+  > = {};
 
   protected defaultOptions: Record<string, unknown> = {};
   protected handlers = new Set<ExtensionsHandler>();

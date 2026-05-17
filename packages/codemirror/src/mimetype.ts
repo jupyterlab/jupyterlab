@@ -3,7 +3,7 @@
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { IEditorLanguageRegistry } from './token';
+import type { IEditorLanguage, IEditorLanguageRegistry } from './token';
 
 /**
  * The mime type service for CodeMirror.
@@ -22,13 +22,13 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     const ext = info.file_extension || '';
     const codemirrorMode = info.codemirror_mode as
       | string
-      | IEditorLanguageRegistry.IEditorLanguage
+      | IEditorLanguage
       | undefined;
     const mode = this.languages.findBest(
       codemirrorMode || {
-        mimetype: info.mimetype,
-        name: info.name,
-        ext: [ext.split('.').slice(-1)[0]]
+        mime: info.mimetype ?? IEditorMimeTypeService.defaultMimeType,
+        name: info.name ?? '',
+        extensions: [ext.split('.').slice(-1)[0]]
       }
     );
     return mode

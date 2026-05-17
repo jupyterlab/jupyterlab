@@ -160,12 +160,12 @@ function activateSettings(
   settingRegistry.transform(plugin.id, {
     fetch: plugin => {
       const schema = plugin.schema.properties!;
-      const defaultValue: { [key: string]: unknown } = {};
+      const defaultValue: PartialJSONObject = {};
       languageServerManager.sessions.forEach((_, key) => {
         defaultValue[key] = { rank: 50, configuration: {} };
       });
 
-      schema[LANGUAGE_SERVERS]['default'] = defaultValue;
+      schema[LANGUAGE_SERVERS].default = defaultValue;
       return plugin;
     },
     compose: plugin => {
@@ -182,7 +182,7 @@ function activateSettings(
       if (serverUserSettings) {
         serverComposite = { ...serverComposite, ...serverUserSettings };
       }
-      const composite: { [key: string]: unknown } = {
+      const composite: PartialJSONObject = {
         [LANGUAGE_SERVERS]: serverComposite
       };
       Object.entries(properties).forEach(([key, value]) => {

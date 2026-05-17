@@ -72,7 +72,7 @@ class YUndoManagerPluginValue implements PluginValue {
   _onStackItemPopped = ({ stackItem }: { stackItem: IStackItem }) => {
     const sel = stackItem.meta.get(this);
     if (sel) {
-      const selection = this._syncConf.fromYRange(sel);
+      const selection = this._syncConf.fromYRange(sel as YRange);
       this._view.dispatch(
         this._view.state.update({
           selection,
