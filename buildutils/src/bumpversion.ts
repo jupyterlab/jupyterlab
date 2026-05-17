@@ -2,14 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { program as commander } from 'commander';
 import * as utils from './utils';
-
-interface IBumpOptions {
-  dryRun?: boolean;
-  force?: boolean;
-  skipCommit?: boolean;
-}
 
 // Specify the program signature.
 commander
@@ -18,7 +14,7 @@ commander
   .option('--force', 'Force the upgrade')
   .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
-  .action((spec: string, opts: IBumpOptions) => {
+  .action((spec: any, opts: any) => {
     utils.exitOnUncaughtException();
 
     // Get the previous version.

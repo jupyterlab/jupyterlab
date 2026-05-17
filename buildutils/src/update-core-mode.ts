@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { program as commander } from 'commander';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -14,7 +16,7 @@ commander
     '--skip-assets',
     'Skip the staging build - only update core.package.json metadata'
   )
-  .action((options: { skipAssets?: boolean }) => {
+  .action((options: any) => {
     updateCoreMode(options.skipAssets);
   });
 

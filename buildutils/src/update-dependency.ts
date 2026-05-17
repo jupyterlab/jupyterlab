@@ -3,6 +3,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as path from 'path';
 import * as utils from './utils';
 import packageJson from 'package-json';
@@ -11,19 +13,6 @@ import { program as commander } from 'commander';
 import semver from 'semver';
 
 const versionCache = new Map();
-type IDependencyMap = { [key: string]: string };
-type IPackageData = {
-  dependencies?: IDependencyMap;
-  devDependencies?: IDependencyMap;
-  [key: string]: unknown;
-};
-type IUpdateDependencyOptions = {
-  path?: string;
-  regex?: boolean;
-  lerna?: boolean;
-  dryRun?: boolean;
-  minimal?: boolean;
-};
 
 /**
  * Matches a simple semver range, where the version number could be an npm tag.
@@ -181,7 +170,7 @@ async function handlePackage(
 
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
-  let data: IPackageData;
+  let data: any;
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
@@ -190,7 +179,7 @@ async function handlePackage(
   }
 
   // Update dependencies as appropriate.
-  for (const dtype of ['dependencies', 'devDependencies'] as const) {
+  for (const dtype of ['dependencies', 'devDependencies']) {
     const deps = data[dtype] || {};
     if (typeof name === 'string') {
       const dep = name;
@@ -248,11 +237,7 @@ commander
   .option('--minimal', 'only update if the change is substantial')
   .arguments('<package> [versionspec]')
   .action(
-    async (
-      name: string | RegExp,
-      version: string = '^latest',
-      args: IUpdateDependencyOptions
-    ) => {
+    async (name: string | RegExp, version: string = '^latest', args: any) => {
       const basePath = path.resolve(args.path || '.');
       const pkg = args.regex ? new RegExp(name) : name;
 

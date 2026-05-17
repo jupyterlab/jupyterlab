@@ -2,7 +2,9 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+/* global NodeRequire */
 import path from 'path';
 import glob from 'glob';
 import fs from 'fs-extra';
@@ -14,47 +16,17 @@ import assert from 'assert';
 
 type Dict<T> = { [key: string]: T };
 
-interface IWorkspaceConfig {
-  packages?: string[];
-}
-
-interface IBaseConfig {
-  workspaces?: string[] | IWorkspaceConfig;
-}
-
-interface ILernaConfig {
-  packages: string[];
-}
-
-interface INodeError {
-  code?: unknown;
-}
-
-interface IProcessException {
-  status?: unknown;
-  stdout?: unknown;
-  stderr?: unknown;
-}
-
-interface IPackageData {
-  name: string;
-  version?: string;
-  dependencies?: Dict<string>;
-  [key: string]: unknown;
-}
-
 const backSlash = /\\/g;
 
 /**
  *  Exit with an error code on uncaught error.
  */
 export function exitOnUncaughtException(): void {
-  process.on('uncaughtException', function (err: unknown) {
-    const processError = err as IProcessException;
-    if (processError.status || processError.stdout || processError.stderr) {
-      console.error(`Status: ${processError.status}`);
-      console.error(`stdout: ${String(processError.stdout ?? '')}`);
-      console.error(`stderr: ${String(processError.stderr ?? '')}`);
+  process.on('uncaughtException', function (err: any) {
+    if (err.status || err.stdout || err.stderr) {
+      console.error(`Status: ${err.status}`);
+      console.error(`stdout: ${err.stdout?.toString()}`);
+      console.error(`stderr: ${err.stderr?.toString()}`);
     }
     console.error('Uncaught exception', err);
     process.exit(1);
@@ -66,23 +38,17 @@ export function exitOnUncaughtException(): void {
  */
 export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
-  let packages: string[];
+  let packages;
   try {
-    let baseConfig = require(
-      path.join(basePath, 'package.json')
-    ) as IBaseConfig;
+    let baseConfig = require(path.join(basePath, 'package.json'));
     if (baseConfig.workspaces) {
-      packages = Array.isArray(baseConfig.workspaces)
-        ? baseConfig.workspaces
-        : baseConfig.workspaces.packages || [];
+      packages = baseConfig.workspaces.packages || baseConfig.workspaces;
     } else {
-      const lernaConfig = require(
-        path.join(basePath, 'lerna.json')
-      ) as ILernaConfig;
-      packages = lernaConfig.packages;
+      baseConfig = require(path.join(basePath, 'lerna.json'));
+      packages = baseConfig.packages;
     }
-  } catch (e: unknown) {
-    if ((e as INodeError).code === 'MODULE_NOT_FOUND') {
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
       throw new Error(
         `No yarn workspace / lerna package list found in ${basePath}`
       );
@@ -126,7 +92,7 @@ export function getCorePaths(): string[] {
  */
 export function writePackageData(
   pkgJsonPath: string,
-  data: Record<string, unknown>
+  data: Record<any, any>
 ): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
@@ -140,13 +106,11 @@ export function writePackageData(
 /**
  * Read a json file.
  */
-export function readJSONFile<T = ReturnType<typeof JSON.parse>>(
-  filePath: string
-): T {
+export function readJSONFile(filePath: string): any {
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
-  } catch (e: unknown) {
-    throw new Error(`Cannot read JSON for path ${filePath}: ${String(e)}`);
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    throw `Cannot read JSON for path ${filePath}: ${e}`;
   }
 }
 
@@ -155,30 +119,24 @@ export function readJSONFile<T = ReturnType<typeof JSON.parse>>(
  */
 export function writeJSONFile(
   filePath: string,
-  data: Record<string, unknown>
+  data: Record<any, any>
 ): boolean {
-  function sortObjByKey(value: unknown): unknown {
+  function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
-    if (value === null || typeof value !== 'object') {
-      return value;
-    }
-    if (Array.isArray(value)) {
-      return value.map(sortObjByKey);
-    }
-    return Object.keys(value)
-      .sort()
-      .reduce(
-        (o, key) => {
-          const v = (value as Record<string, unknown>)[key];
-          o[key] = sortObjByKey(v);
-          return o;
-        },
-        {} as Record<string, unknown>
-      );
+    return typeof value === 'object'
+      ? Array.isArray(value)
+        ? value.map(sortObjByKey)
+        : Object.keys(value)
+            .sort()
+            .reduce((o: any, key) => {
+              const v = value[key];
+              o[key] = sortObjByKey(v);
+              return o;
+            }, {})
+      : value;
   }
-  const sortedData = sortObjByKey(data) as Record<string, unknown>;
-  const text = JSON.stringify(sortedData, null, 2) + '\n';
-  let orig: unknown = {};
+  const text = JSON.stringify(data, sortObjByKey(data), 2) + '\n';
+  let orig = {};
   try {
     orig = readJSONFile(filePath);
   } catch (e) {
@@ -268,7 +226,7 @@ export function getJSVersion(pkg: string): string {
   const filePath = path.resolve(
     path.join('.', 'packages', pkg, 'package.json')
   );
-  const data = readJSONFile<{ version: string }>(filePath);
+  const data = readJSONFile(filePath);
   return data.version;
 }
 
@@ -344,7 +302,7 @@ export function run(
 export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Pick up all the package versions.
   const paths = getLernaPaths();
-  const locals: Dict<IPackageData> = {};
+  const locals: Dict<any> = {};
 
   // These two are not part of the workspaces but should be
   // considered part of the dependency graph.
@@ -354,10 +312,10 @@ export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Gather all of our package data.
   paths.forEach(pkgPath => {
     // Read in the package.json.
-    let data: IPackageData;
+    let data: any;
     try {
-      data = readJSONFile<IPackageData>(path.join(pkgPath, 'package.json'));
-    } catch (e: unknown) {
+      data = readJSONFile(path.join(pkgPath, 'package.json'));
+    } catch (e) {
       console.error(e);
       return;
     }
@@ -370,10 +328,10 @@ export function getPackageGraph(): DepGraph<Dict<unknown>> {
   Object.keys(locals).forEach(name => {
     const data = locals[name];
     graph.addNode(name, data);
-    const deps: Dict<string> = data.dependencies || {};
+    const deps: Dict<Array<string>> = data.dependencies || {};
     Object.keys(deps).forEach(depName => {
       if (!graph.hasNode(depName)) {
-        let depData: IPackageData;
+        let depData: any;
         // get data from locals if available, otherwise from
         // third party library.
         if (depName in locals) {
@@ -394,14 +352,14 @@ function isModuleDir(current: string, moduleDirs: string[]): boolean {
   return moduleDirs.some(dir => current.endsWith(dir));
 }
 
-function findPackageJson(base: string, moduleDirs: string[]): IPackageData {
+function findPackageJson(base: string, moduleDirs: string[]): NodeRequire {
   const { root } = path.parse(base);
   let current = base;
 
   while (current !== root && !isModuleDir(current, moduleDirs)) {
     const pkgJsonPath = path.join(current, 'package.json');
     if (fs.existsSync(pkgJsonPath)) {
-      return readJSONFile<IPackageData>(pkgJsonPath);
+      return require(pkgJsonPath);
     }
     current = path.resolve(current, '..');
   }
@@ -415,7 +373,7 @@ function findPackageJson(base: string, moduleDirs: string[]): IPackageData {
  * We could just use "require(`${depName}/package.json`)", however this won't work for modules
  * that are not hoisted to the top level.
  */
-function requirePackage(parentModule: string, module: string): IPackageData {
+function requirePackage(parentModule: string, module: string): NodeRequire {
   const packagePath = `${module}/package.json`;
   let parentModulePath: string;
   // This will fail when the parent module cannot be loaded, like `@jupyterlab/test-root`
@@ -423,7 +381,7 @@ function requirePackage(parentModule: string, module: string): IPackageData {
     parentModulePath = require.resolve(parentModule);
   } catch {
     try {
-      return readJSONFile<IPackageData>(require.resolve(packagePath));
+      return require(packagePath);
     } catch {
       return findPackageJson(module, [path.resolve(packagePath, '..')]);
     }
@@ -435,7 +393,7 @@ function requirePackage(parentModule: string, module: string): IPackageData {
     const requirePath = require.resolve(packagePath, {
       paths: [parentModulePath]
     });
-    return readJSONFile<IPackageData>(requirePath);
+    return require(requirePath);
   } catch {
     // If it fails, try to find the package.json by going parent to parent
     // Inspired by https://github.com/rollup/plugins/blob/540767b947cfad0dd06a278b977b8ce05da9593c/packages/node-resolve/src/package/utils.js#L11

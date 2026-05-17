@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -188,7 +189,7 @@ export async function ensurePackage(
     const sourceFile = ts.createSourceFile(
       fileName,
       fs.readFileSync(fileName).toString(),
-      ts.ScriptTarget.ES2015,
+      (ts.ScriptTarget as any).ES6,
       /* setParentNodes */ true
     );
     imports = imports.concat(getImports(sourceFile));
@@ -829,7 +830,7 @@ export interface IEnsurePackageOptions {
   /**
    * The package data.
    */
-  data: IPackageData;
+  data: any;
 
   /**
    * The cache of dependency versions by package.
@@ -880,27 +881,6 @@ export interface IEnsurePackageOptions {
    * Whether Node.js imports are allowed.
    */
   allowNodeDependencies?: boolean;
-}
-
-/**
- * Subset of package.json fields used by ensurePackage.
- */
-interface IPackageData {
-  name: string;
-  private?: boolean;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  files?: string[];
-  jupyterlab?: {
-    schemaDir?: string;
-    themePath?: string;
-  };
-  sideEffects?: boolean | string[];
-  style?: string;
-  styleModule?: string;
-  scripts?: Record<string, string>;
-  gitHead?: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -966,19 +946,16 @@ function getImports(sourceFile: ts.SourceFile): string[] {
   const imports: string[] = [];
   handleNode(sourceFile);
 
-  function handleNode(node: ts.Node): void {
-    if (
-      ts.isImportDeclaration(node) &&
-      ts.isStringLiteral(node.moduleSpecifier)
-    ) {
-      imports.push(node.moduleSpecifier.text);
-    } else if (
-      ts.isImportEqualsDeclaration(node) &&
-      ts.isExternalModuleReference(node.moduleReference) &&
-      node.moduleReference.expression &&
-      ts.isStringLiteral(node.moduleReference.expression)
-    ) {
-      imports.push(node.moduleReference.expression.text);
+  function handleNode(node: any): void {
+    switch (node.kind) {
+      case ts.SyntaxKind.ImportDeclaration:
+        imports.push(node.moduleSpecifier.text);
+        break;
+      case ts.SyntaxKind.ImportEqualsDeclaration:
+        imports.push(node.moduleReference.expression.text);
+        break;
+      default:
+      // no-op
     }
     ts.forEachChild(node, handleNode);
   }

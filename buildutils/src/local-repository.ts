@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
@@ -18,21 +19,6 @@ import * as utils from './utils';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const DEFAULT_OUT_DIR = path.join(os.tmpdir(), 'verdaccio');
 const DEFAULT_PORT = 4873;
-
-interface IRegistryInfo {
-  pid: number;
-  prev_npm?: string;
-  prev_jlpm?: string;
-}
-
-interface IRegistryCommandOptions {
-  path?: string;
-  port?: string;
-}
-
-interface IPublishDistsCommandOptions {
-  path?: string;
-}
 
 /**
  * Start a local npm registry.
@@ -108,8 +94,9 @@ packages:
     .trim();
   console.log(`Verdaccio version: ${version}`);
 
-  const out = fs.openSync(log_file, 'a');
-  const err = fs.openSync(log_file, 'a');
+  // Assign as `any`` for compatibility with spawn `OpenMode`` options
+  const out: any = fs.openSync(log_file, 'a');
+  const err: any = fs.openSync(log_file, 'a');
 
   const options = { cwd: out_dir, detached: true, stdio: ['ignore', out, err] };
 
@@ -251,7 +238,7 @@ async function stopLocalRegistry(out_dir: string) {
   if (!fs.existsSync(info_file)) {
     return;
   }
-  const data = utils.readJSONFile<IRegistryInfo>(info_file);
+  const data = utils.readJSONFile(info_file);
 
   // Kill the pid
   console.log(`Killing existing process ${data.pid}`);
@@ -308,20 +295,16 @@ program
   .command('start')
   .option('--port <port>', 'Port to use for the registry')
   .option('--path <path>', 'Path to use for the registry')
-  .action(async (options: IRegistryCommandOptions) => {
+  .action(async (options: any) => {
     utils.exitOnUncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
-    const parsedPort = options.port ? Number(options.port) : DEFAULT_PORT;
-    await startLocalRegistry(
-      out_dir,
-      Number.isFinite(parsedPort) ? parsedPort : DEFAULT_PORT
-    );
+    await startLocalRegistry(out_dir, options.port || DEFAULT_PORT);
   });
 
 program
   .command('stop')
   .option('--path <path>', 'Path to use for the registry')
-  .action(async (options: IRegistryCommandOptions) => {
+  .action(async (options: any) => {
     utils.exitOnUncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await stopLocalRegistry(out_dir);
@@ -330,7 +313,7 @@ program
 program
   .command('publish-dists')
   .option('--path <path>', 'Path to the directory with npm tar balls')
-  .action((options: IPublishDistsCommandOptions) => {
+  .action((options: any) => {
     utils.exitOnUncaughtException();
     publishPackages(options.path || process.cwd());
   });
