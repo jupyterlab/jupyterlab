@@ -3388,6 +3388,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
+    "@codemirror/language": ^6.12.1
     "@jupyter/web-components": ^0.16.6
     "@jupyterlab/application": ^4.6.0-alpha.5
     "@jupyterlab/apputils": ^4.7.0-alpha.5
@@ -3417,6 +3418,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
+    "@codemirror/language": ^6.12.1
     "@jupyter/web-components": ^0.16.6
     "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.6.0-alpha.5

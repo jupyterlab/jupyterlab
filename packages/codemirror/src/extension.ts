@@ -29,7 +29,10 @@ import {
 } from '@codemirror/view';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { ReadonlyJSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -414,7 +417,9 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
    */
   get settingsSchema(): ReadonlyJSONObject {
     return Object.freeze(
-      JSONExt.deepCopy(this.configurationSchema as unknown as ReadonlyPartialJSONValue)
+      JSONExt.deepCopy(
+        this.configurationSchema as unknown as ReadonlyPartialJSONValue
+      )
     ) as ReadonlyJSONObject;
   }
 
