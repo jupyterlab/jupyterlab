@@ -1,14 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import {
-  type PartialJSONObject,
-  type ReadonlyPartialJSONValue,
-  UUID
-} from '@lumino/coreutils';
+import { type PartialJSONObject, UUID } from '@lumino/coreutils';
 
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -100,12 +98,7 @@ export namespace Contents {
     /**
      * The optional file content.
      */
-    readonly content:
-      | string
-      | ReadonlyPartialJSONValue
-      | IModel[]
-      | null
-      | undefined;
+    readonly content: any;
 
     /**
      * The chunk of the file upload.
@@ -866,10 +859,7 @@ export class ContentsManager implements Contents.IManager {
     const [drive, localPath] = this._driveForPath(path);
     return drive.get(localPath, options).then(contentsModel => {
       const listing: Contents.IModel[] = [];
-      if (
-        contentsModel.type === 'directory' &&
-        Array.isArray(contentsModel.content)
-      ) {
+      if (contentsModel.type === 'directory' && contentsModel.content) {
         for (const item of contentsModel.content) {
           listing.push({ ...item, path: this._toGlobalPath(drive, item.path) });
         }

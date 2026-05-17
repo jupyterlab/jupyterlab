@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';
@@ -109,8 +110,7 @@ async function setToolbarItems(
       schema.properties![propertyId].default =
         SettingRegistry.reconcileToolbarItems(
           pluginDefaults,
-          schema.properties![propertyId]
-            .default as ISettingRegistry.IToolbarItem[],
+          schema.properties![propertyId].default as any[],
           true
         )!.sort(
           (a, b) =>
@@ -186,7 +186,7 @@ async function setToolbarItems(
   // React to customization by the user
   settings.changed.connect(() => {
     const newItems: ISettingRegistry.IToolbarItem[] =
-      (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
+      (settings.composite[propertyId] as any) ?? [];
 
     transferSettings(newItems);
   });
@@ -200,9 +200,7 @@ async function setToolbarItems(
   };
 
   // Initialize the toolbar
-  transferSettings(
-    (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? []
-  );
+  transferSettings((settings.composite[propertyId] as any) ?? []);
 
   // React to plugin changes if no other transformer exists, otherwise bail.
   if (!listenPlugin) {
@@ -260,7 +258,7 @@ export function createToolbarFactory(
   propertyId: string = 'toolbar'
 ): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
-    itemCmp: (a, b) => JSONExt.deepEqual(a, b)
+    itemCmp: (a, b) => JSONExt.deepEqual(a as any, b as any)
   });
 
   // Get toolbar definition from the settings

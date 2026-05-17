@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
@@ -16,7 +17,7 @@ import type { IObjectPool, IRestorable } from './interfaces';
 export class RestorablePool<
   T extends IObservableDisposable = IObservableDisposable
 >
-  implements IObjectPool<T>, IRestorable<T, void>
+  implements IObjectPool<T>, IRestorable<T>
 {
   /**
    * Create a new restorable pool.
@@ -237,7 +238,7 @@ export class RestorablePool<
    * multiple restorable pools and, when ready, asks them each to restore their
    * respective objects.
    */
-  async restore(options: IRestorable.IOptions<T>): Promise<void> {
+  async restore(options: IRestorable.IOptions<T>): Promise<any> {
     if (this._hasRestored) {
       throw new Error('This pool has already been restored.');
     }
@@ -246,19 +247,17 @@ export class RestorablePool<
 
     const { command, connector, registry, when } = options;
     const namespace = this.namespace;
-    const whenPromises = when ? (Array.isArray(when) ? when : [when]) : [];
+    const promises = when
+      ? [connector.list(namespace)].concat(when)
+      : [connector.list(namespace)];
 
     this._restore = options;
 
-    const saved = await connector.list(namespace);
-    await Promise.all(whenPromises);
-    await Promise.all(
+    const [saved] = await Promise.all(promises);
+    const values = await Promise.all(
       saved.ids.map(async (id, index) => {
         const value = saved.values[index];
-        const args =
-          value && typeof value === 'object' && !Array.isArray(value)
-            ? (value as { data?: ReadonlyPartialJSONObject }).data
-            : undefined;
+        const args = value && (value as any).data;
 
         if (args === undefined) {
           return connector.remove(id);
@@ -270,7 +269,8 @@ export class RestorablePool<
           .catch(() => connector.remove(id));
       })
     );
-    this._restored.resolve(void 0);
+    this._restored.resolve();
+    return values;
   }
 
   /**

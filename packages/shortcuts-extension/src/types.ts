@@ -2,6 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -27,7 +29,7 @@ export namespace CommandIDs {
  * The layout of shortcuts settings as defined in schema.
  */
 export interface IShortcutsSettingsLayout {
-  [index: string]: unknown;
+  [index: string]: any;
   shortcuts?: CommandRegistry.IKeyBindingOptions[];
 }
 

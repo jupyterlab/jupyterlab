@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Printing } from '@jupyterlab/apputils';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -114,7 +116,7 @@ export class InspectorPanel
    * Handle inspector update signals.
    */
   protected onInspectorUpdate(
-    sender: IInspector.IInspectable,
+    sender: any,
     args: IInspector.IInspectorUpdate
   ): void {
     const { content } = args;
@@ -133,10 +135,7 @@ export class InspectorPanel
   /**
    * Handle source disposed signals.
    */
-  protected onSourceDisposed(
-    sender: IInspector.IInspectable,
-    args: void
-  ): void {
+  protected onSourceDisposed(sender: any, args: void): void {
     this.source = null;
   }
 

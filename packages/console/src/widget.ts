@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISharedRawCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
@@ -225,7 +226,7 @@ export class CodeConsole extends Widget {
   /**
    * The configuration options for the text editor widget.
    */
-  editorConfig: Record<string, unknown> = CodeConsole.defaultEditorConfig;
+  editorConfig: Record<string, any> = CodeConsole.defaultEditorConfig;
 
   /**
    * The list of content cells in the console.
@@ -1333,7 +1334,7 @@ export namespace CodeConsole {
   /**
    * Default console editor configuration
    */
-  export const defaultEditorConfig: Record<string, unknown> = {
+  export const defaultEditorConfig: Record<string, any> = {
     codeFolding: false,
     lineNumbers: false,
     tabFocusable: false

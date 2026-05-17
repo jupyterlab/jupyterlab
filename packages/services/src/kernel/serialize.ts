@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as KernelMessage from './messages';
 
 /**
@@ -254,12 +256,8 @@ namespace Private {
     for (let i = 0; i < origBuffers.length; i++) {
       // msg.buffers elements could be either views or ArrayBuffers
       // buffers elements are ArrayBuffers
-      const b = origBuffers[i];
-      const view =
-        b instanceof ArrayBuffer
-          ? new Uint8Array(b)
-          : new Uint8Array(b.buffer, b.byteOffset, b.byteLength);
-      buffers.push(view.slice().buffer);
+      const b: any = origBuffers[i];
+      buffers.push(ArrayBuffer.isView(b) ? b.buffer : b);
     }
     const nbufs = buffers.length;
     offsets.push(4 * (nbufs + 1));

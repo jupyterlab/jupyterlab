@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JupyterLab } from '@jupyterlab/application';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
@@ -339,7 +340,7 @@ export class PluginListModel extends VDomModel {
    *
    * @param pending A promise that resolves when the action is completed.
    */
-  private _addPendingAction(pending: Promise<unknown>): void {
+  private _addPendingAction(pending: Promise<any>): void {
     // Add to pending actions collection
     this._pendingActions.push(pending);
 
@@ -427,7 +428,7 @@ export class PluginListModel extends VDomModel {
    * @returns The response body interpreted as JSON
    */
   private async _requestAPI<T>(
-    queryArgs: Record<string, unknown> = {},
+    queryArgs: { [k: string]: any } = {},
     init: RequestInit = {}
   ): Promise<T> {
     // Make request to Jupyter API
@@ -445,9 +446,9 @@ export class PluginListModel extends VDomModel {
       throw new ServerConnection.NetworkError(error);
     }
 
-    let data: unknown = await response.text();
+    let data: any = await response.text();
 
-    if (typeof data === 'string' && data.length > 0) {
+    if (data.length > 0) {
       try {
         data = JSON.parse(data);
       } catch (error) {
@@ -456,23 +457,16 @@ export class PluginListModel extends VDomModel {
     }
 
     if (!response.ok) {
-      const message =
-        typeof data === 'object' &&
-        data !== null &&
-        'message' in data &&
-        (data as { message?: unknown }).message
-          ? (data as { message?: unknown }).message
-          : data;
-      throw new ServerConnection.ResponseError(response, message);
+      throw new ServerConnection.ResponseError(response, data.message || data);
     }
 
-    return data as T;
+    return data;
   }
 
   private _trackerDataChanged: Signal<PluginListModel, void> = new Signal(this);
   private _available: Map<string, IEntry>;
   private _isLoading = false;
-  private _pendingActions: Promise<unknown>[] = [];
+  private _pendingActions: Promise<any>[] = [];
   private _serverSettings: ServerConnection.ISettings;
   private _ready = new PromiseDelegate<void>();
   private _query: string;

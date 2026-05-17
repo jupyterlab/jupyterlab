@@ -2,13 +2,13 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Button } from '@jupyter/react-components';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
-import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import type { FormProps, IChangeEvent } from '@rjsf/core';
 import Form from '@rjsf/core';
@@ -239,7 +239,7 @@ export interface ILabCustomizerOptions<P>
   >;
 }
 
-function customizeForLab<P = unknown>(
+function customizeForLab<P = any>(
   options: ILabCustomizerOptions<P>
 ): React.FunctionComponent<P> {
   const {
@@ -448,7 +448,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
     component: props => {
       const trans = (props.translator ?? nullTranslator).load('jupyterlab');
       let isModified = false;
-      let defaultValue: unknown;
+      let defaultValue: any;
       const {
         formData,
         schema,
@@ -490,10 +490,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
           defaultValue !== undefined &&
           !schema.properties &&
           schema.type !== 'array' &&
-          !JSONExt.deepEqual(
-            formData as ReadonlyPartialJSONValue,
-            defaultValue as ReadonlyPartialJSONValue
-          );
+          !JSONExt.deepEqual(formData, defaultValue);
       }
 
       const needsDescription =
@@ -592,7 +589,9 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                 <div className="jp-FormGroup-default">
                   {trans.__(
                     'Default: %1',
-                    defaultValue !== null ? String(defaultValue) : 'null'
+                    defaultValue !== null
+                      ? defaultValue.toLocaleString()
+                      : 'null'
                   )}
                 </div>
               )}
@@ -615,7 +614,7 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
   /**
    *
    */
-  onChange: (e: IChangeEvent<T>) => void;
+  onChange: (e: IChangeEvent<T>) => any;
   /**
    *
    */
@@ -684,15 +683,7 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     ObjectFieldTemplate: objectTemplate
   };
 
-  const normalizedFormContext = formContext as
-    | Record<string, unknown>
-    | undefined;
-
   return (
-    <Form
-      templates={templates}
-      formContext={normalizedFormContext}
-      {...others}
-    />
+    <Form templates={templates} formContext={formContext as any} {...others} />
   );
 }

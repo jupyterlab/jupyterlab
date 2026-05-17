@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   JupyterFrontEnd,
@@ -84,18 +85,12 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if (change.type !== 'removed') {
           return;
         }
-        const data = (change.notification.options.data ?? {}) as Record<
-          string,
-          unknown
-        >;
-        const id = typeof data.id === 'string' ? data.id : undefined;
-        const tags = Array.isArray(data.tags)
-          ? data.tags.filter((tag): tag is string => typeof tag === 'string')
-          : undefined;
+        const { id, tags }: { id?: string; tags?: Array<string> } = (change
+          .notification.options.data ?? {}) as any;
         if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
           const update: { [k: string]: INewsState } = {};
           update[id] = { seen: true, dismissed: true };
-          config?.update(update).catch(reason => {
+          config?.update(update as any).catch(reason => {
             console.error(
               `Failed to update the announcements config:\n${reason}`
             );
@@ -142,26 +137,22 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     .catch(reason => {
                       console.error(`Failed to get the news:\n${reason}`);
                     });
-                  settings
-                    ?.set('fetchNews', 'true')
-                    .catch((reason: unknown) => {
-                      console.error(
-                        `Failed to save setting 'fetchNews':\n${reason}`
-                      );
-                    });
+                  settings?.set('fetchNews', 'true').catch((reason: any) => {
+                    console.error(
+                      `Failed to save setting 'fetchNews':\n${reason}`
+                    );
+                  });
                 }
               },
               {
                 label: trans.__('No'),
                 callback: () => {
                   Notification.dismiss(notificationId);
-                  settings
-                    ?.set('fetchNews', 'false')
-                    .catch((reason: unknown) => {
-                      console.error(
-                        `Failed to save setting 'fetchNews':\n${reason}`
-                      );
-                    });
+                  settings?.set('fetchNews', 'false').catch((reason: any) => {
+                    console.error(
+                      `Failed to save setting 'fetchNews':\n${reason}`
+                    );
+                  });
                 }
               }
             ]
@@ -196,7 +187,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
-                      config?.update(update).catch(reason => {
+                      config?.update(update as any).catch(reason => {
                         console.error(
                           `Failed to update the announcements config:\n${reason}`
                         );
@@ -218,7 +209,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
                   update[id] = { seen: true };
-                  config?.update(update).catch(reason => {
+                  config?.update(update as any).catch(reason => {
                     console.error(
                       `Failed to update the announcements config:\n${reason}`
                     );
@@ -264,7 +255,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                       .then(() => {
                         Notification.dismiss(notificationId);
                       })
-                      .catch((reason: unknown) => {
+                      .catch((reason: any) => {
                         console.error(
                           'Failed to set the `checkForUpdates` setting.',
                           reason
@@ -289,7 +280,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};
                 update[id] = { seen: true };
-                config?.update(update).catch(reason => {
+                config?.update(update as any).catch(reason => {
                   console.error(
                     `Failed to update the announcements config:\n${reason}`
                   );

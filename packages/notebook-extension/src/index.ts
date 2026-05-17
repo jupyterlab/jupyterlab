@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module notebook-extension
@@ -754,8 +755,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
         return;
       }
 
-      const formatLabels: Record<string, string> =
-        Private.getFormatLabels(translator);
+      const formatLabels: any = Private.getFormatLabels(translator);
 
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
@@ -1267,7 +1267,7 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   cellExecutor,
   factory,
   trackerPlugin,
@@ -1312,7 +1312,7 @@ function activateNotebookTools(
   const notebookTools = new NotebookTools({ tracker, translator });
 
   // Create message hook for triggers to save to the database.
-  const hook = (sender: NotebookTools, message: Message): boolean => {
+  const hook = (sender: any, message: Message): boolean => {
     switch (message.type) {
       case 'activate-request':
         void state.save(id, { open: true });
@@ -2590,10 +2590,7 @@ function addCommands(
         return;
       }
       panel.content.model.cells.changed.connect(
-        (
-          list: IObservableList<ICellModel>,
-          args: IObservableList.IChangedArgs<ICellModel>
-        ) => {
+        (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);

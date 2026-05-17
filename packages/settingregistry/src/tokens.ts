@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { CellType } from '@jupyterlab/nbformat';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import type {
@@ -692,7 +694,7 @@ export namespace ISettingRegistry {
     /**
      * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
      */
-    properties: { [option: string]: RJSFSchema };
+    properties: { [option: string]: any };
 
     /**
      * The required fields.

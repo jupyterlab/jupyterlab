@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -179,7 +180,7 @@ enum MessageKind {
 
 interface IMessageLog<T extends AnyMethod = AnyMethod> {
   method: T;
-  message: unknown;
+  message: any;
 }
 
 export class LSPConnection extends LspWsConnection implements ILSPConnection {
@@ -246,7 +247,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    * Signal emitted when the connection receives an error
    * message.
    */
-  get errorSignal(): ISignal<ILSPConnection, unknown> {
+  get errorSignal(): ISignal<ILSPConnection, any> {
     return this._errorSignal;
   }
 
@@ -255,7 +256,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    */
   get serverInitialized(): ISignal<
     ILSPConnection,
-    lsp.ServerCapabilities<unknown>
+    lsp.ServerCapabilities<any>
   > {
     return this._serverInitialized;
   }
@@ -385,41 +386,35 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   >(
     methods: typeof Method.ServerNotification | typeof Method.ClientNotification
   ): T {
-    const factory = () => new Signal<LSPConnection, unknown>(this);
-    return createMethodMap<T, Signal<LSPConnection, unknown>>(methods, factory);
+    const factory = () => new Signal<any, any>(this);
+    return createMethodMap<T, Signal<any, any>>(methods, factory);
   }
 
   /**
    * Generate the client request handler
    */
-  protected constructClientRequestHandler<T extends ClientRequests>(
-    methods: typeof Method.ClientRequest
-  ): T {
+  protected constructClientRequestHandler<
+    T extends ClientRequests,
+    U extends keyof T = keyof T
+  >(methods: typeof Method.ClientRequest): T {
     return createMethodMap<T, IClientRequestHandler>(
       methods,
       method =>
-        new ClientRequestHandler(
-          this.connection,
-          method as unknown as keyof IClientRequestParams,
-          this
-        )
+        new ClientRequestHandler(this.connection, method as U as any, this)
     );
   }
 
   /**
    * Generate the server response handler
    */
-  protected constructServerRequestHandler<T extends ServerRequests>(
-    methods: typeof Method.ServerRequest
-  ): T {
+  protected constructServerRequestHandler<
+    T extends ServerRequests,
+    U extends keyof T = keyof T
+  >(methods: typeof Method.ServerRequest): T {
     return createMethodMap<T, IServerRequestHandler>(
       methods,
       method =>
-        new ServerRequestHandler(
-          this.connection,
-          method as unknown as keyof IServerRequestParams,
-          this
-        )
+        new ServerRequestHandler(this.connection, method as U as any, this)
     );
   }
 
@@ -459,10 +454,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     for (const method of Object.values(
       Method.ServerNotification
     ) as (keyof ServerNotifications)[]) {
-      const signal = this.serverNotifications[method] as Signal<
-        LSPConnection,
-        unknown
-      >;
+      const signal = this.serverNotifications[method] as Signal<any, any>;
       const disposable = this.connection.onNotification(method, params => {
         this.log(MessageKind.serverNotifiedClient, {
           method,
@@ -476,10 +468,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     for (const method of Object.values(
       Method.ClientNotification
     ) as (keyof ClientNotifications)[]) {
-      const signal = this.clientNotifications[method] as Signal<
-        LSPConnection,
-        unknown
-      >;
+      const signal = this.clientNotifications[method] as Signal<any, any>;
       signal.connect((emitter, params) => {
         this.log(MessageKind.clientNotifiedServer, {
           method,
@@ -553,10 +542,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   private _options: ILSPOptions;
 
   private _closeSignal: Signal<ILSPConnection, boolean> = new Signal(this);
-  private _errorSignal: Signal<ILSPConnection, unknown> = new Signal(this);
+  private _errorSignal: Signal<ILSPConnection, any> = new Signal(this);
   private _serverInitialized: Signal<
     ILSPConnection,
-    lsp.ServerCapabilities<unknown>
+    lsp.ServerCapabilities<any>
   > = new Signal(this);
 
   /**

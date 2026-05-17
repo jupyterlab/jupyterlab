@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Extension } from '@codemirror/state';
 import type { ISharedText } from '@jupyter/ydoc';
@@ -373,12 +374,12 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions(options: Record<string, unknown>): void;
+    setOptions(options: Record<string, any>): void;
 
     /**
      * Set a base config options for the editor.
      */
-    setBaseOptions(options: Record<string, unknown>): void;
+    setBaseOptions(options: Record<string, any>): void;
 
     /**
      * Inject an extension into the editor
@@ -533,7 +534,7 @@ export namespace CodeEditor {
     /**
      * The configuration options for the editor.
      */
-    config?: Record<string, unknown>;
+    config?: Record<string, any>;
 
     /**
      * List of editor extensions to be added.

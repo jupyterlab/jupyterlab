@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { ICellModel } from '@jupyterlab/cells';
@@ -80,7 +81,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): unknown;
+  getMetadata(key: string): any;
 
   /**
    * Set a metadata
@@ -88,7 +89,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: unknown): void;
+  setMetadata(key: string, value: any): void;
 }
 
 /**
@@ -138,14 +139,14 @@ export class NotebookModel implements INotebookModel {
   /**
    * Signal emitted when notebook metadata changes.
    */
-  get metadataChanged(): ISignal<INotebookModel, IMapChange<unknown>> {
+  get metadataChanged(): ISignal<INotebookModel, IMapChange<any>> {
     return this._metadataChanged;
   }
 
   /**
    * A signal emitted when the document state changes.
    */
-  get stateChanged(): ISignal<this, IChangedArgs<unknown>> {
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
     return this._stateChanged;
   }
 
@@ -283,7 +284,7 @@ export class NotebookModel implements INotebookModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): unknown {
+  getMetadata(key: string): any {
     return this.sharedModel.getMetadata(key);
   }
 
@@ -293,7 +294,7 @@ export class NotebookModel implements INotebookModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: unknown): void {
+  setMetadata(key: string, value: any): void {
     if (typeof value === 'undefined') {
       this.sharedModel.deleteMetadata(key);
     } else {
@@ -465,7 +466,7 @@ close the notebook without saving it.`,
   /**
    * Trigger a state change signal.
    */
-  protected triggerStateChange(args: IChangedArgs<unknown>): void {
+  protected triggerStateChange(args: IChangedArgs<any>): void {
     this._stateChanged.emit(args);
   }
 
@@ -497,7 +498,7 @@ close the notebook without saving it.`,
   private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<unknown>>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
   private _trans: TranslationBundle;
   private _cells: CellList;

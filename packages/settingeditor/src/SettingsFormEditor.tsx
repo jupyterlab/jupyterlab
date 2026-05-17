@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
@@ -94,7 +96,7 @@ export namespace SettingsFormEditor {
     /**
      * Form context
      */
-    formContext?: unknown;
+    formContext?: any;
   }
 }
 
@@ -348,6 +350,6 @@ export class SettingsFormEditor extends React.Component<
     return filteredFormData as ReadonlyJSONObject;
   }
 
-  private _debouncer: Debouncer<void, void>;
+  private _debouncer: Debouncer<void, any>;
   private _formData: ReadonlyJSONObject;
 }

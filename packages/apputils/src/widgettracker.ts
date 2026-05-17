@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { IRestorable } from '@jupyterlab/statedb';
 import { RestorablePool } from '@jupyterlab/statedb';
 import type { IDisposable } from '@lumino/disposable';
@@ -309,7 +311,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param widget - The widget whose existence is being checked.
    */
   has(widget: Widget): boolean {
-    return this._pool.has(widget as T);
+    return this._pool.has(widget as any);
   }
 
   /**
@@ -323,7 +325,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * This function should not typically be invoked by client code.
    * Its primary use case is to be invoked by a restorer.
    */
-  async restore(options?: IRestorable.IOptions<T>): Promise<unknown> {
+  async restore(options?: IRestorable.IOptions<T>): Promise<any> {
     const deferred = this._deferred;
     if (deferred) {
       this._deferred = null;

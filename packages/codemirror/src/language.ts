@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type * as SQLModule from '@codemirror/lang-sql';
 import type { StreamParser } from '@codemirror/language';
 import {
@@ -262,14 +264,11 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   // and a class with the same fields but all mandatory. Maybe adopting the same
   // pattern would be less confusing (although far more verbose)
   protected makeSpec(spec: IEditorLanguage): IEditorLanguage {
-    const res = LanguageDescription.of(spec) as LanguageDescription & {
-      mime: IEditorLanguage['mime'];
-      displayName?: string;
-    };
+    let res = LanguageDescription.of(spec) as any;
     // CodeMirror does not store/use mime type of a language
     res.mime = spec.mime;
     res.displayName = spec.displayName;
-    return res;
+    return res as IEditorLanguage;
   }
 }
 
@@ -297,7 +296,7 @@ export namespace EditorLanguageRegistry {
     dialectName: keyof typeof SQLModule
   ): Promise<LanguageSupport> {
     const m = await import('@codemirror/lang-sql');
-    return m.sql({ dialect: m[dialectName] as SQLModule.SQLDialect });
+    return m.sql({ dialect: (m as any)[dialectName] });
   }
 
   /**

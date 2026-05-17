@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { IDisposable } from '@lumino/disposable';
 
 import type { Poll } from '@lumino/polling';
@@ -194,7 +196,7 @@ export class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
-  private _onConnectionFailure(sender: unknown, err: Error): void {
+  private _onConnectionFailure(sender: any, err: Error): void {
     this._connectionFailure.emit(err);
   }
 

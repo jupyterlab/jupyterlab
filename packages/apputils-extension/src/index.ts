@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module apputils-extension
@@ -384,11 +385,8 @@ async function updateTabTitle(options: {
   currentWidget?: Widget;
 }) {
   const { workspace, db, name, currentWidget } = options;
-  const data = (await db.toJSON()) as Record<string, unknown>;
-  const layout = data['layout-restorer:data'] as
-    | { main?: { current?: string } }
-    | undefined;
-  const current = layout?.main?.current;
+  const data: any = await db.toJSON();
+  let current: string = data['layout-restorer:data']?.main?.current;
   if (
     current === undefined ||
     !(current.startsWith('notebook') || current.startsWith('editor'))
@@ -725,11 +723,11 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       },
       execute: args => {
         const commands: string[] = args.commands as string[];
-        const commandArgs = args.args as unknown;
-        const argList = Array.isArray(commandArgs);
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
         for (let i = 0; i < commands.length; i++) {
           const cmd = commands[i];
-          const arg = argList ? (commandArgs as unknown[])[i] : commandArgs;
+          const arg = argList ? commandArgs[i] : commandArgs;
           if (app.commands.isEnabled(cmd, arg)) {
             return app.commands.execute(cmd, arg);
           }
@@ -766,13 +764,13 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       },
       execute: async args => {
         const commands: string[] = (args.commands as string[]) ?? [];
-        const commandArgs = args.args as unknown;
-        const argList = Array.isArray(commandArgs);
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
         const errorIfNotEnabled: boolean =
           (args.errorIfNotEnabled as boolean) ?? false;
         for (let i = 0; i < commands.length; i++) {
           const cmd = commands[i];
-          const arg = argList ? (commandArgs as unknown[])[i] : commandArgs;
+          const arg = argList ? commandArgs[i] : commandArgs;
           if (app.commands.isEnabled(cmd, arg)) {
             await app.commands.execute(cmd, arg);
           } else {
@@ -784,14 +782,11 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       },
       isEnabled: args => {
         const commands: string[] = (args.commands as string[]) ?? [];
-        const commandArgs = args.args as unknown;
-        const argList = Array.isArray(commandArgs);
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
 
         return commands.some((cmd, idx) =>
-          app.commands.isEnabled(
-            cmd,
-            argList ? (commandArgs as unknown[])[idx] : commandArgs
-          )
+          app.commands.isEnabled(cmd, argList ? commandArgs[idx] : commandArgs)
         );
       }
     });
@@ -914,7 +909,7 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelSettings,
   announcements,
   kernelStatus,

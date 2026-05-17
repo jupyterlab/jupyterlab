@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Extension } from '@codemirror/state';
 
@@ -306,7 +307,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Editor configuration
    */
-  get editorConfig(): Record<string, unknown> {
+  get editorConfig(): Record<string, any> {
     return this._editorConfig;
   }
 
@@ -461,15 +462,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState(): void {
-    const rawJupyter = this.model.getMetadata('jupyter');
-    const jupyter = (
-      rawJupyter && typeof rawJupyter === 'object' && !Array.isArray(rawJupyter)
-        ? rawJupyter
-        : {}
-    ) as {
-      source_hidden?: boolean;
-      [key: string]: unknown;
-    };
+    const jupyter = { ...(this.model.getMetadata('jupyter') as any) };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -494,15 +487,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Revert view collapse state from model.
    */
   loadCollapseState(): void {
-    const rawJupyter = this.model.getMetadata('jupyter');
-    const jupyter = (
-      rawJupyter && typeof rawJupyter === 'object' && !Array.isArray(rawJupyter)
-        ? rawJupyter
-        : {}
-    ) as {
-      source_hidden?: boolean;
-      [key: string]: unknown;
-    };
+    const jupyter = (this.model.getMetadata('jupyter') as any) ?? {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -584,7 +569,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    *
    * @param v Partial editor configuration
    */
-  updateEditorConfig(v: Record<string, unknown>): void {
+  updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
       this.editor.setBaseOptions(this._editorConfig);
@@ -770,7 +755,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   );
 
-  private _editorConfig: Record<string, unknown> = {};
+  private _editorConfig: Record<string, any> = {};
   private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
@@ -811,7 +796,7 @@ export namespace Cell {
     /**
      * The configuration options for the text editor widget.
      */
-    editorConfig?: Record<string, unknown>;
+    editorConfig?: Record<string, any>;
 
     /**
      * Editor extensions to be added.
@@ -1626,10 +1611,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the model.
    */
-  protected onStateChanged(
-    model: ICellModel,
-    args: IChangedArgs<unknown>
-  ): void {
+  protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
         if (args.newValue !== null) {
@@ -1823,7 +1805,7 @@ export namespace CodeCell {
           // If the data is missing, estimate it to now
           // Date was added in 5.1: https://jupyter-client.readthedocs.io/en/stable/messaging.html#message-header
           const value = msg.header.date || new Date().toISOString();
-          const timingInfo: Record<string, unknown> = Object.assign(
+          const timingInfo: any = Object.assign(
             {},
             model.getMetadata('execution')
           );
@@ -1840,9 +1822,9 @@ export namespace CodeCell {
       const msg = (await msgPromise)!;
       model.executionCount = msg.content.execution_count;
       if (recordTiming) {
-        const timingInfo: Record<string, unknown> = Object.assign(
+        const timingInfo = Object.assign(
           {},
-          model.getMetadata('execution')
+          model.getMetadata('execution') as any
         );
         const started = msg.metadata.started as string;
         // Started is not in the API, but metadata IPyKernel sends
@@ -1863,7 +1845,7 @@ export namespace CodeCell {
         cell.model.executionState = 'idle';
         if (recordTiming && future.isDisposed) {
           // Record the time when the cell execution was aborted
-          const timingInfo: Record<string, unknown> = Object.assign(
+          const timingInfo: any = Object.assign(
             {},
             model.getMetadata('execution')
           );

@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -327,7 +329,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     for (const [id, providerSettings] of Object.entries(
       this._inlineCompleterSettings.providers
     )) {
-      if (providerSettings.enabled === true) {
+      if ((providerSettings as any).enabled === true) {
         enabledProviders.push(id);
       }
     }

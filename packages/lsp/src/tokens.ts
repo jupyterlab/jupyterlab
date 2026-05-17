@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ServerConnection } from '@jupyterlab/services';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -812,7 +814,7 @@ export interface IServerResult {
   [Method.ServerRequest.REGISTER_CAPABILITY]: void;
   [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
   [Method.ServerRequest.UNREGISTER_CAPABILITY]: void;
-  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: unknown[];
+  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: any[];
 }
 
 /**
@@ -1004,7 +1006,7 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * Signal emitted when the connection receives an error
    * message..
    */
-  errorSignal: ISignal<ILSPConnection, unknown>;
+  errorSignal: ISignal<ILSPConnection, any>;
 
   /**
    * @alpha
@@ -1025,7 +1027,7 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    *
    * Signal emitted when the connection is initialized.
    */
-  serverInitialized: ISignal<ILSPConnection, lsp.ServerCapabilities<unknown>>;
+  serverInitialized: ISignal<ILSPConnection, lsp.ServerCapabilities<any>>;
 
   /**
    * @alpha

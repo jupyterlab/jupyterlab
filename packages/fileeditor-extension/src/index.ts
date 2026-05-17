@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module fileeditor-extension
@@ -212,16 +213,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
 
     // Keep a reference to the code editor config from the settings system.
     const updateIndentUnit = (settings: ISettingRegistry.ISettings): void => {
-      const editorConfig = settings.get('editorConfig').composite as Record<
-        string,
-        unknown
-      >;
-      const configuredIndentUnit = editorConfig?.indentUnit;
       item.model!.indentUnit =
-        (typeof configuredIndentUnit === 'string' ||
-        typeof configuredIndentUnit === 'number'
-          ? configuredIndentUnit
-          : null) ??
+        (settings.get('editorConfig').composite as any)?.indentUnit ??
         extensions.baseConfiguration.indentUnit ??
         null;
     };
@@ -313,7 +306,7 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   widgetFactory,
   plugin,
   lineColStatus,
@@ -461,10 +454,7 @@ function activate(
               }
               languageMenu.addItem({
                 command: CommandIDs.changeLanguage,
-                args: {
-                  name: spec.name,
-                  displayName: spec.displayName ?? spec.name
-                }
+                args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
               });
             });
         }

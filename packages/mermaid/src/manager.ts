@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type MermaidType from 'mermaid';
 import type MermaidElkType from '@mermaid-js/layout-elk';
 
@@ -348,7 +350,7 @@ namespace Private {
    * The current upstream behavior appears to be last-in wins, but check all.
    */
   export async function ensureRenderers(text: string): Promise<void> {
-    let promises: Promise<unknown>[] = [];
+    let promises: Promise<any>[] = [];
 
     for (const match of [...text.matchAll(RE_DEFAULT_RENDERER)]) {
       // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check

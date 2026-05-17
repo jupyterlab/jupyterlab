@@ -2,6 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { SemanticCommand } from '@jupyterlab/apputils';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -197,7 +199,7 @@ export function createSemanticCommand(
         commandId => commandId !== null && commands.isEnabled(commandId)
       );
 
-      let result: unknown = null;
+      let result: any = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
           const args = { [SemanticCommand.WIDGET]: widget!.id };
@@ -217,7 +219,7 @@ export function createSemanticCommand(
 
   function reduceAttribute(
     attribute: keyof CommandRegistry.ICommandOptions
-  ): unknown[] {
+  ): any[] {
     const widget = shell.currentWidget;
     const commandIds = commandList.map(cmd =>
       widget !== null ? cmd.getActiveCommandId(widget) : null

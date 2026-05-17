@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module metadataform-extension
@@ -41,10 +42,6 @@ namespace Private {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       loaded = {};
-      const settingsMetadataForms =
-        (schema['jupyter.lab.metadataforms'] as
-          | ISettingRegistry.IMetadataForm[]
-          | undefined) ?? [];
       schema.properties!.metadataforms.default = Object.keys(registry.plugins)
         .map(plugin => {
           const metadataForms =
@@ -56,7 +53,7 @@ namespace Private {
           loaded[plugin] = metadataForms;
           return metadataForms;
         })
-        .concat([settingsMetadataForms])
+        .concat([schema['jupyter.lab.metadataforms'] as any[]])
         .reduce((acc, val) => {
           // If a MetadataForm with the same ID already exists,
           // the metadataKeys will be concatenated to this MetadataForm's metadataKeys .

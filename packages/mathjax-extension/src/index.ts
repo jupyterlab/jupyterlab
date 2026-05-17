@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module mathjax-extension
@@ -49,7 +50,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
   /**
    * Get an instance of the MathDocument object.
    */
-  async mathDocument(): Promise<MathDocument<unknown, unknown, unknown>> {
+  async mathDocument(): Promise<MathDocument<any, any, any>> {
     await this._ensureInitialized();
     return this._mathDocument;
   }
@@ -72,7 +73,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
   }
 
   protected _initialized: boolean = false;
-  protected _mathDocument: MathDocument<unknown, unknown, unknown>;
+  protected _mathDocument: MathDocument<any, any, any>;
 }
 
 /**
@@ -90,10 +91,8 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
     app.commands.addCommand(CommandIDs.copy, {
       execute: async () => {
         const md = await typesetter.mathDocument();
-        const outputJax = md.outputJax as unknown as {
-          math?: { math?: string };
-        };
-        await navigator.clipboard.writeText(outputJax.math?.math ?? '');
+        const oJax: any = md.outputJax;
+        await navigator.clipboard.writeText(oJax.math.math);
       },
       label: trans.__('MathJax Copy Latex'),
       describedBy: {
@@ -146,12 +145,10 @@ export default mathJaxPlugin;
  * A namespace for module-private functionality.
  */
 namespace Private {
-  let _loading: PromiseDelegate<
-    MathDocument<unknown, unknown, unknown>
-  > | null = null;
+  let _loading: PromiseDelegate<MathDocument<any, any, any>> | null = null;
 
   export async function ensureMathDocument(): Promise<
-    MathDocument<unknown, unknown, unknown>
+    MathDocument<any, any, any>
   > {
     if (!_loading) {
       _loading = new PromiseDelegate();
@@ -185,7 +182,7 @@ namespace Private {
       );
 
       class EmptyFont extends TeXFont {
-        protected static defaultFonts = {} as Record<string, unknown>;
+        protected static defaultFonts = {} as any;
       }
 
       const chtml = new CHTML({

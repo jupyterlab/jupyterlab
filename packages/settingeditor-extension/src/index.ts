@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module settingeditor-extension
@@ -386,7 +387,7 @@ function activateJSON(
       // Notify the command registry when the visibility status of the setting
       // editor's commands change. The setting editor toolbar listens for this
       // signal from the command registry.
-      editor.commandsChanged.connect((sender: unknown, args: string[]) => {
+      editor.commandsChanged.connect((sender: any, args: string[]) => {
         args.forEach(id => {
           commands.notifyCommandChanged(id);
         });
@@ -593,8 +594,8 @@ function activateJSON(
    */
   function collectUserSettings(
     registry: ISettingRegistry
-  ): Record<string, unknown> {
-    const userSettings: Record<string, unknown> = {};
+  ): Record<string, any> {
+    const userSettings: Record<string, any> = {};
     for (const [pluginId, plugin] of Object.entries(registry.plugins)) {
       if (plugin) {
         try {

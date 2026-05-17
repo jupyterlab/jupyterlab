@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module nbformat
@@ -106,7 +107,7 @@ export function validateMimeValue(
   const jsonTest = /^application\/.+\+json$/;
   const isJSONType = type === 'application/json' || jsonTest.test(type);
 
-  const isString = (x: unknown) => {
+  const isString = (x: any) => {
     return Object.prototype.toString.call(x) === '[object String]';
   };
 

@@ -2,6 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { CodeCell } from '@jupyterlab/cells';
 import type { KernelMessage } from '@jupyterlab/services';
 import type { IConsoleCellExecutor } from './tokens';
@@ -22,10 +24,13 @@ export async function runCell({
       const content = value.content;
       // Use deprecated payloads for backwards compatibility.
       if (content.payload && content.payload.length) {
-        const setNextInput = content.payload.find(isSetNextInputPayload);
+        const setNextInput = content.payload.filter(i => {
+          return (i as any).source === 'set_next_input';
+        })[0];
         if (setNextInput) {
+          const text = (setNextInput as any).text;
           // Ignore the `replace` value and always set the next cell.
-          cell.model.sharedModel.setSource(setNextInput.text);
+          cell.model.sharedModel.setSource(text);
         }
       }
 
@@ -56,35 +61,15 @@ export async function runCell({
     return false;
   };
 
-  const onFailure = (reason: unknown) => {
+  const onFailure = (reason: any) => {
     onCellExecuted({
       cell,
       executionDate: new Date(),
       success: false,
-      error: reason instanceof Error ? reason : new Error(String(reason))
+      error: new Error(reason)
     });
     return false;
   };
 
   return CodeCell.execute(cell, sessionContext).then(onSuccess, onFailure);
-}
-
-interface ISetNextInputPayload {
-  source: 'set_next_input';
-  text: string;
-}
-
-function isSetNextInputPayload(
-  payload: unknown
-): payload is ISetNextInputPayload {
-  if (!payload || typeof payload !== 'object') {
-    return false;
-  }
-  const candidate = payload as {
-    source?: unknown;
-    text?: unknown;
-  };
-  return (
-    candidate.source === 'set_next_input' && typeof candidate.text === 'string'
-  );
 }

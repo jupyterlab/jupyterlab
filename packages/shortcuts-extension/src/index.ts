@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module shortcuts-extension
@@ -27,7 +28,6 @@ import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type { FieldProps } from '@rjsf/utils';
 
 import { renderShortCut } from './renderer';
 import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
@@ -218,7 +218,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         : undefined;
 
       const component: IFormRenderer = {
-        fieldRenderer: (props: FieldProps) => {
+        fieldRenderer: (props: any) => {
           return renderShortCut({
             external: getExternalForJupyterLab(
               registry,
@@ -245,9 +245,6 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         );
       }
       loaded = {};
-      const canonicalOverridesArray = Array.isArray(cannonicalOverrides)
-        ? (cannonicalOverrides as ISettingRegistry.IShortcut[])
-        : [];
       schema.properties!.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
           const shortcuts =
@@ -255,7 +252,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .concat([canonicalOverridesArray])
+        .concat([cannonicalOverrides as any[]])
         .reduce((acc, val) => {
           if (Platform.IS_MAC) {
             return acc.concat(val);

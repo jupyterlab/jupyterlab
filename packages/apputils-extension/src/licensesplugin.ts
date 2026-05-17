@@ -2,6 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -146,7 +148,7 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: args => {
+      execute: (args: any) => {
         // bail if no license API is available from the server
         if (!PageConfig.getOption('licensesUrl')) {
           console.warn('No license API available from the server');

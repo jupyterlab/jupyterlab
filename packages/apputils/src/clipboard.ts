@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { MimeData } from '@lumino/coreutils';
 
 // 'string' is allowed so as to make it non-breaking for any 1.x releases
@@ -34,13 +36,7 @@ export namespace Clipboard {
   export function copyToSystem(clipboardData: ClipboardData): void {
     const node = document.body;
     const handler = (event: ClipboardEvent) => {
-      const legacyClipboardWindow = window as Window & {
-        clipboardData?: DataTransfer | null;
-      };
-      const data = event.clipboardData || legacyClipboardWindow.clipboardData;
-      if (!data) {
-        return;
-      }
+      const data = event.clipboardData || (window as any).clipboardData;
       if (typeof clipboardData === 'string') {
         data.setData('text', clipboardData);
       } else {
@@ -76,7 +72,7 @@ export namespace Clipboard {
     let sel = window.getSelection();
 
     // Save the current selection.
-    const savedRanges: Range[] = [];
+    const savedRanges: any[] = [];
     for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
       savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }

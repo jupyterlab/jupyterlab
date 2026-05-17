@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Test helpers
 
 /**
@@ -9,19 +11,11 @@ export function sleep(milliseconds?: number): Promise<void>;
 export function sleep<T>(milliseconds: number, value: T): Promise<T>;
 export function sleep<T>(
   milliseconds: number = 0,
-  value?: T
+  value?: any
 ): Promise<T> | Promise<void> {
-  if (arguments.length < 2) {
-    return new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, milliseconds);
-    });
-  }
-
-  return new Promise<T>(resolve => {
+  return new Promise<T>((resolve, reject) => {
     setTimeout(() => {
-      resolve(value as T);
+      resolve(value);
     }, milliseconds);
   });
 }

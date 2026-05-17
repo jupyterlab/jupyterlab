@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { JSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
@@ -642,7 +644,7 @@ export interface IDebugEventMsg extends IIOPubMessage<'debug_event'> {
     seq: number;
     type: 'event';
     event: string;
-    body?: unknown;
+    body?: any;
   };
 }
 
@@ -1244,7 +1246,7 @@ export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
     seq: number;
     type: 'request';
     command: string;
-    arguments?: unknown;
+    arguments?: any;
   };
 }
 
@@ -1280,7 +1282,7 @@ export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
     success: boolean;
     command: string;
     message?: string;
-    body?: unknown;
+    body?: any;
   };
 }
 

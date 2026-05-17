@@ -2,6 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { CommandRegistry } from '@lumino/commands';
 import { Selector } from '@lumino/domutils';
 import * as React from 'react';
@@ -157,7 +159,7 @@ export function displayShortcuts(options: IOptions) {
   }
 
   // Display shortcuts by group
-  const bindingTable: Array<JSX.Element | JSX.Element[]> = [];
+  const bindingTable: any = [];
   for (let d = 0; d <= maxDistance; d++) {
     if (groupedBindings.has(d)) {
       bindingTable.push(

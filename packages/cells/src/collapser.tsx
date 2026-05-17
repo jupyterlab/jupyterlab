@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ReactWidget } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 
@@ -56,7 +58,7 @@ export abstract class Collapser extends ReactWidget {
   /**
    * Render the collapser with the virtual DOM.
    */
-  protected render(): React.ReactElement<unknown> {
+  protected render(): React.ReactElement<any> {
     const childClass = COLLAPSER_CHILD_CLASS;
     return <div className={childClass} onClick={e => this.handleClick(e)} />;
   }

@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import {
@@ -17,14 +19,6 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
-
-interface IWorkspaceLayoutRestorerData {
-  main?: {
-    dock?: {
-      widgets?: unknown[];
-    };
-  };
-}
 
 namespace CommandIDs {
   /**
@@ -372,9 +366,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
 
         const workspace =
           await app.serviceManager.workspaces.fetch(workspaceId);
-        const tabs = (
-          workspace.data['layout-restorer:data'] as IWorkspaceLayoutRestorerData
-        )?.main?.dock?.widgets?.length ?? 0;
+        const tabs = (workspace.data['layout-restorer:data'] as any)?.main?.dock
+          ?.widgets?.length;
 
         const result = await showDialog({
           title: trans.__('Reset Workspace'),
@@ -446,11 +439,6 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
             const fullFile = await contents.get(fileModel.path, {
               content: true
             });
-            if (typeof fullFile.content !== 'string') {
-              throw new Error(
-                `Workspace file "${fileModel.path}" must contain string content`
-              );
-            }
             const workspace = JSON.parse(
               fullFile.content
             ) as unknown as Workspace.IWorkspace;

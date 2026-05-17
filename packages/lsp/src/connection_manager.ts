@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -275,16 +277,9 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
    * singletons).
    */
   onNewConnection = (connection: LSPConnection): void => {
-    const errorSignalSlot = (_: ILSPConnection, e: unknown): void => {
+    const errorSignalSlot = (_: ILSPConnection, e: any): void => {
       console.error(e);
-      let error = new Error();
-      if (Array.isArray(e) && e.length >= 1 && e[0] instanceof Error) {
-        error = e[0];
-      } else if (e instanceof Error) {
-        error = e;
-      } else if (typeof e === 'string') {
-        error = new Error(e);
-      }
+      let error: Error = e.length && e.length >= 1 ? e[0] : new Error();
       if (error.message.indexOf('code = 1005') !== -1) {
         console.error(`Connection failed for ${connection}`);
         this._forEachDocumentOfConnection(connection, virtualDocument => {

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module toc-extension
@@ -214,10 +215,8 @@ async function activateTOC(
       settings = await settingRegistry.load(registry.id);
       const updateSettings = (plugin: ISettingRegistry.ISettings) => {
         const composite = plugin.composite;
-        for (const key of Object.keys(configuration) as Array<
-          keyof typeof configuration
-        >) {
-          const value = composite[key] as (typeof configuration)[typeof key];
+        for (const key of [...Object.keys(configuration)]) {
+          const value = composite[key] as any;
           if (value !== undefined) {
             configuration[key] = value;
           }

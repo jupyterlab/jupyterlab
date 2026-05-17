@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module workspaces-extension
@@ -125,16 +126,9 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
           'toolbar'
         );
         if (Array.isArray(toolbar.composite)) {
-          const updatedToolbar = toolbar.composite.map(item => {
-            if (item && typeof item === 'object') {
-              const toolbarItem = item as {
-                name?: string;
-                disabled?: boolean;
-                [key: string]: unknown;
-              };
-              if (toolbarItem.name === 'workspaceIndicator') {
-                return { ...toolbarItem, disabled: !toolbarItem.disabled };
-              }
+          const updatedToolbar = toolbar.composite.map((item: any) => {
+            if (item.name === 'workspaceIndicator') {
+              return { ...item, disabled: !item.disabled };
             }
             return item;
           });
@@ -163,7 +157,7 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   workspacesModel,
   commandsPlugin,
   workspacesSidebar,

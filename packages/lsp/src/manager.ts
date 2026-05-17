@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import type { ISignal } from '@lumino/signaling';
@@ -12,7 +14,7 @@ import type {
   TSpecsMap
 } from './tokens';
 import { ILanguageServerManager } from './tokens';
-import type { LanguageServerSession, ServerSpecProperties } from './schema';
+import type { ServerSpecProperties } from './schema';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 export class LanguageServerManager implements ILanguageServerManager {
@@ -192,7 +194,7 @@ export class LanguageServerManager implements ILanguageServerManager {
       return;
     }
 
-    let sessions: Record<string, LanguageServerSession>;
+    let sessions: { [key: string]: any };
 
     try {
       const data = await response.json();

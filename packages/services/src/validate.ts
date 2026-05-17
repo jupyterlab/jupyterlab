@@ -1,23 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Validate a property as being on an object, and optionally
  * of a given type and among a given set of values.
  */
 export function validateProperty(
-  object: unknown,
+  object: any,
   name: string,
   typeName?: string,
-  values: unknown[] = []
+  values: any[] = []
 ): void {
-  if (object === null || typeof object !== 'object') {
+  if (!object.hasOwnProperty(name)) {
     throw Error(`Missing property '${name}'`);
   }
-  const typedObject = object as { [key: string]: unknown };
-  if (!Object.prototype.hasOwnProperty.call(typedObject, name)) {
-    throw Error(`Missing property '${name}'`);
-  }
-  const value = typedObject[name];
+  const value = object[name];
 
   if (typeName !== void 0) {
     let valid;

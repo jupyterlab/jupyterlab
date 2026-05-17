@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module terminal-extension
@@ -230,9 +231,8 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    const composite = settings.composite as Partial<ITerminal.IOptions>;
-    Object.keys(composite).forEach((key: keyof ITerminal.IOptions) => {
-      options[key] = composite[key];
+    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
+      (options as any)[key] = settings.composite[key];
     });
   }
 

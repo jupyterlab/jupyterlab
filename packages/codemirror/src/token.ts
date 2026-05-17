@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { LanguageSupport } from '@codemirror/language';
 import type { Extension, StateEffect } from '@codemirror/state';
@@ -59,7 +60,7 @@ export interface IExtensionsHandler extends IDisposable {
    *
    * It should result in a call to `IExtensionsHandler.reconfigureExtensions`.
    */
-  readonly configChanged: ISignal<this, Record<string, unknown>>;
+  readonly configChanged: ISignal<this, Record<string, any>>;
 
   /**
    * Get a config option for the editor.
@@ -90,7 +91,7 @@ export interface IExtensionsHandler extends IDisposable {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Record<string, unknown>): void;
+  setOptions(options: Record<string, any>): void;
 
   /**
    * Set a base config options for the editor.
@@ -98,7 +99,7 @@ export interface IExtensionsHandler extends IDisposable {
    * You will need to reconfigure the editor extensions by listening
    * to `IExtensionsHandler.configChanged`.
    */
-  setBaseOptions(options: Record<string, unknown>): void;
+  setBaseOptions(options: Record<string, any>): void;
 
   /**
    * Returns the list of initial extensions of an editor.
@@ -135,7 +136,7 @@ export interface IExtensionsHandler extends IDisposable {
    */
   reconfigureExtensions(
     view: EditorView,
-    configuration: Record<string, unknown>
+    configuration: Record<string, any>
   ): void;
 }
 
@@ -206,7 +207,7 @@ export interface IEditorExtensionRegistry {
    *
    * This is the default configuration.
    */
-  readonly baseConfiguration: Record<string, unknown>;
+  readonly baseConfiguration: Record<string, any>;
 
   /**
    * Add a default editor extension
@@ -226,7 +227,7 @@ export interface IEditorExtensionRegistry {
       /**
        * The configuration options for the editor.
        */
-      config?: Record<string, unknown>;
+      config?: Record<string, any>;
     }
   ): IExtensionsHandler;
 }

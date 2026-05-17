@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
   type Cell,
@@ -153,7 +155,9 @@ function handlePayload(
   notebook: INotebookModel,
   cell: Cell
 ) {
-  const setNextInput = content.payload?.find(isSetNextInputPayload);
+  const setNextInput = content.payload?.filter(i => {
+    return (i as any).source === 'set_next_input';
+  })[0];
 
   if (!setNextInput) {
     return;
@@ -193,28 +197,4 @@ function handlePayload(
       }
     });
   }
-}
-
-interface ISetNextInputPayload {
-  source: 'set_next_input';
-  text: string;
-  replace?: boolean;
-}
-
-function isSetNextInputPayload(
-  payload: unknown
-): payload is ISetNextInputPayload {
-  if (!payload || typeof payload !== 'object') {
-    return false;
-  }
-  const candidate = payload as {
-    source?: unknown;
-    text?: unknown;
-    replace?: unknown;
-  };
-  return (
-    candidate.source === 'set_next_input' &&
-    typeof candidate.text === 'string' &&
-    (candidate.replace === undefined || typeof candidate.replace === 'boolean')
-  );
 }

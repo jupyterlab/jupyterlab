@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Token } from '@lumino/coreutils';
 import type { ISignal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
@@ -34,17 +36,17 @@ export namespace IInspector {
     /**
      * A signal emitted when the inspector should clear all items.
      */
-    cleared: ISignal<IInspectable, void>;
+    cleared: ISignal<any, void>;
 
     /**
      * A signal emitted when the inspectable is disposed.
      */
-    disposed: ISignal<IInspectable, void>;
+    disposed: ISignal<any, void>;
 
     /**
      * A signal emitted when an inspector value is generated.
      */
-    inspected: ISignal<IInspectable, IInspectorUpdate>;
+    inspected: ISignal<any, IInspectorUpdate>;
 
     /**
      * Test whether the inspectable has been disposed.

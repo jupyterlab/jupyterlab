@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module vega5-extension
@@ -119,7 +120,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const loader = vega.vega.loader({
       http: { credentials: 'same-origin' }
     });
-    const sanitize = async (uri: string, options: unknown) => {
+    const sanitize = async (uri: string, options: any) => {
       // Use the resolver for any URIs it wants to handle
       const resolver = this._resolver;
       if (resolver?.isLocal && resolver.isLocal(uri)) {
@@ -142,11 +143,14 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     }
 
     // Add png representation of vega chart to output
-    const pngScaleFactor =
+    const imageURL = await this._result.view.toImageURL(
+      'png',
       typeof embedOptions.scaleFactor === 'number'
         ? embedOptions.scaleFactor
-        : (embedOptions.scaleFactor as { png?: number } | undefined)?.png;
-    const imageURL = await this._result.view.toImageURL('png', pngScaleFactor);
+        : embedOptions.scaleFactor
+          ? (embedOptions.scaleFactor as any).png
+          : embedOptions.scaleFactor
+    );
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }
     });

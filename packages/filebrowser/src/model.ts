@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { compareVersions, PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -80,11 +82,11 @@ export class FileBrowserModel implements IDisposable {
     services.contents.fileChanged.connect(this.onFileChanged, this);
     services.sessions.runningChanged.connect(this.onRunningChanged, this);
 
-    this._unloadEventListener = (e: BeforeUnloadEvent) => {
+    this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
         const confirmationMessage = this._trans.__('Files still uploading');
 
-        e.returnValue = confirmationMessage;
+        (e as any).returnValue = confirmationMessage;
         return confirmationMessage;
       }
     };
@@ -624,9 +626,9 @@ export class FileBrowserModel implements IDisposable {
       mimetype: contents.mimetype,
       format: contents.format
     };
-    this._items = Array.isArray(contents.content) ? contents.content : [];
+    this._items = contents.content;
     this._paths.clear();
-    this._items.forEach((model: Contents.IModel) => {
+    contents.content.forEach((model: Contents.IModel) => {
       this._paths.add(model.path);
     });
   }
@@ -728,7 +730,7 @@ export class FileBrowserModel implements IDisposable {
   private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel | null>>(
     this
   );
-  private _unloadEventListener: (e: BeforeUnloadEvent) => string | undefined;
+  private _unloadEventListener: (e: Event) => string | undefined;
   private _poll: Poll;
 }
 

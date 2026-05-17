@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module metadataform
@@ -12,11 +13,7 @@ import type {
   ISettingRegistry
 } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
-import type {
-  PartialJSONObject,
-  PartialJSONValue,
-  ReadonlyJSONObject
-} from '@lumino/coreutils';
+import type { PartialJSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { MetadataFormWidget } from './metadataform';
 
@@ -50,7 +47,7 @@ export namespace MetadataForm {
     /**
      * The default value for this metadata.
      */
-    default?: PartialJSONValue;
+    default?: any;
 
     /**
      * Whether to avoid writing default value in metadata.
@@ -69,7 +66,7 @@ export namespace MetadataForm {
    * RJSF ui:schema options.
    */
   export interface IUiSchemaOption {
-    [option: string]: unknown;
+    [option: string]: any;
   }
 
   /**

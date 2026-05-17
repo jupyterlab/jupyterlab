@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { VirtualElement } from '@lumino/virtualdom';
@@ -67,7 +69,7 @@ export namespace TabBarSvg {
      *
      * @returns A virtual element representing the tab close icon.
      */
-    renderCloseIcon(data: TabBar.IRenderData<unknown>): VirtualElement {
+    renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
       const trans = (TabBarSvg.translator ?? nullTranslator).load('jupyterlab');
       const label = titleLabel(data.title);
       const title = label ? trans.__('Close %1', label) : trans.__('Close tab');

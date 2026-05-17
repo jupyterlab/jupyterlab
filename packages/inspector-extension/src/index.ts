@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module inspector-extension
@@ -342,9 +343,5 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
-  inspector,
-  consoles,
-  notebooks
-];
+const plugins: JupyterFrontEndPlugin<any>[] = [inspector, consoles, notebooks];
 export default plugins;

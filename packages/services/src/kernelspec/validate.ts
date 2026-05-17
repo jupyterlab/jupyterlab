@@ -1,77 +1,63 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ISpecModel, ISpecModels } from './restapi';
 import { validateProperty } from '../validate';
-
-type JSONRecord = {
-  [key: string]: unknown;
-};
 
 /**
  * Validate a server kernelspec model to a client side model.
  */
-export function validateSpecModel(data: JSONRecord): ISpecModel {
+export function validateSpecModel(data: any): ISpecModel {
   const spec = data.spec;
-  if (!spec || typeof spec !== 'object') {
+  if (!spec) {
     throw new Error('Invalid kernel spec');
   }
-  const specRecord = spec as JSONRecord;
   validateProperty(data, 'name', 'string');
   validateProperty(data, 'resources', 'object');
-  validateProperty(specRecord, 'language', 'string');
-  validateProperty(specRecord, 'display_name', 'string');
-  validateProperty(specRecord, 'argv', 'array');
+  validateProperty(spec, 'language', 'string');
+  validateProperty(spec, 'display_name', 'string');
+  validateProperty(spec, 'argv', 'array');
 
-  let metadata: ISpecModel['metadata'];
-  if (Object.prototype.hasOwnProperty.call(specRecord, 'metadata')) {
-    validateProperty(specRecord, 'metadata', 'object');
-    metadata = specRecord.metadata as ISpecModel['metadata'];
+  let metadata: any = null;
+  if (spec.hasOwnProperty('metadata')) {
+    validateProperty(spec, 'metadata', 'object');
+    metadata = spec.metadata;
   }
 
-  let env: ISpecModel['env'];
-  if (Object.prototype.hasOwnProperty.call(specRecord, 'env')) {
-    validateProperty(specRecord, 'env', 'object');
-    env = specRecord.env as ISpecModel['env'];
+  let env: any = null;
+  if (spec.hasOwnProperty('env')) {
+    validateProperty(spec, 'env', 'object');
+    env = spec.env;
   }
-  let interruptMode: ISpecModel['interrupt_mode'];
-  if (Object.prototype.hasOwnProperty.call(specRecord, 'interrupt_mode')) {
-    validateProperty(specRecord, 'interrupt_mode', 'string');
-    const mode = specRecord.interrupt_mode;
-    if (mode === 'message' || mode === 'signal') {
-      interruptMode = mode;
-    }
+  if (spec.hasOwnProperty('interrupt_mode')) {
+    validateProperty(spec, 'interrupt_mode', 'string');
+    env = spec.env;
   }
   return {
-    name: data.name as string,
-    resources: data.resources as ISpecModel['resources'],
-    language: specRecord.language as string,
-    display_name: specRecord.display_name as string,
-    argv: specRecord.argv as string[],
+    name: data.name,
+    resources: data.resources,
+    language: spec.language,
+    display_name: spec.display_name,
+    argv: spec.argv,
     metadata,
-    env,
-    interrupt_mode: interruptMode
+    env
   };
 }
 
 /**
  * Validate a `Kernel.ISpecModels` object.
  */
-export function validateSpecModels(data: JSONRecord): ISpecModels {
-  if (!Object.prototype.hasOwnProperty.call(data, 'kernelspecs')) {
+export function validateSpecModels(data: any): ISpecModels {
+  if (!data.hasOwnProperty('kernelspecs')) {
     throw new Error('No kernelspecs found');
   }
-  const rawKernelSpecs = data.kernelspecs;
-  if (!rawKernelSpecs || typeof rawKernelSpecs !== 'object') {
-    throw new Error('No kernelspecs found');
-  }
-  const kernelSpecsRecord = rawKernelSpecs as Record<string, JSONRecord>;
-  let keys = Object.keys(kernelSpecsRecord);
+  let keys = Object.keys(data.kernelspecs);
   const kernelspecs: { [key: string]: ISpecModel } = Object.create(null);
-  let defaultSpec: string | undefined =
-    typeof data.default === 'string' ? data.default : undefined;
+  let defaultSpec = data.default;
 
   for (let i = 0; i < keys.length; i++) {
-    const ks = kernelSpecsRecord[keys[i]];
+    const ks = data.kernelspecs[keys[i]];
     try {
       kernelspecs[keys[i]] = validateSpecModel(ks);
     } catch (err) {

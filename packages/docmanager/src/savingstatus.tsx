@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { TextItem } from '@jupyterlab/statusbar';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import type { ISignal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 import React from 'react';
 import type { IDocumentManager } from './tokens';
@@ -85,12 +85,6 @@ export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
  * A namespace for SavingStatus statics.
  */
 export namespace SavingStatus {
-  interface IWidgetWithSaveStateChanged extends Widget {
-    content?: {
-      saveStateChanged?: ISignal<unknown, DocumentRegistry.SaveState>;
-    };
-  }
-
   /**
    * A VDomModel for the SavingStatus item.
    */
@@ -127,8 +121,8 @@ export namespace SavingStatus {
         const oldContext = this._docManager.contextForWidget(oldWidget);
         if (oldContext) {
           oldContext.saveState.disconnect(this._onStatusChange);
-        } else {
-          this._getContentSaveSignal(oldWidget)?.disconnect(
+        } else if ((this._widget as any).content?.saveStateChanged) {
+          (this._widget as any).content.saveStateChanged.disconnect(
             this._onStatusChange
           );
         }
@@ -141,8 +135,8 @@ export namespace SavingStatus {
         const widgetContext = this._docManager.contextForWidget(this._widget);
         if (widgetContext) {
           widgetContext.saveState.connect(this._onStatusChange);
-        } else {
-          this._getContentSaveSignal(this._widget)?.connect(
+        } else if ((this._widget as any).content?.saveStateChanged) {
+          (this._widget as any).content.saveStateChanged.connect(
             this._onStatusChange
           );
         }
@@ -153,7 +147,7 @@ export namespace SavingStatus {
      * React to a saving status change from the current document widget.
      */
     private _onStatusChange = (
-      _: unknown,
+      _: any,
       newStatus: DocumentRegistry.SaveState
     ) => {
       this._status = newStatus;
@@ -172,13 +166,6 @@ export namespace SavingStatus {
     private _status: DocumentRegistry.SaveState | null = null;
     private _widget: Widget | null = null;
     private _docManager: IDocumentManager;
-
-    private _getContentSaveSignal(
-      widget: Widget
-    ): ISignal<unknown, DocumentRegistry.SaveState> | null {
-      const candidate = widget as IWidgetWithSaveStateChanged;
-      return candidate.content?.saveStateChanged ?? null;
-    }
   }
 
   /**

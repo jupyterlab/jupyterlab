@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
 import type { IDebugger } from '../../tokens';
@@ -44,7 +46,7 @@ const FramesComponent = ({
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 
-  const onSelected = (frame: IDebugger.IStackFrame): void => {
+  const onSelected = (frame: any): void => {
     setSelected(frame);
     model.frame = frame;
   };

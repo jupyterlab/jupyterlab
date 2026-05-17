@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { JSONExt } from '@lumino/coreutils';
 import minimist from 'minimist';
 import { URLExt } from './url';
@@ -7,10 +9,8 @@ import { URLExt } from './url';
 /**
  * Declare stubs for the node variables.
  */
-declare let process:
-  | { argv?: string[]; env?: { [key: string]: string | undefined } }
-  | undefined;
-declare let require: (id: string) => unknown;
+declare let process: any;
+declare let require: any;
 
 /**
  * The namespace for `PageConfig` functions.
@@ -56,19 +56,11 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
-        const path = require('path') as {
-          resolve: (...parts: string[]) => string;
-        };
+        const path: any = require('path');
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
-          const cliPath = cli['jupyter-config-data'];
-          if (typeof cliPath === 'string') {
-            fullPath = path.resolve(cliPath);
-          }
-        } else if (
-          process.env &&
-          typeof process.env['JUPYTER_CONFIG_DATA'] === 'string'
-        ) {
+          fullPath = path.resolve(cli['jupyter-config-data']);
+        } else if ('JUPYTER_CONFIG_DATA' in process.env) {
           fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
         }
         if (fullPath) {

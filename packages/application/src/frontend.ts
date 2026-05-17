@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
@@ -69,13 +71,8 @@ export abstract class JupyterFrontEnd<
       options.commandLinker || new CommandLinker({ commands: this.commands });
     this.docRegistry = options.docRegistry || new DocumentRegistry();
     this.restored =
-      (options.restored as Promise<void> | undefined) ||
-      new Promise<void>(resolve => {
-        void this.started.then(
-          () => void restored.then(() => resolve()),
-          () => void restored.then(() => resolve())
-        );
-      });
+      options.restored ||
+      this.started.then(() => restored).catch(() => restored);
     this.serviceManager = options.serviceManager || new ServiceManager();
   }
 
@@ -226,7 +223,7 @@ export namespace JupyterFrontEnd {
    */
   export interface IOptions<
     T extends IShell = IShell,
-    U = unknown
+    U = any
   > extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.

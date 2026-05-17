@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type * as KernelMessage from './messages';
 
 import type { IModel } from './restapi';
@@ -15,9 +17,7 @@ const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
-type IOPubFieldSpec = string | [string, unknown[]];
-
-const IOPUB_CONTENT_FIELDS: Record<string, Record<string, IOPubFieldSpec>> = {
+const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
   stream: { name: 'string', text: 'string' },
   display_data: { data: 'object', metadata: 'object' },
   execute_input: { code: 'string', execution_count: 'number' },
@@ -81,12 +81,11 @@ function validateIOPubContent(
     const names = Object.keys(fields);
     const content = msg.content;
     for (let i = 0; i < names.length; i++) {
-      const spec = fields[names[i]];
-      if (Array.isArray(spec)) {
-        validateProperty(content, names[i], spec[0], spec[1]);
-      } else {
-        validateProperty(content, names[i], spec);
+      let args = fields[names[i]];
+      if (!Array.isArray(args)) {
+        args = [args];
       }
+      validateProperty(content, names[i], ...args);
     }
   }
 }

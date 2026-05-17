@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { JupyterLab } from '@jupyterlab/application';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
@@ -8,7 +9,7 @@ export function PluginRequiredMessage(props: {
   plugin: JupyterLab.IPluginInfo;
   dependants: JupyterLab.IPluginInfo[];
   trans: TranslationBundle;
-}): React.ReactElement {
+}): React.ReactElement<any> {
   return (
     <>
       {props.trans.__(
@@ -29,7 +30,7 @@ export function PluginInUseMessage(props: {
   plugin: JupyterLab.IPluginInfo;
   optionalDependants: JupyterLab.IPluginInfo[];
   trans: TranslationBundle;
-}): React.ReactElement {
+}): React.ReactElement<any> {
   return (
     <div className={'jp-pluginmanager-PluginInUseMessage'}>
       {props.trans.__(

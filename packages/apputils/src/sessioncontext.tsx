@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -14,7 +15,6 @@ import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import type { ReadonlyJSONValue } from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -495,17 +495,13 @@ export class SessionContext implements ISessionContext {
     return this._kernelPreference;
   }
   set kernelPreference(value: ISessionContext.IKernelPreference) {
-    const newValue = value as unknown as ReadonlyJSONValue;
-    const oldValue = this._kernelPreference as unknown as ReadonlyJSONValue;
-    if (!JSONExt.deepEqual(newValue, oldValue)) {
+    if (!JSONExt.deepEqual(value as any, this._kernelPreference as any)) {
       const oldValue = this._kernelPreference;
       this._kernelPreference = value;
       this._preferenceChanged.emit({
         name: 'kernelPreference',
         oldValue,
-        newValue: JSONExt.deepCopy(
-          newValue
-        ) as ISessionContext.IKernelPreference
+        newValue: JSONExt.deepCopy(value as any)
       });
     }
   }
@@ -1151,10 +1147,7 @@ export class SessionContext implements ISessionContext {
     if (status === 'dead') {
       const model = sender.kernel?.model;
       if (model?.reason) {
-        const traceback =
-          'traceback' in model && typeof model.traceback === 'string'
-            ? model.traceback
-            : '';
+        const traceback = (model as any).traceback || '';
         void this._displayKernelError(model.reason, traceback);
       }
     }
@@ -1265,7 +1258,7 @@ export class SessionContext implements ISessionContext {
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
-  private _dialog: Dialog<unknown> | null = null;
+  private _dialog: Dialog<any> | null = null;
   private _setBusy: (() => IDisposable) | undefined;
   private _busyDisposable: IDisposable | null = null;
   private _pendingKernelName = '';

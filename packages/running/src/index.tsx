@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module running
@@ -1173,7 +1174,7 @@ export namespace IRunningSessions {
     /**
      * A signal that should be emitted when the item list has changed.
      */
-    runningChanged: ISignal<unknown, unknown>;
+    runningChanged: ISignal<any, any>;
 
     /**
      * A string used to describe the shutdown action.

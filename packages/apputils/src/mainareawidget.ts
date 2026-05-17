@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { Toolbar } from '@jupyterlab/ui-components';
@@ -327,7 +329,7 @@ export namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be revealed.
      */
-    reveal?: Promise<unknown>;
+    reveal?: Promise<any>;
 
     /**
      * The application language translator.
@@ -360,6 +362,6 @@ export namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be revealed.
      */
-    reveal?: Promise<unknown>;
+    reveal?: Promise<any>;
   }
 }

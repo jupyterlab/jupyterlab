@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react';
 
 import { ReactWidget } from '@jupyterlab/apputils';
@@ -228,7 +230,7 @@ export class PluginList extends ReactWidget {
   getFilterString(
     filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
-    definitions?: Record<string, ISettingRegistry.IProperty>,
+    definitions?: any,
     ref?: string
   ): string[] {
     // If properties given are references, populate properties
@@ -245,7 +247,7 @@ export class PluginList extends ReactWidget {
       // If given properties are an array, advance into the properties
       // for the items instead.
     } else if (props.items) {
-      props = props.items as ISettingRegistry.IProperty;
+      props = props.items as any;
       // Otherwise, you've reached the base case and don't need to check for matching properties
     } else {
       return [];
@@ -267,17 +269,16 @@ export class PluginList extends ReactWidget {
     }
 
     // Iterate through the properties and check for titles / descriptions that match search.
-    return Object.keys(props).reduce((acc: string[], value: string) => {
+    return Object.keys(props).reduce((acc: string[], value: any) => {
       // If this is the base case, check for matching title / description
       const subProps = props[value] as PartialJSONObject;
       if (!subProps) {
         if (filter((props.title as string) ?? '')) {
-          acc.push(props.title as string);
+          return props.title;
         }
         if (filter(value)) {
-          acc.push(value);
+          return value;
         }
-        return acc;
       }
 
       // If there are properties in the object, check for title / description
@@ -289,8 +290,8 @@ export class PluginList extends ReactWidget {
       }
 
       // Finally, recurse on the properties left.
-      acc.push(
-        ...this.getFilterString(
+      acc.concat(
+        this.getFilterString(
           filter,
           subProps as ISettingRegistry.IProperty,
           definitions,

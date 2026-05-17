@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -822,7 +823,7 @@ export namespace DocumentRegistry {
     /**
      * A signal emitted when the model state changes.
      */
-    stateChanged: ISignal<this, IChangedArgsGeneric<unknown>>;
+    stateChanged: ISignal<this, IChangedArgsGeneric<any>>;
 
     /**
      * The dirty state of the model.

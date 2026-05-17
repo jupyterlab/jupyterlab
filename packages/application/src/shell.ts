@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -15,12 +16,7 @@ import {
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
-import {
-  JSONExt,
-  PromiseDelegate,
-  type ReadonlyPartialJSONValue,
-  Token
-} from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import type { IMessageHandler, Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
@@ -835,16 +831,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'single-document': ILabShell.IUserLayout;
     'multiple-document': ILabShell.IUserLayout;
   } {
-    return {
-      'single-document': JSONExt.deepCopy(
-        this._userLayout['single-document'] as unknown as ReadonlyPartialJSONValue
-      ) as ILabShell.IUserLayout,
-      'multiple-document': JSONExt.deepCopy(
-        this._userLayout[
-          'multiple-document'
-        ] as unknown as ReadonlyPartialJSONValue
-      ) as ILabShell.IUserLayout
-    };
+    return JSONExt.deepCopy(this._userLayout as any);
   }
 
   /**
@@ -1922,7 +1909,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the dock area active widget.
    */
   private _onActiveChanged(
-    sender: FocusTracker<Widget>,
+    sender: any,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {
@@ -1941,7 +1928,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the dock area current widget.
    */
   private _onCurrentChanged(
-    sender: FocusTracker<Widget>,
+    sender: any,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {

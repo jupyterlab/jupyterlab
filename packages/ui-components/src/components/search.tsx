@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
-import type { SearchElement } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
 import type { ISignal } from '@lumino/signaling';
 
@@ -228,7 +228,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
     <Search
       role="search"
       className="jp-FilterBox"
-      ref={props.inputRef as unknown as React.Ref<SearchElement>}
+      ref={props.inputRef as React.Ref<any>}
       value={filter}
       onChange={handleChange}
       onInput={handleChange}

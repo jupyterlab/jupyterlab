@@ -2,11 +2,9 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-import {
-  LanguageDescription,
-  LanguageSupport,
-  StreamLanguage
-} from '@codemirror/language';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { LanguageSupport, StreamLanguage } from '@codemirror/language';
 import type { IYText } from '@jupyter/ydoc';
 import type {
   JupyterFrontEnd,
@@ -75,22 +73,7 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
         ]);
         const mdlang = m.markdown({
           base: m.markdownLanguage,
-          codeLanguages: (info: string) => {
-            const language = languages.findBest(info);
-            if (!language || (!language.support && !language.load)) {
-              return null;
-            }
-            return LanguageDescription.of({
-              name: language.name,
-              alias: language.alias ? [...language.alias] : undefined,
-              extensions: language.extensions
-                ? [...language.extensions]
-                : undefined,
-              filename: language.filename,
-              load: async () =>
-                language.support ?? (await language.load!.call(language))
-            });
-          },
+          codeLanguages: (info: string) => languages.findBest(info) as any,
           extensions: [
             parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
           ]
@@ -155,10 +138,8 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
       if (settingRegistry) {
         const updateSettings = (settings: ISettingRegistry.ISettings) => {
           registry.baseConfiguration =
-            (settings.get('defaultConfig').composite as Record<
-              string,
-              unknown
-            >) ?? {};
+            (settings.get('defaultConfig').composite as Record<string, any>) ??
+            {};
         };
         void Promise.all([
           settingRegistry.load(SETTINGS_ID),
@@ -170,19 +151,13 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
-            let defaultFormData: Record<string, unknown>;
+            let defaultFormData: Record<string, any>;
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
-            ) as Record<string, unknown>;
-            const contextDefaultFormData = props.formContext.defaultFormData as
-              | Record<string, Record<string, unknown>>
-              | undefined;
-            if (
-              contextDefaultFormData &&
-              props.name in contextDefaultFormData
-            ) {
-              defaultFormData = contextDefaultFormData[props.name] ?? {};
+            ) as any;
+            if (props.name in props.formContext.defaultFormData) {
+              defaultFormData = props.formContext.defaultFormData[props.name];
             } else {
               defaultFormData = {};
             }
@@ -229,12 +204,9 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
                       const default_ = defaultFormData[property];
                       if (
                         default_ === undefined ||
-                        !JSONExt.deepEqual(
-                          value as ReadonlyJSONValue,
-                          default_ as ReadonlyJSONValue
-                        )
+                        !JSONExt.deepEqual(value, default_)
                       ) {
-                        nonDefault[property] = value as ReadonlyJSONValue;
+                        nonDefault[property] = value;
                       }
                     }
                     props.onChange(nonDefault);

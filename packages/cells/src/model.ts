@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -62,7 +63,7 @@ export interface ICellModel extends CodeEditor.IModel {
    */
   readonly stateChanged: ISignal<
     ICellModel,
-    IChangedArgs<boolean, boolean, unknown>
+    IChangedArgs<boolean, boolean, any>
   >;
 
   /**
@@ -106,7 +107,7 @@ export interface ICellModel extends CodeEditor.IModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): unknown;
+  getMetadata(key: string): any;
 
   /**
    * Set a metadata
@@ -114,7 +115,7 @@ export interface ICellModel extends CodeEditor.IModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: unknown): void;
+  setMetadata(key: string, value: any): void;
 
   /**
    * Serialize the model to JSON.
@@ -271,8 +272,8 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
   readonly stateChanged = new Signal<
     this,
     IChangedArgs<
-      unknown,
-      unknown,
+      any,
+      any,
       'isDirty' | 'trusted' | 'executionCount' | 'executionState'
     >
   >(this);
@@ -334,7 +335,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * @param key Metadata key
    */
-  deleteMetadata(key: string): unknown {
+  deleteMetadata(key: string): any {
     return this.sharedModel.deleteMetadata(key);
   }
 
@@ -346,7 +347,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): unknown {
+  getMetadata(key: string): any {
     return this.sharedModel.getMetadata(key);
   }
 
@@ -356,7 +357,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: unknown): void {
+  setMetadata(key: string, value: any): void {
     if (typeof value === 'undefined') {
       this.sharedModel.deleteMetadata(key);
     } else {
@@ -768,7 +769,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
                 ) => {
                   if (
                     textEvent.options !== undefined &&
-                    (textEvent.options as Record<string, unknown>)['silent']
+                    (textEvent.options as { [key: string]: any })['silent']
                   ) {
                     return;
                   }

@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IOutputAreaModel } from '@jupyterlab/outputarea';
@@ -65,7 +67,7 @@ export interface ILogPayloadBase {
   /**
    * Data
    */
-  data: unknown;
+  data: any;
 }
 
 /**
