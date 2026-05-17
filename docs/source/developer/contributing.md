@@ -651,27 +651,54 @@ Main reasons for UI test failures are:
 2. **An intended update to user interface**:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
-   fail, then you will need to update reference image(s) for the failing tests. In order
-   to do that, you can post a comment on your PR with the following content:
-   - `please update galata snapshots`: A bot will push a new commit to your PR updating galata
-     test snapshots.
-   - `please update documentation snapshots`: A bot will push a new commit to your PR updating
-     documentation test snapshots.
+   fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
+   In order to do that, you can post a comment on your PR with the following content:
+   - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
+     generated in the most recent run of CI from your branch.
+
+   Maintainers can also use the following commands:
+   - `please update galata snapshots`: A bot will regenerate galata snapshots
+     and push a new commit to your PR branch.
+   - `please update documentation snapshots`: A bot will regenerate documentation
+     snapshots and push a new commit to your PR branch.
    - `please update snapshots`: Combine the two previous comments effects.
 
    > The bot will react with +1 emoji to indicate that the run started and then comment
-   > back once it concluded. This feature is restricted to a subset of users with higher
-   > privileges due to security concerns.
+   > back once it concluded.
 
 For more information on UI Testing, please read the [UI Testing developer documentation](https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md)
 and [Playwright documentation](https://playwright.dev/docs/intro).
+
+### Configure merge driver to reduce snapshot drift friction
+
+If you find yourself frequently resolving merge conflicts due to snapshots being
+updated on both your branch and changing on the `main` branch, you may wish
+to configure git to automatically resolve the `png` conflicts with:
+
+```bash
+git config merge.ours.driver true
+```
+
+Next time when merging the `main` branch you won't be prompted to manually resolve
+the conflicts of the binary files and instead the copy from your branch will be
+used for the merge. This copy will most likely still require regenerating, but
+this setup saves time for manually confirming which copy to use for merge.
+
+This is made possible by the driver rule present in `.gitattributes` file.
 
 ### Good Practices for Integration tests
 
 Here are some good practices to follow when writing integration tests:
 
-- Don't compare multiple screenshots in the same test; if the first comparison breaks,
-  it will require running multiple times the CI workflow to fix all tests.
+- Don't compare multiple screenshots in the same test, unless using `expect.soft`;
+  if the first comparison breaks, it will require multiple re-runs of CI workflow to update all snapshots.
+- Don't include more UI elements than necessary, as that increases review burden when elements other than
+  the one tested change - reviewing hundreds of unrelated snapshots is exhausting and error-prone.
+- When cropping snapshots, prefer retrieving the required dimensions programmatically over hard-coding them.
+- Always use `toMatchSnapshot()` for comparing snapshots; do not implement custom logic reading/writing snapshots.
+- Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
+- If your change introduces subpixel change to dozens of snapshots, consider if it is necessary;
+  such a change often requires many extensions to update their snapshots too, leading to significant cost downstream.
 
 ## Contributing to the debugger front-end
 

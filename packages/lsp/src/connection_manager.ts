@@ -24,6 +24,7 @@ import { expandDottedPaths, sleep, untilReady } from './utils';
 import type { VirtualDocument } from './virtual/document';
 
 import type * as protocol from 'vscode-languageserver-protocol';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * Each Widget with a document (whether file or a notebook) has the same DocumentConnectionManager
@@ -256,7 +257,9 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
       }
       const rawSettings = allServerSettings[languageServerId]!;
 
-      const parsedSettings = expandDottedPaths(rawSettings.configuration || {});
+      const parsedSettings = expandDottedPaths(
+        (rawSettings.configuration as ReadonlyJSONObject) || {}
+      );
 
       const serverSettings: protocol.DidChangeConfigurationParams = {
         settings: parsedSettings
