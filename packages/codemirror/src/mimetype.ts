@@ -20,16 +20,13 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
-    const codemirrorMode = info.codemirror_mode as
-      | string
-      | IEditorLanguage
-      | undefined;
     const mode = this.languages.findBest(
-      codemirrorMode || {
-        mime: info.mimetype ?? IEditorMimeTypeService.defaultMimeType,
-        name: info.name ?? '',
-        extensions: [ext.split('.').slice(-1)[0]]
-      }
+      (info.codemirror_mode as string | IEditorLanguage | undefined) ||
+        ({
+          mimetype: info.mimetype,
+          name: info.name,
+          ext: [ext.split('.').slice(-1)[0]]
+        } as unknown as IEditorLanguage)
     );
     return mode
       ? typeof mode.mime === 'string'

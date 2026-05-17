@@ -11,10 +11,9 @@ import React, { useRef, useState } from 'react';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
-type TDict = PartialJSONObject;
-type TServerSettings = TDict & { serverName: string };
-type TItemMap = Record<string, TServerSettings>;
-type TSchema = Record<string, ISettingRegistry.IProperty>;
+type TDict = { [key: string]: unknown };
+type TSettingItem = TDict & { serverName: string };
+type TItemMap = Record<string, TSettingItem>;
 
 interface ISettingPropertyMap {
   [key: string]: ISettingProperty;
@@ -60,12 +59,12 @@ interface ISettingFormProps {
   /**
    *  Setting value.
    */
-  settings: TServerSettings;
+  settings: TSettingItem;
 
   /**
    * Setting schema.
    */
-  schema: TSchema;
+  schema: TDict;
 }
 
 /**
@@ -80,6 +79,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     ...otherSettings
   } = props.settings;
   const serverSettingsData = (serverSettings ?? {}) as TDict;
+  const serverSettingsSchemaData = (serverSettingsSchema ?? {}) as TDict;
 
   const [currentServerName, setCurrentServerName] =
     useState<string>(serverName);
@@ -116,7 +116,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     if (key in otherSettings) {
       defaultOtherSettings[key] = otherSettings[key];
     } else {
-      defaultOtherSettings[key] = value.default;
+      defaultOtherSettings[key] = (value as TDict)['default'];
     }
   });
 
@@ -129,7 +129,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   const onOtherSettingsChange = (
     property: string,
     value: unknown,
-    type: 'boolean' | 'string' | 'number'
+    type: string
   ) => {
     let settingValue = value;
     if (type === 'number') {
@@ -137,34 +137,10 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     }
     const newProps = {
       ...otherSettingsComposite,
-      [property]: settingValue as PartialJSONValue
+      [property]: settingValue
     };
     props.updateSetting.invoke(props.serverHash, newProps).catch(console.error);
     setOtherSettingsComposite(newProps);
-  };
-
-  const getSettingType = (
-    schema: ISettingRegistry.IProperty
-  ): 'boolean' | 'string' | 'number' => {
-    if (schema.type === 'boolean') {
-      return 'boolean';
-    }
-    if (schema.type === 'number') {
-      return 'number';
-    }
-    return 'string';
-  };
-
-  const getInputType = (
-    settingType: 'boolean' | 'string' | 'number'
-  ): string => {
-    if (settingType === 'number') {
-      return 'number';
-    }
-    if (settingType === 'boolean') {
-      return 'checkbox';
-    }
-    return 'text';
   };
 
   /**
@@ -178,7 +154,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     };
     const payload: TDict = {};
     Object.values(newMap).forEach(value => {
-      payload[value.property] = value.value as PartialJSONValue;
+      payload[value.property] = value.value;
     });
     props.updateSetting
       .invoke(props.serverHash, {
@@ -199,7 +175,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
       }
       const payload: TDict = {};
       Object.values(newMap).forEach(value => {
-        payload[value.property] = value.value as PartialJSONValue;
+        payload[value.property] = value.value;
       });
       props.updateSetting
         .invoke(props.serverHash, {
@@ -218,7 +194,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
       const newMap: ISettingPropertyMap = { ...propertyMap, [hash]: property };
       const payload: TDict = {};
       Object.values(newMap).forEach(value => {
-        payload[value.property] = value.value as PartialJSONValue;
+        payload[value.property] = value.value;
       });
       setPropertyMap(newMap);
       props.updateSetting
@@ -276,7 +252,8 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
               </div>
               {Object.entries(otherSettingsSchema).map(
                 ([property, value], idx) => {
-                  const settingType = getSettingType(value);
+                  const schemaValue = value as TDict;
+                  const inputType = schemaValue.type as string;
                   return (
                     <div
                       key={`${idx}-${property}`}
@@ -284,38 +261,31 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                     >
                       <div className="jp-FormGroup-content">
                         <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-                          {value.title}
+                          {schemaValue.title as string | undefined}
                         </h3>
                         <div className="jp-inputFieldWrapper jp-FormGroup-contentItem">
                           <input
                             className="form-control"
                             placeholder=""
-                            type={getInputType(settingType)}
+                            type={inputType}
                             value={
-                              settingType === 'boolean'
-                                ? undefined
-                                : ((otherSettingsComposite[property] ?? '') as
-                                    | string
-                                    | number)
-                            }
-                            checked={
-                              settingType === 'boolean'
-                                ? Boolean(otherSettingsComposite[property])
-                                : undefined
+                              otherSettingsComposite[property] as
+                                | string
+                                | number
+                                | readonly string[]
+                                | undefined
                             }
                             onChange={e =>
                               onOtherSettingsChange(
                                 property,
-                                settingType === 'boolean'
-                                  ? e.target.checked
-                                  : e.target.value,
-                                settingType
+                                e.target.value,
+                                inputType
                               )
                             }
                           />
                         </div>
                         <div className="jp-FormGroup-description">
-                          {value.description}
+                          {schemaValue.description as string | undefined}
                         </div>
                         <div className="validationErrors"></div>
                       </div>
@@ -324,7 +294,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                 }
               )}
               <fieldset>
-                <legend>{serverSettingsSchema?.title}</legend>
+                <legend>{serverSettingsSchemaData['title'] as string}</legend>
                 {Object.entries(propertyMap).map(([hash, property]) => {
                   return (
                     <PropertyFrom
@@ -337,7 +307,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                     />
                   );
                 })}
-                <span>{serverSettingsSchema?.description}</span>
+                <span>{serverSettingsSchemaData['description'] as string}</span>
               </fieldset>
             </fieldset>
           </div>
@@ -447,7 +417,11 @@ function PropertyFrom(props: {
               ? ((state.value ?? '') as string | number)
               : undefined
           }
-          checked={state.type === 'boolean' ? Boolean(state.value) : undefined}
+          checked={
+            state.type === 'boolean'
+              ? (state.value as boolean | undefined)
+              : undefined
+          }
           onChange={
             state.type !== 'boolean'
               ? e => changeValue(e.target.value, state.type)
@@ -492,25 +466,20 @@ class SettingRenderer extends React.Component<IProps, IState> {
     this._setting = props.formContext.settings;
     this._trans = props.translator.load('jupyterlab');
 
-    const definitions = this._setting.schema['definitions'] as
-      | TDict
-      | undefined;
-    const languageServerSchema = (definitions?.['languageServer'] ??
-      {}) as TDict;
+    const schema = this._setting.schema['definitions'] as TDict;
+    const languageServerSchema = schema['languageServer'] as TDict;
 
-    this._defaultSetting = (languageServerSchema['default'] ?? {}) as TDict;
-    this._schema = (languageServerSchema['properties'] ?? {}) as TSchema;
+    this._defaultSetting = languageServerSchema['default'] as TDict;
+    this._schema = languageServerSchema['properties'] as TDict;
     const title = props.schema.title;
     const desc = props.schema.description;
     const settings: ISettingRegistry.ISettings = props.formContext.settings;
-    const compositeData = settings.get(SETTING_NAME).composite as
-      | TDict
-      | undefined;
+    const compositeData = settings.get(SETTING_NAME).composite as TDict;
 
     let items: TItemMap = {};
     if (compositeData) {
       Object.entries(compositeData).forEach(([key, value]) => {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
+        if (value) {
           const hash = UUID.uuid4();
           items[hash] = { serverName: key, ...(value as TDict) };
         }
@@ -603,10 +572,10 @@ class SettingRenderer extends React.Component<IProps, IState> {
    * Save the value of setting items to the setting registry.
    */
   saveServerSetting = () => {
-    const settings: TDict = {};
+    const settings: PartialJSONObject = {};
     Object.values(this.state.items).forEach(item => {
       const { serverName, ...setting } = item;
-      settings[serverName] = setting as TDict;
+      settings[serverName] = setting as unknown as PartialJSONValue;
     });
     this._setting.set(SETTING_NAME, settings).catch(console.error);
   };
@@ -663,7 +632,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
   /**
    * The setting schema.
    */
-  private _schema: TSchema;
+  private _schema: TDict;
 
   private _debouncedUpdateSetting: Debouncer<
     void,

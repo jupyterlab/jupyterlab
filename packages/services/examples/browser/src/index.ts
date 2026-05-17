@@ -7,7 +7,7 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (
-  window as Window & { __webpack_public_path__: string }
+  window as unknown as Window & { __webpack_public_path__: string }
 ).__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import * as comm from './comm';
