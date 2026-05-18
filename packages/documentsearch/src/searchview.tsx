@@ -1,11 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   caretDownEmptyThinIcon,
   caretDownIcon,
@@ -20,14 +17,15 @@ import {
   VDomRenderer,
   wordIcon
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { CommandRegistry } from '@lumino/commands';
 import { UseSignal } from '@jupyterlab/apputils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { SearchDocumentModel } from './searchmodel';
-import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
+import type { SearchDocumentModel } from './searchmodel';
+import type { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -64,6 +62,7 @@ interface ISearchInputProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   autoFocus: boolean;
   autoUpdate: boolean;
+  lastSearchText?: string;
 }
 
 /**
@@ -128,7 +127,7 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
         tabIndex={0}
         ref={props.inputRef}
         title={props.title}
-        defaultValue={props.initialValue}
+        defaultValue={props.initialValue || props.lastSearchText}
         autoFocus={props.autoFocus}
       ></textarea>
     </label>
@@ -146,6 +145,7 @@ interface ISearchEntryProps {
   useRegex: boolean;
   wholeWords: boolean;
   initialSearchText: string;
+  lastSearchText: string;
   translator?: ITranslator;
 }
 
@@ -175,6 +175,7 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
         initialValue={props.initialSearchText}
+        lastSearchText={props.lastSearchText}
         title={trans.__('Find')}
         autoFocus={true}
         autoUpdate={true}
@@ -245,7 +246,6 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
           <button
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => props.onPreserveCaseToggled()}
-            tabIndex={0}
             title={trans.__('Preserve Case')}
           >
             <caseSensitiveIcon.react
@@ -258,24 +258,16 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
-        tabIndex={0}
       >
-        <span
-          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={0}
-        >
+        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
         </span>
       </button>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
-        tabIndex={0}
         onClick={() => props.onReplaceAll()}
       >
-        <span
-          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
-        >
+        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
         </span>
       </button>
@@ -455,7 +447,7 @@ interface ISearchOverlayProps {
    */
   replaceEntryVisible: boolean;
   /**
-   * Whther the filters grid is visible.
+   * Whether the filters grid is visible.
    */
   filtersVisible: boolean;
   /**
@@ -470,6 +462,10 @@ interface ISearchOverlayProps {
    * The text in the search entry
    */
   initialSearchText: string;
+  /**
+   * The last searched query used to prepopulate the search field when the widget is reopened.
+   */
+  lastSearchText: string;
   /**
    * Search input reference.
    */
@@ -566,25 +562,23 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   }
 
   private _onSearchKeydown(event: React.KeyboardEvent) {
-    if (event.keyCode === 13) {
-      // Enter pressed
+    if (event.key === 'Enter') {
       event.stopPropagation();
       event.preventDefault();
       if (event.ctrlKey) {
         const textarea = event.target as HTMLTextAreaElement;
         this._insertNewLine(textarea);
         this.props.onSearchChanged(textarea.value);
+      } else if (event.shiftKey) {
+        this.props.onHighlightPrevious();
       } else {
-        event.shiftKey
-          ? this.props.onHighlightPrevious()
-          : this.props.onHighlightNext();
+        this.props.onHighlightNext();
       }
     }
   }
 
   private _onReplaceKeydown(event: React.KeyboardEvent) {
-    if (event.keyCode === 13) {
-      // Enter pressed
+    if (event.key === 'Enter') {
       event.stopPropagation();
       event.preventDefault();
       if (event.ctrlKey) {
@@ -662,7 +656,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
           // Show an alternate description, if one exists, when a filter is disabled in replace mode.
           const description = isEnabled
             ? filter.description
-            : filter.disabledDescription ?? filter.description;
+            : (filter.disabledDescription ?? filter.description);
           return (
             <FilterSelection
               key={name}
@@ -728,6 +722,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               this._onSearchChange(e)
             }
             initialSearchText={this.props.initialSearchText}
+            lastSearchText={this.props.lastSearchText}
             translator={this.translator}
           />
           {filterToggle}
@@ -870,6 +865,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    */
   protected onCloseRequest(msg: Message): void {
     super.onCloseRequest(msg);
+    this.setReplaceInputVisibility(false);
     this._closed.emit();
     void this.model.endQuery();
   }
@@ -913,6 +909,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
         initialSearchText={this.model.initialQuery}
+        lastSearchText={this.model.searchExpression}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>
         }

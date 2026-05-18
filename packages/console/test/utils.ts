@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
@@ -20,7 +20,10 @@ const extensions = (() => {
     factory: ({ model }) => {
       const sharedModel = model.sharedModel as IYText;
       return EditorExtensionRegistry.createImmutableExtension([
-        ybinding({ ytext: sharedModel.ysource })
+        ybinding({
+          ytext: sharedModel.ysource,
+          undoManager: sharedModel.undoManager ?? undefined
+        })
       ]);
     }
   });

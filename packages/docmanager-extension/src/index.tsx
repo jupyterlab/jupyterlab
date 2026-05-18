@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module docmanager-extension
  */
 
-import {
-  ILabShell,
-  ILabStatus,
+import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILabStatus, JupyterLab } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   addCommandToolbarButtonClass,
   CommandToolbarButtonComponent,
@@ -26,31 +26,36 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  DocumentManagerDialogs,
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager,
   PathStatus,
-  renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { Contents, Kernel } from '@jupyterlab/services';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import { IUrlResolverFactory } from '@jupyterlab/rendermime';
+import type { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
@@ -120,7 +125,9 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
         if (!widget.isAttached) {
           shell.add(widget, 'main', options || {});
         }
-        shell.activateById(widget.id);
+        if (options?.activate ?? true) {
+          shell.activateById(widget.id);
+        }
         this._opened.emit(widget);
       }
 
@@ -146,7 +153,7 @@ const contextsPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     widgetOpener: IDocumentWidgetOpener,
-    status: ILabStatus
+    status: ILabStatus | null
   ) => {
     const contexts = new WeakSet<DocumentRegistry.Context>();
     widgetOpener.opened.connect((_, widget) => {
@@ -175,7 +182,9 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     ILabStatus,
     ISessionContextDialogs,
     JupyterLab.IInfo,
-    IRecentsManager
+    IRecentsManager,
+    IUrlResolverFactory,
+    IDocumentManagerDialogs
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -184,12 +193,16 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     status: ILabStatus | null,
     sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null,
-    recentsManager: IRecentsManager | null
+    recentsManager: IRecentsManager | null,
+    urlResolverFactory: IUrlResolverFactory | null,
+    docManagerDialogs_: IDocumentManagerDialogs | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
+    const docManagerDialogs =
+      docManagerDialogs_ ?? new DocumentManagerDialogs({ translator });
     const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
@@ -206,7 +219,9 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         }
         return true;
       },
-      recentsManager: recentsManager ?? undefined
+      recentsManager: recentsManager ?? undefined,
+      urlResolverFactory: urlResolverFactory ?? undefined,
+      docManagerDialogs: docManagerDialogs
     });
 
     return docManager;
@@ -221,7 +236,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds commands and settings to the document manager.',
   autoStart: true,
   requires: [IDocumentManager, IDocumentWidgetOpener, ISettingRegistry],
-  optional: [ITranslator, ICommandPalette, ILabShell],
+  optional: [ITranslator, ICommandPalette, ILabShell, IDocumentManagerDialogs],
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
@@ -229,7 +244,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry,
     translator: ITranslator | null,
     palette: ICommandPalette | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    dialogs: IDocumentManagerDialogs | null
   ): void => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
@@ -243,7 +259,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       settingRegistry,
       translator,
       labShell,
-      palette
+      palette,
+      dialogs
     );
 
     // Keep up to date with the settings registry.
@@ -485,6 +502,12 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Download'),
       caption: trans.__('Download the file to your computer'),
       isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {
@@ -554,8 +577,43 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
         });
       },
       iconClass: args => (args['icon'] as string) || '',
-      label: () => trans.__('Open in New Browser Tab')
+      label: () => trans.__('Open in New Browser Tab'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__(
+                'The path of the file to open in browser tab'
+              )
+            },
+            icon: {
+              type: 'string',
+              description: trans.__('The icon class for the command')
+            }
+          },
+          required: ['path']
+        }
+      }
     });
+  }
+};
+
+/**
+ * A plugin that provides the default dialogs for three document management operations:
+ * Rename, Confirm Close, and Save Before Close.
+ *
+ * To customize these dialogs, implement a custom plugin that provides the `IDocumentManagerDialogs` token.
+ */
+const dialogsPlugin: JupyterFrontEndPlugin<IDocumentManagerDialogs> = {
+  id: '@jupyterlab/docmanager-extension:dialogs',
+  description: 'Provides default dialogs for document management operations.',
+  autoStart: true,
+  provides: IDocumentManagerDialogs,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    return new DocumentManagerDialogs({ translator });
   }
 };
 
@@ -571,7 +629,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   downloadPlugin,
   openBrowserTabPlugin,
   openerPlugin,
-  recentsManagerPlugin
+  recentsManagerPlugin,
+  dialogsPlugin
 ];
 export default plugins;
 
@@ -643,7 +702,8 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  dialogs: IDocumentManagerDialogs | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -668,14 +728,35 @@ function addCommands(
       { autoClose: 5000 }
     );
   };
-
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, widgetOpener, translator);
+    if (!dialogs) {
+      dialogs = new DocumentManagerDialogs({ translator: translator });
+    }
+    addLabCommands(
+      app,
+      docManager,
+      labShell,
+      widgetOpener,
+      translator,
+      dialogs
+    );
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
     label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the file to delete'
+          }
+        },
+        required: ['path']
+      }
+    },
     execute: args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -706,7 +787,35 @@ function addCommands(
         .newUntitled(options)
         .catch(error => showErrorMessage(errorTitle, error));
     },
-    label: args => (args['label'] as string) || `New ${args['type'] as string}`
+    label: args => (args['label'] as string) || `New ${args['type'] as string}`,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          error: {
+            type: 'string',
+            description: 'The error title to display'
+          },
+          path: {
+            type: 'string',
+            description: 'The path where to create the file'
+          },
+          type: {
+            type: 'string',
+            description: 'The type of content to create',
+            enum: ['file', 'directory', 'notebook']
+          },
+          ext: {
+            type: 'string',
+            description: 'The file extension (for file type)'
+          },
+          label: {
+            type: 'string',
+            description: 'The label for the command'
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.open, {
@@ -715,17 +824,142 @@ function addCommands(
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       const factory = (args['factory'] as string) || void 0;
       const kernel = args?.kernel as unknown as Kernel.IModel | undefined;
+      const kernelPreference = args?.kernelPreference as unknown as
+        | ISessionContext.IKernelPreference
+        | undefined;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
         .get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options));
+        .then(() =>
+          docManager.openOrReveal(
+            path,
+            factory,
+            kernel,
+            options,
+            kernelPreference
+          )
+        );
     },
     iconClass: args => (args['icon'] as string) || '',
     label: args =>
       ((args['label'] || args['factory']) ??
         trans.__('Open the provided `path`.')) as string,
-    mnemonic: args => (args['mnemonic'] as number) || -1
+    mnemonic: args => (args['mnemonic'] as number) || -1,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the file to open'
+          },
+          factory: {
+            type: 'string',
+            description: 'The widget factory name'
+          },
+          kernel: {
+            type: 'object',
+            description:
+              'The kernel model to use. See the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) for more information.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'Unique identifier of the kernel on the server'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              }
+            }
+          },
+          kernelPreference: {
+            type: 'object',
+            description:
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'The id of an existing kernel'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              },
+              language: {
+                type: 'string',
+                description: 'The preferred kernel language'
+              },
+              shouldStart: {
+                type: 'boolean',
+                description:
+                  'A kernel should be started automatically (default `true`)'
+              },
+              canStart: {
+                type: 'boolean',
+                description: 'A kernel can be started (default `true`)'
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description:
+                  'Shut down the session when session context is disposed (default `false`)'
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description:
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description:
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+              }
+            }
+          },
+          options: {
+            type: 'object',
+            description: 'Additional options for opening the widget',
+            properties: {
+              ref: {
+                type: 'string',
+                description:
+                  'The reference widget id for the insert location (default `null`)'
+              },
+              mode: {
+                type: 'string',
+                description:
+                  'The insertion mode relative to a reference widget ("split-top", "split-bottom", "split-left", "split-right", "tab-before", "tab-after")'
+              },
+              activate: {
+                type: 'boolean',
+                description: 'Whether to activate the widget (default `true`)'
+              },
+              rank: {
+                type: 'number',
+                description: 'The rank order of the widget among its siblings'
+              },
+              type: {
+                type: 'string',
+                description:
+                  'Type of widget to open, used to load user customization (typically a factory name or widget id)'
+              }
+            }
+          },
+          icon: {
+            type: 'string',
+            description: 'The icon class for the command'
+          },
+          label: {
+            type: 'string',
+            description: 'The label for the command'
+          },
+          mnemonic: {
+            type: 'number',
+            description: 'The mnemonic index for the command'
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.reload, {
@@ -736,6 +970,12 @@ function addCommands(
       ),
     caption: trans.__('Reload contents from disk'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
@@ -782,6 +1022,12 @@ function addCommands(
       ),
     caption: trans.__('Revert contents to previous checkpoint'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
@@ -841,12 +1087,6 @@ function addCommands(
 
   const caption = () => {
     if (shell.currentWidget) {
-      const context = docManager.contextForWidget(shell.currentWidget);
-      if (context?.model.collaborative) {
-        return trans.__(
-          'In collaborative mode, the document is saved automatically after every change'
-        );
-      }
       if (!isWritable()) {
         return trans.__(
           `Document is read-only. "Save" is disabled; use "Save as…" instead`
@@ -873,6 +1113,21 @@ function addCommands(
         return isWritable();
       }
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          _luminoEvent: {
+            type: 'object',
+            description: 'The lumino event object'
+          }
+        }
+      }
+    },
     execute: async args => {
       // Checks that shell.currentWidget is valid:
       const widget = shell.currentWidget;
@@ -888,10 +1143,7 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-          if (
-            !context.contentsModel?.writable &&
-            !context.model.collaborative
-          ) {
+          if (!context.contentsModel?.writable) {
             let type = (args._luminoEvent as ReadonlyPartialJSONObject)?.type;
             if (args._luminoEvent && type === 'keybinding') {
               readonlyNotification(context.path);
@@ -916,12 +1168,12 @@ function addCommands(
           ) {
             const result = await InputDialog.getText({
               title: trans.__('Rename file'),
-              okLabel: trans.__('Rename'),
+              okLabel: trans.__('Rename and Save'),
               placeholder: trans.__('File name'),
               text: oldName,
               selectionRange: oldName.length - PathExt.extname(oldName).length,
               checkbox: {
-                label: trans.__('Do not ask me again.'),
+                label: trans.__('Do not ask for rename on first save.'),
                 caption: trans.__(
                   'If checked, you will not be asked to rename future untitled files when saving them.'
                 )
@@ -958,8 +1210,12 @@ function addCommands(
           try {
             await context.save();
 
+            if (newName !== oldName) {
+              await context.rename(newName);
+            }
+
             if (!widget?.isDisposed) {
-              return context!.createCheckpoint();
+              await context!.createCheckpoint();
             }
           } catch (err) {
             // If the save was canceled by user-action, do nothing.
@@ -969,9 +1225,6 @@ function addCommands(
             throw err;
           } finally {
             saveInProgress.delete(context);
-            if (newName !== oldName) {
-              await context.rename(newName);
-            }
           }
         }
       }
@@ -986,6 +1239,12 @@ function addCommands(
         shell.widgets('main'),
         w => docManager.contextForWidget(w)?.contentsModel?.writable ?? false
       );
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     },
     execute: () => {
       const promises: Promise<void>[] = [];
@@ -1010,6 +1269,12 @@ function addCommands(
       trans.__('Save %1 As…', fileType(shell.currentWidget, docManager)),
     caption: trans.__('Save with new path'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
@@ -1072,6 +1337,12 @@ function addCommands(
             `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
           );
         });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1094,7 +1365,8 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   widgetOpener: IDocumentWidgetOpener,
-  translator: ITranslator
+  translator: ITranslator,
+  dialogs: IDocumentManagerDialogs
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -1136,6 +1408,17 @@ function addLabCommands(
       if (child) {
         widgetOpener.open(child, options);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          options: {
+            type: 'object',
+            description: trans.__('Options for opening the cloned document')
+          }
+        }
+      }
     }
   });
 
@@ -1152,7 +1435,13 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return renameDialog(docManager, context!);
+        return dialogs.rename(context!);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1168,6 +1457,12 @@ function addLabCommands(
           return;
         }
         return docManager.duplicate(context.path);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1198,6 +1493,12 @@ function addLabCommands(
           });
         }
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1214,6 +1515,12 @@ function addLabCommands(
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 

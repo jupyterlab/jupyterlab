@@ -3,20 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ILabStatus } from '@jupyterlab/application';
+import type { ILabStatus } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IStateDB } from '@jupyterlab/statedb';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import {
-  IFormRendererRegistry,
   ReactWidget,
+  updateFilterFunction,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { IDisposable } from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { CommandRegistry } from '@lumino/commands';
+import type { IDisposable } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { SplitPanel } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
@@ -106,6 +109,18 @@ export class SettingsEditor extends SplitPanel {
       this.title.className = this.title.className.replace('jp-mod-dirty', '');
     }
     this._saveStateChange.emit(dirty ? 'started' : 'completed');
+  }
+
+  /**
+   * Updates the filter of the plugin list.
+   *
+   * @param query The query to filter the plugin list
+   */
+  updateQuery(query: string): void {
+    this._list.setFilter(
+      query ? updateFilterFunction(query, false, false) : null,
+      query
+    );
   }
 
   /**

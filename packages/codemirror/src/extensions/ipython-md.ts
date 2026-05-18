@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { parseMixed, Parser } from '@lezer/common';
+import type { Parser } from '@lezer/common';
+import { parseMixed } from '@lezer/common';
 import { tags } from '@lezer/highlight';
-import {
+import type {
   DelimiterType,
   InlineContext,
   MarkdownConfig,
@@ -17,7 +18,7 @@ const BLOCK_MATH_DOLLAR = 'BlockMathDollar';
 const BLOCK_MATH_BRACKET = 'BlockMathBracket';
 
 /**
- * Lengh of the delimiter for a math expression
+ * Length of the delimiter for a math expression
  */
 const DELIMITER_LENGTH: Record<string, number> = {
   [INLINE_MATH_DOLLAR]: 1,
@@ -139,18 +140,21 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           // Test if the node type is one of the math expression
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
-            return {
-              parser: latexParser,
-              // Remove delimiter from LaTeX parser otherwise it won't be highlighted
-              overlay: [
-                {
-                  from: node.from + delimiterLength,
-                  to: node.to - delimiterLength
-                }
-              ]
-            };
+            const contentFrom = node.from + delimiterLength;
+            const contentTo = node.to - delimiterLength;
+            if (contentTo - contentFrom > 0) {
+              return {
+                parser: latexParser,
+                // Remove delimiter from LaTeX parser otherwise it won't be highlighted
+                overlay: [
+                  {
+                    from: contentFrom,
+                    to: contentTo
+                  }
+                ]
+              };
+            }
           }
-
           return null;
         })
       : undefined

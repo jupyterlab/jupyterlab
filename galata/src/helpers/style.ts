@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 interface IUnusedStyleCheckOptions {
   /**
@@ -49,7 +49,7 @@ export class StyleHelper {
   /**
    * Find unused CSS rules.
    *
-   * @param options spcify which rules to include/exclude.
+   * @param options specify which rules to include/exclude.
    * @returns List of rules with no matching elements on the page.
    */
   async findUnusedStyleRules(

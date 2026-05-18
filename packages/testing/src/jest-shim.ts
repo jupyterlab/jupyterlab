@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Shims originally adapted from https://github.com/nteract/nteract/blob/47f8b038ff129543e42c39395129efc433eb4e90/scripts/test-shim.js
 
@@ -77,19 +78,46 @@ window.Element.prototype.scrollTo = (
 
 // https://github.com/jsdom/jsdom/issues/3368
 class ResizeObserverMock {
-  constructor(_callback: any) {
+  constructor(_callback: ResizeObserverCallback) {
     // no-op
   }
-  observe(_target: any, _options?: any) {
+  observe(_target: Element, _options?: ResizeObserverOptions) {
     // no-op
   }
-  unobserve(_target: any) {
+  unobserve(_target: Element) {
     // no-op
   }
   disconnect() {
     // no-op
   }
 }
+
+// https://github.com/jsdom/jsdom/issues/2032
+class IntersectionObserverMock {
+  constructor(
+    _callback: IntersectionObserverCallback,
+    _options?: IntersectionObserverInit
+  ) {
+    // no-op
+  }
+  observe(_target: Element) {
+    // no-op
+  }
+  unobserve(_target: Element) {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+  takeRecords() {
+    return [];
+  }
+  root = document;
+  rootMargin = '0px 0px 0px 0px';
+  thresholds = [0];
+}
+
+window.IntersectionObserver = IntersectionObserverMock;
 
 window.ResizeObserver = ResizeObserverMock;
 
@@ -167,10 +195,20 @@ process.on('unhandledRejection', (error, promise) => {
   promise.catch(err => console.error('promise rejected', err));
 });
 
+// https://github.com/jsdom/jsdom/issues/3991
+if (typeof CSS === 'undefined') {
+  (globalThis as any).CSS = {
+    escape: (value: string) =>
+      value.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&')
+  };
+} else if (typeof CSS.escape === 'undefined') {
+  (CSS as any).escape = (value: string) =>
+    value.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+}
+
 if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
-  // eslint-disable-next-line @typescript-eslint/ban-types
   (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {

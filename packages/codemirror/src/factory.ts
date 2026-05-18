@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { EditorView, keymap } from '@codemirror/view';
+import type { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { EditorExtensionRegistry } from './extension';
 import { CodeMirrorEditor } from './editor';
 import { EditorLanguageRegistry } from './language';
-import {
+import type {
   IEditorExtensionFactory,
   IEditorExtensionRegistry,
   IEditorFactoryOptions,
@@ -59,16 +60,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
       ...options,
       config: { ...this.documentCodeMirrorConfig, ...(options.config ?? {}) },
       inline: false,
-      extensions: [
-        keymap.of([
-          {
-            key: 'Shift-Enter',
-            run: (target: EditorView) => {
-              return true;
-            }
-          }
-        ])
-      ].concat(options.extensions ?? [])
+      extensions: options.extensions ?? []
     });
   };
 

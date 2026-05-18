@@ -2,11 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { LoggerRegistry } from '@jupyterlab/logconsole';
-import {
-  IRenderMimeRegistry,
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {
@@ -42,6 +41,20 @@ describe('LoggerRegistry', () => {
     it('should create a registry with initial parameters', () => {
       expect(registry).toBeInstanceOf(LoggerRegistry);
       expect(registry.maxLength).toBe(10);
+    });
+
+    it('should use "warning" as the default log level if not specified', () => {
+      expect(registry.defaultLogLevel).toBe('warning');
+    });
+
+    it('should use the provided default log level if specified', () => {
+      const customRegistry = new LoggerRegistry({
+        defaultRendermime,
+        maxLength: 10,
+        defaultLogLevel: 'info'
+      });
+      expect(customRegistry.defaultLogLevel).toBe('info');
+      customRegistry.dispose();
     });
   });
 
@@ -83,6 +96,28 @@ describe('LoggerRegistry', () => {
       registry.maxLength = 12;
       expect(A.maxLength).toEqual(12);
       expect(B.maxLength).toEqual(12);
+    });
+  });
+
+  describe('#defaultLogLevel', () => {
+    it('should be applied to newly created loggers', () => {
+      const A = registry.getLogger('A');
+      expect(A.level).toBe(registry.defaultLogLevel);
+    });
+
+    it('should only affect loggers created after it is changed', () => {
+      const A = registry.getLogger('A');
+      expect(A.level).toBe('warning');
+
+      registry.defaultLogLevel = 'info';
+      expect(registry.defaultLogLevel).toBe('info');
+
+      // A's level should not be changed
+      expect(A.level).toBe('warning');
+
+      // B should get the new default
+      const B = registry.getLogger('B');
+      expect(B.level).toBe('info');
     });
   });
 });

@@ -5,7 +5,7 @@
     {
       "command": "completer:invoke-console",
       "keys": ["Tab"],
-      "selector": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
+      "selector": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)"
     }
   ],
   "properties": {},

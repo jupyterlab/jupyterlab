@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
 import * as plugin from '@jupyterlab/shortcuts-extension';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { Platform } from '@lumino/domutils';
 import { signalToPromise } from '@jupyterlab/testing';
@@ -79,15 +80,13 @@ describe('@jupyterlab/shortcut-extension', () => {
       await settingRegistry.load(bar.id);
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
       const settings = await settingRegistry.load(plugin.default.id);
-      const shortcuts = (await settings.get('shortcuts')
-        .composite) as ISettingRegistry.IShortcut[];
+      const shortcuts = settings.get('shortcuts')
+        .composite as ISettingRegistry.IShortcut[];
 
       expect(shortcuts).toHaveLength(Platform.IS_MAC ? 2 : 1);
     });
@@ -192,9 +191,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       });
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
@@ -207,8 +204,8 @@ describe('@jupyterlab/shortcut-extension', () => {
       // Ensure the signal about loading has already propagated to listeners
       await signalToPromise(settingRegistry.pluginChanged);
 
-      const shortcuts = (await settings.get('shortcuts')
-        .composite) as ISettingRegistry.IShortcut[];
+      const shortcuts = settings.get('shortcuts')
+        .composite as ISettingRegistry.IShortcut[];
 
       const commandsWithShortcuts = shortcuts.map(shortcut => shortcut.command);
 
@@ -232,6 +229,112 @@ describe('@jupyterlab/shortcut-extension', () => {
       );
       expect(createBindings.length).toEqual(1);
       expect(createBindings[0].keys[0]).toEqual('Ctrl T');
+    });
+
+    it('should allow disabling a default shortcut and registering a different shortcut with the same keys', async () => {
+      const shared: Omit<ISettingRegistry.IPlugin, 'id'> = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        raw: '{}',
+        version: 'test'
+      };
+      const foo = {
+        ...shared,
+        id: 'foo:settings',
+        schema: {
+          type: 'object',
+          'jupyter.lab.shortcuts': [
+            {
+              command: 'application:close',
+              keys: ['Ctrl W'],
+              selector: 'body'
+            },
+            {
+              command: 'application:close-all',
+              keys: ['Alt W'],
+              selector: 'body'
+            }
+          ]
+        }
+      };
+      const defaults = {
+        ...shared,
+        id: plugin.default.id,
+        schema: {
+          ...(pluginSchema as any),
+          properties: {
+            shortcuts: {
+              default: []
+            }
+          }
+        },
+        raw: JSON.stringify({
+          shortcuts: [
+            {
+              command: 'application:close',
+              keys: ['Ctrl W'],
+              selector: 'body',
+              disabled: true
+            },
+            {
+              command: 'application:close-all',
+              keys: ['Ctrl W'],
+              selector: 'body'
+            }
+          ]
+        })
+      };
+
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case foo.id:
+              return foo;
+            case defaults.id:
+              return defaults;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+
+      const settingRegistry = new SettingRegistry({
+        connector
+      });
+
+      void plugin.default.activate(
+        { commands: new CommandRegistry() } as any,
+        settingRegistry
+      );
+
+      // Note: we are also testing that the shortcuts overrides are not lost
+      // when settings are fetched before or after the shortcuts settings.
+      await settingRegistry.load(foo.id);
+      const settings = await settingRegistry.load(plugin.default.id);
+
+      // Ensure the signal about loading has already propagated to listeners
+      await signalToPromise(settingRegistry.pluginChanged);
+
+      const shortcuts = settings.get('shortcuts')
+        .composite as ISettingRegistry.IShortcut[];
+
+      const commandsWithShortcuts = shortcuts.map(shortcut => shortcut.command);
+
+      // `application:close` was disabled by override but `application:close-all` was not
+      expect(commandsWithShortcuts).not.toContain('application:close');
+      expect(commandsWithShortcuts).toContain('application:close-all');
+
+      // `application:close-all` should now be accessible with both Alt + W and Ctrl + W
+      const closeAllBindings = shortcuts.filter(
+        s => s.command === 'application:close-all'
+      );
+      expect(closeAllBindings.map(s => s.keys[0])).toContain('Alt W');
+      expect(closeAllBindings.map(s => s.keys[0])).toContain('Ctrl W');
     });
 
     it('should ignore colliding shortcuts', async () => {
@@ -284,15 +387,13 @@ describe('@jupyterlab/shortcut-extension', () => {
       await settingRegistry.load(bar.id);
 
       void plugin.default.activate(
-        {
-          commands: new CommandRegistry()
-        } as any,
+        { commands: new CommandRegistry() } as any,
         settingRegistry
       );
 
       const settings = await settingRegistry.load(plugin.default.id);
-      const shortcuts = (await settings.get('shortcuts')
-        .composite) as ISettingRegistry.IShortcut[];
+      const shortcuts = settings.get('shortcuts')
+        .composite as ISettingRegistry.IShortcut[];
 
       expect(shortcuts).toHaveLength(1);
     });

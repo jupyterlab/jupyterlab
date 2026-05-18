@@ -83,6 +83,24 @@
         "label": "View",
         "items": [
           {
+            "type": "submenu",
+            "rank": 1,
+            "submenu": {
+              "id": "jp-mainmenu-view-appearance",
+              "label": "Appearance",
+              "items": [
+                {
+                  "command": "viewmenu:show-minimap",
+                  "rank": 50
+                },
+                {
+                  "type": "separator",
+                  "rank": 50
+                }
+              ]
+            }
+          },
+          {
             "type": "separator",
             "rank": 10
           },
@@ -259,6 +277,8 @@
     },
     {
       "command": "editmenu:redo",
+      "winKeys": ["Ctrl Y"],
+      "linuxKeys": ["Ctrl Y"],
       "keys": ["Accel Shift Z"],
       "selector": "[data-jp-undoer]"
     },
@@ -393,7 +413,11 @@
         "type": {
           "description": "Item type",
           "type": "string",
-          "enum": ["command", "submenu", "separator"],
+          "oneOf": [
+            { "const": "command", "title": "Command" },
+            { "const": "submenu", "title": "Submenu" },
+            { "const": "separator", "title": "Separator" }
+          ],
           "default": "command"
         },
         "rank": {

@@ -3,8 +3,9 @@
 
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DataModel } from '@lumino/datagrid';
-import { IDisposable } from '@lumino/disposable';
-import { IParser, parseDSV, parseDSVNoQuotes } from './parse';
+import type { IDisposable } from '@lumino/disposable';
+import type { IParser } from './parse';
+import { parseDSV, parseDSVNoQuotes } from './parse';
 
 /*
 Possible ideas for further implementation:
@@ -195,7 +196,7 @@ export class DSVModel extends DataModel implements IDisposable {
    *
    * @param column - The column index of the cell of interest.
    *
-   * @param returns - The data value for the specified cell.
+   * @returns - The data value for the specified cell.
    */
   data(region: DataModel.CellRegion, row: number, column: number): string {
     let value: string;

@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-  IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
   InputDialog,
@@ -16,7 +14,7 @@ import {
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { FileDialog, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import { Contents, Workspace } from '@jupyterlab/services';
+import type { Contents, Workspace } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -75,7 +73,7 @@ export const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
  * The workspace commands
  */
 export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
-  id: '@jupyterlab/workspaces:commands',
+  id: '@jupyterlab/workspaces-extension:commands',
   description: 'Add workspace commands.',
   autoStart: true,
   requires: [
@@ -149,7 +147,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           workspaceId = result.value;
         }
 
-        if (!workspaceId) {
+        if (!workspaceId || !model.identifiers.includes(workspaceId)) {
           return;
         }
 
@@ -161,6 +159,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           router.navigate(url, { hard: true });
         } else {
           document.location.href = url;
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__('Workspace identifier to open')
+            }
+          }
         }
       }
     });
@@ -204,6 +213,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         if (result.button.accept) {
           await model.remove(workspaceId);
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__('Workspace identifier to delete')
+            }
+          }
+        }
       }
     });
 
@@ -226,6 +246,19 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           return;
         }
         await model.create(workspaceId);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__(
+                'Workspace identifier for the new workspace'
+              )
+            }
+          }
+        }
       }
     });
 
@@ -266,6 +299,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           // If the current workspace was cloned, open the cloned copy
           return app.commands.execute(CommandIDs.open, { workspace: newName });
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__('Workspace identifier to clone')
+            }
+          }
+        }
       }
     });
 
@@ -296,6 +340,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         if (workspaceId === resolver.name) {
           // If the current workspace was renamed, reopen it to ensure consistent state
           return app.commands.execute(CommandIDs.open, { workspace: newName });
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__('Workspace identifier to rename')
+            }
+          }
         }
       }
     });
@@ -343,6 +398,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         } else {
           await model.refresh();
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__('Workspace identifier to reset')
+            }
+          }
+        }
       }
     });
 
@@ -382,6 +448,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
             );
           }
           await model.refresh();
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });
@@ -442,6 +514,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         if (exportPath) {
           await Private.save(exportPath, contents, data, state, false);
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            workspace: {
+              type: 'string',
+              description: trans.__('Workspace identifier to export')
+            }
+          }
+        }
       }
     });
 
@@ -451,6 +534,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         const { contents } = app.serviceManager;
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         await Private.saveAs(fileBrowser, contents, data, state, translator);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -464,6 +553,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           await Private.saveAs(fileBrowser, contents, data, state, translator);
         } else {
           await Private.save(lastSave, contents, data, state);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });

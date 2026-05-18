@@ -3,10 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  IEditorHeading,
-  PythonTableOfContentsModel
-} from '@jupyterlab/fileeditor';
+import type { IEditorHeading } from '@jupyterlab/fileeditor';
+import { PythonTableOfContentsModel } from '@jupyterlab/fileeditor';
 import { signalToPromise } from '@jupyterlab/testing';
 
 describe('@jupyterlab/fileeditor', () => {

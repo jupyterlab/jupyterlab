@@ -2,16 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import {
+import type {
   IObservableList,
-  IObservableString,
-  ObservableList
+  IObservableString
 } from '@jupyterlab/observables';
-import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { ObservableList } from '@jupyterlab/observables';
+import type { IOutputModel } from '@jupyterlab/rendermime';
+import { OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The model for an output area.
@@ -48,6 +50,10 @@ export interface IOutputAreaModel extends IDisposable {
    * Get an item at the specified index.
    */
   get(index: number): IOutputModel;
+
+  removeStreamOutput(number: number): void;
+
+  appendStreamOutput(text: string): void;
 
   /**
    * Add an output, which may be combined with previous output.
@@ -245,6 +251,22 @@ export class OutputAreaModel implements IOutputAreaModel {
     this.list.set(index, item);
   }
 
+  removeStreamOutput(number: number): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.remove(length - number, length, options);
+  }
+
+  appendStreamOutput(text: string): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.insert(length, text, options);
+  }
+
   /**
    * Add an output, which may be combined with previous output.
    *
@@ -326,6 +348,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     if (
       nbformat.isStream(value) &&
       value.name === this._lastStreamName &&
+      this.length > 0 &&
       this.shouldCombine({
         value,
         lastModel: this.list.get(this.length - 1)
@@ -337,15 +360,17 @@ export class OutputAreaModel implements IOutputAreaModel {
       const curText = prev.streamText!;
       const newText =
         typeof value.text === 'string' ? value.text : value.text.join('');
-      Private.addText(curText, newText);
+      this._streamIndex = Private.addText(this._streamIndex, curText, newText);
       return this.length;
     }
 
-    let newText = '';
     if (nbformat.isStream(value)) {
-      newText =
-        typeof value.text === 'string' ? value.text : value.text.join('');
-      value.text = '';
+      if (typeof value.text !== 'string') {
+        value.text = value.text.join('');
+      }
+      const { text, index } = Private.processText(0, value.text);
+      this._streamIndex = index;
+      value.text = text;
     }
 
     // Create the new item.
@@ -357,8 +382,6 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Update the stream information.
     if (nbformat.isStream(value)) {
       this._lastStreamName = value.name;
-      const curText = item.streamText!;
-      Private.addText(curText, newText);
     } else {
       this._lastStreamName = '';
     }
@@ -426,6 +449,13 @@ export class OutputAreaModel implements IOutputAreaModel {
           item.changed.disconnect(this._onGenericChange, this);
         });
         break;
+      case 'move':
+        break;
+      case 'clear':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
     }
     this._changed.emit(args);
   }
@@ -461,6 +491,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
     this
   );
+  private _streamIndex = 0;
 }
 
 /**
@@ -500,13 +531,57 @@ namespace Private {
     }
   }
 
-  /*
-   * Concatenate a string to an observable string, handling backspaces.
+  /**
+   * Like `indexOf` but allowing to use a regular expression.
    */
-  export function addText(curText: IObservableString, newText: string): void {
-    let text = curText.text;
-    let idx0 = text.length;
-    for (let idx1 = 0; idx1 < newText.length; idx1++) {
+  function indexOfAny(text: string, re: RegExp, i: number): number {
+    const index = text.slice(i).search(re);
+    return index >= 0 ? index + i : index;
+  }
+
+  /*
+   * Handle backspaces in `newText` and concatenates to `text`, if any.
+   */
+  export function processText(
+    index: number,
+    newText: string,
+    text?: string
+  ): { text: string; index: number } {
+    if (text === undefined) {
+      text = '';
+    }
+    if (
+      !(
+        newText.includes('\b') ||
+        newText.includes('\r') ||
+        newText.includes('\n')
+      )
+    ) {
+      text =
+        text.slice(0, index) + newText + text.slice(index + newText.length);
+      return { text, index: index + newText.length };
+    }
+    let idx0 = index;
+    let idx1: number = -1;
+    let lastEnd: number = 0;
+    const regex = /[\n\b\r]/;
+
+    while (true) {
+      idx1 = indexOfAny(newText, regex, lastEnd);
+
+      // Insert characters at current position.
+      const prefix = newText.slice(
+        lastEnd,
+        idx1 === -1 ? newText.length : idx1
+      );
+      text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
+      lastEnd = idx1 + 1;
+      idx0 += prefix.length;
+
+      if (idx1 === -1) {
+        break;
+      }
+
       const newChar = newText[idx1];
       if (newChar === '\b') {
         // Backspace: delete previous character if there is one and if it's not a line feed.
@@ -531,32 +606,55 @@ namespace Private {
         text = text + '\n';
         idx0 = text.length;
       } else {
-        // Insert character at current position.
-        text = text.slice(0, idx0) + newChar + text.slice(idx0 + 1);
-        idx0++;
+        throw Error(`This should not happen`);
       }
     }
+    return { text, index: idx0 };
+  }
+
+  /**
+   * Reallocate the string to prevent memory leak,
+   * workaround for issue in Chrome and Firefox:
+   * - https://issues.chromium.org/issues/41480525
+   * - https://bugzilla.mozilla.org/show_bug.cgi?id=727615
+   */
+  function unleakString(s: string) {
+    return JSON.parse(JSON.stringify(s));
+  }
+
+  /*
+   * Concatenate a string to an observable string, handling backspaces.
+   */
+  export function addText(
+    prevIndex: number,
+    curText: IObservableString,
+    newText: string
+  ): number {
+    const { text, index } = processText(prevIndex, newText, curText.text);
     // Compute the difference between current text and new text.
     let done = false;
     let idx = 0;
     while (!done) {
       if (idx === text.length) {
-        if (idx !== curText.text.length) {
+        if (idx === curText.text.length) {
+          done = true;
+        } else {
           curText.remove(idx, curText.text.length);
           done = true;
         }
       } else if (idx === curText.text.length) {
         if (idx !== text.length) {
-          curText.insert(curText.text.length, text.slice(idx));
+          curText.insert(curText.text.length, unleakString(text.slice(idx)));
           done = true;
         }
       } else if (text[idx] !== curText.text[idx]) {
         curText.remove(idx, curText.text.length);
-        curText.insert(idx, text.slice(idx));
+        curText.insert(idx, unleakString(text.slice(idx)));
         done = true;
       } else {
         idx++;
       }
     }
+    return index;
   }
 }

@@ -4,20 +4,17 @@
 |----------------------------------------------------------------------------*/
 
 import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
-  IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
-import { ISchemaValidator } from '@jupyterlab/settingregistry';
+import type { ISchemaValidator } from '@jupyterlab/settingregistry';
 import { DataConnector } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { RawEditor } from './raweditor';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { RawEditor } from './raweditor';
 
 /**
  * Create a raw editor inspector.

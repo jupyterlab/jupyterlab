@@ -1,33 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module completer-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { COMPLETER_ACTIVE_CLASS } from '@jupyterlab/codeeditor';
 import { CommandToolbarButton } from '@jupyterlab/ui-components';
+import type {
+  IInlineCompleterSettings,
+  IInlineCompletionProviderInfo
+} from '@jupyterlab/completer';
 import {
   CompletionProviderManager,
   ContextCompleterProvider,
   HistoryInlineCompletionProvider,
   ICompletionProviderManager,
   IInlineCompleterFactory,
-  IInlineCompleterSettings,
-  IInlineCompletionProviderInfo,
   InlineCompleter,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IFormRenderer } from '@jupyterlab/ui-components';
 import {
   caretLeftIcon,
   caretRightIcon,
   checkIcon,
-  IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -213,7 +216,13 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         completionManager.inline?.cycle(app.shell.currentWidget!.id!, 'next');
       },
       label: trans.__('Next Inline Completion'),
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     app.commands.addCommand(CommandIDs.previousInline, {
       execute: () => {
@@ -223,7 +232,13 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         );
       },
       label: trans.__('Previous Inline Completion'),
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     app.commands.addCommand(CommandIDs.acceptInline, {
       execute: () => {
@@ -235,6 +250,12 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
           isEnabled() &&
           completionManager.inline!.isActive(app.shell.currentWidget!.id!)
         );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
     app.commands.addCommand(CommandIDs.invokeInline, {
@@ -242,7 +263,13 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         completionManager.inline?.invoke(app.shell.currentWidget!.id!);
       },
       label: trans.__('Invoke Inline Completer'),
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
@@ -259,6 +286,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
             // By default all providers are opt-out, but
             // any provider can configure itself to be opt-in.
             enabled: true,
+            autoFillInMiddle: false,
             timeout: 5000,
             debouncerDelay: 0,
             ...((provider.schema?.default as object) ?? {})
@@ -313,6 +341,14 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
                     title: trans.__('Enabled'),
                     description: trans.__(
                       'Whether to fetch completions %1 provider.',
+                      provider.name
+                    ),
+                    type: 'boolean'
+                  },
+                  autoFillInMiddle: {
+                    title: trans.__('Fill in middle on typing'),
+                    description: trans.__(
+                      'Whether to show completions in the middle of the code line from %1 provider on typing.',
                       provider.name
                     ),
                     type: 'boolean'
@@ -372,9 +408,8 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         return;
       }
       const target = event.target as Element;
-      switch (event.keyCode) {
-        case 9: {
-          // Tab key
+      switch (event.key) {
+        case 'Tab': {
           const potentialTabBindings = [
             // Note: `accept` should come ahead of `invoke` due to specificity
             keyBindings[CommandIDs.acceptInline],

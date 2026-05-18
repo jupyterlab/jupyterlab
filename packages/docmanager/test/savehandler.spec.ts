@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Context,
-  DocumentRegistry,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+import type { ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   signalToPromise,
@@ -111,12 +108,12 @@ describe('docregistry/savehandler', () => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         const promise = testEmission(context.fileChanged, {
-          test: () => {
-            if (called === 0) {
+          find: () => {
+            called++;
+            if (called === 1) {
               context.model.fromString('bar');
-              called++;
             }
-            return called === 1;
+            return called === 2;
           }
         });
         context.model.fromString('foo');
@@ -124,6 +121,29 @@ describe('docregistry/savehandler', () => {
         handler.saveInterval = 0.1;
         handler.start();
         return promise;
+      });
+
+      it('should continue to save after being disconnected', async () => {
+        jest.useFakeTimers();
+        handler.saveInterval = 120;
+        handler.start();
+
+        context.model.fromString('foo');
+        jest.advanceTimersByTime(120000); // in ms
+        await signalToPromise(context.fileChanged);
+
+        jest
+          .spyOn(handler as any, '_isConnectedCallback')
+          .mockReturnValue(false);
+        context.model.fromString('bar');
+        jest.advanceTimersByTime(240000);
+        jest
+          .spyOn(handler as any, '_isConnectedCallback')
+          .mockReturnValue(true);
+
+        jest.advanceTimersByTime(120000);
+        jest.useRealTimers();
+        return signalToPromise(context.fileChanged);
       });
 
       it('should overwrite the file on disk', async () => {

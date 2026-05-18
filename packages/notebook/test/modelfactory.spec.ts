@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
-import { Cell, CodeCellModel, ICodeCellModel } from '@jupyterlab/cells';
+import type { YCodeCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
+import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
+import { CodeCellModel } from '@jupyterlab/cells';
 import {
   NotebookModel,
   NotebookModelFactory,
@@ -91,6 +93,11 @@ describe('@jupyterlab/notebook', () => {
 
     beforeEach(() => {
       notebook = new NotebookViewModelTest([]);
+    });
+
+    test('should not throw if requested for cell out of bonds', () => {
+      const height = notebook.estimateWidgetSize(100);
+      expect(height).toBe(0);
     });
 
     test('should calculate height based on number of lines in source and output (string output)', () => {

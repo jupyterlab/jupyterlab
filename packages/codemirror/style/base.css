@@ -67,6 +67,10 @@
   margin-right: -5px;
 }
 
+.cm-builtin {
+  color: var(--jp-mirror-editor-builtin-color);
+}
+
 .cm-searching,
 .cm-searching span {
   /* `.cm-searching span`: we need to override syntax highlighting */
@@ -80,6 +84,7 @@
   color: var(--jp-search-unselected-match-color);
 }
 
+.jp-current-match.cm-searching,
 .jp-current-match > .cm-searching,
 .jp-current-match > .cm-searching span,
 .cm-searching > .jp-current-match,
@@ -94,12 +99,6 @@
 .cm-searching > .jp-current-match span::selection {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
-}
-
-.cm-trailingspace {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAYAAAB4ka1VAAAAsElEQVQIHQGlAFr/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7+r3zKmT0/+pk9P/7+r3zAAAAAAAAAAABAAAAAAAAAAA6OPzM+/q9wAAAAAA6OPzMwAAAAAAAAAAAgAAAAAAAAAAGR8NiRQaCgAZIA0AGR8NiQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQyoYJ/SY80UAAAAASUVORK5CYII=);
-  background-position: center left;
-  background-repeat: repeat-x;
 }
 
 .jp-CollaboratorCursor-hover {
@@ -136,6 +135,7 @@
   top: -1.15em;
   padding-bottom: 0.05em;
   left: -1px;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   font-size: 0.95em;
   font-family: var(--jp-ui-font-family);
   font-weight: bold;

@@ -27,10 +27,7 @@ async function generateInterface(schemaPath, filepath) {
     }
   });
 
-  const formatted = prettier.format(content, {
-    ...prettierConfig,
-    filepath
-  });
+  const formatted = prettier.format(content, { ...prettierConfig, filepath });
   return formatted;
 }
 
@@ -39,10 +36,7 @@ function getSchemaPath() {
   const schemaLocalPath = 'schema/schema.json';
 
   const cmd = `python -c '
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib.resources import files
 print(files("${serverPackage}")/ "${schemaLocalPath}")
   '`;
   let schemaPath;

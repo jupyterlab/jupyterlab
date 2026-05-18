@@ -193,9 +193,10 @@ describe('@jupyterlab/observables', () => {
         expect(value.removeValue(1)).toBe(0);
       });
 
-      it('should return `-1` if the item is not in the list', () => {
+      it('should return `-1` if the item is not in the list, and not remove anything', () => {
         const value = new ObservableList<number>({ values: [1, 2, 3] });
         expect(value.removeValue(10)).toBe(-1);
+        expect(Array.from(value)).toEqual([1, 2, 3]);
       });
 
       it('should trigger a changed signal', () => {
@@ -267,7 +268,7 @@ describe('@jupyterlab/observables', () => {
         const value = new ObservableList<number>({ values });
         value.changed.connect((sender, args) => {
           expect(sender).toBe(value);
-          expect(args.type).toBe('remove');
+          expect(args.type).toBe('clear');
           expect(args.newIndex).toBe(0);
           expect(args.oldIndex).toBe(0);
           expect(Array.from(args.oldValues)).toEqual(values);

@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { TableOfContents } from '../tokens';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import { renderMarkdown } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { TableOfContents } from '../tokens';
 
 /**
  * Markdown heading
@@ -53,8 +54,9 @@ export async function getHeadingId(
     if (!header) {
       return null;
     }
-
-    return header.id;
+    return sanitizer?.allowNamedProperties
+      ? header.id
+      : header.getAttribute('data-jupyter-id');
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
@@ -65,8 +67,62 @@ export async function getHeadingId(
 /**
  * Parses the provided string and returns a list of headings.
  *
+ * @param text - Markdown text
+ * @param parser - A Markdown parser instance used to render the content to HTML.
+ * @returns List of headings
+ *
+ * @remarks
+ * Renders Markdown to HTML and extracts `<h1>`–`<h6>` elements.
+ * Returns an empty list if the parser is `null`.
+ */
+export async function parseHeadings(
+  markdownText: string,
+  parser: IMarkdownParser | null
+): Promise<IMarkdownHeading[]> {
+  if (!parser || !parser.getHeadingTokens) {
+    console.warn(
+      'Unable to parse headings; Markdown parser is missing or does not implement getHeadingTokens().'
+    );
+    return [];
+  }
+
+  // Get the heading tokens from the parser, including the source line metadata
+  const headingTokens = await parser.getHeadingTokens(markdownText);
+
+  // Convert each heading token into HTML and extract the heading elements,
+  // as this provides a clean and reliable way to retrieve the headings.
+  const parseHeadings = await Promise.all(
+    headingTokens.map(async token => {
+      const renderedHtml = await parser.render(token.raw);
+      const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
+      const htmlHeadings = Array.from(
+        dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
+
+      return htmlHeadings.map(e => ({
+        text: e.textContent?.trim() || '',
+        line: token.line,
+        level: parseInt(e.tagName[1], 10),
+        raw: token.raw.replace(/\n+$/, ''),
+        skip: skipHeading.test(token.raw)
+      }));
+    })
+  );
+
+  return parseHeadings.reduce(
+    (acc, curr) => acc.concat(curr),
+    [] as IMarkdownHeading[]
+  );
+}
+
+/**
+ * @deprecated in favour of async parseHeadings()
+ *
+ * Parses the provided string and returns a list of headings.
+ *
  * @param text - Input text
  * @returns List of headings
+ *
  */
 export function getHeadings(text: string): IMarkdownHeading[] {
   // Split the text into lines:
@@ -171,7 +227,6 @@ export function isMarkdown(mime: string): boolean {
 
 /**
  * Interface describing a parsed heading result.
- *
  * @private
  */
 interface IHeader {

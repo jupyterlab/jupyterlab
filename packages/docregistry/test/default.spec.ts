@@ -1,18 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   Base64ModelFactory,
   Context,
   DocumentModel,
-  DocumentRegistry,
   DocumentWidget,
-  IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { sleep } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
@@ -38,6 +40,28 @@ function createFactory(): WidgetFactory {
 
 describe('docregistry/default', () => {
   describe('ABCWidgetFactory', () => {
+    describe('#contentProviderId', () => {
+      it('should be the value passed in', () => {
+        const factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text'],
+          contentProviderId: 'rtc'
+        });
+        expect(factory.contentProviderId).toEqual('rtc');
+      });
+      it('should allow to set value once', () => {
+        const factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text']
+        });
+        factory.contentProviderId = 'rtc';
+        expect(factory.contentProviderId).toEqual('rtc');
+        expect(() => {
+          factory.contentProviderId = 'test';
+        }).toThrow(Error);
+      });
+    });
+
     describe('#fileTypes', () => {
       it('should be the value passed in', () => {
         const factory = new WidgetFactory({

@@ -2,13 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
-import * as Session from './session';
+import type * as Session from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
-import { listRunning, shutdownSession, startSession } from './restapi';
-import { Kernel } from '../kernel';
+import { SessionAPIClient } from './restapi';
+import type { Kernel } from '../kernel';
 
 /**
  * An implementation of a session manager.
@@ -23,6 +24,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
     super(options);
 
     this._kernelManager = options.kernelManager;
+    this._sessionAPIClient =
+      options.sessionAPIClient ??
+      new SessionAPIClient({ serverSettings: options.serverSettings });
 
     // Start model polling with exponential backoff.
     this._pollModels = new Poll({
@@ -106,7 +110,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
     const sessionConnection = new SessionConnection({
       ...options,
       connectToKernel: this._connectToKernel,
-      serverSettings: this.serverSettings
+      serverSettings: this.serverSettings,
+      sessionAPIClient: this._sessionAPIClient
     });
     this._onStarted(sessionConnection);
     if (!this._models.has(options.model.id)) {
@@ -157,7 +162,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
       'model' | 'connectToKernel' | 'serverSettings'
     > = {}
   ): Promise<Session.ISessionConnection> {
-    const model = await startSession(createOptions, this.serverSettings);
+    const model = await this._sessionAPIClient.startNew(createOptions);
     await this.refreshRunning();
     return this.connectTo({ ...connectOptions, model });
   }
@@ -166,7 +171,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Shut down a session by id.
    */
   async shutdown(id: string): Promise<void> {
-    await shutdownSession(id, this.serverSettings);
+    await this._sessionAPIClient.shutdown(id);
     await this.refreshRunning();
   }
 
@@ -181,9 +186,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
 
     // Shut down all models.
     await Promise.all(
-      [...this._models.keys()].map(id =>
-        shutdownSession(id, this.serverSettings)
-      )
+      [...this._models.keys()].map(id => this._sessionAPIClient.shutdown(id))
     );
 
     // Update the list of models to clear out our state.
@@ -200,7 +203,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
    */
   async stopIfNeeded(path: string): Promise<void> {
     try {
-      const sessions = await listRunning(this.serverSettings);
+      const sessions = await this._sessionAPIClient.listRunning();
       const matches = sessions.filter(value => value.path === path);
       if (matches.length === 1) {
         const id = matches[0].id;
@@ -246,7 +249,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Session.IModel[];
     try {
-      models = await listRunning(this.serverSettings);
+      models = await this._sessionAPIClient.listRunning();
     } catch (err) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
@@ -343,6 +346,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   };
 
   private _kernelManager: Kernel.IManager;
+  private _sessionAPIClient: Session.ISessionAPIClient;
 }
 
 /**
@@ -362,6 +366,11 @@ export namespace SessionManager {
      * Kernel Manager
      */
     kernelManager: Kernel.IManager;
+
+    /**
+     * The session API client.
+     */
+    sessionAPIClient?: Session.ISessionAPIClient;
   }
 
   /**

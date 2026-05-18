@@ -23,10 +23,11 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import FrozenSet, Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
+from jupyter_builder.jlpm import YARN_PATH
+from jupyter_builder.jupyterlab_semver import Range, gt, gte, lt, lte, make_semver
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
@@ -43,12 +44,13 @@ from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.jlpmapp import HERE, YARN_PATH
-from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
-# The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+HERE = os.path.dirname(os.path.abspath(__file__))
 
+# The regex for expecting the rspack output.
+# TODO: check if we can just keep the theme.css regex like is commented below
+# RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
 
 # The repo root directory
 REPO_ROOT = osp.abspath(osp.join(HERE, ".."))
@@ -177,6 +179,20 @@ def get_app_dir():
     ):
         app_dir = "/usr/local/share/jupyter/lab"
 
+    # Check for a path relative to the site-packages directory, e.g.,
+    # `<prefix>/lib/python3.13/site-packages/jupyterlab/../../../..` This is
+    # useful for cases where the the `jupyterlab` module is outside the current
+    # Python environment, which can occur via various Python path manipulations.
+    elif not osp.exists(app_dir):
+        maybe_app_dir = pjoin(
+            osp.dirname(osp.dirname(osp.dirname(osp.dirname(HERE)))),
+            "share",
+            "jupyter",
+            "lab",
+        )
+        if osp.exists(maybe_app_dir):
+            app_dir = maybe_app_dir
+
     # We must resolve the path to get the canonical case of the path for
     # case-sensitive systems
     return str(Path(app_dir).resolve())
@@ -266,7 +282,8 @@ def ensure_app(app_dir):
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jupyter lab build` or use a different app directory",
+        "Please run `jlpm run build:core` then `jupyter lab build` ",
+        "or use a different app directory",
     ]
     return msgs
 
@@ -313,12 +330,12 @@ def watch_dev(logger=None):
 
     package_procs = watch_packages(logger)
 
-    # Run webpack watch and wait for compilation.
+    # Run rspack watch and wait for compilation.
     wp_proc = WatchHelper(
         ["node", YARN_PATH, "run", "watch"],
         cwd=DEV_DIR,
         logger=logger,
-        startup_regex=WEBPACK_EXPECT,
+        startup_regex=RSPACK_EXPECT,
     )
 
     return [*package_procs, wp_proc]
@@ -611,11 +628,10 @@ def get_latest_compatible_package_versions(names, app_options=None):
 
 def read_package(target):
     """Read the package data in a given target tarball."""
-    tar = tarfile.open(target, "r")
-    f = tar.extractfile("package/package.json")
-    data = json.loads(f.read().decode("utf8"))
-    data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
-    tar.close()
+    with tarfile.open(target, "r") as tar:
+        with tar.extractfile("package/package.json") as f:
+            data = json.loads(f.read().decode("utf8"))
+        data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
     return data
 
 
@@ -726,7 +742,7 @@ class _AppHandler:
         info = ["production" if production else "development"]
         if production:
             info.append("minimized" if minimize else "not minimized")
-        self.logger.info(f'Building jupyterlab assets ({", ".join(info)})')
+        self.logger.info(f"Building jupyterlab assets ({', '.join(info)})")
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -746,7 +762,7 @@ class _AppHandler:
 
         # Build the app.
         dedupe_yarn(staging, self.logger)
-        command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
+        command = f"build:{'prod' if production else 'dev'}{':minimize' if minimize else ''}"
         ret = self._run(["node", YARN_PATH, "run", command], cwd=staging)
         if ret != 0:
             msg = "JupyterLab failed to build"
@@ -768,7 +784,7 @@ class _AppHandler:
         proc = WatchHelper(
             ["node", YARN_PATH, "run", "watch"],
             cwd=pjoin(self.app_dir, "staging"),
-            startup_regex=WEBPACK_EXPECT,
+            startup_regex=RSPACK_EXPECT,
             logger=self.logger,
         )
         return [proc]
@@ -906,7 +922,7 @@ class _AppHandler:
             if pkg in local or pkg in linked:
                 continue
             if old_deps[pkg] != dep:
-                msg = f"{pkg} changed from {old_deps[pkg]} to {new_deps[pkg]}"
+                msg = f"{pkg} changed from {old_deps[pkg]} to {dep}"
                 messages.append(msg)
 
         # Look for updated local extensions.
@@ -1180,7 +1196,12 @@ class _AppHandler:
         # copy disabled onto lockedExtensions, ensuring the mapping format
         disabled = page_config.get("disabledExtensions", {})
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
+
+        # Short circuit if disabled is empty
+        if not disabled:
+            return False
+
         page_config["lockedExtensions"] = disabled
         write_page_config(page_config, level=level)
         return True
@@ -1310,13 +1331,13 @@ class _AppHandler:
         # handle disabledExtensions specified as a list (jupyterlab_server < 2.10)
         # see https://github.com/jupyterlab/jupyterlab_server/pull/192 for more info
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
 
         info["disabled"] = disabled
 
         locked = page_config.get("lockedExtensions", {})
         if isinstance(locked, list):
-            locked = {extension: True for extension in locked}
+            locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
         disabled_core = []
@@ -1434,6 +1455,15 @@ class _AppHandler:
 
         # Handle splicing of packages
         if splice_source:
+            # Get devDependencies from the source_dir package.json
+            source_pkg_path = pjoin(source_dir, "package.json")
+            with open(source_pkg_path) as fid:
+                source_data = json.load(fid)
+            data["devDependencies"] = source_data["devDependencies"]
+
+            # Handle potential changes in the scripts sections
+            data["scripts"] = source_data["scripts"]
+
             # Splice workspace tree as linked dependencies
             for path in glob(pjoin(REPO_ROOT, "packages", "*", "package.json")):
                 local_path = osp.dirname(osp.abspath(path))
@@ -1444,11 +1474,6 @@ class _AppHandler:
                     jlab["linkedPackages"][name] = local_path
                 if name in data["resolutions"]:
                     data["resolutions"][name] = local_path
-
-            # splice the builder as well
-            local_path = osp.abspath(pjoin(REPO_ROOT, "builder"))
-            data["devDependencies"]["@jupyterlab/builder"] = local_path
-            target = osp.join(staging, "node_modules", "@jupyterlab", "builder")
 
             # Remove node_modules so it gets re-populated
             node_modules = pjoin(staging, "node_modules")
@@ -1738,7 +1763,7 @@ class _AppHandler:
 
         error_accumulator = {}
 
-        ext_dirs = {p: False for p in self.labextensions_path}
+        ext_dirs = dict.fromkeys(self.labextensions_path, False)
         for value in info["federated_extensions"].values():
             ext_dirs[value["ext_dir"]] = True
 
@@ -2043,8 +2068,7 @@ class _AppHandler:
             # All singleton deps in current version of lab are newer than those
             # in the latest version of the extension
             return (
-                f'The extension "{name}" does not yet support the current version of '
-                "JupyterLab.\n"
+                f'The extension "{name}" does not yet support the current version of JupyterLab.\n'
             )
 
         parts = [
@@ -2094,7 +2118,8 @@ def _yarn_config(logger):
 
     Returns
     -------
-    {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
+    {"yarn config": dict, "npm config": dict}
+    if unsuccessful, the subdictionaries are empty
     """
     configuration = {"yarn config": {}, "npm config": {}}
     try:
@@ -2231,18 +2256,20 @@ def _tarsum(input_file):
     """
     Compute the recursive sha sum of a tar file.
     """
-    tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
     h = hashlib.new("sha1")  # noqa: S324
 
-    for member in tar:
-        if not member.isfile():
-            continue
-        f = tar.extractfile(member)
-        data = f.read(chunk_size)
-        while data:
-            h.update(data)
-            data = f.read(chunk_size)
+    with tarfile.open(input_file, "r") as tar:
+        for member in tar:
+            if not member.isfile():
+                continue
+            with tar.extractfile(member) as f:
+                if f:  # Check if f is not None (safety check)
+                    data = f.read(chunk_size)
+                    while data:
+                        h.update(data)
+                        data = f.read(chunk_size)
+
     return h.hexdigest()
 
 
@@ -2345,14 +2372,10 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
 
         # Check for overlap.
         if (
-            gte(x1, y1, True)
-            and ly(x1, y2, True)
-            or gy(x2, y1, True)
-            and ly(x2, y2, True)
-            or gte(y1, x1, True)
-            and lx(y1, x2, True)
-            or gx(y2, x1, True)
-            and lx(y2, x2, True)
+            (gte(x1, y1, True) and ly(x1, y2, True))
+            or (gy(x2, y1, True) and ly(x2, y2, True))
+            or (gte(y1, x1, True) and lx(y1, x2, True))
+            or (gx(y2, x1, True) and lx(y2, x2, True))
         ):
             # if we ever find an overlap, we can return immediately
             return 0
@@ -2400,7 +2423,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[FrozenSet[str]] = None
+    locked_plugins: frozenset[str] | None = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:
@@ -2484,7 +2507,7 @@ def _log_multiple_compat_errors(logger, errors_map, verbose: bool):
 
 
 def _log_single_compat_errors(logger, name, version, errors):
-    """Log compatability errors for a single extension"""
+    """Log compatibility errors for a single extension"""
 
     age = _compat_error_age(errors)
     if age > 0:

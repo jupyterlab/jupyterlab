@@ -2,11 +2,13 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { SemanticCommand } from '@jupyterlab/apputils';
-import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
-import { JupyterFrontEnd } from './frontend';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JupyterFrontEnd } from './frontend';
 
 export interface ISemanticCommandDefault {
   /**
@@ -116,6 +118,7 @@ export function addSemanticCommand(options: ISemanticCommandOptions): void {
           []
         );
         if (commandIds.includes(args.id)) {
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (args.type) {
             case 'changed':
             case 'many-changed':
@@ -199,7 +202,8 @@ export function createSemanticCommand(
       let result: any = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
-          result = await commands.execute(commandId!);
+          const args = { [SemanticCommand.WIDGET]: widget!.id };
+          result = await commands.execute(commandId!, args);
           if (typeof result === 'boolean' && result === false) {
             // If a command returns a boolean, assume it is the execution success status
             // So break if it is false.

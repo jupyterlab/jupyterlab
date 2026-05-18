@@ -131,7 +131,7 @@ test.describe('CSS Selectors', () => {
      * and reported in:
      * https://bugs.chromium.org/p/chromium/issues/detail?id=1248496
      * Since those cause significant UI lag when many elements of `some-tag` are
-     * present we avoid having even a single selector like that, especialy since
+     * present we avoid having even a single selector like that, especially since
      * changing the selector to increase specificity (e.g. replacing `some-tag`
      * with a class) is sufficient to workaround the problem.
      */

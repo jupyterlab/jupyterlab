@@ -2,25 +2,30 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { AttachmentsModel, IAttachmentsModel } from '@jupyterlab/attachments';
+import type { IAttachmentsModel } from '@jupyterlab/attachments';
+import { AttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableString, ObservableValue } from '@jupyterlab/observables';
+import type {
+  IObservableString,
+  ObservableValue
+} from '@jupyterlab/observables';
 
-import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+import type { IOutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import {
+import type {
   CellChange,
-  createMutex,
-  createStandaloneCell,
   IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
@@ -30,6 +35,7 @@ import {
   ISharedRawCell,
   YCodeCell
 } from '@jupyter/ydoc';
+import { createMutex, createStandaloneCell } from '@jupyter/ydoc';
 
 const globalModelDBMutex = createMutex();
 
@@ -496,8 +502,9 @@ export namespace AttachmentsCellModel {
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
-  export interface IOptions<T extends ISharedCell>
-    extends CellModel.IOptions<T> {
+  export interface IOptions<
+    T extends ISharedCell
+  > extends CellModel.IOptions<T> {
     /**
      * The factory for attachment model creation.
      */
@@ -750,6 +757,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     const codeCell = this.sharedModel as YCodeCell;
     globalModelDBMutex(() => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (event.type) {
         case 'add': {
           for (const output of event.newValues) {
@@ -759,16 +767,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
                   sender: IObservableString,
                   textEvent: IObservableString.IChangedArgs
                 ) => {
+                  if (
+                    textEvent.options !== undefined &&
+                    (textEvent.options as { [key: string]: any })['silent']
+                  ) {
+                    return;
+                  }
                   const codeCell = this.sharedModel as YCodeCell;
                   if (textEvent.type === 'remove') {
                     codeCell.removeStreamOutput(
                       event.newIndex,
-                      textEvent.start
+                      textEvent.start,
+                      'silent-change'
                     );
                   } else {
                     codeCell.appendStreamOutput(
                       event.newIndex,
-                      textEvent.value
+                      textEvent.value,
+                      'silent-change'
                     );
                   }
                 },
@@ -803,6 +819,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             'silent-change'
           );
           break;
+        case 'clear':
+          codeCell.clearOutputs();
+          break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
       }
@@ -816,6 +835,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     slot: ISharedCodeCell,
     change: CellChange
   ): void {
+    if (change.streamOutputChange) {
+      globalModelDBMutex(() => {
+        for (const streamOutputChange of change.streamOutputChange!) {
+          if ('delete' in streamOutputChange) {
+            this._outputs.removeStreamOutput(streamOutputChange.delete!);
+          }
+          if ('insert' in streamOutputChange) {
+            this._outputs.appendStreamOutput(
+              streamOutputChange.insert!.toString()
+            );
+          }
+        }
+      });
+    }
+
     if (change.outputsChange) {
       globalModelDBMutex(() => {
         let retain = 0;
@@ -831,7 +865,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           if ('insert' in outputsChange) {
             // Inserting an output always results in appending it.
             for (const output of outputsChange.insert!) {
-              this._outputs.add(output.toJSON());
+              // For compatibility with older ydoc where a plain object,
+              // (rather than a Map instance) could be provided.
+              // In a future major release the use of Map will be required.
+              this._outputs.add('toJSON' in output ? output.toJSON() : output);
             }
           }
         }
@@ -839,12 +876,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
 
     if (change.executionCountChange) {
-      if (
-        change.executionCountChange.newValue &&
-        (this.isDirty || !change.executionCountChange.oldValue)
-      ) {
-        this._setDirty(false);
-      }
       this.stateChanged.emit({
         name: 'executionCount',
         oldValue: change.executionCountChange.oldValue,
@@ -853,6 +884,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
 
     if (change.executionStateChange) {
+      if (change.executionStateChange.newValue === 'running') {
+        this._setDirty(false);
+      }
       this.stateChanged.emit({
         name: 'executionState',
         oldValue: change.executionStateChange.oldValue,
@@ -860,7 +894,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       });
     }
 
-    if (change.sourceChange && this.executionCount !== null) {
+    if (
+      change.sourceChange &&
+      (this.executionCount !== null || this.executionState === 'running')
+    ) {
       this._setDirty(
         this._executedCode !== this.sharedModel.getSource().trim()
       );
@@ -896,8 +933,10 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions
-    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
+  export interface IOptions extends Omit<
+    CellModel.IOptions<ISharedCodeCell>,
+    'cell_type'
+  > {
     /**
      * The factory for output area model creation.
      */

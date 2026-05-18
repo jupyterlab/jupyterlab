@@ -85,7 +85,7 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   flex-shrink: 1;
 }
 
-.jp-Toolbar-responsive-popup {
+.jp-Toolbar-responsive-popup.jp-ThemedContainer {
   position: absolute;
   height: fit-content;
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);

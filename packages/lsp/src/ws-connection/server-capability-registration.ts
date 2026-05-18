@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Disclaimer/acknowledgement: Fragments are based on https://github.com/wylieconlon/lsp-editor-adapter,
 // which is copyright of wylieconlon and contributors and ISC licenced.
@@ -9,7 +10,7 @@
 // but without language deemed unnecessary following the Berne Convention." (Wikipedia).
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
 
-import {
+import type {
   Registration,
   ServerCapabilities,
   Unregistration

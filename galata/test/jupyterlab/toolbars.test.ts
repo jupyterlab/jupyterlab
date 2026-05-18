@@ -5,6 +5,13 @@ import { test } from '@jupyterlab/galata';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { expect } from '@playwright/test';
 
+/**
+ * Normalize rgba color format for comparison (remove spaces, use .XX instead of 0.XX for decimals < 1)
+ */
+function normalizeColor(color: string): string {
+  return color.replace(/\s/g, '').replace(/,0\./g, ',.');
+}
+
 const toolbars: string[][] = [
   ['@jupyterlab/csvviewer-extension:csv', 'toolbar'],
   ['@jupyterlab/csvviewer-extension:tsv', 'toolbar'],
@@ -59,7 +66,7 @@ test.describe('Toolbar Button', () => {
         .trim()
     );
 
-    expect(labelColor).toEqual(color);
+    expect(normalizeColor(labelColor)).toEqual(normalizeColor(color));
   });
 
   test('Render Switch Kernel ToolbarButton in dark theme', async ({ page }) => {
@@ -78,6 +85,15 @@ test.describe('Toolbar Button', () => {
         .trim()
     );
 
-    expect(labelColor).toEqual(color);
+    expect(normalizeColor(labelColor)).toEqual(normalizeColor(color));
   });
+});
+test('Toolbar widget visibility', async ({ page }) => {
+  const workspaceSelector = page.locator('div.jp-WorkspaceSelector');
+  await expect(workspaceSelector).toHaveCount(0);
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(1);
+  await expect(workspaceSelector).toHaveText('default');
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(0);
 });

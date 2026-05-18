@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -18,6 +19,10 @@ export class Switch extends Widget {
 
     this._button.className = 'jp-switch';
     this._button.setAttribute('role', 'switch');
+    this._button.setAttribute(
+      'aria-checked',
+      this._value ? this._value.toString() : 'false'
+    );
 
     this._label.className = 'jp-switch-label';
 

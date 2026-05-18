@@ -3,14 +3,16 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
+import type {
   CompletionHandler,
   ICompletionContext,
-  ICompletionProvider,
-  ProviderReconciliator
+  ICompletionProvider
 } from '@jupyterlab/completer';
+import { ProviderReconciliator } from '@jupyterlab/completer';
+import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Context } from '@jupyterlab/docregistry';
-import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
@@ -172,6 +174,84 @@ describe('completer/reconciliator', () => {
         const result = await reconciliator.fetch({ offset: 0, text: '' });
         expect(result).toEqual(replyWithSpace);
       });
+
+      it('should remove prefix when reply starts in the first line', async () => {
+        const reply1 = {
+          start: 4,
+          end: 6,
+          items: [{ label: '.fromkeys' }]
+        };
+        const reply2 = {
+          start: 5,
+          end: 6,
+          items: [{ label: 'foo' }]
+        };
+        const provider1 = new FooCompletionProvider({ reply: reply1 });
+        const provider2 = new FooCompletionProvider({ reply: reply2 });
+        const editor = createEditorWidget();
+        editor.model.sharedModel.setSource('dict.f\nfoo');
+        let reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          context: {
+            ...defaultOptions.context,
+            editor: editor.editor
+          },
+          providers: [provider1, provider2]
+        });
+        const request = {
+          offset: 6,
+          text: editor.model.sharedModel.getSource()
+        };
+        let result = await reconciliator.fetch(request);
+        expect(result).toEqual({
+          start: 5,
+          end: 6,
+          items: [
+            { label: '.fromkeys', insertText: 'fromkeys', resolve: undefined },
+            { label: 'foo', resolve: undefined }
+          ]
+        });
+      });
+
+      it('should remove prefix when reply starts in a subsequent line', async () => {
+        const reply1 = {
+          start: 12,
+          end: 14,
+          items: [{ label: '.fromkeys' }]
+        };
+        const reply2 = {
+          start: 13,
+          end: 14,
+          items: [{ label: 'foo' }]
+        };
+        const provider1 = new FooCompletionProvider({ reply: reply1 });
+        const provider2 = new FooCompletionProvider({ reply: reply2 });
+        const editor = createEditorWidget();
+        editor.model.sharedModel.setSource('foo = 0\ndict.f');
+        editor.editor.setCursorPosition({ line: 1, column: 6 });
+        let reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          context: {
+            ...defaultOptions.context,
+            editor: editor.editor
+          },
+          providers: [provider1, provider2]
+        });
+        const request = {
+          offset: 14,
+          text: editor.model.sharedModel.getSource()
+        };
+        let result = await reconciliator.fetch(request);
+        expect(result).toEqual({
+          start: 13,
+          end: 14,
+          items: [
+            { label: '.fromkeys', insertText: 'fromkeys', resolve: undefined },
+            { label: 'foo', resolve: undefined }
+          ]
+        });
+      });
+
       it('should return completions even if one of providers fails', async () => {
         const provider1 = new FooCompletionProvider();
         const provider2 = new FooCompletionProvider({ reject: true });

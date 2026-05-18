@@ -73,9 +73,9 @@ describe('@jupyterlab/statusbar', () => {
           align: 'right',
           rank: 1
         });
-        // Reverse order than what one might expect, as right-to-left
-        // is set in the styling of the right panel.
-        expect(item1.node.nextSibling).toBe(item2.node);
+        // The right panel uses a right-to-left ordering.
+        // Higher‑rank items are therefore placed before lower‑rank ones.
+        expect(item2.node.nextSibling).toBe(item1.node);
       });
 
       it('should allow insertion of status items in the middle', () => {

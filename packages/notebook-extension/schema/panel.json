@@ -32,12 +32,7 @@
       { "name": "cellType", "rank": 40 },
       { "name": "spacer", "type": "spacer", "rank": 100 },
       { "name": "kernelName", "rank": 1000 },
-      { "name": "executionProgress", "rank": 1002 },
-      {
-        "name": "scrollbar",
-        "command": "notebook:toggle-virtual-scrollbar",
-        "rank": 1003
-      }
+      { "name": "executionProgress", "rank": 1002 }
     ]
   },
   "jupyter.lab.transform": true,
@@ -93,7 +88,10 @@
         "type": {
           "title": "Item type",
           "type": "string",
-          "enum": ["command", "spacer"]
+          "oneOf": [
+            { "const": "command", "title": "Command" },
+            { "const": "spacer", "title": "Spacer" }
+          ]
         },
         "rank": {
           "title": "Item rank",

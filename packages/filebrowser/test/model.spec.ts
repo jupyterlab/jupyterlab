@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
 import { StateDB } from '@jupyterlab/statedb';
 import {
   acceptDialog,
@@ -152,6 +153,28 @@ describe('filebrowser/model', () => {
         expect(called).toBe(true);
       });
 
+      it('should be emitted when a file is created in a drive with a name', async () => {
+        await state.clear();
+        const driveName = 'RTC';
+        const modelWithName = new FileBrowserModel({
+          manager,
+          state,
+          driveName
+        });
+
+        let called = false;
+        modelWithName.fileChanged.connect((sender, args) => {
+          expect(sender).toBe(modelWithName);
+          expect(args.type).toBe('new');
+          expect(args.oldValue).toBeNull();
+          expect(args.newValue!.type).toBe('file');
+          called = true;
+        });
+        await manager.newUntitled({ type: 'file' });
+        expect(called).toBe(true);
+        modelWithName.dispose();
+      });
+
       it('should be emitted when a file is renamed', async () => {
         let called = false;
         model.fileChanged.connect((sender, args) => {
@@ -192,6 +215,59 @@ describe('filebrowser/model', () => {
         expect(model.rootPath).toBe('');
         await model.cd('src/');
         expect(model.rootPath).toBe('');
+      });
+    });
+
+    describe('#root', () => {
+      it('should return empty string when no root is set', () => {
+        expect(model.root).toBe('');
+      });
+
+      it('should return the root when set', () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        expect(restrictedModel.root).toBe(subDir);
+        restrictedModel.dispose();
+      });
+
+      it('should block navigation outside the root', async () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        await restrictedModel.cd(subDir);
+        expect(restrictedModel.path).toBe(subDir);
+
+        // Try to navigate to parent (outside root) - should be blocked
+        await restrictedModel.cd('..');
+        expect(restrictedModel.path).toBe(subDir);
+
+        // Try to navigate to root "/" - should be blocked
+        await restrictedModel.cd('/');
+        expect(restrictedModel.path).toBe(subDir);
+
+        restrictedModel.dispose();
+      });
+
+      it('should allow navigation within the root', async () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        await restrictedModel.cd(subDir);
+        expect(restrictedModel.path).toBe(subDir);
+
+        // Navigate to subdirectory within root - should work
+        await restrictedModel.cd('/' + subSubDir);
+        expect(restrictedModel.path).toBe(subSubDir);
+
+        // Navigate back to root - should work
+        await restrictedModel.cd('/' + subDir);
+        expect(restrictedModel.path).toBe(subDir);
+
+        restrictedModel.dispose();
       });
     });
 
