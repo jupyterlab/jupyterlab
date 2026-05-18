@@ -97,7 +97,9 @@
 }
 
 .jp-BreadCrumbs-item:focus-visible {
-  outline: 2px solid var(--jp-brand-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-style: solid;
+  outline-color: var(--jp-focus-outline-color);
 }
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
