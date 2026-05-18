@@ -2563,11 +2563,9 @@ namespace Private {
       return null;
     }
     let done = false;
-    future.done.finally(
-      () => {
-        done = true;
-      }
-    );
+    future.done.finally(() => {
+      done = true;
+    });
     const buffered: KernelMessage.IIOPubMessage[] = [];
     future.onIOPub = msg => {
       buffered.push(msg);
