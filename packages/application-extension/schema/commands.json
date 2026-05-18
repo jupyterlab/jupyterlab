@@ -43,6 +43,11 @@
       "selector": "body"
     },
     {
+      "command": "application:toggle-down-area",
+      "keys": [""],
+      "selector": "body"
+    },
+    {
       "command": "application:toggle-presentation-mode",
       "keys": [""],
       "selector": "body"
@@ -321,8 +326,12 @@
                   }
                 },
                 {
-                  "command": "application:toggle-header",
+                  "command": "application:toggle-down-area",
                   "rank": 15
+                },
+                {
+                  "command": "application:toggle-header",
+                  "rank": 16
                 },
                 {
                   "type": "separator",
@@ -375,6 +384,16 @@
       {
         "command": "application:close",
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
+        "rank": 4
+      },
+      {
+        "command": "application:close",
+        "selector": ".jp-SideBar .lm-TabBar-tab.lm-mod-closable[data-id]",
+        "rank": 4
+      },
+      {
+        "command": "application:close",
+        "selector": "#jp-down-stack .lm-TabBar-tab.lm-mod-closable[data-id]",
         "rank": 4
       },
       {
