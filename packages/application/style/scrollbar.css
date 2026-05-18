@@ -52,24 +52,31 @@
 
 /*
  * Lumino
+ *
+ * The Lumino scrollbar (used by every DataGrid — CSV viewer, Debugger
+ * Variables panel, …) is themed via the shared scrollbar variables.
+ * Fallbacks equal the previous hardcoded values, so themes that do not
+ * define `--jp-scrollbar-*` (the default light theme) are unchanged at
+ * rest. Hover/active blend towards `--jp-ui-font-color1` (dark in the
+ * light theme, light in the dark themes) with `color-mix` so the
+ * feedback stays visible in every theme. See issue #18797.
  */
-/* stylelint-disable declaration-property-value-allowed-list */
 .lm-ScrollBar[data-orientation='horizontal'] {
   min-height: 16px;
   max-height: 16px;
   min-width: 45px;
-  border-top: 1px solid #a0a0a0;
+  border-top: 1px solid var(--jp-border-color1);
 }
 
 .lm-ScrollBar[data-orientation='vertical'] {
   min-width: 16px;
   max-width: 16px;
   min-height: 45px;
-  border-left: 1px solid #a0a0a0;
+  border-left: 1px solid var(--jp-border-color1);
 }
 
 .lm-ScrollBar-button {
-  background-color: #f0f0f0;
+  background-color: var(--jp-scrollbar-background-color, #f0f0f0);
   background-position: center center;
   min-height: 15px;
   max-height: 15px;
@@ -78,43 +85,58 @@
 }
 
 .lm-ScrollBar-button:hover {
-  background-color: #dadada;
+  background-color: color-mix(
+    in srgb,
+    var(--jp-scrollbar-background-color, #f0f0f0) 86%,
+    var(--jp-ui-font-color1) 14%
+  );
 }
 
 .lm-ScrollBar-button.lm-mod-active {
-  background-color: #cdcdcd;
+  background-color: color-mix(
+    in srgb,
+    var(--jp-scrollbar-background-color, #f0f0f0) 74%,
+    var(--jp-ui-font-color1) 26%
+  );
 }
 
 .lm-ScrollBar-track {
-  background: #f0f0f0;
+  background: var(--jp-scrollbar-background-color, #f0f0f0);
 }
 
 .lm-ScrollBar-thumb {
-  background: #cdcdcd;
+  background: rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205));
 }
 
 .lm-ScrollBar-thumb:hover {
-  background: #bababa;
+  background: color-mix(
+    in srgb,
+    rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205)) 78%,
+    var(--jp-ui-font-color1) 22%
+  );
 }
 
 .lm-ScrollBar-thumb.lm-mod-active {
-  background: #a0a0a0;
+  background: color-mix(
+    in srgb,
+    rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205)) 62%,
+    var(--jp-ui-font-color1) 38%
+  );
 }
 
 .lm-ScrollBar[data-orientation='horizontal'] .lm-ScrollBar-thumb {
   height: 100%;
   min-width: 15px;
-  border-left: 1px solid #a0a0a0;
-  border-right: 1px solid #a0a0a0;
+  border-left: 1px solid var(--jp-border-color1);
+  border-right: 1px solid var(--jp-border-color1);
 }
 
 .lm-ScrollBar[data-orientation='vertical'] .lm-ScrollBar-thumb {
   width: 100%;
   min-height: 15px;
-  border-top: 1px solid #a0a0a0;
-  border-bottom: 1px solid #a0a0a0;
+  border-top: 1px solid var(--jp-border-color1);
+  border-bottom: 1px solid var(--jp-border-color1);
 }
-/* stylelint-enable declaration-property-value-allowed-list */
 
 .lm-ScrollBar[data-orientation='horizontal']
   .lm-ScrollBar-button[data-action='decrement'] {
