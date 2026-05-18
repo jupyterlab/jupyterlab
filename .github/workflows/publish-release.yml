@@ -47,12 +47,16 @@ jobs:
 
       - name: "** Next Step **"
         if: ${{ success() }}
+        env:
+          RELEASE_URL: ${{ steps.finalize-release.outputs.release_url }}
         run: |
           echo "Verify the final release"
-          echo ${{ steps.finalize-release.outputs.release_url }}
+          echo "$RELEASE_URL"
 
       - name: "** Failure Message **"
         if: ${{ failure() }}
+        env:
+          RELEASE_URL: ${{ steps.populate-release.outputs.release_url }}
         run: |
           echo "Failed to Publish the Draft Release Url:"
-          echo ${{ steps.populate-release.outputs.release_url }}
+          echo "$RELEASE_URL"

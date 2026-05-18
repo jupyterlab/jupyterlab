@@ -30,5 +30,7 @@ jobs:
           branch: ${{ github.event.inputs.branch }}
 
       - name: "** Next Step **"
+        env:
+          PR_URL: ${{ steps.publish-changelog.outputs.pr_url }}
         run: |
-          echo "Merge the changelog update PR: ${{ steps.publish-changelog.outputs.pr_url }}"
+          echo "Merge the changelog update PR: ${PR_URL}"
