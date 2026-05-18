@@ -2266,6 +2266,7 @@ export class Notebook extends StaticNotebook {
       cell.headingCollapsed &&
       cell.numberChildNodes > 0
     ) {
+      console.log('selecting child nodes');
       const idx = this.widgets.indexOf(cell);
       for (let i = idx; i <= idx + cell.numberChildNodes; i++) {
         if (this.widgets[i]) {
