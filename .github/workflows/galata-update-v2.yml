@@ -21,7 +21,9 @@ jobs:
       (github.event.issue.pull_request || github.event.pull_request) &&
       (
         contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update galata snapshots please') ||
-        contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update snapshots please')
+        contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update snapshots please') ||
+        contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update galata snapshots') ||
+        contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update snapshots')
       )
     runs-on: ubuntu-slim
     environment: update-snapshots
