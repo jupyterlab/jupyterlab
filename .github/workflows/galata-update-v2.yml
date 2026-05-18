@@ -170,6 +170,7 @@ jobs:
           sparse-checkout: scripts/unpack_snapshots.py
           sparse-checkout-cone-mode: false
           path: tools
+          persist-credentials: false
 
       - name: Process JSON reports and unpack snapshots
         run: |
@@ -261,6 +262,7 @@ jobs:
           repository: galata-snapshots-bot/${{ github.event.repository.name }}
           fetch-depth: 1
           token: ${{ secrets.BOT_USER_PAT }}
+          persist-credentials: false
 
       - name: Open Pull Request
         id: open-pr
