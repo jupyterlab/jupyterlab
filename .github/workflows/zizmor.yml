@@ -27,7 +27,7 @@ jobs:
       - name: Run zizmor 🌈
         run: uvx zizmor --format=sarif . > results.sarif
         # Note: we are not passing GitHub token here, so it runs in offline mode;
-        # online mode is known to exhaust iGutHub rate limits due to extensive
+        # online mode is known to exhaust Github rate limits due to extensive
         # GitHub API calls, see https://github.com/zizmorcore/zizmor/issues/278 and
         # https://grafana.com/blog/how-to-detect-vulnerable-github-actions-at-scale-with-zizmor/
         # This means that some checks like imposter-commits and ref-confusion will not run.
