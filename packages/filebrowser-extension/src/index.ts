@@ -271,7 +271,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           sortNotebooksFirst: false,
           sortFileNamesNaturally: true,
           showFullPath: false,
-          allowFileUploads: true
+          allowFileUploads: true,
+          showFileFilter: false
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
@@ -290,8 +291,6 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             .composite as boolean;
           browser.model.filterDirectories = filterDirectories;
           browser.model.useFuzzyFilter = useFuzzyFilter;
-          browser.showFileFilter = settings.get('showFileFilter')
-            .composite as boolean;
         }
         settings.changed.connect(onSettingsChanged);
         onSettingsChanged(settings);
