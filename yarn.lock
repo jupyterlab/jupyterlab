@@ -2250,12 +2250,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/builder@npm:^0.0.8":
-  version: 0.0.8
-  resolution: "@jupyter/builder@npm:0.0.8"
+"@jupyter/builder@npm:^1.0.0-beta.1":
+  version: 1.0.0-beta.1
+  resolution: "@jupyter/builder@npm:1.0.0-beta.1"
   dependencies:
     "@jupyterlab/core-meta": 4.6.0-alpha.4
-    "@rspack/core": ^1.7.7
+    "@module-federation/runtime-tools": ^2.0.0
+    "@rspack/core": ^2.0.2
     ajv: ^8.12.0
     commander: ^9.4.1
     css-loader: ^6.7.1
@@ -2271,7 +2272,7 @@ __metadata:
     supports-color: ^7.2.0
     webpack-merge: ^5.8.0
     worker-loader: ^3.0.2
-  checksum: 5f80322e4eecd4c643e73996b9f383bc9bc60cc5d52d5909c80e658bfb7c9e8727a219c4330994cfc2df5d5fd900d89e28e2b29bd4d5078a32c142d22d4d9e9f
+  checksum: 70b0900546f11ceed9ce3cebeff3e21eed4b6212a20eb81a75a9aa3f94ba7232c312f8df66ba1c2dd9bc4d720abd64e58a36a423ef583ea48bb1635e918923ac
   languageName: node
   linkType: hard
 
@@ -2350,7 +2351,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-top@workspace:dev_mode"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/application": ~4.6.0-alpha.5
     "@jupyterlab/application-extension": ~4.6.0-alpha.5
     "@jupyterlab/apputils-extension": ~4.6.0-alpha.5
@@ -3199,7 +3200,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-app@workspace:examples/app"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/application": ^4.6.0-alpha.5
     "@jupyterlab/application-extension": ^4.6.0-alpha.5
     "@jupyterlab/apputils-extension": ^4.6.0-alpha.5
@@ -3302,7 +3303,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-core@workspace:examples/federated/core_package"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/application": ^4.6.0-alpha.5
     "@jupyterlab/application-extension": ^4.6.0-alpha.5
     "@jupyterlab/apputils-extension": ^4.6.0-alpha.5
@@ -3359,7 +3360,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-md@workspace:examples/federated/md_package"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/application": ^4.6.0-alpha.5
     "@jupyterlab/example-federated-middle": ^3.5.0-alpha.5
     "@jupyterlab/markdownviewer-extension": ^4.6.0-alpha.5
@@ -3372,7 +3373,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-middle@workspace:examples/federated/middle_package"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@lumino/coreutils": ^2.2.2
     rimraf: ~5.0.5
   languageName: unknown
@@ -3690,7 +3691,7 @@ __metadata:
     "@fontsource-variable/noto-sans-sc": ^5.2.10
     "@fontsource/dejavu-mono": ^5.2.5
     "@fontsource/dejavu-sans": ^5.2.5
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/application": ^4.6.0-alpha.5
     "@jupyterlab/apputils": ^4.7.0-alpha.5
     "@jupyterlab/cells": ^4.6.0-alpha.5
@@ -4360,7 +4361,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-consumer@workspace:jupyterlab/tests/mock_packages/interop/consumer"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/mock-token": ^4.6.0-alpha.5
   languageName: unknown
   linkType: soft
@@ -4369,7 +4370,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/launcher": ^4.6.0-alpha.5
   languageName: unknown
   linkType: soft
@@ -4378,7 +4379,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-provider@workspace:jupyterlab/tests/mock_packages/interop/provider"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/mock-token": ^4.6.0-alpha.5
   languageName: unknown
   linkType: soft
@@ -4387,7 +4388,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension"
   dependencies:
-    "@jupyter/builder": ^0.0.8
+    "@jupyter/builder": ^1.0.0-beta.1
     "@jupyterlab/services": ^7.6.0-alpha.5
   languageName: unknown
   linkType: soft

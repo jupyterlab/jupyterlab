@@ -6,7 +6,7 @@
     "@jupyterlab/mock-token": "^4.6.0-alpha.5"
   },
   "devDependencies": {
-    "@jupyter/builder": "^0.0.8"
+    "@jupyter/builder": "^1.0.0-beta.1"
   },
   "jupyterlab": {
     "extension": true
