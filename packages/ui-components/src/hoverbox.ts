@@ -126,8 +126,10 @@ export namespace HoverBox {
   /**
    * An interface describing anchor coordinates.
    */
-  export interface IAnchor
-    extends Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'> {}
+  export interface IAnchor extends Pick<
+    DOMRect,
+    'left' | 'right' | 'top' | 'bottom'
+  > {}
 
   /**
    * Set the visible dimensions of a hovering box anchored to an editor cursor.
@@ -173,10 +175,10 @@ export namespace HoverBox {
       privilege === 'forceAbove'
         ? false
         : privilege === 'forceBelow'
-        ? true
-        : privilege === 'above'
-        ? spaceAbove < maxHeight && spaceAbove < spaceBelow
-        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+          ? true
+          : privilege === 'above'
+            ? spaceAbove < maxHeight && spaceAbove < spaceBelow
+            : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);

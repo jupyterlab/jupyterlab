@@ -27,11 +27,6 @@ test.beforeAll(async ({ request, tmpPath }) => {
   );
 });
 
-test.afterAll(async ({ request, tmpPath }) => {
-  const contents = galata.newContentsHelper(request);
-  await contents.deleteDirectory(tmpPath);
-});
-
 /**
  * Activate notebook tools side bar.
  */
@@ -200,9 +195,9 @@ test.describe('Required metadata', () => {
 
     // Error should be displayed as required field is empty.
     await expect(formGroup.locator('.validationErrors')).not.toBeEmpty();
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-required-missing.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-required-missing.png');
 
     // Relevant metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -508,13 +503,16 @@ test.describe('Notebook level and cell type metadata', () => {
 
     // There should be 2 fields displayed.
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot('metadata-level.png');
+    expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
     expect(cellMetadata['cell-metadata']).toBeUndefined();
     let nbMetadata = await getNotebookMetadata(page);
     expect(nbMetadata['nb-nested']).toBeUndefined();
+
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     // Fill the first level nested metadata.
     await formGroup.locator('input').first().fill('Cell input');
@@ -548,18 +546,18 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Create a raw cell and select it.
     await page.notebook.addCell('raw', 'Raw cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Select the code cell again to retrieve full form.
     await page.notebook.selectCells(0);
@@ -625,16 +623,16 @@ test.describe('Conditional metadata', () => {
     // There should be 1 field displayed as condition is not met.
     await formGroup.locator('select').first().selectOption('not met');
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-not-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-not-met.png');
 
     // Met the condition, then the second field should be displayed too.
     await formGroup.locator('select').first().selectOption('met');
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-met.png');
 
     // If the condition is not met, only one field should be displayed.
     await formGroup.locator('select').first().selectOption('not met');

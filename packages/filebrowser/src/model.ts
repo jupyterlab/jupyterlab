@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { shouldOverwrite } from '@jupyterlab/docmanager';
 import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
@@ -61,6 +62,7 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
+    this._root = options.root || '';
     this._allowFileUploads = options.allowFileUploads ?? true;
     this._model = {
       path: this.rootPath,
@@ -147,6 +149,15 @@ export class FileBrowserModel implements IDisposable {
    */
   get rootPath(): string {
     return this._driveName ? this._driveName + ':' : '';
+  }
+
+  /**
+   * Get the navigation root path.
+   *
+   * When set, navigation is restricted to this path and its subdirectories.
+   */
+  get root(): string {
+    return this._root;
   }
 
   /**
@@ -241,10 +252,20 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise with the contents of the directory.
    */
   async cd(path = '.'): Promise<void> {
+    const isRefresh = path === '.';
     if (path !== '.') {
       path = this.manager.services.contents.resolvePath(this._model.path, path);
     } else {
       path = this._pendingPath || this._model.path;
+    }
+    // Check if navigation is restricted and the path is outside the root
+    if (this._root && !this._isPathWithinRoot(path)) {
+      if (isRefresh) {
+        // During refresh, if current path is outside root, navigate to root
+        path = this._root;
+      } else {
+        return;
+      }
     }
     if (this._pending) {
       // Collapse requests to the same directory.
@@ -289,14 +310,19 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (error.response && error.response.status === 404 && path !== '/') {
+        const fallbackPath = this._root || '/';
+        if (
+          error.response &&
+          error.response.status === 404 &&
+          path !== fallbackPath
+        ) {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
           );
           console.error(error);
           this._connectionFailure.emit(error);
-          return this.cd('/');
+          return this.cd(fallbackPath);
         } else {
           this._connectionFailure.emit(error);
         }
@@ -418,8 +444,9 @@ export class FileBrowserModel implements IDisposable {
     // instead of Jupyter Notebook.
     const serverVersion = PageConfig.getNotebookVersion();
     const supportsChunked =
-      serverVersion < [4, 0, 0] /* Jupyter Server */ ||
-      serverVersion >= [5, 1, 0]; /* Jupyter Notebook >= 5.1.0 */
+      compareVersions(serverVersion, [4, 0, 0]) < 0 /* Jupyter Server */ ||
+      compareVersions(serverVersion, [5, 1, 0]) >=
+        0; /* Jupyter Notebook >= 5.1.0 */
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {
@@ -634,10 +661,10 @@ export class FileBrowserModel implements IDisposable {
       prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue &&
-          newValue.path &&
-          prefix + PathExt.dirname(newValue.path) === path
-        ? newValue
-        : undefined;
+            newValue.path &&
+            prefix + PathExt.dirname(newValue.path) === path
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
@@ -646,6 +673,26 @@ export class FileBrowserModel implements IDisposable {
       this._fileChanged.emit(change);
       return;
     }
+  }
+
+  /**
+   * Check if a path is within the navigation root.
+   *
+   * @param path - The path to check.
+   * @returns Whether the path is within the root boundary.
+   */
+  private _isPathWithinRoot(path: string): boolean {
+    if (!this._root) {
+      return true;
+    }
+    // Normalize paths for comparison (remove trailing slashes)
+    const normalizedPath = PathExt.removeSlash(path);
+    const normalizedRoot = PathExt.removeSlash(this._root);
+    // Path is valid if it equals the root or is a subdirectory of root
+    return (
+      normalizedPath === normalizedRoot ||
+      normalizedPath.startsWith(normalizedRoot + '/')
+    );
   }
 
   /**
@@ -675,6 +722,7 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
+  private _root: string;
   private _allowFileUploads: boolean;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
@@ -711,6 +759,14 @@ export namespace FileBrowserModel {
      * A document manager instance.
      */
     manager: IDocumentManager;
+
+    /**
+     * The root path for navigation restriction.
+     *
+     * When set, navigation will be restricted to this path and its
+     * subdirectories. Users will not be able to navigate above this path.
+     */
+    root?: string;
 
     /**
      * The time interval for browser refreshing, in ms.
@@ -758,6 +814,13 @@ export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
     return this._includeHiddenFiles
       ? super.items()
       : filter(super.items(), value => !value.name.startsWith('.'));
+  }
+
+  /**
+   * Whether hidden files are currently included.
+   */
+  get includeHiddenFiles(): boolean {
+    return this._includeHiddenFiles;
   }
 
   /**

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
@@ -73,9 +74,8 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       if (KEYWORDS.flags.includes('d')) {
         hasKeyword = KEYWORDS.exec(line);
       } else {
-        const { default: execWithIndices } = await import(
-          'regexp-match-indices'
-        );
+        const { default: execWithIndices } =
+          await import('regexp-match-indices');
         hasKeyword = execWithIndices(KEYWORDS, line);
       }
       if (hasKeyword) {

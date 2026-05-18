@@ -175,12 +175,10 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
           return;
         }
         const attribute =
-          this.sanitizer.allowNamedProperties ?? false
+          (this.sanitizer.allowNamedProperties ?? false)
             ? 'id'
             : 'data-jupyter-id';
-        const selector = `h${heading.level}[${attribute}="${CSS.escape(
-          elementId
-        )}"]`;
+        const selector = `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`;
 
         headingToElement.set(
           heading,

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -36,8 +37,7 @@ import type { MessageConnection } from 'vscode-ws-jsonrpc';
  */
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
-> implements IClientRequestHandler
-{
+> implements IClientRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -66,8 +66,7 @@ class ClientRequestHandler<
  */
 class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
-> implements IServerRequestHandler
-{
+> implements IServerRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,

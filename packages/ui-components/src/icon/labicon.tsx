@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
@@ -925,7 +926,6 @@ namespace Private {
       protected _rendererOptions?: LabIcon.IRendererOptions
     ) {}
 
-    // eslint-disable-next-line
     render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {}
     unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
   }

@@ -15,9 +15,9 @@ import type {
 /**
  * Abstract class implementing the search provider interface.
  */
-export abstract class SearchProvider<T extends Widget = Widget>
-  implements ISearchProvider
-{
+export abstract class SearchProvider<
+  T extends Widget = Widget
+> implements ISearchProvider {
   /**
    * Constructor
    *

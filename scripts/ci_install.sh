@@ -14,9 +14,15 @@ export YARN_ENABLE_INLINE_BUILDS=1
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
-if [ $OSTYPE == "linux-gnu" ]; then
-    sudo rm -rf $(which yarn)
-    ! yarn
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+    YARN_BIN="$(command -v yarn || true)"
+    if [[ -n "${YARN_BIN}" ]]; then
+        sudo rm -rf "${YARN_BIN}"
+    fi
+    if command -v yarn; then
+        echo "Global yarn should be unavailable"
+        exit 1
+    fi
 fi
 
 # create jupyter base dir (needed for config retrieval)
@@ -27,10 +33,25 @@ git config --global user.name foo
 git config --global user.email foo@bar.com
 
 # Install and enable the server extension
-pip install -q --upgrade pip --user
+pip install -q --upgrade pip uv
 pip --version
+uv --version
+
+if [[ -z "${OPTIONAL_DEPENDENCIES+x}" ]]; then
+    # undefined - use default dev,test
+    SPEC=".[dev,test]"
+elif [[ -z "${OPTIONAL_DEPENDENCIES}" ]]; then
+    # defined but empty
+    SPEC="."
+else
+    # defined and non-empty
+    SPEC=".[${OPTIONAL_DEPENDENCIES}]"
+fi
+# Keep OPTIONAL_DEPENDENCIES handling in sync with scripts/ci_install.ps1.
+
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
+uv pip install --system -e "${SPEC}" || uv pip install --verbose --system -e "${SPEC}"
+
 node -p process.versions
 jlpm config
 
@@ -38,16 +59,29 @@ if [[ $GROUP != js-services ]]; then
     # Tests run much faster in ipykernel 6, so use that except for
     # ikernel.spec.ts in js-services, which tests subshell compatibility in
     # ipykernel 7.
-    pip install "ipykernel<7"
+    uv pip install --system "ipykernel<7"
 fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
-    pip install build
+    uv pip install --system build
     python -m build .
 
-    # Remove NodeJS, twice to take care of system and locally installed node versions.
-    sudo rm -rf $(which node)
-    sudo rm -rf $(which node)
-    ! node
+    # Remove NodeJS from PATH entries. There may be multiple binaries
+    # (for example system and local installs), so rehash between removals.
+    hash -r
+    for _ in 1 2 3; do
+        NODE_BIN="$(command -v node || true)"
+        if [[ -z "${NODE_BIN}" || ! -x "${NODE_BIN}" ]]; then
+            break
+        fi
+        sudo rm -f "${NODE_BIN}"
+        hash -r
+    done
+
+    NODE_BIN="$(command -v node || true)"
+    if [[ -n "${NODE_BIN}" && -x "${NODE_BIN}" ]]; then
+        echo "Node should be unavailable for nonode checks"
+        exit 1
+    fi
 fi

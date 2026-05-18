@@ -202,11 +202,11 @@ By default, there are two extension managers provided by JupyterLab:
 - `pypi`: [default] Allow to un-/install extensions from PyPI.org
 - `readonly`: Display installed extensions (with the ability to dis-/en-able them)
 
-You can specify the manager with the command line option `--LabApp.extension-manager`;
+You can specify the manager with the command line option `--LabApp.extension_manager`;
 e.g. to use the _read-only_ manager:
 
 ```sh
-jupyter lab --LabApp.extension-manager=readonly
+jupyter lab --LabApp.extension_manager=readonly
 ```
 
 #### PyPI Manager settings

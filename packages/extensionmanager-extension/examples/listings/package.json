@@ -42,7 +42,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@rspack/cli": "^0.5.1",
+    "@jupyter/builder": "^0.0.8",
+    "@rspack/cli": "^2.0.2",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
     "mini-svg-data-uri": "^1.4.4",

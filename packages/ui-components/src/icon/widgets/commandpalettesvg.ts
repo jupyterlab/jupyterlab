@@ -28,9 +28,7 @@ export namespace CommandPaletteSvg {
     renderHeader(data: CommandPalette.IHeaderRenderData): VirtualElement {
       const content = this.formatHeader(data);
       return h.li(
-        {
-          className: classes('lm-CommandPalette-header', 'jp-icon-hoverShow')
-        },
+        { className: classes('lm-CommandPalette-header', 'jp-icon-hoverShow') },
         content,
         h.span(searchHeaderIcon)
       );
