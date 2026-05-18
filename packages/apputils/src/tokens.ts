@@ -421,11 +421,30 @@ export const IToolbarWidgetRegistry = new Token<IToolbarWidgetRegistry>(
 );
 
 /**
- * A section entry exposed by a source sidebar — its ID and title DOM element.
+ * A section entry exposed by a source sidebar.
  */
 export interface ISectionEntry {
+  /**
+   * Stable identifier for this section, matching the widget's Lumino id.
+   * Used by the move plugin to persist and restore the section across reloads.
+   */
   readonly id: string;
+
+  /**
+   * The `.jp-AccordionPanel-title` DOM element that acts as the visual header
+   * for this section in its source sidebar.
+   *
+   * The move plugin attaches the `jp-movable-section` CSS class to this node
+   * so that Lumino's context-menu selector (`'.jp-movable-section'`) fires when
+   * the user right-clicks the header. The node is also used as a `WeakMap` key
+   * to look up the section identity on each context-menu invocation.
+   *
+   */
   readonly titleNode: HTMLElement;
+
+  /**
+   * The content widget for this section.
+   */
   readonly widget: Widget;
 }
 

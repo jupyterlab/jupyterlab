@@ -311,7 +311,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
             widget.hide();
             hostedTitle.classList.remove('lm-mod-expanded');
             hostedTitle.setAttribute('aria-expanded', 'false');
-            // accordion.collapse(idx);
           }
         }
       }
@@ -381,10 +380,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           restored.widget.hide();
           restored.titleNode.classList.remove('lm-mod-expanded');
           restored.titleNode.setAttribute('aria-expanded', 'false');
-          // sourceEntry.sidebar.accordionPanel?.collapse(
-          //  sourceEntry.sidebar.accordionPanel?.widgets.indexOf(restored.widget)
-          //   )
-          // );
         }
       }
 
