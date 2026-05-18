@@ -2101,15 +2101,19 @@ class _AppHandler:
 
 
 def _node_check(logger):
-    """Check for the existence of nodejs with the correct version."""
-    node = which("node")
+    """Check for the existence of nodejs and npm with the correct version."""
     try:
+        node = which("node")
+        which("npm")
         output = subprocess.check_output([node, "node-version-check.js"], cwd=HERE)  # noqa S603
         logger.debug(output.decode("utf-8"))
     except Exception:
         data = CoreConfig()._data
         ver = data["engines"]["node"]
-        msg = f"Please install nodejs {ver} before continuing. nodejs may be installed using conda or directly from the nodejs website."
+        msg = (
+            f"Please install Node.js {ver} and npm before continuing. "
+            "Node.js may be installed using conda or directly from the Node.js website."
+        )
         raise ValueError(msg) from None
 
 
