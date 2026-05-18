@@ -296,6 +296,9 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           const fileSizeDisplayUnit = settings.get('fileSizeDisplayUnit')
             .composite as 'decimal' | 'binary';
           browser.fileSizeDisplayUnit = fileSizeDisplayUnit;
+          browser.clearFilterOnNavigation = settings.get(
+            'clearFilterOnNavigation'
+          ).composite as boolean;
         }
         settings.changed.connect(onSettingsChanged);
         onSettingsChanged(settings);
