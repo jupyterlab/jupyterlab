@@ -1530,6 +1530,19 @@ export namespace NotebookActions {
       switch (mode) {
         case 'below':
           index = notebook.activeCellIndex + 1;
+          // If the active cell is a collapsed markdown heading with children,
+          // insert after all the children, not just after the heading.
+          {
+            const activeCell = notebook.activeCell;
+            if (
+              activeCell instanceof MarkdownCell &&
+              activeCell.headingCollapsed &&
+              activeCell.numberChildNodes > 0
+            ) {
+              index =
+                notebook.activeCellIndex + activeCell.numberChildNodes + 1;
+            }
+          }
           break;
         case 'belowSelected':
           notebook.widgets.forEach((child, childIndex) => {
@@ -1537,7 +1550,24 @@ export namespace NotebookActions {
               index = childIndex + 1;
             }
           });
-
+          // If the last selected cell is a collapsed markdown heading with children,
+          // insert after all the children, not just after the heading.
+          {
+            const lastSelectedIndex = index - 1;
+            if (
+              lastSelectedIndex >= 0 &&
+              lastSelectedIndex < notebook.widgets.length
+            ) {
+              const widget = notebook.widgets[lastSelectedIndex];
+              if (
+                widget instanceof MarkdownCell &&
+                widget.headingCollapsed &&
+                widget.numberChildNodes > 0
+              ) {
+                index = lastSelectedIndex + widget.numberChildNodes + 1;
+              }
+            }
+          }
           break;
         case 'above':
           index = notebook.activeCellIndex;
