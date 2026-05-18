@@ -97,7 +97,7 @@ Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
 All non-python source code is formatted using [prettier](https://prettier.io), Python
 source code is formatted using [ruff](https://docs.astral.sh/ruff), and shell scripts
-are linted with [shellcheck](https://www.shellcheck.net/).
+are linted with [shellcheck](https://github.com/koalaman/shellcheck).
 When code is modified and committed, all staged files will be
 automatically formatted using pre-commit git hooks (with help from
 [pre-commit](https://github.com/pre-commit/pre-commit)). The benefit of
