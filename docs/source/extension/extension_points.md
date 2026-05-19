@@ -544,22 +544,30 @@ The recommended ranges for this rank are:
 Sidebar panels can participate in the movable-sections system so users can
 relocate accordion sections between panels via the context menu. There are two
 roles — **source** (sections can be taken out) and **target** (sections can be
-dropped in). Take `IMovableSectionRegistry` as an `optional` dependency and
-register:
+dropped in). A panel can serve as both simultaneously.
+
+Take {ts:interface}`apputils.IMovableSectionRegistry` as an **optional** dependency and register your panel:
 
 ```typescript
 import { IMovableSectionRegistry } from '@jupyterlab/apputils';
 
-// in your plugin's activate():
-if (registry) {
-  registry.registerSource('@my-org/my-ext:panel', 'My Panel', myPanel);
-  // and/or:
-  registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
+optional: [IMovableSectionRegistry]
+activate: (app, registry: IMovableSectionRegistry | null) => {
+  if (registry) {
+    // Expose sections that can be moved out:
+    registry.registerSource('@my-org/my-ext:panel', 'My Panel', myPanel);
+    // Accept sections dropped in:
+    registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
+  }
 }
 ```
 
-Your panel must then implement `IMovableSectionSource`, `IMovableSectionDestination`,
-or both. See {doc}`movable_sections` for the full API and implementation guide.
+The label (second argument) appears in the context menu as "Move to My Panel" or
+"Move back to My Panel".
+
+**Source panels** must implement {ts:interface}`apputils.IMovableSectionSource`
+
+**Target panels** must implement {ts:interface}`apputils.IMovableSectionDestination`
 
 (mainmenu)=
 

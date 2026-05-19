@@ -22,7 +22,6 @@ documents
 notebook
 virtualdom
 ui_helpers
-movable_sections
 internationalization
 identity
 ../developer/patterns
