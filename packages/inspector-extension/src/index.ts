@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module inspector-extension
@@ -77,6 +78,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector = new MainAreaWidget({
           content: new InspectorPanel({ translator })
         });
+        inspector.disposed.connect(() => {
+          delete document.body.dataset[datasetKey];
+        });
         inspector.id = 'jp-inspector';
         inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;
@@ -97,8 +101,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       return inspector;
     }
     function closeInspector(): void {
-      inspector.dispose();
-      delete document.body.dataset[datasetKey];
+      if (isInspectorOpen()) {
+        inspector.dispose();
+      }
     }
 
     // Add inspector:open command to registry.
@@ -235,8 +240,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
-    consoles: IConsoleTracker,
-    translator: ITranslator
+    consoles: IConsoleTracker
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};

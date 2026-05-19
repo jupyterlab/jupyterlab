@@ -41,7 +41,11 @@
       "minimum": 1.0
     },
     "theme": {
-      "enum": ["dark", "light", "inherit"]
+      "oneOf": [
+        { "const": "dark", "title": "Dark" },
+        { "const": "light", "title": "Light" },
+        { "const": "inherit", "title": "Inherit" }
+      ]
     },
     "scrollback": {
       "type": "number"
@@ -58,7 +62,7 @@
       "title": "Font family",
       "description": "The font family used to render text.",
       "$ref": "#/definitions/fontFamily",
-      "default": "monospace"
+      "default": "ui-monospace, monospace"
     },
     "fontSize": {
       "title": "Font size",

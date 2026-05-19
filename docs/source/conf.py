@@ -52,6 +52,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
@@ -375,7 +376,6 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -541,6 +541,7 @@ def setup(app):
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
+    app.add_js_file("js/plugin_playground_embed.js")
     # Skip we are dealing with internationalization
     outdir = Path(app.outdir)
     if outdir.name != "gettext":

@@ -147,11 +147,13 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right.png');
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
@@ -476,11 +478,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
+    // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
+    // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
+    await page.getByText('Cell 1/6').waitFor();
+
     const trustIndictor = page.locator('.jp-StatusItem-trust');
 
-    expect(await trustIndictor.screenshot()).toMatchSnapshot(
-      'notebook_not_trusted.png'
-    );
+    expect
+      .soft(await trustIndictor.screenshot())
+      .toMatchSnapshot('notebook_not_trusted.png');
 
     // Open trust dialog
     // Note: we do not `await` here as it only resolves once dialog is closed

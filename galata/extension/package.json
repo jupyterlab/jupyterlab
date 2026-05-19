@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata-extension",
-  "version": "5.6.0-alpha.4",
+  "version": "5.6.0-alpha.5",
   "private": true,
   "description": "JupyterLab UI Testing Framework Extension.",
   "keywords": [
@@ -25,7 +25,7 @@
   ],
   "scripts": {
     "build": "npm run build:lib && npm run build:labextension",
-    "build:labextension": "node ../../node_modules/@jupyterlab/builder/lib/build-labextension.js --core-path ../../dev_mode --development .",
+    "build:labextension": "node ../../node_modules/@jupyter/builder/lib/build-labextension.js --development --core-package-file ../../dev_mode/package.json .",
     "build:lib": "tsc",
     "clean": "npm run clean:lib && npm run clean:labextension",
     "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
@@ -33,20 +33,23 @@
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-sc": "^5.2.10",
-    "@jupyterlab/application": "^4.6.0-alpha.4",
-    "@jupyterlab/apputils": "^4.7.0-alpha.4",
-    "@jupyterlab/cells": "^4.6.0-alpha.4",
-    "@jupyterlab/debugger": "^4.6.0-alpha.4",
-    "@jupyterlab/docmanager": "^4.6.0-alpha.4",
-    "@jupyterlab/nbformat": "^4.6.0-alpha.4",
-    "@jupyterlab/notebook": "^4.6.0-alpha.4",
-    "@jupyterlab/settingregistry": "^4.6.0-alpha.4",
+    "@fontsource/dejavu-mono": "^5.2.5",
+    "@fontsource/dejavu-sans": "^5.2.5",
+    "@jupyterlab/application": "^4.6.0-alpha.5",
+    "@jupyterlab/apputils": "^4.7.0-alpha.5",
+    "@jupyterlab/cells": "^4.6.0-alpha.5",
+    "@jupyterlab/debugger": "^4.6.0-alpha.5",
+    "@jupyterlab/docmanager": "^4.6.0-alpha.5",
+    "@jupyterlab/nbformat": "^4.6.0-alpha.5",
+    "@jupyterlab/notebook": "^4.6.0-alpha.5",
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.5",
+    "@jupyterlab/terminal": "^4.6.0-alpha.5",
     "@lumino/algorithm": "^2.0.4",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/signaling": "^2.1.5"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.6.0-alpha.4",
+    "@jupyter/builder": "^1.0.0-beta.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

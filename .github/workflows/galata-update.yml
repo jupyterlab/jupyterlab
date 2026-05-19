@@ -25,6 +25,8 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Install dependencies
         run: |
@@ -75,6 +77,7 @@ jobs:
           repository: jupyterlab/jupyterlab-demo
           ref: master
           path: demo
+          persist-credentials: false
 
       - name: Get demo folder
         run: |
@@ -83,6 +86,8 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Install dependencies
         env:
