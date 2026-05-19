@@ -85,6 +85,36 @@ The above example will result in the following changes:
 (After Change) Customized terminal position in "multiple" (default) mode
 :::
 
+(move-open-widgets)=
+
+### Move open widgets
+
+You can also move an open widget directly from its tab context menu. Right-click
+the widget tab in a sidebar, the main work area, or the down area, select
+**Move Widget To**, and choose the destination area.
+
+:::{figure} ../images/move-widget-submenu.png
+:alt: The Move Widget To submenu showing the available destination areas.
+
+The Move Widget To submenu lists the available destination areas.
+:::
+
+:::{figure} ../images/move-file-browser-main-area.png
+:alt: The file browser moved from the left sidebar to the main work area.
+
+The file browser moved from the left sidebar to the main work area.
+:::
+
+:::{figure} ../images/move-running-sessions-down-area.png
+:alt: The sessions and tabs panel moved from the left sidebar to the down area.
+
+The sessions and tabs panel moved from the left sidebar to the down area.
+:::
+
+Those changes are stored in the workspace layout, so they are restored when you
+reopen the same workspace. They do not change the type-based `layout` setting
+described above, which controls the default area for future widgets.
+
 (activity-bar-position-customization)=
 
 ## Activity Bar Position
