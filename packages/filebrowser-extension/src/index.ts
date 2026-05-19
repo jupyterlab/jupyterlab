@@ -272,14 +272,20 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           sortFileNamesNaturally: true,
           showFullPath: false,
           allowFileUploads: true,
-          showFileFilter: false
+          showFileFilterByDefault: false
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean;
-            browser[key] = value;
+            if (key === 'showFileFilterByDefault') {
+              if (value !== browser.showFileFilterByDefault) {
+                browser.showFileFilterByDefault = value;
+              }
+            } else {
+              browser[key] = value;
+            }
           }
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;

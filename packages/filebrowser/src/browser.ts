@@ -329,6 +329,20 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show the file filter by default when the file browser is opened.
+   */
+  get showFileFilterByDefault(): boolean {
+    return this._showFileFilterByDefault;
+  }
+
+  set showFileFilterByDefault(value: boolean) {
+    this._showFileFilterByDefault = value;
+    if (value) {
+      this.showFileFilter = true;
+    }
+  }
+
+  /**
    * Whether to clear the filter value when navigating to a new directory.
    */
   get clearFilterOnNavigation(): boolean {
@@ -696,6 +710,7 @@ export class FileBrowser extends SidePanel {
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
+  private _showFileFilterByDefault: boolean = false;
   private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
