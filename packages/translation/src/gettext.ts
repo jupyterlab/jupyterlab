@@ -12,6 +12,7 @@
 | Distributed under the terms of the Modified MIT License.
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DEFAULT_LANGUAGE_CODE } from './tokens';
 import { normalizeDomain } from './utils';
