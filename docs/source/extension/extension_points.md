@@ -551,7 +551,7 @@ Take {ts:interface}`apputils.IMovableSectionRegistry` as an **optional** depende
 ```typescript
 import { IMovableSectionRegistry } from '@jupyterlab/apputils';
 
-optional: [IMovableSectionRegistry]
+optional: [IMovableSectionRegistry];
 activate: (app, registry: IMovableSectionRegistry | null) => {
   if (registry) {
     // Expose sections that can be moved out:
@@ -559,7 +559,7 @@ activate: (app, registry: IMovableSectionRegistry | null) => {
     // Accept sections dropped in:
     registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
   }
-}
+};
 ```
 
 The label (second argument) appears in the context menu as "Move to My Panel" or
