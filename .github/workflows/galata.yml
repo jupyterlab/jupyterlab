@@ -69,6 +69,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           path: core
+          persist-credentials: false
 
       - name: Checkout demo project
         if: ${{ matrix.project == 'documentation' }}
@@ -77,6 +78,7 @@ jobs:
           repository: jupyterlab/jupyterlab-demo
           ref: master
           path: demo
+          persist-credentials: false
 
       - name: Get demo folder
         if: ${{ matrix.project == 'documentation' }}
@@ -225,6 +227,7 @@ jobs:
         with:
           sparse-checkout: yarn.lock
           sparse-checkout-cone-mode: false
+          persist-credentials: false
 
       - name: Find out Playwright version
         id: pw-version
@@ -280,8 +283,9 @@ jobs:
       - name: Merge Playwright reports
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
+          PW_VERSION: ${{ steps.pw-version.outputs.version }}
         run: |
-          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,json,github ./artifacts/final/
+          npx "playwright@${PW_VERSION}" merge-reports --reporter html,json,github ./artifacts/final/
 
       - name: Extract failing and flaky counts
         id: test-counts
@@ -315,20 +319,26 @@ jobs:
           path: playwright-report/output.html
 
       - name: Add report link to job summary
+        env:
+          ARTIFACT_URL: ${{ steps.upload-report.outputs.artifact-url }}
         run: |
-          echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
+          echo "**[View Visual Regression Report](${ARTIFACT_URL})**" >> $GITHUB_STEP_SUMMARY
 
       - name: Save PR comment data
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/github-script@v8
+        env:
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}
+          FAILING: ${{ steps.test-counts.outputs.failing || 0 }}
+          FLAKY: ${{ steps.test-counts.outputs.flaky || 0 }}
         with:
           script: |
             const fs = require('fs');
             fs.writeFileSync('pr-comment-data.json', JSON.stringify({
               prNumber: context.payload.pull_request.number,
-              reportUrl: '${{ steps.upload-report.outputs.artifact-url }}',
-              failing: ${{ steps.test-counts.outputs.failing || 0 }},
-              flaky: ${{ steps.test-counts.outputs.flaky || 0 }},
+              reportUrl: process.env.REPORT_URL,
+              failing: Number(process.env.FAILING),
+              flaky: Number(process.env.FLAKY),
             }));
 
       - name: Upload PR comment data

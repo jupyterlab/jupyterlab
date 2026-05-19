@@ -150,10 +150,12 @@ jobs:
           path: repo
 
       - name: Download test results
-        run: |
-          gh run download ${{ needs.get-snapshot-updates.outputs.assets-run-id }} --repo ${{ github.repository }} --name galata-test-assets-merged --dir ./test-assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASSETS_RUN_ID: ${{ needs.get-snapshot-updates.outputs.assets-run-id }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh run download "$ASSETS_RUN_ID" --repo "$REPOSITORY" --name galata-test-assets-merged --dir ./test-assets
 
       - name: List tests assets
         run: |
@@ -168,6 +170,7 @@ jobs:
           sparse-checkout: scripts/unpack_snapshots.py
           sparse-checkout-cone-mode: false
           path: tools
+          persist-credentials: false
 
       - name: Process JSON reports and unpack snapshots
         run: |
@@ -226,17 +229,20 @@ jobs:
 
       - name: Ensure fork exists
         if: steps.check-changes.outputs.has-changes == 'true'
-        run: |
-          gh repo fork --default-branch-only
-          git remote add bot https://@github.com/galata-snapshots-bot/${{ github.event.repository.name }}.git
-        working-directory: repo
         env:
           GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          gh repo fork --default-branch-only
+          git remote add bot "https://@github.com/galata-snapshots-bot/${REPO_NAME}.git"
+        working-directory: repo
 
       - name: Push to bot fork
         if: steps.check-changes.outputs.has-changes == 'true'
+        env:
+          BRANCH_NAME: ${{ steps.create-branch.outputs.branch-name }}
         run: |
-          git push bot ${{ steps.create-branch.outputs.branch-name }} --force
+          git push bot "$BRANCH_NAME" --force
         working-directory: repo
 
   open-pr:
@@ -256,6 +262,7 @@ jobs:
           repository: galata-snapshots-bot/${{ github.event.repository.name }}
           fetch-depth: 1
           token: ${{ secrets.BOT_USER_PAT }}
+          persist-credentials: false
 
       - name: Open Pull Request
         id: open-pr
@@ -319,16 +326,22 @@ jobs:
         env:
           SNAPSHOT_PR_URL: ${{ needs.open-pr.outputs.pr-url }}
           SNAPSHOT_PR_ACTION: ${{ needs.open-pr.outputs.pr-action }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          ASSETS_RUN_ID: ${{ needs.get-snapshot-updates.outputs.assets-run-id }}
+          CREATE_BRANCH_RESULT: ${{ needs.create-branch.result }}
+          HAS_CHANGES: ${{ needs.create-branch.outputs.has-changes }}
+          OPEN_PR_RESULT: ${{ needs.open-pr.result }}
         run: |
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          ASSETS_RUN_ID="${{ needs.get-snapshot-updates.outputs.assets-run-id }}"
-          ASSETS_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${ASSETS_RUN_ID}"
+          RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${RUN_ID}"
+          ASSETS_RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${ASSETS_RUN_ID}"
 
-          if [ "${{ needs.create-branch.result }}" != "success" ]; then
+          if [ "$CREATE_BRANCH_RESULT" != "success" ]; then
             BODY="I failed to update snapshots while preparing/pushing the update branch. [Workflow run](${RUN_URL})"
-          elif [ "${{ needs.create-branch.outputs.has-changes }}" = "false" ]; then
+          elif [ "$HAS_CHANGES" = "false" ]; then
             BODY="I did not detect any snapshot changes. [Workflow run](${RUN_URL})"
-          elif [ "${{ needs.open-pr.result }}" != "success" ]; then
+          elif [ "$OPEN_PR_RESULT" != "success" ]; then
             BODY="I prepared snapshot changes, but opening the snapshot update PR failed. [Workflow run](${RUN_URL})"
           elif [ "$SNAPSHOT_PR_ACTION" = "updated" ]; then
             BODY="I updated the PR ${SNAPSHOT_PR_URL} with the latest snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
@@ -342,7 +355,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
           COMMENT_BODY: ${{ steps.compose-message.outputs.body }}
+          PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
         run: |
-          PR_NUMBER=${{ github.event.issue.number || github.event.pull_request.number }}
-          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/comments \
+          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" \
             --raw-field "body=$COMMENT_BODY"
