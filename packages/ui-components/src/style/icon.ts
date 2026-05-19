@@ -160,7 +160,7 @@ export namespace LabIconStyle {
           '&:focus-visible': {
             outlineWidth: 'var(--jp-focus-outline-width)',
             outlineColor: 'var(--jp-focus-outline-color)',
-            outlineStyle: 'solid',
+            outlineStyle: 'solid'
           },
           '&:hover': {
             backgroundColor: 'var(--jp-layout-color2)'
