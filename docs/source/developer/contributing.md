@@ -95,7 +95,9 @@ All source code is written in
 [TypeScript](https://www.typescriptlang.org/Handbook). See the [Style
 Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
-All non-python source code is formatted using [prettier](https://prettier.io), and python source code is formatted using [ruff](https://docs.astral.sh/ruff).
+All non-python source code is formatted using [prettier](https://prettier.io), Python
+source code is formatted using [ruff](https://docs.astral.sh/ruff), and shell scripts
+are linted with [shellcheck](https://github.com/koalaman/shellcheck).
 When code is modified and committed, all staged files will be
 automatically formatted using pre-commit git hooks (with help from
 [pre-commit](https://github.com/pre-commit/pre-commit)). The benefit of
@@ -136,6 +138,12 @@ You may also use the prettier npm script (e.g. `npm run prettier` or
 We recommend installing a prettier extension for your code editor and
 configuring it to format your code with a keyboard shortcut or
 automatically on save.
+
+To lint shell scripts directly, run:
+
+```bash
+jlpm run shellcheck
+```
 
 ## Submitting a Pull Request Contribution
 
@@ -754,7 +762,7 @@ Then start the debugger:
 
 The content of the log file looks like this:
 
-```bash
+```text
 ...
 
 D00000.032: IDE --> {
@@ -881,6 +889,12 @@ The Read the Docs pages can be built using `make`:
 ```bash
 cd docs
 make html
+```
+
+To lint shell command snippets in the documentation:
+
+```bash
+make shellcheck
 ```
 
 The JupyterLab API reference documentation is also included in the previous step.

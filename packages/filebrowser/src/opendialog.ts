@@ -351,6 +351,8 @@ namespace Private {
       handleOpenFile
     });
 
+    widget.clearFilterOnNavigation = false;
+
     if (defaultPath) {
       await widget.model.cd(defaultPath);
     }
