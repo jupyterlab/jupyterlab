@@ -48,6 +48,12 @@ jobs:
 
           git diff
 
+      - name: Setup git credentials
+        if: steps.files-changed.outputs.N_CHANGES != '0'
+        run: gh auth setup-git
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Commit any changes
         if: steps.files-changed.outputs.N_CHANGES != '0'
         shell: bash -l {0}
