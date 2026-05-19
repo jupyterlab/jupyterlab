@@ -13,10 +13,10 @@
 }
 
 .jp-Terminal-body .xterm-viewport:focus-visible {
-  outline-width: 2px;
+  outline-width: var(--jp-focus-outline-width);
   outline-style: solid;
-  outline-color: var(--jp-brand-color1);
-  outline-offset: -2px;
+  outline-color: var(--jp-focus-outline-color);
+  outline-offset: calc(var(--jp-focus-outline-width) * -1);
 }
 
 [data-term-theme='inherit'] .xterm .xterm-screen canvas {
