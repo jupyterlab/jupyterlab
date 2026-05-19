@@ -438,7 +438,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-scrollbar-background-color: #000;
   --jp-scrollbar-thumb-color:
-    196, 204, 206; /* need to specify thumb color as an RGB triplet */
+    140, 148, 150; /* need to specify thumb color as an RGB triplet */
 
   --jp-scrollbar-endpad: 3px; /* the minimum gap between the thumb and the ends of a scrollbar */
 

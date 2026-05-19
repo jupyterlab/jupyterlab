@@ -76,12 +76,31 @@
 }
 
 .lm-ScrollBar-button {
+  position: relative;
   background-color: var(--jp-scrollbar-background-color, #f0f0f0);
-  background-position: center center;
   min-height: 15px;
   max-height: 15px;
   min-width: 15px;
   max-width: 15px;
+}
+
+/*
+ * The caret SVGs have a fixed fill, so render them as a theme-aware
+ * mask tinted with --jp-ui-font-color1 (light in the dark themes, dark
+ * in the light theme) rather than a fixed-colour background image, so
+ * the arrows keep enough contrast in every theme.
+ */
+.lm-ScrollBar-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--jp-ui-font-color1);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
 }
 
 .lm-ScrollBar-button:hover {
@@ -139,25 +158,25 @@
 }
 
 .lm-ScrollBar[data-orientation='horizontal']
-  .lm-ScrollBar-button[data-action='decrement'] {
-  background-image: var(--jp-icon-caret-left);
-  background-size: 17px;
+  .lm-ScrollBar-button[data-action='decrement']::before {
+  -webkit-mask-image: var(--jp-icon-caret-left);
+  mask-image: var(--jp-icon-caret-left);
 }
 
 .lm-ScrollBar[data-orientation='horizontal']
-  .lm-ScrollBar-button[data-action='increment'] {
-  background-image: var(--jp-icon-caret-right);
-  background-size: 17px;
+  .lm-ScrollBar-button[data-action='increment']::before {
+  -webkit-mask-image: var(--jp-icon-caret-right);
+  mask-image: var(--jp-icon-caret-right);
 }
 
 .lm-ScrollBar[data-orientation='vertical']
-  .lm-ScrollBar-button[data-action='decrement'] {
-  background-image: var(--jp-icon-caret-up);
-  background-size: 17px;
+  .lm-ScrollBar-button[data-action='decrement']::before {
+  -webkit-mask-image: var(--jp-icon-caret-up);
+  mask-image: var(--jp-icon-caret-up);
 }
 
 .lm-ScrollBar[data-orientation='vertical']
-  .lm-ScrollBar-button[data-action='increment'] {
-  background-image: var(--jp-icon-caret-down);
-  background-size: 17px;
+  .lm-ScrollBar-button[data-action='increment']::before {
+  -webkit-mask-image: var(--jp-icon-caret-down);
+  mask-image: var(--jp-icon-caret-down);
 }
