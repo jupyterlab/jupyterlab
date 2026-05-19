@@ -1996,11 +1996,7 @@ export class Notebook extends StaticNotebook {
       cell.numberChildNodes > 0 &&
       cell.headingCollapsed
     ) {
-      for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
-        if (this.widgets[i]) {
-          this.select(this.widgets[i]);
-        }
-      }
+      this.select(cell);
     }
     if (newValue === oldValue) {
       return;
