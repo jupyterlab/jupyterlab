@@ -158,7 +158,9 @@ export namespace LabIconStyle {
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
           '&:focus-visible': {
-            outline: '2px solid var(--jp-brand-color1)'
+            outlineWidth: 'var(--jp-focus-outline-width)',
+            outlineColor: 'var(--jp-focus-outline-color)',
+            outlineStyle: 'solid',
           },
           '&:hover': {
             backgroundColor: 'var(--jp-layout-color2)'
