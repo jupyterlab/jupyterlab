@@ -5,16 +5,14 @@
  * @module property-inspector
  */
 
-import { ILabShell } from '@jupyterlab/application';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ILabShell } from '@jupyterlab/application';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ReactWidget } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
-import * as React from 'react';
+import type * as React from 'react';
 import { IPropertyInspector, IPropertyInspectorProvider } from './token';
 
 export { IPropertyInspector, IPropertyInspectorProvider };
@@ -186,8 +184,15 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
     } else {
       const node = document.createElement('div');
       const content = document.createElement('div');
-      content.textContent = this._trans.__('No properties to inspect.');
+      const placeholderHeadline = document.createElement('h3');
+      const placeholderText = document.createElement('p');
+      placeholderHeadline.textContent = this._trans.__('No Properties');
+      placeholderText.textContent = this._trans.__(
+        'The property inspector allows to view and edit properties of a selected notebook.'
+      );
       content.className = 'jp-PropertyInspector-placeholderContent';
+      content.appendChild(placeholderHeadline);
+      content.appendChild(placeholderText);
       node.appendChild(content);
       this._placeholder = new Widget({ node });
       this._placeholder.addClass('jp-PropertyInspector-placeholder');

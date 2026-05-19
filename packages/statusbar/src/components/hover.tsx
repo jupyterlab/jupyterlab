@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { HoverBox } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -29,6 +29,7 @@ export class Popup extends Widget {
    */
   constructor(options: Omit<Popup.IOptions, 'startHidden'>) {
     super();
+    this.addClass('jp-ThemedContainer');
     this._body = options.body;
     this._body.addClass('jp-StatusBar-HoverItem');
     this._anchor = options.anchor;
@@ -134,8 +135,8 @@ export class Popup extends Widget {
 
   private _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    switch (event.keyCode) {
-      case 27: // Escape.
+    switch (event.key) {
+      case 'Escape':
         event.stopPropagation();
         event.preventDefault();
         this.dispose();

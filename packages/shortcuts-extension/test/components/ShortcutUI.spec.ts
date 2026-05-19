@@ -3,19 +3,17 @@
  * Distributed under the terms of the Modified BSD License.
  */
 import { ShortcutUI } from '@jupyterlab/shortcuts-extension/lib/components';
-import {
+import type {
   IKeybinding,
   IShortcutTarget
 } from '@jupyterlab/shortcuts-extension/lib/types';
 import { CommandRegistry } from '@lumino/commands';
-import { JSONValue, PromiseDelegate } from '@lumino/coreutils';
+import type { JSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import {
-  ISettingRegistry,
-  SettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { nullTranslator } from '@jupyterlab/translation';
 import { createRoot } from 'react-dom/client';
 import React from 'react';
@@ -266,6 +264,30 @@ describe('@jupyterlab/shortcut-extension', () => {
         registerKeybinding(target, keybinding);
         await shortcutUI.deleteKeybinding(target, keybinding);
         expect(data.user.shortcuts).toHaveLength(0);
+      });
+
+      it('should keep other keybinding', async () => {
+        const keybinding = {
+          keys: ['Ctrl A'],
+          isDefault: false
+        };
+        const otherKeybinding = {
+          keys: ['Ctrl B'],
+          isDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding, otherKeybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        registerKeybinding(target, otherKeybinding);
+        await shortcutUI.deleteKeybinding(target, keybinding);
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0].keys[0]).toBe('Ctrl B');
       });
     });
 

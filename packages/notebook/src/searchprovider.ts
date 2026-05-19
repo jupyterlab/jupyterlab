@@ -1,34 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import {
+import type {
   CellSearchProvider,
-  CodeCell,
-  createCellSearchProvider,
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import {
+import { CodeCell, createCellSearchProvider } from '@jupyterlab/cells';
+import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type {
   IFilter,
   IFilters,
   IReplaceOptions,
   IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
-  SearchProvider,
   SelectionState
 } from '@jupyterlab/documentsearch';
-import { IObservableList, IObservableMap } from '@jupyterlab/observables';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { SearchProvider } from '@jupyterlab/documentsearch';
+import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
-import { Widget } from '@lumino/widgets';
-import { CellList } from './celllist';
+import type { Widget } from '@lumino/widgets';
+import type { CellList } from './celllist';
 import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
+import type { Notebook } from './widget';
 
 /**
  * Notebook document search provider
@@ -170,8 +171,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return selectedCount > 1
       ? 'multiple'
       : selectedCount === 1 && !cellMode
-      ? 'single'
-      : 'none';
+        ? 'single'
+        : 'none';
   }
 
   /**
@@ -584,7 +585,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this._addCellProvider(changes.newIndex + index);
           this._removeCellProvider(changes.newIndex + index + 1);
         });
-
+        break;
+      case 'clear':
+        for (
+          let index = this._searchProviders.length - 1;
+          index >= 0;
+          index--
+        ) {
+          this._removeCellProvider(index);
+        }
         break;
     }
     this._stateChanged.emit();
@@ -648,6 +657,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (reverse && this.widget.content.mode === 'command') {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       const currentMatch = searchEngine.getCurrentMatch();
+
       if (!currentMatch) {
         this._currentProviderIndex -= 1;
       }
@@ -854,7 +864,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       textMode = false;
     } else {
       // When search in selection is off we either search in full cells
-      // (toggling off isActive flag on search enginges of non-selected cells)
+      // (toggling off isActive flag on search engines of non-selected cells)
       // or in selected text of the active cell.
       textMode = this._selectionSearchMode === 'text';
     }

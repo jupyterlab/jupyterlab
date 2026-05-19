@@ -104,6 +104,86 @@ test.describe('Kernel', () => {
         'Python 3 (ipykernel)'
       );
     });
+
+    test('Should support opening subshell in separate code console', async ({
+      page
+    }) => {
+      // Open new notebook
+      await page.menu.clickMenuItem('File>New>Notebook');
+      await page
+        .getByRole('tab', { name: 'Untitled.ipynb' })
+        .waitFor({ state: 'detached' });
+      await page.getByRole('button', { name: 'Select Kernel' }).click();
+
+      // Run %subshell in notebook
+      const notebook = page.locator('.jp-Notebook');
+      await notebook.waitFor();
+      await page.notebook.setCell(0, 'code', '%subshell');
+      await page.notebook.runCell(0);
+
+      const notebookOutput = notebook
+        .locator('.jp-OutputArea-output')
+        .locator('pre');
+      // Confirm that subshells are supported by %subshell printing something useful.
+      // Subshell ID for this main shell is None, and no subshells have been created
+      // yet so the subshell list is empty.
+      await expect(async () => {
+        const text = (await notebookOutput.innerText()).split('\n');
+        expect(text[0]).toEqual('subshell id: None');
+        expect(text[5]).toEqual('subshell list: []');
+      }).toPass();
+
+      // Open subshell console
+      await notebookOutput.click({ button: 'right' });
+      await page
+        .getByRole('menuitem', { name: 'New Subshell Console for Notebook' })
+        .click();
+
+      // Run %subshell in console
+      const subshellConsole = page.locator('.jp-CodeConsole');
+      await subshellConsole.waitFor();
+      await subshellConsole
+        .getByLabel('Code Cell Content')
+        .getByRole('textbox')
+        .click();
+      await subshellConsole
+        .getByLabel('Code Cell Content')
+        .getByRole('textbox')
+        .fill('%subshell');
+      await page.menu.clickMenuItem('Run>Run Cell (forced)');
+
+      let subshellId: string;
+      // Confirm that this is a subshell using "subshell id" printed by %subshell magic
+      // which will be something other than None (None means main shell not subshell).
+      // The subshell ID should also be the one and only entry in the "subshell list",
+      // and wrapped in quotes as it is a string.
+      const consoleOutput = subshellConsole
+        .locator('.jp-OutputArea-output')
+        .locator('pre');
+      await expect(async () => {
+        const text = (await consoleOutput.innerText()).split('\n');
+        expect(text[0]).toMatch(/^subshell id:/);
+        subshellId = text[0].split(':')[1].trim();
+        expect(subshellId).not.toEqual('None');
+        expect(text[5]).toEqual(`subshell list: ['${subshellId}']`);
+      }).toPass();
+
+      // Rerun %subshell in notebook now that subshell exists.
+      await notebook
+        .getByLabel('Code Cell Content')
+        .getByRole('textbox')
+        .nth(0)
+        .click();
+      await page.menu.clickMenuItem('Run>Run Selected Cell');
+
+      // Confirm that the parent shell is still a parent shell (subshell ID is None),
+      // and that the new subshell appears in the "subshell list".
+      await expect(async () => {
+        const text = (await notebookOutput.innerText()).split('\n');
+        expect(text[0]).toEqual('subshell id: None');
+        expect(text[5]).toEqual(`subshell list: ['${subshellId}']`);
+      }).toPass();
+    });
   });
 
   test.describe('Console', () => {
@@ -141,5 +221,43 @@ test.describe('Kernel', () => {
         .getByText('Python 3 (ipykernel) | Idle')
         .waitFor();
     });
+  });
+
+  test('Kernel status bar shows correct status when switching notebooks', async ({
+    page,
+    tmpPath
+  }) => {
+    const statusBar = page.locator('#jp-main-statusbar');
+
+    await page.menu.clickMenuItem('File>New>Notebook');
+    await page
+      .locator('.jp-Dialog-button.jp-mod-accept:has-text("select")')
+      .click();
+
+    // Add long running script to first cell
+    await page.notebook.setCell(
+      0,
+      'code',
+      'import time\nfor i in range(5):\n    print(f"Step {i}")\n    time.sleep(1)'
+    );
+    await statusBar.getByText('Idle').waitFor();
+
+    // Execute the long running cell without waiting
+    await page.notebook.runCell(0, { wait: false });
+    await statusBar.getByText('Busy').waitFor();
+
+    await page.menu.clickMenuItem('File>New>Notebook');
+    await page
+      .locator('.jp-Dialog-button.jp-mod-accept:has-text("select")')
+      .click();
+    await statusBar.getByText('Idle').waitFor();
+
+    // Switch back to running notebook
+    await page.notebook.activate('Untitled.ipynb');
+    // The status bar should show Busy since the long running script is still executing
+    await page.waitForTimeout(500);
+
+    const statusText = await statusBar.textContent();
+    expect(statusText).toContain('Busy');
   });
 });

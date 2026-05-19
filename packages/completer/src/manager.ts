@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { ProviderReconciliator } from './reconciliator';
 import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
@@ -9,7 +11,8 @@ import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
 import { CompletionHandler } from './handler';
 import { CompleterModel } from './model';
 import { InlineCompleter } from './inline';
-import {
+import type {
+  ICompleterSelection,
   ICompletionContext,
   ICompletionProvider,
   ICompletionProviderManager,
@@ -36,6 +39,10 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
+    this._selected = new Signal<
+      ICompletionProviderManager,
+      ICompleterSelection
+    >(this);
     this._inlineCompleterFactory = null;
   }
 
@@ -44,6 +51,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    */
   get activeProvidersChanged(): ISignal<ICompletionProviderManager, void> {
     return this._activeProvidersChanged;
+  }
+
+  /**
+   * Signal emitted when a selection is made from a completer menu.
+   */
+  get selected(): ISignal<ICompletionProviderManager, ICompleterSelection> {
+    return this._selected;
   }
 
   /**
@@ -63,6 +77,16 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       handler => (handler.completer.showDocsPanel = showDoc)
     );
     this._showDoc = showDoc;
+  }
+
+  /**
+   * Whether to suppress the tab completer when inline completions are presented.
+   */
+  setSuppressIfInlineCompleterActive(suppress: boolean): void {
+    this._panelHandlers.forEach(
+      handler => (handler.completer.suppressIfInlineCompleterActive = suppress)
+    );
+    this._suppressIfInlineCompleterActive = suppress;
   }
 
   /**
@@ -172,6 +196,9 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       // Create a new handler.
       const handler = await this._generateHandler(newCompleterContext, options);
       this._panelHandlers.set(widget.id, handler);
+      handler.completer.selected.connect((completer, insertText) =>
+        this._selected.emit({ insertText })
+      );
       widget.disposed.connect(old => {
         this.disposeHandler(old.id, handler);
         this._mostRecentContext.delete(id);
@@ -183,6 +210,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       completer.model = options.model;
       completer.renderer = options.renderer;
       completer.showDocsPanel = options.showDoc;
+      completer.suppressIfInlineCompleterActive =
+        this._suppressIfInlineCompleterActive;
 
       // Update other handler attributes.
       handler.autoCompletion = this._autoCompletion;
@@ -237,6 +266,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
           handler.invokeInline();
         }
       },
+      isActive: (id: string) => {
+        const handler = this._panelHandlers.get(id);
+        if (handler && handler.inlineCompleter) {
+          return handler.inlineCompleter.isActive;
+        }
+        return false;
+      },
       cycle: (id: string, direction: 'next' | 'previous') => {
         const handler = this._panelHandlers.get(id);
         if (handler && handler.inlineCompleter) {
@@ -251,15 +287,12 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       },
       configure: (settings: IInlineCompleterSettings) => {
         this._inlineCompleterSettings = settings;
-        this._panelHandlers.forEach((handler, handlerId) => {
-          for (const [
-            providerId,
-            provider
-          ] of this._inlineProviders.entries()) {
-            if (provider.configure) {
-              provider.configure(settings.providers[providerId]);
-            }
+        for (const [providerId, provider] of this._inlineProviders.entries()) {
+          if (provider.configure) {
+            provider.configure(settings.providers[providerId]);
           }
+        }
+        this._panelHandlers.forEach((handler, handlerId) => {
           if (handler.inlineCompleter) {
             handler.inlineCompleter.configure(settings);
           }
@@ -410,6 +443,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _autoCompletion: boolean;
 
   private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
+  private _selected: Signal<ICompletionProviderManager, ICompleterSelection>;
   private _inlineCompleterFactory: IInlineCompleterFactory | null;
   private _inlineCompleterSettings = InlineCompleter.defaultSettings;
+  private _suppressIfInlineCompleterActive: boolean;
 }

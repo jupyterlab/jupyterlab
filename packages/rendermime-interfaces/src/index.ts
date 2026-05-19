@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module rendermime-interfaces
@@ -368,6 +369,11 @@ export namespace IRenderMime {
     linkHandler: ILinkHandler | null;
 
     /**
+     * An optional trust handler.
+     */
+    trustHandler?: ITrustHandler | null;
+
+    /**
      * The LaTeX typesetter.
      */
     latexTypesetter: ILatexTypesetter | null;
@@ -421,6 +427,16 @@ export namespace IRenderMime {
      * @returns The sanitized string.
      */
     sanitize(dirty: string, options?: ISanitizerOptions): string;
+
+    /**
+     * @returns Whether to allow name and id properties.
+     */
+    readonly allowNamedProperties?: boolean;
+
+    /**
+     * @returns Whether to allow command linker attributes.
+     */
+    readonly allowCommandLinker?: boolean;
   }
 
   /**
@@ -437,6 +453,7 @@ export namespace IRenderMime {
      * @param id an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
+
     /**
      * Add the path handler to the node.
      *
@@ -454,6 +471,21 @@ export namespace IRenderMime {
       scope: 'kernel' | 'server',
       id?: string
     ): void;
+  }
+
+  /**
+   * An object that handles trust boundaries for rendered content.
+   */
+  export interface ITrustHandler {
+    /**
+     * Mark a trusted DOM boundary.
+     */
+    markTrusted(node: HTMLElement): void;
+
+    /**
+     * Remove a trusted DOM boundary previously set by `markTrusted`.
+     */
+    unmarkTrusted(node: HTMLElement): void;
   }
 
   export interface IResolvedLocation {
@@ -474,7 +506,7 @@ export namespace IRenderMime {
     /**
      * Resolve a relative url to an absolute url path.
      */
-    resolveUrl(url: string): Promise<string>;
+    resolveUrl(url: string, context?: IResolveUrlContext): Promise<string>;
 
     /**
      * Get the download url for a given absolute url path.
@@ -499,12 +531,46 @@ export namespace IRenderMime {
 
     /**
      * Resolve a path from Jupyter kernel to a path:
-     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - relative to `root_dir` (preferably) this is in jupyter-server scope,
      * - path understood and known by kernel (if such a path exists).
      * Returns `null` if there is no file matching provided path in neither
      * kernel nor jupyter-server contents manager.
      */
     resolvePath?: (path: string) => Promise<IResolvedLocation | null>;
+  }
+
+  type UrlAttributes = 'href' | 'src';
+
+  type TagsAcceptingUrls = {
+    [K in keyof HTMLElementTagNameMap]: Extract<
+      keyof HTMLElementTagNameMap[K],
+      UrlAttributes
+    > extends never
+      ? never
+      : K;
+  }[keyof HTMLElementTagNameMap];
+
+  /**
+   * Context in which the URL is being resolved.
+   *
+   * This is useful to specify for applications which wish to base64-encode
+   * contents of certain local files referenced by URLs, e.g. images, short
+   * videos, or CSS styles. Because base64-encoding is not advisable or even
+   * impossible for some combinations of tags and attributes, the resolving
+   * function needs know both the tag and the attribute to decide whether
+   * to base64-encode or not. For example, passing encoding contents to `href`
+   * in the `<link>` context can be used to provide CSS styles, but doing the
+   * same for `href` in `<a>` context URL will prevent navigation.
+   */
+  export interface IResolveUrlContext {
+    /**
+     * Attribute for which the URL is being resolved.
+     */
+    attribute?: UrlAttributes;
+    /**
+     * Tag for which the URL is being resolved, e.g. `a` or `img`.
+     */
+    tag?: TagsAcceptingUrls;
   }
 
   /**
@@ -517,7 +583,7 @@ export namespace IRenderMime {
      * @param element - the DOM element to typeset. The typesetting may
      *   happen synchronously or asynchronously.
      */
-    typeset(element: HTMLElement): void;
+    typeset(element: HTMLElement): void | Promise<void>;
   }
 
   /**

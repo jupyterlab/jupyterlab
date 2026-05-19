@@ -62,7 +62,7 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
     payload = json.loads(response.body)
     assert payload["notification"]["message"] == message
     assert payload["notification"]["link"] == [
-        "Open changelog",
+        "Read more…",
         "https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0",
     ]
     assert payload["notification"]["options"] == {

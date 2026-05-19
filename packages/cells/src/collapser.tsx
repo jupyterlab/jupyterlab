@@ -2,13 +2,14 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ReactWidget } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';
 
-import { Cell, CodeCell } from './widget';
+import type { Cell, CodeCell } from './widget';
 
 /**
  * The CSS class added to all collapsers.

@@ -3,14 +3,25 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Contents, ServerConnection } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { SidePanel } from '@jupyterlab/ui-components';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore } from '@jupyterlab/ui-components';
+import {
+  FilenameSearcher,
+  SidePanel,
+  Toolbar
+} from '@jupyterlab/ui-components';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
+import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
-import { FilterFileBrowserModel } from './model';
+import type { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to file browsers.
@@ -33,9 +44,19 @@ const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
 const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
 
 /**
+ * The class name added to the filebrowser filter toolbar node.
+ */
+const FILTER_TOOLBAR_CLASS = 'jp-FileBrowser-filterToolbar';
+
+/**
  * The class name added to the filebrowser listing node.
  */
 const LISTING_CLASS = 'jp-FileBrowser-listing';
+
+/**
+ * The class name added to the filebrowser filterbox node.
+ */
+const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * A widget which hosts a file browser.
@@ -61,6 +82,7 @@ export class FileBrowser extends SidePanel {
     const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    model.pathChanged.connect(this._onPathChanged, this);
     this._manager = model.manager;
 
     this.toolbar.node.setAttribute(
@@ -73,17 +95,65 @@ export class FileBrowser extends SidePanel {
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
     this.mainPanel.title.label = this._trans.__('File Browser');
 
-    this.crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs = new BreadCrumbs({
+      model,
+      translator,
+      onPathEdited: () => {
+        // Wait a frame so listing updates are reflected before focusing.
+        requestAnimationFrame(() => {
+          this._focusListingContentOrCrumb();
+        });
+      },
+      onPathActivated: () => {
+        requestAnimationFrame(() => {
+          this._focusListingContentOrCrumb();
+        });
+      }
+    });
     this.crumbs.addClass(CRUMBS_CLASS);
+
+    // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
+    const searcher = FilenameSearcher({
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
+        this.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
+      useFuzzyFilter: this.model.useFuzzyFilter,
+      placeholder: this._trans.__('Filter files by name'),
+      forceRefresh: false,
+      showIcon: false,
+      inputRef: this._fileFilterRef,
+      filterSettingsChanged: this.model.filterSettingsChanged
+    });
+    searcher.addClass(FILTERBOX_CLASS);
+
+    this.filterToolbar = new Toolbar();
+    this.filterToolbar.addClass(FILTER_TOOLBAR_CLASS);
+    this.filterToolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('File browser toolbar')
+    );
+    this.filterToolbar.addItem('fileNameSearcher', searcher);
+    this.filterToolbar.setHidden(!this.showFileFilter);
 
     this.listing = this.createDirListing({
       model,
       renderer,
-      translator
+      translator,
+      state: options.state,
+      handleOpenFile: options.handleOpenFile
     });
     this.listing.addClass(LISTING_CLASS);
+    this.listing.selectionChanged.connect(() => {
+      this._selectionChanged.emit();
+    });
 
     this.mainPanel.addWidget(this.crumbs);
+    this.mainPanel.addWidget(this.filterToolbar);
     this.mainPanel.addWidget(this.listing);
 
     this.addWidget(this.mainPanel);
@@ -91,6 +161,8 @@ export class FileBrowser extends SidePanel {
     if (options.restore !== false) {
       void model.restore(this.id);
     }
+    // restore listing regardless of the restore option
+    void this.listing.restore(this.id);
   }
 
   /**
@@ -126,6 +198,28 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Number of directory items to show on the left side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsLeftItems(): number {
+    return this.crumbs.minimumLeftItems;
+  }
+
+  set minimumBreadcrumbsLeftItems(value: number) {
+    this.crumbs.minimumLeftItems = value;
+  }
+
+  /**
+   * Number of directory items to show on the right side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsRightItems(): number {
+    return this.crumbs.minimumRightItems;
+  }
+
+  set minimumBreadcrumbsRightItems(value: number) {
+    this.crumbs.minimumRightItems = value;
+  }
+
+  /**
    * Whether to show the full path in the breadcrumbs
    */
   get showFullPath(): boolean {
@@ -134,6 +228,29 @@ export class FileBrowser extends SidePanel {
 
   set showFullPath(value: boolean) {
     this.crumbs.fullPath = value;
+  }
+
+  /**
+   * Enter breadcrumb edit mode, showing the path input.
+   */
+  editPath(): void {
+    this.crumbs.enterEditMode();
+  }
+
+  /**
+   * Whether to show the date created column
+   */
+  get showDateCreatedColumn(): boolean {
+    return this._showDateCreatedColumn;
+  }
+
+  set showDateCreatedColumn(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('date_created', value);
+      this._showDateCreatedColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
   }
 
   /**
@@ -181,6 +298,48 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show a text box to filter files by name.
+   */
+  get showFileFilter(): boolean {
+    return this._showFileFilter;
+  }
+
+  set showFileFilter(value: boolean) {
+    // If the old value was true and the new value is false, clear the filter
+    const oldValue = this.showFileFilter;
+    if (oldValue && !value) {
+      // Clear the search box input
+      if (this._fileFilterRef.current) {
+        this._fileFilterRef.current.value = '';
+      }
+
+      // Set a filter that doesn't exclude anything.
+      this.model.setFilter(value => {
+        return {};
+      });
+      this.model.refresh().catch(console.warn);
+    }
+    this._showFileFilter = value;
+
+    // Update widget visibility
+    this.filterToolbar.setHidden(!this.showFileFilter);
+    if (this.showFileFilter) {
+      this._fileFilterRef.current?.focus();
+    }
+  }
+
+  /**
+   * Whether to clear the filter value when navigating to a new directory.
+   */
+  get clearFilterOnNavigation(): boolean {
+    return this._clearFilterOnNavigation;
+  }
+
+  set clearFilterOnNavigation(value: boolean) {
+    this._clearFilterOnNavigation = value;
+  }
+
+  /**
    * Whether to sort notebooks above other files
    */
   get sortNotebooksFirst(): boolean {
@@ -197,12 +356,69 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to sort file names naturally.
+   * Default is true; set to false for lexicographic order.
+   */
+  get sortFileNamesNaturally(): boolean {
+    return this._sortFileNamesNaturally;
+  }
+
+  set sortFileNamesNaturally(value: boolean) {
+    if (this.listing.setSortFileNamesNaturally) {
+      this.listing.setSortFileNamesNaturally(value);
+      this._sortFileNamesNaturally = value;
+    } else {
+      console.warn('Listing does not support natural file name sorting');
+    }
+  }
+
+  /**
+   * Whether to allow single click files and directories
+   */
+  get singleClickNavigation(): boolean {
+    return this._allowSingleClick;
+  }
+
+  set singleClickNavigation(value: boolean) {
+    if (this.listing.setAllowSingleClickNavigation) {
+      this.listing.setAllowSingleClickNavigation(value);
+      this._allowSingleClick = value;
+    } else {
+      console.warn('Listing does not support single click navigation');
+    }
+  }
+
+  /**
+   * Whether to allow upload of files.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this.model.allowFileUploads = value;
+    if (this.listing.setAllowDragDropUpload) {
+      this.listing.setAllowDragDropUpload(value);
+      this._allowFileUploads = value;
+    } else {
+      console.warn('Listing does not support setting upload');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
    */
   selectedItems(): IterableIterator<Contents.IModel> {
     return this.listing.selectedItems();
+  }
+
+  /**
+   * A signal emitted when the selection changes in the file browser.
+   */
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
   }
 
   /**
@@ -216,6 +432,17 @@ export class FileBrowser extends SidePanel {
 
   clearSelectedItems(): void {
     this.listing.clearSelectedItems();
+  }
+
+  /**
+   * Focus listing content, or trailing breadcrumb when listing is empty.
+   */
+  private _focusListingContentOrCrumb(): void {
+    if (this.listing.sortedItems().next().done ?? false) {
+      this.crumbs.focusLastCrumb();
+      return;
+    }
+    this.listing.activate();
   }
 
   /**
@@ -248,6 +475,28 @@ export class FileBrowser extends SidePanel {
    */
   paste(): Promise<void> {
     return this.listing.paste();
+  }
+
+  /**
+   * Handle a `pathChanged` signal from the model.
+   */
+  private _onPathChanged(): void {
+    // Clear filter when user navigates to a new directory
+    if (this._clearFilterOnNavigation) {
+      const input = this._fileFilterRef.current;
+      const query = input ? input.value : '';
+
+      // Only clear the filter (and trigger a refresh) if a non-empty query is active
+      if (query && query.trim() !== '') {
+        this.model.setFilter(value => {
+          return {};
+        });
+
+        if (input) {
+          input.value = '';
+        }
+      }
+    }
   }
 
   private async _createNew(
@@ -324,6 +573,13 @@ export class FileBrowser extends SidePanel {
    */
   duplicate(): Promise<void> {
     return this.listing.duplicate();
+  }
+
+  /**
+   * Select all listing items.
+   */
+  selectAll(): Promise<void> {
+    return this.listing.selectAll();
   }
 
   /**
@@ -426,19 +682,28 @@ export class FileBrowser extends SidePanel {
     }
   }
 
+  protected filterToolbar: Toolbar;
   protected listing: DirListing;
   protected crumbs: BreadCrumbs;
   protected mainPanel: Panel;
 
-  private _manager: IDocumentManager;
   private _directoryPending: Promise<Contents.IModel> | null = null;
   private _filePending: Promise<Contents.IModel> | null = null;
+  private _fileFilterRef = createRef<HTMLInputElement>();
+  private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
-  private _showLastModifiedColumn: boolean = true;
+  private _clearFilterOnNavigation: boolean = true;
+  private _allowSingleClick: boolean = false;
+  private _showFileCheckboxes: boolean = false;
+  private _showFileFilter: boolean = false;
+  private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
-  private _showFileCheckboxes: boolean = false;
+  private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _sortFileNamesNaturally: boolean = true;
+  private _allowFileUploads: boolean = true;
+  private _selectionChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -480,6 +745,18 @@ export namespace FileBrowser {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional state database. If provided, the widget will restore
+     * the columns sizes
+     */
+    state?: IStateDB;
+
+    /**
+     * Callback overriding action performed when user asks to open a file.
+     * The default is to open the file in the main area if it is not open already, or to reveal it otherwise.
+     */
+    handleOpenFile?: (path: string) => void;
   }
 
   /**

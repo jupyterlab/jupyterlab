@@ -18,9 +18,7 @@ def expected_http_error(error, expected_code, expected_message=None):
     if isinstance(e, tornado.web.HTTPError):
         if expected_code != e.status_code:
             return False
-        if expected_message is not None and expected_message != str(e):
-            return False
-        return True
+        return expected_message is None or expected_message == str(e)
     elif any(
         [
             isinstance(e, tornado.httpclient.HTTPClientError),

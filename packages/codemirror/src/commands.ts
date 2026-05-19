@@ -11,16 +11,22 @@ import {
   insertTab,
   simplifySelection
 } from '@codemirror/commands';
-import { EditorState, Transaction } from '@codemirror/state';
+import type { EditorState, Transaction } from '@codemirror/state';
 import {
   COMPLETER_ACTIVE_CLASS,
-  COMPLETER_ENABLED_CLASS
+  COMPLETER_ENABLED_CLASS,
+  COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
 
 /**
  * Selector for a widget that can run code.
  */
 const CODE_RUNNER_SELECTOR = '[data-jp-code-runner]';
+
+/**
+ * Selector for a widget that can run code in terminal mode.
+ */
+const TERMINAL_CODE_RUNNER_SELECTOR = '[data-jp-interaction-mode="terminal"]';
 
 /**
  * Selector for a widget that can open a tooltip.
@@ -46,7 +52,10 @@ export namespace StateCommands {
     state: EditorState;
     dispatch: (transaction: Transaction) => void;
   }): boolean {
-    if (target.dom.parentElement?.classList.contains(COMPLETER_ENABLED_CLASS)) {
+    let classList = target.dom.parentElement?.classList;
+    let completerEnabled = classList?.contains(COMPLETER_ENABLED_CLASS);
+    let lineBeggining = classList?.contains(COMPLETER_LINE_BEGINNING_CLASS);
+    if (completerEnabled && !lineBeggining) {
       return false;
     }
 
@@ -75,6 +84,10 @@ export namespace StateCommands {
   }): boolean {
     if (target.dom.parentElement?.classList.contains(COMPLETER_ACTIVE_CLASS)) {
       // do not prevent default to allow completer `enter` action
+      return false;
+    }
+    if (target.dom.closest(TERMINAL_CODE_RUNNER_SELECTOR)) {
+      // do not prevent default to allow for the cell to run
       return false;
     }
 
@@ -141,7 +154,7 @@ export namespace StateCommands {
     dispatch: (transaction: Transaction) => void;
   }): boolean {
     if (target.dom.closest(TOOLTIP_OPENER_SELECTOR)) {
-      return true;
+      return false;
     }
     return indentLess(target);
   }

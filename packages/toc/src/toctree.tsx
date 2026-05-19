@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { TreeView } from '@jupyter/react-components';
 import * as React from 'react';
 import { TableOfContentsItem } from './tocitem';
-import { TableOfContents } from './tokens';
+import type { TableOfContents } from './tokens';
 
 /**
  * Interface describing component properties.
@@ -41,12 +42,12 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
   render(): JSX.Element {
     const { documentType } = this.props;
     return (
-      <ol
-        className="jp-TableOfContents-content"
+      <TreeView
+        className={'jp-TableOfContents-content jp-TreeView'}
         {...{ 'data-document-type': documentType }}
       >
         {this.buildTree()}
-      </ol>
+      </TreeView>
     );
   }
 

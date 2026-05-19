@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(
@@ -52,7 +53,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -63,6 +64,7 @@ function main(): void {
   const specsManager = new KernelSpecManager();
   const sessionManager = new SessionManager({ kernelManager });
   const sessionContext = new SessionContext({
+    kernelManager,
     sessionManager,
     specsManager,
     name: 'Example'
@@ -217,6 +219,12 @@ function main(): void {
   panel.addWidget(cellWidget);
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
+
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  completer.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

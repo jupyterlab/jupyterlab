@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { CommandPalette, Widget } from '@lumino/widgets';
-import { ISessionContext } from './sessioncontext';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { CommandPalette, Widget } from '@lumino/widgets';
+import type { ISessionContext } from './sessioncontext';
+import type { Licenses } from './licenses';
 
 /**
  * The command palette token.
@@ -69,6 +70,29 @@ export interface IKernelStatusModel {
   addSessionProvider: (
     provider: (widget: Widget | null) => ISessionContext | null
   ) => void;
+}
+
+/**
+ * The license client for fetching licenses.
+ */
+export const ILicensesClient = new Token<ILicensesClient>(
+  '@jupyterlab/apputils:ILicensesClient',
+  'A service for fetching licenses.'
+);
+
+/**
+ * An interface for the license client.
+ */
+export interface ILicensesClient {
+  /**
+   * Fetch the license bundles from the server.
+   */
+  getBundles(): Promise<Licenses.ILicenseResponse>;
+
+  /**
+   * Download the licenses in the requested format.
+   */
+  download(options: Licenses.IDownloadOptions): Promise<void>;
 }
 
 /**

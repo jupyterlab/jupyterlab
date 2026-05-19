@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Context } from '@jupyterlab/docregistry';
+import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer } from '@jupyterlab/testing';
 import { Toolbar } from '@jupyterlab/ui-components';
-import { INotebookModel, Notebook, NotebookPanel } from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 /**

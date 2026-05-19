@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
@@ -84,6 +85,15 @@ packages:
     fs.unlinkSync(log_file);
   }
 
+  // Warm up npx cache to avoid conflating install time with startup time,
+  // also get and print out the version info for debugging while at it.
+  const version = child_process
+    .execFileSync('npx', ['verdaccio@6.2.1', '--version'], {
+      encoding: 'utf-8'
+    })
+    .trim();
+  console.log(`Verdaccio version: ${version}`);
+
   // Assign as `any`` for compatibility with spawn `OpenMode`` options
   const out: any = fs.openSync(log_file, 'a');
   const err: any = fs.openSync(log_file, 'a');
@@ -92,7 +102,7 @@ packages:
 
   const subproc = child_process.spawn(
     'npx',
-    ['verdaccio'].concat(args.split(' ')),
+    ['verdaccio@6.2.1'].concat(args.split(' ')),
     options
   );
   subproc.unref();
@@ -173,6 +183,10 @@ packages:
     loginPs.stdout.on('data', (chunk: string) => {
       const data = Buffer.from(chunk, 'utf-8').toString().trim();
       console.log('stdout:', data);
+      if (!data) {
+        console.log('Ignoring empty stdout.');
+        return;
+      }
       if (data.indexOf('Logged in ') !== -1) {
         loginPs.stdin.end();
         // do not accept here yet, the token may not have been written
@@ -203,8 +217,11 @@ packages:
     loginPs.on('close', () => accept());
   });
 
-  await loggedIn;
-  loginPs.kill();
+  try {
+    await loggedIn;
+  } finally {
+    loginPs.kill();
+  }
 
   console.log('Running in', out_dir);
   ps.exit(0);

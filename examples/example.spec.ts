@@ -36,11 +36,6 @@ test('should load the example', async ({ page }) => {
 
   await page.goto(URL);
 
-  // Wait for the local file to redirect on notebook >= 6.0. Refs:
-  // https://jupyter-notebook.readthedocs.io/en/stable/changelog.html?highlight=redirect
-  // https://stackoverflow.com/q/46948489/425458
-  await page.waitForURL('http://**');
-
   await expect.soft(page.locator('#jupyter-config-data')).toHaveCount(1);
 
   await waitForTestEnd;

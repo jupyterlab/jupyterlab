@@ -8,13 +8,16 @@ import {
   jpToolbar,
   provideJupyterDesignSystem
 } from '@jupyter/web-components';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Layout, PanelLayout, Widget } from '@lumino/widgets';
+import type { Layout } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
 import { ellipsesIcon, LabIcon } from '../icon';
@@ -43,6 +46,14 @@ const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
  * The class name added to toolbar spacer.
  */
 const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
+
+/**
+ * ARIA attributes shared by toolbar buttons that control menus/popups.
+ */
+type ToolbarAriaMenuButtonProps = Pick<
+  React.AriaAttributes,
+  'aria-haspopup' | 'aria-expanded' | 'aria-controls'
+>;
 
 /**
  * A layout for toolbars.
@@ -177,6 +188,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass(TOOLBAR_CLASS);
     this.layout = options.layout ?? new ToolbarLayout();
+    this.noFocusOnClick = options.noFocusOnClick ?? false;
   }
 
   /**
@@ -238,6 +250,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
     Private.nameProperty.set(widget, name);
     widget.node.dataset['jpItemName'] = name;
+    if (this.noFocusOnClick) {
+      widget.node.dataset['noFocusOnClick'] = 'true';
+    }
     return true;
   }
 
@@ -360,6 +375,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
   }
+
+  noFocusOnClick: boolean;
 }
 
 /**
@@ -369,8 +386,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   /**
    * Construct a new toolbar widget.
    */
-  constructor() {
-    super();
+  constructor(options: Toolbar.IOptions = {}) {
+    super(options);
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
     this._resizer = new Throttler(async (callTwice = false) => {
@@ -452,7 +469,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (widget instanceof ToolbarPopupOpener) {
       status = super.insertItem(index, name, widget);
     } else {
-      // Insert the widget in the toolbar at axpected index if possible, otherwise
+      // Insert the widget in the toolbar at expected index if possible, otherwise
       // before the popup opener. This position may change when invoking the resizer
       // at the end of this function.
       const j = Math.max(
@@ -495,9 +512,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       this._widgetPositions.set(name, index);
 
       // Invokes resizing to ensure correct display of items after an addition, only
-      // if the toolbar is rendered.
+      // if the toolbar is rendered. Call the resizer twice (callTwice = true) so that
+      // widgets that have not yet been painted (clientWidth === 0) get a chance to be
+      // rendered before the second pass recalculates the layout.
       if (this.isVisible) {
-        void this._resizer.invoke();
+        void this._resizer.invoke(true);
       }
     }
     return status;
@@ -509,7 +528,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
    * Invokes resizing to ensure correct display of items.
    */
   onAfterShow(msg: Message): void {
-    void this._resizer.invoke(true);
+    void this._resizer.stop().then(() => void this._resizer.invoke(true));
   }
 
   /**
@@ -559,8 +578,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     const toolbarPadding = 2 + 5;
     let width = opener.isHidden ? toolbarPadding : toolbarPadding + openerWidth;
 
-    this._getWidgetsToRemove(width, toolbarWidth, openerWidth)
-      .then(values => {
+    return this._getWidgetsToRemove(width, toolbarWidth, openerWidth)
+      .then(async values => {
         let { width, widgetsToRemove } = values;
         while (widgetsToRemove.length > 0) {
           // Insert the widget at the right position in the opener popup, relatively
@@ -626,7 +645,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
           opener.hide();
         }
         if (callTwice) {
-          void this._onResize();
+          await this._onResize();
         }
       })
       .catch(msg => {
@@ -640,14 +659,14 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     openerWidth: number
   ) {
     const opener = this.popupOpener;
-    const layout = this.layout as ToolbarLayout;
-    const toIndex = layout.widgets.length - 1;
+    const widgets = [...(this.layout as ToolbarLayout).widgets];
+    const toIndex = widgets.length - 1;
 
     const widgetsToRemove = [];
 
     let index = 0;
     while (index < toIndex) {
-      const widget = layout.widgets[index];
+      const widget = widgets[index];
       const name = Private.nameProperty.get(widget);
       // Compute the widget size only if
       // - the zoom has changed.
@@ -730,6 +749,10 @@ export namespace Toolbar {
      * Toolbar widget layout.
      */
     layout?: Layout;
+    /**
+     * Do not give the focus to the button on click.
+     */
+    noFocusOnClick?: boolean;
   }
 
   /**
@@ -761,7 +784,7 @@ export namespace ToolbarButtonComponent {
   /**
    * Interface for ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     className?: string;
     /**
      * Data set of the button
@@ -772,7 +795,7 @@ export namespace ToolbarButtonComponent {
     iconClass?: string;
     iconLabel?: string;
     tooltip?: string;
-    onClick?: () => void;
+    onClick?: (event?: React.SyntheticEvent) => void;
     enabled?: boolean;
     pressed?: boolean;
     pressedIcon?: LabIcon.IMaybeResolvable;
@@ -780,12 +803,10 @@ export namespace ToolbarButtonComponent {
     disabledTooltip?: string;
 
     /**
-     * Trigger the button on the actual onClick event rather than onMouseDown.
-     *
-     * See note in ToolbarButtonComponent below as to why the default is to
-     * trigger on onMouseDown.
+     * Trigger the button on onMouseDown event rather than onClick, to avoid giving
+     * the focus on the button.
      */
-    actualOnClick?: boolean;
+    noFocusOnClick?: boolean;
 
     /**
      * The application language translator.
@@ -802,34 +823,39 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(
   props: ToolbarButtonComponent.IProps
 ): JSX.Element {
-  const actualOnClick = props.actualOnClick ?? false;
-
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
-  // We avoid a click event by calling preventDefault in mousedown, and
-  // we bind the button action to `mousedown`.
-  const handleMouseDown = actualOnClick
-    ? undefined
-    : (event: React.MouseEvent) => {
-        // Fire action only when left button is pressed.
-        if (event.button === 0) {
-          event.preventDefault();
-          props.onClick?.();
-        }
-      };
+  const handleClick =
+    (props.noFocusOnClick ?? false)
+      ? undefined
+      : (event: React.MouseEvent) => {
+          if (event.button === 0) {
+            props.onClick?.(event);
+            // In safari, the focus do not move to the button on click (see
+            // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+            (event.target as HTMLElement).focus();
+          }
+        };
 
-  const handleClick = actualOnClick
-    ? (event: React.MouseEvent) => {
-        if (event.button === 0) {
-          props.onClick?.();
+  // To avoid focusing the button, we avoid a click event by calling preventDefault in
+  // mousedown, and we bind the button action to `mousedown`.
+  // Currently this is mostly useful for the notebook panel, to retrieve the focused
+  // cell before the click event.
+  const handleMouseDown =
+    (props.noFocusOnClick ?? false)
+      ? (event: React.MouseEvent) => {
+          // Fire action only when left button is pressed.
+          if (event.button === 0) {
+            event.preventDefault();
+            props.onClick?.(event);
+          }
         }
-      }
-    : undefined;
+      : undefined;
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      props.onClick?.();
+      props.onClick?.(event);
     }
   };
 
@@ -857,17 +883,19 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
-      {...props.dataset}
+      aria-haspopup={props['aria-haspopup']}
+      aria-expanded={props['aria-expanded']}
+      aria-controls={props['aria-controls']}
+      {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={title}
-      minimal
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.pressed ? props.pressedIcon ?? props.icon : props.icon}
+          icon={props.pressed ? (props.pressedIcon ?? props.icon) : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
@@ -960,14 +988,21 @@ export class ToolbarButton extends ReactWidget {
   /**
    * Returns the click handler for the button
    */
-  get onClick(): () => void {
-    return this._onClick!;
+  get onClick(): (event?: React.SyntheticEvent) => void {
+    return (event?: React.SyntheticEvent) => {
+      // Toggle the `pressed` state of the button when clicked
+      this.pressed = !this.pressed;
+
+      // Call the original click handler, if defined
+      this._onClick(event);
+    };
   }
 
   render(): JSX.Element {
     return (
       <ToolbarButtonComponent
         {...this.props}
+        noFocusOnClick={this.props.noFocusOnClick}
         pressed={this.pressed}
         enabled={this.enabled}
         onClick={this.onClick}
@@ -977,7 +1012,7 @@ export class ToolbarButton extends ReactWidget {
 
   private _pressed: boolean;
   private _enabled: boolean;
-  private _onClick: () => void;
+  private _onClick: (event?: React.SyntheticEvent) => void;
 }
 
 /**
@@ -985,9 +1020,10 @@ export class ToolbarButton extends ReactWidget {
  */
 export namespace CommandToolbarButtonComponent {
   /**
-   * Interface for CommandToolbarButtonComponent props.
+   * Interface for CommandToolbarButtonComponent props. It extends
+   * the ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     /**
      * Application commands registry
      */
@@ -1012,6 +1048,11 @@ export namespace CommandToolbarButtonComponent {
      * Overrides command caption
      */
     caption?: string;
+    /**
+     * Trigger the button on onMouseDown event rather than onClick, to avoid giving
+     * the focus on the button.
+     */
+    noFocusOnClick?: boolean;
   }
 }
 
@@ -1051,7 +1092,7 @@ export function addCommandToolbarButtonClass(w: Widget): Widget {
 }
 
 /**
- * Phosphor Widget version of CommandToolbarButtonComponent.
+ * Lumino widget version of CommandToolbarButtonComponent.
  */
 export class CommandToolbarButton extends ReactWidget {
   /**
@@ -1097,6 +1138,12 @@ export class CommandToolbarButton extends ReactWidget {
   render(): JSX.Element {
     return <CommandToolbarButtonComponent {...this.props} />;
   }
+  /**
+   * Identifier of the underlying command.
+   */
+  get commandId(): string {
+    return this.props.id;
+  }
 }
 
 /**
@@ -1110,10 +1157,13 @@ class ToolbarPopup extends Widget {
   /**
    *  Construct a new ToolbarPopup
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     super({ node: document.createElement('jp-toolbar') });
+    this.node.setAttribute('aria-label', trans.__('Responsive popup toolbar'));
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
+    this.addClass('jp-ThemedContainer');
     this.layout = new PanelLayout();
     Widget.attach(this, document.body);
     this.hide();
@@ -1189,14 +1239,15 @@ class ToolbarPopupOpener extends ToolbarButton {
     const trans = (props.translator || nullTranslator).load('jupyterlab');
     super({
       icon: ellipsesIcon,
-      onClick: () => {
+      onClick: event => {
+        event?.preventDefault();
         this.handleClick();
       },
       tooltip: trans.__('More commands')
     });
     this.addClass('jp-Toolbar-responsive-opener');
 
-    this.popup = new ToolbarPopup();
+    this.popup = new ToolbarPopup(props.translator);
   }
 
   /**
@@ -1284,6 +1335,25 @@ class ToolbarPopupOpener extends ToolbarButton {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Ensures all dataset keys have the 'data-' prefix.
+   * @param dataset object
+   */
+  export function normalizeDataset(
+    dataset?: DOMStringMap
+  ): DOMStringMap | undefined {
+    if (!dataset) {
+      return undefined;
+    }
+
+    const normalized: DOMStringMap = {};
+    for (const [key, value] of Object.entries(dataset)) {
+      const normalizedKey = key.startsWith('data-') ? key : `data-${key}`;
+      normalized[normalizedKey] = value;
+    }
+    return normalized;
+  }
+
   export function propsFromCommand(
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
@@ -1324,16 +1394,27 @@ namespace Private {
     };
     const enabled = commands.isEnabled(id, args);
 
+    const ariaProps: ToolbarAriaMenuButtonProps = options;
+    const {
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
+    } = ariaProps;
+
     return {
       className,
       dataset: { 'data-command': options.id },
+      noFocusOnClick: options.noFocusOnClick,
       icon,
       iconClass,
       tooltip: options.caption ?? tooltip,
       onClick,
       enabled,
       label: labelOverride ?? label,
-      pressed
+      pressed,
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
     };
   }
 

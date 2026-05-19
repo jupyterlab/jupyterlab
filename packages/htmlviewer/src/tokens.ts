@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { HTMLViewer } from './widget';
+import type { HTMLViewer } from './widget';
 
 /**
  * A class that tracks HTML viewer widgets.

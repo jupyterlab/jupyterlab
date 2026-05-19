@@ -1,17 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import * as path from 'path';
-import { ContentsHelper } from '../contents';
+import type { ContentsHelper } from '../contents';
 import type { INotebookRunCallback } from '../extension';
-import { galata } from '../galata';
+import type { galata } from '../galata';
 import * as Utils from '../utils';
-import { ActivityHelper } from './activity';
-import { FileBrowserHelper } from './filebrowser';
-import { MenuHelper } from './menu';
+import type { ActivityHelper } from './activity';
+import type { FileBrowserHelper } from './filebrowser';
+import type { MenuHelper } from './menu';
 
 /**
  * Maximal number of retries to get a cell
@@ -69,8 +70,13 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async open(name: string): Promise<boolean> {
-    const isListed = await this.filebrowser.isFileListedInBrowser(name);
-    if (!isListed) {
+    try {
+      // The notebook may not be rendered on the list if the upload
+      // has just completed but the listing was not refreshed yet.
+      await Utils.waitForCondition(() =>
+        this.filebrowser.isFileListedInBrowser(name)
+      );
+    } catch {
       return false;
     }
 
@@ -255,6 +261,16 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<boolean> {
+    if (await this.isAnyActive()) {
+      const focusedMarkdownEditor = this.page.locator(
+        '.jp-MarkdownCell .jp-InputArea-editor.jp-mod-focused, .jp-MarkdownCell .cm-content.jp-mod-focused'
+      );
+      if ((await focusedMarkdownEditor.count()) > 0) {
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(25);
+      }
+    }
+
     const toolbarItem = await this.getToolbarItemLocator(itemId, notebookName);
 
     if (toolbarItem) {
@@ -426,6 +442,11 @@ export class NotebookHelper {
         .locator('[data-icon="ui-components:not-trusted"]')
         .count()) === 1
     ) {
+      // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
+      await this.page
+        .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+        .waitFor();
+
       await this.page.keyboard.press('Control+Shift+C');
       await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
       await this.page.getByText('Trust Notebook').click();
@@ -692,7 +713,11 @@ export class NotebookHelper {
     }
     await this.page.keyboard.press('Control+A');
     await this.page.keyboard.press('Control+C');
-    await this.page.context().grantPermissions(['clipboard-read']);
+    try {
+      await this.page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not it it either
+    }
     const handle = await this.page.evaluateHandle(() =>
       navigator.clipboard.readText()
     );
@@ -1129,7 +1154,7 @@ export class NotebookHelper {
       let break_ = true;
       try {
         await Utils.waitForCondition(
-          async () => ((await gutter.textContent())?.length ?? 0) > 0,
+          async () => (await gutter.locator('.cm-breakpoint-icon').count()) > 0,
           1000
         );
       } catch (reason) {
@@ -1260,7 +1285,7 @@ export class NotebookHelper {
 
     await this._setCellMode(cell, 'Edit');
     await cell.getByRole('textbox').press('Control+A');
-    await cell.getByRole('textbox').type(source, { delay: 0 });
+    await cell.getByRole('textbox').pressSequentially(source);
     await this._setCellMode(cell, 'Command');
 
     if (cellType === 'code') {
@@ -1268,22 +1293,36 @@ export class NotebookHelper {
       // over 10 consecutive animation frames.
       await cell.evaluate((cell: HTMLElement) => {
         let _resolve: () => void;
-        const promise = new Promise<void>(resolve => {
+        let _reject: (reason?: string) => void;
+        const promise = new Promise<void>((resolve, reject) => {
           _resolve = resolve;
+          _reject = reject;
         });
         let framesWithoutChange = 0;
-        let content = cell.querySelector('.cm-content')!.innerHTML;
+        let previousContent = cell.querySelector('.cm-content')!.innerHTML;
+        let newContent: string | null = null;
+        let cancelled = false;
+        const timeoutId = window.setTimeout(() => {
+          cancelled = true;
+          _reject(
+            `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${previousContent}; Current innerHTML: ${newContent}`
+          );
+        }, 10000);
         const waitUntilNextFrame = () => {
           window.requestAnimationFrame(() => {
-            const newContent = cell.querySelector('.cm-content')!.innerHTML;
-            if (content === newContent) {
+            newContent = cell.querySelector('.cm-content')!.innerHTML;
+            if (previousContent === newContent) {
               framesWithoutChange += 1;
             } else {
               framesWithoutChange = 0;
             }
+            previousContent = newContent;
             if (framesWithoutChange < 10) {
-              waitUntilNextFrame();
+              if (!cancelled) {
+                waitUntilNextFrame();
+              }
             } else {
+              window.clearTimeout(timeoutId);
               _resolve();
             }
           });
@@ -1384,13 +1423,33 @@ export class NotebookHelper {
   }
 
   /**
-   * Run a given cell
+   * Run a given cell.
+   *
+   * Note: cell execution relies on cell selection, thus this method
+   * is not reliable if cell selection changes before the cell gets run.
    *
    * @param cellIndex Cell index
-   * @param inplace Whether to stay on the cell or select the next one
+   * @param options Options for running cell; for compatibility a boolean can be passed as shorthand for `inplace`
+   * @param options.inplace Whether to stay on the cell or select the next one (default `false`)
+   * @param options.wait Whether to wait for the completion (default `true`)
    * @returns Action success status
    */
-  async runCell(cellIndex: number, inplace?: boolean): Promise<boolean> {
+  async runCell(
+    cellIndex: number,
+    options?:
+      | boolean
+      | {
+          inplace?: boolean;
+          wait?: boolean;
+        }
+  ): Promise<boolean> {
+    if (typeof options === 'boolean') {
+      options = {
+        inplace: options
+      };
+    }
+    const inplace = options?.inplace ?? false;
+    const wait = options?.wait ?? true;
     if (!(await this.isAnyActive())) {
       return false;
     }
@@ -1408,22 +1467,44 @@ export class NotebookHelper {
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
-    await this.waitForRun(cellIndex);
+    if (wait) {
+      await this.waitForRun(cellIndex);
+    }
 
     return true;
   }
 
   /**
-   * Create a new notebook
+   * Creates a new notebook.
    *
-   * @param name Name of the notebook
-   * @returns Name of the created notebook or null if it failed
+   * @param name - The name of the notebook. If provided, the notebook will be renamed to this name.
+   * @param options - Parameters for creating the notebook.
+   * @param options.kernel - The kernel to use for the notebook.
+   * @returns A Promise that resolves to the name of the created notebook, or `null` if the notebook creation failed.
    */
-  async createNew(name?: string): Promise<string | null> {
+  async createNew(
+    name?: string,
+    options?: { kernel?: string | null }
+  ): Promise<string | null> {
     await this.menu.clickMenuItem('File>New>Notebook');
 
     const page = this.page;
     await page.locator('.jp-Dialog').waitFor();
+
+    if (options && options.kernel !== undefined) {
+      if (options.kernel === null) {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption('null');
+      } else {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption(`{"name":"${options.kernel}"}`);
+      }
+    }
+
     await page.click('.jp-Dialog .jp-mod-accept');
 
     const activeTab = this.activity.getTabLocator();

@@ -1,23 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { EditorSelection, type TransactionSpec } from '@codemirror/state';
+import type { SourceChange } from '@jupyter/ydoc';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { HoverBox, kernelIcon, Toolbar } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Message } from '@lumino/messaging';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { HoverBox } from '@jupyterlab/ui-components';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { SourceChange } from '@jupyter/ydoc';
-import { kernelIcon, Toolbar } from '@jupyterlab/ui-components';
-import { TranslationBundle } from '@jupyterlab/translation';
-import {
+import { GhostTextManager } from './ghost';
+import type { CompletionHandler } from './handler';
+import type {
   IInlineCompleterFactory,
   IInlineCompleterSettings,
   IInlineCompletionList
 } from './tokens';
-import { CompletionHandler } from './handler';
-import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
 const INLINE_COMPLETER_ACTIVE_CLASS = 'jp-mod-inline-completer-active';
@@ -36,6 +37,7 @@ export class InlineCompleter extends Widget {
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass(INLINE_COMPLETER_CLASS);
+    this.addClass('jp-ThemedContainer');
     this._ghostManager = new GhostTextManager({
       onBlur: this._onEditorBlur.bind(this)
     });
@@ -136,15 +138,38 @@ export class InlineCompleter extends Widget {
     const requestPosition = editor.getOffsetAt(position);
     const start = requestPosition;
     const end = cursorBeforeChange;
-    // update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(
-      requestPosition,
-      cursorBeforeChange,
-      value
+    const cmEditor = (editor as CodeMirrorEditor).editor;
+    const selections = editor.getSelections();
+    const hasNonEmptySelections = selections.some(
+      selection =>
+        selection.start.line !== selection.end.line ||
+        selection.start.column !== selection.end.column
     );
-    if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
-      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+    if (selections.length <= 1 || hasNonEmptySelections) {
+      const transactions: TransactionSpec = {
+        changes: { from: start, to: end, insert: value }
+      };
+      if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
+        transactions.selection = { anchor: start + value.length };
+      }
+      cmEditor.dispatch(transactions);
+      model.reset();
+      this.update();
+      return;
     }
+
+    const replacedLength = end - start;
+
+    const transaction = cmEditor.state.changeByRange(range => {
+      const from = Math.max(0, range.head - replacedLength);
+      const to = range.head;
+
+      return {
+        changes: { from, to, insert: value },
+        range: EditorSelection.cursor(from + value.length)
+      };
+    });
+    cmEditor.dispatch(transaction);
     model.reset();
     this.update();
   }
@@ -199,6 +224,35 @@ export class InlineCompleter extends Widget {
       this._updateShortcutsVisibility();
     }
     GhostTextManager.streamingAnimation = settings.streamingAnimation;
+    GhostTextManager.spacerRemovalDelay = Math.max(
+      0,
+      settings.editorResizeDelay - 300
+    );
+    GhostTextManager.spacerRemovalDuration = Math.max(
+      0,
+      Math.min(300, settings.editorResizeDelay - 300)
+    );
+    this._minLines = settings.minLines;
+    this._maxLines = settings.maxLines;
+    this._reserveSpaceForLongest = settings.reserveSpaceForLongest;
+    this._suppressIfTabCompleterActive = settings.suppressIfTabCompleterActive;
+    GhostTextManager.ghostSyntaxHighlighting = settings.ghostSyntaxHighlighting;
+  }
+
+  /**
+   * Whether to suppress the inline completer when tab completer is active.
+   */
+  get suppressIfTabCompleterActive(): boolean {
+    return this._suppressIfTabCompleterActive;
+  }
+
+  /**
+   * Whether the inline completer is active.
+   */
+  get isActive(): boolean {
+    return !!this.editor?.host.classList.contains(
+      INLINE_COMPLETER_ACTIVE_CLASS
+    );
   }
 
   /**
@@ -408,16 +462,48 @@ export class InlineCompleter extends Widget {
     }
 
     const view = (editor as CodeMirrorEditor).editor;
-    this._ghostManager.placeGhost(view, {
-      from: editor.getOffsetAt(model.cursor),
+
+    let minLines: number;
+    if (this._reserveSpaceForLongest) {
+      const items = this.model?.completions?.items ?? [];
+      const longest = Math.max(
+        ...items.map(i => i.insertText.split('\n').length)
+      );
+      minLines = Math.max(this._minLines, longest);
+    } else {
+      minLines = this._minLines;
+    }
+
+    const ghostBase = {
       content: text,
       providerId: item.provider.identifier,
       addedPart: item.lastStreamed,
       streaming: item.streaming,
+      minLines: minLines,
+      maxLines: this._maxLines,
       onPointerOver: this._onPointerOverGhost.bind(this),
       onPointerLeave: this._onPointerLeaveGhost.bind(this),
       error: item.error
-    });
+    };
+    const cursorOffsets = editor
+      .getSelections()
+      .filter(
+        selection =>
+          selection.start.line === selection.end.line &&
+          selection.start.column === selection.end.column
+      )
+      .map(selection => editor.getOffsetAt(selection.end));
+    const uniqueOffsets =
+      cursorOffsets.length > 0
+        ? Array.from(new Set(cursorOffsets))
+        : [editor.getOffsetAt(model.cursor)];
+    this._ghostManager.placeGhost(
+      view,
+      uniqueOffsets.map(from => ({
+        ...ghostBase,
+        from
+      }))
+    );
     editor.host.classList.add(INLINE_COMPLETER_ACTIVE_CLASS);
   }
 
@@ -492,6 +578,8 @@ export class InlineCompleter extends Widget {
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _ghostManager: GhostTextManager;
   private _lastItem: CompletionHandler.IInlineItem | null = null;
+  private _maxLines: number;
+  private _minLines: number;
   private _model: InlineCompleter.IModel | null = null;
   private _providerWidget = new Widget();
   private _showShortcuts = InlineCompleter.defaultSettings.showShortcuts;
@@ -500,6 +588,8 @@ export class InlineCompleter extends Widget {
   private _trans: TranslationBundle;
   private _toolbar = new Toolbar<Widget>();
   private _progressBar: HTMLElement;
+  private _reserveSpaceForLongest: boolean;
+  private _suppressIfTabCompleterActive: boolean;
 }
 
 /**
@@ -539,7 +629,13 @@ export namespace InlineCompleter {
     showWidget: 'onHover',
     showShortcuts: true,
     streamingAnimation: 'uncover',
-    providers: {}
+    ghostSyntaxHighlighting: false,
+    providers: {},
+    minLines: 2,
+    maxLines: 4,
+    editorResizeDelay: 1000,
+    reserveSpaceForLongest: false,
+    suppressIfTabCompleterActive: true
   };
 
   /**

@@ -7,7 +7,6 @@
   display: flex;
   flex-direction: column;
   min-width: var(--jp-sidebar-min-width);
-  overflow-y: auto;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
@@ -46,6 +45,9 @@
   box-sizing: border-box;
   line-height: 25px;
   margin: 0;
+
+  /* padding to allow for focus outline */
+  padding: 2px;
   display: flex;
   align-items: center;
   background: var(--jp-layout-color1);
@@ -56,8 +58,9 @@
 }
 
 .lm-AccordionPanel .jp-AccordionPanel-title:focus-visible {
-  outline: 4px solid var(--jp-accept-color-active, var(--jp-brand-color1));
-  outline-offset: -1px;
+  /* --accent-fill-focus is computed by the jp toolkit to ensure accessibility */
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+  outline-offset: -2px;
 }
 
 .jp-AccordionPanel-title {

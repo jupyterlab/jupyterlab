@@ -1,17 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
-
+import { DebuggerDisplayRegistry } from '../../displayregistry';
+import type { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { IConsoleTracker } from '@jupyterlab/console';
 /**
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
+  constructor(options: { displayRegistry?: IDebuggerDisplayRegistry }) {
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
+  }
+
   /**
    * Get all the frames.
    */
+
   get frames(): IDebugger.IStackFrame[] {
     return this._state;
   }
@@ -63,12 +72,51 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
     return this._currentFrameChanged;
   }
 
+  /**
+   * Returns a human-readable display for a frame.
+   */
+  getDisplayName(frame: IDebugger.IStackFrame): string {
+    let name = this._displayRegistry.getDisplayName(
+      frame.source as IDebugger.Source
+    );
+    if (frame.line !== undefined) {
+      name += `:${frame.line}`;
+    }
+    return name;
+  }
+
   private _state: IDebugger.IStackFrame[] = [];
   private _currentFrame: IDebugger.IStackFrame | null = null;
   private _framesChanged = new Signal<this, IDebugger.IStackFrame[]>(this);
   private _currentFrameChanged = new Signal<this, IDebugger.IStackFrame | null>(
     this
   );
+  private _displayRegistry: IDebuggerDisplayRegistry;
+}
+
+/**
+ * A namespace for CallstackModel
+ */
+export namespace CallstackModel {
+  /**
+   * Instantiation options for CallstackModel
+   */
+  export interface IOptions {
+    /**
+     * Debugger configuration.
+     */
+    config: IDebugger.IConfig;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker: INotebookTracker | null;
+
+    /**
+     * The console tracker.
+     */
+    consoleTracker: IConsoleTracker | null;
+  }
 }
 
 /**

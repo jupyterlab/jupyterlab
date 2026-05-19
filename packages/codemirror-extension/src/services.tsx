@@ -2,10 +2,11 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { LanguageSupport, StreamLanguage } from '@codemirror/language';
-import { IYText } from '@jupyter/ydoc';
-import {
+import type { IYText } from '@jupyter/ydoc';
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -29,7 +30,8 @@ import {
   FormComponent,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
-import { JSONExt, ReadonlyJSONValue } from '@lumino/coreutils';
+import type { ReadonlyJSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import type { FieldProps } from '@rjsf/utils';
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import React from 'react';
@@ -52,7 +54,8 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
 
     // Register default languages
     for (const language of EditorLanguageRegistry.getDefaultLanguages(
-      translator
+      translator,
+      (info: string) => languages.findBest(info)
     )) {
       languages.addLanguage(language);
     }
@@ -148,16 +151,24 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
+            let defaultFormData: Record<string, any>;
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
             ) as any;
-            const defaultFormData: Record<string, any> = {};
+            if (props.name in props.formContext.defaultFormData) {
+              defaultFormData = props.formContext.defaultFormData[props.name];
+            } else {
+              defaultFormData = {};
+            }
             // Only provide customizable options
             for (const [key, value] of Object.entries(
               registry.defaultConfiguration
             )) {
-              if (typeof properties[key] !== 'undefined') {
+              if (
+                typeof properties[key] !== 'undefined' &&
+                !(key in defaultFormData)
+              ) {
                 defaultFormData[key] = value;
               }
             }
@@ -202,6 +213,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
                   }}
                   tagName="div"
                   translator={translator ?? nullTranslator}
+                  buttonStyle="icons"
                 />
               </div>
             );

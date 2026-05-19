@@ -1,22 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
+import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
 import {
-  IOutputAreaModel,
   OutputArea,
   OutputAreaModel,
-  SimplifiedOutputArea,
-  Stdin
+  SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
-import { Kernel, KernelManager } from '@jupyterlab/services';
+import type { Kernel } from '@jupyterlab/services';
+import { KernelManager } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -144,7 +144,9 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBeLessThan(model.length);
         Widget.attach(widget, document.body);
         simulate(
-          widget.widgets[widget.widgets.length - 1].node.querySelector('a')!,
+          widget.widgets[widget.widgets.length - 1].node.querySelector(
+            'button'
+          )!,
           'click'
         );
         Widget.detach(widget);
@@ -323,15 +325,41 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(0);
       });
 
-      it('should handle a set', () => {
+      it('should follow changes to initial stdout stream', () => {
+        model = new OutputAreaModel({
+          values: [DEFAULT_OUTPUTS[0]],
+          trusted: true
+        });
+        widget = new LogOutputArea({ rendermime, model });
+        // A stream output appended to the model should be seen in the widget.
+        const streamOutput = 'nctvjd745fdk56';
+        expect(widget.node.innerHTML).not.toContain(streamOutput);
+        widget.model.appendStreamOutput(streamOutput);
+        expect(widget.node.innerHTML).toContain(streamOutput);
+      });
+
+      it('should handle stream outputs of same name', () => {
         widget.model.clear();
-        widget.model.add(DEFAULT_OUTPUTS[0]);
-        widget.methods = [];
+        // An initial stdout stream creates an output.
         widget.model.add(DEFAULT_OUTPUTS[0]);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onModelChanged'])
         );
-        expect(widget.widgets.length).toBe(1);
+        // Another stdout stream only changes the "text" of the last output.
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[0]);
+        expect(widget.methods).toEqual([]);
+        // A stderr stream creates a new output.
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[1]);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onModelChanged'])
+        );
+        // Another stderr stream only changes the "text" of the last output.
+        widget.methods = [];
+        widget.model.add(DEFAULT_OUTPUTS[1]);
+        expect(widget.methods).toEqual([]);
+        expect(widget.widgets.length).toBe(2);
       });
 
       it('should rerender when preferred mimetype changes', () => {

@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
@@ -118,4 +118,47 @@ export async function stubGitHubUserIcons(page: Page): Promise<void> {
       body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
     });
   });
+}
+
+export async function freeezeKernelIds(
+  node: Locator,
+  mockMap: Record<string, string>
+): Promise<void> {
+  const KERNEL_ID_SELECTOR = '.jp-RunningSessions-item-label-kernel-id';
+  // wait for the kernel IDs to be rendered.
+  await node.locator(KERNEL_ID_SELECTOR).first().waitFor();
+
+  return node.evaluate(
+    (node, [KERNEL_ID_SELECTOR, mockMap]) => {
+      const isTree = node.querySelector('.jp-TreeView');
+      for (const [notebook, kernelId] of Object.entries(mockMap)) {
+        const selector = isTree
+          ? `[title*='${notebook}'] ${KERNEL_ID_SELECTOR}`
+          : `${KERNEL_ID_SELECTOR}[title='${notebook}']`;
+        const element = node.querySelector(selector) as HTMLElement;
+        element.innerText = `(${kernelId})`;
+      }
+    },
+    [KERNEL_ID_SELECTOR, mockMap]
+  );
+}
+
+export async function setTerminalTitle(page: Page, title: string) {
+  const terminal = page.locator('.jp-Terminal-body');
+  await terminal.waitFor();
+  await terminal.focus();
+  if (process.platform === 'win32') {
+    const escapedTitle = title.replace(/"/g, '""').replace(/'/g, "''");
+    // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe
+    await page.keyboard.type(
+      `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`
+    );
+  } else {
+    // Linux and Mac
+    const escapedTitle = title.replace(/'/g, `'\\''`);
+    await page.keyboard.type(
+      `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`
+    );
+  }
+  await page.keyboard.press('Enter');
 }

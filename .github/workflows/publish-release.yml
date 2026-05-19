@@ -21,11 +21,12 @@ jobs:
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: app-token
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
 
       - name: Populate Release
         id: populate-release
@@ -47,12 +48,16 @@ jobs:
 
       - name: "** Next Step **"
         if: ${{ success() }}
+        env:
+          RELEASE_URL: ${{ steps.finalize-release.outputs.release_url }}
         run: |
           echo "Verify the final release"
-          echo ${{ steps.finalize-release.outputs.release_url }}
+          echo "$RELEASE_URL"
 
       - name: "** Failure Message **"
         if: ${{ failure() }}
+        env:
+          RELEASE_URL: ${{ steps.populate-release.outputs.release_url }}
         run: |
           echo "Failed to Publish the Draft Release Url:"
-          echo ${{ steps.populate-release.outputs.release_url }}
+          echo "$RELEASE_URL"

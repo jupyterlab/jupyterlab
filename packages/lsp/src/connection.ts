@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import {
+import type {
   ClientNotifications,
   ClientRequests,
   IClientRequestHandler,
@@ -15,10 +17,10 @@ import {
   IServerRequestHandler,
   IServerRequestParams,
   IServerResult,
-  Method,
   ServerNotifications,
   ServerRequests
 } from './tokens';
+import { Method } from './tokens';
 import { untilReady } from './utils';
 import {
   registerServerCapability,
@@ -35,8 +37,7 @@ import type { MessageConnection } from 'vscode-ws-jsonrpc';
  */
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
-> implements IClientRequestHandler
-{
+> implements IClientRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -65,8 +66,7 @@ class ClientRequestHandler<
  */
 class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
-> implements IServerRequestHandler
-{
+> implements IServerRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -268,9 +268,12 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     if (this.isDisposed) {
       return;
     }
-    Object.values(this.serverRequests).forEach(request =>
-      request.clearHandler()
-    );
+    if (this.serverRequests) {
+      // `serverRequests` may be undefined if dispose is called during initialization sequence
+      Object.values(this.serverRequests).forEach(request =>
+        request.clearHandler()
+      );
+    }
     this.close();
     super.dispose();
   }

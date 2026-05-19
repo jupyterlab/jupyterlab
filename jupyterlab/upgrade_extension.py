@@ -7,17 +7,13 @@ import re
 import shutil
 import subprocess
 import sys
-from typing import Optional
 
 try:
     import tomllib
 except ImportError:
     import tomli as tomllib
 
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib.resources import files
 from pathlib import Path
 
 try:
@@ -60,7 +56,7 @@ JUPYTER_SERVER_REQUIREMENT = re.compile("^jupyter_server([^\\w]|$)")
 
 
 def update_extension(  # noqa
-    target: str, vcs_ref: Optional[str] = None, interactive: bool = True
+    target: str, vcs_ref: str | None = None, interactive: bool = True
 ) -> None:
     """Update an extension to the current JupyterLab
 
@@ -98,7 +94,7 @@ def update_extension(  # noqa
         if setup_file.exists():
             python_name = (
                 subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"],  # noqa: S603
+                    [sys.executable, "setup.py", "--name"],
                     cwd=target,
                 )
                 .decode("utf8")
@@ -269,7 +265,7 @@ def update_extension(  # noqa
     if override_pyproject:
         if (target / "setup.cfg").exists():
             try:
-                import tomli_w
+                import tomli_w  # noqa: PLC0415
             except ImportError:
                 msg = "To update pyproject.toml, you need to install tomli-w"
                 print(msg)
@@ -341,7 +337,7 @@ if __name__ == "__main__":
     if answer_file.exists():
         msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
         if tuple(copier.__version__.split(".")) >= ("8", "0", "0"):
-            msg += " --UNSAFE"
+            msg += " --trust"
         print(msg)
     else:
         update_extension(args.path, args.vcs_ref, args.no_input is False)

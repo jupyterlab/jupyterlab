@@ -8,7 +8,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-notebook-toolbar-padding: 2px 5px 2px 2px;
+  --jp-notebook-toolbar-padding: 0 5px 0 2px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -22,23 +22,6 @@
 
   /* disable paint containment from lumino 2.0 default strict CSS containment */
   contain: style size !important;
-}
-
-.jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
-  border: none;
-  box-shadow: none;
-}
-
-.jp-Notebook-toolbarCellTypeDropdown select {
-  height: 24px;
-  font-size: var(--jp-ui-font-size1);
-  line-height: 14px;
-  border-radius: 0;
-  display: block;
-}
-
-.jp-Notebook-toolbarCellTypeDropdown select:focus-visible {
-  outline-color: var(--accent-fill-focus);
 }
 
 .jp-Toolbar > .jp-Toolbar-responsive-opener {

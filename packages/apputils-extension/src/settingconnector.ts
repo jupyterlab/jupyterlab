@@ -4,8 +4,12 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
+import type {
+  ISettingConnector,
+  ISettingRegistry
+} from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import { DataConnector } from '@jupyterlab/statedb';
 import { Throttler } from '@lumino/polling';
 
 /**
@@ -14,10 +18,10 @@ import { Throttler } from '@lumino/polling';
  * #### Notes
  * This connector adds a query parameter to the base services setting manager.
  */
-export class SettingConnector extends DataConnector<
-  ISettingRegistry.IPlugin,
-  string
-> {
+export class SettingConnector
+  extends DataConnector<ISettingRegistry.IPlugin, string>
+  implements ISettingConnector
+{
   constructor(connector: IDataConnector<ISettingRegistry.IPlugin, string>) {
     super();
     this._connector = connector;

@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  WidgetType
-} from '@codemirror/view';
-import { StateEffect, StateField, Text, Transaction } from '@codemirror/state';
+import { language } from '@codemirror/language';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import type { Text, Transaction } from '@codemirror/state';
+import { StateEffect, StateField } from '@codemirror/state';
+import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 const TRANSIENT_LINE_SPACER_CLASS = 'jp-GhostText-lineSpacer';
 const TRANSIENT_LETTER_SPACER_CLASS = 'jp-GhostText-letterSpacer';
@@ -15,6 +14,17 @@ const GHOST_TEXT_CLASS = 'jp-GhostText';
 const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
 const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
+const HIDDEN_LINES_CLASS = 'jp-GhostText-hiddenLines';
+
+/**
+ * A single, shared language registry to efficiently highlight ghost text.
+ */
+const GHOST_TEXT_LANGUAGE_REGISTRY = new EditorLanguageRegistry();
+EditorLanguageRegistry.getDefaultLanguages(null, (info: string) =>
+  GHOST_TEXT_LANGUAGE_REGISTRY.findBest(info)
+).forEach(lang => {
+  GHOST_TEXT_LANGUAGE_REGISTRY.addLanguage(lang);
+});
 
 /**
  * Ghost text content and placement.
@@ -40,6 +50,14 @@ export interface IGhostText {
    * Whether streaming is in progress.
    */
   streaming?: boolean;
+  /**
+   * Maximum number of lines to show.
+   */
+  maxLines?: number;
+  /**
+   * Minimum number of lines to reserve (to avoid frequent resizing).
+   */
+  minLines?: number;
   /**
    * An error occurred in the request.
    */
@@ -70,10 +88,28 @@ export class GhostTextManager {
   static streamingAnimation: 'none' | 'uncover' = 'uncover';
 
   /**
+   * Whether to apply syntax highlighting to ghost text.
+   */
+  static ghostSyntaxHighlighting: boolean = false;
+
+  /**
+   * Delay for removal of line spacer.
+   */
+  static spacerRemovalDelay: number = 700;
+
+  /**
+   * Duration for line spacer removal.
+   */
+  static spacerRemovalDuration: number = 300;
+
+  /**
    * Place ghost text in an editor.
    */
-  placeGhost(view: EditorView, text: IGhostText): void {
-    const effects: StateEffect<unknown>[] = [Private.addMark.of(text)];
+  placeGhost(view: EditorView, text: IGhostText | IGhostText[]): void {
+    const specs = Array.isArray(text) ? text : [text];
+    const effects: StateEffect<unknown>[] = specs.map(spec =>
+      Private.addMark.of(spec)
+    );
 
     if (!view.state.field(Private.markField, false)) {
       effects.push(StateEffect.appendConfig.of([Private.markField]));
@@ -126,8 +162,8 @@ class GhostTextWidget extends WidgetType {
     return (this.content.match(/\n/g) || '').length;
   }
 
-  updateDOM(dom: HTMLElement, _view: EditorView): boolean {
-    this._updateDOM(dom);
+  updateDOM(dom: HTMLElement, view: EditorView): boolean {
+    void this._updateDOM(dom, view);
     return true;
   }
 
@@ -135,7 +171,7 @@ class GhostTextWidget extends WidgetType {
     return this.options.content;
   }
 
-  toDOM() {
+  toDOM(view: EditorView) {
     let wrap = document.createElement('span');
     if (this.options.onPointerOver) {
       wrap.addEventListener('pointerover', this.options.onPointerOver);
@@ -146,7 +182,7 @@ class GhostTextWidget extends WidgetType {
     wrap.classList.add(GHOST_TEXT_CLASS);
     wrap.dataset.animation = GhostTextManager.streamingAnimation;
     wrap.dataset.providedBy = this.options.providerId;
-    this._updateDOM(wrap);
+    this._updateDOM(wrap, view).catch(console.error);
     return wrap;
   }
 
@@ -181,7 +217,7 @@ class GhostTextWidget extends WidgetType {
     dom.appendChild(errorIndicator);
   }
 
-  private _updateDOM(dom: HTMLElement) {
+  private async _updateDOM(dom: HTMLElement, view: EditorView) {
     if (this.options.error) {
       this._mountErrorAnimation(dom);
 
@@ -198,27 +234,99 @@ class GhostTextWidget extends WidgetType {
       this._clearErrorTimeout = null;
     }
 
-    const content = this.content;
+    let content = this.content;
+    let hiddenContent = '';
     let addition = this.options.addedPart;
-    if (addition && !this.isSpacer) {
+
+    if (addition) {
       if (addition.startsWith('\n')) {
         // Show the new line straight away to ensure proper positioning.
         addition = addition.substring(1);
       }
-      dom.innerText = content.substring(0, content.length - addition.length);
+      content = content.substring(0, content.length - addition.length);
+    }
+
+    const maxLines = this.options.maxLines || Infinity;
+    if (maxLines !== Infinity) {
+      // Split into content to show immediately and the hidden part
+      const lines = content.split('\n');
+      content = lines.slice(0, maxLines).join('\n');
+      hiddenContent = lines.slice(maxLines).join('\n');
+    }
+
+    const minLines = Math.min(this.options.minLines ?? 0, maxLines);
+    const linesToAdd = Math.max(0, minLines - content.split('\n').length + 1);
+    const placeHolderLines = new Array(linesToAdd).fill('').join('\n');
+    dom.innerHTML = '';
+
+    if (this.isSpacer) {
+      dom.innerText = content + placeHolderLines;
+      return;
+    }
+
+    if (GhostTextManager.ghostSyntaxHighlighting) {
+      // Get the current CodeMirror Language object from the editor state.
+      const currentLanguageObject = view.state.facet(language);
+
+      if (currentLanguageObject) {
+        // Use the language name to look up the full IEditorLanguage object.
+        const editorLanguage = await GHOST_TEXT_LANGUAGE_REGISTRY.getLanguage(
+          currentLanguageObject.name
+        );
+
+        if (editorLanguage) {
+          // Pass the IEditorLanguage object to the highlight method.
+          await GHOST_TEXT_LANGUAGE_REGISTRY.highlight(
+            content,
+            editorLanguage,
+            dom
+          );
+        } else {
+          // Fallback if the language isn't in our registry.
+          dom.appendChild(document.createTextNode(content));
+        }
+      } else {
+        // Fallback if no language is active in the editor.
+        dom.appendChild(document.createTextNode(content));
+      }
+    } else {
+      dom.innerText = content;
+    }
+
+    let streamedTokenHost = dom;
+
+    if (hiddenContent.length > 0) {
+      const hiddenWrapper = document.createElement('span');
+      hiddenWrapper.className = 'jp-GhostText-hiddenWrapper';
+      dom.appendChild(hiddenWrapper);
+      const expandOnHover = document.createElement('span');
+      expandOnHover.className = 'jp-GhostText-expandHidden';
+      expandOnHover.innerText = '⇓';
+      const hiddenPart = document.createElement('span');
+      hiddenWrapper.appendChild(expandOnHover);
+      hiddenPart.className = HIDDEN_LINES_CLASS;
+      hiddenPart.innerText = '\n' + hiddenContent;
+      hiddenWrapper.appendChild(hiddenPart);
+      streamedTokenHost = hiddenPart;
+    }
+
+    if (addition) {
       const addedPart = document.createElement('span');
       addedPart.className = STREAMED_TOKEN_CLASS;
       addedPart.innerText = addition;
-      dom.appendChild(addedPart);
-    } else {
-      // just set text
-      dom.innerText = content;
+      streamedTokenHost.appendChild(addedPart);
     }
+
     // Add "streaming-in-progress" indicator
-    if (!this.isSpacer && this.options.streaming) {
+    if (this.options.streaming) {
       const streamingIndicator = document.createElement('span');
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
-      dom.appendChild(streamingIndicator);
+      streamedTokenHost.appendChild(streamingIndicator);
+    }
+
+    if (placeHolderLines.length > 0) {
+      const placeholderLinesNode = document.createTextNode(placeHolderLines);
+      streamedTokenHost.appendChild(placeholderLinesNode);
     }
   }
   destroy(dom: HTMLElement) {
@@ -257,9 +365,12 @@ class TransientSpacerWidget extends GhostTextWidget {
 }
 
 class TransientLineSpacerWidget extends TransientSpacerWidget {
-  toDOM() {
-    const wrap = super.toDOM();
+  toDOM(view: EditorView) {
+    const wrap = super.toDOM(view);
     wrap.classList.add(TRANSIENT_LINE_SPACER_CLASS);
+    wrap.style.animationDelay = GhostTextManager.spacerRemovalDelay + 'ms';
+    wrap.style.animationDuration =
+      GhostTextManager.spacerRemovalDuration + 'ms';
     return wrap;
   }
 }
@@ -269,8 +380,8 @@ class TransientLetterSpacerWidget extends TransientSpacerWidget {
     return this.options.content[0];
   }
 
-  toDOM() {
-    const wrap = super.toDOM();
+  toDOM(view: EditorView) {
+    const wrap = super.toDOM(view);
     wrap.classList.add(TRANSIENT_LETTER_SPACER_CLASS);
     return wrap;
   }
@@ -288,6 +399,8 @@ namespace Private {
     action: GhostAction;
     /* Spec of the ghost text to set on transaction */
     spec?: IGhostText;
+    /* Specs of ghost texts to set on transaction */
+    specs?: IGhostText[];
   }
 
   export const addMark = StateEffect.define<IGhostText>({
@@ -304,18 +417,27 @@ namespace Private {
    * Decide what should be done for transaction effects.
    */
   function chooseAction(tr: Transaction): IGhostActionData | null {
-    // This function can short-circuit because at any time there is no more than one ghost text.
+    const specs: IGhostText[] = [];
     for (let e of tr.effects) {
       if (e.is(addMark)) {
-        return {
-          action: GhostAction.Set,
-          spec: e.value
-        };
+        specs.push(e.value);
       } else if (e.is(removeMark)) {
         return {
           action: GhostAction.Remove
         };
       }
+    }
+    if (specs.length === 1) {
+      return {
+        action: GhostAction.Set,
+        spec: specs[0]
+      };
+    }
+    if (specs.length > 1) {
+      return {
+        action: GhostAction.Set,
+        specs
+      };
     }
     if (tr.docChanged || tr.selection) {
       return {
@@ -400,11 +522,19 @@ namespace Private {
       }
       switch (data.action) {
         case GhostAction.Set: {
-          const spec = data.spec!;
-          const newWidget = createWidget(spec, tr);
+          if (data.spec) {
+            const newWidget = createWidget(data.spec, tr);
+            return marks.update({
+              add: [newWidget],
+              filter: (_from, _to, value) => value === newWidget.value
+            });
+          }
+          const specs = data.specs ?? [];
+          const newWidgets = specs.map(spec => createWidget(spec, tr));
+          const newValues = newWidgets.map(widget => widget.value);
           return marks.update({
-            add: [newWidget],
-            filter: (_from, _to, value) => value === newWidget.value
+            add: newWidgets,
+            filter: (_from, _to, value) => newValues.includes(value)
           });
         }
         case GhostAction.Remove:
@@ -412,80 +542,90 @@ namespace Private {
             filter: () => false
           });
         case GhostAction.FilterAndUpdate: {
+          const originalSpecs: IGhostText[] = [];
           let cursor = marks.iter();
-          // skip over spacer if any
-          while (
-            cursor.value &&
-            cursor.value.spec.widget instanceof TransientSpacerWidget
-          ) {
+          while (cursor.value) {
+            if (!(cursor.value.spec.widget instanceof TransientSpacerWidget)) {
+              originalSpecs.push(cursor.value.spec.ghostSpec as IGhostText);
+            }
             cursor.next();
           }
-          if (!cursor.value) {
-            // short-circuit if no widgets are present, or if only spacer was present
+          if (originalSpecs.length === 0) {
+            // short-circuit if no widgets are present, or if only spacers are present
             return marks.map(tr.changes);
           }
-          const originalSpec = cursor.value!.spec.ghostSpec as IGhostText;
-          const spec = { ...originalSpec };
-          let shouldRemoveGhost = false;
-          tr.changes.iterChanges(
-            (
-              fromA: number,
-              toA: number,
-              fromB: number,
-              toB: number,
-              inserted: Text
-            ) => {
-              if (shouldRemoveGhost) {
-                return;
-              }
-              if (fromA === toA && fromB !== toB) {
-                // text was inserted without modifying old text
-                for (
-                  let lineNumber = 0;
-                  lineNumber < inserted.lines;
-                  lineNumber++
-                ) {
-                  const lineContent = inserted.lineAt(lineNumber).text;
-                  const line =
-                    lineNumber > 0 ? '\n' + lineContent : lineContent;
-                  if (spec.content.startsWith(line)) {
-                    spec.content = spec.content.slice(line.length);
-                    spec.from += line.length;
-                  } else {
-                    shouldRemoveGhost = true;
-                    break;
-                  }
+
+          const newWidgets = [];
+          for (const originalSpec of originalSpecs) {
+            const spec = {
+              ...originalSpec,
+              from: tr.changes.mapPos(originalSpec.from, 1)
+            };
+            let shouldRemoveGhost = false;
+            tr.changes.iterChanges(
+              (
+                fromA: number,
+                toA: number,
+                fromB: number,
+                toB: number,
+                inserted: Text
+              ) => {
+                if (shouldRemoveGhost) {
+                  return;
                 }
-              } else if (fromB === toB && fromA !== toA) {
-                // text was removed
-                shouldRemoveGhost = true;
-              } else {
-                // text was replaced
-                shouldRemoveGhost = true;
-                // TODO: could check if the previous spec matches
+                if (fromA === toA && fromB !== toB) {
+                  // text was inserted without modifying old text
+                  if (fromA !== originalSpec.from) {
+                    return;
+                  }
+                  for (
+                    let lineNumber = 0;
+                    lineNumber < inserted.lines;
+                    lineNumber++
+                  ) {
+                    const lineContent = inserted.lineAt(lineNumber).text;
+                    const line =
+                      lineNumber > 0 ? '\n' + lineContent : lineContent;
+                    if (spec.content.startsWith(line)) {
+                      spec.content = spec.content.slice(line.length);
+                    } else {
+                      shouldRemoveGhost = true;
+                      break;
+                    }
+                  }
+                } else if (fromB === toB && fromA !== toA) {
+                  // text was removed
+                  shouldRemoveGhost = true;
+                } else {
+                  // text was replaced
+                  shouldRemoveGhost = true;
+                  // TODO: could check if the previous spec matches
+                }
               }
+            );
+            // removing multi-line widget would cause the code cell to jump; instead
+            // we add a temporary spacer widget(s) which will be removed in a future update
+            // allowing a slight delay between getting a new suggestion and reducing cell height
+            if (shouldRemoveGhost) {
+              newWidgets.push(
+                ...createSpacer(
+                  {
+                    ...originalSpec,
+                    from: spec.from
+                  },
+                  tr
+                )
+              );
+            } else {
+              newWidgets.push(createWidget(spec, tr));
             }
-          );
-          // removing multi-line widget would cause the code cell to jump; instead
-          // we add a temporary spacer widget(s) which will be removed in a future update
-          // allowing a slight delay between getting a new suggestion and reducing cell height
-          const newWidgets = shouldRemoveGhost
-            ? createSpacer(originalSpec, tr)
-            : [createWidget(spec, tr)];
+          }
+
           const newValues = newWidgets.map(widget => widget.value);
           marks = marks.update({
             add: newWidgets,
             filter: (_from, _to, value) => newValues.includes(value)
           });
-          if (shouldRemoveGhost) {
-            // TODO this can error out when deleting text, ideally a clean solution would be used.
-            try {
-              marks = marks.map(tr.changes);
-            } catch (e) {
-              console.warn(e);
-              return Decoration.none;
-            }
-          }
           return marks;
         }
       }

@@ -1,17 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { IDisposable } from '@lumino/disposable';
-import { IDocumentInfo } from '../ws-connection/types';
-import { IPosition } from '../positioning';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { IDocumentInfo } from '../ws-connection/types';
+import type { IPosition } from '../positioning';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Document, ILSPCodeExtractorsManager } from '../tokens';
+import type { Document, ILSPCodeExtractorsManager } from '../tokens';
 import { DocumentConnectionManager } from '../connection_manager';
-import { IForeignCodeExtractor } from '../extractors/types';
-import { LanguageIdentifier } from '../lsp';
-import {
+import type { IForeignCodeExtractor } from '../extractors/types';
+import type { LanguageIdentifier } from '../lsp';
+import type {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
@@ -633,7 +635,7 @@ export class VirtualDocument implements IDisposable {
       this.virtualLines.set(this.lastVirtualLine + i, {
         skipInspect: [],
         editor: ceEditor,
-        // TODO this is incorrect, wont work if something was extracted
+        // TODO this is incorrect, won't work if something was extracted
         sourceLine: this.lastSourceLine + i
       });
     }
@@ -647,7 +649,7 @@ export class VirtualDocument implements IDisposable {
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: ceEditor,
         foreignDocumentsMap,
-        // TODO this is incorrect, wont work if something was extracted
+        // TODO this is incorrect, won't work if something was extracted
         virtualLine: this.lastVirtualLine + i
       });
     }

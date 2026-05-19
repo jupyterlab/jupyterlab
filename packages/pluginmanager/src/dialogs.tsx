@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { JupyterLab } from '@jupyterlab/application';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 
 export function PluginRequiredMessage(props: {
@@ -20,7 +21,7 @@ export function PluginRequiredMessage(props: {
           <li key={'dependantsDialog-' + plugin.id}>{plugin.id}</li>
         ))}
       </ul>
-      {props.trans.__('Please disable the dependant plugins first.')}
+      {props.trans.__('Please disable the dependent plugins first.')}
     </>
   );
 }

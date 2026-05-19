@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -71,7 +71,13 @@ export const recentsManagerPlugin: JupyterFrontEndPlugin<IRecentsManager> = {
         recentsManager.recentlyOpened.length != 0 ||
         recentsManager.recentlyClosed.length != 0,
       label: trans.__('Clear Recent Documents'),
-      caption: trans.__('Clear the list of recently opened items.')
+      caption: trans.__('Clear the list of recently opened items.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     return recentsManager;

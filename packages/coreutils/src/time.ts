@@ -17,9 +17,7 @@ const UNITS: { name: Intl.RelativeTimeFormatUnit; milliseconds: number }[] = [
  * The namespace for date functions.
  */
 export namespace Time {
-  // Intl.RelativeTimeFormatStyle contains these, but it requires `ES2020.Intl`.
-  // We currently compile to an `ES2018` target.
-  export type HumanStyle = 'long' | 'short' | 'narrow';
+  export type HumanStyle = Intl.ResolvedRelativeTimeFormatOptions['style'];
 
   /**
    * Convert a timestring to a human readable string (e.g. 'two minutes ago').

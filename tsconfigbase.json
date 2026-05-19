@@ -2,11 +2,20 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
     "composite": true,
     "declaration": true,
     "esModuleInterop": true,
     "incremental": true,
     "jsx": "react",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2018",
+      "ES2020.BigInt",
+      "ES2020.Intl",
+      "ES2020.String"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
@@ -15,7 +24,9 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strictBuiltinIteratorReturn": true,
     "strictNullChecks": true,
+    "noImplicitThis": true,
     "target": "ES2018",
     "types": []
   }

@@ -12,6 +12,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
       "path": "../coreutils"
     },
     {
@@ -34,9 +37,6 @@
     },
     {
       "path": "."
-    },
-    {
-      "path": "../codemirror"
     },
     {
       "path": "../testing"

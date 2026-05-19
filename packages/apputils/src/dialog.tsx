@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   Button,
   closeIcon,
@@ -11,7 +13,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { WidgetTracker } from './widgettracker';
@@ -44,7 +47,7 @@ export function showErrorMessage(
   buttons?: ReadonlyArray<Dialog.IButton>
 ): Promise<void> {
   const trans = Dialog.translator.load('jupyterlab');
-  buttons = buttons ?? [Dialog.okButton({ label: trans.__('Dismiss') })];
+  buttons = buttons ?? [Dialog.cancelButton({ label: trans.__('Close') })];
   console.warn('Showing error:', error);
 
   // Cache promises to prevent multiple copies of identical dialogs showing
@@ -88,6 +91,7 @@ export class Dialog<T> extends Widget {
     dialogNode.ariaModal = 'true';
     super({ node: dialogNode });
     this.addClass('jp-Dialog');
+    this.addClass('jp-ThemedContainer');
     const normalized = Private.handleOptions(options);
     const renderer = normalized.renderer;
 
@@ -326,13 +330,24 @@ export class Dialog<T> extends Widget {
     }
     super.onCloseRequest(msg);
   }
+
   /**
    * Handle the `'input'` event for dialog's children.
    *
    * @param event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
-    this._hasValidationErrors = !!this.node.querySelector(':invalid');
+    this._checkValidation();
+  }
+
+  /**
+   * Check that every input in the dialog is valid.
+   * It looks for :invalid pseudo class of inputs, or .jp-mod-error class.
+   */
+  protected _checkValidation(): void {
+    this._hasValidationErrors =
+      !!this.node.querySelector(':invalid') ||
+      !!this.node.querySelector('.jp-mod-error');
     for (let i = 0; i < this._buttons.length; i++) {
       if (this._buttons[i].accept) {
         this._buttonNodes[i].disabled = this._hasValidationErrors;
@@ -372,16 +387,15 @@ export class Dialog<T> extends Widget {
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    switch (event.keyCode) {
-      case 27: // Escape.
+    switch (event.key) {
+      case 'Escape':
         event.stopPropagation();
         event.preventDefault();
         if (this._hasClose) {
           this.reject();
         }
         break;
-      case 37: {
-        // Left arrow
+      case 'ArrowLeft': {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
@@ -399,8 +413,7 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 39: {
-        // Right arrow
+      case 'ArrowRight': {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
@@ -418,8 +431,7 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 9: {
-        // Tab.
+      case 'Tab': {
         // Handle a tab on the last button.
         const node = this._buttonNodes[this._buttons.length - 1];
         if (document.activeElement === node && !event.shiftKey) {
@@ -429,18 +441,21 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 13: {
-        // Enter.
+      case 'Enter': {
         event.stopPropagation();
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl);
+          const index = this._buttonNodes.indexOf(activeEl);
+          if (index !== -1) {
+            this.resolve(index);
+          }
+        } else if (!(activeEl instanceof HTMLTextAreaElement)) {
+          const index = this._defaultButton;
+          this.resolve(index);
         }
-        this.resolve(index);
         break;
       }
       default:
@@ -457,7 +472,7 @@ export class Dialog<T> extends Widget {
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      this._buttonNodes[this._defaultButton]?.focus();
+      (this._primary ?? this._buttonNodes[this._defaultButton])?.focus();
     }
   }
 
@@ -972,9 +987,12 @@ export namespace Dialog {
           '<div class="jp-Dialog-spacer"></div>'
         );
       }
+      const footerButton = document.createElement('div');
+      footerButton.classList.add('jp-Dialog-footerButtons');
       for (const button of buttons) {
-        footer.node.appendChild(button);
+        footerButton.appendChild(button);
       }
+      footer.node.appendChild(footerButton);
       Styling.styleNode(footer.node);
 
       return footer;

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module example-simple-list
@@ -18,7 +19,7 @@ import '../index.css';
 import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 
 import { Widget } from '@lumino/widgets';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { ObservableList } from '@jupyterlab/observables';
 
 function getRandomInt(max: number): number {
@@ -120,9 +121,7 @@ class MyList extends WindowedListModel {
     );
     if (!widget) {
       widget = new ContentWidget(
-        `item-${
-          (this.itemsList as ObservableList<{ index: number }>).get(i).index
-        }`
+        `item-${(this.itemsList as ObservableList<{ index: number }>).get(i).index}`
       );
       this.widgetsCache.set(
         (this.itemsList as ObservableList<{ index: number }>).get(i),
@@ -228,6 +227,9 @@ function main(): void {
   scrollToOffset.addEventListener('change', () => {
     panel.scrollTo(scrollToOffset.valueAsNumber);
   });
+
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

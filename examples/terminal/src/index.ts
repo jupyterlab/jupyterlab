@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(
@@ -19,6 +20,11 @@ import { Terminal } from '@jupyterlab/terminal';
 async function main(): Promise<void> {
   const dock = new DockPanel();
   dock.id = 'main';
+
+  // Ensure Jupyter styling
+  dock.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the widget to the dom.
   Widget.attach(dock, document.body);

@@ -18,6 +18,32 @@ test.describe('Notebook Tests', () => {
       true
     );
   });
+  test('Create New Notebook with kernel', async ({ page, tmpPath }) => {
+    const fileName = 'create_kernel_test.ipynb';
+    await page.notebook.createNew(fileName, { kernel: 'python3' });
+    await page.getByRole('main').getByText(fileName).waitFor();
+
+    expect(await page.contents.fileExists(`${tmpPath}/${fileName}`)).toEqual(
+      true
+    );
+    const toolbar = page.getByRole('toolbar', { name: 'main area toolbar' });
+    await expect(toolbar.getByText('Python 3 (ipykernel)')).toBeVisible();
+  });
+
+  test('Create New Notebook with kernel - no kernel', async ({
+    page,
+    tmpPath
+  }) => {
+    const fileName = 'create_no_kernel_test.ipynb';
+    await page.notebook.createNew(fileName, { kernel: null });
+    await page.getByRole('main').getByText(fileName).waitFor();
+
+    expect(await page.contents.fileExists(`${tmpPath}/${fileName}`)).toEqual(
+      true
+    );
+    const toolbar = page.getByRole('toolbar', { name: 'main area toolbar' });
+    await expect(toolbar.getByText('No Kernel')).toBeVisible();
+  });
 
   test('Create Markdown cell', async ({ page }) => {
     await page.notebook.createNew();
@@ -91,6 +117,12 @@ test.describe('Notebook Tests', () => {
     const tabList = page.getByRole('main').getByRole('tablist');
     const notSavedIndicator = tabList.locator('.jp-mod-dirty');
     await expect(notSavedIndicator).toHaveCount(1);
+
+    // Wait for the kernel to settle to idle because
+    // kernel initialization modifies metadata and would mark the
+    // notebook dirty again, and if it happens after assertion
+    // below but before snapshot - randomly fail the test.
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     await page.notebook.save();
     await expect(notSavedIndicator).toHaveCount(0);

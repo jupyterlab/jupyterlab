@@ -6,6 +6,7 @@ import * as path from 'path';
 import { positionMouseOver } from './utils';
 
 test.use({
+  autoGoto: false,
   viewport: { height: 720, width: 1280 },
   mockState: false,
   tmpPath: 'workspaces-sidebar'
@@ -25,12 +26,8 @@ test.describe('Workspaces sidebar', () => {
   });
 
   test.beforeEach(async ({ page, tmpPath }) => {
+    await page.goto('?reset');
     await page.filebrowser.openDirectory(tmpPath);
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   test('Workspaces context menu', async ({ page }) => {
@@ -38,11 +35,10 @@ test.describe('Workspaces sidebar', () => {
     await page.dblclick(
       `.jp-DirListing-item span:has-text("${testWorkspace}")`
     );
+    // This is flaky for unknown reasons - a timeout is used to retry sooner than later
     await page
-      .locator(
-        `.jp-RunningSessions-item.jp-mod-workspace >> text=${workspaceName}`
-      )
-      .waitFor();
+      .getByRole('treeitem', { name: workspaceName })
+      .waitFor({ timeout: 15000 });
 
     await galata.Mock.mockRunners(page, new Map(), 'sessions');
 
@@ -61,14 +57,12 @@ test.describe('Workspaces sidebar', () => {
       }`
     });
 
-    const workspaceItem = page.locator(
-      '.jp-RunningSessions-item.jp-mod-workspace >> text=default'
-    );
+    const workspaceItem = page.getByRole('treeitem', { name: 'default' });
     // Open menu for the shot
     await workspaceItem.click({ button: 'right' });
-    const renameWorkspace = page.locator(
-      '.lm-Menu-itemLabel:text("Rename Workspace")'
-    );
+    const renameWorkspace = page.getByRole('menuitem', {
+      name: 'Rename Workspace'
+    });
     await renameWorkspace.hover();
     // Inject mouse
     await page.evaluate(

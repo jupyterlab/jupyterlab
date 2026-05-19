@@ -1,16 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  INotebookModel,
-  NotebookPanel,
-  NotebookSearchProvider
-} from '@jupyterlab/notebook';
-import { Context } from '@jupyterlab/docregistry';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookSearchProvider } from '@jupyterlab/notebook';
+import type { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
+import type { IReplaceOptions } from '@jupyterlab/documentsearch';
+import type { CodeCellModel } from '@jupyterlab/cells';
 
 /**
  * To avoid relying on ydoc passing the selections via server
@@ -203,6 +202,142 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#searchOnCellOutputs', () => {
+      it('should highlight all matches in code and output cells, and cycle through them correctly', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('print("code1 code2")');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['code1 code2']
+        });
+
+        await provider.startQuery(/code/, { output: true });
+        expect(provider.matchesCount).toBe(4); // 2 in code + 2 in output
+        expect(provider.currentMatchIndex).toBe(0);
+
+        for (let i = 1; i < 4; i++) {
+          await provider.highlightNext();
+          expect(provider.currentMatchIndex).toBe(i);
+        }
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+
+        for (let i = 3; i > 0; i--) {
+          await provider.highlightPrevious();
+          expect(provider.currentMatchIndex).toBe(i);
+        }
+
+        await provider.endQuery();
+      });
+
+      it('should handle no matches gracefully', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('code1 code2');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['code3 code4']
+        });
+
+        await provider.startQuery(/notfound/, { output: true });
+        expect(provider.matchesCount).toBe(0);
+        expect(provider.currentMatchIndex).toBe(null);
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(null);
+
+        await provider.endQuery();
+      });
+
+      it('should find matches only in outputs', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('xyz xyz');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['code']
+        });
+
+        await provider.startQuery(/code/, { output: true });
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+
+        await provider.highlightPrevious();
+        expect(provider.currentMatchIndex).toBe(0);
+
+        await provider.endQuery();
+      });
+
+      it('should highlight matches across multiple code and markdown cells including their outputs', async () => {
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'code',
+            source: 'print("cell0 line1")\nprint("cell0 line2")'
+          },
+          {
+            cell_type: 'code',
+            source: 'print("cell1 line1")\nprint("cell1 line2")'
+          },
+          {
+            cell_type: 'markdown',
+            source: 'This is cell2 line1\nThis is cell2 line2'
+          }
+        ]);
+
+        const c0 = panel.model!.cells.get(0) as CodeCellModel;
+        c0.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['cell0 line1\ncell0 line2']
+        });
+
+        const c1 = panel.model!.cells.get(1) as CodeCellModel;
+        c1.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['cell1 line1\ncell1 line2']
+        });
+
+        await provider.startQuery(/cell.? line.?/, { output: true });
+        expect(provider.matchesCount).toBe(10); // 4 in codeCell + 4 in codeCellOutput + 2 in markdownCell
+        expect(provider.currentMatchIndex).toBe(0);
+
+        for (let i = 1; i < 10; i++) {
+          await provider.highlightNext();
+          expect(provider.currentMatchIndex).toBe(i);
+        }
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+
+        for (let i = 9; i >= 0; i--) {
+          await provider.highlightPrevious();
+          expect(provider.currentMatchIndex).toBe(i);
+        }
+        await provider.endQuery();
+      });
+
+      it('should handle empty code cells and outputs', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('');
+        codeCell.outputs.clear();
+
+        await provider.startQuery(/anything/, { output: true });
+        expect(provider.matchesCount).toBe(0);
+        expect(provider.currentMatchIndex).toBe(null);
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(null);
+
+        await provider.endQuery();
+      });
+    });
+
     describe('#replaceCurrentMatch()', () => {
       it('should replace with a shorter text and highlight next', async () => {
         await provider.startQuery(/test\d/, undefined);
@@ -288,6 +423,38 @@ describe('@jupyterlab/notebook', () => {
         expect(source).toBe('rabarbar');
         expect(provider.currentMatchIndex).toBe(null);
       });
+
+      it('should not replace the current match in a read-only cell', async () => {
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'test1',
+            metadata: { editable: false }
+          },
+          { cell_type: 'code', source: 'test2', metadata: { editable: false } }
+        ]);
+
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        let replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(false);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1');
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
+        replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(false);
+        const source1 = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source1).toBe('test2');
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(2);
+        replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+        const source2 = panel.model!.cells.get(2).sharedModel.getSource();
+        expect(source2).toBe('bar test2');
+      });
     });
 
     describe('#replaceAllMatches()', () => {
@@ -353,6 +520,64 @@ describe('@jupyterlab/notebook', () => {
         let source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test1\nbar2\nbar3\nbar4\ntest5');
         await provider.endQuery();
+      });
+
+      it('should not replace all matches in read-only cells', async () => {
+        panel.model!.sharedModel.insertCells(2, [
+          {
+            cell_type: 'markdown',
+            source: 'test1 test2',
+            metadata: { editable: false }
+          },
+          {
+            cell_type: 'code',
+            source: 'test1 test2 test3',
+            metadata: { editable: false }
+          }
+        ]);
+        await provider.startQuery(/test\d/, undefined);
+        await provider.highlightNext();
+        const replaced = await provider.replaceAllMatches('test0');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test0 test0');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('test0');
+        source = panel.model!.cells.get(2).sharedModel.getSource();
+        expect(source).toBe('test1 test2');
+        source = panel.model!.cells.get(3).sharedModel.getSource();
+        expect(source).toBe('test1 test2 test3');
+        expect(provider.currentMatchIndex).toBe(null);
+      });
+
+      it('should replace all matches using regex', async () => {
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'a=123',
+            metadata: { editable: true }
+          },
+          {
+            cell_type: 'code',
+            source: 'a=123\nb=234'
+          }
+        ]);
+        const replaceOptions: IReplaceOptions = {
+          regularExpression: true
+        };
+
+        await provider.startQuery(/(\d+)/, undefined);
+        await provider.highlightNext();
+        const replaced = await provider.replaceAllMatches(
+          '$1+1',
+          replaceOptions
+        );
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('a=123+1');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('a=123+1\nb=234+1');
+        expect(provider.currentMatchIndex).toBe(null);
       });
     });
 

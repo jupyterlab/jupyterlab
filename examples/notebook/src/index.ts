@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 (window as any).__webpack_public_path__ = URLExt.join(
@@ -10,7 +11,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 // Import style through JS file to deduplicate them.
 import './style';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 import {
   Toolbar as AppToolbar,
   CommandToolbarButton,
@@ -265,6 +266,10 @@ function createApp(manager: ServiceManager.IManager): void {
   panel.addWidget(palette);
   panel.addWidget(nbWidget);
 
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  completer.addClass('jp-ThemedContainer');
+
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
   Widget.attach(completer, document.body);
@@ -273,7 +278,6 @@ function createApp(manager: ServiceManager.IManager): void {
   window.addEventListener('resize', () => {
     panel.update();
   });
-
   setupCommands(commands, palette, nbWidget, handler, sessionContextDialogs);
 
   console.debug('Example started!');

@@ -2,27 +2,33 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
 
-const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
+const GHOST_LINE_SPACER_CLASS = '.jp-GhostText-lineSpacer';
 const PLUGIN_ID = '@jupyterlab/completer-extension:inline-completer';
 const SHORTCUTS_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
 const SHARED_SETTINGS = {
   providers: {
     '@jupyterlab/inline-completer:history': {
-      enabled: true
+      enabled: true,
+      autoFillInMiddle: true
     }
   }
 };
 
 test.describe('Inline Completer', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.notebook.createNew(fileName);
-    await page.notebook.setCell(0, 'code', 'suggestion_1 = 1');
-    await page.notebook.addCell('code', 'suggestion_2 = 2');
-    await page.notebook.addCell('code', 's');
+  test.beforeEach(async ({ page, tmpPath }) => {
+    const fileName = 'inline_completer.ipynb';
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+
     await page.notebook.runCell(0, true);
     await page.notebook.runCell(1, true);
     await page.notebook.enterCellEditingMode(2);
@@ -185,6 +191,36 @@ test.describe('Inline Completer', () => {
     });
   });
 
+  test.describe('Invoke on Alt+\\ on empty line', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          showWidget: 'always',
+          ...SHARED_SETTINGS
+        },
+        [SHORTCUTS_ID]: {
+          shortcuts: [
+            {
+              command: 'inline-completer:invoke',
+              keys: ['Tab'],
+              selector: '.jp-mod-completer-enabled'
+            }
+          ]
+        }
+      }
+    });
+
+    test('Shows up on Alt+\\ on an empty line', async ({ page }) => {
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Alt+\\');
+
+      // Widget shows up
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+    });
+  });
+
   test.describe('Ghost text', () => {
     test.use({
       mockSettings: {
@@ -197,17 +233,17 @@ test.describe('Inline Completer', () => {
     });
 
     test('Ghost text updates on typing', async ({ page }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
       await page.keyboard.press('u');
 
       // Ghost text shows up
-      const ghostText = page.locator(GHOST_SELECTOR);
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
       await ghostText.waitFor();
 
       // Ghost text should be updated from "ggestion" to "estion"
       await page.keyboard.type('gg');
       await expect(ghostText).toHaveText(/estion.*/);
 
-      const cellEditor = await page.notebook.getCellInputLocator(2);
       const imageName = 'editor-with-ghost-text.png';
       expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
 
@@ -215,6 +251,105 @@ test.describe('Inline Completer', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(ghostText).toBeHidden();
+    });
+
+    test('Ghost text shows on middle of line when FIM is enabled', async ({
+      page
+    }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      await page.keyboard.press('u');
+
+      // Ghost text shows up
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      await page.keyboard.type('n'); //sun|
+      await page.keyboard.press('ArrowLeft'); //su|n
+      await page.keyboard.type('g'); //sug|n
+      await expect(ghostText).toHaveText('gestio'); //sug|(gestio)n
+      await page.keyboard.press('ArrowRight'); //sugn|
+      await page.keyboard.press('Backspace'); //sug|
+      await page.keyboard.type('q'); //sugq|
+      await page.keyboard.press('ArrowLeft'); //sug|q
+      await page.keyboard.press('Backspace'); //su|q
+      await page.keyboard.type('g'); //sug|q
+      await expect(ghostText).toBeHidden(); //Hidden on sug|q
+    });
+
+    test('Empty space is retained to avoid jitter', async ({ page }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      const measureEditorHeight = async () =>
+        (await cellEditor.boundingBox())!.height;
+      const noGhostTextHeight = await measureEditorHeight();
+
+      await page.keyboard.type('uggestion_2');
+
+      // Ghost text shows up
+      const ghostText = cellEditor.locator(
+        `${GHOST_SELECTOR}:not(${GHOST_LINE_SPACER_CLASS})`
+      );
+      const lineSpacer = cellEditor.locator(GHOST_LINE_SPACER_CLASS);
+
+      await ghostText.waitFor();
+      await expect(lineSpacer).toBeHidden();
+      await expect(ghostText).toHaveText(/ = 2# second line# third line/);
+
+      const ghostTextShownHeight = await measureEditorHeight();
+      expect(ghostTextShownHeight).toBeGreaterThan(noGhostTextHeight);
+
+      // Ghost text should disappear and line spacer appear
+      await page.keyboard.type('x');
+
+      await lineSpacer.waitFor();
+      await expect(lineSpacer).toBeVisible();
+      await expect(ghostText).toBeHidden();
+
+      const spacerExpandedHeight = await measureEditorHeight();
+      expect(ghostTextShownHeight).toEqual(spacerExpandedHeight);
+
+      // By default the hiding animation starts after 700ms and lasts for 300ms
+
+      // When animation starts the editor height should reduce
+      await page.waitForTimeout(750);
+      const spacerAnimatingHeight = await measureEditorHeight();
+      expect(spacerAnimatingHeight).toBeLessThan(ghostTextShownHeight);
+
+      // After animation is done the height should be back to the initial height
+      await page.waitForTimeout(300);
+      const finalHeight = await measureEditorHeight();
+      expect(noGhostTextHeight).toEqual(finalHeight);
+    });
+  });
+  test.describe('Ghost text with Syntax Highlighting', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          ...SHARED_SETTINGS,
+          showWidget: 'never',
+          ghostSyntaxHighlighting: true
+        }
+      }
+    });
+
+    test('should apply syntax highlighting', async ({ page }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      // Type 'ug' (the cell already has 's') which matches 'suggestion_1 = 1' from the setup notebook.
+      await page.keyboard.type('ug');
+
+      // Wait for the ghost text to appear.
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      // The ghost text should contain the rest of the suggestion.
+      await expect(ghostText).toHaveText('gestion_1 = 1');
+
+      // Wait a brief moment for highlighting to apply.
+      await page.waitForTimeout(100);
+
+      // Take a screenshot of the entire cell.
+      const imageName = 'ghost-text-with-syntax-highlighting.png';
+      expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
     });
   });
 });

@@ -62,6 +62,13 @@
 
 .jp-Notebook .jp-Cell {
   overflow: visible;
+
+  /* Prevent scroll anchoring to inactive cells */
+  overflow-anchor: none;
+}
+
+.jp-Notebook .jp-Cell.jp-mod-active {
+  overflow-anchor: auto;
 }
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
@@ -152,7 +159,7 @@
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
-  box-shadow: var(--jp-input-box-shadow);
+  box-shadow: var(--jp-cell-editor-box-shadow);
   background-color: var(--jp-cell-editor-active-background);
 }
 
@@ -173,7 +180,7 @@
 }
 
 .jp-dragImage {
-  display: block;
+  display: flex;
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
@@ -204,6 +211,7 @@
   flex: 0 0 auto;
   min-width: 36px;
   color: var(--jp-cell-inprompt-font-color);
+  opacity: 0.5;
   padding: var(--jp-code-padding);
   padding-left: 12px;
   font-family: var(--jp-cell-prompt-font-family);
@@ -221,7 +229,13 @@
   top: 8px;
   left: 8px;
   background: var(--jp-layout-color2);
-  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-width: var(--jp-border-width);
+  border-style: solid;
+  border-color: color-mix(
+    in srgb,
+    var(--jp-input-border-color) 20%,
+    transparent
+  );
   box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
@@ -286,11 +300,6 @@
 .jp-MetadataEditorTool label,
 .jp-NumberSetter label {
   line-height: 1.4;
-}
-
-.jp-NotebookTools .jp-select-wrapper {
-  margin-top: 4px;
-  margin-bottom: 0;
 }
 
 .jp-NumberSetter input {
@@ -392,98 +401,83 @@
 }
 
 /*-----------------------------------------------------------------------------
-| Placeholder
-|----------------------------------------------------------------------------*/
-
-.jp-Cell-Placeholder {
-  padding-left: 55px;
-}
-
-.jp-Cell-Placeholder-wrapper {
-  background: #fff;
-  border: 1px solid;
-  border-color: #e5e6e9 #dfe0e4 #d0d1d5;
-  border-radius: 4px;
-  -webkit-border-radius: 4px;
-  margin: 10px 15px;
-}
-
-.jp-Cell-Placeholder-wrapper-inner {
-  padding: 15px;
-  position: relative;
-}
-
-.jp-Cell-Placeholder-wrapper-body {
-  background-repeat: repeat;
-  background-size: 50% auto;
-}
-
-.jp-Cell-Placeholder-wrapper-body div {
-  background: #f6f7f8;
-  background-image: -webkit-linear-gradient(
-    left,
-    #f6f7f8 0%,
-    #edeef1 20%,
-    #f6f7f8 40%,
-    #f6f7f8 100%
-  );
-  background-repeat: no-repeat;
-  background-size: 800px 104px;
-  height: 104px;
-  position: absolute;
-  right: 15px;
-  left: 15px;
-  top: 15px;
-}
-
-div.jp-Cell-Placeholder-h1 {
-  top: 20px;
-  height: 20px;
-  left: 15px;
-  width: 150px;
-}
-
-div.jp-Cell-Placeholder-h2 {
-  left: 15px;
-  top: 50px;
-  height: 10px;
-  width: 100px;
-}
-
-div.jp-Cell-Placeholder-content-1,
-div.jp-Cell-Placeholder-content-2,
-div.jp-Cell-Placeholder-content-3 {
-  left: 15px;
-  right: 15px;
-  height: 10px;
-}
-
-div.jp-Cell-Placeholder-content-1 {
-  top: 100px;
-}
-
-div.jp-Cell-Placeholder-content-2 {
-  top: 120px;
-}
-
-div.jp-Cell-Placeholder-content-3 {
-  top: 140px;
-}
-
-/*-----------------------------------------------------------------------------
 | Virtual scrollbar
 |----------------------------------------------------------------------------*/
 
-.jp-Notebook
-  .jp-WindowedPanel-scrollbar-content
-  .jp-mod-active.jp-mod-selected {
+.jp-Notebook .jp-WindowedPanel-scrollbar-item[data-output='error'] {
+  background: var(--jp-error-color3);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-item[data-output='error']:hover {
+  background: var(--jp-error-color2);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-dirty {
+  background: var(--jp-warn-color3);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-dirty:hover {
+  background: var(--jp-warn-color2);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-selected {
+  background: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-selected:hover {
+  background: var(--jp-brand-color1);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-active {
   background: var(--jp-brand-color1);
   color: var(--jp-ui-inverse-font-color1);
 }
 
-.jp-Notebook .jp-WindowedPanel-scrollbar-content .jp-mod-selected {
-  background: var(--jp-brand-color2);
-  color: var(--jp-ui-inverse-font-color2);
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-active:hover {
+  background: var(--jp-brand-color0);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-item {
+  max-width: 60px;
+  display: flex;
+}
+
+.jp-Notebook .jp-scrollbarItem-executionIndicator {
+  display: inline-block;
+  font-family: var(--jp-cell-prompt-font-family);
+  font-size: 80%;
+  line-height: 100%;
+  margin-left: -1px;
+  padding-right: 1px;
+  text-wrap: nowrap; /* stylelint-disable-line csstree/validator */
+}
+
+.jp-Notebook .jp-scrollbarItem-source {
+  display: inline-block;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  font-size: 3px;
+  vertical-align: middle;
+  max-height: 10em;
+  overflow: hidden;
+}
+
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-item[data-type='code']
+  > .jp-scrollbarItem-source {
+  white-space: pre;
+}
+
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-item[data-type='markdown']
+  > .jp-scrollbarItem-source {
+  white-space: pre-line;
+}
+
+/* Lazy rendering to notebook cells: content outside viewport won't be rendered until scrolled into view */
+.jp-content-visibility-mode > .jp-Notebook-cell {
+  content-visibility: auto;
+  contain: layout style paint; /* Isolates layout, style, and paint for this element */
 }
 
 /*-----------------------------------------------------------------------------

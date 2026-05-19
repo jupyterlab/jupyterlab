@@ -1,7 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { codeIcon, runIcon, stopIcon } from '@jupyterlab/ui-components';
+import {
+  closeAllIcon as closeAll,
+  codeIcon,
+  pauseIcon as pause,
+  runIcon,
+  stepIntoIcon as stepInto,
+  stepOutIcon as stepOut,
+  stepOverIcon as stepOver,
+  stopIcon,
+  variableIcon as variable,
+  viewBreakpointIcon as viewBreakpoint
+} from '@jupyterlab/ui-components';
 
 import { DebuggerConfig } from './config';
 
@@ -12,16 +23,6 @@ import { ReadOnlyEditorFactory as EditorFactory } from './factory';
 import { DebuggerHandler } from './handler';
 
 import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
-
-import {
-  closeAllIcon as closeAll,
-  pauseIcon as pause,
-  stepIntoIcon as stepInto,
-  stepOutIcon as stepOut,
-  stepOverIcon as stepOver,
-  variableIcon as variable,
-  viewBreakpointIcon as viewBreakpoint
-} from './icons';
 
 import { DebuggerModel } from './model';
 
@@ -125,6 +126,12 @@ export namespace Debugger {
     export const copyToClipboard = 'debugger:copy-to-clipboard';
 
     export const copyToGlobals = 'debugger:copy-to-globals';
+
+    export const invokeConsole = 'debugger:invoke-console-completer';
+
+    export const selectConsole = 'debugger:select-console-completion';
+
+    export const executeConsole = 'debugger:run-in-console';
 
     export const openSource = 'debugger:open-source';
   }

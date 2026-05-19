@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 
 const DEFAULT_NAME = 'untitled.txt';
 
@@ -31,9 +32,9 @@ test.describe('Text Editor Tests', () => {
 
     // Add two rulers
     await page.locator('#root').getByRole('button', { name: 'Add' }).click();
-    await page.locator('input[id="root_rulers_0"]').type('50');
+    await page.locator('input[id="root_rulers_0"]').fill('50');
     await page.locator('#root').getByRole('button', { name: 'Add' }).click();
-    await page.locator('input[id="root_rulers_1"]').type('75');
+    await page.locator('input[id="root_rulers_1"]').fill('75');
 
     await page.activity.activateTab(DEFAULT_NAME);
 
@@ -57,10 +58,9 @@ test.describe('Text Editor Tests', () => {
 
     await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    await page.type(
-      '.cm-content',
-      'Not active\nActive line with >>selected text<<\nNot active'
-    );
+    await page
+      .locator('.jp-FileEditorCodeWrapper .cm-content')
+      .fill('Not active\nActive line with >>selected text<<\nNot active');
 
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('End');
@@ -70,7 +70,7 @@ test.describe('Text Editor Tests', () => {
       await page.keyboard.press('Shift+ArrowLeft');
     }
     expect(
-      await page.locator('.jp-FileEditorCodeWrapper .cm-content').screenshot()
+      await page.locator('.jp-FileEditorCodeWrapper .cm-editor').screenshot()
     ).toMatchSnapshot(imageName, { threshold: 0.01 });
   });
 
@@ -80,8 +80,7 @@ test.describe('Text Editor Tests', () => {
 
     await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    await page.type(
-      '.cm-content',
+    await page.locator('.jp-FileEditorCodeWrapper .cm-content').fill(
       `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
 libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum.
 Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia
@@ -118,9 +117,14 @@ ut elit.`
       await page.menu.clickMenuItem('File>New>Text File');
 
       await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
-      await page.type('.cm-content', 'text editor');
+      await page
+        .locator('.jp-FileEditorCodeWrapper .cm-content')
+        .fill('text editor');
     };
-    const changeFontSize = async (page: IJupyterLabPageFixture, menuOption) => {
+    const changeFontSize = async (
+      page: IJupyterLabPageFixture,
+      menuOption: string
+    ) => {
       await page.click('text=Settings');
       await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
     };
@@ -130,7 +134,12 @@ ut elit.`
       let fontSize = await getFontSize(page);
       await changeFontSize(page, 'Increase Text Editor Font Size');
 
-      expect(await getFontSize(page)).toEqual(fontSize + 1);
+      // We wrap the font size comparisons in `expect().toPass()`
+      // because clicking on the menu only triggers the asynchronous
+      // update which might take a fraction on second to propagate.
+      await expect(async () => {
+        expect(await getFontSize(page)).toEqual(fontSize + 1);
+      }).toPass();
     });
 
     test('Should decrease a text editor font-size', async ({ page }) => {
@@ -138,7 +147,9 @@ ut elit.`
       let fontSize = await getFontSize(page);
       await changeFontSize(page, 'Decrease Text Editor Font Size');
 
-      expect(await getFontSize(page)).toEqual(fontSize - 1);
+      await expect(async () => {
+        expect(await getFontSize(page)).toEqual(fontSize - 1);
+      }).toPass();
     });
   });
 });

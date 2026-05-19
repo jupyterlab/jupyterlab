@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -41,6 +43,11 @@ export interface IFilterBoxProps {
   placeholder?: string;
 
   /**
+   * Whether to show a search icon in the box.
+   */
+  showIcon?: boolean;
+
+  /**
    * A function to callback when filter is updated.
    */
   updateFilter: (
@@ -51,7 +58,15 @@ export interface IFilterBoxProps {
   /**
    * Whether to use the fuzzy filter.
    */
-  useFuzzyFilter: boolean;
+  useFuzzyFilter?: boolean;
+
+  /**
+   * Signal emitted when filter settings change
+   */
+  filterSettingsChanged?: ISignal<
+    unknown,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >;
 }
 
 /**
@@ -100,7 +115,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
     }
 
     // Update the match if the score is better.
-    if (match && match.score <= score) {
+    if (match.score <= score) {
       score = match.score;
       indices = match.indices;
     }
@@ -120,7 +135,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
 
 export const updateFilterFunction = (
   value: string,
-  useFuzzyFilter: boolean,
+  useFuzzyFilter?: boolean,
   caseSensitive?: boolean
 ) => {
   return (item: string): Partial<IScore> | null => {
@@ -139,7 +154,7 @@ export const updateFilterFunction = (
       return null;
     }
     return {
-      indices: [...Array(item.length).keys()].map(x => x + 1)
+      indices: [...Array(value.length).keys()].map(x => x + i)
     };
   };
 };
@@ -154,48 +169,73 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       });
     }, []);
   }
+  const firstRender = useRef(true);
+  const inputRef = props.inputRef ?? useRef<HTMLInputElement>();
 
   useEffect(() => {
     // If there is an initial search value, pass the parent the initial filter function for that value.
-    if (props.initialQuery !== undefined) {
-      props.updateFilter(
-        updateFilterFunction(
-          props.initialQuery,
-          props.useFuzzyFilter,
-          props.caseSensitive
-        ),
-        props.initialQuery
-      );
+    if (firstRender.current) {
+      firstRender.current = false;
+      if (props.initialQuery !== undefined) {
+        props.updateFilter(
+          updateFilterFunction(
+            props.initialQuery,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          props.initialQuery
+        );
+      }
+    } else {
+      if (inputRef.current) {
+        // If filter settings changed, update the filter
+        props.updateFilter(
+          updateFilterFunction(
+            inputRef.current.value,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          inputRef.current.value
+        );
+      }
     }
-  }, []);
+  }, [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]);
 
   /**
    * Handler for search input changes.
    */
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.updateFilter(
-      updateFilterFunction(
-        target.value,
-        props.useFuzzyFilter,
-        props.caseSensitive
-      ),
-      target.value
-    );
-  };
+  const handleChange = useCallback(
+    (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      setFilter(target.value);
+      props.updateFilter(
+        updateFilterFunction(
+          target.value,
+          props.useFuzzyFilter,
+          props.caseSensitive
+        ),
+        target.value
+      );
+    },
+    [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]
+  );
 
+  // Show the icon by default, or if the caller specifically requests it
+  const showSearchIcon = props.showIcon ?? true;
+
+  // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
   return (
     <Search
+      role="search"
       className="jp-FilterBox"
-      ref={props.inputRef}
+      ref={props.inputRef as React.Ref<any>}
       value={filter}
       onChange={handleChange}
       onInput={handleChange}
       placeholder={props.placeholder}
       disabled={props.disabled}
     >
-      <searchIcon.react slot="end" tag={null} />
+      {showSearchIcon && <searchIcon.react slot="end" tag={null} />}
     </Search>
   );
 };
@@ -203,14 +243,33 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
+class FilenameSearcherWidget extends ReactWidget {
+  constructor(props: IFilterBoxProps) {
+    super();
+    this._filterBoxProps = { ...props };
+    props?.filterSettingsChanged?.connect((_, args) => {
+      this._updateProps(args);
+    }, this);
+  }
+
+  render(): JSX.Element {
+    return <FilterBox {...this._filterBoxProps} />;
+  }
+
+  /**
+   * Update a specific prop.
+   */
+  private _updateProps(props: Partial<IFilterBoxProps>): void {
+    Object.assign(this._filterBoxProps, props);
+    this.update();
+  }
+
+  private _filterBoxProps: IFilterBoxProps;
+}
+
+/**
+ * Function which returns a widget that hosts an input textbox to filter on file names.
+ */
 export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(
-    <FilterBox
-      updateFilter={props.updateFilter}
-      useFuzzyFilter={props.useFuzzyFilter}
-      placeholder={props.placeholder}
-      forceRefresh={props.forceRefresh}
-      caseSensitive={props.caseSensitive}
-    />
-  );
+  return new FilenameSearcherWidget(props);
 };

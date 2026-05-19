@@ -21,9 +21,9 @@
   font-family: var(--jp-code-font-family);
 }
 
-.jp-RenderedText pre,
-.jp-RenderedJavaScript pre,
-.jp-RenderedHTMLCommon pre {
+.jp-ThemedContainer .jp-RenderedText pre,
+.jp-ThemedContainer .jp-RenderedJavaScript pre,
+.jp-ThemedContainer .jp-RenderedHTMLCommon pre {
   color: var(--jp-content-font-color1);
   font-size: var(--jp-code-font-size);
   border: none;
@@ -45,6 +45,8 @@
   text-decoration: none;
   color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
 }
+
+/* stylelint-disable declaration-property-value-allowed-list */
 
 /* console foregrounds and backgrounds */
 .jp-RenderedText pre .ansi-black-fg {
@@ -191,6 +193,8 @@
   padding: var(--jp-private-code-span-padding) 0;
 }
 
+/* stylelint-enable declaration-property-value-allowed-list */
+
 .jp-RenderedText pre .ansi-default-inverse-fg {
   color: var(--jp-ui-inverse-font-color0);
 }
@@ -211,6 +215,11 @@
 .jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr'] {
   background: var(--jp-rendermime-error-background);
   padding-top: var(--jp-code-padding);
+}
+
+/* fix illegible yellow text with yellow background in exception stacktrace */
+.jp-RenderedText pre .ansi-yellow-bg.ansi-yellow-fg {
+  color: black;
 }
 
 /*-----------------------------------------------------------------------------
@@ -391,12 +400,12 @@
   margin-bottom: 1em;
 }
 
-.jp-RenderedHTMLCommon > pre {
+.jp-ThemedContainer .jp-RenderedHTMLCommon > pre {
   margin: 1.5em 2em;
 }
 
-.jp-RenderedHTMLCommon pre,
-.jp-RenderedHTMLCommon code {
+.jp-ThemedContainer .jp-RenderedHTMLCommon pre,
+.jp-ThemedContainer .jp-RenderedHTMLCommon code {
   border: 0;
   background-color: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
@@ -407,7 +416,7 @@
   white-space: pre-wrap;
 }
 
-.jp-RenderedHTMLCommon :not(pre) > code {
+.jp-ThemedContainer .jp-RenderedHTMLCommon :not(pre) > code {
   background-color: var(--jp-layout-color2);
   padding: 1px 5px;
 }
@@ -599,7 +608,7 @@ h6:hover .jp-InternalAnchorLink {
   visibility: visible;
 }
 
-.jp-RenderedHTMLCommon kbd {
+.jp-ThemedContainer .jp-RenderedHTMLCommon kbd {
   background-color: var(--jp-rendermime-table-row-background);
   border: 1px solid var(--jp-border-color0);
   border-bottom-color: var(--jp-border-color2);

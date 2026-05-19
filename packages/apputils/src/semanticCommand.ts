@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * Options when add a command to a semantic group.
@@ -36,6 +36,11 @@ export class SemanticCommand {
    * Default rank for semantic command
    */
   static readonly DEFAULT_RANK = 500;
+
+  /**
+   * The `args` key for a semantic command's current widget ID.
+   */
+  static readonly WIDGET = 'semanticWidget';
 
   /**
    * The command IDs used by this semantic command.

@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONValue } from '@lumino/coreutils';
-import { IObservableList, ObservableList } from './observablelist';
+import type { JSONValue } from '@lumino/coreutils';
+import type { IObservableList } from './observablelist';
+import { ObservableList } from './observablelist';
 
 /**
  * An object which knows how to serialize and
@@ -213,6 +214,12 @@ export class ObservableUndoableList<T>
       case 'move':
         this.move(change.newIndex, change.oldIndex);
         break;
+      case 'clear':
+        index = 0;
+        for (const value of change.oldValues) {
+          this.insert(index++, serializer.fromJSON(value));
+        }
+        break;
       default:
         return;
     }
@@ -244,6 +251,9 @@ export class ObservableUndoableList<T>
         break;
       case 'move':
         this.move(change.oldIndex, change.newIndex);
+        break;
+      case 'clear':
+        this.clear();
         break;
       default:
         return;
@@ -288,9 +298,9 @@ export namespace ObservableUndoableList {
   /**
    * A default, identity serializer.
    */
-  export class IdentitySerializer<T extends JSONValue>
-    implements ISerializer<T>
-  {
+  export class IdentitySerializer<
+    T extends JSONValue
+  > implements ISerializer<T> {
     /**
      * Identity serialize.
      */

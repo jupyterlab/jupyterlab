@@ -1,16 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
-  CodeCell,
-  ICodeCellModel,
-  MarkdownCell,
-  RawCell
-} from '@jupyterlab/cells';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
+  type ISessionContext,
+  Notification,
+  type SessionContext
+} from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+import type { ICodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import {
   KernelError,
   Notebook,
@@ -18,9 +18,10 @@ import {
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
-import { Stdin } from '@jupyterlab/outputarea';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISharedCodeCell } from '@jupyter/ydoc';
+import type { Stdin } from '@jupyterlab/outputarea';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IExecutionState, ISharedCodeCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
@@ -29,14 +30,45 @@ import {
   sleep,
   waitForDialog
 } from '@jupyterlab/testing';
-import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import type { JSONArray, JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import * as utils from './utils';
+import uncoalescedOp from './uncoalesced_op.json';
 
 const ERROR_INPUT = 'a = foo';
+const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
+const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
+const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+const STDOUT_TYPE = 'application/vnd.jupyter.stdout';
 
 const server = new JupyterServer();
+
+function withNotificationError(action: () => void, message: string): void {
+  const notificationError = jest
+    .spyOn(Notification, 'error')
+    .mockImplementation(() => '');
+  try {
+    action();
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(notificationError).toHaveBeenCalledWith(message, {
+      autoClose: READ_ONLY_NOTIFICATION_AUTO_CLOSE
+    });
+  } finally {
+    notificationError.mockRestore();
+  }
+}
+
+function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
+  return new Promise<void>(resolve => {
+    cell.model.sharedModel.changed.connect((_, change) => {
+      if (change.executionStateChange?.newValue === state) {
+        resolve();
+      }
+    });
+  });
+}
 
 beforeAll(async () => {
   await server.start();
@@ -258,6 +290,17 @@ describe('@jupyterlab/notebook', () => {
         expect(prev.model.sharedModel.getSource()).toBe('');
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.splitCell(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_SPLIT_ERROR);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
@@ -281,6 +324,76 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[0];
         expect(cell.model.sharedModel.getSource()).toBe(source);
       });
+
+      it('should preserve original cell identity in the last cell after split', () => {
+        const cell = widget.activeCell!;
+        const originalCellCount = widget.model!.cells.length;
+        const originalCellId = cell.model.id;
+        const source = 'line1\nline2\nline3';
+        cell.model.sharedModel.setSource(source);
+        const index = widget.activeCellIndex;
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(12)!);
+        NotebookActions.splitCell(widget);
+        const cells = widget.model!.cells;
+        expect(cells.length).toBe(originalCellCount + 1);
+        const firstCell = cells.get(index);
+        const secondCell = cells.get(index + 1);
+        expect(secondCell.id).toBe(originalCellId);
+        expect(firstCell.id).not.toBe(originalCellId);
+      });
+    });
+
+    it('should clear execution metadata when splitting a running cell', () => {
+      const cell = widget.activeCell as CodeCell;
+      // Simulate a running cell with only iopub.status.busy and iopub.execute_input
+      const busyTime = '2000-01-01T00:00:00.000Z';
+      const inputTime = '2000-01-01T00:00:01.000Z';
+      cell.model.setMetadata('execution', {
+        'iopub.status.busy': busyTime,
+        'iopub.execute_input': inputTime
+      });
+      cell.model.sharedModel.setSource('line1\nline2');
+      const editor = cell.editor as CodeEditor.IEditor;
+      editor.setCursorPosition(editor.getPositionAt(6)!);
+      NotebookActions.splitCell(widget);
+
+      // After split, both cells should have execution metadata cleared if reply is not present
+      const firstCell = widget.model!.cells.get(0);
+      const execMeta = firstCell.getMetadata('execution') as any;
+      expect(execMeta).toBeUndefined();
+
+      const secondCell = widget.model!.cells.get(1);
+      const secondExecMeta = secondCell.getMetadata('execution') as any;
+      expect(secondExecMeta['iopub.status.busy']).toEqual(busyTime);
+      expect(secondExecMeta['iopub.execute_input']).toEqual(inputTime);
+    });
+
+    it('should not clear or remove execution metadata when splitting an executed cell', () => {
+      const cell = widget.activeCell as CodeCell;
+      // Simulate a fully executed cell
+      const busyTime = '2000-01-01T00:00:00.000Z';
+      const inputTime = '2000-01-01T00:00:01.000Z';
+      const replyTime = '2000-01-01T00:00:02.000Z';
+      const execMeta = {
+        'iopub.status.busy': busyTime,
+        'iopub.execute_input': inputTime,
+        'shell.execute_reply': replyTime
+      };
+      cell.model.setMetadata('execution', execMeta);
+      cell.model.sharedModel.setSource('line1\nline2');
+      const editor = cell.editor as CodeEditor.IEditor;
+      editor.setCursorPosition(editor.getPositionAt(6)!);
+      NotebookActions.splitCell(widget);
+
+      // After split, both cells should have the full execution metadata
+      const firstCell = widget.model!.cells.get(0);
+      const firstExecMeta = firstCell.getMetadata('execution') as any;
+      expect(firstExecMeta).toEqual(execMeta);
+
+      const secondCell = widget.model!.cells.get(1);
+      const secondExecMeta = secondCell.getMetadata('execution') as any;
+      expect(secondExecMeta).toEqual(execMeta);
     });
 
     describe('#mergeCells', () => {
@@ -312,6 +425,17 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
         widget.activeCellIndex = 1;
         let source = widget.activeCell!.model.sharedModel.getSource();
@@ -327,6 +451,42 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.mergeCells(widget, true);
         expect(widget.widgets.length).toBe(cellNumber);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should be a no-op if any merged cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[1].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op if a selected cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          const cell = widget.widgets[2];
+          cell.model.setMetadata('editable', false);
+          widget.select(cell);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op when mergeAbove is true and previous cell is not editable', () => {
+        widget.activeCellIndex = 1;
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[0].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget, true);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
       });
 
       it('should clear the outputs of a code cell', () => {
@@ -412,6 +572,36 @@ describe('@jupyterlab/notebook', () => {
         const model = widget.activeCell!.model.toJSON();
         expect(model.cell_type).toEqual('code');
         expect(model.attachments).toBeUndefined();
+      });
+
+      it('should merge cells with double newline when addExtraLine is true (default)', () => {
+        const firstCell = widget.activeCell!;
+        const firstSource = firstCell.model.sharedModel.getSource();
+        const secondCell = widget.widgets[1];
+        const secondSource = secondCell.model.sharedModel.getSource();
+        widget.select(secondCell);
+
+        NotebookActions.mergeCells(widget, false, true);
+
+        const expectedSource = firstSource + '\n\n' + secondSource;
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          expectedSource
+        );
+      });
+
+      it('should merge cells with single newline when addExtraLine is false', () => {
+        const firstCell = widget.activeCell!;
+        const firstSource = firstCell.model.sharedModel.getSource();
+        const secondCell = widget.widgets[1];
+        const secondSource = secondCell.model.sharedModel.getSource();
+        widget.select(secondCell);
+
+        NotebookActions.mergeCells(widget, false, false);
+
+        const expectedSource = firstSource + '\n' + secondSource;
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          expectedSource
+        );
       });
     });
 
@@ -617,6 +807,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeNull();
       });
 
+      it('should preserve the cell id', () => {
+        const original = widget.activeCell?.model.id || null;
+        NotebookActions.changeCellType(widget, 'code');
+        expect(widget.activeCell?.model.id).toBe(original);
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell?.model.id).toBe(original);
+      });
+
       it('should preserve the widget mode', () => {
         NotebookActions.changeCellType(widget, 'code');
         expect(widget.mode).toBe('command');
@@ -697,6 +895,22 @@ describe('@jupyterlab/notebook', () => {
         // Try to change cell type again, it should work now
         NotebookActions.changeCellType(widget, 'raw');
         expect(widget.activeCell).toBeInstanceOf(RawCell);
+      });
+
+      it('should not change cell type when the cell is not editable', async () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        let cell = widget.activeCell as MarkdownCell;
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+        cell.model.setMetadata('editable', false);
+
+        // Try to change cell type
+        NotebookActions.changeCellType(widget, 'raw');
+        // Cell type should stay unchanged.
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+
+        // Should show a dialog informing user why cell type could not be changed
+        await waitForDialog();
+        await acceptDialog();
       });
     });
 
@@ -1095,6 +1309,26 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[2])).toBe(true);
       });
+
+      it('should run the selected cells', async () => {
+        let emitted = 0;
+        let notebook: Notebook | null = null;
+        let lastCell: Cell | null = null;
+        NotebookActions.selectionExecuted.connect(async (_, args) => {
+          notebook = args.notebook;
+          lastCell = args.lastCell;
+          emitted += 1;
+        });
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[1], widget.widgets[2]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(emitted).toBe(1);
+        expect(notebook).toBeInstanceOf(Notebook);
+        expect(lastCell).toBeInstanceOf(Cell);
+      });
     });
 
     describe('#runAll()', () => {
@@ -1490,6 +1724,51 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#copyToSystemClipboard()', () => {
+      it('should copy the selected cells to a utils.systemClipboard', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        await NotebookActions.copyToSystemClipboard(widget);
+        expect(await utils.systemClipboard.hasData(JUPYTER_CELL_MIME)).toBe(
+          true
+        );
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        expect(data.length).toBe(2);
+      });
+
+      it('should be a no-op if there is no model', async () => {
+        widget.model = null;
+        utils.systemClipboard.clear();
+        await NotebookActions.copyToSystemClipboard(widget);
+        expect(await utils.systemClipboard.hasData(JUPYTER_CELL_MIME)).toBe(
+          false
+        );
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        await NotebookActions.copyToSystemClipboard(widget);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should delete metadata.deletable', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        await NotebookActions.copyToSystemClipboard(widget);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeUndefined();
+        });
+      });
+    });
+
     describe('#cut()', () => {
       it('should cut the selected cells to a utils.clipboard', () => {
         const next = widget.widgets[1];
@@ -1523,6 +1802,48 @@ describe('@jupyterlab/notebook', () => {
           widget.select(widget.widgets[i]);
         }
         NotebookActions.cut(widget);
+        await sleep();
+        expect(widget.widgets.length).toBe(1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+      });
+    });
+
+    describe('#cutToSystemClipboard()', () => {
+      it('should cut the selected cells to a utils.systemClipboard', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        const count = widget.widgets.length;
+        await NotebookActions.cutToSystemClipboard(widget);
+        expect(widget.widgets.length).toBe(count - 2);
+      });
+
+      it('should be a no-op if there is no model', async () => {
+        widget.model = null;
+        utils.systemClipboard.clear();
+        await NotebookActions.cutToSystemClipboard(widget);
+        expect(await utils.systemClipboard.hasData(JUPYTER_CELL_MIME)).toBe(
+          false
+        );
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        await NotebookActions.cutToSystemClipboard(widget);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should be undo-able', async () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        await NotebookActions.cutToSystemClipboard(widget);
+        NotebookActions.undo(widget);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should add a new code cell if all cells were cut', async () => {
+        for (let i = 0; i < widget.widgets.length; i++) {
+          widget.select(widget.widgets[i]);
+        }
+        await NotebookActions.cutToSystemClipboard(widget);
         await sleep();
         expect(widget.widgets.length).toBe(1);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
@@ -1574,6 +1895,149 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });
+
+      it('should paste code cells without outputs when stripOutputs is true', () => {
+        const cell = widget.activeCell as CodeCell;
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: ['some output']
+        });
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, 'below', { stripOutputs: true });
+        const pastedCell = widget.widgets[2] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.outputs.length).toBe(0);
+        expect(pastedCell.model.executionCount).toBeNull();
+        expect(pastedCell.model.sharedModel.getSource()).toBe(
+          cell.model.sharedModel.getSource()
+        );
+      });
+
+      it('should emit a signal with cut action', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].previousInteraction).toBe('cut');
+      });
+
+      it('should emit a signal with copy action', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].previousInteraction).toBe('copy');
+      });
+
+      it('should emit a signal with the number of copied cells', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        const next = widget.widgets[1];
+        widget.select(next);
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].cellCount).toBe(2);
+      });
+
+      it('should emit a signal with action to null', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+
+        // Create another notebook widget
+        const widget2 = new Notebook({
+          rendermime,
+          contentFactory: utils.createNotebookFactory(),
+          mimeTypeService: utils.mimeTypeService,
+          notebookConfig: {
+            ...StaticNotebook.defaultNotebookConfig,
+            windowingMode: 'none'
+          }
+        });
+        const model2 = new NotebookModel();
+        model2.fromJSON(utils.DEFAULT_CONTENT);
+        widget2.model = model2;
+        model2.sharedModel.clearUndoHistory();
+
+        widget2.activeCellIndex = 0;
+        await NotebookActions.copyToSystemClipboard(widget2);
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].cellCount).toBe(1);
+        expect(signals[0].previousInteraction).toBeNull();
+      });
+    });
+
+    describe('#pasteFromSystemClipboard()', () => {
+      it('should paste cells from a utils.systemClipboard', async () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const next = widget.widgets[1];
+        widget.select(next);
+        const count = widget.widgets.length;
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[2].model.sharedModel.getSource()).toBe(source);
+        expect(widget.activeCellIndex).toBe(3);
+      });
+
+      it('should be a no-op if there is no model', async () => {
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.model = null;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.activeCellIndex).toBe(-1);
+      });
+
+      it('should be a no-op if there is no cell data on the utils.systemClipboard', async () => {
+        utils.systemClipboard.clear();
+        const count = widget.widgets.length;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.widgets.length).toBe(count);
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        await NotebookActions.cutToSystemClipboard(widget);
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should be undo-able', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        const count = widget.widgets.length;
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        widget.model?.sharedModel.clearUndoHistory();
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).toBe(count - 2);
+      });
     });
 
     describe('#undo()', () => {
@@ -1605,6 +2069,230 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 1);
       });
+
+      it('should undo a merge after split', () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('foo\nbar');
+
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(4)!); // Split after 'foo\n'
+        NotebookActions.splitCell(widget);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+        const count = widget.widgets.length;
+
+        // Separate undo capture - otherwise we would need to wait 500ms
+        // for timeout to prevent split and merge from being combined into a single entry
+        (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+        widget.activeCellIndex = 0;
+        NotebookActions.mergeCells(widget, false, false);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(
+          'foo\nbar'
+        );
+
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+      });
+
+      it.each([
+        { interrupt: true, secondCellExpectedState: 'idle' as const },
+        { interrupt: false, secondCellExpectedState: 'running' as const }
+      ])(
+        'should preserve execution state and output after undoing a merge (interrupt: $interrupt)',
+        async ({
+          interrupt,
+          secondCellExpectedState
+        }: {
+          interrupt: boolean;
+          secondCellExpectedState: 'idle' | 'running';
+        }) => {
+          const cell = widget.widgets[0] as CodeCell;
+          widget.activeCellIndex = 0;
+          const initialSource =
+            'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+          cell.model.sharedModel.setSource(initialSource);
+
+          const executionStarted = waitForExecutionState(cell, 'running');
+          const executionCompleted = NotebookActions.run(
+            widget,
+            ipySessionContext
+          );
+          await executionStarted;
+
+          // Split the first cell
+          const editor = cell.editor as CodeEditor.IEditor;
+          widget.activeCellIndex = 0;
+          editor.setCursorPosition(editor.getPositionAt(12)!); // Split after 'import time\n'
+          NotebookActions.splitCell(widget);
+          const firstSplitCell = widget.widgets[0] as CodeCell;
+          const secondSplitCell = widget.widgets[1] as CodeCell;
+          expect(firstSplitCell.model.sharedModel.getSource()).toBe(
+            'import time'
+          );
+          expect(secondSplitCell.model.sharedModel.getSource()).toBe(
+            'for i in range(5):\n    print(i)\n    time.sleep(1)'
+          );
+          expect(firstSplitCell.model.sharedModel.executionState).toBe('idle');
+          expect(secondSplitCell.model.sharedModel.executionState).toBe(
+            'running'
+          );
+
+          // Separate undo capture - otherwise we would need to wait 500ms
+          // for timeout to prevent split and merge from being combined into a single entry
+          (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+          // Merge cells
+          widget.activeCellIndex = 0;
+          NotebookActions.mergeCells(widget, false, false);
+          const mergedCell = widget.widgets[0] as CodeCell;
+          expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
+
+          const kernel = ipySessionContext.session?.kernel;
+          expect(kernel).toBeTruthy();
+
+          if (interrupt) {
+            const statusChanged = signalToPromise(kernel!.statusChanged);
+            await kernel!.interrupt();
+            await statusChanged;
+            await executionCompleted.catch(() => false);
+            expect(mergedCell.model.sharedModel.executionState).toBe('idle');
+          }
+
+          // Undo the merge (which splits the cells again)
+          NotebookActions.undo(widget);
+          const firstCellModelAfterUndo = (widget.widgets[0] as CodeCell).model
+            .sharedModel;
+          const secondCellModelAfterUndo = (widget.widgets[1] as CodeCell).model
+            .sharedModel;
+          expect(firstCellModelAfterUndo.getSource()).toBe('import time');
+          expect(secondCellModelAfterUndo.getSource()).toBe(
+            'for i in range(5):\n    print(i)\n    time.sleep(1)'
+          );
+          expect(firstCellModelAfterUndo.executionState).toBe('idle');
+          expect(secondCellModelAfterUndo.executionState).toBe(
+            secondCellExpectedState
+          );
+
+          if (!interrupt) {
+            const secondCellAfterUndo = widget.widgets[1] as CodeCell;
+            // Verify output keeps arriving in the reconnected cell.
+            await signalToPromise(secondCellAfterUndo.outputArea.model.changed);
+            const output = secondCellAfterUndo.outputArea.model.get(0);
+
+            const finalOutput = '0\n1\n2\n3\n4\n';
+            expect(
+              finalOutput.startsWith(output.data[STDOUT_TYPE] as string)
+            ).toBe(true);
+            expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+            expect(secondCellAfterUndo.model.executionState).toBe('running');
+            expect(secondCellAfterUndo.model.executionCount).toBe(null);
+
+            await executionCompleted;
+            expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+            expect(secondCellAfterUndo.model.executionState).toBe('idle');
+            expect(secondCellAfterUndo.model.executionCount).not.toBe(null);
+          }
+        },
+        20000
+      );
+
+      it('should preserve execution state and output after undoing a cell type change', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        widget.activeCellIndex = 0;
+        const initialSource =
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+        cell.model.sharedModel.setSource(initialSource);
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        await signalToPromise(cell.outputArea.model.changed);
+        const outputBefore = cell.outputArea.model.get(0);
+        expect(outputBefore.data[STDOUT_TYPE]).not.toBe(finalOutput);
+
+        NotebookActions.changeCellType(widget, 'markdown');
+
+        // Wait for one print to go to buffer - reproduces an issue where content
+        // streamed while the cell was removed would be lost.
+        await sleep(1500);
+
+        // Undo cell type change
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+        // Right now the cell is still executing so we should not see
+        // the final output just yet (only its prefix),
+        // and we should not see the execution count number yet.
+        const output = cellAfterUndo.outputArea.model.get(0);
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for cell to complete execution
+        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should preserve execution state and output after undoing a cell deletion', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        const initialSource =
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+        cell.model.sharedModel.setSource(initialSource);
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        NotebookActions.deleteCells(widget);
+
+        // Undo cell deletion and find the relevant cell
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+        await signalToPromise(cellAfterUndo.outputArea.model.changed);
+        const output = cellAfterUndo.outputArea.model.get(0);
+
+        // The cell should still be executing and output should not be final
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for cell to complete execution
+        await executionCompleted;
+        // Verify outputs kept arriving even after undo reconnected the future.
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#redo()', () => {
@@ -1712,6 +2400,25 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.clearOutputs(widget);
         expect(widget.activeCellIndex).toBe(-1);
       });
+
+      it('should clear all the uncoalesced outputs', () => {
+        const model = new NotebookModel();
+        model.fromJSON(uncoalescedOp);
+        widget.model = model;
+
+        const cell = widget.widgets[0] as CodeCell;
+
+        const outputsBefore = cell.model.toJSON().outputs;
+        expect(Array.isArray(outputsBefore)).toBe(true);
+        expect(outputsBefore.length).toBeGreaterThan(1);
+
+        widget.select(cell);
+        NotebookActions.clearOutputs(widget);
+
+        const outputsAfter = cell.model.toJSON().outputs;
+        expect(cell.model.outputs.length).toBe(0);
+        expect(outputsAfter.length).toBe(0);
+      });
     });
 
     describe('#clearAllOutputs()', () => {
@@ -1744,6 +2451,38 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#showOutput()', () => {
+      it('should hide the outputs on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.hideOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
+      });
+
+      it('should hide and show the outputs on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.hideOutput(widget);
+        NotebookActions.showOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(false);
+      });
+
+      it('should toggle the outputs from shown to hidden on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.toggleOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
+      });
+
+      it('should toggle the outputs twice, from shown to hidden and back, on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.toggleOutput(widget);
+        NotebookActions.toggleOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(false);
+      });
+    });
+
     describe('#setMarkdownHeader()', () => {
       it('should set the markdown header level of selected cells', () => {
         const next = widget.widgets[1];
@@ -1758,6 +2497,22 @@ describe('@jupyterlab/notebook', () => {
       it('should convert the cells to markdown type', () => {
         NotebookActions.setMarkdownHeader(widget, 2);
         expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+      });
+
+      it('should be undoable', () => {
+        widget.activeCell!.model.sharedModel.setSource('# foo');
+        expect(widget.activeCell!.model.type).toBe('code');
+        NotebookActions.setMarkdownHeader(widget, 3);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          '### foo'
+        );
+        expect(widget.activeCell!.model.type).toBe('markdown');
+        const index = widget.activeCellIndex;
+        NotebookActions.undo(widget);
+        // TODO: find a way to avoid index drift on undo
+        widget.activeCellIndex = index;
+        expect(widget.activeCell!.model.type).toBe('code');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('# foo');
       });
 
       it('should be clamped between 1 and 6', () => {
@@ -1803,7 +2558,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: true });
         expect(cell.trusted).toBe(true);
       });
 
@@ -1814,13 +2569,15 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await dismissDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: false });
         expect(cell.trusted).not.toBe(true);
       });
 
       it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
-        await expect(NotebookActions.trust(widget)).resolves.not.toThrow();
+        await expect(NotebookActions.trust(widget)).resolves.toEqual({
+          trusted: false
+        });
       });
 
       it('should show a dialog if all cells are trusted', async () => {
@@ -1833,7 +2590,7 @@ describe('@jupyterlab/notebook', () => {
         }
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await expect(promise).resolves.not.toThrow();
+        await expect(promise).resolves.toEqual({ trusted: true });
       });
     });
   });

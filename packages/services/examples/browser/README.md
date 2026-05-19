@@ -1,14 +1,15 @@
 # Jupyter JS Services Browser Example
 
 This example demonstrates using Jupyter JS Services from the browser using
-Webpack. The python script `main.py` is used to start a Jupyter Notebook Server
-and serve the Webpack bundle.
+Rspack. The python script `main.py` is used to start a Jupyter Notebook Server
+and serve the Rspack bundle.
 
 The base url of the notebook server is to the HTML template as part of a JSON
 script tag. The script starts a python notebook session and interacts
 with it, printing messages to the browser console.
 
-The example can be installed as `npm install` and run as `python main.py`.
+The example can be installed and built as `npm install && npm run build`, then
+run as `python main.py`.
 
 Notes:
 

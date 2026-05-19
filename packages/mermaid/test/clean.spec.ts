@@ -33,4 +33,11 @@ describe('@jupyterlab/mermaid', () => {
       expect(numberValue).toBe(variants.length);
     });
   }
+
+  it('should accept non-breaking spaces', () => {
+    const raw = [...SVG_XHTML_HEADER, '&nbsp;', ...SVG_XHTML_FOOTER].join('\n');
+    const clean = MermaidManager.cleanMermaidSvg(raw);
+    parser.parseFromString(clean, SVG_MIME);
+    expect(clean).toContain('"&#160;"');
+  });
 });

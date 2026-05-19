@@ -1,18 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { CodeCell, ICellModel } from '@jupyterlab/cells';
+import { Cell, MarkdownCell } from '@jupyterlab/cells';
+import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { TableOfContents } from '@jupyterlab/toc';
 import {
-  TableOfContents,
   TableOfContentsFactory,
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { KernelError, NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
-import { INotebookTracker } from './tokens';
-import { Notebook } from './widget';
+import type { KernelError } from './actions';
+import { NotebookActions } from './actions';
+import type { NotebookPanel } from './panel';
+import type { INotebookTracker } from './tokens';
+import type { Notebook } from './widget';
 
 /**
  * Cell running status
@@ -224,7 +227,7 @@ export class NotebookToCModel extends TableOfContentsModel<
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  protected getHeadings(): Promise<INotebookHeading[] | null> {
+  protected async getHeadings(): Promise<INotebookHeading[] | null> {
     const cells = this.widget.content.widgets;
     const headings: INotebookHeading[] = [];
     const documentLevels = new Array<number>();
@@ -243,7 +246,7 @@ export class NotebookToCModel extends TableOfContentsModel<
           ) {
             headings.push(
               ...TableOfContentsUtils.filterHeadings(
-                cell.headings,
+                await cell.getHeadings(),
                 this.configuration,
                 documentLevels
               ).map(heading => {
@@ -261,7 +264,7 @@ export class NotebookToCModel extends TableOfContentsModel<
         }
         case 'markdown': {
           const cellHeadings = TableOfContentsUtils.filterHeadings(
-            cell.headings,
+            await cell.getHeadings(),
             this.configuration,
             documentLevels
           ).map((heading, index) => {
@@ -289,6 +292,9 @@ export class NotebookToCModel extends TableOfContentsModel<
 
       if (headings.length > 0) {
         this._cellToHeadingIndex.set(cell, headings.length - 1);
+      } else {
+        // If no headings were found, remove the cell from the map
+        this._cellToHeadingIndex.delete(cell);
       }
     }
     this.updateRunningStatus(headings);
@@ -608,7 +614,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           }
 
           const el = headingToElement.get(heading);
-
           if (el) {
             if (this.scrollToTop) {
               el.scrollIntoView({ block: 'start' });
@@ -673,8 +678,12 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           this.sanitizer
         );
 
+        const attribute =
+          (this.sanitizer.allowNamedProperties ?? false)
+            ? 'id'
+            : 'data-jupyter-id';
         const selector = elementId
-          ? `h${heading.level}[id="${CSS.escape(elementId)}"]`
+          ? `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`
           : `h${heading.level}`;
 
         if (heading.outputIndex !== undefined) {

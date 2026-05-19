@@ -1,22 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
   CodeMirrorEditor,
-  EditorSearchProvider,
   IHighlightAdjacentMatchOptions
 } from '@jupyterlab/codemirror';
+import { EditorSearchProvider } from '@jupyterlab/codemirror';
 import { signalToPromise } from '@jupyterlab/coreutils';
-import {
-  GenericSearchProvider,
+import type {
   IBaseSearchProvider,
   IFilters,
+  IReplaceOptions,
   ISearchMatch
 } from '@jupyterlab/documentsearch';
-import { OutputArea } from '@jupyterlab/outputarea';
-import { ICellModel } from './model';
-import { Cell, CodeCell, MarkdownCell } from './widget';
+import { GenericSearchProvider } from '@jupyterlab/documentsearch';
+import type { OutputArea } from '@jupyterlab/outputarea';
+import type { ICellModel } from './model';
+import type { Cell, CodeCell, MarkdownCell } from './widget';
 
 /**
  * Class applied on highlighted search matches
@@ -120,6 +121,15 @@ class CodeCellSearchProvider extends CellSearchProvider {
       provider.dispose();
     });
     this.outputsProvider.length = 0;
+  }
+
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this.currentProviderIndex === -1) {
+      return super.getCurrentMatch();
+    } else if (this.currentProviderIndex < this.outputsProvider.length) {
+      const provider = this.outputsProvider[this.currentProviderIndex];
+      return provider.currentMatch ?? undefined;
+    }
   }
 
   /**
@@ -247,6 +257,42 @@ class CodeCellSearchProvider extends CellSearchProvider {
         this.outputsProvider.map(provider => provider.endQuery())
       );
     }
+  }
+
+  /**
+   * Replace all matches in the cell source with the provided text
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceAllMatches(newText, options);
+    return result;
+  }
+
+  /**
+   * Replace the currently selected match with the provided text.
+   * If no match is selected, it won't do anything.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceCurrentMatch(newText, loop, options);
+    return result;
   }
 
   private async _onOutputsChanged(
@@ -392,13 +438,37 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    const result = await super.replaceAllMatches(newText);
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceAllMatches(newText, options);
     // if the cell is rendered force update
     if ((this.cell as MarkdownCell).rendered) {
       this.cell.update();
     }
+    return result;
+  }
 
+  /**
+   * Replace the currently selected match with the provided text.
+   * If no match is selected, it won't do anything.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceCurrentMatch(newText, loop, options);
     return result;
   }
 

@@ -2,15 +2,17 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IWindowResolver } from '@jupyterlab/apputils';
 import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import type { IRunningSessions } from '@jupyterlab/running';
+import { IRunningSessionManagers } from '@jupyterlab/running';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Workspace } from '@jupyterlab/services';
+import type { Workspace } from '@jupyterlab/services';
 import { WORKSPACE_ITEM_CLASS } from './commands';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
 
@@ -79,6 +81,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
     }
     managers.add({
       name: trans.__('Workspaces'),
+      supportsMultipleViews: false,
       running: () => {
         return model.workspaces.map((workspace: Workspace.IWorkspace) => {
           return new WorkspaceItem(workspace);

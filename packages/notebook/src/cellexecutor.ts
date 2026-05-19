@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
@@ -56,7 +57,7 @@ export async function runCell({
           await showDialog({
             title: trans.__('Cell not executed due to pending input'),
             body: trans.__(
-              'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
+              'The cell has not been executed to avoid kernel deadlock as there is another pending input! Type your input in the input box, press Enter and try again.'
             ),
             buttons: [Dialog.okButton()]
           });

@@ -18,6 +18,7 @@ export async function createSessionContext(
 
   await Promise.all([manager.ready, specsManager.ready]);
   return new SessionContext({
+    kernelManager: options.kernelManager ?? Private.getManager().kernels,
     sessionManager: manager,
     specsManager,
     path: options.path ?? UUID.uuid4(),

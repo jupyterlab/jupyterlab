@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import type { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import mergeWith from 'lodash.mergewith';
 
 /**

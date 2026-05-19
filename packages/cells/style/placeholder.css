@@ -46,7 +46,7 @@
 
 .jp-Placeholder-content .jp-MoreHorizIcon:hover {
   border: 1px solid var(--jp-border-color1);
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: var(--jp-toolbar-box-shadow);
   background-color: var(--jp-layout-color0);
 }
 

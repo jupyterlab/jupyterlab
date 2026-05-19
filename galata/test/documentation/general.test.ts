@@ -5,15 +5,27 @@ import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import {
   filterContent,
+  freeezeKernelIds,
   generateArrow,
   positionMouse,
-  positionMouseOver
+  positionMouseOver,
+  setTerminalTitle
 } from './utils';
 
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  viewport: { height: 720, width: 1280 },
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
+    }
+  }
 });
 
 test.describe('General', () => {
@@ -43,6 +55,7 @@ test.describe('General', () => {
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
+    await setTerminalTitle(page, 'Terminal 1');
 
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
@@ -58,8 +71,18 @@ test.describe('General', () => {
     await page.notebook.run();
 
     const cell = page.locator(
-      '[aria-label="Code Cell Content with Output"] >> text=interactive'
+      '[aria-label="Code Cell Content with Output"] >> text=interactive(solve_lorenz'
     );
+
+    // Enforce position of the cell we are after by moving up
+    // and down to invoke cell/viewport alignment logic.
+    await cell.click();
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp');
+
     await cell.click();
     await page.keyboard.press('ContextMenu');
     await page.click('text=Create New View for Cell Output');
@@ -124,13 +147,18 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right.png');
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
+
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18460
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
@@ -450,11 +478,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
+    // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
+    // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
+    await page.getByText('Cell 1/6').waitFor();
+
     const trustIndictor = page.locator('.jp-StatusItem-trust');
 
-    expect(await trustIndictor.screenshot()).toMatchSnapshot(
-      'notebook_not_trusted.png'
-    );
+    expect
+      .soft(await trustIndictor.screenshot())
+      .toMatchSnapshot('notebook_not_trusted.png');
 
     // Open trust dialog
     // Note: we do not `await` here as it only resolves once dialog is closed
@@ -482,7 +514,9 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
-    const heading = page.locator('h2[id="Open-a-CSV-file-using-Pandas"]');
+    const heading = page.locator(
+      'h2[data-jupyter-id="Open-a-CSV-file-using-Pandas"]'
+    );
     await heading.waitFor();
     const anchor = heading.locator('text=¶');
     await heading.hover();
@@ -541,6 +575,7 @@ test.describe('General', () => {
     // Wait for the xterm.js element to be added in the DOM
     await page.locator('.jp-Terminal-body').waitFor();
 
+    await setTerminalTitle(page, 'Terminal 1');
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
     await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
@@ -567,6 +602,8 @@ test.describe('General', () => {
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
+    await setTerminalTitle(page, 'Terminal 1');
+
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
@@ -580,17 +617,13 @@ test.describe('General', () => {
       .soft(page.locator('.jp-RunningSessions-item.jp-mod-kernel'))
       .toHaveCount(2, { timeout: 5000 });
 
-    const freeezeKernelIds = async () => {
-      return page.evaluate(() => {
-        const mockedKernelIds = ['abcd1234', 'wxyz5678'];
-        document
-          .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
-          .forEach((span, i) => {
-            span.innerText = `(${mockedKernelIds[i]})`;
-          });
-      });
+    const sessionsSidebar = page.locator('.jp-SidePanel.jp-RunningSessions');
+    const mockedKernelIds = {
+      'Data.ipynb': 'abcd1234',
+      'Julia.ipynb': 'wxyz5678'
     };
-    await freeezeKernelIds();
+
+    await freeezeKernelIds(sessionsSidebar, mockedKernelIds);
 
     expect
       .soft(
@@ -601,18 +634,43 @@ test.describe('General', () => {
       .toMatchSnapshot('running_layout.png');
 
     await page.click('jp-button[data-command="running:show-modal"]');
-    await freeezeKernelIds();
 
     // Playwright uses shadow-piercing selectors so this works with webcomponents too
     await expect
       .soft(page.locator('.jp-SearchableSessions-modal input'))
       .toBeFocused();
 
-    expect(
-      await page
-        .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
-        .screenshot()
-    ).toMatchSnapshot('running_modal.png');
+    const dialog = page.locator(
+      '.jp-SearchableSessions-modal .jp-Dialog-content'
+    );
+    await freeezeKernelIds(dialog, mockedKernelIds);
+
+    // Freeze `terminal/X` identifier because under concurrent execution the
+    // server might be tracking another terminal already so instead of
+    // `terminal/1` the screenshot would show e.g. `terminal/2`.
+    // Changing this via mocks would involve both intercepting terminal REST
+    // API and then rewiring websocket connections which does not work
+    // reliably in galata as of now.
+    await dialog.evaluate(node => {
+      let changed = false;
+      for (let [_, entry] of node
+        .querySelectorAll('.jp-RunningSessions-itemLabel')
+        .entries()) {
+        const label = entry.textContent ?? '';
+        if (/terminals\/\d+/i.test(label)) {
+          entry.textContent = label.replace(/terminals\/\d+/gi, 'terminals/1');
+          changed = true;
+          break;
+        }
+      }
+      if (!changed) {
+        throw Error(
+          'Expected to find at least one terminal entry in the dialog.'
+        );
+      }
+    });
+
+    expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');
   });
 
   test('Command Palette', async ({ page }) => {
@@ -650,7 +708,7 @@ test.describe('General', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+    await page.filebrowser.openDirectory('data');
     await page.click('text=README.md', {
       button: 'right'
     });
@@ -685,9 +743,7 @@ test.describe('General', () => {
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))",
-      {
-        delay: 0
-      }
+      { delay: 0 }
     );
     await page.keyboard.press('Shift+Enter');
 
@@ -707,7 +763,7 @@ test.describe('General', () => {
     await page.notebook.setCell(
       0,
       'code',
-      "import altair as alt\n# load a simple dataset as a pandas DataFrame\nfrom vega_datasets import data\ncars = data.cars()\n\nalt.Chart(cars).mark_point().encode(x='Horsepower', y='Miles_per_Gallon', color='Origin').interactive()"
+      "import altair as alt\n# load a simple dataset as a pandas DataFrame\nfrom altair.datasets import data\ncars = data.cars()\n\nalt.Chart(cars).mark_point().encode(x='Horsepower', y='Miles_per_Gallon', color='Origin').interactive()"
     );
 
     await page.notebook.run();

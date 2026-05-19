@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel } from '@jupyterlab/ui-components';
-import { IObservableDisposable } from '@lumino/disposable';
+import type { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
-import {
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type {
   IFilter,
   IFilters,
   IReplaceOptionsSupport,
@@ -104,13 +105,8 @@ export class SearchDocumentModel
     return this._initialQuery;
   }
   set initialQuery(v: string) {
-    if (v) {
-      // Usually the value comes from user selection (set by search provider).
-      this._initialQuery = v;
-    } else {
-      // If user selection is empty, we fall back to most recent value (if any).
-      this._initialQuery = this._searchExpression;
-    }
+    // The value comes from user selection (set by search provider).
+    this._initialQuery = v;
   }
 
   /**

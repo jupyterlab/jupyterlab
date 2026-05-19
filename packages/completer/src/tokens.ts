@@ -1,18 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMime } from '@jupyterlab/rendermime';
-import { Session } from '@jupyterlab/services';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { SourceChange } from '@jupyter/ydoc';
-import { JSONValue, Token } from '@lumino/coreutils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import type { Session } from '@jupyterlab/services';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import type { SourceChange } from '@jupyter/ydoc';
+import type { JSONValue } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
-import { CompletionHandler } from './handler';
-import { Completer } from './widget';
-import { InlineCompleter } from './inline';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import type { CompletionHandler } from './handler';
+import type { Completer } from './widget';
+import type { InlineCompleter } from './inline';
 
 /**
  * The type of completion request.
@@ -53,8 +54,8 @@ export interface ICompletionContext {
  * The interface to implement a completion provider.
  */
 export interface ICompletionProvider<
-  T extends
-    CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+  T extends CompletionHandler.ICompletionItem =
+    CompletionHandler.ICompletionItem
 > {
   /**
    * Unique identifier of the provider
@@ -216,7 +217,11 @@ export interface IInlineCompletionError {
  * @alpha
  */
 export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
+  /**
+   * Token passed to identify the completion when streaming updates.
+   */
   token?: string;
+
   /**
    * Whether generation of `insertText` is still ongoing. If your provider supports streaming,
    * you can set this to true, which will result in the provider's `stream()` method being called
@@ -384,6 +389,11 @@ export interface ICompletionProviderManager {
   activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
 
   /**
+   * Signal emitted when a selection is made from a completer menu.
+   */
+  selected: ISignal<ICompletionProviderManager, ICompleterSelection>;
+
+  /**
    * Inline completer actions.
    */
   inline?: IInlineCompleterActions;
@@ -392,6 +402,13 @@ export interface ICompletionProviderManager {
    * Inline providers information.
    */
   inlineProviders?: IInlineCompletionProviderInfo[];
+}
+
+export interface ICompleterSelection {
+  /**
+   * The text selected by the completer.
+   */
+  insertText: string;
 }
 
 export interface IInlineCompleterActions {
@@ -421,6 +438,14 @@ export interface IInlineCompleterActions {
   accept(id: string): void;
 
   /**
+   * Check if the inline compelter is active (showing ghost text)
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  isActive(id: string): boolean;
+
+  /**
    * Configure the inline completer.
    * @experimental
    *
@@ -446,11 +471,36 @@ export interface IInlineCompleterSettings {
    */
   streamingAnimation: 'none' | 'uncover';
   /**
+   * Whether to suppress the inline completer when tab completer is active.
+   */
+  suppressIfTabCompleterActive: boolean;
+  /**
+   * Minimum lines to show.
+   */
+  minLines: number;
+  /**
+   * Maximum lines to show.
+   */
+  maxLines: number;
+  /**
+   * Delay between resizing the editor after an incline completion was cancelled.
+   */
+  editorResizeDelay: number;
+  /*
+   * Reserve space for the longest of the completions candidates.
+   */
+  reserveSpaceForLongest: boolean;
+  /**
+   * If true, applies syntax highlighting to the ghost text suggestion instead of showing it as plain, faded text.
+   */
+  ghostSyntaxHighlighting: boolean;
+  /**
    * Provider settings.
    */
   providers: {
     [providerId: string]: {
       enabled: boolean;
+      autoFillInMiddle: boolean;
       debouncerDelay: number;
       timeout: number;
       [property: string]: JSONValue;
@@ -480,7 +530,8 @@ export interface IProviderReconciliator {
    */
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger?: InlineCompletionTriggerKind
+    trigger?: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[];
 
   /**

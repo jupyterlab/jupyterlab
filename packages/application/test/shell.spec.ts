@@ -5,8 +5,9 @@ import { LabShell, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
 import { framePromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import { Message } from '@lumino/messaging';
-import { DockPanel, Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { DockPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 class ContentWidget extends Widget {
@@ -60,6 +61,19 @@ describe('LabShell', () => {
       expect(shell.rightCollapsed).toBe(true);
       shell.activateById('foo');
       expect(shell.rightCollapsed).toBe(false);
+    });
+  });
+
+  describe('#downCollapsed', () => {
+    it('should return whether the down area is collapsed', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'down');
+      expect(shell.downCollapsed).toBe(false);
+      shell.collapseDown();
+      expect(shell.downCollapsed).toBe(true);
+      shell.expandDown();
+      expect(shell.downCollapsed).toBe(false);
     });
   });
 
@@ -306,6 +320,16 @@ describe('LabShell', () => {
       expect(widget.isVisible).toBe(false);
     });
 
+    it('should activate a widget in the down area', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'down');
+      shell.collapseDown();
+      expect(widget.isVisible).toBe(false);
+      shell.activateById('foo');
+      expect(widget.isVisible).toBe(true);
+    });
+
     it('should activate a widget in the main area', async () => {
       const widget = new ContentWidget();
       widget.id = 'foo';
@@ -344,6 +368,17 @@ describe('LabShell', () => {
       shell.activateById('foo');
       expect(widget.isVisible).toBe(true);
       shell.collapseRight();
+      expect(widget.isVisible).toBe(false);
+    });
+  });
+
+  describe('#collapseDown()', () => {
+    it('should collapse all widgets in the down area', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'down');
+      expect(widget.isVisible).toBe(true);
+      shell.collapseDown();
       expect(widget.isVisible).toBe(false);
     });
   });
@@ -404,6 +439,18 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#expandDown()', () => {
+    it('should expand the current widget', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'down');
+      shell.collapseDown();
+      expect(widget.isVisible).toBe(false);
+      shell.expandDown();
+      expect(widget.isVisible).toBe(true);
+    });
+  });
+
   describe('#closeAll()', () => {
     it('should close all of the widgets in the main area', () => {
       const foo = new Widget();
@@ -415,6 +462,271 @@ describe('LabShell', () => {
       shell.closeAll();
       expect(foo.parent).toBe(null);
       expect(bar.parent).toBe(null);
+    });
+  });
+
+  describe('#activityBarPosition', () => {
+    it('should hide the left side area after rehydrating with a collapsed state in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const handler = (shell as any)._leftHandler;
+      handler.rehydrate({
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(true);
+      expect(widget.isVisible).toBe(false);
+    });
+
+    it('should restore the active widget when rehydrating in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const handler = (shell as any)._leftHandler;
+      handler.rehydrate({
+        collapsed: false,
+        currentWidget: widget,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(false);
+      expect(widget.isVisible).toBe(true);
+    });
+
+    it('should keep the left side area visible when toggling the activity bar visibility in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+      expect(widget.isVisible).toBe(true);
+
+      shell.toggleSideTabBarVisibility('left');
+      const handler = (shell as any)._leftHandler;
+      expect(shell.isSideTabBarVisible('left')).toBe(false);
+      expect(handler.area.isHidden).toBe(false);
+      expect(widget.isVisible).toBe(true);
+
+      shell.toggleSideTabBarVisibility('left');
+      expect(shell.isSideTabBarVisible('left')).toBe(true);
+      expect(widget.isVisible).toBe(true);
+    });
+
+    it('should report the collapsed state via leftCollapsed in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+      expect(shell.leftCollapsed).toBe(false);
+
+      shell.collapseLeft();
+      expect(shell.leftCollapsed).toBe(true);
+
+      shell.expandLeft();
+      expect(shell.leftCollapsed).toBe(false);
+    });
+
+    it('should reflect the position via the data-side attribute on the bar', () => {
+      const handler = (shell as any)._leftHandler;
+      const sideBar = handler.sideBar;
+      expect(sideBar.node.getAttribute('data-side')).toBe('left');
+
+      shell.updateConfig({ activityBarPosition: 'top' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('top');
+
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('bottom');
+
+      shell.updateConfig({ activityBarPosition: 'side' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('left');
+    });
+
+    it('should support transitioning between positions', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      shell.activateById('foo');
+
+      shell.updateConfig({ activityBarPosition: 'top' });
+      expect(widget.isVisible).toBe(true);
+
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      expect(widget.isVisible).toBe(true);
+
+      shell.updateConfig({ activityBarPosition: 'side' });
+      expect(widget.isVisible).toBe(true);
+    });
+
+    it('should hide the right side area after rehydrating with a collapsed state in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'top' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+      const handler = (shell as any)._rightHandler;
+      handler.rehydrate({
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: [widget],
+        widgetStates: {}
+      });
+      expect(handler.area.isHidden).toBe(true);
+      expect(widget.isVisible).toBe(false);
+    });
+
+    it('should reflect the position via the data-side attribute on the right bar', () => {
+      const handler = (shell as any)._rightHandler;
+      const sideBar = handler.sideBar;
+      expect(sideBar.node.getAttribute('data-side')).toBe('right');
+
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('bottom');
+
+      shell.updateConfig({ activityBarPosition: 'side' });
+      expect(sideBar.node.getAttribute('data-side')).toBe('right');
+    });
+
+    it('should report the collapsed state via rightCollapsed in horizontal mode', () => {
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+      shell.activateById('foo');
+      expect(shell.rightCollapsed).toBe(false);
+
+      shell.collapseRight();
+      expect(shell.rightCollapsed).toBe(true);
+
+      shell.expandRight();
+      expect(shell.rightCollapsed).toBe(false);
+    });
+  });
+
+  describe('#move()', () => {
+    it('should preserve title dataset entries when moving widgets between areas', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      widget.title.label = '';
+      widget.title.caption = 'Tooltip';
+      widget.title.dataset = {
+        type: 'document-title',
+        jpTabLabel: 'Fallback Label'
+      };
+
+      shell.add(widget, 'main');
+      shell.move(widget, 'left');
+
+      expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual(['foo']);
+      expect(widget.title.dataset).toEqual({
+        type: 'document-title',
+        jpTabLabel: 'Fallback Label',
+        id: 'foo'
+      });
+
+      shell.move(widget, 'main');
+
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual(['foo']);
+      expect(widget.title.dataset).toEqual({
+        type: 'document-title',
+        jpTabLabel: 'Fallback Label',
+        id: 'foo'
+      });
+    });
+
+    it('should preserve sidebar rank when moving a widget back from the main area', async () => {
+      const restoredShell = new LabShell();
+      Widget.attach(restoredShell, document.body);
+      try {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve<void>(void 0),
+          registry: new CommandRegistry()
+        });
+
+        const fileBrowser = new Widget();
+        fileBrowser.id = 'filebrowser';
+        const running = new Widget();
+        running.id = 'jp-running-sessions';
+        const toc = new Widget();
+        toc.id = 'table-of-contents';
+
+        restoredShell.add(fileBrowser, 'left', {
+          rank: 100,
+          type: 'File Browser'
+        });
+        restoredShell.add(running, 'left', {
+          rank: 200,
+          type: 'Sessions and Tabs'
+        });
+        restoredShell.add(toc, 'left', {
+          rank: 400,
+          type: 'Table of Contents'
+        });
+
+        await restoredShell.restoreLayout('multiple-document', restorer, {
+          'single-document': {},
+          'multiple-document': {
+            'Sessions and Tabs': { area: 'main' }
+          }
+        });
+
+        expect(
+          Array.from(restoredShell.widgets('left')).map(v => v.id)
+        ).toEqual(['filebrowser', 'table-of-contents']);
+        expect(
+          Array.from(restoredShell.widgets('main')).map(v => v.id)
+        ).toEqual(['jp-running-sessions']);
+
+        const newLayout = restoredShell.move(running, 'left');
+
+        expect(newLayout['multiple-document']['Sessions and Tabs']).toEqual({
+          area: 'left',
+          options: { rank: 200 }
+        });
+        expect(
+          Array.from(restoredShell.widgets('left')).map(v => v.id)
+        ).toEqual(['filebrowser', 'jp-running-sessions', 'table-of-contents']);
+      } finally {
+        restoredShell.dispose();
+      }
+    });
+
+    it('should not persist a transient add() to the type-based user layout', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+
+      // Extension-style initial placement with a type and rank.
+      shell.add(widget, 'left', { type: 'Foo', rank: 100 });
+      expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual(['foo']);
+
+      // Simulate the Move Widget plugin: transient move via add() that
+      // should not touch type-based settings.
+      shell.add(widget, 'main');
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual(['foo']);
+      expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual([]);
+
+      // The user layout must stay untouched after a transient add():
+      // only an explicit move() should populate this map.
+      expect(shell.userLayout['multiple-document']['Foo']).toBeUndefined();
+      expect(shell.userLayout['single-document']['Foo']).toBeUndefined();
+
+      const layout = shell.move(widget, 'main');
+      expect(layout['multiple-document']['Foo']).toEqual({
+        area: 'main',
+        options: { rank: 100 }
+      });
+      expect(layout['single-document']['Foo']).toEqual({
+        area: 'main',
+        options: { rank: 100 }
+      });
     });
   });
 
@@ -441,6 +753,175 @@ describe('LabShell', () => {
       shell.mode = 'single-document';
       await shell.restoreLayout(mode, restorer);
       expect(shell.mode).toBe('multiple-document');
+    });
+
+    it('should restore widgets moved to the right sidebar', async () => {
+      const restorer = new LayoutRestorer({
+        connector: new StateDB(),
+        first: Promise.resolve<void>(void 0),
+        registry: new CommandRegistry()
+      });
+      const mode: DockPanel.Mode = 'multiple-document';
+      const widget = new Widget();
+      widget.id = 'foo';
+
+      restorer.add(widget, 'test-one');
+      shell.add(widget, 'main');
+
+      await restorer.restored;
+      await restorer.save({
+        mainArea: { currentWidget: null, dock: null },
+        downArea: { currentWidget: null, widgets: null, size: null },
+        leftArea: {
+          collapsed: true,
+          currentWidget: null,
+          widgets: [],
+          visible: true,
+          widgetStates: {}
+        },
+        rightArea: {
+          collapsed: false,
+          currentWidget: widget,
+          widgets: [widget],
+          visible: true,
+          widgetStates: {}
+        },
+        relativeSizes: null,
+        topArea: { simpleVisibility: true }
+      });
+
+      await shell.restoreLayout(mode, restorer);
+
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual([]);
+      expect(Array.from(shell.widgets('right')).map(v => v.id)).toEqual([
+        'foo'
+      ]);
+    });
+
+    it('should show restored widgets in the down area', async () => {
+      const restorer = new LayoutRestorer({
+        connector: new StateDB(),
+        first: Promise.resolve<void>(void 0),
+        registry: new CommandRegistry()
+      });
+      const mode: DockPanel.Mode = 'multiple-document';
+      const widget = new ContentWidget();
+      widget.id = 'foo';
+
+      restorer.add(widget, 'test-one');
+      shell.add(widget, 'main');
+
+      await restorer.restored;
+      await restorer.save({
+        mainArea: { currentWidget: null, dock: null },
+        downArea: {
+          collapsed: false,
+          currentWidget: widget,
+          widgets: [widget],
+          size: 0.25
+        },
+        leftArea: {
+          collapsed: true,
+          currentWidget: null,
+          widgets: [],
+          visible: true,
+          widgetStates: {}
+        },
+        rightArea: {
+          collapsed: true,
+          currentWidget: null,
+          widgets: [],
+          visible: true,
+          widgetStates: {}
+        },
+        relativeSizes: null,
+        topArea: { simpleVisibility: true }
+      });
+
+      await shell.restoreLayout(mode, restorer);
+      await framePromise();
+
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual([]);
+      expect(Array.from(shell.widgets('down')).map(v => v.id)).toEqual(['foo']);
+      expect(widget.isVisible).toBe(true);
+      expect(widget.activated).toBe(true);
+    });
+
+    it('should keep omitted sidebar widgets in their current rank order', async () => {
+      const restoredShell = new LabShell();
+      Widget.attach(restoredShell, document.body);
+      try {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve<void>(void 0),
+          registry: new CommandRegistry()
+        });
+
+        const fileBrowser = new Widget();
+        fileBrowser.id = 'filebrowser';
+        const running = new Widget();
+        running.id = 'jp-running-sessions';
+        const toc = new Widget();
+        toc.id = 'table-of-contents';
+        const extensionManager = new Widget();
+        extensionManager.id = 'extensionmanager.main-view';
+
+        for (const widget of [fileBrowser, running, toc, extensionManager]) {
+          restorer.add(widget, widget.id);
+        }
+
+        restoredShell.add(fileBrowser, 'left', {
+          rank: 100,
+          type: 'File Browser'
+        });
+        restoredShell.add(running, 'left', {
+          rank: 200,
+          type: 'Sessions and Tabs'
+        });
+        restoredShell.add(toc, 'left', {
+          rank: 400,
+          type: 'Table of Contents'
+        });
+        restoredShell.add(extensionManager, 'left', {
+          rank: 1000,
+          type: 'Extension Manager'
+        });
+
+        await restorer.restored;
+        await restorer.save({
+          mainArea: { currentWidget: null, dock: null },
+          downArea: { currentWidget: null, widgets: null, size: null },
+          leftArea: {
+            collapsed: false,
+            currentWidget: running,
+            widgets: [fileBrowser, running, extensionManager],
+            visible: true,
+            widgetStates: {}
+          },
+          rightArea: {
+            collapsed: true,
+            currentWidget: null,
+            widgets: [],
+            visible: true,
+            widgetStates: {}
+          },
+          relativeSizes: null,
+          topArea: { simpleVisibility: true }
+        });
+
+        await restoredShell.restoreLayout('multiple-document', restorer);
+
+        expect(
+          Array.from(restoredShell.widgets('left')).map(v => v.id)
+        ).toEqual([
+          'filebrowser',
+          'jp-running-sessions',
+          'table-of-contents',
+          'extensionmanager.main-view'
+        ]);
+      } finally {
+        restoredShell.dispose();
+      }
     });
   });
 
@@ -555,7 +1036,7 @@ describe('LabShell', () => {
       );
     });
 
-    it('right handler should have a role of complementary and aria label of altenate sidebar', () => {
+    it('right handler should have a role of complementary and aria label of alternate sidebar', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');
