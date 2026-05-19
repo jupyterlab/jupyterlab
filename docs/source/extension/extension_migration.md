@@ -9,41 +9,41 @@
 ## JupyterLab 4.5 to 4.6 (not released yet)
 
 ### Migrating to `jupyter-builder`
- 
+
 JupyterLab's build tooling has moved out of the JupyterLab repository into a standalone package: [`jupyter-builder`](https://pypi.org/project/jupyter-builder/) (PyPI) and [`@jupyter/builder`](https://www.npmjs.com/package/@jupyter/builder) (npm). Existing extensions continue to work, but we recommend migrating so your build no longer depends on a full JupyterLab installation.
- 
+
 The migration is two small changes.
- 
+
 #### 1. Update `pyproject.toml`
- 
+
 Replace `jupyterlab` in your build requirements with `jupyter-builder`:
- 
+
 ```toml
 # Before
 requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0.3.2"]
- 
+
 # After
 requires = ["hatchling>=1.5.0", "hatch-nodejs-version>=0.3.2", "jupyter-builder>=1.0.0"]
 ```
- 
+
 #### 2. Update `package.json`
- 
+
 Replace `@jupyterlab/builder` with `@jupyter/builder` in your dependencies:
- 
+
 ```json
 "@jupyter/builder": "^1.0.0"
 ```
- 
+
 Then update your build scripts to use the new CLI:
- 
+
 ```json
 "build:labextension": "jupyter-builder build .",
 "build:labextension:dev": "jupyter-builder build --development True .",
 "watch:labextension": "jupyter-builder watch ."
 ```
- 
+
 That's it. Your extension now builds without pulling in all of JupyterLab.
- 
+
 For more information on `jupyter-builder`, see the [blog post](#TODO).
 
 ### Building extensions with Rspack
