@@ -88,7 +88,10 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     // For context-menu lookup
     const hostedTitleToWidget = new WeakMap<HTMLElement, Widget>();
 
-    const dragSetupDone = new Set<string>();
+    // Keyed by accordion instance so a recreated accordion (after the last
+    // hosted section leaves and the FileBrowser disposes it) gets fresh
+    // listeners on the next move-in.
+    const dragSetupDone = new WeakSet<AccordionPanel>();
     const pendingSections = new Map<
       string,
       Map<string, { targetId: string; collapsed: boolean; index?: number }>
@@ -146,6 +149,14 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       );
     };
 
+    // Re-appending all titles in logical to fix keyboard Tab navigation.
+    const syncTitleDOMOrder = (accordion: AccordionPanel): void => {
+      const layout = accordion.layout as AccordionLayout;
+      for (const title of layout.titles) {
+        accordion.node.appendChild(title);
+      }
+    };
+
     const addDragHandle = (widget: Widget, accordion: AccordionPanel): void => {
       const idx = Array.from(accordion.widgets).indexOf(widget);
       if (idx < 0) {
@@ -159,14 +170,11 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
     };
 
-    const setupAccordionDrag = (
-      accordion: AccordionPanel,
-      targetId: string
-    ): void => {
-      if (dragSetupDone.has(targetId)) {
+    const setupAccordionDrag = (accordion: AccordionPanel): void => {
+      if (dragSetupDone.has(accordion)) {
         return;
       }
-      dragSetupDone.add(targetId);
+      dragSetupDone.add(accordion);
 
       // Persist collapse/expand state whenever the user toggles a section.
       accordion.expansionToggled.connect(() => void saveState());
@@ -219,6 +227,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
             targetSlot > currentIdx ? targetSlot - 1 : targetSlot;
           if (insertIdx !== currentIdx) {
             accordion.insertWidget(insertIdx, draggedWidget);
+            syncTitleDOMOrder(accordion);
             void saveState();
           }
         }
@@ -291,12 +300,11 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           const target = Math.max(0, Math.min(index, total - 1));
           if (accordion.widgets[target] !== widget) {
             accordion.insertWidget(target, widget);
+            syncTitleDOMOrder(accordion);
           }
         }
 
-        if (!dragSetupDone.has(targetId)) {
-          setupAccordionDrag(accordion, targetId);
-        }
+        setupAccordionDrag(accordion);
         addDragHandle(widget, accordion);
 
         const idx = Array.from(accordion.widgets).indexOf(widget);
@@ -433,7 +441,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       });
 
       if (panel.accordionPanel && panel.sections.length > 0) {
-        setupAccordionDrag(panel.accordionPanel, targetId);
+        setupAccordionDrag(panel.accordionPanel);
       }
     };
 
