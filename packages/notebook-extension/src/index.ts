@@ -1327,6 +1327,10 @@ function activateNotebookTools(
     return true;
   };
   notebookTools.title.icon = buildIcon;
+  notebookTools.title.dataset = {
+    ...notebookTools.title.dataset,
+    jpTabLabel: trans.__('Notebook Tools')
+  };
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
 

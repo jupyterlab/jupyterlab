@@ -1,3 +1,9 @@
 jupyterlab/staging/yarn.js binary
 # SCM syntax highlighting
 pixi.lock linguist-language=YAML linguist-generated=true
+# Merge png files to ease regenerating snapshots on conflicts
+# (we always need to "resolve" conflicts and then regenerate
+# the snapshots anyways, so the initial "resolution"
+# does not really matter)
+galata/**/*.png merge=ours
+examples/**/*.png merge=ours

@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.21.1", "jupyter-builder>=0.0.8"]
+requires = ["hatchling>=1.21.1", "jupyter-builder>=1.0.0b1"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter-builder>=0.0.8",
+    "jupyter-builder>=1.0.0b1",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -78,6 +78,7 @@ docs = [
     "sphinx>=1.8,<8.2.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
+    "shellcheck-py",
     "pytest",
     "pytest-jupyter",
     "pytest-check-links",
@@ -117,6 +118,7 @@ test = [
 dev = [
     "build",
     "pre-commit",
+    "shellcheck-py",
     "pytest-cov",
     "coverage",
     "hatch",
