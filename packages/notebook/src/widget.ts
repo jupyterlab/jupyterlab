@@ -2064,6 +2064,9 @@ export class Notebook extends StaticNotebook {
     if (newActiveCellIndex >= 0) {
       this.activeCellIndex = newActiveCellIndex;
     }
+
+    // Deselect all cells first to clear any stale selection state.
+    this.deselectAll();
     if (from > to) {
       isSelected.forEach((selected, idx) => {
         if (selected) {
