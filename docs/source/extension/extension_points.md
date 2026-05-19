@@ -539,6 +539,28 @@ The recommended ranges for this rank are:
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
 
+#### Movable accordion sections
+
+Sidebar panels can participate in the movable-sections system so users can
+relocate accordion sections between panels via the context menu. There are two
+roles — **source** (sections can be taken out) and **target** (sections can be
+dropped in). Take `IMovableSectionRegistry` as an `optional` dependency and
+register:
+
+```typescript
+import { IMovableSectionRegistry } from '@jupyterlab/apputils';
+
+// in your plugin's activate():
+if (registry) {
+  registry.registerSource('@my-org/my-ext:panel', 'My Panel', myPanel);
+  // and/or:
+  registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
+}
+```
+
+Your panel must then implement `IMovableSectionSource`, `IMovableSectionDestination`,
+or both. See {doc}`movable_sections` for the full API and implementation guide.
+
 (mainmenu)=
 
 ## Main Menu
