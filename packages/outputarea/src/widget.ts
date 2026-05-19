@@ -192,6 +192,16 @@ export class OutputArea extends Widget {
       KernelMessage.IExecuteReplyMsg
     >
   ) {
+    this._setFuture(value, true);
+  }
+
+  private _setFuture(
+    value: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >,
+    clear: boolean
+  ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       throw Error('Model is disposed');
@@ -213,14 +223,16 @@ export class OutputArea extends Widget {
         // even if caught on the `done` promise level before.
       });
 
-    this.model.clear();
+    if (clear) {
+      this.model.clear();
 
-    // Make sure there were no input widgets.
-    if (this.widgets.length) {
-      this._clear();
-      this.outputLengthChanged.emit(
-        Math.min(this.model.length, this._maxNumberOutputs)
-      );
+      // Make sure there were no input widgets.
+      if (this.widgets.length) {
+        this._clear();
+        this.outputLengthChanged.emit(
+          Math.min(this.model.length, this._maxNumberOutputs)
+        );
+      }
     }
 
     // Handle published messages.
@@ -285,6 +297,45 @@ export class OutputArea extends Widget {
     this._displayIdMap.clear();
     this._outputTracker.dispose();
     super.dispose();
+  }
+
+  /**
+   * Detach the kernel future from this output area without disposing it.
+   *
+   * Clears the message handlers on the future so this output area can be
+   * safely disposed without terminating the in-flight execution. The returned
+   * future can be re-attached to a new output area via `reattachFuture` method.
+   *
+   * Returns `null` if no future is currently attached.
+   */
+  detachFuture(): Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
+    const future = this._future;
+    if (!future) {
+      return null;
+    }
+    future.onIOPub = () => undefined;
+    future.onReply = () => undefined;
+    future.onStdin = () => undefined;
+    this._future = null!;
+    return future;
+  }
+
+  /**
+   * Reattach the kernel future, without clearing the existing output model.
+   *
+   * This is useful when a cell gets deleted by a user but user later decides
+   * to undo the deletion, as it allows to keep the output data flowing.
+   */
+  reattachFuture(
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >
+  ) {
+    this._setFuture(future, false);
   }
 
   /**
