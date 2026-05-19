@@ -34,6 +34,33 @@ By working through this tutorial, you'll learn:
 The completed extension, showing the [Astronomy Picture of the Day for 24 Jul 2015](https://apod.nasa.gov/apod/ap150724.html).
 :::
 
+:::{note}
+Prefer trying the tutorial in the browser first?
+
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts&hide=all&fromURLToFolder=step-0">Step 0: Template baseline</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all&fromURLToFolder=step-1">Step 1: Show a panel</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts&hide=all&fromURLToFolder=step-2">Step 2: Show an image</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/572572da88a780711470fcf29d9520979837b2ce/src/index.ts&hide=all&fromURLToFolder=step-3">Step 3: Style and attribution</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts&hide=all&fromURLToFolder=step-4">Step 4: Refactor and refresh</a>
+- <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&hide=all&fromURLToFolder=step-5">Step 5: Restore panel state (final tutorial state)</a>
+
+After opening a step, run `Load Current File As Extension` from the editor toolbar (or command palette).
+You can also launch the playground on Binder:
+[Lab](https://mybinder.org/v2/gh/jupyterlab/plugin-playground/main?urlpath=lab),
+[Notebook v7](https://mybinder.org/v2/gh/jupyterlab/plugin-playground/main?urlpath=tree).
+:::
+
+```{raw} html
+<!-- Plugin Playground source loaded from jupyterlab/jupyterlab_apod@cffae6a4049af97436f0c19a0dae65a574f74390 src/index.ts -->
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-query="fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&fromURLToFolder=step-5"
+  data-playground-title="JupyterLab extension tutorial interactive example"
+  data-playground-description="Interactive example for the final APOD tutorial state."
+></div>
+```
+
 Sound like fun? Excellent. Here we go!
 
 ## Set up a development environment
@@ -102,7 +129,7 @@ When prompted, enter values like the following for all of the template
 prompts (`apod` stands for Astronomy Picture of the Day, the NASA service we
 are using to fetch pictures).
 
-```bash
+```text
 What is your extension kind?
 (Use arrow keys)
  frontend
@@ -158,6 +185,8 @@ git init
 git add .
 git commit -m 'Seed apod project from extension template'
 ```
+
+You can also open this seed state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/54d8b37810cb402f72615ca36ea206a3690a25d0/src/index.ts&hide=all&fromURLToFolder=step-0">Plugin Playground</a>.
 
 :::{note}
 This step is not technically necessary, but it is good practice to
@@ -433,6 +462,7 @@ The in-progress extension, showing a blank panel.
 If your widget is not behaving, compare your code with the reference
 project state at the [01-show-a-panel
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-01-show-a-panel).
+You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all&fromURLToFolder=step-1">Plugin Playground</a>.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -568,7 +598,9 @@ of these problems in the upcoming sections.
 If you don't see a image at all, compare your code with the
 [02-show-an-image
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-02-show-an-image)
-in the reference project. When it's working, make another git commit.
+in the reference project. You can also open this state in
+<a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/f4c7801b1fcf0d5df6d43d8a39a639426837f5c5/src/index.ts&hide=all&fromURLToFolder=step-2">Plugin Playground</a>. When it's working, make another git
+commit.
 
 ```bash
 git add src/index.ts
@@ -681,6 +713,7 @@ of the image.
 If anything is not working correctly, compare your code with the reference project
 [03-style-and-attribute
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-03-style-and-attribute).
+You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/572572da88a780711470fcf29d9520979837b2ce/src/index.ts&hide=all&fromURLToFolder=step-3">Plugin Playground</a>.
 When everything is working as expected, make another commit.
 
 ```bash
@@ -858,7 +891,8 @@ image.
 
 If anything is not working correctly, compare your code with the
 [04-refactor-and-refresh
-tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-04-refactor-and-refresh)
+tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-04-refactor-and-refresh).
+You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/c0b0f6c4cce1fcfdc2df4e4f3680da89fc69f27c/src/index.ts&hide=all&fromURLToFolder=step-4">Plugin Playground</a>
 to debug. Once it is working properly, commit it.
 
 ```bash
@@ -1005,6 +1039,7 @@ The completed extension, showing the [Astronomy Picture of the Day for 24 Jul 20
 
 Refer to the [05-restore-panel-state
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-05-restore-panel-state)
+or open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/cffae6a4049af97436f0c19a0dae65a574f74390/src/index.ts&hide=all&fromURLToFolder=step-5">Plugin Playground</a>
 if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
