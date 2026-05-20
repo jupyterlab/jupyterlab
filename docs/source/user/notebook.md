@@ -282,3 +282,26 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 ## Paste code cells without output
 
 When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+
+(jpy-session-name)=
+
+## Getting the notebook's file path from the kernel
+
+Each kernel started by JupyterLab is given an environment variable, `JPY_SESSION_NAME`, that holds the relative path of the notebook (or file) that the kernel is associated with. The value is set by Jupyter Server when the kernel is spawned, and is updated whenever the notebook is renamed in the JupyterLab UI.
+
+This makes `JPY_SESSION_NAME` the recommended way for code running inside a notebook to determine its own file path on disk, without depending on third-party helpers such as `ipynbname` (which does not work reliably behind proxies or in JupyterHub deployments).
+
+For example, from a Python kernel:
+
+```python
+import os
+
+notebook_path = os.environ.get("JPY_SESSION_NAME")
+print(notebook_path)  # e.g. "notebooks/my_analysis.ipynb"
+```
+
+Notes:
+
+- `JPY_SESSION_NAME` is set per-kernel, so its value reflects the notebook the kernel was started for. If you attach a single kernel to multiple notebooks, the variable still refers to the original notebook.
+- The path is *relative to the Jupyter Server's working directory* (usually the directory the server was launched from), not an absolute path. Combine it with `os.getcwd()` or with the server's `notebook_dir` setting if you need an absolute path.
+- A kernel started outside of JupyterLab (for example, by `jupyter console` or by direct use of `jupyter_client`) will not have this variable set, so code that relies on it should handle the missing-variable case gracefully.
