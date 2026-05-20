@@ -22,6 +22,8 @@
   "@jupyterlab/apputils-extension:kernels-settings": "Reserves the name for kernel settings.",
   "@jupyterlab/apputils-extension:licenses-client": "The licenses client plugin for fetching licenses.",
   "@jupyterlab/apputils-extension:licenses-plugin": "Adds licenses reporting tools.",
+  "@jupyterlab/apputils-extension:movable-section-registry": "Provides the movable section registry for panels that exchange moveable sections.",
+  "@jupyterlab/apputils-extension:move-sections": "Enables moving sections between any registered source and target sidebars.",
   "@jupyterlab/apputils-extension:notification": "Add the notification center and its status indicator.",
   "@jupyterlab/apputils-extension:palette": "Provides the command palette.",
   "@jupyterlab/apputils-extension:palette-restorer": "Restores the command palette.",

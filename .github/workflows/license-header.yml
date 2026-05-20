@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Configure git to use https
         run: git config --global hub.protocol https
@@ -46,6 +47,12 @@ jobs:
           echo "N_CHANGES=${CHANGES}" >> $GITHUB_OUTPUT
 
           git diff
+
+      - name: Setup git credentials
+        if: steps.files-changed.outputs.N_CHANGES != '0'
+        run: gh auth setup-git
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit any changes
         if: steps.files-changed.outputs.N_CHANGES != '0'

@@ -17,11 +17,12 @@ export YARN_ENABLE_INLINE_BUILDS=1
 wait_for_condition() {
     local timeout=$1
     shift
-    for i in $(seq 1 $timeout); do
+    while [[ $timeout -gt 0 ]]; do
         if "$@"; then
             return 0
         fi
         sleep 1
+        timeout=$((timeout - 1))
     done
     return 1
 }
@@ -34,7 +35,7 @@ fi
 
 if [[ $GROUP == python ]]; then
     export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
-    mkdir -p $JUPYTERLAB_DIR
+    mkdir -p "${JUPYTERLAB_DIR}"
 
     # the env var ensures that `yarn.lock` in app dir does not change on a simple `jupyter lab build` call
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
@@ -48,7 +49,7 @@ if [[ $GROUP == js* ]]; then
 
     # extract the group name
     export PKG="${GROUP#*-}"
-    pushd packages/${PKG}
+    pushd "packages/${PKG}"
 
     jlpm run build:test; true
 
@@ -64,6 +65,7 @@ if [[ $GROUP == docs ]]; then
     python -m pip install .[docs]
     pushd docs
     make html
+    make shellcheck
     popd
 fi
 
@@ -92,8 +94,9 @@ if [[ $GROUP == lint ]]; then
     # Lint our files.
     jlpm run prettier:check || (echo 'Please run `jlpm run prettier` locally and push changes' && exit 1)
     jlpm run eslint:check || (echo 'Please run `jlpm run eslint` locally and push changes' && exit 1)
-    jlpm run eslint:check:typed || (echo echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
+    jlpm run eslint:check:typed || (echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
     jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
+    jlpm run shellcheck || (echo 'Please run `jlpm run shellcheck` locally and push changes' && exit 1)
 
     # Python checks
     ruff format .
@@ -339,20 +342,20 @@ if [[ $GROUP == usage2 ]]; then
 
     # Make sure we can non-dev install.
     TEST_INSTALL_PATH="${HOME}/test_install"
-    virtualenv -p $(which python3) $TEST_INSTALL_PATH
-    $TEST_INSTALL_PATH/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
+    virtualenv -p "$(command -v python3)" "$TEST_INSTALL_PATH"
+    "$TEST_INSTALL_PATH"/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
 
-    $TEST_INSTALL_PATH/bin/jupyter server extension list 1>serverextensions 2>&1
+    "$TEST_INSTALL_PATH"/bin/jupyter server extension list 1>serverextensions 2>&1
     cat serverextensions
     cat serverextensions | grep -i "jupyterlab.*enabled"
     cat serverextensions | grep -i "jupyterlab.*OK"
 
-    $TEST_INSTALL_PATH/bin/python -m jupyterlab.browser_check
+    "$TEST_INSTALL_PATH"/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
-    $TEST_INSTALL_PATH/bin/jupyter lab build
+    "$TEST_INSTALL_PATH"/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
+    "$TEST_INSTALL_PATH"/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
     if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
         echo "Server started successfully"
@@ -369,12 +372,12 @@ if [[ $GROUP == usage2 ]]; then
     # Check the labhubapp
     # Test that the labhubapp fails to start if jupyterhub is not installed
     # and provides a helpful error message.
-    ($TEST_INSTALL_PATH/bin/jupyter-labhub 2>&1 || true) | tee labhub.log
+    ("$TEST_INSTALL_PATH"/bin/jupyter-labhub 2>&1 || true) | tee labhub.log
     grep -q "JupyterHub is not installed" labhub.log || exit 1
     # Install jupyterhub and test that the labhubapp starts successfully.
-    $TEST_INSTALL_PATH/bin/pip install jupyterhub
+    "$TEST_INSTALL_PATH"/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
-    $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
+    "$TEST_INSTALL_PATH"/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
     TASK_PID=$!
     unset JUPYTERHUB_API_TOKEN
     # Make sure the task is running
@@ -488,7 +491,7 @@ fi
 
 if [[ $GROUP == nonode ]]; then
     # Make sure we can install the wheel
-    virtualenv -p $(which python3) test_install
+    virtualenv -p "$(command -v python3)" test_install
     ./test_install/bin/pip install -v --pre --no-cache-dir --no-deps jupyterlab --no-index --find-links=dist  # Install latest jupyterlab
     ./test_install/bin/pip install jupyterlab  # Install jupyterlab dependencies
     ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
@@ -509,7 +512,7 @@ if [[ $GROUP == nonode ]]; then
     rm -f /tmp/jupyter_log_$$.txt
 
     # Make sure we can install the tarball
-    virtualenv -p $(which python3) test_sdist
+    virtualenv -p "$(command -v python3)" test_sdist
     ./test_sdist/bin/pip install dist/*.tar.gz
     ./test_sdist/bin/python -m jupyterlab.browser_check --no-browser-test
 fi
