@@ -23,7 +23,9 @@
 }
 
 .jp-ThemedContainer button:focus-visible {
-  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -1px;
 }
 
@@ -42,7 +44,9 @@ button.jp-mod-styled.jp-mod-accept:active {
 }
 
 button.jp-mod-styled.jp-mod-accept:focus-visible {
-  outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-accept-color-active, var(--jp-focus-outline-color));
+  outline-style: solid;
 }
 
 button.jp-mod-styled.jp-mod-reject {
@@ -60,7 +64,9 @@ button.jp-mod-styled.jp-mod-reject:active {
 }
 
 button.jp-mod-styled.jp-mod-reject:focus-visible {
-  outline: 1px solid var(--jp-reject-color-active, var(--md-grey-700, #616161));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-reject-color-active, var(--md-grey-700, #616161));
+  outline-style: solid;
 }
 
 button.jp-mod-styled.jp-mod-warn {
@@ -78,7 +84,9 @@ button.jp-mod-styled.jp-mod-warn:active {
 }
 
 button.jp-mod-styled.jp-mod-warn:focus-visible {
-  outline: 1px solid var(--jp-warn-color-active, var(--md-red-700, #d32f2f));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-warn-color-active, var(--md-red-700, #d32f2f));
+  outline-style: solid;
 }
 
 .jp-Button-flat {

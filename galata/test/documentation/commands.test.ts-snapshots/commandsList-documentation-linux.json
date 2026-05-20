@@ -2387,7 +2387,7 @@
     "label": "Redo",
     "caption": "",
     "shortcuts": [
-      "Ctrl Shift Z"
+      "Ctrl Y"
     ],
     "args": {
       "type": "object",
@@ -4108,6 +4108,16 @@
     }
   },
   {
+    "id": "notebook:copy-selected-text",
+    "label": "Copy Selected Text",
+    "caption": "Copy selected text from the active cell or output area",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:copy-to-clipboard",
     "label": "Copy Output to Clipboard",
     "caption": "",
@@ -4220,6 +4230,16 @@
           "description": "Whether to activate the notebook after execution"
         }
       }
+    }
+  },
+  {
+    "id": "notebook:cut-selected-text",
+    "label": "Cut Selected Text",
+    "caption": "Cut selected text from the active cell or output area",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -4706,6 +4726,16 @@
           "description": "Whether to activate the notebook after execution"
         }
       }
+    }
+  },
+  {
+    "id": "notebook:paste-text",
+    "label": "Paste Text",
+    "caption": "Paste text from the clipboard into the active cell editor",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {

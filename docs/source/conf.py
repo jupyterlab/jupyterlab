@@ -52,6 +52,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 

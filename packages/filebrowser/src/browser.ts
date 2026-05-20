@@ -94,6 +94,7 @@ export class FileBrowser
     const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    model.pathChanged.connect(this._onPathChanged, this);
     this._manager = model.manager;
 
     this.toolbar.node.setAttribute(
@@ -340,6 +341,17 @@ export class FileBrowser
   }
 
   /**
+   * Whether to clear the filter value when navigating to a new directory.
+   */
+  get clearFilterOnNavigation(): boolean {
+    return this._clearFilterOnNavigation;
+  }
+
+  set clearFilterOnNavigation(value: boolean) {
+    this._clearFilterOnNavigation = value;
+  }
+
+  /**
    * Whether to sort notebooks above other files
    */
   get sortNotebooksFirst(): boolean {
@@ -482,6 +494,28 @@ export class FileBrowser
    */
   paste(): Promise<void> {
     return this.listing.paste();
+  }
+
+  /**
+   * Handle a `pathChanged` signal from the model.
+   */
+  private _onPathChanged(): void {
+    // Clear filter when user navigates to a new directory
+    if (this._clearFilterOnNavigation) {
+      const input = this._fileFilterRef.current;
+      const query = input ? input.value : '';
+
+      // Only clear the filter (and trigger a refresh) if a non-empty query is active
+      if (query && query.trim() !== '') {
+        this.model.setFilter(value => {
+          return {};
+        });
+
+        if (input) {
+          input.value = '';
+        }
+      }
+    }
   }
 
   private async _createNew(
@@ -736,6 +770,7 @@ export class FileBrowser
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
+  private _clearFilterOnNavigation: boolean = true;
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
