@@ -9242,11 +9242,11 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^5.0.2":
-  version: 5.0.3
-  resolution: "brace-expansion@npm:5.0.3"
+  version: 5.0.6
+  resolution: "brace-expansion@npm:5.0.6"
   dependencies:
     balanced-match: ^4.0.2
-  checksum: 8fea33ebbf4eac08d578fad7727c25c18a86e453bbd95d6312ecd87db73effe5607c77ed03d81ad7f56b4d84a4e355abbda939fdcab0d8a820bdb56d6587a7c5
+  checksum: b5a0e54a5d5f66d0acb88f297e1f3e74732f9c8a35ab6c87b96bd60f6e390697f099b747dd053b9017bd1a38225ff3f60632de09a723a99f2144740b7fbda66b
   languageName: node
   linkType: hard
 
