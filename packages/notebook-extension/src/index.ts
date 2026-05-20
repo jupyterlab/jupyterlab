@@ -2952,7 +2952,8 @@ function addCommands(
       if (current) {
         const { context, content } = current;
         const trustResult = await NotebookActions.trust(content);
-        if (trustResult.trusted) {
+        const save = args.save !== false;
+        if (trustResult.trusted && save) {
           await context.save();
         }
         return trustResult;
@@ -2963,7 +2964,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          save: {
+            type: 'boolean',
+            description: 'Whether to save the notebook after trusting (default: true)'
+          }
+        }
       }
     }
   });

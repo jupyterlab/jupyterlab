@@ -1,3 +1,30 @@
+bug: []
+
+enhancement:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'packages/**/*'
+
+feature: []
+
+maintenance:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/**/*'
+    - 'buildutils/**/*'
+    - '*.py'
+    - '*.cfg'
+    - '*.yaml'
+    - '*.yml'
+
+dependencies:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'package.json'
+    - 'yarn.lock'
+    - 'requirements*.txt'
+    - '.github/dependabot.yml'
+
 Design System CSS:
 - changed-files:
   - any-glob-to-any-file:
