@@ -79,7 +79,6 @@ jobs:
         with:
           path: /home/runner/pw-browsers
           key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}
-          lookup-only: true
 
       - name: Restore ${{ matrix.group }} cache
         if: ${{ matrix.cache-path }}
@@ -88,7 +87,6 @@ jobs:
           path: ${{ matrix.cache-path }}
           key: |-
             ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version  }}
-          lookup-only: true
 
       - name: Install dependencies
         env:

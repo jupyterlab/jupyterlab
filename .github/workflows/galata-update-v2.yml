@@ -148,7 +148,6 @@ jobs:
           fetch-depth: 1
           token: ${{ secrets.BOT_USER_PAT }}
           path: repo
-          persist-credentials: false
 
       - name: Download test results
         env:
