@@ -1959,6 +1959,8 @@ export class Notebook extends StaticNotebook {
     }
 
     this._ensureFocus();
+
+    this.deselectAll();
     if (
       cell instanceof MarkdownCell &&
       cell.numberChildNodes > 0 &&
@@ -2155,9 +2157,6 @@ export class Notebook extends StaticNotebook {
     if (changed) {
       this._selectionChanged.emit(void 0);
     }
-    // Make sure we have a valid active cell.
-    // eslint-disable-next-line no-self-assign
-    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
