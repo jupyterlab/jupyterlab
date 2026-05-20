@@ -10,6 +10,7 @@ import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
+import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 
 // Filter globals to remove any with leading/trailing whitespace
@@ -234,6 +235,7 @@ export default defineConfig([
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-untranslated-string': 'error',
+      'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -255,7 +257,7 @@ export default defineConfig([
       ],
 
       '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
@@ -448,6 +450,24 @@ export default defineConfig([
       '**/*.spec.ts',
       '**/*.spec.tsx',
       '**/test/**/*.ts',
+      '**/test/**/*.tsx',
+      '**/tests/**/*.ts',
+      '**/tests/**/*.tsx',
+      'testutils/**/*.ts',
+      'testutils/**/*.tsx',
+      'galata/test/**/*.ts',
+      'galata/test/**/*.tsx'
+    ],
+
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
+  },
+  {
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**/*.ts',
       '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',
@@ -480,6 +500,14 @@ export default defineConfig([
             "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
       ]
+    }
+  },
+  {
+    files: ['**/schema/*.json'],
+    languageOptions: { parser: jsoncParser },
+    plugins: { jupyter: jupyterPlugin },
+    rules: {
+      'jupyter/no-schema-enum': 'error'
     }
   },
   prettierPluginRecommended,

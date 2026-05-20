@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import type { ISignal } from '@lumino/signaling';
@@ -25,6 +26,7 @@ import { expandDottedPaths, sleep, untilReady } from './utils';
 import type { VirtualDocument } from './virtual/document';
 
 import type * as protocol from 'vscode-languageserver-protocol';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * Each Widget with a document (whether file or a notebook) has the same DocumentConnectionManager
@@ -257,7 +259,9 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
       }
       const rawSettings = allServerSettings[languageServerId]!;
 
-      const parsedSettings = expandDottedPaths(rawSettings.configuration || {});
+      const parsedSettings = expandDottedPaths(
+        (rawSettings.configuration as ReadonlyJSONObject) || {}
+      );
 
       const serverSettings: protocol.DidChangeConfigurationParams = {
         settings: parsedSettings

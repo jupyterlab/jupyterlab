@@ -206,16 +206,19 @@
 }
 
 .jp-HTMLSelect.jp-DefaultStyle select:focus-visible {
-  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
 }
 
 /* Use our own theme for hover and option styles */
-/* stylelint-disable-next-line selector-max-type */
+/* stylelint-disable selector-max-type */
 .jp-HTMLSelect.jp-DefaultStyle select:hover,
 .jp-HTMLSelect.jp-DefaultStyle select > option {
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color0);
 }
+/* stylelint-enable selector-max-type */
 
 .jp-ThemedContainer select {
   box-sizing: border-box;

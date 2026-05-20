@@ -97,7 +97,9 @@
 }
 
 .jp-BreadCrumbs-item:focus-visible {
-  outline: 2px solid var(--jp-brand-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-style: solid;
+  outline-color: var(--jp-focus-outline-color);
 }
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
@@ -228,18 +230,14 @@
 .jp-DirListing-headerItem.jp-id-created,
 .jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
-  /* stylelint-disable */
   container-type: inline-size;
-  /* stylelint-enable */
 }
 
 /**
- * Use container queries (not yet supported by our version of stylelint)
- * to display either a small or large header for the date and file size columns.
+ * Use container queries to display either a small or large header
+ * for the date and file size columns.
  */
-/* stylelint-disable */
 @container (max-width: 100px) {
-  /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
@@ -259,9 +257,7 @@
   }
 }
 
-/* stylelint-disable */
 @container (min-width: 100px) {
-  /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
@@ -420,8 +416,8 @@
 .jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
   /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
   when it gets replaced with `jp-DirListing-editor` when editing the file name */
-  outline-width: 2px;
-  outline-color: var(--jp-inverse-layout-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
   outline-offset: -4px;
 }
