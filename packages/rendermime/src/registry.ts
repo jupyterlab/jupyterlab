@@ -4,12 +4,13 @@
 |----------------------------------------------------------------------------*/
 import { Sanitizer } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Contents } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Contents } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
-import { IRenderMimeRegistry } from './tokens';
+import type { IRenderMimeRegistry } from './tokens';
 
 /**
  * An object which manages mime renderer factories.
@@ -32,6 +33,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
     this.translator = options.translator ?? nullTranslator;
     this.resolver = options.resolver ?? null;
     this.linkHandler = options.linkHandler ?? null;
+    this.trustHandler = options.trustHandler ?? null;
     this.latexTypesetter = options.latexTypesetter ?? null;
     this.markdownParser = options.markdownParser ?? null;
     this.sanitizer = options.sanitizer ?? new Sanitizer();
@@ -58,6 +60,11 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    * The object used to handle path opening links.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The object used to register trusted render boundaries.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
 
   /**
    * The LaTeX typesetter for the rendermime.
@@ -141,6 +148,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
+      trustHandler: this.trustHandler,
       latexTypesetter: this.latexTypesetter,
       markdownParser: this.markdownParser,
       translator: this.translator
@@ -171,6 +179,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       resolver: options.resolver ?? this.resolver ?? undefined,
       sanitizer: options.sanitizer ?? this.sanitizer ?? undefined,
       linkHandler: options.linkHandler ?? this.linkHandler ?? undefined,
+      trustHandler: options.trustHandler ?? this.trustHandler ?? undefined,
       latexTypesetter:
         options.latexTypesetter ?? this.latexTypesetter ?? undefined,
       markdownParser:
@@ -305,6 +314,11 @@ export namespace RenderMimeRegistry {
      * An optional path handler.
      */
     linkHandler?: IRenderMime.ILinkHandler;
+
+    /**
+     * An optional trust handler.
+     */
+    trustHandler?: IRenderMime.ITrustHandler;
 
     /**
      * An optional LaTeX typesetter.

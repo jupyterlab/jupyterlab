@@ -5,7 +5,7 @@
  * @module apputils
  */
 import { Toolbar as UIToolbar } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**
@@ -49,6 +49,7 @@ export * from './sanitizer';
 export * from './semanticCommand';
 export * from './sessioncontext';
 export * from './thememanager';
+export * from './movableSectionRegistry';
 export * from './tokens';
 export {
   ToolbarWidgetRegistry,

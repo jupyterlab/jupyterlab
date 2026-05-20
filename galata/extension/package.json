@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata-extension",
-  "version": "5.5.0",
+  "version": "5.6.0-beta.0",
   "private": true,
   "description": "JupyterLab UI Testing Framework Extension.",
   "keywords": [
@@ -25,29 +25,33 @@
   ],
   "scripts": {
     "build": "npm run build:lib && npm run build:labextension",
-    "build:labextension": "node ../../node_modules/@jupyterlab/builder/lib/build-labextension.js --core-path ../../dev_mode --development .",
+    "build:labextension": "node ../../node_modules/@jupyter/builder/lib/build-labextension.js --development --core-package-file ../../dev_mode/package.json .",
     "build:lib": "tsc",
     "clean": "npm run clean:lib && npm run clean:labextension",
     "clean:labextension": "rimraf ../../jupyterlab/galata/@jupyterlab",
     "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.0",
-    "@jupyterlab/apputils": "^4.6.0",
-    "@jupyterlab/cells": "^4.5.0",
-    "@jupyterlab/debugger": "^4.5.0",
-    "@jupyterlab/docmanager": "^4.5.0",
-    "@jupyterlab/nbformat": "^4.5.0",
-    "@jupyterlab/notebook": "^4.5.0",
-    "@jupyterlab/settingregistry": "^4.5.0",
+    "@fontsource-variable/noto-sans-sc": "^5.2.10",
+    "@fontsource/dejavu-mono": "^5.2.5",
+    "@fontsource/dejavu-sans": "^5.2.5",
+    "@jupyterlab/application": "^4.6.0-beta.0",
+    "@jupyterlab/apputils": "^4.7.0-beta.0",
+    "@jupyterlab/cells": "^4.6.0-beta.0",
+    "@jupyterlab/debugger": "^4.6.0-beta.0",
+    "@jupyterlab/docmanager": "^4.6.0-beta.0",
+    "@jupyterlab/nbformat": "^4.6.0-beta.0",
+    "@jupyterlab/notebook": "^4.6.0-beta.0",
+    "@jupyterlab/settingregistry": "^4.6.0-beta.0",
+    "@jupyterlab/terminal": "^4.6.0-beta.0",
     "@lumino/algorithm": "^2.0.4",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/signaling": "^2.1.5"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.5.0",
+    "@jupyter/builder": "^1.0.0-beta.1",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "jupyterlab": {
     "extension": true,

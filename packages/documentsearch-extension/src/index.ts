@@ -5,14 +5,14 @@
  * @module documentsearch-extension
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
+import type { ISearchKeyBindings } from '@jupyterlab/documentsearch';
 import {
-  ISearchKeyBindings,
   ISearchProviderRegistry,
   SearchDocumentModel,
   SearchDocumentView,
@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/documentsearch';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -182,7 +182,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    palette: ICommandPalette,
+    palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null
   ) => {
     const trans = translator.load('jupyterlab');
@@ -509,6 +509,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     if (palette) {
       [
         CommandIDs.search,
+        CommandIDs.searchAndReplace,
         CommandIDs.findNext,
         CommandIDs.findPrevious,
         CommandIDs.end,

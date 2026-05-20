@@ -4,7 +4,7 @@
 import { ServerConnection } from '../serverconnection';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel, validateModels } from './validate';
-import { IKernelAPIClient } from './kernel';
+import type { IKernelAPIClient } from './kernel';
 
 /**
  * The kernel model provided by the server.
@@ -31,7 +31,6 @@ export interface IModel {
   /**
    * The timestamp of the last activity on the kernel.
    */
-  // eslint-disable-next-line camelcase
   readonly last_activity?: string;
 
   /**

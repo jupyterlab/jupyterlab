@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { IDisposable } from '@lumino/disposable';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 /**

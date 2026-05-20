@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 /**
  * The body for a Callstack Panel.

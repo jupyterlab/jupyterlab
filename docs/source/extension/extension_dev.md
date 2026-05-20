@@ -40,6 +40,7 @@ Before we get started, here are some resources for hands-on practice or more in-
 Learn how to write JupyterLab extensions with these guides:
 
 - {ref}`extension-tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
+- [JupyterLab Plugin Playground (JupyterLite)](https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/): Prototype and test extension ideas directly in the browser.
 - {ref}`Making Extensions Compatible with Multiple Applications Tutorial <multiple-ui-extensions>`
   A tutorial for making extensions that work in both JupyterLab, Jupyter Notebook 7+ and more
 - The [JupyterLab Extension Examples Repository](https://github.com/jupyterlab/extension-examples): A short tutorial series to learn how to develop extensions for JupyterLab by example.
@@ -281,7 +282,7 @@ activated before the application is set. As a consequence, the first parameter o
 
 A source extension is a JavaScript (npm) package that exports one or more plugins. All JupyterLab extensions are developed as source extensions (for example, prebuilt extensions are built from source extensions).
 
-A source extension has metadata in the `jupyterlab` field of its `package.json` file. The [JSON schema](https://github.com/jupyterlab/jupyterlab/blob/main/builder/metadata_schema.json) for the metadata is distributed in the `@jupyterlab/builder` package.
+A source extension has metadata in the `jupyterlab` field of its `package.json` file. The [JSON schema](https://github.com/jupyterlab/jupyter-builder/blob/main/src/metadata_schema.json) for the metadata is distributed in the `@jupyter/builder` package.
 
 We will talk about each `jupyterlab` metadata field in `package.json` for source extensions below.
 
@@ -442,7 +443,7 @@ When an extension (the "consumer") is optionally using a service identified by a
 %
 % Prebuilt extensions need to deduplicate many of their dependencies with other prebuilt extensions and with source extensions. This deduplication happens in two phases:
 %
-% 1. When JupyterLab is initialized in the browser, the core Jupyterlab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
+% 1. When JupyterLab is initialized in the browser, the core JupyterLab build (including all source extensions) and each prebuilt extension can share copies of dependencies with a package cache in the browser.
 % 2. A source or prebuilt extension can import a dependency from the cache while JupyterLab is running.
 %
 % The main options controlling how things work in this deduplication are as follows. If a package is listed in this sharing config, it will be requested from the package cache.
@@ -586,19 +587,19 @@ module.exports = {
 };
 ```
 
-This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyterlab/blob/main/builder/src/extensionConfig.ts)
+This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyter-builder/blob/main/src/extensionConfig.ts)
 when building the prebuilt extension.
 
 (prebuilt-dev-workflow)=
 
 ### Developing a prebuilt extension
 
-Build a prebuilt extension using the `jupyter labextension build` command. This command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point `remoteEntry.<hash>.js`, dependencies bundled into JavaScript files, `package.json` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
+Build a prebuilt extension using the `jupyter-builder build` command. This command uses dependency metadata from the active JupyterLab to produce a set of files from a source extension that comprise the prebuilt extension. The files include a main entry point `remoteEntry.<hash>.js`, dependencies bundled into JavaScript files, `package.json` (with some extra build metadata), as well as plugin settings and theme directory structures if needed.
 
-While authoring a prebuilt extension, you can use the `labextension develop` command to create a link to your prebuilt output directory, similar to `pip install -e`:
+While authoring a prebuilt extension, you can use the `jupyter-builder develop` command to create a link to your prebuilt output directory, similar to `pip install -e`:
 
 ```
-jupyter labextension develop . --overwrite
+jupyter-builder develop . --overwrite
 ```
 
 Then rebuilding your extension and refreshing JupyterLab in the browser should pick up changes in your prebuilt extension source code.
@@ -763,7 +764,7 @@ jupyter lab --watch --splice-source
 ```
 
 This command will splice the local `packages` directory into the application directory, allowing you to build source extension(s)
-against the current development sources. To statically build spliced sources, use `jupyter lab build --splice-source`. Once a spliced build is created, any subsequent calls to `jupyter labextension build` will be in splice mode by default. A spliced build can be forced by calling `jupyter labextension build --splice-source`. Note that {ref}`developing a prebuilt extension <prebuilt-dev-workflow>` against a development version of JupyterLab is generally much easier than source package building.
+against the current development sources. To statically build spliced sources, use `jupyter lab build --splice-source`. Once a spliced build is created, any subsequent calls to `jupyter-builder build` will be in splice mode by default. A spliced build can be forced by calling `jupyter-builder build --splice-source`. Note that {ref}`developing a prebuilt extension <prebuilt-dev-workflow>` against a development version of JupyterLab is generally much easier than source package building.
 
 The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax `require('foo.css')`. The CSS files can
@@ -785,7 +786,7 @@ If your JavaScript is written in any other dialect than
 EMCAScript 6 (2015) it should be converted using an appropriate tool.
 You can use Rspack or Webpack to pre-build your extension to use any of it's features
 not enabled in our build configuration. To build a compatible package, set
-`output.libraryTarget` to `"commonjs2"` in your Webpack or Rspack configuration.
+`output.library.type` to `"commonjs2"` in your Webpack or Rspack configuration.
 (see [this](https://github.com/saulshanabrook/jupyterlab-webpack) example repo).
 
 If you publish your extension on `npm.org`, users will be able to install

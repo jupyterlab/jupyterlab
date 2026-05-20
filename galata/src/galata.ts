@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
@@ -17,11 +18,8 @@ import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
 import { PerformanceHelper } from './helpers';
-import {
-  IJupyterLabPage,
-  IJupyterLabPageFixture,
-  JupyterLabPage
-} from './jupyterlabpage';
+import type { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
+import { JupyterLabPage } from './jupyterlabpage';
 
 /**
  * Galata namespace
@@ -29,12 +27,20 @@ import {
 export namespace galata {
   /**
    * Default user settings:
-   * - Deactivate codemirror cursor blinking to avoid noise in screenshots
+   * - Deactivate cursor blinking to avoid noise in screenshots
+   * - Fix fonts to ensure consistent screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
       checkForUpdates: false,
       fetchNews: 'false'
+    },
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
     },
     '@jupyterlab/fileeditor-extension:plugin': {},
     '@jupyterlab/notebook-extension:tracker': {},
@@ -44,7 +50,20 @@ export namespace galata {
       }
     },
     '@jupyterlab/terminal-extension:plugin': {
-      cursorBlink: false
+      cursorBlink: false,
+      fontFamily: '"DejaVu Mono"'
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        'code-font-family': '"DejaVu Mono"',
+        // DejaVu Sans (system on Ubuntu) does not support Chinese, so
+        // we fall back to Noto Simplified Chinese (for tests where only
+        // a few Chinese characters are shown). For tests where the whole
+        // UI is meant to be displayed in a non-Latin script, drop the
+        // "system-ui" part so that `font-display: swap` is respected.
+        'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
+        'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
+      }
     }
   };
 
@@ -127,6 +146,12 @@ export namespace galata {
      * Default: true
      */
     autoGoto?: boolean;
+    /**
+     * Whether to reset workspace state before loading the page.
+     *
+     * Default: true
+     */
+    resetWorkspace?: boolean;
     /**
      * Mock Jupyter Server configuration in-memory or not.
      *
@@ -224,7 +249,8 @@ export namespace galata {
     terminals: Map<string, TerminalAPI.IModel> | null,
     tmpPath: string,
     waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
-    kernels?: Map<string, Kernel.IModel> | null
+    kernels?: Map<string, Kernel.IModel> | null,
+    resetWorkspace?: boolean
   ): Promise<IJupyterLabPageFixture> {
     // Hook the helpers
     const jlabWithPage = addHelpersToPage(
@@ -294,7 +320,11 @@ export namespace galata {
 
     if (autoGoto) {
       // Load and initialize JupyterLab and goto test folder
-      await jlabWithPage.goto(`tree/${tmpPath}`);
+      const path = `tree/${tmpPath}`;
+      // Reset workspace state to avoid stale state from previous runs
+      await jlabWithPage.goto(
+        resetWorkspace !== false ? `${path}?reset` : path
+      );
     }
 
     return jlabWithPage;
@@ -338,6 +368,7 @@ export namespace galata {
       mockState,
       mockTerminals,
       mockUser,
+      resetWorkspace,
       tmpPath
     } = {
       appPath: '/lab',
@@ -349,6 +380,7 @@ export namespace galata {
       mockState: true,
       mockTerminals: true,
       mockUser: true,
+      resetWorkspace: true,
       tmpPath: '',
       ...options
     };
@@ -375,7 +407,8 @@ export namespace galata {
         terminals,
         tmpPath,
         waitForApplication,
-        kernels
+        kernels,
+        resetWorkspace
       ),
       kernels,
       sessions,
@@ -431,7 +464,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Sessions API
@@ -440,7 +473,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const sessions = /.*\/api\/sessions(?<id>\/[@:-\w]+)?/;
+    export const sessions = /.*\/api\/sessions(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Settings API
@@ -449,7 +482,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const settings = /.*\/api\/settings(?<id>(\/[@:-\w]+)*)/;
+    export const settings = /.*\/api\/settings(?<id>(\/[@:\-\w]+)*)/;
 
     /**
      * Terminals API
@@ -458,7 +491,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const terminals = /.*\/api\/terminals(?<id>\/[@:-\w]+)?/;
+    export const terminals = /.*\/api\/terminals(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Translations API
@@ -467,7 +500,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const translations = /.*\/api\/translations(?<id>\/[@:-\w]+)?/;
+    export const translations = /.*\/api\/translations(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Workspaces API
@@ -619,10 +652,16 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(Routes.contents, async (route, request) => {
+      await page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -684,10 +723,16 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(Routes.contents, async (route, request) => {
+      await page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -747,11 +792,11 @@ export namespace galata {
      * @param page Page model object
      * @param config In-memory config
      */
-    export function mockConfig(
+    export async function mockConfig(
       page: Page,
       config: Record<string, JSONObject>
     ): Promise<void> {
-      return page.route(Routes.config, (route, request) => {
+      await page.route(Routes.config, (route, request) => {
         const section = Routes.config.exec(request.url())?.groups
           ?.section as string;
         switch (request.method()) {
@@ -788,11 +833,11 @@ export namespace galata {
      * @param page Page model object
      * @param customCSS Custom CSS content
      */
-    export function mockCustomCSS(
+    export async function mockCustomCSS(
       page: Page,
       customCSS: string
     ): Promise<void> {
-      return page.route(Routes.customCSS, async (route, request) => {
+      await page.route(Routes.customCSS, async (route, request) => {
         switch (request.method()) {
           case 'GET':
             return route.fulfill({
@@ -813,13 +858,49 @@ export namespace galata {
     };
 
     /**
+     * Custom error thrown when a response is disposed.
+     */
+    class ResponseDisposedError extends Error {
+      constructor(error: string) {
+        super(error);
+        this.name = 'ResponseDisposedError';
+      }
+    }
+
+    /**
+     * Parse response JSON with response disposal error detection.
+     *
+     * @param response The API response to parse
+     * @returns Parsed JSON data
+     * @throws ResponseDisposedError if response was disposed
+     * @throws Error if parsing fails for other reasons
+     */
+    async function handleJsonResponse(
+      response: Awaited<ReturnType<APIRequestContext['fetch']>>
+    ): Promise<any> {
+      try {
+        return await response.json();
+      } catch (error) {
+        // Check if this is a disposal error
+        const isDisposalError =
+          error instanceof Error &&
+          error.message.toLowerCase().includes('disposed');
+        if (isDisposalError) {
+          throw new ResponseDisposedError(error.message);
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+
+    /**
      * Mock the runners API to display only those created during a test
      *
      * @param page Page model object
      * @param runners Mapping of current test runners
      * @param type Type of runner; session or terminal
      */
-    export function mockRunners(
+    export async function mockRunners(
       page: Page,
       runners: Map<string, any>,
       type: 'kernels' | 'sessions' | 'terminals',
@@ -835,7 +916,7 @@ export namespace galata {
       ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
-      return page.route(routeRegex, async (route, request) => {
+      await page.route(routeRegex, async (route, request) => {
         switch (request.method()) {
           case 'DELETE': {
             // slice is used to remove the '/' prefix
@@ -856,6 +937,12 @@ export namespace galata {
             if (id) {
               if (runners.has(id)) {
                 // Proxy the GET request
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
                 const response = await ctxt.request.fetch(request);
                 if (!response.ok()) {
                   if (!page.isClosed() && !isClosed) {
@@ -866,16 +953,29 @@ export namespace galata {
                   }
                   break;
                 }
-                const data = await response.json();
-                // Update stored runners
-                runners.set(type === 'terminals' ? data.name : data.id, data);
+                try {
+                  const data = await handleJsonResponse(response);
+                  // Update stored runners
+                  runners.set(type === 'terminals' ? data.name : data.id, data);
 
-                if (!page.isClosed() && !isClosed) {
-                  return route.fulfill({
-                    status: 200,
-                    body: JSON.stringify(data),
-                    contentType: 'application/json'
-                  });
+                  if (!page.isClosed() && !isClosed) {
+                    return route.fulfill({
+                      status: 200,
+                      body: JSON.stringify(data),
+                      contentType: 'application/json'
+                    });
+                  }
+                } catch (error) {
+                  if (
+                    error instanceof ResponseDisposedError &&
+                    (page.isClosed() || isClosed)
+                  ) {
+                    console.warn(
+                      `Route handler: ${error.message} during teardown`
+                    );
+                    return route.abort();
+                  }
+                  throw error;
                 }
                 break;
               } else {
@@ -888,6 +988,12 @@ export namespace galata {
               }
             } else {
               // Proxy the GET request
+              if (page.isClosed() || isClosed) {
+                console.warn(
+                  `Route handler: aborting ${request.url()} because page/context is closed`
+                );
+                return route.abort();
+              }
               const response = await ctxt.request.fetch(request);
               if (!response.ok()) {
                 if (!page.isClosed() && !isClosed) {
@@ -898,7 +1004,21 @@ export namespace galata {
                 }
                 break;
               }
-              const data = (await response.json()) as any[];
+              let data: any[];
+              try {
+                data = (await handleJsonResponse(response)) as any[];
+              } catch (error) {
+                if (
+                  error instanceof ResponseDisposedError &&
+                  (page.isClosed() || isClosed)
+                ) {
+                  console.warn(
+                    `Route handler: ${error.message} during teardown`
+                  );
+                  return route.abort();
+                }
+                throw error;
+              }
               const updated = new Set<string>();
               data.forEach(item => {
                 const itemID: string =
@@ -929,6 +1049,12 @@ export namespace galata {
           }
           case 'PATCH': {
             // Proxy the PATCH request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -939,7 +1065,19 @@ export namespace galata {
               }
               break;
             }
-            const data = await response.json();
+            let data: any;
+            try {
+              data = await handleJsonResponse(response);
+            } catch (error) {
+              if (
+                error instanceof ResponseDisposedError &&
+                (page.isClosed() || isClosed)
+              ) {
+                console.warn(`Route handler: ${error.message} during teardown`);
+                return route.abort();
+              }
+              throw error;
+            }
             // Update stored runners
             runners.set(type === 'terminals' ? data.name : data.id, data);
             // Update kernels
@@ -958,6 +1096,12 @@ export namespace galata {
           }
           case 'POST': {
             // Proxy the POST request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -968,7 +1112,19 @@ export namespace galata {
               }
               break;
             }
-            const data = await response.json();
+            let data: any;
+            try {
+              data = await handleJsonResponse(response);
+            } catch (error) {
+              if (
+                error instanceof ResponseDisposedError &&
+                (page.isClosed() || isClosed)
+              ) {
+                console.warn(`Route handler: ${error.message} during teardown`);
+                return route.abort();
+              }
+              throw error;
+            }
             const id = type === 'terminals' ? data.name : data.id;
             runners.set(id, data);
             // Update kernels
@@ -997,11 +1153,11 @@ export namespace galata {
      * @param page Page model object
      * @param workspace In-memory workspace
      */
-    export function mockState(
+    export async function mockState(
       page: Page,
       workspace: Workspace.IWorkspace
     ): Promise<void> {
-      return page.route(Routes.workspaces, (route, request) => {
+      await page.route(Routes.workspaces, (route, request) => {
         switch (request.method()) {
           case 'GET': {
             const id = Routes.workspaces.exec(request.url())?.groups?.id;
@@ -1046,7 +1202,7 @@ export namespace galata {
      * @param settings In-memory settings
      * @param mockedSettings Test mocked settings
      */
-    export function mockSettings(
+    export async function mockSettings(
       page: Page,
       settings: ISettingRegistry.IPlugin[],
       mockedSettings: Record<string, any>
@@ -1061,7 +1217,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(settingsRegex, async (route, request) => {
+      await page.route(settingsRegex, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // slice is used to remove the '/' prefix
@@ -1070,6 +1226,12 @@ export namespace galata {
             if (!id) {
               // Get all settings
               if (settings.length === 0) {
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
                 const response = await ctxt.request.fetch(request);
                 const loadedSettings = (await response.json())
                   .settings as ISettingRegistry.IPlugin[];
@@ -1096,6 +1258,12 @@ export namespace galata {
               // Get specific settings
               let pluginSettings = settings.find(setting => setting.id === id);
               if (!pluginSettings) {
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
                 const response = await ctxt.request.fetch(request);
                 pluginSettings = await response.json();
                 if (pluginSettings) {
@@ -1163,8 +1331,11 @@ export namespace galata {
      * @param page Page model object
      * @param user In-memory user
      */
-    export function mockUser(page: Page, user: User.IUser): Promise<void> {
-      return page.route(Routes.user, (route, request) => {
+    export async function mockUser(
+      page: Page,
+      user: User.IUser
+    ): Promise<void> {
+      await page.route(Routes.user, (route, request) => {
         switch (request.method()) {
           case 'GET':
             return route.fulfill({

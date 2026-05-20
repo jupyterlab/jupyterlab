@@ -5,13 +5,16 @@
  * @module running-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
+import {
+  Dialog,
+  ICommandPalette,
+  IMovableSectionRegistry
+} from '@jupyterlab/apputils';
 import {
   IRunningSessionManagers,
   IRunningSessionSidebar,
@@ -82,18 +85,23 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
   description: 'Provides the running session sidebar.',
   provides: IRunningSessionSidebar,
   requires: [IRunningSessionManagers, ITranslator],
-  optional: [ILayoutRestorer, IStateDB],
+  optional: [ILayoutRestorer, IStateDB, IMovableSectionRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     manager: IRunningSessionManagers,
     translator: ITranslator,
     restorer: ILayoutRestorer | null,
-    state: IStateDB | null
+    state: IStateDB | null,
+    registry: IMovableSectionRegistry | null
   ): IRunningSessionSidebar => {
     const trans = translator.load('jupyterlab');
     const running = new RunningSessions(manager, translator, state);
     running.id = 'jp-running-sessions';
+    running.title.dataset = {
+      ...running.title.dataset,
+      jpTabLabel: trans.__('Sessions and Tabs')
+    };
     running.title.caption = trans.__('Running Terminals and Kernels');
     running.title.icon = runningIcon;
     running.node.setAttribute('role', 'region');
@@ -125,6 +133,14 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
       }
     });
 
+    if (registry) {
+      registry.registerSource(
+        '@jupyterlab/running-extension:running-sessions',
+        trans.__('Running Sessions'),
+        running
+      );
+    }
+
     return running;
   }
 };
@@ -154,7 +170,7 @@ const recentsPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * An optional plugin allowing to among running items.
+ * An optional plugin allowing to search among running items.
  */
 const searchPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/running-extension:search-tabs',

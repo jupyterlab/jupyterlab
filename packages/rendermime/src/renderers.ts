@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { removeMath, replaceMath } from './latex';
 
@@ -570,18 +571,18 @@ namespace ILinker {
       '"]{2,}[^\\s' +
       controlCodes +
       '"\'(){}\\[\\],:;.!?])',
-    'ug'
+    'gu'
   );
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/3e407526a1e2ff22cacb69c7e353e81a12f41029/extensions/notebook-renderers/src/linkify.ts#L9
-  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w\.-]*)+)/;
-  const winRelPathRegex = /(?:(?:\~|\.)(?:(?:\\|\/)[\w\.-]*)+)/;
+  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w.-]*)+)/;
+  const winRelPathRegex = /(?:(?:~|\.)(?:(?:\\|\/)[\w.-]*)+)/;
   const winPathRegex = new RegExp(
+    // eslint-disable-next-line regexp/no-useless-non-capturing-group
     `(${winAbsPathRegex.source}|${winRelPathRegex.source})`
   );
-  const posixPathRegex = /((?:\~|\.)?(?:\/[\w\.-]*)+)/;
-  const lineColumnRegex =
-    /(?:(?:\:|", line )(?<line>[\d]+))?(?:\:(?<column>[\d]+))?/;
+  const posixPathRegex = /((?:~|\.)?(?:\/[\w.-]*)+)/;
+  const lineColumnRegex = /(?:(?::|", line )(?<line>\d+))?(?::(?<column>\d+))?/;
   // TODO: this ought to come from kernel (browser may be on a different OS).
   const isWindows = navigator.userAgent.indexOf('Windows') >= 0;
   export const pathLinkRegex = new RegExp(
@@ -1380,21 +1381,35 @@ namespace Private {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href') || '';
+    if (!href) {
+      return;
+    }
+    const hash = anchor.hash;
+    if (hash && hash === href) {
+      anchor.target = '_self';
+      anchor.addEventListener('click', (event: MouseEvent) => {
+        const id = hash.slice(1);
+        const escapedId = CSS.escape(id);
+        const doc = anchor.ownerDocument;
+        const el =
+          doc.querySelector(`[data-jupyter-id="${escapedId}"]`) ||
+          doc.querySelector(`#${escapedId}`);
+        if (el) {
+          event.preventDefault();
+          el.scrollIntoView();
+        }
+      });
+      return;
+    }
     const isLocal = resolver.isLocal
       ? resolver.isLocal(href)
       : URLExt.isLocal(href);
     // Bail if it is not a file-like url.
-    if (!href || !isLocal) {
+    if (!isLocal) {
       return;
     }
     // Remove the hash until we can handle it.
-    const hash = anchor.hash;
     if (hash) {
-      // Handle internal link in the file.
-      if (hash === href) {
-        anchor.target = '_self';
-        return;
-      }
       // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
@@ -1618,7 +1633,8 @@ namespace Private {
    * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
    */
   export function ansiSpan(str: string): string {
-    const ansiRe = /\x1b\[(.*?)([@-~])/g; // eslint-disable-line no-control-regex
+    // Final byte range and control regex are intended here
+    const ansiRe = /\x1b\[(.*?)([@-~])/g; // eslint-disable-line no-control-regex, regexp/no-obscure-range
     let fg: number | Array<number> = [];
     let bg: number | Array<number> = [];
     let bold = false;
@@ -1657,6 +1673,7 @@ namespace Private {
 
       while (numbers.length) {
         const n = numbers.shift();
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (n) {
           case 0:
             fg = bg = [];

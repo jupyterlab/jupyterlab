@@ -14,19 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
 
       - name: Check Release
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@634ac751f8a58d3d4a19b63f58aad138e6355cc8 # v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
 
       - name: Upload Assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: jupyterlab-releaser-dist-${{ github.run_number }}
           path: |

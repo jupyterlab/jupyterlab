@@ -3,11 +3,12 @@
 import * as React from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { PanelWithToolbar } from '@jupyterlab/ui-components';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 import { KernelSourcesBody } from './body';
 import { KernelSourcesFilter } from './filter';

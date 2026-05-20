@@ -7,18 +7,28 @@
  * @module services-extension
  */
 
+import type {
+  Contents,
+  Event,
+  IContentProvider,
+  Kernel,
+  KernelSpec,
+  NbConvert,
+  ServiceManagerPlugin,
+  Session,
+  Setting,
+  User,
+  Workspace
+} from '@jupyterlab/services';
 import {
   ConfigSection,
   ConfigSectionManager,
   ConnectionStatus,
-  Contents,
   ContentsManager,
   Drive,
-  Event,
   EventManager,
   IConfigSectionManager,
   IConnectionStatus,
-  IContentProvider,
   IContentsManager,
   IDefaultContentProvider,
   IDefaultDrive,
@@ -33,25 +43,17 @@ import {
   ITerminalManager,
   IUserManager,
   IWorkspaceManager,
-  Kernel,
   KernelManager,
-  KernelSpec,
   KernelSpecManager,
-  NbConvert,
   NbConvertManager,
   RestContentProvider,
   ServerConnection,
   ServiceManager,
-  ServiceManagerPlugin,
-  Session,
   SessionManager,
-  Setting,
   SettingManager,
   Terminal,
   TerminalManager,
-  User,
   UserManager,
-  Workspace,
   WorkspaceManager
 } from '@jupyterlab/services';
 
@@ -310,6 +312,9 @@ const terminalManagerPlugin: ServiceManagerPlugin<Terminal.IManager> = {
     serverSettings: ServerConnection.ISettings | undefined,
     connectionStatus: IConnectionStatus | undefined
   ): Terminal.IManager => {
+    if (!Terminal.isAvailable()) {
+      return new TerminalManager.NoopManager();
+    }
     return new TerminalManager({
       serverSettings,
       standby: () => {

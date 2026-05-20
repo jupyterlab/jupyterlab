@@ -1,13 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
-import { Widget } from '@lumino/widgets';
-import { FileEditor } from '../widget';
-import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { TableOfContents } from '@jupyterlab/toc';
+import { TableOfContentsModel } from '@jupyterlab/toc';
+import type { Widget } from '@lumino/widgets';
+import type { FileEditor } from '../widget';
+import type { IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory } from './factory';
 
 /**
  * Regular expression to create the outline
@@ -17,8 +23,10 @@ try {
   // https://github.com/tc39/proposal-regexp-match-indices was accepted
   // in May 2021 (https://github.com/tc39/proposals/blob/main/finished-proposals.md)
   // So we will fallback to the polyfill regexp-match-indices if not available
+  // eslint-disable-next-line prefer-regex-literals
   KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )', 'd');
 } catch {
+  // eslint-disable-next-line prefer-regex-literals
   KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )');
 }
 
@@ -68,9 +76,8 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       if (KEYWORDS.flags.includes('d')) {
         hasKeyword = KEYWORDS.exec(line);
       } else {
-        const { default: execWithIndices } = await import(
-          'regexp-match-indices'
-        );
+        const { default: execWithIndices } =
+          await import('regexp-match-indices');
         hasKeyword = execWithIndices(KEYWORDS, line);
       }
       if (hasKeyword) {

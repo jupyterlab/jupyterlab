@@ -3,15 +3,16 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
+import type {
   CompletionHandler,
   ICompletionContext,
-  ICompletionProvider,
-  ProviderReconciliator
+  ICompletionProvider
 } from '@jupyterlab/completer';
+import { ProviderReconciliator } from '@jupyterlab/completer';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Context } from '@jupyterlab/docregistry';
-import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 

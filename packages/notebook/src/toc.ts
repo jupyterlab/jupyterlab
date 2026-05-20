@@ -1,18 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { CodeCell, ICellModel } from '@jupyterlab/cells';
+import { Cell, MarkdownCell } from '@jupyterlab/cells';
+import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { TableOfContents } from '@jupyterlab/toc';
 import {
-  TableOfContents,
   TableOfContentsFactory,
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { KernelError, NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
-import { INotebookTracker } from './tokens';
-import { Notebook } from './widget';
+import type { KernelError } from './actions';
+import { NotebookActions } from './actions';
+import type { NotebookPanel } from './panel';
+import type { INotebookTracker } from './tokens';
+import type { Notebook } from './widget';
+import {
+  CommandToolbarButton,
+  jumpBackIcon,
+  jumpForwardIcon
+} from '@jupyterlab/ui-components';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import type { CommandRegistry } from '@lumino/commands';
 
 /**
  * Cell running status
@@ -557,11 +567,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
    * @param tracker Widget tracker
    * @param parser Markdown parser
    * @param sanitizer Sanitizer
+   * @param commands A registry of commands
    */
   constructor(
     tracker: INotebookTracker,
     protected parser: IMarkdownParser | null,
-    protected sanitizer: IRenderMime.ISanitizer
+    protected sanitizer: IRenderMime.ISanitizer,
+    protected commands: CommandRegistry | undefined
   ) {
     super(tracker);
   }
@@ -676,7 +688,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         );
 
         const attribute =
-          this.sanitizer.allowNamedProperties ?? false
+          (this.sanitizer.allowNamedProperties ?? false)
             ? 'id'
             : 'data-jupyter-id';
         const selector = elementId
@@ -786,6 +798,44 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     });
 
     return model;
+  }
+
+  /**
+   * Get the toolbar items for the widget
+   *
+   * @param widget - widget
+   * @returns List of toolbar items
+   */
+  getToolbarItems(widget: NotebookPanel): ToolbarRegistry.IToolbarItem[] {
+    if (!this.commands) {
+      return [];
+    }
+    return [
+      {
+        name: 'select-last-modified-back',
+        widget: new CommandToolbarButton({
+          commands: this.commands,
+          id: 'notebook:select-last-modified-cell',
+          args: {
+            toolbar: true
+          },
+          icon: jumpBackIcon,
+          label: ''
+        })
+      },
+      {
+        name: 'select-last-modified-forward',
+        widget: new CommandToolbarButton({
+          commands: this.commands,
+          id: 'notebook:select-next-modified-cell',
+          args: {
+            toolbar: true
+          },
+          icon: jumpForwardIcon,
+          label: ''
+        })
+      }
+    ];
   }
 
   private _scrollToTop: boolean = true;

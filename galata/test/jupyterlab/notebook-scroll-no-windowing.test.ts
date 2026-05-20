@@ -144,7 +144,7 @@ test.describe('Notebook scroll on dragging cells (no windowing)', () => {
     const scroller = page.locator(NOTEBOOK_SCROLLER);
     await firstCellLocator.scrollIntoViewIfNeeded();
 
-    const scrollerBBox = await scroller.boundingBox();
+    const scrollerBBox = (await scroller.boundingBox())!;
     const notebookContentHeight = (
       await page.locator(NOTEBOOK_CONTENT).boundingBox()
     ).height;
@@ -183,7 +183,7 @@ test.describe('Notebook scroll on dragging cells (no windowing)', () => {
     );
 
     const scroller = page.locator(NOTEBOOK_SCROLLER);
-    const scrollerBBox = await scroller.boundingBox();
+    const scrollerBBox = (await scroller.boundingBox())!;
     const notebookContentHeight = (
       await page.locator(NOTEBOOK_CONTENT).boundingBox()
     ).height;
@@ -241,27 +241,95 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
     const notebook = await page.notebook.getNotebookInPanelLocator();
     const thirdCell = await page.notebook.getCellLocator(2);
 
-    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 0.01);
-    // Select second cell
+    // Set second cell to code without output to test advancement in isolation
+    await page.notebook.setCell(1, 'code', '# test cell without output');
     await page.notebook.selectCells(1);
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:clear-cell-output');
+    });
 
-    // The third cell should be positioned at the bottom, revealing between 0 to 2% of its content.
-    await expect(thirdCell!).toBeInViewport({ ratio: 0.0 });
-    await expect(thirdCell!).not.toBeInViewport({ ratio: 0.02 });
+    // The cell should scroll if less than one line of code is visible,
+    // this is the height of the top cell margin + editor line height,
+    // so this number needs to less than that to count as "marginally
+    // visible". It so happens that it is ~1% of this particular cell,
+    // because it has 100 lines of output + 1 editor line and the output
+    // lines are about the same height so 1% = ~1 line visible.
+    await positionCellPartiallyBelowViewport(
+      page,
+      notebook!,
+      thirdCell!,
+      0.5 / 100
+    );
+
+    // The third cell should be positioned at the bottom, revealing between 0% to 1% of its content.
+    await expect(thirdCell!).toBeInViewport({ ratio: 0 / 100 });
+    await expect(thirdCell!).not.toBeInViewport({ ratio: 1 / 100 });
+
     // Only a small fraction of notebook viewport should be taken up by that cell
     expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeLessThan(
       0.1
     );
 
-    // Run second cell
-    await page.notebook.runCell(1);
+    // Run second cell and advance to next cell
+    await page.notebook.runCell(1, { inplace: false });
 
-    // After running the second cell, the third cell should be revealed, in at least 10%
+    // After running the second cell and advancing to the third cell, the third cell should be revealed, in at least 10%
     await expect(thirdCell!).toBeInViewport({ ratio: 0.1 });
 
     // The third cell should now occupy about half of the notebook viewport
     expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeGreaterThan(
       0.4
+    );
+  });
+
+  test('should keep active cell when a cell above generates a lot of output', async ({
+    page
+  }) => {
+    const notebook = await page.notebook.getNotebookInPanelLocator();
+    const thirdCell = await page.notebook.getCellLocator(2);
+
+    // Set second cell to produce long output with delay to test active cell scroll anchoring
+    await page.notebook.setCell(
+      1,
+      'code',
+      // In the `full` windowing mode the anchoring will be in effect for 3 seconds
+      // after the most recent scroll event. In other windowing modes the browser
+      // will anchor the active cell at all times, without time limits.
+      'from time import sleep\nsleep(2)\nfor i in range(100):\nprint(i)\nsleep(0.05)'
+    );
+
+    // Clear output of the second cell
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:clear-cell-output');
+    });
+
+    // Select third cell to make sure it is visible
+    await page.notebook.selectCells(2);
+
+    // Clear output of the third cell
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:clear-cell-output');
+    });
+
+    // Make the third cell fully visible
+    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 1);
+
+    // The third cell should occupy non-zero portion of the notebook (sanity check)
+    expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeGreaterThan(
+      0
+    );
+
+    // Run second cell which will generate a lot of
+    // output that would have shifted the third cell
+    // out of view if not for scroll anchoring
+    await page.notebook.runCell(1, { inplace: false });
+
+    // After running second cell and advancing to third cell, it should remain in the viewport
+    await expect(thirdCell!).toBeInViewport({ ratio: 0.1 });
+
+    // It should should still occupy non-zero portion of the viewport (sanity check)
+    expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeGreaterThan(
+      0
     );
   });
 
@@ -343,13 +411,13 @@ test.describe('Notebook scroll over long outputs (no windowing)', () => {
       '.jp-Cell .jp-RenderedMarkdown:has-text("Before")'
     );
     // Wait until Markdown cells are rendered
-    await renderedMarkdownLocator.waitFor({ timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ timeout: 500 });
     // Un-render the "before" markdown cell
     await renderedMarkdownLocator.dblclick();
     // Make the first cell active
     await page.notebook.selectCells(0);
     // Check that that the markdown cell is un-rendered
-    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 100 });
+    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 500 });
 
     // Scroll to the last cell
     const lastCell = await page.notebook.getCellLocator(10);
@@ -360,6 +428,15 @@ test.describe('Notebook scroll over long outputs (no windowing)', () => {
 
     let previousOffset = await outer.evaluate(node => node.scrollTop);
     expect(previousOffset).toBeGreaterThan(1000);
+
+    const nbPanel = (await page.notebook.getNotebookInPanelLocator())!;
+    const bbox = (await nbPanel.boundingBox())!;
+
+    // Position mouse for scrolling
+    await page.mouse.move(
+      bbox.x + 0.5 * bbox.width,
+      bbox.y + 0.5 * bbox.height
+    );
 
     // Scroll piece by piece checking that there is no jump
     while (previousOffset > 75) {

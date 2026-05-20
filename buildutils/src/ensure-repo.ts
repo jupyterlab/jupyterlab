@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Ensure the integrity of the packages in the repo.
@@ -16,11 +17,8 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
-import {
-  ensurePackage,
-  ensureUiComponents,
-  IEnsurePackageOptions
-} from './ensure-package';
+import type { IEnsurePackageOptions } from './ensure-package';
+import { ensurePackage, ensureUiComponents } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
 
@@ -44,7 +42,6 @@ const URL_CONFIG = {
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['assert', 'child_process', 'fs', 'path'],
-  '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
@@ -54,30 +51,6 @@ const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
-  '@jupyterlab/builder': [
-    '@lumino/algorithm',
-    '@lumino/application',
-    '@lumino/commands',
-    '@lumino/coreutils',
-    '@lumino/disposable',
-    '@lumino/domutils',
-    '@lumino/dragdrop',
-    '@lumino/messaging',
-    '@lumino/properties',
-    '@lumino/signaling',
-    '@lumino/virtualdom',
-    '@lumino/widgets',
-
-    // The libraries needed for building other extensions.
-    '@babel/core',
-    '@babel/preset-env',
-    'css-loader',
-    'path-browserify',
-    'process',
-    'style-loader',
-    'worker-loader',
-    'source-map-loader'
-  ],
   '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
   '@jupyterlab/codemirror': [
     '@codemirror/lang-cpp',
@@ -101,6 +74,10 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/galata-extension': [
+    '@fontsource/dejavu-mono',
+    '@fontsource/dejavu-sans'
+  ],
   '@jupyterlab/markedparser-extension': [
     // only (but always) imported asynchronously
     'marked-gfm-heading-id',
@@ -139,20 +116,6 @@ const BACKWARD_VERSIONS: Record<string, Record<string, string>> = {
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
-  '@jupyterlab/builder': [
-    '@lumino/algorithm',
-    '@lumino/application',
-    '@lumino/commands',
-    '@lumino/coreutils',
-    '@lumino/disposable',
-    '@lumino/domutils',
-    '@lumino/dragdrop',
-    '@lumino/messaging',
-    '@lumino/properties',
-    '@lumino/signaling',
-    '@lumino/virtualdom',
-    '@lumino/widgets'
-  ],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
@@ -174,7 +137,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/apputils',
     '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    '@jupyterlab/terminal'
   ],
   '@jupyterlab/galata-extension': [
     '@jupyterlab/application',
@@ -182,7 +146,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/cells',
     '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    '@jupyterlab/terminal'
   ],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/lsp': ['codemirror'],
@@ -324,6 +289,7 @@ function ensureBranch(): string[] {
   // Handle the github_version in conf.py
   const confPath = 'docs/source/conf.py';
   const oldConfData = fs.readFileSync(confPath, 'utf-8');
+  // eslint-disable-next-line prefer-regex-literals
   const confTest = new RegExp('"github_version": "(.*)"');
   const newConfData = oldConfData.replace(
     confTest,
@@ -672,26 +638,25 @@ function ensureJupyterlab(): string[] {
 }
 
 /**
- * Ensure buildutils and builder bin files are symlinked
+ * Ensure buildutils bin file is symlinked
  */
 function ensureBuildUtils() {
   const basePath = path.resolve('.');
-  ['builder', 'buildutils'].forEach(packageName => {
-    const utilsPackage = path.join(basePath, packageName, 'package.json');
-    const utilsData = utils.readJSONFile(utilsPackage);
-    for (const name in utilsData.bin) {
-      const src = path.join(basePath, packageName, utilsData.bin[name]);
-      const dest = path.join(basePath, 'node_modules', '.bin', name);
-      try {
-        fs.lstatSync(dest);
-        fs.removeSync(dest);
-      } catch (e) {
-        // no-op
-      }
-      fs.symlinkSync(src, dest, 'file');
-      fs.chmodSync(dest, 0o777);
+  const packageName = 'buildutils';
+  const utilsPackage = path.join(basePath, packageName, 'package.json');
+  const utilsData = utils.readJSONFile(utilsPackage);
+  for (const name in utilsData.bin) {
+    const src = path.join(basePath, packageName, utilsData.bin[name]);
+    const dest = path.join(basePath, 'node_modules', '.bin', name);
+    try {
+      fs.lstatSync(dest);
+      fs.removeSync(dest);
+    } catch {
+      // no-op
     }
-  });
+    fs.symlinkSync(src, dest, 'file');
+    fs.chmodSync(dest, 0o777);
+  }
 }
 
 /**
@@ -826,6 +791,12 @@ export async function ensureIntegrity(): Promise<boolean> {
 
     if (name === '@jupyterlab/metapackage') {
       options.noUnused = false;
+    }
+
+    if (name === '@jupyterlab/galata') {
+      // Most of the galata codebase runs on the Node.js runtime,
+      // with the exception being the `extension` subpackage.
+      options.allowNodeDependencies = true;
     }
 
     const pkgMessages = await ensurePackage(options);
