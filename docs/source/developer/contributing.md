@@ -504,6 +504,21 @@ dev mode, extensions will not be activated by default - refer
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
+```{important}
+`--dev-mode` only loads the **core** packages from source. If you are
+changing code under `jupyterlab/packages/` that is shipped as a
+*prebuilt extension* (for example `@jupyterlab/cell-toolbar-extension`
+or `@jupyterlab/debugger-extension`), you also need
+`--extensions-in-dev-mode` for your changes to be picked up:
+
+```bash
+jupyter lab --dev-mode --extensions-in-dev-mode
+```
+
+See {ref}`prebuilt-dev-workflow` for the full prebuilt-extension
+development workflow.
+```
+
 If you want to change the TypeScript code and rebuild on the fly
 (needs page refresh after each rebuild):
 
