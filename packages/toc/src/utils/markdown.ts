@@ -195,9 +195,8 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 // Returns the length of ``` or ~~~ fences.
 function extractLeadingFences(line: string) {
   let match;
-  if (line.startsWith('`'))
-    match = line.match(/^(`{3,})/); // eslint-disable-line regexp/no-unused-capturing-group
-  else match = line.match(/^(~{3,})/); // eslint-disable-line regexp/no-unused-capturing-group
+  if (line.startsWith('`')) match = line.match(/^`{3,}/);
+  else match = line.match(/^~{3,}/);
   return match ? match[0].length : 0;
 }
 
@@ -350,5 +349,4 @@ function cleanTitle(heading: string): string {
  * Ignore title with html tag with a class name equal to `jp-toc-ignore` or `tocSkip`
  */
 const skipHeading =
-  // eslint-disable-next-line regexp/no-unused-capturing-group
-  /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;
+  /<\w+\s(?:.*?\s)?class="(?:.*?\s)?(?:jp-toc-ignore|tocSkip)(?:\s.*?)?"(?:\s.*?)?>/;

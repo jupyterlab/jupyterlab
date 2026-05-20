@@ -291,7 +291,7 @@ export function run(
   }
   return value
     .toString()
-    .replace(/(\r\n|\n)$/, '') // eslint-disable-line regexp/no-unused-capturing-group
+    .replace(/(?:\r\n|\n)$/, '')
     .trim();
 }
 
