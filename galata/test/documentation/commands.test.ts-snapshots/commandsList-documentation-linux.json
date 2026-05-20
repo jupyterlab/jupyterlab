@@ -663,6 +663,33 @@
     }
   },
   {
+    "id": "apputils:move-section-back",
+    "label": "Move back",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "apputils:move-section-to",
+    "label": "Move to ",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "targetId": {
+          "type": "string"
+        },
+        "targetLabel": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
     "id": "apputils:notify",
     "label": "Emit a notification",
     "caption": "Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
