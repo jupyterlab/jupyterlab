@@ -211,7 +211,7 @@ describe('@jupyterlab/filebrowser', () => {
       const files = result.value!;
       expect(files.length).toBe(1);
       expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.+ipynb/));
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*\.ipynb/));
 
       document.body.removeChild(node);
     });
@@ -259,7 +259,7 @@ describe('@jupyterlab/filebrowser', () => {
       const files = result.value!;
       expect(files.length).toBe(1);
       expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.+ipynb/));
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*\.ipynb/));
 
       document.body.removeChild(node);
     });
@@ -321,7 +321,7 @@ describe('@jupyterlab/filebrowser', () => {
       const files = result.value!;
       expect(files.length).toBe(1);
       expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.+ipynb/));
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*\.ipynb/));
 
       const fileDirectory = PathExt.dirname(files[0].path);
       expect(fileDirectory).toEqual(testDirectory);
