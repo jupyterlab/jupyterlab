@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -1445,7 +1446,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     );
 
     // Strip any authentication from the display string.
-    const display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
+    const display = partialUrl.replace(/^((?:\w+:)?\/\/)[^@/]+@/, '$1');
     console.debug(`Starting WebSocket: ${display}`);
 
     let url = URLExt.join(
@@ -1472,7 +1473,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     let alreadyCalledOnclose = false;
 
-    const getKernelModel = async (evt: Event) => {
+    const getKernelModel = async (evt: CloseEvent | ErrorEvent) => {
       if (this._isDisposed) {
         return;
       }
@@ -1506,7 +1507,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       return;
     };
 
-    const earlyClose = async (evt: Event) => {
+    const earlyClose = async (evt: CloseEvent | ErrorEvent) => {
       // If the websocket was closed early, that could mean
       // that the kernel is actually dead. Try getting
       // information about the kernel from the API call,
@@ -1814,10 +1815,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle a websocket close event.
    */
-  private _onWSClose = (evt: Event) => {
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent | ErrorEvent) => {
+    if (this.isDisposed) {
+      return;
     }
+
+    if ('code' in evt && (evt.code === 1000 || evt.code === 1001)) {
+      this._updateConnectionStatus('disconnected');
+      return;
+    }
+
+    this._reconnect();
   };
 
   get hasPendingInput(): boolean {

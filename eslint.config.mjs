@@ -8,8 +8,11 @@ import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
+import regexpPlugin from 'eslint-plugin-regexp';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
+import * as jsoncParser from 'jsonc-eslint-parser';
+import jupyterPlugin from '@jupyter/eslint-plugin';
 
 // Filter globals to remove any with leading/trailing whitespace
 const cleanGlobals = globalsObj => {
@@ -194,12 +197,17 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
-    extends: [js.configs.recommended, tseslint.configs.recommended],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      regexpPlugin.configs.recommended
+    ],
 
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       jest: jestPlugin,
-      react: reactPlugin
+      react: reactPlugin,
+      jupyter: jupyterPlugin
     },
 
     languageOptions: {
@@ -226,6 +234,13 @@ export default defineConfig([
     },
 
     rules: {
+      'jupyter/command-described-by': 'error',
+      'jupyter/plugin-activation-args': 'error',
+      'jupyter/plugin-description': 'error',
+      'jupyter/token-format': 'error',
+      'jupyter/no-translation-concatenation': 'error',
+      'jupyter/no-untranslated-string': 'error',
+      'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -247,7 +262,7 @@ export default defineConfig([
       ],
 
       '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
@@ -438,15 +453,66 @@ export default defineConfig([
   {
     files: [
       '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**/*.ts',
+      '**/test/**/*.tsx',
+      '**/tests/**/*.ts',
+      '**/tests/**/*.tsx',
+      'testutils/**/*.ts',
+      'testutils/**/*.tsx',
+      'galata/test/**/*.ts',
+      'galata/test/**/*.tsx'
+    ],
+
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
+  },
+  {
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
       '**/test/**/*.ts',
       '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',
-      'packages/services/src/serverconnection.ts'
+      'packages/services/src/serverconnection.ts',
+      'docs/source/extension/*.tsx'
     ],
 
     rules: {
-      'no-restricted-syntax': 'off'
+      'no-restricted-syntax': 'off',
+      'jupyter/command-described-by': 'off',
+      'jupyter/no-untranslated-string': 'off'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.property.name='screenshot'] > ObjectExpression > Property[key.name='path']",
+          message:
+            "Do not pass 'path' to screenshot(). Save the result of toMatchSnapshot() or use expect() assertions instead."
+        },
+        {
+          selector:
+            "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure'] > ObjectExpression > Property[key.name='mode'][value.value='serial']",
+          message:
+            "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
+        }
+      ]
+    }
+  },
+  {
+    files: ['**/schema/*.json'],
+    languageOptions: { parser: jsoncParser },
+    plugins: { jupyter: jupyterPlugin },
+    rules: {
+      'jupyter/no-schema-enum': 'error'
     }
   },
   prettierPluginRecommended,

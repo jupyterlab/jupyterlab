@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -597,7 +598,7 @@ export class DocumentWidget<
    * Handle a title change.
    */
   private async _onTitleChanged(_sender: Title<this>) {
-    const validNameExp = /[\/\\:]/;
+    const validNameExp = /[/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name
     const filename =

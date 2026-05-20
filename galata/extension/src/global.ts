@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  * Copyright (c) Bloomberg Finance LP.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import type {

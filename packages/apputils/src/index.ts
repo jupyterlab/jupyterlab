@@ -49,6 +49,7 @@ export * from './sanitizer';
 export * from './semanticCommand';
 export * from './sessioncontext';
 export * from './thememanager';
+export * from './movableSectionRegistry';
 export * from './tokens';
 export {
   ToolbarWidgetRegistry,

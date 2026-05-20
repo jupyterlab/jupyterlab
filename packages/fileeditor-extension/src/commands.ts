@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectAll } from '@codemirror/commands';
 import { findNext, gotoLine } from '@codemirror/search';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
@@ -8,6 +9,7 @@ import type {
   ISessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
+
 import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
 import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
@@ -1222,11 +1224,16 @@ export namespace Commands {
 
         // Get data from clipboard
         const clipboard = window.navigator.clipboard;
-        const clipboardData: string = await clipboard.readText();
+        try {
+          const clipboardData: string = await clipboard.readText();
 
-        if (clipboardData) {
-          // Paste data to the editor
-          editor.replaceSelection && editor.replaceSelection(clipboardData);
+          if (clipboardData) {
+            // Paste data to the editor
+            editor.replaceSelection && editor.replaceSelection(clipboardData);
+          }
+        } catch (err) {
+          // browser limitation fallback (e.g Firefox)
+          Clipboard.showPasteUnavailableDialog(trans);
         }
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),

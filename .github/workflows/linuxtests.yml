@@ -56,10 +56,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
 
       - name: Find out Playwright version
         id: pw-version
@@ -70,7 +74,7 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Restore Playwright browsers cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         id: playwright-cache
         with:
           path: /home/runner/pw-browsers
@@ -78,7 +82,7 @@ jobs:
 
       - name: Restore ${{ matrix.group }} cache
         if: ${{ matrix.cache-path }}
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ${{ matrix.cache-path }}
           key: |-
@@ -99,7 +103,7 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: |
@@ -111,12 +115,15 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_version: "3.10"
           dependency_type: minimum
+          python_package_manager: "uv pip"
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
@@ -128,9 +135,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
@@ -138,7 +149,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: "sdist"
           path: dist/*.tar.gz
@@ -150,9 +161,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
       - name: Download sdist
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           path: "sdist"
       - name: Install From SDist
@@ -173,13 +184,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
       - run: |
           node ./jupyterlab/staging/yarn.js install
           node ./jupyterlab/staging/yarn.js run build:packages
           node ./jupyterlab/staging/yarn.js run docs
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.* https://webpack.js.org/.*"
+          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.* https://webpack.js.org/.* https://docs.conda.io/*"

@@ -8,7 +8,7 @@ import type {
   IRunningSessions
 } from '@jupyterlab/running';
 import type { ITranslator } from '@jupyterlab/translation';
-import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
+import { fileIcon, LabIcon, TabBarSvg } from '@jupyterlab/ui-components';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
@@ -111,14 +111,14 @@ export function addOpenTabsSessionManager(
       return widgetIcon instanceof LabIcon ? widgetIcon : fileIcon;
     }
     label() {
-      return this._widget.title.label;
+      return TabBarSvg.titleLabel(this._widget.title);
     }
     labelTitle() {
       let labelTitle: string;
       if (this._widget instanceof DocumentWidget) {
         labelTitle = this._widget.context.path;
       } else {
-        labelTitle = this._widget.title.label;
+        labelTitle = TabBarSvg.titleLabel(this._widget.title);
       }
       return labelTitle;
     }
