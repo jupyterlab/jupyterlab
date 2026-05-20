@@ -564,7 +564,7 @@ namespace Private {
     let idx0 = index;
     let idx1: number = -1;
     let lastEnd: number = 0;
-    const regex = /[\n\b\r]/;
+    const regex = /[\n\b\r]/; // eslint-disable-line regexp/no-escape-backspace
 
     while (true) {
       idx1 = indexOfAny(newText, regex, lastEnd);

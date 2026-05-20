@@ -189,7 +189,7 @@ export function fromTemplate(
       // try to match the indentation level of the {{var}} in the input template.
       templ = templ.split(`{{${key}}}`).reduce((acc, cur) => {
         // Regex: 0 or more non-newline whitespaces followed by end of string
-        const indentRe = acc.match(/([^\S\r\n]*).*$/);
+        const indentRe = acc.match(/([^\S\r\n]*).*$/); // eslint-disable-line regexp/no-super-linear-backtracking
         const indent = indentRe ? indentRe[1] : '';
         return acc + val.split('\n').join('\n' + indent) + cur;
       });
@@ -291,7 +291,7 @@ export function run(
   }
   return value
     .toString()
-    .replace(/(\r\n|\n)$/, '')
+    .replace(/(\r\n|\n)$/, '') // eslint-disable-line regexp/no-unused-capturing-group
     .trim();
 }
 

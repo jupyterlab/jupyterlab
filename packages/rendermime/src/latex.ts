@@ -44,9 +44,11 @@ export function removeMath(text: string): { text: string; math: string[] } {
       // can be followed by an `info string` but this cannot include backticks,
       // see specification: https://spec.commonmark.org/0.30/#info-string
       .replace(
+        // eslint-disable-next-line regexp/no-unused-capturing-group, regexp/optimal-quantifier-concatenation
         /^(?<fence>`{3,}|(~T){3,})[^`\n]*\n([\s\S]*?)^\k<fence>`*$/gm,
         wholematch => wholematch.replace(/\$/g, '~D')
       )
+      // eslint-disable-next-line regexp/no-unused-capturing-group, regexp/no-super-linear-backtracking
       .replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, wholematch =>
         wholematch.replace(/\$/g, '~D')
       );

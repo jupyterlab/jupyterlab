@@ -1252,7 +1252,7 @@ export namespace Completer {
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
       // Get the label text without HTML markup (`<mark>` is the only markup
       // that is allowed in processed items, everything else gets escaped).
-      const labelText = item.label.replace(/<(\/)?mark>/g, '');
+      const labelText = item.label.replace(/<(\/)?mark>/g, ''); // eslint-disable-line regexp/no-unused-capturing-group
       return labelText.length + (item.type?.length || 0);
     }
 

@@ -464,6 +464,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
+    // eslint-disable-next-line regexp/strict
     export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
 
     /**
@@ -473,6 +474,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
+    // eslint-disable-next-line regexp/strict
     export const sessions = /.*\/api\/sessions(?<id>\/[@:-\w]+)?/;
 
     /**
@@ -482,6 +484,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
+    // eslint-disable-next-line regexp/strict
     export const settings = /.*\/api\/settings(?<id>(\/[@:-\w]+)*)/;
 
     /**
@@ -491,6 +494,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
+    // eslint-disable-next-line regexp/strict
     export const terminals = /.*\/api\/terminals(?<id>\/[@:-\w]+)?/;
 
     /**
@@ -500,6 +504,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
+    // eslint-disable-next-line regexp/strict
     export const translations = /.*\/api\/translations(?<id>\/[@:-\w]+)?/;
 
     /**
