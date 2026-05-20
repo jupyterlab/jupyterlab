@@ -418,6 +418,21 @@ export class FileBrowser
   }
 
   /**
+   * The timestamp format to use in the file listing.
+   */
+  get timestampFormat(): Time.TimestampFormat {
+    return this._timestampFormat;
+  }
+
+  set timestampFormat(value: Time.TimestampFormat) {
+    if (this._timestampFormat === value) {
+      return;
+    }
+    this._timestampFormat = value;
+    this.listing?.setTimestampFormat(value);
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -777,23 +792,11 @@ export class FileBrowser
   private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
-  private _timestampFormat: Time.TimestampFormat = 'absolute';
-
-  get timestampFormat(): Time.TimestampFormat {
-    return this._timestampFormat;
-  }
-
-  set timestampFormat(value: Time.TimestampFormat) {
-    if (this._timestampFormat === value) {
-      return;
-    }
-    this._timestampFormat = value;
-    this.listing?.setTimestampFormat(value);
-  }
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
   private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
+  private _timestampFormat: Time.TimestampFormat = 'absolute';
   private _selectionChanged = new Signal<this, void>(this);
   private _sectionChanged = new Signal<this, void>(this);
   private _accordion: AccordionPanel | null = null;

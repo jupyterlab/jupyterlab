@@ -240,8 +240,10 @@
       "title": "Timestamp format",
       "description": "Display format for file timestamps",
       "default": "absolute",
-      "enum": ["absolute", "relative"],
-      "enumNames": ["Absolute", "Relative"]
+      "oneOf": [
+        { "const": "absolute", "title": "Absolute" },
+        { "const": "relative", "title": "Relative" }
+      ]
     },
     "showFileCheckboxes": {
       "type": "boolean",
