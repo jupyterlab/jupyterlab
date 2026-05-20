@@ -2451,6 +2451,90 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Pop and return the top cell from the back stack, pushing to forward stack.
+   * @experimental
+   */
+  popLastModifiedCell(): Cell | null {
+    const activeId = this.activeCell?.model.id;
+
+    while (this._lastModifiedCellBackStack.length) {
+      const id = this._lastModifiedCellBackStack.pop()!;
+
+      // Skip active cell
+      if (id === activeId) {
+        this._lastModifiedCellForwardStack.push(id);
+        continue;
+      }
+
+      const cell = this.widgets.find(c => c.model.id === id);
+      if (cell && !cell.isDisposed) {
+        this._lastModifiedCellForwardStack.push(id);
+        return cell;
+      }
+    }
+    return null;
+  }
+  /**
+   * Pop and return the top cell from the forward stack, pushing to back stack.
+   * @experimental
+   */
+  popNextModifiedCell(): Cell | null {
+    const activeId = this.activeCell?.model.id;
+
+    while (this._lastModifiedCellForwardStack.length) {
+      const id = this._lastModifiedCellForwardStack.pop()!;
+
+      if (id === activeId) {
+        this._lastModifiedCellBackStack.push(id);
+        continue;
+      }
+
+      const cell = this.widgets.find(c => c.model.id === id);
+      if (cell && !cell.isDisposed) {
+        this._lastModifiedCellBackStack.push(id);
+        return cell;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Check if there is a navigable cell in the back stack.
+   * @experimental
+   */
+  hasNavigableModifiedCellBack(): boolean {
+    const activeId = this.activeCell?.model.id;
+    for (let i = this._lastModifiedCellBackStack.length - 1; i >= 0; i--) {
+      const id = this._lastModifiedCellBackStack[i];
+      if (id !== activeId) {
+        const cell = this.widgets.find(c => c.model.id === id);
+        if (cell && !cell.isDisposed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check if there is a navigable cell in the forward stack.
+   * @experimental
+   */
+  hasNavigableModifiedCellForward(): boolean {
+    const activeId = this.activeCell?.model.id;
+    for (let i = this._lastModifiedCellForwardStack.length - 1; i >= 0; i--) {
+      const id = this._lastModifiedCellForwardStack[i];
+      if (id !== activeId) {
+        const cell = this.widgets.find(c => c.model.id === id);
+        if (cell && !cell.isDisposed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
@@ -3535,86 +3619,6 @@ export class Notebook extends StaticNotebook {
       oldValue: null,
       newValue: null
     });
-  }
-
-  /**
-   * Pop and return the top cell from the back stack, pushing to forward stack.
-   */
-  popLastModifiedCell(): Cell | null {
-    const activeId = this.activeCell?.model.id;
-
-    while (this._lastModifiedCellBackStack.length) {
-      const id = this._lastModifiedCellBackStack.pop()!;
-
-      // Skip active cell
-      if (id === activeId) {
-        this._lastModifiedCellForwardStack.push(id);
-        continue;
-      }
-
-      const cell = this.widgets.find(c => c.model.id === id);
-      if (cell && !cell.isDisposed) {
-        this._lastModifiedCellForwardStack.push(id);
-        return cell;
-      }
-    }
-    return null;
-  }
-  /**
-   * Pop and return the top cell from the forward stack, pushing to back stack.
-   */
-  popNextModifiedCell(): Cell | null {
-    const activeId = this.activeCell?.model.id;
-
-    while (this._lastModifiedCellForwardStack.length) {
-      const id = this._lastModifiedCellForwardStack.pop()!;
-
-      if (id === activeId) {
-        this._lastModifiedCellBackStack.push(id);
-        continue;
-      }
-
-      const cell = this.widgets.find(c => c.model.id === id);
-      if (cell && !cell.isDisposed) {
-        this._lastModifiedCellBackStack.push(id);
-        return cell;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Check if there is a navigable cell in the back stack.
-   */
-  hasNavigableModifiedCellBack(): boolean {
-    const activeId = this.activeCell?.model.id;
-    for (let i = this._lastModifiedCellBackStack.length - 1; i >= 0; i--) {
-      const id = this._lastModifiedCellBackStack[i];
-      if (id !== activeId) {
-        const cell = this.widgets.find(c => c.model.id === id);
-        if (cell && !cell.isDisposed) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Check if there is a navigable cell in the forward stack.
-   */
-  hasNavigableModifiedCellForward(): boolean {
-    const activeId = this.activeCell?.model.id;
-    for (let i = this._lastModifiedCellForwardStack.length - 1; i >= 0; i--) {
-      const id = this._lastModifiedCellForwardStack[i];
-      if (id !== activeId) {
-        const cell = this.widgets.find(c => c.model.id === id);
-        if (cell && !cell.isDisposed) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   private _lastModifiedCellBackStack: string[] = [];
