@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
@@ -22,8 +23,10 @@ try {
   // https://github.com/tc39/proposal-regexp-match-indices was accepted
   // in May 2021 (https://github.com/tc39/proposals/blob/main/finished-proposals.md)
   // So we will fallback to the polyfill regexp-match-indices if not available
+  // eslint-disable-next-line prefer-regex-literals
   KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )', 'd');
 } catch {
+  // eslint-disable-next-line prefer-regex-literals
   KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )');
 }
 

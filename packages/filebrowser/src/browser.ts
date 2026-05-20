@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
+import type { IMovableSectionDestination } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
@@ -11,13 +12,15 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { IScore } from '@jupyterlab/ui-components';
 import {
+  AccordionToolbar,
   FilenameSearcher,
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { Panel } from '@lumino/widgets';
+import { AccordionPanel, Panel } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
@@ -32,6 +35,12 @@ const FILE_BROWSER_CLASS = 'jp-FileBrowser';
  * The class name added to file browser panel (gather filter, breadcrumbs and listing).
  */
 const FILE_BROWSER_PANEL_CLASS = 'jp-FileBrowser-Panel';
+
+/**
+ * The class name added to the lazily-created accordion that hosts mainPanel
+ * and any moved-in sections.
+ */
+const FILE_BROWSER_ACCORDION_CLASS = 'jp-FileBrowser-accordion';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -65,7 +74,10 @@ const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
  * and presents itself as a flat list of files and directories with
  * breadcrumbs.
  */
-export class FileBrowser extends SidePanel {
+export class FileBrowser
+  extends SidePanel
+  implements IMovableSectionDestination
+{
   /**
    * Construct a new file browser.
    *
@@ -82,6 +94,7 @@ export class FileBrowser extends SidePanel {
     const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    model.pathChanged.connect(this._onPathChanged, this);
     this._manager = model.manager;
 
     this.toolbar.node.setAttribute(
@@ -94,7 +107,21 @@ export class FileBrowser extends SidePanel {
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
     this.mainPanel.title.label = this._trans.__('File Browser');
 
-    this.crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs = new BreadCrumbs({
+      model,
+      translator,
+      onPathEdited: () => {
+        // Wait a frame so listing updates are reflected before focusing.
+        requestAnimationFrame(() => {
+          this._focusListingContentOrCrumb();
+        });
+      },
+      onPathActivated: () => {
+        requestAnimationFrame(() => {
+          this._focusListingContentOrCrumb();
+        });
+      }
+    });
     this.crumbs.addClass(CRUMBS_CLASS);
 
     // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
@@ -314,6 +341,17 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to clear the filter value when navigating to a new directory.
+   */
+  get clearFilterOnNavigation(): boolean {
+    return this._clearFilterOnNavigation;
+  }
+
+  set clearFilterOnNavigation(value: boolean) {
+    this._clearFilterOnNavigation = value;
+  }
+
+  /**
    * Whether to sort notebooks above other files
    */
   get sortNotebooksFirst(): boolean {
@@ -396,6 +434,13 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * A signal emitted when a section is added to or removed from the bottom panel.
+   */
+  get sectionChanged(): ISignal<this, void> {
+    return this._sectionChanged;
+  }
+
+  /**
    * Select an item by name.
    *
    * @param name - The name of the item to select.
@@ -406,6 +451,17 @@ export class FileBrowser extends SidePanel {
 
   clearSelectedItems(): void {
     this.listing.clearSelectedItems();
+  }
+
+  /**
+   * Focus listing content, or trailing breadcrumb when listing is empty.
+   */
+  private _focusListingContentOrCrumb(): void {
+    if (this.listing.sortedItems().next().done ?? false) {
+      this.crumbs.focusLastCrumb();
+      return;
+    }
+    this.listing.activate();
   }
 
   /**
@@ -438,6 +494,28 @@ export class FileBrowser extends SidePanel {
    */
   paste(): Promise<void> {
     return this.listing.paste();
+  }
+
+  /**
+   * Handle a `pathChanged` signal from the model.
+   */
+  private _onPathChanged(): void {
+    // Clear filter when user navigates to a new directory
+    if (this._clearFilterOnNavigation) {
+      const input = this._fileFilterRef.current;
+      const query = input ? input.value : '';
+
+      // Only clear the filter (and trigger a refresh) if a non-empty query is active
+      if (query && query.trim() !== '') {
+        this.model.setFilter(value => {
+          return {};
+        });
+
+        if (input) {
+          input.value = '';
+        }
+      }
+    }
   }
 
   private async _createNew(
@@ -606,6 +684,65 @@ export class FileBrowser extends SidePanel {
     }
   }
 
+  // IMovableSectionDestination implementation
+
+  addSection(widget: Widget): void {
+    if (!this._accordion) {
+      const accordion = new AccordionPanel({
+        layout: AccordionToolbar.createLayout({})
+      });
+      accordion.addClass(FILE_BROWSER_ACCORDION_CLASS);
+      // Move mainPanel into the accordion, then add the new section.
+      accordion.addWidget(this.mainPanel);
+      accordion.addWidget(widget);
+      this._accordion = accordion;
+      this.content.addWidget(accordion);
+    } else {
+      this._accordion.addWidget(widget);
+    }
+    this._sectionChanged.emit();
+  }
+
+  removeSectionWidget(widget: Widget): void {
+    if (!this._accordion || widget.parent !== this._accordion) {
+      return;
+    }
+    widget.parent = null;
+    // If only mainPanel is left, exit accordion mode and put mainPanel
+    // back as a direct child of the content wrapper.
+    if (
+      this._accordion.widgets.length === 1 &&
+      this._accordion.widgets[0] === this.mainPanel
+    ) {
+      if (this.mainPanel.isHidden) {
+        this.mainPanel.show();
+      }
+      this.content.addWidget(this.mainPanel);
+      this._accordion.dispose();
+      this._accordion = null;
+    }
+    this._sectionChanged.emit();
+  }
+
+  /**
+   * Sections currently hosted by the file browser, excluding `mainPanel`.
+   * Empty when no sections have been moved in.
+   */
+  get sections(): ReadonlyArray<Widget> {
+    if (!this._accordion) {
+      return [];
+    }
+    return this._accordion.widgets.filter(w => w !== this.mainPanel);
+  }
+
+  /**
+   * The accordion panel hosting the file listing and any moved-in sections,
+   * or `null` while no sections have been moved in.
+   */
+  get accordionPanel(): AccordionPanel | null {
+    return this._accordion;
+  }
+
   /**
    * Given a drive name and a local path, return the full
    * drive path which includes the drive name and the local path.
@@ -633,6 +770,7 @@ export class FileBrowser extends SidePanel {
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
+  private _clearFilterOnNavigation: boolean = true;
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
@@ -644,6 +782,8 @@ export class FileBrowser extends SidePanel {
   private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
+  private _sectionChanged = new Signal<this, void>(this);
+  private _accordion: AccordionPanel | null = null;
 }
 
 /**

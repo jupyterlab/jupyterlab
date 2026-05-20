@@ -11,7 +11,7 @@ export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
 // layout sniffing
 export const RE_DEFAULT_RENDERER =
-  /\bdefaultRenderer["']?\s*:\s*(["']?)(\b[^"'\s]+\b)(\1)/gm;
+  /\bdefaultRenderer["']?\s*:\s*(["']?)(\b[^"'\s]+\b)(\1)/g;
 
 // mermaid themes
 export const MERMAID_DEFAULT_THEME: MermaidConfig['theme'] = 'default';

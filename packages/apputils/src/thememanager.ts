@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { URLExt } from '@jupyterlab/coreutils';
@@ -378,7 +379,7 @@ export class ThemeManager implements IThemeManager {
    */
   private _incrFontSize(key: string, add: boolean = true): Promise<void> {
     // get the numeric and unit parts of the current font size
-    const parts = (this.getCSS(key) ?? '13px').split(/([a-zA-Z]+)/);
+    const parts = (this.getCSS(key) ?? '13px').split(/([a-z]+)/i);
 
     // determine the increment
     const incr = (add ? 1 : -1) * (parts[1] === 'em' ? 0.1 : 1);

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module debugger-extension
@@ -51,7 +52,6 @@ import {
 } from '@jupyterlab/rendermime';
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { NullTranslator } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
@@ -100,9 +100,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
     consoleTracker: IConsoleTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator,
+    translator: ITranslator | null,
     displayRegistry: IDebuggerDisplayRegistry | null
   ) => {
+    if (!translator) {
+      translator = nullTranslator;
+    }
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
 
@@ -203,8 +206,11 @@ const files: JupyterFrontEndPlugin<void> = {
     editorTracker: IEditorTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator
+    translator: ITranslator | null
   ) => {
+    if (!translator) {
+      translator = nullTranslator;
+    }
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
 
@@ -950,32 +956,33 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         return;
       }
       const { content, mimeType, path } = source;
-      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
-        const results = debuggerSources.find({
-          focus: true,
-          kernel: service.session?.connection?.kernel?.name ?? '',
-          path: service.session?.connection?.path ?? '',
-          source: breakpointOrFrame?.source?.path ?? ''
-        });
-
-        if (results.length > 0) {
-          results.forEach(editor => {
-            void editor.reveal().then(() => {
-              const edit = editor.get();
-              if (edit) {
-                edit.revealPosition({
-                  line: (breakpointOrFrame.line as number) - 1,
-                  column: breakpointOrFrame.column ?? 0
-                });
-                Debugger.EditorHandler.showCurrentLine(
-                  edit,
-                  breakpointOrFrame.line as number
-                );
-              }
-            });
+      const results = debuggerSources.find({
+        focus: true,
+        kernel: service.session?.connection?.kernel?.name ?? '',
+        path: service.session?.connection?.path ?? '',
+        source: breakpointOrFrame?.source?.path ?? path
+      });
+      if (results.length > 0) {
+        results.forEach(editor => {
+          void editor.reveal().then(() => {
+            const edit = editor.get();
+            if (
+              edit &&
+              breakpointOrFrame &&
+              typeof breakpointOrFrame.line !== 'undefined'
+            ) {
+              edit.revealPosition({
+                line: breakpointOrFrame.line - 1,
+                column: breakpointOrFrame.column ?? 0
+              });
+              Debugger.EditorHandler.showCurrentLine(
+                edit,
+                breakpointOrFrame.line
+              );
+            }
           });
-          return;
-        }
+        });
+        return;
       }
       // Auto-close previously auto-opened read-only editor
       if (breakpointOrFrame) {
@@ -1028,14 +1035,15 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         }
       }
 
-      const frame = service.model.callstack.frame;
-      if (frame) {
+      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
+        const line = breakpointOrFrame.line;
+        const column = breakpointOrFrame.column ?? 0;
         requestAnimationFrame(() => {
           editor.revealPosition({
-            line: frame.line - 1,
-            column: frame.column
+            line: line - 1,
+            column
           });
-          Debugger.EditorHandler.showCurrentLine(editor, frame.line, 'start');
+          Debugger.EditorHandler.showCurrentLine(editor, line, 'start');
         });
       }
     };
@@ -1401,6 +1409,10 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
 
+    sidebar.title.dataset = {
+      ...sidebar.title.dataset,
+      jpTabLabel: trans.__('Debugger')
+    };
     sidebar.title.caption = trans.__('Debugger');
 
     shell.add(sidebar, 'right', { type: 'Debugger' });

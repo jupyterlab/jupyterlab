@@ -3,6 +3,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as path from 'path';
 import * as utils from './utils';
@@ -16,6 +17,7 @@ const versionCache = new Map();
 /**
  * Matches a simple semver range, where the version number could be an npm tag.
  */
+// eslint-disable-next-line regexp/prefer-character-class
 const SEMVER_RANGE = /^(~|\^|=|<|>|<=|>=)?([\w\-.]*)$/;
 
 /**

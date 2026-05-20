@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module imageviewer-extension
@@ -63,7 +64,7 @@ const TEXT_FILE_TYPES = ['svg', 'xbm'];
 /**
  * The test pattern for text file types in paths.
  */
-const TEXT_FILE_REGEX = new RegExp(`[.](${TEXT_FILE_TYPES.join('|')})$`);
+const TEXT_FILE_REGEX = new RegExp(`\\.(?:${TEXT_FILE_TYPES.join('|')})$`);
 
 /**
  * The image file handler extension.

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Sanitizer } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -1251,7 +1252,7 @@ export namespace Completer {
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
       // Get the label text without HTML markup (`<mark>` is the only markup
       // that is allowed in processed items, everything else gets escaped).
-      const labelText = item.label.replace(/<(\/)?mark>/g, '');
+      const labelText = item.label.replace(/<\/?mark>/g, '');
       return labelText.length + (item.type?.length || 0);
     }
 

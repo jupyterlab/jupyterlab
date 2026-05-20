@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Extension } from '@codemirror/state';
 
@@ -2076,7 +2077,7 @@ export abstract class AttachmentsCell<
       if (protocol !== 'data:') {
         return;
       }
-      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
+      const dataURIRegex = /([\w+/]+)?(?:;(charset=[\w-]*|base64))?,(.*)/;
       const matches = dataURIRegex.exec(href);
       if (!matches || matches.length !== 4) {
         return;

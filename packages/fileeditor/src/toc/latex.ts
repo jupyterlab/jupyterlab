@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   DocumentRegistry,
@@ -34,7 +35,7 @@ const LATEX_LEVELS: { [label: string]: number } = {
 /**
  * Regular expression to create the outline
  */
-const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
+const SECTIONS = /^\s*\\(section|subsection|subsubsection)\{(.+)\}/;
 
 /**
  * Table of content model for LaTeX files.

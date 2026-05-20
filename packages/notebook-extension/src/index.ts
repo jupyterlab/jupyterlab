@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module notebook-extension
@@ -14,6 +15,7 @@ import type {
 import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
+  Clipboard,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -35,7 +37,7 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -66,6 +68,7 @@ import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { Notebook } from '@jupyterlab/notebook';
 import {
+  CellCounterStatus,
   CommandEditStatus,
   ExecutionIndicator,
   INotebookCellExecutor,
@@ -312,7 +315,13 @@ namespace CommandIDs {
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
+  export const toggleOutputScrolling = 'notebook:toggle-output-scrolling';
+
   export const selectLastRunCell = 'notebook:select-last-run-cell';
+
+  export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
+
+  export const selectNextModifiedCell = 'notebook:select-next-modified-cell';
 
   export const replaceSelection = 'notebook:replace-selection';
 
@@ -337,6 +346,12 @@ namespace CommandIDs {
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
+
+  export const copySelectedtext = 'notebook:copy-selected-text';
+
+  export const pasteText = 'notebook:paste-text';
+
+  export const cutSelectedtext = 'notebook:cut-selected-text';
 }
 
 /**
@@ -456,6 +471,50 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
       item,
       align: 'right',
       rank: 4,
+      isActive: () =>
+        !!shell.currentWidget &&
+        !!tracker.currentWidget &&
+        shell.currentWidget === tracker.currentWidget
+    });
+  }
+};
+
+/**
+ * A plugin providing a current cell/total cells status item.
+ */
+export const cellCounterItem: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-counter-status',
+  description: 'Adds a notebook cell counter status widget.',
+  autoStart: true,
+  requires: [INotebookTracker, ITranslator],
+  optional: [IStatusBar],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    translator: ITranslator,
+    statusBar: IStatusBar | null
+  ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
+
+    const { shell } = app;
+    const item = new CellCounterStatus({ translator });
+
+    const updateNotebook = () => {
+      const current = tracker.currentWidget;
+      item.model.notebook = current && current.content;
+    };
+
+    tracker.currentChanged.connect(updateNotebook);
+    updateNotebook();
+
+    statusBar.registerStatusItem(cellCounterItem.id, {
+      priority: 1,
+      item,
+      align: 'right',
+      rank: 2.5,
       isActive: () =>
         !!shell.currentWidget &&
         !!tracker.currentWidget &&
@@ -617,11 +676,32 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         const { context } = current;
 
+        const serverVersion = PageConfig.getNotebookVersion();
+        const supportsHTMLSanitizationOption =
+          compareVersions(serverVersion, [4, 0, 0]) <
+            0 /* Jupyter Server only */ &&
+          compareVersions(serverVersion, [2, 18, 0]) >= 0;
+
+        let sanitizeHtml = false;
+
+        if (args['format'] === 'html' && supportsHTMLSanitizationOption) {
+          const result = await InputDialog.getBoolean({
+            title: trans.__('Export as HTML'),
+            label: trans.__('Sanitize HTML output'),
+            value: true
+          });
+          if (!result.button.accept) {
+            return;
+          }
+          sanitizeHtml = result.value ?? false;
+        }
+
         const exportOptions: NbConvert.IExportOptions = {
           format: args['format'] as string,
           path: current.context.path,
           exporterOptions: {
-            download: true
+            download: true,
+            sanitizeHtml
           }
         };
 
@@ -691,7 +771,8 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
       formatList.forEach(function (key) {
-        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+        const capCaseKey = trans.__(formattedKey);
         const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
         let args = {
           format: key,
@@ -935,7 +1016,12 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     mdParser: IMarkdownParser | null,
     settingRegistry: ISettingRegistry | null
   ): void => {
-    const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
+    const nbTocFactory = new NotebookToCFactory(
+      tracker,
+      mdParser,
+      sanitizer,
+      app.commands
+    );
     tocRegistry.add(nbTocFactory);
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
@@ -1027,7 +1113,8 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
             value => value.const === key
           ).length > 0;
         if (!mimetypeExists) {
-          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          const altOption = trans.__(formattedKey);
           const option = formatLabels[key] ? formatLabels[key] : altOption;
           const mimeTypeValue = response[key].output_mimetype;
 
@@ -1203,6 +1290,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   executionIndicator,
   exportPlugin,
   tools,
+  cellCounterItem,
   commandEditItem,
   notebookTrustItem,
   widgetFactoryPlugin,
@@ -1255,6 +1343,10 @@ function activateNotebookTools(
     return true;
   };
   notebookTools.title.icon = buildIcon;
+  notebookTools.title.dataset = {
+    ...notebookTools.title.dataset,
+    jpTabLabel: trans.__('Notebook Tools')
+  };
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
 
@@ -2014,6 +2106,8 @@ function activateNotebookHandler(
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
 
+    widget.content.node.setAttribute('data-trust-command', CommandIDs.trust);
+
     // Set up the title icon
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
@@ -2426,6 +2520,25 @@ function getCurrent(
   return widget;
 }
 
+// Whether all selected code cells have output scrolling enabled.
+function isOutputScrollingEnabled(notebook: Notebook): boolean {
+  if (!notebook.model || !notebook.activeCell) {
+    return false;
+  }
+
+  let hasCodeCell = false;
+  for (const cell of notebook.widgets) {
+    if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
+      hasCodeCell = true;
+      if (!(cell as CodeCell).outputsScrolled) {
+        return false;
+      }
+    }
+  }
+
+  return hasCodeCell;
+}
+
 /**
  * Add the notebook commands to the application's command registry.
  */
@@ -2450,6 +2563,11 @@ function addCommands(
         cell
           .getHeadings()
           .then(() => {
+            // Heading parsing is async; avoid restoring an outdated collapse
+            // state if the heading has been expanded in the meantime.
+            if (cell.isDisposed || !cell.headingCollapsed) {
+              return;
+            }
             NotebookActions.setHeadingCollapse(cell, true, notebook);
           })
           .catch(error => {
@@ -2505,6 +2623,9 @@ function addCommands(
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.copySelectedtext);
+    commands.notifyCommandChanged(CommandIDs.pasteText);
+    commands.notifyCommandChanged(CommandIDs.cutSelectedtext);
     commands.notifyCommandChanged(CommandIDs.copy);
     commands.notifyCommandChanged(CommandIDs.cut);
     commands.notifyCommandChanged(CommandIDs.pasteBelow);
@@ -2521,6 +2642,16 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
+    commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+    commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+  });
+  tracker.widgetAdded.connect((_, panel) => {
+    panel.content.stateChanged.connect((_, args) => {
+      if (args.name === 'lastModifiedCellStack') {
+        commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+        commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+      }
+    });
   });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
@@ -2835,12 +2966,17 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
         const { context, content } = current;
-        return NotebookActions.trust(content).then(() => context.save());
+        const trustResult = await NotebookActions.trust(content);
+        if (trustResult.trusted) {
+          await context.save();
+        }
+        return trustResult;
       }
+      return { trusted: false };
     },
     isEnabled,
     describedBy: {
@@ -3390,6 +3526,156 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.copySelectedtext, {
+    label: trans.__('Copy Selected Text'),
+    caption: trans.__('Copy selected text from the active cell or output area'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
+
+      // copying from the editor (input area)
+      const editor = current.content.activeCell?.editor;
+      if (editor) {
+        const selection = editor.getSelection();
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        const text = editor.model.sharedModel.getSource().slice(start, end);
+        if (text) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+      }
+
+      // fallback to DOM selection (output)
+      const domSelection = window.getSelection();
+      const selectedText = domSelection?.toString();
+      if (selectedText && selectedText.trim().length > 0) {
+        await navigator.clipboard.writeText(selectedText);
+      }
+    },
+
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (editor) {
+        const selection = editor.getSelection();
+        const hasEditorSelection =
+          selection.start.line !== selection.end.line ||
+          selection.start.column !== selection.end.column;
+        if (hasEditorSelection) {
+          return true;
+        }
+      }
+
+      // Check for text selection in output area
+      const domSelection = window.getSelection();
+      return !!domSelection && domSelection.toString().trim().length > 0;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.cutSelectedtext, {
+    label: trans.__('Cut Selected Text'),
+    caption: trans.__('Cut selected text from the active cell or output area'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (editor) {
+        const selection = editor.getSelection();
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        const text = editor.model.sharedModel.getSource().slice(start, end);
+        if (text) {
+          await navigator.clipboard.writeText(text);
+          editor.replaceSelection?.('');
+          return;
+        }
+      }
+    },
+
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (!editor) {
+        return false;
+      }
+
+      const selection = editor.getSelection();
+      const hasEditorSelection =
+        selection.start.line !== selection.end.line ||
+        selection.start.column !== selection.end.column;
+      return hasEditorSelection;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.pasteText, {
+    label: trans.__('Paste Text'),
+    caption: trans.__(
+      'Paste text from the clipboard into the active cell editor'
+    ),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (!editor) {
+        return;
+      }
+
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          editor.replaceSelection?.(text);
+        }
+      } catch (err) {
+        // browser limitation fallback (e.g Firefox)
+        Clipboard.showPasteUnavailableDialog(trans);
+      }
+    },
+
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      return !!current.content.activeCell?.editor;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.split, {
     label: trans.__('Split Cell'),
     execute: args => {
@@ -3424,7 +3710,16 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isVisible: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      // Enable only if more than one cell is selected
+      const notebook = current.content;
+      return notebook && notebook.selectedCells.length > 1;
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -4409,6 +4704,43 @@ function addCommands(
       }
     }
   });
+  commands.addCommand(CommandIDs.toggleOutputScrolling, {
+    label: args =>
+      args['isMenu'] || args['isPalette']
+        ? trans.__('Enable Scrolling for Outputs')
+        : trans.__('Toggle Scrolling for Outputs'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        if (isOutputScrollingEnabled(current.content)) {
+          return NotebookActions.disableOutputScrolling(current.content);
+        }
+
+        return NotebookActions.enableOutputScrolling(current.content);
+      }
+    },
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        return isOutputScrollingEnabled(current.content);
+      } else {
+        return false;
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          isMenu: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from a menu')
+          }
+        }
+      }
+    }
+  });
   commands.addCommand(CommandIDs.selectLastRunCell, {
     label: trans.__('Select current running or last run cell'),
     execute: args => {
@@ -4419,6 +4751,44 @@ function addCommands(
       }
     },
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.selectLastModifiedCell, {
+    label: trans.__('Select Last Modified Cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        await NotebookActions.selectLastModifiedCell(current.content);
+      }
+    },
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return !!current && current.content.hasNavigableModifiedCellBack();
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.selectNextModifiedCell, {
+    label: trans.__('Select Next Modified Cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        await NotebookActions.selectNextModifiedCell(current.content);
+      }
+    },
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return !!current && current.content.hasNavigableModifiedCellForward();
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -4682,6 +5052,9 @@ function populatePalette(
     CommandIDs.pasteAbove,
     CommandIDs.pasteAndReplace,
     CommandIDs.deleteCell,
+    CommandIDs.copySelectedtext,
+    CommandIDs.pasteText,
+    CommandIDs.cutSelectedtext,
     CommandIDs.split,
     CommandIDs.merge,
     CommandIDs.mergeAbove,
@@ -4720,7 +5093,9 @@ function populatePalette(
     CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
-    CommandIDs.disableOutputScrolling
+    CommandIDs.disableOutputScrolling,
+    CommandIDs.selectLastModifiedCell,
+    CommandIDs.selectNextModifiedCell
   ].forEach(command => {
     palette.addItem({ command, category });
   });
@@ -4977,7 +5352,7 @@ namespace Private {
       this._index = options.index !== undefined ? options.index : -1;
       this._cell = options.cell || null;
       this.id = `LinkedOutputView-${UUID.uuid4()}`;
-      this.title.label = 'Output View';
+      this.title.label = trans.__('Output View');
       this.title.icon = notebookIcon;
       this.title.caption = this._notebook.title.label
         ? trans.__('For Notebook: %1', this._notebook.title.label)

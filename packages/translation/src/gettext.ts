@@ -12,6 +12,7 @@
 | Distributed under the terms of the Modified MIT License.
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DEFAULT_LANGUAGE_CODE } from './tokens';
 import { normalizeDomain } from './utils';
@@ -543,8 +544,9 @@ class Gettext {
     // Plural form string regexp
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js
     // plural forms list available here http://localization-guide.readthedocs.org/en/latest/l10n/pluralforms.html
+    // eslint-disable-next-line prefer-regex-literals
     let pf_re = new RegExp(
-      '^\\s*nplurals\\s*=\\s*[0-9]+\\s*;\\s*plural\\s*=\\s*(?:\\s|[-\\?\\|&=!<>+*/%:;n0-9_()])+'
+      '^\\s*nplurals\\s*=\\s*\\d+\\s*;\\s*plural\\s*=[\\s\\-?|&=!<>+*/%:;n0-9_()]+'
     );
 
     if (!pf_re.test(pluralForm))
