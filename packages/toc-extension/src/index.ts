@@ -50,6 +50,13 @@ namespace CommandIDs {
 }
 
 /**
+ * A namespace for toolbar item IDs of table of contents plugin.
+ */
+namespace ToolbarItemIDs {
+  export const collapseAll = 'collapse-all';
+}
+
+/**
  * Activates the ToC extension.
  *
  * @private
@@ -269,7 +276,7 @@ async function activateTOC(
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
   toc.toolbar.addItem(
-    'collapse-all',
+    ToolbarItemIDs.collapseAll,
     new CommandToolbarButton({
       commands: app.commands,
       id: CommandIDs.toggleCollapse,
@@ -360,7 +367,7 @@ async function activateTOC(
     if (toolbarItems) {
       toolbarItems.forEach(item => {
         toc.toolbar.insertBefore(
-          'collapse-all',
+          ToolbarItemIDs.collapseAll,
           `toc-item-${item.name}`,
           item.widget
         );
