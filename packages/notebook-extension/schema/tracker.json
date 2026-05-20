@@ -718,7 +718,7 @@
     },
     "autoStartDefaultKernel": {
       "title": "Automatically Start Preferred Kernel",
-      "description": "Whether to automatically start the preferred kernel.",
+      "description": "If true, opening a notebook for which a 'preferred' kernel is known will start that kernel automatically, without showing the 'Select Kernel' dialog. The 'preferred' kernel is the one matching the notebook's stored kernel metadata (the kernel that was used when the notebook was last saved) and, as a fallback, the kernel whose language matches the notebook. This setting only controls whether the dialog is auto-confirmed; the kernel selection itself is not stored here.",
       "type": "boolean",
       "default": false
     },
