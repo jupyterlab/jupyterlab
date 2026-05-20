@@ -76,12 +76,11 @@ key that has the same value as the ID of the workspace. This should also be the 
 like `/lab/workspaces/foo`. Additionally, `metadata` may contain `created` and `last_modified` fields with date and time creation and most recent modification, respectively.
 The date and time are encoded using ISO 8601 format, for example `2022-06-15T23:41:15.818986+00:00`.
 
-The `data` key maps to the initial state of the `IStateDB`. Many plugins look in the State DB for the configuration.
-Also any plugins that register with the `ILayoutRestorer` will look up all keys in the State DB
-that start with the `namespace` of their tracker before the first `:`. The values of these keys should have a `data`
-attribute that maps.
+The `data` key holds the initial contents of JupyterLab's *state database* (the JavaScript object exposed as `IStateDB`). Many plugins use the state database for their configuration.
 
-For example, if your workspace looks like this:
+In particular, plugins that register a tracker with `ILayoutRestorer` use the state database to remember which widgets were open in the workspace and how to recreate them. When the workspace is loaded, the layout restorer walks the `data` object and, for each tracker, finds the entries whose keys begin with the tracker's *namespace* followed by `:`. For each such entry it then calls the tracker's `restore` command, passing the value of the entry's own `data` field as the command arguments.
+
+For example, consider this workspace:
 
 ```json
 {
@@ -93,7 +92,7 @@ For example, if your workspace looks like this:
 }
 ```
 
-It will run the `docmanager:open` with the `{ "path": "package.json", "factory": "JSON" }` args, because the `application-mimedocuments` tracker is registered with the `docmanager:open` command, like this:
+The key `application-mimedocuments:package.json:JSON` starts with the namespace `application-mimedocuments`, so the corresponding tracker picks it up. That tracker is registered with the `docmanager:open` command, like this:
 
 ```typescript
 const namespace = 'application-mimedocuments';
@@ -109,4 +108,6 @@ void restorer.restore(tracker, {
 });
 ```
 
-Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.
+Loading the workspace therefore runs `docmanager:open` with the arguments `{ "path": "package.json", "factory": "JSON" }`, which reopens `package.json` with the JSON viewer.
+
+The part of the key *after* the first `:` (here `package.json:JSON`) is only used by the tracker to identify the widget uniquely (so it knows whether the same widget is already restored), and is not parsed by the layout restorer itself — that is why it is allowed to be arbitrary text built from the widget's own state.
