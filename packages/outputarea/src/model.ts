@@ -564,6 +564,7 @@ namespace Private {
     let idx0 = index;
     let idx1: number = -1;
     let lastEnd: number = 0;
+    // Matching the backspace (not word boundary) here is intended.
     const regex = /[\n\b\r]/; // eslint-disable-line regexp/no-escape-backspace
 
     while (true) {

@@ -1633,6 +1633,7 @@ namespace Private {
    * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
    */
   export function ansiSpan(str: string): string {
+    // Final byte range and control regex are intended here
     const ansiRe = /\x1b\[(.*?)([@-~])/g; // eslint-disable-line no-control-regex, regexp/no-obscure-range
     let fg: number | Array<number> = [];
     let bg: number | Array<number> = [];
