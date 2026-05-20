@@ -163,7 +163,7 @@ export class PathNavigator extends Widget {
       normalized = '/' + normalized;
     }
     // Collapse any double slashes that may result from the above transforms.
-    normalized = normalized.replace(/\/\/+/g, '/');
+    normalized = normalized.replace(/\/{2,}/g, '/');
     this._submittedLocalPath = this._model.manager.services.contents.localPath(
       normalized || '/'
     );

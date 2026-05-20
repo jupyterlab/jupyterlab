@@ -3193,7 +3193,7 @@ namespace Private {
    */
   export function setMarkdownHeader(source: string, level: number): string {
     // Remove existing header or leading white space.
-    const regex = /^(#+\s*)|^(\s*)/;
+    const regex = /^#+\s*|^\s*/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
 

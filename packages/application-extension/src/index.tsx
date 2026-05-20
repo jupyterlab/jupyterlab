@@ -1487,8 +1487,9 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
+    // eslint-disable-next-line prefer-regex-literals
     const treePattern = new RegExp(
-      '/(lab|doc)(/workspaces/[a-zA-Z0-9-_]+)?(/tree/.*)?'
+      '/(lab|doc)(/workspaces/[\\w-]+)?(/tree/.*)?'
     );
 
     set.add(
