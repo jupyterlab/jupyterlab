@@ -2732,7 +2732,7 @@
     }
   },
   {
-    "id": "filebrowser:show-browser",
+    "id": "filebrowser:show-panel",
     "label": "Open the file browser for the provided `path`.",
     "caption": "",
     "shortcuts": [],
