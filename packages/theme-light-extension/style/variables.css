@@ -418,9 +418,6 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Search-related styles */
 
-  --jp-search-toggle-off-opacity: 0.5;
-  --jp-search-toggle-hover-opacity: 0.8;
-  --jp-search-toggle-on-opacity: 1;
   --jp-search-selected-match-background-color: rgb(245, 200, 0);
   --jp-search-selected-match-color: black;
   --jp-search-unselected-match-background-color: var(
@@ -457,6 +454,12 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-700, #616161);
   --jp-switch-color: var(--md-grey-400, #bdbdbd);
   --jp-switch-true-position-color: var(--md-orange-900, #e65100);
+
+  /* Outline styles for focus-visible states needed for keyboard navigation.
+      2px is the minimum size required for accessibility.
+  */
+  --jp-focus-outline-color: var(--jp-brand-color1);
+  --jp-focus-outline-width: 2px;
 }
 
 /* Completer specific styles */

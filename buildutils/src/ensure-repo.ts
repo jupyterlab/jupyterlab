@@ -289,6 +289,7 @@ function ensureBranch(): string[] {
   // Handle the github_version in conf.py
   const confPath = 'docs/source/conf.py';
   const oldConfData = fs.readFileSync(confPath, 'utf-8');
+  // eslint-disable-next-line prefer-regex-literals
   const confTest = new RegExp('"github_version": "(.*)"');
   const newConfData = oldConfData.replace(
     confTest,

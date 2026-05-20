@@ -66,17 +66,19 @@ jobs:
             optional_dependencies: "docs-screenshots"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           path: core
+          persist-credentials: false
 
       - name: Checkout demo project
         if: ${{ matrix.project == 'documentation' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
           path: demo
+          persist-credentials: false
 
       - name: Get demo folder
         if: ${{ matrix.project == 'documentation' }}
@@ -85,7 +87,7 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_package_manager: "uv pip"
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
@@ -100,7 +102,7 @@ jobs:
         working-directory: core
 
       - name: Set up browser cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
@@ -192,7 +194,7 @@ jobs:
 
       - name: Upload test assets
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
           path: core/galata/test-results
@@ -200,7 +202,7 @@ jobs:
 
       - name: Upload test report blob
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
           path: core/galata/blob-report
@@ -221,10 +223,11 @@ jobs:
       contents: read
     steps:
       - name: Checkout lockfile
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           sparse-checkout: yarn.lock
           sparse-checkout-cone-mode: false
+          persist-credentials: false
 
       - name: Find out Playwright version
         id: pw-version
@@ -237,14 +240,14 @@ jobs:
       - name: Download aggregate blob artifact
         if: ${{ github.run_attempt > 1 }}
         continue-on-error: true
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: galata-blobs-merged
           path: artifacts/base
 
       - name: Download individual blob artifacts
         continue-on-error: true
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           path: artifacts/overlay
           pattern: galata-blobs-*-*-*
@@ -280,12 +283,13 @@ jobs:
       - name: Merge Playwright reports
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
+          PW_VERSION: ${{ steps.pw-version.outputs.version }}
         run: |
-          npx playwright@${{ steps.pw-version.outputs.version }} merge-reports --reporter html,json,github ./artifacts/final/
+          npx "playwright@${PW_VERSION}" merge-reports --reporter html,json,github ./artifacts/final/
 
       - name: Extract failing and flaky counts
         id: test-counts
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const fs = require('fs');
@@ -296,44 +300,50 @@ jobs:
             core.setOutput('flaky', String(flaky));
 
       - name: Upload merged reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: visual-regression-report
           path: playwright-report
 
       - name: Inline the report
-        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           path: playwright-report
 
       - name: Upload inlined report
         id: upload-report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           archive: false
           name: visual-regression-report-standalone
           path: playwright-report/output.html
 
       - name: Add report link to job summary
+        env:
+          ARTIFACT_URL: ${{ steps.upload-report.outputs.artifact-url }}
         run: |
-          echo "**[View Visual Regression Report](${{ steps.upload-report.outputs.artifact-url }})**" >> $GITHUB_STEP_SUMMARY
+          echo "**[View Visual Regression Report](${ARTIFACT_URL})**" >> $GITHUB_STEP_SUMMARY
 
       - name: Save PR comment data
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}
+          FAILING: ${{ steps.test-counts.outputs.failing || 0 }}
+          FLAKY: ${{ steps.test-counts.outputs.flaky || 0 }}
         with:
           script: |
             const fs = require('fs');
             fs.writeFileSync('pr-comment-data.json', JSON.stringify({
               prNumber: context.payload.pull_request.number,
-              reportUrl: '${{ steps.upload-report.outputs.artifact-url }}',
-              failing: ${{ steps.test-counts.outputs.failing || 0 }},
-              flaky: ${{ steps.test-counts.outputs.flaky || 0 }},
+              reportUrl: process.env.REPORT_URL,
+              failing: Number(process.env.FAILING),
+              flaky: Number(process.env.FLAKY),
             }));
 
       - name: Upload PR comment data
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-pr-comment-data
           path: pr-comment-data.json
@@ -342,7 +352,7 @@ jobs:
       - name: Merge and upload test results
         if: ${{ !cancelled() }}
         continue-on-error: true
-        uses: actions/upload-artifact/merge@v6
+        uses: actions/upload-artifact/merge@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
           name: galata-test-assets-merged
@@ -351,7 +361,7 @@ jobs:
 
       - name: Merge blobs and delete individual shards
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact/merge@v6
+        uses: actions/upload-artifact/merge@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
           name: galata-blobs-merged
