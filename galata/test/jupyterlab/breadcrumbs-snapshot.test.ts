@@ -4,6 +4,7 @@
  */
 
 import { expect, test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const BREADCRUMB_SELECTOR = '.jp-BreadCrumbs';
 const SETTING_ID = '@jupyterlab/filebrowser-extension:browser';
@@ -51,6 +52,11 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Wait for breadcrumb recalculation after resize
     await page.locator(`${BREADCRUMB_SELECTOR} >> text=dir2`).waitFor();
 
+    const input = page.locator('.jp-PathNavigator > input');
+
+    // Keep snapshot text stable while preserving isolated tmpPath on disk.
+    await stabilizeInputPath(input, tmpPath);
+
     // Take snapshot of breadcrumbs container
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
     await expect(crumbs).toHaveScreenshot('breadcrumbs.png');
@@ -90,19 +96,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await suggestions.locator('li').first().waitFor();
 
     // Keep snapshot text stable while preserving isolated tmpPath on disk.
-    await input.evaluate(
-      (element, { stablePath, dynamicPath }) => {
-        const inputElement = element as HTMLInputElement;
-        inputElement.value = inputElement.value.replace(
-          dynamicPath,
-          stablePath
-        );
-      },
-      {
-        stablePath: 'test-breadcrumbs',
-        dynamicPath: tmpPath
-      }
-    );
+    await stabilizeInputPath(input, tmpPath);
 
     // Capture the whole file browser so the absolutely-positioned
     // suggestions dropdown is included in the screenshot.
@@ -112,3 +106,16 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     );
   });
 });
+
+async function stabilizeInputPath(
+  input: Locator,
+  tmpPath: string
+): Promise<void> {
+  await input.evaluate(
+    (element, { stablePath, dynamicPath }) => {
+      const inputElement = element as HTMLInputElement;
+      inputElement.value = inputElement.value.replace(dynamicPath, stablePath);
+    },
+    { stablePath: 'test-breadcrumbs', dynamicPath: tmpPath }
+  );
+}
