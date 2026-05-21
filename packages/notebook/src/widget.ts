@@ -1960,7 +1960,9 @@ export class Notebook extends StaticNotebook {
 
     this._ensureFocus();
 
-    this.select(cell);
+    if (cell) {
+      this.select(cell);
+    }
     if (newValue === oldValue) {
       return;
     }
