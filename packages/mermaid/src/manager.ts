@@ -398,7 +398,7 @@ namespace Private {
    * but _any_ "malformed" tag will break the SVG rendering entirely.
    */
   export const RE_VOID_ELEMENT =
-    /<\s*(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\s*([^>]*?)\s*>/gi;
+    /<\s*(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\s*([^>]*?)\s*>/gi; // eslint-disable-line regexp/no-super-linear-backtracking
 
   /**
    * Ensure a void element is closed with a slash, preserving any attributes.

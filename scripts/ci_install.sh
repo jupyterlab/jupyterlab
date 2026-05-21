@@ -14,9 +14,15 @@ export YARN_ENABLE_INLINE_BUILDS=1
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
-if [ $OSTYPE == "linux-gnu" ]; then
-    sudo rm -rf $(which yarn)
-    ! yarn
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+    YARN_BIN="$(command -v yarn || true)"
+    if [[ -n "${YARN_BIN}" ]]; then
+        sudo rm -rf "${YARN_BIN}"
+    fi
+    if command -v yarn; then
+        echo "Global yarn should be unavailable"
+        exit 1
+    fi
 fi
 
 # create jupyter base dir (needed for config retrieval)
@@ -61,8 +67,21 @@ if [[ $GROUP == nonode ]]; then
     uv pip install --system build
     python -m build .
 
-    # Remove NodeJS, twice to take care of system and locally installed node versions.
-    sudo rm -rf $(which node)
-    sudo rm -rf $(which node)
-    ! node
+    # Remove NodeJS from PATH entries. There may be multiple binaries
+    # (for example system and local installs), so rehash between removals.
+    hash -r
+    for _ in 1 2 3; do
+        NODE_BIN="$(command -v node || true)"
+        if [[ -z "${NODE_BIN}" || ! -x "${NODE_BIN}" ]]; then
+            break
+        fi
+        sudo rm -f "${NODE_BIN}"
+        hash -r
+    done
+
+    NODE_BIN="$(command -v node || true)"
+    if [[ -n "${NODE_BIN}" && -x "${NODE_BIN}" ]]; then
+        echo "Node should be unavailable for nonode checks"
+        exit 1
+    fi
 fi

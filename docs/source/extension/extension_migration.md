@@ -24,6 +24,15 @@ Webpack config to Rspack.
   - new `--jp-datagrid-font-size` variable controlling the font size; if not specified by a theme, the fallback of 12px will be used,
   - new `--jp-datagrid-font-family` variable controlling the font family; if not specified, `--jp-content-font-family` will be used as a fallback.
 
+- Document search buttons no longer rely on theme-specific opacity variables; instead, they use layout and brand colors to indicate state. The following variables are neither defined in built-in themes nor used by core packages:
+  - `--jp-search-toggle-off-opacity` (removed)
+  - `--jp-search-toggle-hover-opacity` (removed)
+  - `--jp-search-toggle-on-opacity` (removed)
+
+- JupyterLab now uses focus-outline variables for keyboard navigation (`:focus-visible` states) across the application. Components such as tabs, buttons, menus, side panels, cells, and others use these variables for `:focus-visible` styling:
+  - new `--jp-focus-outline-color` to define the color of the focus ring
+  - new `--jp-focus-outline-width` variable to set the width of the focus outline (minimum 2px width for accessibility)
+
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
