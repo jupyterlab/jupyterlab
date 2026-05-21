@@ -52,10 +52,9 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Wait for breadcrumb recalculation after resize
     await page.locator(`${BREADCRUMB_SELECTOR} >> text=dir2`).waitFor();
 
-    const input = page.locator('.jp-PathNavigator > input');
-
     // Keep snapshot text stable while preserving isolated tmpPath on disk.
-    await stabilizeInputPath(input, tmpPath);
+    const crumb = page.locator(`${BREADCRUMB_SELECTOR} >> text=${tmpPath}`);
+    await mockPath(crumb, tmpPath);
 
     // Take snapshot of breadcrumbs container
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
@@ -96,7 +95,7 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await suggestions.locator('li').first().waitFor();
 
     // Keep snapshot text stable while preserving isolated tmpPath on disk.
-    await stabilizeInputPath(input, tmpPath);
+    await mockPath(input, tmpPath);
 
     // Capture the whole file browser so the absolutely-positioned
     // suggestions dropdown is included in the screenshot.
@@ -107,14 +106,17 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
   });
 });
 
-async function stabilizeInputPath(
-  input: Locator,
-  tmpPath: string
-): Promise<void> {
-  await input.evaluate(
+async function mockPath(locator: Locator, tmpPath: string): Promise<void> {
+  await locator.evaluate(
     (element, { stablePath, dynamicPath }) => {
-      const inputElement = element as HTMLInputElement;
-      inputElement.value = inputElement.value.replace(dynamicPath, stablePath);
+      if (element instanceof HTMLInputElement) {
+        element.value = element.value.replace(dynamicPath, stablePath);
+      } else {
+        element.textContent = element.textContent!.replace(
+          dynamicPath,
+          stablePath
+        );
+      }
     },
     { stablePath: 'test-breadcrumbs', dynamicPath: tmpPath }
   );
