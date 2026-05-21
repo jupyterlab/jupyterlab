@@ -2,6 +2,7 @@
   "name": "@jupyterlab/repo-top",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "yarn@3.5.0",
   "files": [],
   "workspaces": [
     "dev_mode",

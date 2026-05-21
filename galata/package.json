@@ -1,6 +1,7 @@
 {
   "name": "@jupyterlab/galata",
   "version": "5.6.0-alpha.5",
+  "packageManager": "yarn@3.5.0",
   "description": "JupyterLab UI Testing Framework",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
