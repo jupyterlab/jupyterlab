@@ -78,10 +78,13 @@ test.describe('Console Interactions', () => {
     // Select kernel
     await page.getByRole('button', { name: 'Select Kernel' }).click();
 
-    // Wait for banner to disappear once fully loaded
+    // Wait for loading banner to disappear once fully loaded
     await loadingBanner.waitFor({ state: 'detached' });
 
     await page.getByText('123', { exact: true }).click();
+
+    // Wait for kernel to start up before execution
+    await page.locator('.jp-ConsolePanel [title="Kernel Idle"]').waitFor();
 
     await page.keyboard.press('Shift+Enter');
 
