@@ -3,24 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 
 const BREADCRUMB_SELECTOR = '.jp-BreadCrumbs';
 const SETTING_ID = '@jupyterlab/filebrowser-extension:browser';
 
-test.use({ tmpPath: 'test-breadcrumbs' });
-
 test.describe('Adaptive Breadcrumbs Snapshots', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.createDirectory(tmpPath);
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should render correctly with wide sidebar', async ({
     page,
     tmpPath
@@ -100,6 +88,21 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     const suggestions = page.locator('.jp-PathNavigator-suggestions');
     await suggestions.waitFor({ state: 'visible' });
     await suggestions.locator('li').first().waitFor();
+
+    // Keep snapshot text stable while preserving isolated tmpPath on disk.
+    await input.evaluate(
+      (element, { stablePath, dynamicPath }) => {
+        const inputElement = element as HTMLInputElement;
+        inputElement.value = inputElement.value.replace(
+          dynamicPath,
+          stablePath
+        );
+      },
+      {
+        stablePath: 'test-breadcrumbs',
+        dynamicPath: tmpPath
+      }
+    );
 
     // Capture the whole file browser so the absolutely-positioned
     // suggestions dropdown is included in the screenshot.
