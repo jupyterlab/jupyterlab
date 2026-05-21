@@ -135,7 +135,7 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=0.0.8"
+    "jupyter-builder>=1.0.0b1"
 ]
 
 [tool.check-wheel-contents]
