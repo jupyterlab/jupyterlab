@@ -15,7 +15,7 @@ export YARN_ENABLE_INLINE_BUILDS=1
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-    while [ command -v yarn ]; do
+    while [[ command -v yarn ]]; do
         YARN_BIN="$(command -v yarn || true)"
         if [[ -n "${YARN_BIN}" ]]; then
             sudo rm -rf "${YARN_BIN}"
