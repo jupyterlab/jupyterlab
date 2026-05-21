@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
@@ -26,12 +27,20 @@ import { JupyterLabPage } from './jupyterlabpage';
 export namespace galata {
   /**
    * Default user settings:
-   * - Deactivate codemirror cursor blinking to avoid noise in screenshots
+   * - Deactivate cursor blinking to avoid noise in screenshots
+   * - Fix fonts to ensure consistent screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
       checkForUpdates: false,
       fetchNews: 'false'
+    },
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
     },
     '@jupyterlab/fileeditor-extension:plugin': {},
     '@jupyterlab/notebook-extension:tracker': {},
@@ -41,7 +50,20 @@ export namespace galata {
       }
     },
     '@jupyterlab/terminal-extension:plugin': {
-      cursorBlink: false
+      cursorBlink: false,
+      fontFamily: '"DejaVu Mono"'
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        'code-font-family': '"DejaVu Mono"',
+        // DejaVu Sans (system on Ubuntu) does not support Chinese, so
+        // we fall back to Noto Simplified Chinese (for tests where only
+        // a few Chinese characters are shown). For tests where the whole
+        // UI is meant to be displayed in a non-Latin script, drop the
+        // "system-ui" part so that `font-display: swap` is respected.
+        'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
+        'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
+      }
     }
   };
 
@@ -442,7 +464,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Sessions API
@@ -451,7 +473,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const sessions = /.*\/api\/sessions(?<id>\/[@:-\w]+)?/;
+    export const sessions = /.*\/api\/sessions(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Settings API
@@ -460,7 +482,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const settings = /.*\/api\/settings(?<id>(\/[@:-\w]+)*)/;
+    export const settings = /.*\/api\/settings(?<id>(\/[@:\-\w]+)*)/;
 
     /**
      * Terminals API
@@ -469,7 +491,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const terminals = /.*\/api\/terminals(?<id>\/[@:-\w]+)?/;
+    export const terminals = /.*\/api\/terminals(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Translations API
@@ -478,7 +500,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const translations = /.*\/api\/translations(?<id>\/[@:-\w]+)?/;
+    export const translations = /.*\/api\/translations(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Workspaces API
@@ -630,7 +652,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(Routes.contents, async (route, request) => {
+      await page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
@@ -701,7 +723,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(Routes.contents, async (route, request) => {
+      await page.route(Routes.contents, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
@@ -770,11 +792,11 @@ export namespace galata {
      * @param page Page model object
      * @param config In-memory config
      */
-    export function mockConfig(
+    export async function mockConfig(
       page: Page,
       config: Record<string, JSONObject>
     ): Promise<void> {
-      return page.route(Routes.config, (route, request) => {
+      await page.route(Routes.config, (route, request) => {
         const section = Routes.config.exec(request.url())?.groups
           ?.section as string;
         switch (request.method()) {
@@ -811,11 +833,11 @@ export namespace galata {
      * @param page Page model object
      * @param customCSS Custom CSS content
      */
-    export function mockCustomCSS(
+    export async function mockCustomCSS(
       page: Page,
       customCSS: string
     ): Promise<void> {
-      return page.route(Routes.customCSS, async (route, request) => {
+      await page.route(Routes.customCSS, async (route, request) => {
         switch (request.method()) {
           case 'GET':
             return route.fulfill({
@@ -878,7 +900,7 @@ export namespace galata {
      * @param runners Mapping of current test runners
      * @param type Type of runner; session or terminal
      */
-    export function mockRunners(
+    export async function mockRunners(
       page: Page,
       runners: Map<string, any>,
       type: 'kernels' | 'sessions' | 'terminals',
@@ -894,7 +916,7 @@ export namespace galata {
       ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
-      return page.route(routeRegex, async (route, request) => {
+      await page.route(routeRegex, async (route, request) => {
         switch (request.method()) {
           case 'DELETE': {
             // slice is used to remove the '/' prefix
@@ -1131,11 +1153,11 @@ export namespace galata {
      * @param page Page model object
      * @param workspace In-memory workspace
      */
-    export function mockState(
+    export async function mockState(
       page: Page,
       workspace: Workspace.IWorkspace
     ): Promise<void> {
-      return page.route(Routes.workspaces, (route, request) => {
+      await page.route(Routes.workspaces, (route, request) => {
         switch (request.method()) {
           case 'GET': {
             const id = Routes.workspaces.exec(request.url())?.groups?.id;
@@ -1180,7 +1202,7 @@ export namespace galata {
      * @param settings In-memory settings
      * @param mockedSettings Test mocked settings
      */
-    export function mockSettings(
+    export async function mockSettings(
       page: Page,
       settings: ISettingRegistry.IPlugin[],
       mockedSettings: Record<string, any>
@@ -1195,7 +1217,7 @@ export namespace galata {
         isClosed = true;
       });
 
-      return page.route(settingsRegex, async (route, request) => {
+      await page.route(settingsRegex, async (route, request) => {
         switch (request.method()) {
           case 'GET': {
             // slice is used to remove the '/' prefix
@@ -1309,8 +1331,11 @@ export namespace galata {
      * @param page Page model object
      * @param user In-memory user
      */
-    export function mockUser(page: Page, user: User.IUser): Promise<void> {
-      return page.route(Routes.user, (route, request) => {
+    export async function mockUser(
+      page: Page,
+      user: User.IUser
+    ): Promise<void> {
+      await page.route(Routes.user, (route, request) => {
         switch (request.method()) {
           case 'GET':
             return route.fulfill({

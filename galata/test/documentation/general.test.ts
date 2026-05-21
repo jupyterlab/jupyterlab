@@ -15,7 +15,17 @@ import {
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  viewport: { height: 720, width: 1280 },
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
+    }
+  }
 });
 
 test.describe('General', () => {
@@ -120,9 +130,22 @@ test.describe('General', () => {
       (document.activeElement as HTMLElement).blur();
     });
 
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 31, x: 0, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_left.png');
+
+    await page.click('[title="Running Terminals and Kernels"]');
+    await page.click('[aria-label="Open Tabs Section"]', {
+      button: 'right',
+      position: { x: 10, y: 10 }
+    });
     expect(
-      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('interface_left.png');
+      await page.screenshot({ clip: { y: 31, x: 0, width: 330, height: 400 } })
+    ).toMatchSnapshot('sidebar_context_menu.png');
   });
 
   test('Right Sidebar', async ({ page, tmpPath }) => {
@@ -137,11 +160,13 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right.png');
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
@@ -466,11 +491,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
+    // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
+    // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
+    await page.getByText('Cell 1/6').waitFor();
+
     const trustIndictor = page.locator('.jp-StatusItem-trust');
 
-    expect(await trustIndictor.screenshot()).toMatchSnapshot(
-      'notebook_not_trusted.png'
-    );
+    expect
+      .soft(await trustIndictor.screenshot())
+      .toMatchSnapshot('notebook_not_trusted.png');
 
     // Open trust dialog
     // Note: we do not `await` here as it only resolves once dialog is closed

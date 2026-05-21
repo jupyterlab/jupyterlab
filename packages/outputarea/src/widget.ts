@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { WidgetTracker } from '@jupyterlab/apputils';
@@ -191,6 +192,16 @@ export class OutputArea extends Widget {
       KernelMessage.IExecuteReplyMsg
     >
   ) {
+    this._setFuture(value, true);
+  }
+
+  private _setFuture(
+    value: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >,
+    clear: boolean
+  ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       throw Error('Model is disposed');
@@ -212,14 +223,16 @@ export class OutputArea extends Widget {
         // even if caught on the `done` promise level before.
       });
 
-    this.model.clear();
+    if (clear) {
+      this.model.clear();
 
-    // Make sure there were no input widgets.
-    if (this.widgets.length) {
-      this._clear();
-      this.outputLengthChanged.emit(
-        Math.min(this.model.length, this._maxNumberOutputs)
-      );
+      // Make sure there were no input widgets.
+      if (this.widgets.length) {
+        this._clear();
+        this.outputLengthChanged.emit(
+          Math.min(this.model.length, this._maxNumberOutputs)
+        );
+      }
     }
 
     // Handle published messages.
@@ -287,12 +300,52 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * Detach the kernel future from this output area without disposing it.
+   *
+   * Clears the message handlers on the future so this output area can be
+   * safely disposed without terminating the in-flight execution. The returned
+   * future can be re-attached to a new output area via `reattachFuture` method.
+   *
+   * Returns `null` if no future is currently attached.
+   */
+  detachFuture(): Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
+    const future = this._future;
+    if (!future) {
+      return null;
+    }
+    future.onIOPub = () => undefined;
+    future.onReply = () => undefined;
+    future.onStdin = () => undefined;
+    this._future = null!;
+    return future;
+  }
+
+  /**
+   * Reattach the kernel future, without clearing the existing output model.
+   *
+   * This is useful when a cell gets deleted by a user but user later decides
+   * to undo the deletion, as it allows to keep the output data flowing.
+   */
+  reattachFuture(
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >
+  ) {
+    this._setFuture(future, false);
+  }
+
+  /**
    * Follow changes on the model state.
    */
   protected onModelChanged(
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add':
         const output = args.newValues[0];
@@ -371,26 +424,6 @@ export class OutputArea extends Widget {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
-
-    // Update overlay height so it always matches the output panel.
-    // TODO: use CSS anchor positionning level once fully supported in all browsers
-    const resize = () => {
-      const panel = this.node.querySelector(
-        '.jp-OutputArea-child'
-      ) as HTMLElement;
-      if (panel) {
-        overlay.style.height = `${Math.max(
-          panel.getBoundingClientRect().height,
-          this.node.getBoundingClientRect().height
-        )}px`;
-      }
-    };
-    const observer = new ResizeObserver(resize);
-    observer.observe(this.node);
-
-    this.disposed.connect(() => {
-      observer.disconnect();
-    });
 
     requestAnimationFrame(() => {
       this._initialize.emit();
@@ -735,6 +768,7 @@ export class OutputArea extends Widget {
     const transient = ((msg.content as any).transient || {}) as JSONObject;
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
       case 'execute_result':
       case 'display_data':

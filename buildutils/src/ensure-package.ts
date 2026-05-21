@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -231,6 +232,17 @@ export async function ensurePackage(
     }
     if (name === '.' || name === '..') {
       return;
+    }
+    // Skip processing Node.js-native dependencies
+    if (name.startsWith('node:')) {
+      if (options.allowNodeDependencies) {
+        return;
+      } else {
+        messages.push(
+          `Node.js dependencies are not allowed in ${data.name} package (seen ${name})`
+        );
+        return;
+      }
     }
     if (!deps[name]) {
       if (!(name in seenDeps)) {
@@ -864,6 +876,11 @@ export interface IEnsurePackageOptions {
    * Older versions supported by core packages in addition to the latest.
    */
   backwardVersions?: Record<string, Record<string, string>>;
+
+  /**
+   * Whether Node.js imports are allowed.
+   */
+  allowNodeDependencies?: boolean;
 }
 
 /**

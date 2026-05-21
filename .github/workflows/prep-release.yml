@@ -29,11 +29,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
 
       - name: Prep Release
         id: prep-release
-        uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@634ac751f8a58d3d4a19b63f58aad138e6355cc8 # v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: ${{ github.event.inputs.version_spec }}
@@ -45,5 +45,7 @@ jobs:
           since_last_stable: ${{ github.event.inputs.since_last_stable }}
 
       - name: "** Next Step **"
+        env:
+          RELEASE_URL: ${{ steps.prep-release.outputs.release_url }}
         run: |
-          echo "Optional): Review Draft Release: ${{ steps.prep-release.outputs.release_url }}"
+          echo "Optional): Review Draft Release: ${RELEASE_URL}"

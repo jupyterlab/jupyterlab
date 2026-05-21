@@ -304,7 +304,10 @@ export function xpBuildActiveActivityTabSelector(): string {
 /**
  * Whether JupyterLab is in simple mode or not
  */
-export function isInSimpleMode(page: Page): Promise<boolean> {
-  const toggle = page.getByRole('switch', { name: 'Simple' });
-  return toggle.isChecked();
+export async function isInSimpleMode(page: Page): Promise<boolean> {
+  return page.evaluate(() => {
+    return (
+      document.getElementById('main')?.dataset?.shellMode === 'single-document'
+    );
+  });
 }

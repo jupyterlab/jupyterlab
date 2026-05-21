@@ -165,6 +165,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.variables.scopes = [];
     this.sources.currentSource = null;
     this.kernelSources.kernelSources = null;
+    // eslint-disable-next-line jupyter/no-untranslated-string
     this.title = '-';
   }
 
@@ -188,7 +189,10 @@ export namespace DebuggerModel {
     /**
      * Get source
      */
-    getSource(): Promise<IDebugger.Source>;
+    getSource(args: {
+      sourceReference: number;
+      path: string | undefined;
+    }): Promise<IDebugger.Source>;
     /**
      * The display registry.
      */

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { JSONExt } from '@lumino/coreutils';
 import minimist from 'minimist';
@@ -64,7 +65,6 @@ export namespace PageConfig {
         }
         if (fullPath) {
           // Force Rspack to ignore this require and not treat it as requiring a package.
-          // eslint-disable-next-line
           configData = eval('require')(fullPath) as { [key: string]: string };
         }
       } catch (e) {
@@ -146,11 +146,7 @@ export namespace PageConfig {
     const labOrDoc = mode === 'single-document' ? 'doc' : 'lab';
     path = URLExt.join(path, labOrDoc);
     if (workspace !== defaultWorkspace) {
-      path = URLExt.join(
-        path,
-        'workspaces',
-        encodeURIComponent(getOption('workspace') ?? defaultWorkspace)
-      );
+      path = URLExt.join(path, 'workspaces', encodeURIComponent(workspace));
     }
     const treePath = options.treePath ?? getOption('treePath');
     if (treePath) {
@@ -333,4 +329,19 @@ export namespace PageConfig {
       return disabled.some(val => val === id || (extName && val === extName));
     }
   }
+}
+
+/**
+ * Compare two version tuples element-by-element.
+ */
+export function compareVersions(
+  a: [number, number, number],
+  b: [number, number, number]
+): number {
+  for (let index = 0; index < 3; index++) {
+    if (a[index] !== b[index]) {
+      return a[index] - b[index];
+    }
+  }
+  return 0;
 }

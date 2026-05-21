@@ -46,6 +46,18 @@ test.describe('File Edit Operations', () => {
     await page.keyboard.press('Alt+A');
     expect(await getEditorText(page)).toBe('first\n/* second\nthird */');
   });
+  test('Should fall back to line comment on Alt + A for Python', async ({
+    page
+  }) => {
+    // Python has no block comment syntax, so Alt+A should fall back to
+    // line comments (via toggleBlockCommentWithFallback)
+    // Select "second" and "third"
+    await page.getByRole('textbox').getByText('second').last().dblclick();
+    await page.keyboard.press('Shift+ArrowDown');
+    // Toggle block comment (falls back to line comment for Python)
+    await page.keyboard.press('Alt+A');
+    expect(await getEditorText(page)).toBe('first\n# second\n# third');
+  });
 });
 
 test.describe('Console Interactions', () => {
@@ -56,15 +68,21 @@ test.describe('Console Interactions', () => {
     });
 
     await page.getByText('Create Console for Editor').click();
+
+    const loadingBanner = page
+      .locator('.jp-CodeConsole-banner')
+      .getByText('...');
+    // Wait for loading state in the banner to show up
+    await loadingBanner.waitFor({ state: 'attached' });
+
+    // Select kernel
     await page.getByRole('button', { name: 'Select Kernel' }).click();
 
-    await page
-      .getByText("Type 'copyright', 'credits'")
-      .waitFor({ state: 'visible' });
+    // Wait for banner to disappear once fully loaded
+    await loadingBanner.waitFor({ state: 'detached' });
 
     await page.getByText('123', { exact: true }).click();
 
-    await expect(page.getByText("Type 'copyright', 'credits'")).toBeVisible();
     await page.keyboard.press('Shift+Enter');
 
     await expect(

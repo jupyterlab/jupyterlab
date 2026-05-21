@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import {
+  type ISessionContext,
+  Notification,
+  type SessionContext
+} from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import type { ICodeCellModel } from '@jupyterlab/cells';
 import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
@@ -16,7 +20,8 @@ import {
 } from '@jupyterlab/notebook';
 import type { Stdin } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import type { ISharedCodeCell } from '@jupyter/ydoc';
+import type { IExecutionState, ISharedCodeCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
@@ -31,10 +36,39 @@ import * as utils from './utils';
 import uncoalescedOp from './uncoalesced_op.json';
 
 const ERROR_INPUT = 'a = foo';
+const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
+const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
+const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+const STDOUT_TYPE = 'application/vnd.jupyter.stdout';
 
 const server = new JupyterServer();
+
+function withNotificationError(action: () => void, message: string): void {
+  const notificationError = jest
+    .spyOn(Notification, 'error')
+    .mockImplementation(() => '');
+  try {
+    action();
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(notificationError).toHaveBeenCalledWith(message, {
+      autoClose: READ_ONLY_NOTIFICATION_AUTO_CLOSE
+    });
+  } finally {
+    notificationError.mockRestore();
+  }
+}
+
+function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
+  return new Promise<void>(resolve => {
+    cell.model.sharedModel.changed.connect((_, change) => {
+      if (change.executionStateChange?.newValue === state) {
+        resolve();
+      }
+    });
+  });
+}
 
 beforeAll(async () => {
   await server.start();
@@ -256,6 +290,17 @@ describe('@jupyterlab/notebook', () => {
         expect(prev.model.sharedModel.getSource()).toBe('');
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.splitCell(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_SPLIT_ERROR);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
@@ -380,6 +425,17 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
         widget.activeCellIndex = 1;
         let source = widget.activeCell!.model.sharedModel.getSource();
@@ -395,6 +451,42 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.mergeCells(widget, true);
         expect(widget.widgets.length).toBe(cellNumber);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should be a no-op if any merged cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[1].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op if a selected cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          const cell = widget.widgets[2];
+          cell.model.setMetadata('editable', false);
+          widget.select(cell);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op when mergeAbove is true and previous cell is not editable', () => {
+        widget.activeCellIndex = 1;
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[0].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget, true);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
       });
 
       it('should clear the outputs of a code cell', () => {
@@ -1977,6 +2069,230 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 1);
       });
+
+      it('should undo a merge after split', () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('foo\nbar');
+
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(4)!); // Split after 'foo\n'
+        NotebookActions.splitCell(widget);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+        const count = widget.widgets.length;
+
+        // Separate undo capture - otherwise we would need to wait 500ms
+        // for timeout to prevent split and merge from being combined into a single entry
+        (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+        widget.activeCellIndex = 0;
+        NotebookActions.mergeCells(widget, false, false);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(
+          'foo\nbar'
+        );
+
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+      });
+
+      it.each([
+        { interrupt: true, secondCellExpectedState: 'idle' as const },
+        { interrupt: false, secondCellExpectedState: 'running' as const }
+      ])(
+        'should preserve execution state and output after undoing a merge (interrupt: $interrupt)',
+        async ({
+          interrupt,
+          secondCellExpectedState
+        }: {
+          interrupt: boolean;
+          secondCellExpectedState: 'idle' | 'running';
+        }) => {
+          const cell = widget.widgets[0] as CodeCell;
+          widget.activeCellIndex = 0;
+          const initialSource =
+            'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+          cell.model.sharedModel.setSource(initialSource);
+
+          const executionStarted = waitForExecutionState(cell, 'running');
+          const executionCompleted = NotebookActions.run(
+            widget,
+            ipySessionContext
+          );
+          await executionStarted;
+
+          // Split the first cell
+          const editor = cell.editor as CodeEditor.IEditor;
+          widget.activeCellIndex = 0;
+          editor.setCursorPosition(editor.getPositionAt(12)!); // Split after 'import time\n'
+          NotebookActions.splitCell(widget);
+          const firstSplitCell = widget.widgets[0] as CodeCell;
+          const secondSplitCell = widget.widgets[1] as CodeCell;
+          expect(firstSplitCell.model.sharedModel.getSource()).toBe(
+            'import time'
+          );
+          expect(secondSplitCell.model.sharedModel.getSource()).toBe(
+            'for i in range(5):\n    print(i)\n    time.sleep(1)'
+          );
+          expect(firstSplitCell.model.sharedModel.executionState).toBe('idle');
+          expect(secondSplitCell.model.sharedModel.executionState).toBe(
+            'running'
+          );
+
+          // Separate undo capture - otherwise we would need to wait 500ms
+          // for timeout to prevent split and merge from being combined into a single entry
+          (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+          // Merge cells
+          widget.activeCellIndex = 0;
+          NotebookActions.mergeCells(widget, false, false);
+          const mergedCell = widget.widgets[0] as CodeCell;
+          expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
+
+          const kernel = ipySessionContext.session?.kernel;
+          expect(kernel).toBeTruthy();
+
+          if (interrupt) {
+            const statusChanged = signalToPromise(kernel!.statusChanged);
+            await kernel!.interrupt();
+            await statusChanged;
+            await executionCompleted.catch(() => false);
+            expect(mergedCell.model.sharedModel.executionState).toBe('idle');
+          }
+
+          // Undo the merge (which splits the cells again)
+          NotebookActions.undo(widget);
+          const firstCellModelAfterUndo = (widget.widgets[0] as CodeCell).model
+            .sharedModel;
+          const secondCellModelAfterUndo = (widget.widgets[1] as CodeCell).model
+            .sharedModel;
+          expect(firstCellModelAfterUndo.getSource()).toBe('import time');
+          expect(secondCellModelAfterUndo.getSource()).toBe(
+            'for i in range(5):\n    print(i)\n    time.sleep(1)'
+          );
+          expect(firstCellModelAfterUndo.executionState).toBe('idle');
+          expect(secondCellModelAfterUndo.executionState).toBe(
+            secondCellExpectedState
+          );
+
+          if (!interrupt) {
+            const secondCellAfterUndo = widget.widgets[1] as CodeCell;
+            // Verify output keeps arriving in the reconnected cell.
+            await signalToPromise(secondCellAfterUndo.outputArea.model.changed);
+            const output = secondCellAfterUndo.outputArea.model.get(0);
+
+            const finalOutput = '0\n1\n2\n3\n4\n';
+            expect(
+              finalOutput.startsWith(output.data[STDOUT_TYPE] as string)
+            ).toBe(true);
+            expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+            expect(secondCellAfterUndo.model.executionState).toBe('running');
+            expect(secondCellAfterUndo.model.executionCount).toBe(null);
+
+            await executionCompleted;
+            expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+            expect(secondCellAfterUndo.model.executionState).toBe('idle');
+            expect(secondCellAfterUndo.model.executionCount).not.toBe(null);
+          }
+        },
+        20000
+      );
+
+      it('should preserve execution state and output after undoing a cell type change', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        widget.activeCellIndex = 0;
+        const initialSource =
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+        cell.model.sharedModel.setSource(initialSource);
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        await signalToPromise(cell.outputArea.model.changed);
+        const outputBefore = cell.outputArea.model.get(0);
+        expect(outputBefore.data[STDOUT_TYPE]).not.toBe(finalOutput);
+
+        NotebookActions.changeCellType(widget, 'markdown');
+
+        // Wait for one print to go to buffer - reproduces an issue where content
+        // streamed while the cell was removed would be lost.
+        await sleep(1500);
+
+        // Undo cell type change
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+        // Right now the cell is still executing so we should not see
+        // the final output just yet (only its prefix),
+        // and we should not see the execution count number yet.
+        const output = cellAfterUndo.outputArea.model.get(0);
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for cell to complete execution
+        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should preserve execution state and output after undoing a cell deletion', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        const initialSource =
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+        cell.model.sharedModel.setSource(initialSource);
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        NotebookActions.deleteCells(widget);
+
+        // Undo cell deletion and find the relevant cell
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+        await signalToPromise(cellAfterUndo.outputArea.model.changed);
+        const output = cellAfterUndo.outputArea.model.get(0);
+
+        // The cell should still be executing and output should not be final
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for cell to complete execution
+        await executionCompleted;
+        // Verify outputs kept arriving even after undo reconnected the future.
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#redo()', () => {
@@ -2183,6 +2499,22 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
       });
 
+      it('should be undoable', () => {
+        widget.activeCell!.model.sharedModel.setSource('# foo');
+        expect(widget.activeCell!.model.type).toBe('code');
+        NotebookActions.setMarkdownHeader(widget, 3);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          '### foo'
+        );
+        expect(widget.activeCell!.model.type).toBe('markdown');
+        const index = widget.activeCellIndex;
+        NotebookActions.undo(widget);
+        // TODO: find a way to avoid index drift on undo
+        widget.activeCellIndex = index;
+        expect(widget.activeCell!.model.type).toBe('code');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('# foo');
+      });
+
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
         expect(
@@ -2218,6 +2550,78 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#selectLastModifiedCell() and #selectNextModifiedCell()', () => {
+      beforeEach(async () => {
+        const model = new NotebookModel();
+        widget.model = model;
+        for (let i = 0; i < 3; i++) {
+          model.sharedModel.insertCell(i, {
+            cell_type: 'code',
+            source: ''
+          });
+        }
+      });
+
+      function editCell(index: number, source: string) {
+        widget.activeCellIndex = index;
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource(source);
+      }
+
+      it('should push on edit and select last modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(1);
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should allow forward navigation to next modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // select 1
+        await NotebookActions.selectLastModifiedCell(widget); // then 0
+
+        await NotebookActions.selectNextModifiedCell(widget); // back to 1
+        expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should clear forward stack on new edit', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // selects 1
+        await NotebookActions.selectLastModifiedCell(widget); // selects 0
+
+        // Make an edit while at index 0 to clear the forward stack
+        editCell(0, 'edit 3');
+        await NotebookActions.selectNextModifiedCell(widget);
+        // Should stay at 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should skip active cell and disposed cells', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+
+        // Remove cell 1
+        widget.activeCellIndex = 1;
+        NotebookActions.deleteCells(widget);
+
+        widget.activeCellIndex = 1; // Now index 1 is the cell 2
+        await NotebookActions.selectLastModifiedCell(widget);
+        // Should skip deleted cell 1 and select cell 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+    });
+
     describe('#trust()', () => {
       it('should trust the notebook cells if the user accepts', async () => {
         const model = widget.model!;
@@ -2226,7 +2630,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: true });
         expect(cell.trusted).toBe(true);
       });
 
@@ -2237,13 +2641,15 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await dismissDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: false });
         expect(cell.trusted).not.toBe(true);
       });
 
       it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
-        await expect(NotebookActions.trust(widget)).resolves.not.toThrow();
+        await expect(NotebookActions.trust(widget)).resolves.toEqual({
+          trusted: false
+        });
       });
 
       it('should show a dialog if all cells are trusted', async () => {
@@ -2256,7 +2662,7 @@ describe('@jupyterlab/notebook', () => {
         }
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await expect(promise).resolves.not.toThrow();
+        await expect(promise).resolves.toEqual({ trusted: true });
       });
     });
   });
