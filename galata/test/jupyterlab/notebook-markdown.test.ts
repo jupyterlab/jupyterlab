@@ -34,7 +34,7 @@ async function enterEditingModeForScreenshot(
   await cell!.evaluate(element => {
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
   });
-  await cell!.locator('.jp-cell-toolbar').waitFor();
+  await page.waitForTimeout(50);
 }
 
 test.describe('Notebook Markdown', () => {
@@ -79,6 +79,7 @@ test.describe('Notebook Markdown', () => {
     const imageName = 'do-not-highlight-standalone-dollar.png';
     await enterEditingModeForScreenshot(page, 2);
     const cell = await page.notebook.getCellLocator(2);
+    await cell!.locator('.jp-cell-toolbar').waitFor();
 
     expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       imageName
