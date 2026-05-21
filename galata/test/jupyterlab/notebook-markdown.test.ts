@@ -34,7 +34,7 @@ async function enterEditingModeForScreenshot(
   await cell!.evaluate(element => {
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
   });
-  await page.waitForTimeout(50);
+  await cell!.locator('.jp-cell-toolbar').waitFor();
 }
 
 test.describe('Notebook Markdown', () => {
