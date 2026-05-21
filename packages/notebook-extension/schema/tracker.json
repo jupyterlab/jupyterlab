@@ -699,7 +699,11 @@
       "title": "Default cell type",
       "description": "The default type (markdown, code, or raw) for new cells",
       "type": "string",
-      "enum": ["code", "markdown", "raw"],
+      "oneOf": [
+        { "const": "code", "title": "Code" },
+        { "const": "markdown", "title": "Markdown" },
+        { "const": "raw", "title": "Raw" }
+      ],
       "default": "code"
     },
     "autoStartDefaultKernel": {
@@ -717,7 +721,10 @@
     "inputHistoryScope": {
       "type": "string",
       "default": "global",
-      "enum": ["global", "session"],
+      "oneOf": [
+        { "const": "global", "title": "Global" },
+        { "const": "session", "title": "Session" }
+      ],
       "title": "Input History Scope",
       "description": "Whether the line history for standard input (e.g. the ipdb prompt) should kept separately for different kernel sessions (`session`) or combined (`global`)."
     },
@@ -813,7 +820,10 @@
     "renderingLayout": {
       "title": "Rendering Layout",
       "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
-      "enum": ["default", "side-by-side"],
+      "oneOf": [
+        { "const": "default", "title": "Default" },
+        { "const": "side-by-side", "title": "Side by side" }
+      ],
       "default": "default"
     },
     "sideBySideLeftMarginOverride": {
@@ -838,7 +848,12 @@
     "windowingMode": {
       "title": "Windowing mode",
       "description": "- 'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells\n- 'full': Best performance with side effects - Attach to the DOM only cells in viewport\n- 'none': Worst performance without side effects - Attach all cells to the viewport\n- 'contentVisibility': Browser-optimized rendering - Use content-visibility to skip offscreen cells",
-      "enum": ["defer", "full", "none", "contentVisibility"],
+      "oneOf": [
+        { "const": "defer", "title": "Defer" },
+        { "const": "full", "title": "Full" },
+        { "const": "none", "title": "None" },
+        { "const": "contentVisibility", "title": "Content visibility" }
+      ],
       "default": "contentVisibility"
     },
     "accessKernelHistory": {
