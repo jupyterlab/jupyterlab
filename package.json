@@ -2,7 +2,6 @@
   "name": "@jupyterlab/repo-top",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "yarn@3.5.0",
   "files": [],
   "workspaces": [
     "dev_mode",
@@ -139,5 +138,6 @@
     "lerna": "^7.1.4",
     "typedoc": "~0.27.4",
     "typedoc-plugin-mdn-links": "^4.0.4"
-  }
+  },
+  "packageManager": "yarn@3.5.0"
 }
