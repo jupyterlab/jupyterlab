@@ -1992,11 +1992,13 @@ export class Notebook extends StaticNotebook {
 
     this._ensureFocus();
 
-    if (cell) {
-      this.select(cell);
-    }
     if (newValue === oldValue) {
       return;
+    }
+
+    this.deselectAll();
+    if (cell) {
+      this.select(cell);
     }
     this._trimSelections();
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
@@ -2184,6 +2186,9 @@ export class Notebook extends StaticNotebook {
     if (changed) {
       this._selectionChanged.emit(void 0);
     }
+    // Make sure we have a valid active cell.
+    // eslint-disable-next-line no-self-assign
+    this.activeCellIndex = this.activeCellIndex;
     this.update();
   }
 
