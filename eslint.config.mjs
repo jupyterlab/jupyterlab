@@ -52,7 +52,6 @@ export default defineConfig([
     'galata/playwright-report',
     'jupyterlab/chrome-test.js',
     'jupyterlab/geckodriver',
-    'jupyterlab/staging/yarn.js',
     'jupyterlab/staging/index.js',
     'jupyterlab/staging/webpack.config.js',
     'packages/codemirror/test/foo*.js',

@@ -120,7 +120,7 @@ def build_api_docs(out_dir: Path):
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
-    jlpm = ["node", str(root / "jupyterlab" / "staging" / "yarn.js")]
+    jlpm = ["jlpm"]
 
     if api_index.exists():
         # avoid rebuilding docs because it takes forever

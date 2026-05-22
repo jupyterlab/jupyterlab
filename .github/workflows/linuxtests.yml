@@ -189,9 +189,10 @@ jobs:
           persist-credentials: false
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
       - run: |
-          node ./jupyterlab/staging/yarn.js install
-          node ./jupyterlab/staging/yarn.js run build:packages
-          node ./jupyterlab/staging/yarn.js run docs
+          pip install -vv --group builder
+          jlpm
+          jlpm build:packages
+          jlpm docs
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"

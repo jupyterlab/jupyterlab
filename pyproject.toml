@@ -133,6 +133,11 @@ upgrade-extension = [
     "tomli-w<2.0"
 ]
 
+[dependency-groups]
+builder = [
+    "jupyter-builder>=1.0.0b1"
+]
+
 [tool.check-wheel-contents]
 ignore = ["W002", "W004"]
 
@@ -213,14 +218,14 @@ install-pre-commit-hook = true
 build_cmd = "build"
 source_dir = "packages"
 build_dir = "dev_mode/static"
-npm = ["node", "jupyterlab/staging/yarn.js"]
+npm = ["jlpm"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod:minimize"
 path = "jupyterlab/staging"
 source_dir = "jupyterlab/staging"
 build_dir = "jupyterlab/static"
-npm = ["node", "yarn.js"]
+npm = ["jlpm"]
 
 [tool.pytest.ini_options]
 testpaths = "jupyterlab/tests"
@@ -241,12 +246,12 @@ before-bump-version = [
 ]
 before-build-npm = [
     "jlpm",
-    "jlpm run build:all",
+    "jlpm build:all",
     "node buildutils/lib/update-core-mode.js --skip-assets",
 ]
 before-build-python = [
     "node buildutils/lib/local-repository start",
-    "jlpm run before:build:python",
+    "jlpm before:build:python",
     "node buildutils/lib/local-repository stop",
 ]
 after-publish-assets = "npm run after:publish:assets"
