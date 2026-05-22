@@ -53,11 +53,10 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await page.locator(`${BREADCRUMB_SELECTOR} >> text=dir2`).waitFor();
 
     // Keep snapshot text stable while preserving isolated tmpPath on disk.
-    const crumb = page.locator(`${BREADCRUMB_SELECTOR} >> text=${tmpPath}`);
-    await mockPath(crumb, tmpPath);
+    const crumbs = page.locator(BREADCRUMB_SELECTOR);
+    await mockPath(crumbs, tmpPath);
 
     // Take snapshot of breadcrumbs container
-    const crumbs = page.locator(BREADCRUMB_SELECTOR);
     await expect(crumbs).toHaveScreenshot('breadcrumbs.png');
   });
 
@@ -112,10 +111,17 @@ async function mockPath(locator: Locator, tmpPath: string): Promise<void> {
       if (element instanceof HTMLInputElement) {
         element.value = element.value.replace(dynamicPath, stablePath);
       } else {
-        element.textContent = element.textContent!.replace(
-          dynamicPath,
-          stablePath
-        );
+        const walk = (node: Node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = node.textContent!.replace(
+              dynamicPath,
+              stablePath
+            );
+          } else {
+            node.childNodes.forEach(walk);
+          }
+        };
+        walk(element);
       }
     },
     { stablePath: 'test-breadcrumbs', dynamicPath: tmpPath }
