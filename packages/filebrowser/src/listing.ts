@@ -2848,7 +2848,7 @@ export class DirListing extends Widget {
   private _focusPath = '';
   private _modifiedStyle: Time.HumanStyle = 'short';
   private _createdStyle: Time.HumanStyle = 'short';
-  private _timestampFormat: Time.TimestampFormat = 'absolute';
+  private _timestampFormat: Time.TimestampFormat = 'relative';
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
@@ -3470,7 +3470,7 @@ export namespace DirListing {
       modified: HTMLElement,
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle,
-      timestampFormat: Time.TimestampFormat = 'absolute'
+      timestampFormat: Time.TimestampFormat = 'relative'
     ): void {
       this._updateItemDate(
         modified,
@@ -3522,9 +3522,13 @@ export namespace DirListing {
       style: Time.HumanStyle,
       cache: WeakMap<
         HTMLElement,
-        { date: string; style: Time.HumanStyle; timestampFormat?: Time.TimestampFormat }
+        {
+          date: string;
+          style: Time.HumanStyle;
+          timestampFormat?: Time.TimestampFormat;
+        }
       >,
-      timestampFormat: Time.TimestampFormat = 'absolute'
+      timestampFormat: Time.TimestampFormat = 'relative'
     ): void {
       const previousUpdate = cache.get(element);
       if (
@@ -3537,7 +3541,11 @@ export namespace DirListing {
 
       const parsedDate = new Date(dateString);
       // Render the date using the configured format (absolute or relative)
-      element.textContent = Time.formatTimestamp(parsedDate, timestampFormat, style);
+      element.textContent = Time.formatTimestamp(
+        parsedDate,
+        timestampFormat,
+        style
+      );
       element.title = Time.format(parsedDate);
       cache.set(element, { date: dateString, style, timestampFormat });
     }
@@ -3562,7 +3570,7 @@ export namespace DirListing {
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
       createdStyle?: Time.HumanStyle,
-      timestampFormat: Time.TimestampFormat = 'absolute'
+      timestampFormat: Time.TimestampFormat = 'relative'
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3948,7 +3956,11 @@ export namespace DirListing {
      */
     private _createdColumnLastUpdate = new WeakMap<
       HTMLElement,
-      { date: string; style: Time.HumanStyle; timestampFormat?: Time.TimestampFormat }
+      {
+        date: string;
+        style: Time.HumanStyle;
+        timestampFormat?: Time.TimestampFormat;
+      }
     >();
 
     private _lastRenderedState = new WeakMap<HTMLElement, string>();

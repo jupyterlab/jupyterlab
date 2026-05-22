@@ -102,24 +102,19 @@
         "rank": 14
       },
       {
-        "command": "filebrowser:toggle-date-created",
+        "command": "filebrowser:toggle-file-size",
         "selector": ".jp-DirListing-header",
         "rank": 15
       },
       {
-        "command": "filebrowser:toggle-file-size",
+        "command": "filebrowser:toggle-file-checkboxes",
         "selector": ".jp-DirListing-header",
         "rank": 16
       },
       {
-        "command": "filebrowser:toggle-file-checkboxes",
-        "selector": ".jp-DirListing-header",
-        "rank": 17
-      },
-      {
         "command": "filebrowser:toggle-sort-notebooks-first",
         "selector": ".jp-DirListing-header",
-        "rank": 18
+        "rank": 17
       },
       {
         "command": "filebrowser:share-main",
@@ -217,12 +212,6 @@
       "description": "Whether to show the last modified column",
       "default": true
     },
-    "showDateCreatedColumn": {
-      "type": "boolean",
-      "title": "Show date created column",
-      "description": "Whether to show the date created column",
-      "default": false
-    },
     "showFileSizeColumn": {
       "type": "boolean",
       "title": "Show file size column",
@@ -239,11 +228,9 @@
       "type": "string",
       "title": "Timestamp format",
       "description": "Display format for file timestamps",
-      "default": "absolute",
-      "oneOf": [
-        { "const": "absolute", "title": "Absolute" },
-        { "const": "relative", "title": "Relative" }
-      ]
+      "default": "relative",
+      "enum": ["absolute", "relative"],
+      "enumNames": ["Absolute", "Relative"]
     },
     "showFileCheckboxes": {
       "type": "boolean",
@@ -323,12 +310,6 @@
       "title": "Show Filter Bar by Default",
       "description": "Show the filter bar by default in the file browser.",
       "default": false
-    },
-    "clearFilterOnNavigation": {
-      "type": "boolean",
-      "title": "Clear Filter on Navigation",
-      "description": "Clear the filter when naviating to a new directory",
-      "default": true
     }
   },
   "additionalProperties": false,
