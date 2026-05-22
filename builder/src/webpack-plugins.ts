@@ -242,7 +242,7 @@ export namespace WPPlugin {
       for (const mod of modules) {
         report.packages.push({
           name: mod.name || '',
-          versionInfo: mod.packageJson.version || '',
+          versionInfo: mod.packageJson?.version || '',
           licenseId: mod.licenseId || '',
           extractedText: mod.licenseText || ''
         });

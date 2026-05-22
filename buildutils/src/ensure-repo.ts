@@ -83,6 +83,7 @@ const UNUSED: Dict<string[]> = {
     'style-loader',
     'terser-webpack-plugin',
     'webpack-cli',
+    'webpack-sources',
     'worker-loader',
     'source-map-loader'
   ],
