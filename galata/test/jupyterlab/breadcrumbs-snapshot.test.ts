@@ -3,24 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const BREADCRUMB_SELECTOR = '.jp-BreadCrumbs';
 const SETTING_ID = '@jupyterlab/filebrowser-extension:browser';
 
-test.use({ tmpPath: 'test-breadcrumbs' });
-
 test.describe('Adaptive Breadcrumbs Snapshots', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.createDirectory(tmpPath);
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should render correctly with wide sidebar', async ({
     page,
     tmpPath
@@ -63,8 +52,11 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Wait for breadcrumb recalculation after resize
     await page.locator(`${BREADCRUMB_SELECTOR} >> text=dir2`).waitFor();
 
-    // Take snapshot of breadcrumbs container
+    // Keep snapshot text stable while preserving isolated tmpPath on disk.
     const crumbs = page.locator(BREADCRUMB_SELECTOR);
+    await mockPath(crumbs, tmpPath);
+
+    // Take snapshot of breadcrumbs container
     await expect(crumbs).toHaveScreenshot('breadcrumbs.png');
   });
 
@@ -101,6 +93,9 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     await suggestions.waitFor({ state: 'visible' });
     await suggestions.locator('li').first().waitFor();
 
+    // Keep snapshot text stable while preserving isolated tmpPath on disk.
+    await mockPath(input, tmpPath);
+
     // Capture the whole file browser so the absolutely-positioned
     // suggestions dropdown is included in the screenshot.
     const fileBrowser = page.locator('.jp-FileBrowser');
@@ -109,3 +104,26 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     );
   });
 });
+
+async function mockPath(locator: Locator, tmpPath: string): Promise<void> {
+  await locator.evaluate(
+    (element, { stablePath, dynamicPath }) => {
+      if (element instanceof HTMLInputElement) {
+        element.value = element.value.replace(dynamicPath, stablePath);
+      } else {
+        const walk = (node: Node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = node.textContent!.replace(
+              dynamicPath,
+              stablePath
+            );
+          } else {
+            node.childNodes.forEach(walk);
+          }
+        };
+        walk(element);
+      }
+    },
+    { stablePath: 'test-breadcrumbs', dynamicPath: tmpPath }
+  );
+}
