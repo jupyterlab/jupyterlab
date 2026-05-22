@@ -320,9 +320,9 @@ describe('Debugger', () => {
           expect(title[0].innerHTML).toContain('Source');
         });
 
-        it('should have one button', () => {
+        it('should have no buttons', () => {
           const buttons = toolbar.querySelectorAll('jp-button');
-          expect(buttons.length).toBe(1);
+          expect(buttons.length).toBe(0);
         });
       });
     });
@@ -352,9 +352,9 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('ui-components:caret-down');
       });
 
-      it('should have one button', () => {
+      it('should have no buttons', () => {
         const buttons = toolbar.querySelectorAll('jp-button');
-        expect(buttons.length).toBe(1);
+        expect(buttons.length).toBe(0);
       });
     });
   });

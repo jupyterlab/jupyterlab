@@ -126,6 +126,8 @@ The Kernel Sources filter bar has been moved to the toolbar and now supports liv
 src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-kernel-sources-filter.png"
 class="jp-screenshot">
 
+The refresh button for sources list was removed - the sources will not update automatically after each code execution.
+
 ### Keyboard navigation and accessibility
 
 Keyboard navigation has been improved across several components:
