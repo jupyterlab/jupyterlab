@@ -110,7 +110,16 @@
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay {
-  left: calc(-1 * var(--jp-private-cell-scrolling-output-offset));
+  position: fixed;
+  top: anchor(top);
+  bottom: anchor(bottom);
+  left: anchor(left);
+  position-anchor: --jp-output-area;
+  height: unset;
+  width: calc(
+    var(--jp-cell-prompt-width) - 1 *
+      var(--jp-private-cell-scrolling-output-offset)
+  );
 }
 
 /*-----------------------------------------------------------------------------

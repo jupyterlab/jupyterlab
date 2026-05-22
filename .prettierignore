@@ -29,7 +29,6 @@ jupyterlab/galata
 jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver
-jupyterlab/staging/yarn.js
 jupyterlab/staging/yarn.lock
 jupyterlab/staging/index.js
 jupyterlab/staging/webpack.config.js
