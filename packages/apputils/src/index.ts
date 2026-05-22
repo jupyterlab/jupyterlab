@@ -19,8 +19,6 @@ export {
   CommandToolbarButton,
   CommandToolbarButtonComponent,
   IFrame,
-  IUseSignalProps,
-  IUseSignalState,
   HoverBox,
   ReactWidget,
   Spinner,
@@ -30,6 +28,10 @@ export {
   UseSignal,
   VDomModel,
   VDomRenderer
+} from '@jupyterlab/ui-components';
+export type {
+  IUseSignalProps,
+  IUseSignalState
 } from '@jupyterlab/ui-components';
 
 export * from './clipboard';
