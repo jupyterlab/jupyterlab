@@ -8,6 +8,42 @@
 
 ## JupyterLab 4.5 to 4.6 (not released yet)
 
+### Migrating to `jupyter-builder`
+
+JupyterLab's build tooling has moved out of the JupyterLab repository into a standalone package: [`jupyter-builder`](https://pypi.org/project/jupyter-builder/) (PyPI) and [`@jupyter/builder`](https://www.npmjs.com/package/@jupyter/builder) (npm). Existing extensions continue to work, but we recommend migrating so your build no longer depends on a full JupyterLab installation.
+
+The migration is two small changes.
+
+#### 1. Update `pyproject.toml`
+
+Replace `jupyterlab` in your build requirements with `jupyter-builder`:
+
+```toml
+# Before
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0.3.2"]
+
+# After
+requires = ["hatchling>=1.5.0", "hatch-nodejs-version>=0.3.2", "jupyter-builder>=1.0.0"]
+```
+
+#### 2. Update `package.json`
+
+Replace `@jupyterlab/builder` with `@jupyter/builder` in your dependencies:
+
+```json
+"@jupyter/builder": "^1.0.0"
+```
+
+Then update your build scripts to use the new CLI:
+
+```json
+"build:labextension": "jupyter-builder build .",
+"build:labextension:dev": "jupyter-builder build --development True .",
+"watch:labextension": "jupyter-builder watch ."
+```
+
+That's it. Your extension now builds without pulling in all of JupyterLab.
+
 ### Building extensions with Rspack
 
 In the upcoming 4.6, JupyterLab will use [Rspack](https://rspack.rs/) instead of
@@ -455,7 +491,7 @@ nodeLinker: node-modules
 .yarn/
 ```
 
-- Run `jlpm install`
+- Run `jlpm`
   This will reset your `yarn.lock` content as its format has changed.
 
 :::{note}
@@ -1030,13 +1066,13 @@ index 6f1562f..3fcdf37 100644
 -    "build": "tsc",
 -    "build:labextension": "npm run clean:labextension && mkdirp myextension/labextension && cd myextension/labextension && npm pack ../..",
 -    "clean": "rimraf lib tsconfig.tsbuildinfo",
-+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
-+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
++    "build": "jlpm build:lib && jlpm build:labextension:dev",
++    "build:prod": "jlpm build:lib && jlpm build:labextension",
 +    "build:lib": "tsc",
 +    "build:labextension": "jupyter-builder build .",
 +    "build:labextension:dev": "jupyter-builder build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
-+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
++    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
    "clean:labextension": "rimraf myextension/labextension",
    "eslint": "eslint . --ext .ts,.tsx --fix",
    "eslint:check": "eslint . --ext .ts,.tsx",
@@ -1074,7 +1110,7 @@ It hides away internal dependencies such as `webpack`, and produces the assets t
 
 Extension developers do not need to interact with `@jupyterlab/builder` directly, but instead can use the
 `jupyter-builder build` command. This command is run automatically as part of the `build` script
-(`jlpm run build`).
+(`jlpm build`).
 
 For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`
 
