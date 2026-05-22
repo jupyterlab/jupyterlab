@@ -15,39 +15,39 @@ Extension authors are encouraged to consult the [Extension Migration Guide](http
 The activity bar can now be positioned at the top or bottom of the interface, in addition to the default left and right placement. The setting is available under Settings → Interface → [Activity Bar Position](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#activity-bar-position).
 
 <img alt="JupyterLab with the activity bar icons placed at the bottom of the left sidebar"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-activity-bar-bottom.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-activity-bar-bottom.png"
 class="jp-screenshot">
 
 Sections of accordion sidebars can now be [moved between panels](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#move-accordion-sections-between-panels) via a context menu. Right-clicking a section header shows a "Move To" menu. The placement and collapsed state of moved sections are persisted across sessions.
 
 <img alt="The 'Move To File Browser' context menu entry on Open Tabs section of Running panel"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-move-to-file-browser.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-move-to-file-browser.png"
 class="jp-screenshot">
 
 <img alt="Open Tabs section moved into the file browser"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-open-tabs-in-file-browser.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-open-tabs-in-file-browser.png"
 class="jp-screenshot">
 
 The sidebar panels themselves can be [moved between areas](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#move-open-widgets). Right-clicking a sidebar shows submenu with options to move it to the main area, a different sidebar, or the down area.
 
 <img alt="The 'Move Widget To' context menu submenu, showing options to move a section to the main area, left sidebar, right sidebar, or down area."
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-move-sidebar-submenu.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-move-sidebar-submenu.png"
 class="jp-screenshot">
 
 <img alt="The File Browser moved into the main area."
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-filebrowser-in-mainarea.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-filebrowser-in-mainarea.png"
 class="jp-screenshot">
 
 Tabs can now be split in four directions using the "Split Tab" context menu item (or the command palette), which adds split left, right, up, and down options.
 
 <img alt="Split tab context menu"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-split-tab-menu.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-split-tab-menu.png"
 class="jp-screenshot">
 
 Individual panels can be zoomed in or out using <kbd>Ctrl</kbd> + mouse wheel (when "Enable Ctrl+ Scroll Zoom" is turned on in Settings → Interface) or via the command palette, without affecting other panels.
 
 <img alt="Zoom on ctrl + scroll setting"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-ctrl-scroll-zoom.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-ctrl-scroll-zoom.png"
 class="jp-screenshot">
 
 ### Performance
@@ -59,25 +59,25 @@ Panel resizing is now more responsive; the width of individual widgets inside re
 Two new navigation commands, "Select previous last modified cell" and "Select next last modified cell", allow jumping back and forward through recently edited cells. The commands are accessible from the Command Palette and as buttons in the [Table Of Contents](https://jupyterlab.readthedocs.io/en/latest/user/toc.html) toolbar when a notebook is active.
 
 <img alt="Select next previous last modified cell button in ToC"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-select-last-modified-cell.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-select-last-modified-cell.png"
 class="jp-screenshot">
 
 Copy, cut, and paste text commands have been added to the notebook context menu. This feature requires permission to access clipboard to work reliably and may not work in Firefox depending on version and additional restrictions.
 
 <img alt="Copy, cut and paste in context menu"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
 class="jp-screenshot">
 
 The cell toolbar delete button now shows a confirmation dialog to prevent accidental deletion. The "Do not ask me again" checkbox is available and the preference is persisted in [Cell Toolbar](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#cell-toolbar) settings. The standard keyboard shortcut (<kbd>D</kbd>, <kbd>D</kbd>) is unaffected.
 
 <img alt="Delete Cell dialog asking Are you sure you want to delete this cell? with Do not ask me again checkbox"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-cell-toolbar-confirmation.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-cell-toolbar-confirmation.png"
 class="jp-screenshot">
 
 A new ["Paste code cells without output"](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#paste-code-cells-without-output) setting strips outputs and execution counts from code cells when pasting, producing clean cells without the output which may be stale or untrusted.
 
 <img alt="Setting to paste code cells without outputs"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-paste-without-output.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-paste-without-output.png"
 class="jp-screenshot">
 
 Pressing <kbd>Ctrl</kbd> + <kbd>B</kbd> (<kbd>Cmd</kbd> + <kbd>B</kbd> on macOS) in a markdown cell wraps the selected text in bold formatting.
@@ -89,19 +89,19 @@ When exporting a notebook as HTML via [File → Save and Export Notebook As → 
 A new "Date Created" column has been added to the file browser, showing when files were created. The column can be toggled via Settings → File Browser → "Show date created column" or by right-clicking the column header. The latest `jupyter-server` (`v2.18`+) is required for accurate values across operating systems.
 
 <img alt="File listing sorted by creation date"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-date-created.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-date-created.png"
 class="jp-screenshot">
 
 The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/latest/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the edit button at the end of the breadcrumbs, or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
 
 <img alt="The file browser showing an editable breadcrumb input field with a completion dropdown listing subdirectory names"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-breadcrumbs-editable.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-breadcrumbs-editable.png"
 class="jp-screenshot">
 
 A new "Open in Terminal" option in the file browser context menu opens a terminal navigated to the selected directory. When multiple directories are selected, one terminal is opened per directory.
 
 <img alt="Open in Terminal context menu option over selected directory"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-open-in-terminal.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-open-in-terminal.png"
 class="jp-screenshot">
 
 Additional file browser improvements include: a configurable [file name sort order](https://jupyterlab.readthedocs.io/en/latest/user/files.html#file-name-sort-order), persistence of the sort state across sessions, automatic clearing of the file filter when changing directories, and a loading animation during file browser refresh.
@@ -111,19 +111,19 @@ Additional file browser improvements include: a configurable [file name sort ord
 The debugger Sources panel has been moved out of the debugger sidebar; the Sources now open as read-only editors in the main area, keeping the sidebar uncluttered while you [explore the code state](https://jupyterlab.readthedocs.io/en/latest/user/debugger.html#explore-the-code-state). The previous behavior can be restored by disabling the "Show Sources in Main Area" setting in the Debugger settings.
 
 <img alt="Read-only source from debugger displayed in the main area"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-debugger-source-in-main-panel.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-debugger-source-in-main-panel.png"
 class="jp-screenshot">
 
 An overlay with continue/step in/stop buttons has been added easing the control of the debugger steps:
 
 <img alt="The debugger overlay"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-debugger-overlay.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-debugger-overlay.png"
 class="jp-screenshot">
 
 The Kernel Sources filter bar has been moved to the toolbar and now supports live filtering, making it easier to search through kernel source files while debugging.
 
 <img alt="Kernel sources filter in the debugger sidebar toolbar"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-kernel-sources-filter.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-kernel-sources-filter.png"
 class="jp-screenshot">
 
 ### Keyboard navigation and accessibility
@@ -146,7 +146,7 @@ Focus indicators have been improved across the interface, including the status b
 Shortcuts can now be added from the UI shortcut editor for any command (previously this required writing JSON in Advanced Settings Editor).
 
 <img alt="Shortcut editor"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-shortcut-editor.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-shortcut-editor.png"
 class="jp-screenshot">
 
 "Find and Replace" has been added to the Edit menu with the keyboard shortcut <kbd>Ctrl</kbd> + <kbd>H</kbd> (<kbd>Cmd</kbd> + <kbd>H</kbd> on macOS).
@@ -160,7 +160,7 @@ Pressing <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>, <kbd>4</kbd>, <kbd>5</kbd> an
 Language packs can now be installed directly from within JupyterLab by selecting "Install more languages..." at the bottom of the Settings → Language menu. This opens the Extension Manager pre-filled with a search for available language pack extensions.
 
 <img alt="Install more languages entry in Languages menu"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
 class="jp-screenshot">
 
 
@@ -173,7 +173,7 @@ Pressing <kbd>Shift</kbd>+<kbd>Enter</kbd> in the terminal now inserts a newline
 [Inline completion suggestions](https://jupyterlab.readthedocs.io/en/latest/user/completer.html#inline-completer) can now be rendered with syntax highlighting that matches the active editor language. This can be enabled in Settings → Inline Completer → "Ghost text syntax highlighting".
 
 <img alt="A code cell showing ghost text with syntax-highlighted completion, with the variable name in one color and the assignment in another"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-ghost-text-highlighting.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-ghost-text-highlighting.png"
 class="jp-screenshot">
 
 Ghost text is now also shown for all active cursors in a multi-cursor editing session.
