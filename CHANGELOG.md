@@ -20,7 +20,7 @@ class="jp-screenshot">
 
 Sections of accordion sidebars can now be [moved between panels](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#move-accordion-sections-between-panels) via a context menu. Right-clicking a section header shows a "Move To" menu. The placement and collapsed state of moved sections are persisted across sessions.
 
-<img alt="The 'Move To File broweser' context menu menu entry on Open Tabs section of Running pannel"
+<img alt="The 'Move To File Browser' context menu entry on Open Tabs section of Running panel"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-move-to-file-browser.png"
 class="jp-screenshot">
 
@@ -52,7 +52,7 @@ class="jp-screenshot">
 
 ### Performance
 
-Panel resizing is now more responsive; the width of inividual widgets inside resized panels is frozen during the drag. This behaviour can be disabled by toggling "Optimize panel resize" in Settings → Application Shell.
+Panel resizing is now more responsive; the width of individual widgets inside resized panels is frozen during the drag. This behaviour can be disabled by toggling "Optimize panel resize" in Settings → Application Shell.
 
 ### Notebook improvements
 
@@ -62,7 +62,7 @@ Two new navigation commands, "Select previous last modified cell" and "Select ne
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-select-last-modified-cell.png"
 class="jp-screenshot">
 
-Copy, cut, and paste text commands have been added to the notebook context menu. This feature requires permission to access clipboard to work reliably and may not work in Firefox depending onversion and additional restrictions.
+Copy, cut, and paste text commands have been added to the notebook context menu. This feature requires permission to access clipboard to work reliably and may not work in Firefox depending on version and additional restrictions.
 
 <img alt="Copy, cut and paste in context menu"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
@@ -86,7 +86,7 @@ When exporting a notebook as HTML via [File → Save and Export Notebook As → 
 
 ### File browser enhancements
 
-A new "Date Created" column has been added to the file browser, showing when files were created. The column can be toggled via Settings → File Browser → "Show date created column" or by right-clicking the column header. The latest `jupyter-server` (`v2.18`+) is required to for accurate values across operating systems.
+A new "Date Created" column has been added to the file browser, showing when files were created. The column can be toggled via Settings → File Browser → "Show date created column" or by right-clicking the column header. The latest `jupyter-server` (`v2.18`+) is required for accurate values across operating systems.
 
 <img alt="File listing sorted by creation date"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-date-created.png"
@@ -141,21 +141,32 @@ The Keyboard Shortcuts settings panel has been updated to improve accessibility,
 
 Focus indicators have been improved across the interface, including the status bar and other interactive components.
 
-### Settings and keyboard shortcuts
+### Keyboard shortcuts
 
-Language packs can now be installed directly from within JupyterLab by selecting "Install more languages..." at the bottom of the Settings → Language menu. This opens the Extension Manager pre-filled with a search for available language pack extensions.
+Shortcuts can now be added from the UI shortcut editor for any command (previously this required writing JSON in Advanced Settings Editor).
 
-<img alt="Install more lanugages entry in Languages menu"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
+<img alt="Shortcut editor"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-shortcut-editor.png"
 class="jp-screenshot">
 
 "Find and Replace" has been added to the Edit menu with the keyboard shortcut <kbd>Ctrl</kbd> + <kbd>H</kbd> (<kbd>Cmd</kbd> + <kbd>H</kbd> on macOS).
 
 <kbd>Ctrl</kbd> + <kbd>Y</kbd> has been added as a redo shortcut on Windows and Linux.
 
+Pressing <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>, <kbd>4</kbd>, <kbd>5</kbd> and <kbd>6</kbd> will no longer convert a focused code or raw cell to Markdown to avoid accidental conversions. These shortcuts continue working on markdown cells, switching the heading level, as they did before.
+
+### Internationalization
+
+Language packs can now be installed directly from within JupyterLab by selecting "Install more languages..." at the bottom of the Settings → Language menu. This opens the Extension Manager pre-filled with a search for available language pack extensions.
+
+<img alt="Install more languages entry in Languages menu"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
+class="jp-screenshot">
+
+
 ### Terminal enhancements
 
-Pressing Shift+Enter in the terminal now inserts a newline without executing the current line. This matches the behavior expected by certain terminal applications.
+Pressing <kbd>Shift</kbd>+<kbd>Enter</kbd> in the terminal now inserts a newline without executing the current line. This matches the behavior expected by certain terminal applications.
 
 ### Inline completion enhancements
 
