@@ -44,8 +44,6 @@ Then update your build scripts to use the new CLI:
 
 That's it. Your extension now builds without pulling in all of JupyterLab.
 
-For more information on `jupyter-builder`, see the [blog post](#TODO).
-
 ### Building extensions with Rspack
 
 In the upcoming 4.6, JupyterLab will use [Rspack](https://rspack.rs/) instead of
