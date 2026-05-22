@@ -431,22 +431,22 @@ test.describe('Debugger Tests', () => {
 
       await page.click('jp-button[title^=Continue]');
     });
-  });
 
-  test('Kernel Sources panel updates after execute_reply', async ({
-    page,
-    tmpPath
-  }) => {
-    await init({ page, tmpPath });
+    test('Kernel Sources panel updates after execute_reply', async ({
+      page,
+      tmpPath
+    }) => {
+      await init({ page, tmpPath });
 
-    await page.notebook.addCell('code', 'import anyio');
-    await page.notebook.runCell(2);
+      await page.notebook.addCell('code', 'import anyio');
+      await page.notebook.runCell(2);
 
-    await page.waitForCondition(async () => {
-      const texts = await page
-        .locator('.jp-DebuggerKernelSource-source')
-        .allInnerTexts();
-      return texts.some(t => t.includes('anyio'));
+      await page.waitForCondition(async () => {
+        const texts = await page
+          .locator('.jp-DebuggerKernelSource-source')
+          .allInnerTexts();
+        return texts.some(t => t.includes('anyio'));
+      });
     });
   });
 });
