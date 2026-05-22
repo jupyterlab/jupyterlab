@@ -62,10 +62,10 @@ Two new navigation commands, "Select previous last modified cell" and "Select ne
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-select-last-modified-cell.png"
 class="jp-screenshot">
 
-A new ["Paste code cells without output"](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#paste-code-cells-without-output) setting strips outputs and execution counts from code cells when pasting, producing clean cells without stale output data.
+Copy, cut, and paste text commands have been added to the notebook context menu. This feature requires permission to access clipboard to work reliably and may not work in Firefox depending onversion and additional restrictions.
 
-<img alt="Setting to paste code cells without outputs"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-paste-without-output.png"
+<img alt="Copy, cut and paste in context menu"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
 class="jp-screenshot">
 
 The cell toolbar delete button now shows a confirmation dialog to prevent accidental deletion. The "Do not ask me again" checkbox is available and the preference is persisted in [Cell Toolbar](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#cell-toolbar) settings. The standard keyboard shortcut (<kbd>D</kbd>, <kbd>D</kbd>) is unaffected.
@@ -74,10 +74,10 @@ The cell toolbar delete button now shows a confirmation dialog to prevent accide
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-cell-toolbar-confirmation.png"
 class="jp-screenshot">
 
-Copy, cut, and paste text commands have been added to the notebook context menu. This feature requires permission to access clipboard to work reliably and may not work in Firefox depending onversion and additional restrictions.
+A new ["Paste code cells without output"](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#paste-code-cells-without-output) setting strips outputs and execution counts from code cells when pasting, producing clean cells without the output which may be stale or untrusted.
 
-<img alt="Copy, cut and paste in context menu"
-src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
+<img alt="Setting to paste code cells without outputs"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-paste-without-output.png"
 class="jp-screenshot">
 
 Pressing <kbd>Ctrl</kbd> + <kbd>B</kbd> (<kbd>Cmd</kbd> + <kbd>B</kbd> on macOS) in a markdown cell wraps the selected text in bold formatting.
@@ -86,7 +86,7 @@ When exporting a notebook as HTML via [File → Save and Export Notebook As → 
 
 ### File browser enhancements
 
-A new "Date Created" column has been added to the file browser, showing when files were created. The column can be toggled via Settings → File Browser → "Show date created column" or by right-clicking the column header. Update to `jupyter-server` `v2.18.0` is required to get correct values across operating systems.
+A new "Date Created" column has been added to the file browser, showing when files were created. The column can be toggled via Settings → File Browser → "Show date created column" or by right-clicking the column header. The latest `jupyter-server` (`v2.18`+) is required to for accurate values across operating systems.
 
 <img alt="File listing sorted by creation date"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-date-created.png"
@@ -110,17 +110,21 @@ Additional file browser improvements include: a configurable [file name sort ord
 
 The debugger Sources panel has been moved out of the debugger sidebar; the Sources now open as read-only editors in the main area, keeping the sidebar uncluttered while you [explore the code state](https://jupyterlab.readthedocs.io/en/latest/user/debugger.html#explore-the-code-state). The previous behavior can be restored by disabling the "Show Sources in Main Area" setting in the Debugger settings.
 
-<img alt=""
+<img alt="Read-only source from debugger displayed in the main area"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-debugger-source-in-main-panel.png"
 class="jp-screenshot">
 
 An overlay with continue/step in/stop buttons has been added easing the control of the debugger steps:
 
-<img alt=""
+<img alt="The debugger overlay"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-debugger-overlay.png"
 class="jp-screenshot">
 
 The Kernel Sources filter bar has been moved to the toolbar and now supports live filtering, making it easier to search through kernel source files while debugging.
+
+<img alt="Kernel sources filter in the debugger sidebar toolbar"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-kernel-sources-filter.png"
+class="jp-screenshot">
 
 ### Keyboard navigation and accessibility
 
@@ -141,7 +145,7 @@ Focus indicators have been improved across the interface, including the status b
 
 Language packs can now be installed directly from within JupyterLab by selecting "Install more languages..." at the bottom of the Settings → Language menu. This opens the Extension Manager pre-filled with a search for available language pack extensions.
 
-<img alt=""
+<img alt="Install more lanugages entry in Languages menu"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
 class="jp-screenshot">
 
