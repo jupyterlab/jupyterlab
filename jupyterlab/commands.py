@@ -2109,7 +2109,7 @@ def _node_check(logger):
     except Exception:
         data = CoreConfig()._data
         ver = data["engines"]["node"]
-        msg = f"Please install nodejs {ver} before continuing. nodejs may be installed using conda or directly from the nodejs website."
+        msg = f"Please install nodejs {ver} and npm before continuing. nodejs and npm may be installed using conda or directly from the nodejs website."
         raise ValueError(msg) from None
 
 
