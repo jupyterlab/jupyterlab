@@ -6,6 +6,7 @@
  */
 
 export * from './dialogs';
+export * from './filewatcher';
 export * from './manager';
 export * from './pathstatus';
 export * from './savehandler';

@@ -156,6 +156,18 @@
       "description": "Number of recently opened/closed files and directories to remember.",
       "default": 10,
       "minimum": 0
+    },
+    "watchForExternalChanges": {
+      "type": "boolean",
+      "title": "Watch for External File Changes",
+      "description": "Use OS-level filesystem notifications to detect when open files are modified externally. Requires the Python 'watchdog' package.",
+      "default": true
+    },
+    "externalChangeAutoReload": {
+      "type": "boolean",
+      "title": "Auto-Reload on External Change",
+      "description": "Automatically reload files changed externally when they have no unsaved edits. When false, always shows a notification instead.",
+      "default": true
     }
   },
   "additionalProperties": false,
