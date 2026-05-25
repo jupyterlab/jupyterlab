@@ -16,6 +16,7 @@ import type {
 import { YNotebook } from '@jupyter/ydoc';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { JSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -378,7 +379,7 @@ close the notebook without saving it.`,
         { cell_type: 'code', source: '', metadata: { trusted: true } }
       ];
     }
-    this.sharedModel.fromJSON(copy);
+    this.sharedModel.setSource(copy as JSONValue);
 
     this._ensureMetadata();
   }
