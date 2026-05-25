@@ -17,11 +17,13 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  IMovableSectionRegistry,
   ISanitizer,
   ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
   MainAreaWidget,
+  MovableSectionRegistry,
   Printing,
   Sanitizer,
   SessionContextDialogs,
@@ -51,6 +53,7 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
 import type { Kernel } from '@jupyterlab/services';
 import { IKernelManager } from '@jupyterlab/services';
+import { moveSectionsPlugin } from './movesectionsplugin';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -62,7 +65,7 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
  * Matches bare `?reset`, `?reset=<value>`, and `&reset` variants,
  * including URLs where `reset` is followed by a hash fragment.
  */
-const RESET_QUERY_PATTERN = /(\?reset|\&reset)(=[^&#]*)?($|&|#)/;
+const RESET_QUERY_PATTERN = /(\?reset|&reset)(=[^&#]*)?($|&|#)/;
 
 /**
  * The command IDs used by the apputils plugin.
@@ -151,7 +154,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     try {
       await solver.resolve(candidate);
       return solver;
-    } catch (error) {
+    } catch {
       // Window resolution has failed so the URL must change. Return a promise
       // that never resolves to prevent the application from loading plugins
       // that rely on `IWindowResolver`.
@@ -249,7 +252,7 @@ Would you like to clear the workspace or keep waiting?`),
             // Because recovery can be stopped, handle invocation rejection.
             void recovery.invoke().catch(_ => undefined);
           });
-        } catch (error) {
+        } catch {
           /* no-op */
         }
       },
@@ -907,6 +910,17 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Plugin providing the movable section registry.
+ */
+const movableSectionRegistry: JupyterFrontEndPlugin<IMovableSectionRegistry> = {
+  id: '@jupyterlab/apputils-extension:movable-section-registry',
+  description:
+    'Provides the movable section registry for panels that exchange moveable sections.',
+  provides: IMovableSectionRegistry,
+  activate: (): IMovableSectionRegistry => new MovableSectionRegistry()
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -931,8 +945,10 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   themesPlugin,
   themesPaletteMenuPlugin,
   toggleHeader,
+  movableSectionRegistry,
   toolbarRegistry,
   utilityCommands,
-  workspacesPlugin
+  workspacesPlugin,
+  moveSectionsPlugin
 ];
 export default plugins;

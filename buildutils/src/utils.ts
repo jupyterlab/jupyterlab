@@ -189,7 +189,7 @@ export function fromTemplate(
       // try to match the indentation level of the {{var}} in the input template.
       templ = templ.split(`{{${key}}}`).reduce((acc, cur) => {
         // Regex: 0 or more non-newline whitespaces followed by end of string
-        const indentRe = acc.match(/([^\S\r\n]*).*$/);
+        const indentRe = acc.match(/([^\S\r\n]*).*$/); // eslint-disable-line regexp/no-super-linear-backtracking
         const indent = indentRe ? indentRe[1] : '';
         return acc + val.split('\n').join('\n' + indent) + cur;
       });
@@ -262,7 +262,7 @@ ${diff}`
  * Post-bump.
  */
 export function postbump(commit = true): void {
-  run('jlpm run integrity');
+  run('jlpm integrity');
 
   // Commit changes.
   if (commit) {
@@ -291,7 +291,7 @@ export function run(
   }
   return value
     .toString()
-    .replace(/(\r\n|\n)$/, '')
+    .replace(/(?:\r\n|\n)$/, '')
     .trim();
 }
 
@@ -439,7 +439,7 @@ export function stem(pathArg: string): string {
  * @returns the camel case version of the input string.
  */
 export function camelCase(str: string, upper: boolean = false): string {
-  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+|_+)/g, function (match, index) {
+  return str.replace(/^\w|[A-Z]|\b\w|\s+|-+|_+/g, function (match, index) {
     if (+match === 0 || match[0] === '-') {
       return '';
     } else if (index === 0 && !upper) {

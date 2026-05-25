@@ -289,6 +289,7 @@ function ensureBranch(): string[] {
   // Handle the github_version in conf.py
   const confPath = 'docs/source/conf.py';
   const oldConfData = fs.readFileSync(confPath, 'utf-8');
+  // eslint-disable-next-line prefer-regex-literals
   const confTest = new RegExp('"github_version": "(.*)"');
   const newConfData = oldConfData.replace(
     confTest,
@@ -841,15 +842,15 @@ export async function ensureIntegrity(): Promise<boolean> {
     console.debug(JSON.stringify(messages, null, 2));
     if (process.argv.indexOf('--force') !== -1) {
       console.debug(
-        '\n\nPlease run `jlpm run integrity` locally and commit the changes'
+        '\n\nPlease run `jlpm integrity` locally and commit the changes'
       );
       process.exit(1);
     }
     try {
-      utils.run('jlpm install');
+      utils.run('jlpm');
     } catch (error) {
       // Fallback in case this script is called during editable installation
-      utils.run(`node jupyterlab/staging/yarn.js install`);
+      utils.run(`jlpm`);
     }
 
     console.debug('\n\nMade integrity changes!');

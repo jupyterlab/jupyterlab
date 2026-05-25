@@ -20,18 +20,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_package_manager: "uv pip"
 
-      - uses: iterative/setup-cml@v3
+      - uses: iterative/setup-cml@1b5ab8766e715e8f1aab96bbb1f4f2e3e1e8af45 # v3
 
       - name: Get PR Info
         id: pr
@@ -64,7 +64,7 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
           # Build dev-mode
-          jlpm run build
+          jlpm build
 
       - name: Launch JupyterLab
         shell: bash
@@ -77,7 +77,7 @@ jobs:
         run: |
           # Install only Chromium browser
           jlpm playwright install chromium
-          jlpm run build
+          jlpm build
         working-directory: galata
 
       - name: Wait for JupyterLab
@@ -87,7 +87,7 @@ jobs:
         continue-on-error: true
         working-directory: galata
         run: |
-          jlpm run test:benchmark -u
+          jlpm test:benchmark -u
 
       - name: Kill the server
         shell: bash
@@ -105,8 +105,8 @@ jobs:
       - name: Install dependencies
         run: |
           # Reset installation
-          jlpm run clean:slate
-          jlpm run build
+          jlpm clean:slate
+          jlpm build
 
       - name: Launch JupyterLab
         working-directory: galata
@@ -119,7 +119,7 @@ jobs:
         run: |
           # Install only Chromium browser
           jlpm playwright install chromium
-          jlpm run build
+          jlpm build
 
       - name: Wait for JupyterLab
         run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
@@ -131,13 +131,13 @@ jobs:
         run: |
           set -ex
           # Update test screenshots - in case they have not yet been corrected on the challenger branch
-          BENCHMARK_NUMBER_SAMPLES=1 PW_VIDEO=1 jlpm run test:benchmark -u
+          BENCHMARK_NUMBER_SAMPLES=1 PW_VIDEO=1 jlpm test:benchmark -u
 
           # Copy reference here otherwise it will use the value from the update screenshots
           # command called just before
           cp /tmp/lab-benchmark-expected.json .
 
-          jlpm run test:benchmark
+          jlpm test:benchmark
 
       - name: Stop JupyterLab
         if: always()
@@ -180,7 +180,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: benchmark-assets
           path: |
@@ -207,12 +207,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_package_manager: "uv pip"
 
@@ -220,7 +220,7 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
           # Build dev-mode
-          jlpm run build
+          jlpm build
 
       - name: Launch JupyterLab
         shell: bash
@@ -231,7 +231,7 @@ jobs:
 
       - name: Execute memory leak tests
         id: memory_leaks
-        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1
+        uses: jupyterlab/benchmarks/.github/actions/memory-leak@806faa929eaf903b9b24938bcca9a2d300b22cbc # v1
         with:
           server_url: localhost:8888
           artifacts_name: benchmark-assets

@@ -24,7 +24,7 @@ repos:
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
-        exclude: (.bumpversion.cfg|yarn.js)
+        exclude: .bumpversion.cfg
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.37.2
