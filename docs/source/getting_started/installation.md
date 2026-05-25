@@ -6,6 +6,20 @@
 
 # Installation
 
+:::{hint}
+JupyterLab 4.6 Beta is now available and includes new layout customization options,
+navigation between recently edited cells, revamped keyboard shortcuts UI, editable
+breadcrumbs in file browser and debugger enhancements.
+If you are an experienced user, or just would like to test out the latest
+improvements, please consider installing the pre-release, for example with:
+
+```bash
+pip install --pre --upgrade jupyterlab==4.6.0b0
+```
+
+For the full release notes please see the [Release Notes](https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html#v4-6)
+:::
+
 JupyterLab can be installed as a terminal-launched application accessible via a web browser (default), or as a desktop application which is running in its own window and can be opened by clicking on a desktop shortcut ([JupyterLab Desktop](https://github.com/jupyterlab/jupyterlab-desktop)). This page describes installation of the default (terminal-launched) JupyterLab application using `conda`, `mamba`, `pip`, `pipenv` or `docker` and assumes basic knowledge of the terminal. For JupyterLab Desktop instructions see the [Installation section](https://github.com/jupyterlab/jupyterlab-desktop#installation) in the JupyterLab Desktop repository.
 
 :::{warning}
