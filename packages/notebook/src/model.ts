@@ -378,7 +378,7 @@ close the notebook without saving it.`,
         { cell_type: 'code', source: '', metadata: { trusted: true } }
       ];
     }
-    this.sharedModel.fromJSON(copy, false);
+    this.sharedModel.fromJSON(copy);
 
     this._ensureMetadata();
   }
