@@ -670,9 +670,9 @@ describe('@jupyterlab/apputils', () => {
       await waitForDialog();
 
       // Click the accept button, which will trigger _resolve → getValue() → throws
-      document.querySelector('.jp-mod-accept')!.dispatchEvent(generate('click'));
+      await acceptDialog();
 
-      await expectAsync(prompt).toBeRejectedWithError('getValue() failed');
+      await expect(prompt).rejects.toThrow('getValue() failed');
     });
 
     it('should not create a close button by default', async () => {
