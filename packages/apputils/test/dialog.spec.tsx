@@ -44,6 +44,12 @@ class ValueWidget extends Widget {
   }
 }
 
+class ThrowingValueWidget extends Widget {
+  getValue(): string {
+    throw new Error('getValue() failed');
+  }
+}
+
 describe('@jupyterlab/apputils', () => {
   describe('Dialog', () => {
     let dialog: TestDialog;
@@ -656,6 +662,17 @@ describe('@jupyterlab/apputils', () => {
 
       expect(result.button.accept).toBe(true);
       expect(result.value).toBe('foo');
+    });
+
+    it('should reject the promise when getValue() throws', async () => {
+      const prompt = showDialog({ body: new ThrowingValueWidget() });
+
+      await waitForDialog();
+
+      // Click the accept button, which will trigger _resolve → getValue() → throws
+      document.querySelector('.jp-mod-accept')!.dispatchEvent(generate('click'));
+
+      await expectAsync(prompt).toBeRejectedWithError('getValue() failed');
     });
 
     it('should not create a close button by default', async () => {
