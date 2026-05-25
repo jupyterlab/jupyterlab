@@ -48,45 +48,29 @@ export class LLMOptimizer implements ICodeOptimizer {
     const startTime = Date.now();
     const transformations: Transformation[] = [];
 
-    try {
-      const optimizedCode = await this.requestLLMOptimization(
-        code,
-        language,
-        options
-      );
+    const optimizedCode = await this.requestLLMOptimization(
+      code,
+      language,
+      options
+    );
 
-      // Calculate metrics
-      const metrics = this.calculateMetrics(code, optimizedCode, startTime);
+    // Calculate metrics
+    const metrics = this.calculateMetrics(code, optimizedCode, startTime);
 
-      // Add transformation
-      transformations.push({
-        type: 'llm-optimization',
-        description: 'LLM-based code optimization',
-        range: { start: 0, end: code.length },
-        confidence: 0.9
-      });
+    // Add transformation
+    transformations.push({
+      type: 'llm-optimization',
+      description: 'LLM-based code optimization',
+      range: { start: 0, end: code.length },
+      confidence: 0.9
+    });
 
-      return {
-        code: optimizedCode,
-        transformations,
-        metrics,
-        explanation: 'Code optimized using LLM-based analysis'
-      };
-    } catch (error) {
-      console.error('LLM optimization failed:', error);
-
-      // Return original code if LLM fails
-      return {
-        code,
-        transformations: [],
-        metrics: {
-          originalSize: code.length,
-          optimizedSize: code.length,
-          complexityReduction: 0
-        },
-        explanation: 'LLM optimization failed, returning original code'
-      };
-    }
+    return {
+      code: optimizedCode,
+      transformations,
+      metrics,
+      explanation: 'Code optimized using LLM-based analysis'
+    };
   }
 
   private async requestLLMOptimization(
@@ -117,8 +101,10 @@ export class LLMOptimizer implements ICodeOptimizer {
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      const apiMsg = (body as any)?.error?.message || response.statusText;
       throw new Error(
-        `LLM API request failed: ${response.status} ${response.statusText}`
+        `LLM API request failed: ${response.status} - ${apiMsg}`
       );
     }
 
@@ -247,10 +233,11 @@ Return ONLY the optimized code, with no additional text, explanations, or markdo
       content = data.choices[0].message.content;
     }
 
-    // Remove markdown code blocks if present
-    content = content.replace(/```[\s\S]*?```/g, match => {
-      return match.replace(/```\w*\n?/g, '').replace(/```/g, '');
-    });
+    // Extract code from fenced block if present (Gemini often wraps response)
+    const fenceMatch = content.match(/```(?:\w+)?\n([\s\S]*?)```/);
+    if (fenceMatch) {
+      return fenceMatch[1].trim();
+    }
 
     return content.trim();
   }

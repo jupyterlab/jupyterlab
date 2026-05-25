@@ -50,7 +50,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand('code-optimizer:optimize-active-cell', {
       icon: offlineBoltIcon,
       caption: 'Optimize this cell (Gemini if configured, else rule-based)',
-      describedBy: { args: {}, selector: '.jp-Cell' },
+      describedBy: { args: {} } as any,
       execute: async () => {
         const cell = tracker.activeCell;
         if (!cell || cell.model.type !== 'code') return;
@@ -69,23 +69,23 @@ const plugin: JupyterFrontEndPlugin<void> = {
           try {
             const llmModel =
               (pluginSettings?.get('llmModel').composite as string) ||
-              'gemini-flash-latest';
+              'gemini-2.0-flash';
             const llm = new LLMOptimizer({
               apiKey,
               provider: 'google',
               model: llmModel
             });
             const result = await llm.optimize(originalCode, 'python');
-            if (result.code.trim() === originalCode.trim()) {
-              throw new Error('LLM returned unchanged code');
-            }
             optimizedCode = result.code;
             method = 'Gemini';
-          } catch {
+          } catch (err) {
             const rule = new RuleBasedOptimizer();
             const result = rule.optimize(originalCode, 'python');
             optimizedCode = result.code;
-            method = 'rule-based (Gemini failed)';
+            const errMsg = err instanceof Error ? err.message : String(err);
+            method = errMsg.includes('429')
+              ? 'rule-based (Gemini quota exceeded — check billing at aistudio.google.com)'
+              : `rule-based (Gemini error: ${errMsg.slice(0, 80)})`;
             transformations = result.transformations;
           }
         } else {
@@ -177,7 +177,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
             // ── Gemini path — live queue: dialog opens immediately, cells stream in ──
             const llmModel =
               (pluginSettings?.get('llmModel').composite as string) ||
-              'gemini-flash-latest';
+              'gemini-2.0-flash';
 
             interface IGResult {
               index: number;

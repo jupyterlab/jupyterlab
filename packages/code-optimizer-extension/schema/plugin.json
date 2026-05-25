@@ -69,14 +69,14 @@
       "type": "string",
       "title": "LLM Provider",
       "description": "LLM provider to use (openai, anthropic, or google)",
-      "default": "openai",
+      "default": "google",
       "enum": ["openai", "anthropic", "google"]
     },
     "llmModel": {
       "type": "string",
       "title": "LLM Model",
-      "description": "LLM model to use (e.g., gpt-4, claude-3-5-sonnet-20241022)",
-      "default": "gpt-4"
+      "description": "LLM model to use (e.g., gemini-2.0-flash, gpt-4, claude-3-5-sonnet-20241022)",
+      "default": "gemini-2.0-flash"
     },
     "llmApiKey": {
       "type": "string",

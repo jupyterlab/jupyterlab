@@ -169,6 +169,9 @@ docs/code-optimizer/
 # midterm coursework (private)
 Midterm/
 
+# homework files (private)
+docs/HW/
+
 # temporary test scripts
 test_*.py
 
