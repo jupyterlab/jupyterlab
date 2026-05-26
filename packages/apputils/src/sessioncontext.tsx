@@ -282,6 +282,11 @@ export namespace ISessionContext {
     readonly shouldStart?: boolean;
 
     /**
+     * Reuse an existing session on the current path (default `true`).
+     */
+    readonly shouldReuse?: boolean;
+
+    /**
      * A kernel can be started (default `true`).
      */
     readonly canStart?: boolean;
@@ -804,8 +809,7 @@ export class SessionContext implements ISessionContext {
    *
    * #### Notes
    * If a server session exists on the current path, we will connect to it
-   * unless opening explicitly without a kernel (`shouldStart === false`
-   * without a preferred kernel `id`).
+   * unless `kernelPreference.shouldReuse === false`.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -838,8 +842,7 @@ export class SessionContext implements ISessionContext {
     await manager.ready;
     await manager.refreshRunning();
     const preference = this.kernelPreference;
-    const shouldConnectToPathSession =
-      preference.shouldStart !== false || !!preference.id;
+    const shouldConnectToPathSession = preference.shouldReuse !== false;
 
     if (shouldConnectToPathSession) {
       const model = find(manager.running(), item => {

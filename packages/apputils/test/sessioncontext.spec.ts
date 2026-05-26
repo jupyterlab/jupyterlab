@@ -303,7 +303,7 @@ describe('@jupyterlab/apputils', () => {
         other.dispose();
       });
 
-      it('should keep no kernel when shouldStart is false even if a path session exists', async () => {
+      it('should keep no kernel when shouldReuse is false even if a path session exists', async () => {
         const refreshRunning = jest
           .spyOn(sessionManager, 'refreshRunning')
           .mockResolvedValue(undefined);
@@ -322,20 +322,41 @@ describe('@jupyterlab/apputils', () => {
           .mockReturnValue([pathSessionModel][Symbol.iterator]());
         const connectTo = jest.spyOn(sessionManager, 'connectTo');
         try {
-          sessionContext.kernelPreference = {
+          const kernelPreference = {
             ...sessionContext.kernelPreference,
-            shouldStart: false
+            shouldStart: false,
+            shouldReuse: false
           };
+          sessionContext.kernelPreference = kernelPreference;
+          expect(sessionContext.kernelPreference.shouldReuse).toBe(false);
 
           const result = await sessionContext.initialize();
           expect(result).toBe(false);
-          expect(sessionContext.session?.kernel).toBeFalsy();
           expect(connectTo).not.toHaveBeenCalled();
+          expect(sessionContext.session?.kernel).toBeFalsy();
         } finally {
           refreshRunning.mockRestore();
           running.mockRestore();
           connectTo.mockRestore();
         }
+      });
+
+      it('should connect to a path session when shouldStart is false', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel?.id).toBe(other.kernel?.id);
+        other.dispose();
       });
 
       it('should connect to a path session when shouldStart is false and a kernel id is provided', async () => {
