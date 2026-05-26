@@ -11,7 +11,8 @@ import React, { useRef, useState } from 'react';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
-type TDict = { [key: string]: unknown };
+type TSchemaDict = { [key: string]: unknown };
+type TDict = PartialJSONObject;
 type TSettingItem = TDict & { serverName: string };
 type TItemMap = Record<string, TSettingItem>;
 
@@ -30,7 +31,7 @@ interface ISettingProperty {
   /**
    * Value of setting property
    */
-  value: unknown;
+  value: PartialJSONValue;
 }
 const SETTING_NAME = 'languageServers';
 const SERVER_SETTINGS = 'configuration';
@@ -64,7 +65,7 @@ interface ISettingFormProps {
   /**
    * Setting schema.
    */
-  schema: TDict;
+  schema: TSchemaDict;
 }
 
 /**
@@ -79,7 +80,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     ...otherSettings
   } = props.settings;
   const serverSettingsData = (serverSettings ?? {}) as TDict;
-  const serverSettingsSchemaData = (serverSettingsSchema ?? {}) as TDict;
+  const serverSettingsSchemaData = (serverSettingsSchema ?? {}) as TSchemaDict;
 
   const [currentServerName, setCurrentServerName] =
     useState<string>(serverName);
@@ -98,6 +99,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
 
   const serverSettingWithType: ISettingPropertyMap = {};
   Object.entries(serverSettingsData).forEach(([key, value]) => {
+    if (value === undefined) {
+      return;
+    }
     const newProps: ISettingProperty = {
       property: key,
       type: typeof value as 'string' | 'number' | 'boolean',
@@ -114,9 +118,12 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
 
   Object.entries(otherSettingsSchema).forEach(([key, value]) => {
     if (key in otherSettings) {
-      defaultOtherSettings[key] = otherSettings[key];
+      defaultOtherSettings[key] = (otherSettings[key] ??
+        null) as PartialJSONValue;
     } else {
-      defaultOtherSettings[key] = (value as TDict)['default'];
+      defaultOtherSettings[key] = (value as TSchemaDict)[
+        'default'
+      ] as PartialJSONValue;
     }
   });
 
@@ -131,11 +138,11 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     value: unknown,
     type: string
   ) => {
-    let settingValue = value;
+    let settingValue = value as PartialJSONValue;
     if (type === 'number') {
       settingValue = parseFloat(String(value));
     }
-    const newProps = {
+    const newProps: TDict = {
       ...otherSettingsComposite,
       [property]: settingValue
     };
@@ -252,7 +259,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
               </div>
               {Object.entries(otherSettingsSchema).map(
                 ([property, value], idx) => {
-                  const schemaValue = value as TDict;
+                  const schemaValue = value as TSchemaDict;
                   const inputType = schemaValue.type as string;
                   return (
                     <div
@@ -342,7 +349,7 @@ function PropertyFrom(props: {
   const [state, setState] = useState<{
     property: string;
     type: 'boolean' | 'string' | 'number';
-    value: unknown;
+    value: PartialJSONValue;
   }>({ ...props.property });
   const TYPE_MAP = { string: 'text', number: 'number', boolean: 'checkbox' };
 
@@ -360,7 +367,7 @@ function PropertyFrom(props: {
     newValue: unknown,
     type: 'string' | 'boolean' | 'number'
   ) => {
-    let value = newValue;
+    let value: PartialJSONValue = newValue as PartialJSONValue;
     if (type === 'number') {
       value = parseFloat(String(newValue));
     }
@@ -466,20 +473,22 @@ class SettingRenderer extends React.Component<IProps, IState> {
     this._setting = props.formContext.settings;
     this._trans = props.translator.load('jupyterlab');
 
-    const schema = this._setting.schema['definitions'] as TDict;
-    const languageServerSchema = schema['languageServer'] as TDict;
+    const schema = this._setting.schema['definitions'] as TSchemaDict;
+    const languageServerSchema = schema['languageServer'] as TSchemaDict;
 
     this._defaultSetting = languageServerSchema['default'] as TDict;
-    this._schema = languageServerSchema['properties'] as TDict;
+    this._schema = languageServerSchema['properties'] as TSchemaDict;
     const title = props.schema.title;
     const desc = props.schema.description;
     const settings: ISettingRegistry.ISettings = props.formContext.settings;
-    const compositeData = settings.get(SETTING_NAME).composite as TDict;
+    const compositeData = settings.get(SETTING_NAME).composite as
+      | TDict
+      | undefined;
 
     let items: TItemMap = {};
     if (compositeData) {
       Object.entries(compositeData).forEach(([key, value]) => {
-        if (value) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
           const hash = UUID.uuid4();
           items[hash] = { serverName: key, ...(value as TDict) };
         }
@@ -575,7 +584,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
     const settings: PartialJSONObject = {};
     Object.values(this.state.items).forEach(item => {
       const { serverName, ...setting } = item;
-      settings[serverName] = setting as unknown as PartialJSONValue;
+      settings[serverName] = setting;
     });
     this._setting.set(SETTING_NAME, settings).catch(console.error);
   };
@@ -632,7 +641,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
   /**
    * The setting schema.
    */
-  private _schema: TDict;
+  private _schema: TSchemaDict;
 
   private _debouncedUpdateSetting: Debouncer<
     void,

@@ -23,9 +23,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     const mode = this.languages.findBest(
       (info.codemirror_mode as string | IEditorLanguage | undefined) ||
         ({
-          mimetype: info.mimetype,
+          mime: info.mimetype,
           name: info.name,
-          ext: [ext.split('.').slice(-1)[0]]
+          extensions: [ext.split('.').slice(-1)[0]]
         } as unknown as IEditorLanguage)
     );
     return mode

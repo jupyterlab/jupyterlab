@@ -31,9 +31,15 @@ module.exports = (path: string, options: IResolverOptions) => {
     packageFilter: (pkg: IResolverPackage) => {
       // This is a workaround for https://github.com/websockets/ws/pull/2118
       if (pkg.name === 'ws') {
-        delete (pkg as { exports: { '.': Record<string, unknown> } }).exports[
-          '.'
-        ].browser;
+        const exportsField = pkg.exports;
+        if (exportsField && typeof exportsField === 'object') {
+          const exportRoot = (exportsField as Record<string, unknown>)['.'];
+          if (exportRoot && typeof exportRoot === 'object') {
+            if ('browser' in exportRoot) {
+              delete (exportRoot as Record<string, unknown>).browser;
+            }
+          }
+        }
       }
       return pkg;
     }
