@@ -58,6 +58,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
+import { DebuggerIPythonCompletionProvider } from './debugger-ipython-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
 
@@ -1425,14 +1426,17 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
     completionManager: ICompletionProviderManager,
     translator: ITranslator | null
   ): void => {
-    // Create and register the debugger completion provider
     const provider = new DebuggerCompletionProvider({
       debuggerService: debuggerService,
       translator: translator || nullTranslator
     });
-
-    // Register the provider with the completion manager
     completionManager.registerProvider(provider);
+
+    const ipythonProvider = new DebuggerIPythonCompletionProvider({
+      debuggerService: debuggerService,
+      translator: translator || nullTranslator
+    });
+    completionManager.registerProvider(ipythonProvider);
   }
 };
 
