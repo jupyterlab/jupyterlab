@@ -274,10 +274,11 @@ jobs:
               MODIFIED_TEST_ARGS=(--project=${{ matrix.project }})
               MODIFIED_TEST_ARGS+=("${MODIFIED_TEST_FILES[@]}")
               PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report-modified \
+              PLAYWRIGHT_JSON_OUTPUT_FILE=test-results-replay/report.json \
                 jlpm run test -c playwright-video.config.js "${MODIFIED_TEST_ARGS[@]}"
               MODIFIED_TESTS_EXIT_CODE=$?
-              if [[ -f test-results/report.json ]]; then
-                mv test-results/report.json test-results/modified-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+              if [[ -f test-results-replay/report.json ]]; then
+                mv test-results-replay/report.json test-results-replay/modified-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
               fi
             else
               echo "No modified test files to replay for project ${{ matrix.project }}."
@@ -294,7 +295,9 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
-          path: core/galata/test-results
+          path: |
+            core/galata/test-results
+            core/galata/test-results-replay
           if-no-files-found: ignore  # expected when no tests fail
 
       - name: Upload test report blob
