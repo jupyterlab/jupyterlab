@@ -87,6 +87,12 @@ test.describe('General', () => {
     await page.keyboard.press('ContextMenu');
     await page.click('text=Create New View for Cell Output');
 
+    // wait for the debugger bug icon to settle (needs to be before drag-and-drop)
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+
     // Emulate drag and drop
     const viewerHandle = page.locator(
       '.lm-TabBar-tabLabel:text-is("lorenz.py")'
@@ -101,12 +107,6 @@ test.describe('General', () => {
     await page.mouse.down();
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
-
-    // wait for the debugger bug icon to settle
-    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
-    await panel
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
 
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
