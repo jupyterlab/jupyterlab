@@ -17,7 +17,6 @@ import type {
   ITerminalOptions,
   Terminal as Xterm
 } from '@xterm/xterm';
-import type { CanvasAddon } from '@xterm/addon-canvas';
 import type { FitAddon } from '@xterm/addon-fit';
 import type { SearchAddon } from '@xterm/addon-search';
 import type { WebLinksAddon } from '@xterm/addon-web-links';
@@ -75,6 +74,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     const xtermOptions = {
       theme: Private.getXTermTheme(theme),
       allowProposedApi: true, // To support xtermjs SearchAddon coloring.
+      // Enable the Kitty keyboard protocol so TUI apps can distinguish
+      // key combinations like Shift+Enter from plain Enter.
+      vtExtensions: { kittyKeyboard: true },
       ...other
     };
 
@@ -768,7 +770,7 @@ namespace Private {
   let FitAddon_: typeof FitAddon;
   let WeblinksAddon_: typeof WebLinksAddon;
   let SearchAddon_: typeof SearchAddon;
-  let Renderer_: typeof CanvasAddon | typeof WebglAddon;
+  let WebglAddon_: typeof WebglAddon | undefined;
 
   /**
    * Detect if the browser supports WebGL or not.
@@ -794,16 +796,20 @@ namespace Private {
   }
 
   function addRenderer(term: Xterm): void {
-    let renderer = new Renderer_();
-    term.loadAddon(renderer);
-    if (supportWebGL) {
-      (renderer as WebglAddon).onContextLoss(event => {
-        console.debug('WebGL context lost - reinitialize Xtermjs renderer.');
-        renderer.dispose();
-        // If the Webgl context is lost, reinitialize the addon
-        addRenderer(term);
-      });
+    // With xterm.js 6.x the canvas renderer has been removed and the DOM
+    // renderer is the built-in fallback. Only load the WebGL addon when
+    // the browser supports it; otherwise let xterm use its DOM renderer.
+    if (!WebglAddon_) {
+      return;
     }
+    const renderer = new WebglAddon_();
+    term.loadAddon(renderer);
+    renderer.onContextLoss(() => {
+      console.debug('WebGL context lost - reinitialize Xtermjs renderer.');
+      renderer.dispose();
+      // If the Webgl context is lost, reinitialize the addon
+      addRenderer(term);
+    });
   }
 
   /**
@@ -814,22 +820,28 @@ namespace Private {
   ): Promise<[Xterm, FitAddon, SearchAddon]> {
     if (!Xterm_) {
       supportWebGL = hasWebGLContext();
-      const [xterm_, fitAddon_, renderer_, weblinksAddon_, searchAddon_] =
+      const [xterm_, fitAddon_, weblinksAddon_, searchAddon_] =
         await Promise.all([
           import('@xterm/xterm'),
           import('@xterm/addon-fit'),
-          supportWebGL
-            ? import('@xterm/addon-webgl')
-            : import('@xterm/addon-canvas'),
           import('@xterm/addon-web-links'),
           import('@xterm/addon-search')
         ]);
       Xterm_ = xterm_.Terminal;
       FitAddon_ = fitAddon_.FitAddon;
-      Renderer_ =
-        (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
       WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
       SearchAddon_ = searchAddon_.SearchAddon;
+      if (supportWebGL) {
+        try {
+          const webglAddon_ = await import('@xterm/addon-webgl');
+          WebglAddon_ = webglAddon_.WebglAddon;
+        } catch (error) {
+          console.warn(
+            'Failed to load the WebGL renderer, falling back to the DOM renderer.',
+            error
+          );
+        }
+      }
     }
 
     const term = new Xterm_(options);

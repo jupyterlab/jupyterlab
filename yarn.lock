@@ -5007,7 +5007,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-beta.0
     "@lumino/widgets": ^2.7.5
     "@types/webpack-env": ^1.18.0
-    "@xterm/addon-search": ~0.15.0
+    "@xterm/addon-search": ~0.17.0-beta.197
     color: ^5.0.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
@@ -5028,12 +5028,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.5
     "@types/jest": ^29.2.0
-    "@xterm/addon-canvas": ~0.7.0
-    "@xterm/addon-fit": ~0.10.0
-    "@xterm/addon-search": ~0.15.0
-    "@xterm/addon-web-links": ~0.11.0
-    "@xterm/addon-webgl": ~0.18.0
-    "@xterm/xterm": ~5.5.0
+    "@xterm/addon-fit": ~0.12.0-beta.197
+    "@xterm/addon-search": ~0.17.0-beta.197
+    "@xterm/addon-web-links": ~0.13.0-beta.197
+    "@xterm/addon-webgl": ~0.20.0-beta.196
+    "@xterm/xterm": ~6.1.0-beta.197
     color: ^5.0.0
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
@@ -8278,55 +8277,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xterm/addon-canvas@npm:~0.7.0":
-  version: 0.7.0
-  resolution: "@xterm/addon-canvas@npm:0.7.0"
+"@xterm/addon-fit@npm:~0.12.0-beta.197":
+  version: 0.12.0-beta.197
+  resolution: "@xterm/addon-fit@npm:0.12.0-beta.197"
   peerDependencies:
-    "@xterm/xterm": ^5.0.0
-  checksum: 28b9965f34e01a9bbcc31651dee2d4a9380aad528039484cce372b856be820705b293c4b5091cee65208c3dfbf6f944f27ecc6c3b794df5a96036cbf6dba0d74
+    "@xterm/xterm": ^6.1.0-beta.197
+  checksum: 9a7c61deefe4a317db63c4d2306cb0688bb70301c19295718e8cc10294c5b289828d68521e847451db9b2ee0fddfc78842100b623cf5a2c5afe20f82f7804fc7
   languageName: node
   linkType: hard
 
-"@xterm/addon-fit@npm:~0.10.0":
-  version: 0.10.0
-  resolution: "@xterm/addon-fit@npm:0.10.0"
+"@xterm/addon-search@npm:~0.17.0-beta.197":
+  version: 0.17.0-beta.197
+  resolution: "@xterm/addon-search@npm:0.17.0-beta.197"
   peerDependencies:
-    "@xterm/xterm": ^5.0.0
-  checksum: 8edfad561c0d0316c5883cbe2ce56109f105a2b2bf53b71d5f8c788e656a3205c1093a659dddcf4025a459e4b7ff8e07b6c6a19815c8711deeded560de5f1893
+    "@xterm/xterm": ^6.1.0-beta.197
+  checksum: 30885e3142aedc3218f4ac90a82b24e9e32dc3d1cd317c60d6e5e266c10fc613c6d48067dc9366d2ab50faece1a0eed8e79eda25d9d3cd62b8dd44b63fa26391
   languageName: node
   linkType: hard
 
-"@xterm/addon-search@npm:~0.15.0":
-  version: 0.15.0
-  resolution: "@xterm/addon-search@npm:0.15.0"
+"@xterm/addon-web-links@npm:~0.13.0-beta.197":
+  version: 0.13.0-beta.197
+  resolution: "@xterm/addon-web-links@npm:0.13.0-beta.197"
   peerDependencies:
-    "@xterm/xterm": ^5.0.0
-  checksum: d4f77e3637f915e86c9208da70f615f5e6150810943931a4bba8a3422d5c2b791b84d2136de65603dbc4437328f4c584c8faa1f53e71524dd667bee631ca3f1e
+    "@xterm/xterm": ^6.1.0-beta.197
+  checksum: ca8083584ab7ddd66111e5848f65861b2b357e2b75821ca2b9bd6979be74aa64c1e01118b019179a21bc07157fdb55a12ecd3ea717d526ff22ed010833fb67e8
   languageName: node
   linkType: hard
 
-"@xterm/addon-web-links@npm:~0.11.0":
-  version: 0.11.0
-  resolution: "@xterm/addon-web-links@npm:0.11.0"
+"@xterm/addon-webgl@npm:~0.20.0-beta.196":
+  version: 0.20.0-beta.196
+  resolution: "@xterm/addon-webgl@npm:0.20.0-beta.196"
   peerDependencies:
-    "@xterm/xterm": ^5.0.0
-  checksum: c1b36b649b8cddc613213eb9e835daf3106a8be359a19ccacca1f1d9ff883b59d478f166109ee017fa3994d224dcdd82976ad5d5a1221271ab8d3d5684eb141d
+    "@xterm/xterm": ^6.1.0-beta.197
+  checksum: 8996fb37795ed8ec449321765c86602b3be6e81f8d583a7c9c24eabe3eb85e17133312891198ba7a901cd8713716af57000bb9ddeb37d66957d8dae9834b109d
   languageName: node
   linkType: hard
 
-"@xterm/addon-webgl@npm:~0.18.0":
-  version: 0.18.0
-  resolution: "@xterm/addon-webgl@npm:0.18.0"
-  peerDependencies:
-    "@xterm/xterm": ^5.0.0
-  checksum: 942ecaa4e08423563a795a1a63fa79637e60d4e3aba1b5fa2f426e1d7b19c553e8c8f1cfad1258461f22e05362e791f642dc6aab7e8766e26d4d3876617d8320
-  languageName: node
-  linkType: hard
-
-"@xterm/xterm@npm:~5.5.0":
-  version: 5.5.0
-  resolution: "@xterm/xterm@npm:5.5.0"
-  checksum: 393c1891b95fdd50d05e7a063abdc95a6643d2c45a4231637c23db90511426a95b1b56a5c4c91831121d2710aee9de97cf5e426016c589ca87dea8fff9a41b33
+"@xterm/xterm@npm:~6.1.0-beta.197":
+  version: 6.1.0-beta.197
+  resolution: "@xterm/xterm@npm:6.1.0-beta.197"
+  checksum: 80c7494e0b954919d1ac7bdaeae96ab418ccea0d89c87ae8dcafaccc000df31943dac47c5f37cc846f19c1e87e620c4aef3f717169ea55a0ca43a043825c1702
   languageName: node
   linkType: hard
 
