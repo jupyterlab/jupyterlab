@@ -495,7 +495,7 @@ describe('rendermime/registry', () => {
           expect(getSpy).not.toHaveBeenCalled();
         });
 
-        it('should retry resolvePath API without kernel scope after kernel 404', async () => {
+        it('should use unresolved kernel scope response without retrying', async () => {
           const kernelId = UUID.uuid4();
           const localContents = new ContentsManager();
           const resolver = new RenderMimeRegistry.UrlResolver({
@@ -505,17 +505,20 @@ describe('rendermime/registry', () => {
           });
           const settings = localContents.serverSettings as IWritableSettings;
           const previousFetch = settings.fetch;
-          const fetchMock = jest
-            .fn()
-            .mockResolvedValueOnce(new Response('', { status: 404 }))
-            .mockResolvedValueOnce(
-              new Response(
-                JSON.stringify({
-                  resolved: [{ scope: 'server', path: 'foo.py' }]
-                }),
-                { status: 200 }
-              )
-            );
+          const fetchMock = jest.fn().mockResolvedValue(
+            new Response(
+              JSON.stringify({
+                resolved: [{ scope: 'server', path: 'foo.py' }],
+                unresolved: [
+                  {
+                    scope: 'kernel',
+                    reason: `Kernel ${kernelId} could not be found`
+                  }
+                ]
+              }),
+              { status: 200 }
+            )
+          );
           settings.fetch = fetchMock as ServerConnection.ISettings['fetch'];
           restoreFetch = () => {
             settings.fetch = previousFetch;
@@ -525,13 +528,10 @@ describe('rendermime/registry', () => {
             .mockResolvedValue({ path: 'legacy-foo.py' } as Contents.IModel);
 
           const resolved = await resolver.resolvePath('./foo.py');
-          expect(fetchMock).toHaveBeenCalledTimes(2);
+          expect(fetchMock).toHaveBeenCalledTimes(1);
           const firstUrl = (fetchMock.mock.calls[0][0] as Request).url;
-          const secondUrl = (fetchMock.mock.calls[1][0] as Request).url;
           expect(firstUrl).toContain('/api/resolvePath?path=.%2Ffoo.py');
           expect(firstUrl).toContain(`&kernel=${kernelId}`);
-          expect(secondUrl).toContain('/api/resolvePath?path=.%2Ffoo.py');
-          expect(secondUrl).not.toContain('kernel=');
           expect(resolved).toEqual({ scope: 'server', path: 'foo.py' });
           expect(getSpy).not.toHaveBeenCalled();
         });

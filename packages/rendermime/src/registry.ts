@@ -453,7 +453,7 @@ export namespace RenderMimeRegistry {
         return undefined;
       }
 
-      let params: Private.IResolvePathQuery = { path };
+      const params: Private.IResolvePathQuery = { path };
       const kernelId = this._kernelId?.();
       if (kernelId) {
         // `kernel` is expected by jupyter-server resolvePath handler.
@@ -464,19 +464,6 @@ export namespace RenderMimeRegistry {
       if (!response) {
         console.warn(`Could not resolve location of ${path} using server API`);
         return null;
-      }
-
-      // A 404 with a kernel id can mean "kernel does not exist" rather than
-      // "resolvePath endpoint is unavailable". Retry once without kernel scope.
-      if (response.status === 404 && params.kernel) {
-        params = { path };
-        response = await this._makeResolvePathRequest(params);
-        if (!response) {
-          console.warn(
-            `Could not resolve location of ${path} using server API`
-          );
-          return null;
-        }
       }
 
       if (response.status === 404) {
@@ -494,7 +481,17 @@ export namespace RenderMimeRegistry {
           (await response.json()) as Private.IResolvePathResponse | null;
         const resolved =
           data?.resolved?.filter(Private.isResolvedLocation) ?? [];
+        const hasUnresolvedKernelScope =
+          data?.unresolved?.some(
+            item =>
+              !!item &&
+              typeof item === 'object' &&
+              (item as { scope?: unknown }).scope === 'kernel'
+          ) ?? false;
         if (!resolved.length) {
+          if (hasUnresolvedKernelScope) {
+            return null;
+          }
           return null;
         }
 
@@ -611,6 +608,7 @@ namespace Private {
 
   export interface IResolvePathResponse {
     resolved?: unknown[];
+    unresolved?: unknown[];
   }
 
   export function isResolvedLocation(
