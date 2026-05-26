@@ -224,7 +224,7 @@ module.exports = {
       Widget:
         'https://lumino.readthedocs.io/en/latest/api/classes/widgets.Widget-1.html',
       'Widget.Flag.IsVisible':
-        'https://lumino.readthedocs.io/widgets/classes/widget.html'
+        'https://lumino.readthedocs.io/en/latest/api/enums/widgets.Widget.Flag.html#IsVisible'
     },
     '@rjsf/utils': {
       FieldProps:
