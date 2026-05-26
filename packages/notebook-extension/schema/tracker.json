@@ -251,6 +251,21 @@
         "rank": 3
       },
       {
+        "command": "notebook:copy-selected-text",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 3
+      },
+      {
+        "command": "notebook:cut-selected-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
+        "command": "notebook:paste-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
         "rank": 4
@@ -304,11 +319,6 @@
         "command": "notebook:clear-cell-output",
         "selector": ".jp-Notebook .jp-CodeCell",
         "rank": 12
-      },
-      {
-        "command": "notebook:clear-all-cell-outputs",
-        "selector": ".jp-Notebook",
-        "rank": 13
       },
       {
         "type": "separator",
