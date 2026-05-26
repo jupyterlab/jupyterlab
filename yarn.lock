@@ -3003,6 +3003,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/debugger-extension@workspace:packages/debugger-extension"
   dependencies:
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.6.0-beta.0
     "@jupyterlab/apputils": ^4.7.0-beta.0
     "@jupyterlab/cells": ^4.6.0-beta.0
