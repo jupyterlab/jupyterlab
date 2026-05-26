@@ -70,7 +70,7 @@
     "@lumino/properties": "^2.0.4",
     "@lumino/signaling": "^2.1.5",
     "@lumino/virtualdom": "^2.0.4",
-    "@lumino/widgets": "^2.7.5",
+    "@lumino/widgets": "^2.8.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
