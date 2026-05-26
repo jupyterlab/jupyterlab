@@ -271,8 +271,14 @@ for (const c of showSourcesCases) {
 
 /* Non parametrized tests */
 test.describe('Debugger Tests', () => {
-  test.afterEach(async ({ page }) => {
-    await page.click('jp-button[title^=Continue]');
+  test.afterEach(async ({ page }, testInfo) => {
+    if (
+      !testInfo.annotations.some(
+        annotation => annotation.type === 'skip-continue'
+      )
+    ) {
+      await page.click('jp-button[title^=Continue]');
+    }
     await page.debugger.switchOff();
     await page.waitForTimeout(500);
     await page.notebook.close();
@@ -436,6 +442,11 @@ test.describe('Debugger Tests', () => {
       page,
       tmpPath
     }) => {
+      test.info().annotations.push({
+        type: 'skip-continue',
+        description: 'This test does not pause on a debugger breakpoint'
+      });
+
       await init({ page, tmpPath });
 
       await page.notebook.addCell('code', 'import anyio');
