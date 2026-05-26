@@ -510,7 +510,6 @@
 .jp-RenderedHTMLCommon svg,
 .jp-RenderedSVG svg {
   max-width: 100%;
-  height: auto;
 }
 
 .jp-RenderedHTMLCommon img.jp-mod-unconfined,
