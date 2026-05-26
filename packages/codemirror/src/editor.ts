@@ -83,12 +83,23 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
-    // For backward-compatibility with older CodeMirror
-    const content = host.querySelector('.cm-content')!;
-    (content as any).cmView = {
-      view: this._editor,
-      dom: content
-    };
+    // For backward-compatibility with consumers of older CodeMirror private API.
+    const content = host.querySelector('.cm-content');
+    if (content) {
+      const legacyCmView = {
+        view: this._editor,
+        dom: content
+      };
+      Object.defineProperty(content, 'cmView', {
+        configurable: true,
+        get: () => {
+          console.warn(
+            'Accessing cmView is deprecated. Use the public API EditorView.findFromDOM() instead.'
+          );
+          return legacyCmView;
+        }
+      });
+    }
 
     const scroller = host.querySelector('.cm-scroller') as HTMLElement | null;
     if (scroller) {
