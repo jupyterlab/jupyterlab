@@ -270,14 +270,12 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showFileSizeColumn: false,
           showHiddenFiles: false,
           showFileCheckboxes: false,
+          showFileFilter: false,
           sortNotebooksFirst: false,
           sortFileNamesNaturally: true,
           showFullPath: false,
           allowFileUploads: true
         };
-
-        browser.showFileFilter = settings.get('showFileFilter')
-          .composite as boolean;
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
@@ -1777,9 +1775,15 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleFileFilter, {
     execute: () => {
-      // Update toggled state, then let the toolbar button update
-      browser.showFileFilter = !browser.showFileFilter;
-      commands.notifyCommandChanged(CommandIDs.toggleFileFilter);
+      const value = !browser.showFileFilter;
+      const key = 'showFileFilter';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
     },
     isToggled: () => {
       const toggled = browser.showFileFilter;
