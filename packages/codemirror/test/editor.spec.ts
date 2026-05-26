@@ -134,6 +134,21 @@ describe('CodeMirrorEditor', () => {
       const cm = editor.editor;
       expect(cm.state.doc).toBe(editor.doc);
     });
+
+    it('should warn when accessing the legacy cmView shim', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const content = editor.editor.contentDOM as HTMLElement & {
+        cmView?: { view: typeof editor.editor; dom: HTMLElement };
+      };
+
+      expect(content.cmView?.view).toBe(editor.editor);
+      expect(content.cmView?.dom).toBe(content);
+      expect(warn).toHaveBeenCalledWith(
+        'Accessing cmView is deprecated. Use the public API EditorView.findFromDOM() instead.'
+      );
+
+      warn.mockRestore();
+    });
   });
 
   describe('#lineCount', () => {
