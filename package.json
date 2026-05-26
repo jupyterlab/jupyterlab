@@ -114,7 +114,7 @@
     "prettier": "^3.8.1",
     "react": "^18.2.0",
     "type-fest": "^4.30.0",
-    "yjs": "^13.5.40"
+    "yjs": "^13.6.30"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
