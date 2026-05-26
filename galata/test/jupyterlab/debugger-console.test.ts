@@ -57,6 +57,16 @@ async function setupDebuggerConsole(
 
 test.describe('Debugger Console', () => {
   test.use({ tmpPath: 'test-debugger-console' });
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      // Raise the provider timeout so the two evaluate() calls in
+      // DebuggerCompletionProvider.fetch() complete well within the budget.
+      '@jupyterlab/completer-extension:manager': {
+        providerTimeout: 60000
+      }
+    }
+  });
 
   test.beforeAll(async ({ tmpPath, request }) => {
     const contents = galata.newContentsHelper(request);

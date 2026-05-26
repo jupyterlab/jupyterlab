@@ -8,6 +8,15 @@ const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-Completer';
 
 test.describe('Completer', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/completer-extension:manager': {
+        providerTimeout: 60000
+      }
+    }
+  });
+
   test.describe('Notebook', () => {
     test.beforeEach(async ({ page }) => {
       await page.notebook.createNew(fileName);
@@ -33,6 +42,10 @@ test.describe('Completer', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
+      // Ensure the completer is still bound to the editor before pressing Tab
+      // again; this guards against a brief window after Escape where the editor
+      // state hasn't settled yet.
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
