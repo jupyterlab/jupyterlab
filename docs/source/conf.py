@@ -61,6 +61,11 @@ if os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1":
     # TypeDoc references are not needed for spelling checks and can require
     # generated API artifacts that are intentionally skipped in this builder.
     extensions = [ext for ext in extensions if ext != "typedoc_links"]
+    # Keep spelling runs focused on spelling failures only.
+    suppress_warnings = list(globals().get("suppress_warnings", []))
+    if "myst.xref_missing" not in suppress_warnings:
+        suppress_warnings.append("myst.xref_missing")
+    globals()["suppress_warnings"] = suppress_warnings
 
 if importlib.util.find_spec("enchant") is not None:
     extensions += ["sphinxcontrib.spelling"]

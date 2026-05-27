@@ -73,4 +73,20 @@ jobs:
         env:
           JUPYTERLAB_SPELLING_BUILD: '1'
         run: |
-          python -m sphinx -b spelling -W --keep-going docs/source docs/build/spelling
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.ref }}"
+          mapfile -t changed_docs_raw < <(
+            git diff --name-only --diff-filter=ACMR \
+              "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}" \
+              | grep -E '^docs/source/.*\.(md|rst|txt)$' || true
+          )
+          if [ "${#changed_docs_raw[@]}" -eq 0 ]; then
+            echo "No docs/source text files changed; skipping Sphinx spelling builder."
+            exit 0
+          fi
+          changed_docs=()
+          for path in "${changed_docs_raw[@]}"; do
+            changed_docs+=("${path#docs/source/}")
+          done
+          printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs[@]}"
+          python -m sphinx -b spelling -W --keep-going docs/source docs/build/spelling "${changed_docs[@]}"
