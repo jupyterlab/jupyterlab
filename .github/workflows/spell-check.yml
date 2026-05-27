@@ -14,12 +14,17 @@ on:
       - 'pyproject.toml'
       - '.github/workflows/spell-check.yml'
 
+permissions:
+  contents: read
+
 jobs:
   codespell:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -37,6 +42,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -51,7 +58,16 @@ jobs:
       - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[docs]" pyenchant
+          python - <<'PY'
+          import subprocess
+          import sys
+          import tomllib
+          from pathlib import Path
+
+          pyproject = tomllib.loads(Path("pyproject.toml").read_text())
+          docs_deps = pyproject["project"]["optional-dependencies"]["docs"]
+          subprocess.check_call([sys.executable, "-m", "pip", "install", *docs_deps, "pyenchant"])
+          PY
 
       - name: Run Sphinx spelling builder
         env:

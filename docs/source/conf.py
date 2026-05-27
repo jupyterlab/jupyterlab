@@ -23,6 +23,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import importlib.util
 import json
 import os
 import shutil
@@ -61,12 +62,8 @@ if os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1":
     # generated API artifacts that are intentionally skipped in this builder.
     extensions = [ext for ext in extensions if ext != "typedoc_links"]
 
-try:
-    import enchant  # noqa: F401
-
+if importlib.util.find_spec("enchant") is not None:
     extensions += ["sphinxcontrib.spelling"]
-except ImportError:
-    pass
 
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
@@ -120,15 +117,20 @@ exclude_patterns = [
 ]
 
 if "sphinxcontrib.spelling" in extensions:
-    spelling_word_list_filename = ["spelling_wordlist.txt"]
-    spelling_exclude_patterns = [
-        "api/**",
-        "getting_started/changelog.md",
-    ]
-    spelling_filters = [
-        "spelling_filters.CodeIdentifierFilter",
-    ]
-    spelling_show_suggestions = True
+    # Sphinx consumes these values dynamically by their module-global names.
+    globals().update(
+        {
+            "spelling_word_list_filename": ["spelling_wordlist.txt"],
+            "spelling_exclude_patterns": [
+                "api/**",
+                "getting_started/changelog.md",
+            ],
+            "spelling_filters": [
+                "spelling_filters.CodeIdentifierFilter",
+            ],
+            "spelling_show_suggestions": True,
+        }
+    )
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
