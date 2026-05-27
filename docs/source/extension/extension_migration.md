@@ -75,8 +75,8 @@ Webpack config to Rspack.
 - The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
 - Synchronization properties (`syncEditable` and `syncCollapse`) of the {ts:class}`cells.Cell` class and its derivatives, as well as `CodeCell.syncScrolled`, now default to `undefined` rather than `false`. In notebook initialization, these values are now only set to `true` if `undefined`, so custom notebook content factories ({ts:interface}`notebook.NotebookPanel.IContentFactory`) can explicitly set them to `true` or `false` without being overwritten later.
 - JupyterLab now depends on `@jupyter/ydoc` v4, which sets the shared document dirty state to `true`
-after every change, except for `setSource()` (and the `source` setter) which is used for document
-initialization. With that, JupyterLab's document dirty indicator is now fully backed by a shared model.
+  after every change, except for `setSource()` (and the `source` setter) which is used for document
+  initialization. With that, JupyterLab's document dirty indicator is now fully backed by a shared model.
 
 ### Testing with Galata
 
