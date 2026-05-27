@@ -72,12 +72,15 @@ jobs:
       - name: Run Sphinx spelling builder
         env:
           JUPYTERLAB_SPELLING_BUILD: '1'
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.ref }}"
+          git fetch --no-tags --depth=1 origin "$PR_BASE_REF"
           mapfile -t changed_docs_raw < <(
             git diff --name-only --diff-filter=ACMR \
-              "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}" \
+              "$PR_BASE_SHA...$PR_HEAD_SHA" \
               | grep -E '^docs/source/.*\.(md|rst|txt)$' || true
           )
           if [ "${#changed_docs_raw[@]}" -eq 0 ]; then
