@@ -68,7 +68,7 @@ test('should update displayed cells on resize', async ({ page, tmpPath }) => {
   );
   await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
-  // The cell should be visible again
+  // The cell should be visible aqain
   await expect.soft(cell).toBeVisible();
 });
 

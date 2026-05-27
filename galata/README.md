@@ -109,7 +109,7 @@ report will be created in `playwright-report` folder. That report can be see by 
 jlpm playwright show-report
 ```
 
-## User advice
+## User advices
 
 ### Create tests
 

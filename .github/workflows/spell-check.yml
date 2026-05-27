@@ -3,24 +3,58 @@ name: Documentation Spell Check
 on:
   pull_request:
     paths:
-      - '**.md'
-      - '**.rst'
-      - 'docs/**'
-      - '**.txt'
-      - 'README*'
-      - 'CHANGELOG*'
-      - 'CONTRIBUTING*'
+      - '**/*.md'
+      - '**/*.rst'
+      - '**/*.txt'
+      - '.codespellignore'
+      - '.pre-commit-config.yaml'
+      - 'docs/source/conf.py'
+      - 'docs/source/_ext/**'
+      - 'docs/source/spelling_wordlist.txt'
+      - 'pyproject.toml'
+      - '.github/workflows/spell-check.yml'
 
 jobs:
-  spellcheck:
+  codespell:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run codespell
-        uses: codespell-project/actions-codespell@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          check_filenames: false
-          skip: '*.min.js,*.map,*.lock,*.json,node_modules,*.ipynb,*.svg,*.png,*.jpg,*.jpeg,*.gif,*.ico,*.woff,*.woff2,*.ttf,*.eot,*.sum,*.pyc,.git,yarn.lock,package-lock.json,*.bundle.js,yarn.js'
-          ignore_words_file: .codespellignore
+          python-version: '3.11'
+
+      - name: Install pre-commit
+        run: python -m pip install pre-commit
+
+      - name: Run codespell pre-commit hook
+        run: pre-commit run codespell --all-files
+
+  sphinx-spelling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies for enchant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libenchant-2-2 aspell aspell-en
+
+      - name: Install documentation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[docs]" pyenchant
+
+      - name: Run Sphinx spelling builder
+        env:
+          JUPYTERLAB_SPELLING_BUILD: '1'
+        run: |
+          python -m sphinx -b spelling -W --keep-going docs/source docs/build/spelling
