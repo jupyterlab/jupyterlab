@@ -1072,6 +1072,26 @@ describe('cells/widget', () => {
         expect(renderedPlaceholder?.textContent).toBe(
           'Double-click (or press Enter) to edit'
         );
+        expect(
+          widget.node.classList.contains('jp-mod-emptyMarkdownPlaceholder')
+        ).toBe(true);
+      });
+
+      it('should not mark rendered markdown content as placeholder', async () => {
+        const model = new MarkdownCellModel();
+        model.sharedModel.setSource('hello');
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        expect(
+          widget.node.classList.contains('jp-mod-emptyMarkdownPlaceholder')
+        ).toBe(false);
       });
 
       it('should show markdown help placeholder in edit mode', async () => {
@@ -1100,7 +1120,7 @@ describe('cells/widget', () => {
         host.remove();
       });
 
-      it('should show command placeholder text in command mode', async () => {
+      it('should not show a placeholder in command mode', async () => {
         const model = new MarkdownCellModel();
         const host = document.createElement('div');
         host.classList.add('jp-Notebook', 'jp-mod-commandMode');
@@ -1120,9 +1140,7 @@ describe('cells/widget', () => {
         widget.editor!.focus();
         await framePromise();
         const placeholder = widget.node.querySelector('.cm-placeholder');
-        expect(placeholder?.textContent).toBe(
-          'Double-click (or press Enter) to edit'
-        );
+        expect(placeholder).toBeNull();
         host.remove();
       });
     });

@@ -166,6 +166,11 @@ const RAW_CELL_CLASS = 'jp-RawCell';
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
 
+/**
+ * The class name added to rendered markdown cells showing the empty placeholder.
+ */
+const EMPTY_MARKDOWN_PLACEHOLDER_CLASS = 'jp-mod-emptyMarkdownPlaceholder';
+
 const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
 
 /**
@@ -2520,9 +2525,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const base = super.getEditorOptions() ?? {};
     base.extensions = [
       ...(base.extensions ?? []),
-      this._placeholderCompartment.of(
-        editorPlaceholder(this._emptyPlaceholder)
-      ),
+      this._placeholderCompartment.of([]),
       EditorView.updateListener.of(update => {
         this._placeholderEditorView = update.view;
         if (update.focusChanged || update.docChanged || update.selectionSet) {
@@ -2573,6 +2576,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private async _handleRendered(): Promise<void> {
     if (!this._rendered) {
+      this.removeClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS);
       this.showEditor();
     } else {
       // TODO: It would be nice for the cell to provide a way for
@@ -2594,8 +2598,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
 
     const model = this.model;
-    const text =
-      (model && model.sharedModel.getSource()) || this._emptyPlaceholder;
+    const source = model?.sharedModel.getSource() ?? '';
+    const isEmpty = source.length === 0;
+    const text = isEmpty ? this._emptyPlaceholder : source;
+    this.toggleClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS, isEmpty);
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -2614,16 +2620,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       return;
     }
     const placeholderText =
-      this._placeholderMode === 'edit'
-        ? this._editModePlaceholder
-        : this._emptyPlaceholder;
+      this._placeholderMode === 'edit' ? this._editModePlaceholder : null;
     if (placeholderText === this._activePlaceholderText) {
       return;
     }
     this._activePlaceholderText = placeholderText;
     editorView.dispatch({
       effects: this._placeholderCompartment.reconfigure(
-        editorPlaceholder(placeholderText)
+        placeholderText === null ? [] : editorPlaceholder(placeholderText)
       )
     });
   }

@@ -133,6 +133,10 @@
   overflow: auto;
 }
 
+.jp-MarkdownCell.jp-mod-emptyMarkdownPlaceholder .jp-MarkdownOutput {
+  opacity: 0.75;
+}
+
 /* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */
 .jp-collapseHeadingButton {
   display: flex;
