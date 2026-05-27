@@ -512,6 +512,13 @@
   max-width: 100%;
 }
 
+.jp-RenderedHTMLCommon img:not([height]),
+.jp-RenderedImage img:not([height]),
+.jp-RenderedHTMLCommon svg:not([height]),
+.jp-RenderedSVG svg:not([height]) {
+  height: auto;
+}
+
 .jp-RenderedHTMLCommon img.jp-mod-unconfined,
 .jp-RenderedImage img.jp-mod-unconfined,
 .jp-RenderedHTMLCommon svg.jp-mod-unconfined,
