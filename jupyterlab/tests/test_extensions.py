@@ -2,15 +2,87 @@
 # Distributed under the terms of the Modified BSD License.
 
 import json
-from unittest.mock import Mock, patch
+import sys
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from tornado import web
 from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
-from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage, PluginManager
+from jupyterlab.extensions.manager import (
+    ExtensionManager,
+    ExtensionPackage,
+    PluginManager,
+)
+from jupyterlab.extensions.pypi import _check_python_version_compatible
+from jupyterlab.handlers.extension_manager_handler import ExtensionHandler
 
 from . import fake_client_factory
+
+
+@pytest.mark.parametrize(
+    "requires_python, expected",
+    (
+        (None, True),  # No requirement
+        ("", True),  # Empty requirement
+        (">=3.6", True),  # Should pass on any modern Python
+        (">=3.6,<4", True),  # Common range
+        (">=99.0", False),  # Future version
+        ("<3.0", False),  # Very old Python
+        ("invalid-specifier", True),  # Invalid specifier should default to compatible
+    ),
+)
+def test_check_python_version_compatible(requires_python, expected):
+    """Test the Python version compatibility check function."""
+    result, _ = _check_python_version_compatible(requires_python)
+    assert result == expected
+
+
+def test_check_python_version_compatible_current_version():
+    """Test that current Python version is compatible with its own specifier."""
+    current = f">={sys.version_info.major}.{sys.version_info.minor}"
+    assert _check_python_version_compatible(current)[0] is True
+
+
+@pytest.mark.parametrize(
+    "requires_python, expected_allowed",
+    (
+        (">=3.6", True),  # Compatible with current Python
+        (">=99.0", False),  # Incompatible - future version
+        (None, True),  # No requirement - should be allowed
+    ),
+)
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+@patch("jupyterlab.extensions.pypi.xmlrpc.client")
+async def test_extension_package_allowed_set_from_python_compatibility(
+    mocked_rpcclient, requires_python, expected_allowed
+):
+    """Test that allowed attribute is correctly set based on Python version compatibility."""
+    proxy = Mock(browse=Mock(return_value=[["test-extension", "1.0.0"]]))
+    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
+
+    manager = PyPIExtensionManager()
+
+    async def mock_pkg_metadata(name, version, base_url):
+        return {
+            "name": "test-extension",
+            "summary": "A test extension",
+            "requires_python": requires_python,
+        }
+
+    manager._fetch_package_metadata = mock_pkg_metadata
+
+    extensions, _ = await manager.list_extensions("test")
+
+    assert len(extensions) == 1
+    ext = extensions[0]
+    assert ext.name == "test-extension"
+    assert ext.allowed == expected_allowed
+    if not expected_allowed:
+        assert "Requires Python" in ext.description
+    else:
+        assert ext.description == "A test extension"
 
 
 @pytest.mark.parametrize(
@@ -133,6 +205,49 @@ async def test_ExtensionManager_list_extensions_query_allow_block(mock_client, m
     assert extensions == ([extension1], 1)
 
 
+async def test_ExtensionManager_is_install_allowed_no_policy():
+    manager = PyPIExtensionManager()
+    assert await manager.is_install_allowed("any-extension") is True
+
+
+@patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
+async def test_ExtensionManager_is_install_allowed_allowlist(mock_client):
+    mock_client.body = json.dumps({"allowed_extensions": [{"name": "jupyterlab-git"}]}).encode()
+    manager = PyPIExtensionManager(
+        ext_options={"allowed_extensions_uris": {"http://dummy-allowed-extension"}}
+    )
+    assert await manager.is_install_allowed("jupyterlab-git") is True
+    assert await manager.is_install_allowed("jupyterlab-evil") is False
+
+
+@patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
+async def test_ExtensionManager_is_install_allowed_blocklist(mock_client):
+    mock_client.body = json.dumps({"blocked_extensions": [{"name": "jupyterlab-evil"}]}).encode()
+    manager = PyPIExtensionManager(
+        ext_options={"blocked_extensions_uris": {"http://dummy-blocked-extension"}}
+    )
+    assert await manager.is_install_allowed("jupyterlab-evil") is False
+    assert await manager.is_install_allowed("jupyterlab-git") is True
+
+
+@patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
+async def test_ExtensionManager_is_install_allowed_allowlist_takes_precedence(mock_client):
+    mock_client.body = json.dumps(
+        {
+            "allowed_extensions": [{"name": "jupyterlab-git"}],
+            "blocked_extensions": [{"name": "jupyterlab-git"}],  # allowlist takes precedence
+        }
+    ).encode()
+    manager = PyPIExtensionManager(
+        ext_options={
+            "allowed_extensions_uris": {"http://dummy-allowed-extension"},
+            "blocked_extensions_uris": {"http://dummy-blocked-extension"},
+        }
+    )
+    assert await manager.is_install_allowed("jupyterlab-git") is True
+    assert await manager.is_install_allowed("jupyterlab-evil") is False
+
+
 async def test_ExtensionManager_install():
     manager = ReadOnlyExtensionManager()
 
@@ -151,6 +266,7 @@ async def test_ExtensionManager_uninstall():
     assert result.message == "Extension removal not supported."
 
 
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
     extension_data = [
@@ -219,6 +335,7 @@ async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
     ]
 
 
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension1 = ExtensionPackage(
@@ -435,3 +552,42 @@ async def test_PluginManager_custom_level(level):
 async def test_PluginManager_default_level():
     manager = PluginManager()
     assert manager.level == "sys_prefix"
+
+
+@pytest.mark.parametrize(
+    "name,expected",
+    [
+        ("jupyterlab-git", True),
+        ("my_extension.pkg", True),
+        # GHSA-37w4-hwhx-4rc4: VCS/URL names must be blocked
+        ("git+https://github.com/attacker/malicious.git", False),
+        ("/tmp/local-pkg", False),  # noqa: S108
+        ("http://evil.com/pkg.tar.gz", False),
+    ],
+)
+async def test_pypi_manager_is_install_allowed_rejects_non_pypi_names(name, expected):
+    manager = PyPIExtensionManager()
+    assert await manager.is_install_allowed(name) is expected
+
+
+@pytest.mark.parametrize(
+    "version,expected",
+    [(None, True), ("1.2.3", True), ("not valid version", False)],
+)
+async def test_pypi_manager_is_install_allowed_rejects_non_pypi_versions(version, expected):
+    manager = PyPIExtensionManager()
+    assert await manager.is_install_allowed("package", version) is expected
+
+
+async def test_handler_blocks_install_when_policy_denies():
+    handler = Mock()
+    handler.current_user = "user"
+    handler.get_json_body.return_value = {"cmd": "install", "extension_name": "jupyterlab-evil"}
+    handler.manager.is_install_allowed = AsyncMock(return_value=False)
+
+    with pytest.raises(web.HTTPError) as exc_info:
+        await ExtensionHandler.post(handler)
+    assert exc_info.value.status_code == 422
+    assert "was blocked" in exc_info.value.log_message
+    handler.manager.is_install_allowed.assert_called_once_with("jupyterlab-evil", None)
+    handler.manager.install.assert_not_called()

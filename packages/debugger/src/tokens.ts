@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -759,11 +760,10 @@ export namespace IDebugger {
    * #### Notes
    * This is experimental API
    */
-  export interface IVariableSelection
-    extends Pick<
-      DebugProtocol.Variable,
-      'name' | 'type' | 'variablesReference' | 'value'
-    > {}
+  export interface IVariableSelection extends Pick<
+    DebugProtocol.Variable,
+    'name' | 'type' | 'variablesReference' | 'value'
+  > {}
 
   /**
    * Debugger sidebar interface.

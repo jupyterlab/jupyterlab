@@ -109,8 +109,8 @@ class CheckForUpdate(CheckForUpdateABC):
             if parse(self.version) < parse(last_version):
                 trans = translator.load("jupyterlab")
                 return (
-                    trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    trans.gettext(f"A newer version ({last_version}) of JupyterLab is available."),
+                    (trans.gettext("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None

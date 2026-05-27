@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module example-simple-list
@@ -120,9 +121,7 @@ class MyList extends WindowedListModel {
     );
     if (!widget) {
       widget = new ContentWidget(
-        `item-${
-          (this.itemsList as ObservableList<{ index: number }>).get(i).index
-        }`
+        `item-${(this.itemsList as ObservableList<{ index: number }>).get(i).index}`
       );
       this.widgetsCache.set(
         (this.itemsList as ObservableList<{ index: number }>).get(i),

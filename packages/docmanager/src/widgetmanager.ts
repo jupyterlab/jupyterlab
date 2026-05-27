@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { Time } from '@jupyterlab/coreutils';
@@ -475,7 +476,10 @@ export class DocumentWidgetManager implements IDisposable {
     // Ask confirmation
     if (this.confirmClosingDocument) {
       const { shouldClose, ignoreSave, doNotAskAgain } =
-        await dialogs.confirmClose({ fileName, isDirty });
+        await dialogs.confirmClose({
+          fileName,
+          isDirty
+        });
 
       if (doNotAskAgain) {
         this.confirmClosingDocument = false;

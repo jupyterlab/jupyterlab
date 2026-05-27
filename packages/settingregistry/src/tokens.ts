@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CellType } from '@jupyterlab/nbformat';
 import type { IDataConnector } from '@jupyterlab/statedb';
@@ -38,8 +39,10 @@ export const ISettingRegistry = new Token<ISettingRegistry>(
 /**
  * The settings connector interface.
  */
-export interface ISettingConnector
-  extends IDataConnector<ISettingRegistry.IPlugin, string> {}
+export interface ISettingConnector extends IDataConnector<
+  ISettingRegistry.IPlugin,
+  string
+> {}
 
 /**
  * The settings registry interface.

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type * as SQLModule from '@codemirror/lang-sql';
 import type { StreamParser } from '@codemirror/language';
@@ -200,7 +201,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   ): IEditorLanguage | null {
     const modename = typeof language === 'string' ? language : language.name;
     const mimetype = typeof language !== 'string' ? language.mime : modename;
-    const ext = typeof language !== 'string' ? language.extensions ?? [] : [];
+    const ext = typeof language !== 'string' ? (language.extensions ?? []) : [];
 
     return (
       (modename ? this.findByName(modename) : null) ??
@@ -249,9 +250,13 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
       pos = to;
     });
 
-    if (pos < tree.length - 1) {
-      // No style applied on the trailing text
-      el.appendChild(document.createTextNode(code.slice(pos, tree.length)));
+    if (pos === 0 && code.length > 0) {
+      // No tokens were emitted (e.g., single unrecognized character like 'x')
+      // Render the entire code as plain text fallback
+      el.appendChild(document.createTextNode(code));
+    } else if (pos < code.length) {
+      // Handle any remaining unstyled content
+      el.appendChild(document.createTextNode(code.slice(pos, code.length)));
     }
   }
 
@@ -298,10 +303,12 @@ export namespace EditorLanguageRegistry {
    * Get the default editor languages
    *
    * @param translator Application translator
+   * @param findLanguage Optional function to find a language by name for markdown code block highlighting
    * @returns Default CodeMirror 6 languages
    */
   export function getDefaultLanguages(
-    translator?: ITranslator | null
+    translator?: ITranslator | null,
+    findLanguage?: (info: string) => IEditorLanguage | null
   ): ReadonlyArray<IEditorLanguage> {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
     return [
@@ -418,7 +425,23 @@ export namespace EditorLanguageRegistry {
         extensions: ['md', 'markdown', 'mkd'],
         async load() {
           const m = await import('@codemirror/lang-markdown');
-          return m.markdown({ codeLanguages: this._modeList as any });
+          if (!findLanguage) {
+            return m.markdown();
+          }
+          return m.markdown({
+            codeLanguages: (info: string) => {
+              const language = findLanguage(info);
+              if (!language) {
+                return null;
+              }
+              if (language instanceof LanguageDescription) {
+                // Sometimes the IEditorLanguage returned is a
+                // LanguageDescription instance, so early return in this case.
+                return language;
+              }
+              return LanguageDescription.of(language);
+            }
+          });
         }
       },
       {

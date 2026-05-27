@@ -100,12 +100,16 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     this.console.executed.connect(this._onExecuted, this);
     this._updateTitlePanel();
-    sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
-    sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
+    if (!options.preventTitleUpdate) {
+      sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
+      sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
+    }
 
     this.title.icon = consoleIcon;
     this.title.closable = true;
     this.id = `console-${count}`;
+
+    this._preventTitleUpdate = options.preventTitleUpdate ?? false;
   }
 
   /**
@@ -164,13 +168,21 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Update the console panel title.
    */
   private _updateTitlePanel(): void {
-    Private.updateTitle(this, this._connected, this._executed, this.translator);
+    if (!this._preventTitleUpdate) {
+      Private.updateTitle(
+        this,
+        this._connected,
+        this._executed,
+        this.translator
+      );
+    }
   }
 
   translator: ITranslator;
   private _executed: Date | null = null;
   private _connected: Date | null = null;
   private _sessionContext: ISessionContext;
+  private _preventTitleUpdate: boolean = false;
 }
 
 /**
@@ -250,6 +262,11 @@ export namespace ConsolePanel {
      * A function to call when the kernel is busy.
      */
     setBusy?: () => IDisposable;
+
+    /**
+     * Whether to update the panel title on kernel/cell events or not.
+     */
+    preventTitleUpdate?: boolean;
   }
 
   /**

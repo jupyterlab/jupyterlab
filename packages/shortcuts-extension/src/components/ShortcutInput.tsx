@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from 'react';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -366,8 +367,8 @@ export class ShortcutInput extends React.Component<
               this.state.selected && this._isReplacingExistingKeybinding
                 ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
                 : this.state.value === ''
-                ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
-                : 'jp-Shortcuts-InputText'
+                  ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
+                  : 'jp-Shortcuts-InputText'
             }
           >
             {this.state.value === ''
@@ -380,8 +381,8 @@ export class ShortcutInput extends React.Component<
             !this.state.isFunctional
               ? 'jp-Shortcuts-Submit jp-mod-defunc-Submit'
               : !this.state.isAvailable
-              ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
-              : 'jp-Shortcuts-Submit'
+                ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
+                : 'jp-Shortcuts-Submit'
           }
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={this.handleSubmit}

@@ -186,9 +186,7 @@ describe('terminal/index', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).toContain('onUpdateRequest');
-        expect(widget.node.firstElementChild!.classList).toContain(
-          'jp-Terminal-body'
-        );
+        expect(widget.node.querySelector('.jp-Terminal-body')).not.toBeNull();
       });
     });
 

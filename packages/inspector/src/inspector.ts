@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Printing } from '@jupyterlab/apputils';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -45,9 +46,7 @@ export class InspectorPanel
         `<p>${options.initialContent}</p>`
       );
     } else {
-      const placeholderHeadline = `<h3>${this._trans.__(
-        'No Documentation'
-      )}</h3>`;
+      const placeholderHeadline = `<h3>${this._trans.__('No Documentation')}</h3>`;
       const placeholderText = `<p>${this._trans.__(
         'Move the cursor to a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
       )}</p>`;

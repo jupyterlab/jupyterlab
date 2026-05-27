@@ -501,9 +501,7 @@ export namespace Licenses {
     }
 
     get title(): string {
-      return `${this._currentBundleName || ''} ${this._trans.__(
-        'Licenses'
-      )}`.trim();
+      return `${this._currentBundleName || ''} ${this._trans.__('Licenses')}`.trim();
     }
 
     /**

@@ -14,6 +14,7 @@
  * - simplified `YUndoManagerConfig` by removing public methods
  * - moved `_onStackItemAdded`, `_onStackItemPopped` and `_storeSelection` definitions out of constructor
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PluginValue, ViewUpdate } from '@codemirror/view';
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import { Facet } from '@codemirror/state';

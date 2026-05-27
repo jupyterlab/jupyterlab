@@ -183,8 +183,8 @@ class AvailableList extends VDomRenderer<PluginListModel> {
                                 'To enable/disable, please acknowledge the disclaimer.'
                               )
                           : row.enabled
-                          ? this.trans.__('Disable %1 plugin', row.id)
-                          : this.trans.__('Enable %1 plugin', row.id)
+                            ? this.trans.__('Disable %1 plugin', row.id)
+                            : this.trans.__('Enable %1 plugin', row.id)
                       }
                       onChange={(
                         event: React.ChangeEvent<HTMLInputElement>

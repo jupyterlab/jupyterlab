@@ -121,17 +121,20 @@ test.describe('Kernel', () => {
       await page.notebook.setCell(0, 'code', '%subshell');
       await page.notebook.runCell(0);
 
-      const output1 = notebook.locator('.jp-OutputArea-output').locator('pre');
-      const text1 = (await output1.innerText()).split('\n');
-
+      const notebookOutput = notebook
+        .locator('.jp-OutputArea-output')
+        .locator('pre');
       // Confirm that subshells are supported by %subshell printing something useful.
       // Subshell ID for this main shell is None, and no subshells have been created
       // yet so the subshell list is empty.
-      expect(text1[0]).toEqual('subshell id: None');
-      expect(text1[5]).toEqual('subshell list: []');
+      await expect(async () => {
+        const text = (await notebookOutput.innerText()).split('\n');
+        expect(text[0]).toEqual('subshell id: None');
+        expect(text[5]).toEqual('subshell list: []');
+      }).toPass();
 
       // Open subshell console
-      await output1.click({ button: 'right' });
+      await notebookOutput.click({ button: 'right' });
       await page
         .getByRole('menuitem', { name: 'New Subshell Console for Notebook' })
         .click();
@@ -149,18 +152,21 @@ test.describe('Kernel', () => {
         .fill('%subshell');
       await page.menu.clickMenuItem('Run>Run Cell (forced)');
 
+      let subshellId: string;
       // Confirm that this is a subshell using "subshell id" printed by %subshell magic
       // which will be something other than None (None means main shell not subshell).
       // The subshell ID should also be the one and only entry in the "subshell list",
       // and wrapped in quotes as it is a string.
-      const output2 = subshellConsole
+      const consoleOutput = subshellConsole
         .locator('.jp-OutputArea-output')
         .locator('pre');
-      const text2 = (await output2.innerText()).split('\n');
-      expect(text2[0]).toMatch(/^subshell id:/);
-      const subshellId = text2[0].split(':')[1].trim();
-      expect(subshellId).not.toEqual('None');
-      expect(text2[5]).toEqual(`subshell list: ['${subshellId}']`);
+      await expect(async () => {
+        const text = (await consoleOutput.innerText()).split('\n');
+        expect(text[0]).toMatch(/^subshell id:/);
+        subshellId = text[0].split(':')[1].trim();
+        expect(subshellId).not.toEqual('None');
+        expect(text[5]).toEqual(`subshell list: ['${subshellId}']`);
+      }).toPass();
 
       // Rerun %subshell in notebook now that subshell exists.
       await notebook
@@ -172,10 +178,11 @@ test.describe('Kernel', () => {
 
       // Confirm that the parent shell is still a parent shell (subshell ID is None),
       // and that the new subshell appears in the "subshell list".
-      const output3 = notebook.locator('.jp-OutputArea-output').locator('pre');
-      const text3 = (await output3.innerText()).split('\n');
-      expect(text3[0]).toEqual('subshell id: None');
-      expect(text3[5]).toEqual(`subshell list: ['${subshellId}']`);
+      await expect(async () => {
+        const text = (await notebookOutput.innerText()).split('\n');
+        expect(text[0]).toEqual('subshell id: None');
+        expect(text[5]).toEqual(`subshell list: ['${subshellId}']`);
+      }).toPass();
     });
   });
 
@@ -236,7 +243,7 @@ test.describe('Kernel', () => {
     await statusBar.getByText('Idle').waitFor();
 
     // Execute the long running cell without waiting
-    void page.notebook.runCell(0);
+    await page.notebook.runCell(0, { wait: false });
     await statusBar.getByText('Busy').waitFor();
 
     await page.menu.clickMenuItem('File>New>Notebook');

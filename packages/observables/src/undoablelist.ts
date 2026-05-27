@@ -298,9 +298,9 @@ export namespace ObservableUndoableList {
   /**
    * A default, identity serializer.
    */
-  export class IdentitySerializer<T extends JSONValue>
-    implements ISerializer<T>
-  {
+  export class IdentitySerializer<
+    T extends JSONValue
+  > implements ISerializer<T> {
     /**
      * Identity serialize.
      */

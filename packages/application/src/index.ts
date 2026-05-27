@@ -6,11 +6,8 @@
  */
 
 export { ConnectionLost } from './connectionlost';
-export {
-  JupyterFrontEnd,
-  JupyterFrontEndContextMenu,
-  JupyterFrontEndPlugin
-} from './frontend';
+export { JupyterFrontEnd, JupyterFrontEndContextMenu } from './frontend';
+export type { JupyterFrontEndPlugin } from './frontend';
 export { JupyterLab } from './lab';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 export {

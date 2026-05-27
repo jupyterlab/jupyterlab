@@ -2,6 +2,7 @@
 coverage/
 .eslintcache
 .stylelintcache
+.prettiercache
 
 dev_mode/listings
 dev_mode/schemas

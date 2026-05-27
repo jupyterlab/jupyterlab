@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   deleteLine,
@@ -46,6 +47,10 @@ namespace CommandIDs {
   export const unfoldSubregions = 'codemirror:unfold-subregions';
   export const foldAll = 'codemirror:fold-all';
   export const unfoldAll = 'codemirror:unfold-all';
+}
+
+function toggleBlockCommentWithFallback(view: EditorView): boolean {
+  return toggleBlockComment(view) || toggleComment(view);
 }
 
 /**
@@ -219,7 +224,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.toggleBlockComment, {
       label: trans.__('Toggle Block Comment'),
       caption: trans.__(
-        'Toggles block comments in languages which support it (e.g. C, JavaScript)'
+        'Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable'
       ),
       describedBy: {
         args: {
@@ -232,7 +237,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         if (!view) {
           return;
         }
-        toggleBlockComment(view);
+        toggleBlockCommentWithFallback(view);
       },
       isEnabled
     });

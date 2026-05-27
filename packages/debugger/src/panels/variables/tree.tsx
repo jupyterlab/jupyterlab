@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -368,7 +369,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       }}
     >
       <span className="jp-DebuggerVariables-name">{variable.name}</span>
-      {details && (
+      {details != null && (
         <span className="jp-DebuggerVariables-detail">{details}</span>
       )}
       {hasMimeRenderer && showDetailsButton && (

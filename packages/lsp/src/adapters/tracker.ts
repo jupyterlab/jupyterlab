@@ -16,8 +16,7 @@ import type { IShell, IWidgetLSPAdapterTracker } from '../tokens';
  */
 export class WidgetLSPAdapterTracker<
   T extends WidgetLSPAdapter = WidgetLSPAdapter
-> implements IWidgetLSPAdapterTracker<T>
-{
+> implements IWidgetLSPAdapterTracker<T> {
   /**
    * Create a new widget tracker.
    *

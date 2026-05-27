@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module shortcuts-extension
@@ -9,6 +10,8 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { IFormRenderer } from '@jupyterlab/ui-components';
@@ -23,11 +26,12 @@ import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
-import { CommandIDs } from './types';
-import { renderShortCut } from './renderer';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+
+import { renderShortCut } from './renderer';
+import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
+import { CommandIDs } from './types';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
@@ -35,7 +39,8 @@ function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator,
-  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>,
+  editorFactory?: CodeEditor.Factory
 ): IShortcutUI.IExternalBundle {
   return {
     translator,
@@ -44,7 +49,8 @@ function getExternalForJupyterLab(
         ISettingRegistry.ISettings<IShortcutsSettingsLayout>
       >,
     commandRegistry: app.commands,
-    actionRequested
+    actionRequested,
+    editorFactory
   };
 }
 
@@ -81,12 +87,13 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
   id: SHORTCUT_PLUGIN_ID,
   description: 'Adds the keyboard shortcuts editor.',
   requires: [ISettingRegistry],
-  optional: [ITranslator, IFormRendererRegistry],
+  optional: [ITranslator, IFormRendererRegistry, IEditorServices],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator | null,
-    editorRegistry: IFormRendererRegistry | null
+    editorRegistry: IFormRendererRegistry | null,
+    editorServices: IEditorServices | null
   ) => {
     const translator_ = translator ?? nullTranslator;
     const trans = translator_.load('jupyterlab');
@@ -206,6 +213,10 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      const editorFactory: CodeEditor.Factory | undefined = editorServices
+        ? options => editorServices.factoryService.newInlineEditor(options)
+        : undefined;
+
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
           return renderShortCut({
@@ -213,7 +224,8 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
               registry,
               app,
               translator_,
-              actionRequested
+              actionRequested,
+              editorFactory
             ),
             ...props
           });

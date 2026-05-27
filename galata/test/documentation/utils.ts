@@ -142,3 +142,23 @@ export async function freeezeKernelIds(
     [KERNEL_ID_SELECTOR, mockMap]
   );
 }
+
+export async function setTerminalTitle(page: Page, title: string) {
+  const terminal = page.locator('.jp-Terminal-body');
+  await terminal.waitFor();
+  await terminal.focus();
+  if (process.platform === 'win32') {
+    const escapedTitle = title.replace(/"/g, '""').replace(/'/g, "''");
+    // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe
+    await page.keyboard.type(
+      `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`
+    );
+  } else {
+    // Linux and Mac
+    const escapedTitle = title.replace(/'/g, `'\\''`);
+    await page.keyboard.type(
+      `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`
+    );
+  }
+  await page.keyboard.press('Enter');
+}

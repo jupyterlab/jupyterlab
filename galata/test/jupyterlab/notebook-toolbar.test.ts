@@ -72,10 +72,7 @@ async function addWidgetsInNotebookToolbar(
 test.describe('Notebook Toolbar', () => {
   test.use({
     mockSettings: {
-      ...galata.DEFAULT_SETTINGS,
-      '@jupyterlab/notebook-extension:tracker': {
-        useSystemClipboardForCells: true
-      }
+      ...galata.DEFAULT_SETTINGS
     }
   });
 
@@ -161,6 +158,58 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.selectCells(2);
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+});
+
+test.describe('Notebook Toolbar using system clipboard', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        useSystemClipboardForCells: true
+      }
+    }
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+    await populateNotebook(page);
+  });
+
+  test('Copy-Paste cell', async ({ page }) => {
+    const imageName = 'copy-paste-cell.png';
+    await page.notebook.selectCells(2);
+    await page.notebook.clickToolbarItem('copy');
+    await page.notebook.selectCells(0);
+    await page.notebook.clickToolbarItem('paste');
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Cut cell', async ({ page }) => {
+    const imageName = 'cut-cell.png';
+    await page.notebook.selectCells(1);
+    await page.notebook.clickToolbarItem('cut');
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Paste cell', async ({ page }) => {
+    // Cut cell to populate clipboard
+    await page.notebook.selectCells(0);
+    await page.notebook.clickToolbarItem('cut');
+
+    const imageName = 'paste-cell.png';
+    await page.notebook.selectCells(1);
+    await page.notebook.clickToolbarItem('paste');
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+
+    await expect(
+      page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    ).toBeVisible();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
@@ -349,6 +398,10 @@ test.describe('Reactive toolbar', () => {
     const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
     await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
 
+    // Wait for bug button to settle before taking a snapshot
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
     expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
   });
 });

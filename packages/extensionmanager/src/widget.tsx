@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
@@ -367,6 +368,7 @@ class Header extends ReactWidget {
           )}
         </div>
         <FilterBox
+          initialQuery={this.model.query || undefined}
           placeholder={this.trans.__('Search extensions')}
           disabled={!this.model.isDisclaimed}
           updateFilter={(fn, query) => {
@@ -495,7 +497,7 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -600,7 +602,7 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -768,6 +770,24 @@ export class ExtensionsPanel extends SidePanel {
       }
     }
     super.onActivateRequest(msg);
+  }
+
+  /**
+   * Set the search query programmatically.
+   *
+   * @param query - The search query string.
+   */
+  setQuery(query: string): void {
+    const input = this._searchInputRef.current;
+    if (input) {
+      // Update the search input value and dispatch an event so that
+      // FilterBox's internal state and the model stay in sync.
+      input.value = query;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      // Fallback when the search input has not rendered yet.
+      this.model.query = query;
+    }
   }
 
   private _onStateChanged(): void {

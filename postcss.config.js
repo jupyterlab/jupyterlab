@@ -9,6 +9,7 @@
 const plugin = () => {
   return {
     postcssPlugin: 'no-op',
+    // eslint-disable-next-line no-unused-vars
     Once(root) {
       // no-op plugin
     }

@@ -29,11 +29,6 @@ test.describe('ToC Running indicator', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should display running indicators', async ({ page }) => {
     const tocPanel = page.sidebar.getContentPanelLocator(
       (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
@@ -79,6 +74,7 @@ test.describe('ToC Running indicator', () => {
     await expect(
       tocPanel.getByTitle('Title 1', { exact: true })
     ).toHaveAttribute('data-running', '1');
+
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'
     );

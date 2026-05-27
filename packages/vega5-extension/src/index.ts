@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module vega5-extension
@@ -147,8 +148,8 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       typeof embedOptions.scaleFactor === 'number'
         ? embedOptions.scaleFactor
         : embedOptions.scaleFactor
-        ? (embedOptions.scaleFactor as any).png
-        : embedOptions.scaleFactor
+          ? (embedOptions.scaleFactor as any).png
+          : embedOptions.scaleFactor
     );
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }

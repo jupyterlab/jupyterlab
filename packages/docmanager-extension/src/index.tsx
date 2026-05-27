@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module docmanager-extension
@@ -152,7 +153,7 @@ const contextsPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     widgetOpener: IDocumentWidgetOpener,
-    status: ILabStatus
+    status: ILabStatus | null
   ) => {
     const contexts = new WeakSet<DocumentRegistry.Context>();
     widgetOpener.opened.connect((_, widget) => {
