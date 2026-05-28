@@ -2539,7 +2539,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   /**
    * Update the markdown editor placeholder for notebook mode.
    */
-  setEditorPlaceholderMode(mode: 'command' | 'edit'): void {
+  private setEditorPlaceholderMode(mode: 'command' | 'edit'): void {
     if (this._placeholderMode !== mode) {
       this._placeholderMode = mode;
     }
