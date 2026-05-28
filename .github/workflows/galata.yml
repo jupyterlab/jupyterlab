@@ -77,7 +77,7 @@ jobs:
       - name: Collect modified Galata test files
         if: ${{ github.event_name == 'pull_request' }}
         id: modified-tests
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const files = await github.paginate(github.rest.pulls.listFiles, {
