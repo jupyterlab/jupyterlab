@@ -27,6 +27,17 @@ const styleGradientIcon = new LabIcon({
   svgstr: styleGradientSvgstr
 });
 
+const styleSelectorSvgstr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>#gradient0 stop:first-child{stop-color:#123}.a{fill:url(#gradient0)}</style>
+<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
+<rect class="a" width="10" height="10"/>
+</svg>`;
+
+const styleSelectorIcon = new LabIcon({
+  name: 'test-ui-components:style-selector',
+  svgstr: styleSelectorSvgstr
+});
+
 describe('@jupyterlab/ui-components', () => {
   describe('svg import', () => {
     it('should hold a string with the raw contents of an svg', () => {
@@ -98,6 +109,27 @@ describe('@jupyterlab/ui-components', () => {
         expect(secondStyle.styleText).toContain(
           `url(#${secondStyle.gradientId})`
         );
+      });
+
+      it('should rewrite inline style ID selectors when ids are uniquified', () => {
+        const firstSvg = styleSelectorIcon.element({ tag: null });
+        const secondSvg = styleSelectorIcon.element({ tag: null });
+        const first = getStyleGradientData(firstSvg);
+        const second = getStyleGradientData(secondSvg);
+
+        expect(first.styleText).toContain(
+          `#${first.gradientId} stop:first-child`
+        );
+        expect(first.styleText).toContain(`url(#${first.gradientId})`);
+        expect(first.styleText).toContain('stop-color:#123');
+        expect(first.styleText).not.toContain('#gradient0 stop:first-child');
+
+        expect(second.styleText).toContain(
+          `#${second.gradientId} stop:first-child`
+        );
+        expect(second.styleText).toContain(`url(#${second.gradientId})`);
+        expect(second.styleText).toContain('stop-color:#123');
+        expect(second.styleText).not.toContain('#gradient0 stop:first-child');
       });
 
       it('should create unique ids for each React render', () => {
