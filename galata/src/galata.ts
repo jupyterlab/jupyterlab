@@ -464,7 +464,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Sessions API
@@ -473,7 +473,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const sessions = /.*\/api\/sessions(?<id>\/[@:-\w]+)?/;
+    export const sessions = /.*\/api\/sessions(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Settings API
@@ -482,7 +482,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const settings = /.*\/api\/settings(?<id>(\/[@:-\w]+)*)/;
+    export const settings = /.*\/api\/settings(?<id>(\/[@:\-\w]+)*)/;
 
     /**
      * Terminals API
@@ -491,7 +491,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const terminals = /.*\/api\/terminals(?<id>\/[@:-\w]+)?/;
+    export const terminals = /.*\/api\/terminals(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Translations API
@@ -500,7 +500,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const translations = /.*\/api\/translations(?<id>\/[@:-\w]+)?/;
+    export const translations = /.*\/api\/translations(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Workspaces API

@@ -32,6 +32,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -46,6 +47,13 @@ namespace CommandIDs {
   export const showPanel = 'toc:show-panel';
 
   export const toggleCollapse = 'toc:toggle-collapse';
+}
+
+/**
+ * A namespace for toolbar item IDs of table of contents plugin.
+ */
+namespace ToolbarItemIDs {
+  export const collapseAll = 'collapse-all';
 }
 
 /**
@@ -268,7 +276,7 @@ async function activateTOC(
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
   toc.toolbar.addItem(
-    'collapse-all',
+    ToolbarItemIDs.collapseAll,
     new CommandToolbarButton({
       commands: app.commands,
       id: CommandIDs.toggleCollapse,
@@ -299,6 +307,9 @@ async function activateTOC(
 
   // Add the ToC to the left area:
   app.shell.add(toc, 'left', { rank: 400, type: 'Table of Contents' });
+
+  // Keep track of factory items to dispose them
+  let factoryToolbarItems: IDisposable[] = [];
 
   // Update the ToC when the active widget changes:
   if (labShell) {
@@ -344,6 +355,26 @@ async function activateTOC(
       toc.model.headingsChanged.connect(onCollapseChange);
       toc.model.collapseChanged.connect(onCollapseChange);
     }
+
+    // Clean up previous factory items
+    factoryToolbarItems.forEach(item => {
+      item.dispose();
+    });
+    factoryToolbarItems = [];
+
+    const toolbarItems = tocRegistry.getToolbarItems?.(widget);
+
+    if (toolbarItems) {
+      toolbarItems.forEach(item => {
+        toc.toolbar.insertBefore(
+          ToolbarItemIDs.collapseAll,
+          `toc-item-${item.name}`,
+          item.widget
+        );
+        factoryToolbarItems.push(item.widget);
+      });
+    }
+
     setToolbarButtonsState();
   }
 
