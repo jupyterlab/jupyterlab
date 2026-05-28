@@ -749,7 +749,7 @@ export namespace LabIcon {
 }
 
 namespace Private {
-  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^'" )]+)\1\s*\)/g;
+  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'" )]+)\1\s*\)/g;
   const URL_ID_CANDIDATE = 'url(';
   const ID_SELECTOR_REFERENCE_TEMPLATE = (id: string) =>
     new RegExp(`(^|[\\s>+~,(])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`, 'gm');
