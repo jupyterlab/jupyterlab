@@ -92,6 +92,15 @@ export namespace IParser {
      * first row.
      */
     ncols?: number;
+
+    /**
+     * The comment character to ignore lines.
+     *
+     * #### Notes
+     * If defined, lines that start with this character are treated as comments
+     * and skipped.
+     */
+    comment?: string;
   }
 
   /**
@@ -161,7 +170,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     startIndex = 0,
     maxRows = 0xffffffff,
     rowDelimiter = '\r\n',
-    quote = '"'
+    quote = '"',
+    comment
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -219,6 +229,18 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
       // Start a new row and reset the column counter.
       offsets.push(i);
       col = 1;
+
+      // If we have a comment character and this line starts with it,
+      // skip to the next line.
+      if (comment !== undefined && data.charCodeAt(i) === comment.charCodeAt(0)) {
+        offsets.pop();
+        const delimIndex = data.indexOf(rowDelimiter, i);
+        if (delimIndex < 0) {
+          break;
+        }
+        i = delimIndex + rowDelimiterLength;
+        continue;
+      }
     }
 
     // Below, we handle this character, modify the parser state and increment the index to be consistent.
@@ -494,7 +516,8 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     delimiter = ',',
     rowDelimiter = '\r\n',
     startIndex = 0,
-    maxRows = 0xffffffff
+    maxRows = 0xffffffff,
+    comment
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -521,6 +544,16 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
 
   // Loop through rows until we run out of data or we've reached maxRows.
   while (nextRow !== -1 && nrows < maxRows && currRow < len) {
+    // If this line starts with the comment character, skip it.
+    if (comment !== undefined && data.charCodeAt(currRow) === comment.charCodeAt(0)) {
+      nextRow = data.indexOf(rowDelimiter, currRow);
+      if (nextRow === -1) {
+        break;
+      }
+      currRow = nextRow + rowDelimiterLength;
+      continue;
+    }
+
     // Store the offset for the beginning of the row and increment the rows.
     offsets.push(currRow);
     nrows++;

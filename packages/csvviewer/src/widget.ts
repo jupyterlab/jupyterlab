@@ -322,6 +322,20 @@ export class CSVViewer extends Widget {
   }
 
   /**
+   * The comment character for the file.
+   */
+  get comment(): string | undefined {
+    return this._comment;
+  }
+  set comment(value: string | undefined) {
+    if (value === this._comment) {
+      return;
+    }
+    this._comment = value;
+    void this._updateGrid();
+  }
+
+  /**
    * The style used by the data grid.
    */
   get style(): DataGridModule.DataGrid.Style {
@@ -382,7 +396,8 @@ export class CSVViewer extends Widget {
     const oldModel = this._grid.dataModel as DSVModelModule.DSVModel;
     const dataModel = (this._grid.dataModel = new DSVModel({
       data,
-      delimiter
+      delimiter,
+      comment: this._comment
     }));
     this._grid.selectionModel = new BasicSelectionModel({ dataModel });
     if (oldModel) {
@@ -421,6 +436,7 @@ export class CSVViewer extends Widget {
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
     null;
   private _delimiter = ',';
+  private _comment: string | undefined;
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
   private _ready: Promise<void>;
@@ -446,13 +462,16 @@ export namespace CSVViewer {
  */
 export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
   constructor(options: CSVDocumentWidget.IOptions) {
-    let { content, context, delimiter, reveal, ...other } = options;
+    let { content, context, delimiter, comment, reveal, ...other } = options;
     content = content || Private.createContent(context);
     reveal = Promise.all([reveal, content.revealed]);
     super({ content, context, reveal, ...other });
 
     if (delimiter) {
       content.delimiter = delimiter;
+    }
+    if (comment) {
+      content.comment = comment;
     }
   }
 
@@ -492,6 +511,11 @@ export namespace CSVDocumentWidget {
      * Data delimiter character
      */
     delimiter?: string;
+
+    /**
+     * Comment character to skip lines
+     */
+    comment?: string;
   }
 }
 

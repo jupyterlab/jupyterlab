@@ -49,13 +49,15 @@ export class DSVModel extends DataModel implements IDisposable {
       quote = '"',
       quoteParser = undefined,
       header = true,
-      initialRows = 500
+      initialRows = 500,
+      comment
     } = options;
     this._rawData = data;
     this._delimiter = delimiter;
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
     this._initialRows = initialRows;
+    this._comment = comment;
 
     // Guess the row delimiter if it was not supplied. This will be fooled if a
     // different line delimiter possibility appears in the first row.
@@ -303,7 +305,8 @@ export class DSVModel extends DataModel implements IDisposable {
         columnOffsets: true,
         maxRows: maxRows,
         ncols: ncols,
-        startIndex: this._rowOffsets[row]
+        startIndex: this._rowOffsets[row],
+        comment: this._comment
       });
 
       // Copy results to the cache.
@@ -417,7 +420,8 @@ export class DSVModel extends DataModel implements IDisposable {
         rowDelimiter: this._rowDelimiter,
         quote: this._quote,
         columnOffsets: true,
-        maxRows: 1
+        maxRows: 1,
+        comment: this._comment
       }).ncols;
     }
 
@@ -433,7 +437,8 @@ export class DSVModel extends DataModel implements IDisposable {
       rowDelimiter: this._rowDelimiter,
       quote: this._quote,
       columnOffsets: false,
-      maxRows: endRow - this._rowCount! + reparse
+      maxRows: endRow - this._rowCount! + reparse,
+      comment: this._comment
     });
 
     // If we have already set up our initial bookkeeping, return early if we
@@ -632,6 +637,7 @@ export class DSVModel extends DataModel implements IDisposable {
   private _quoteEscaped: RegExp;
   private _parser: 'quotes' | 'noquotes';
   private _rowDelimiter: string;
+  private _comment: string | undefined;
 
   // Data values
   private _rawData: string;
@@ -737,5 +743,14 @@ export namespace DSVModel {
      * full parse of the data. This should be greater than 0.
      */
     initialRows?: number;
+
+    /**
+     * The comment character to ignore lines.
+     *
+     * #### Notes
+     * If defined, lines that start with this character are treated as comments
+     * and skipped.
+     */
+    comment?: string;
   }
 }
