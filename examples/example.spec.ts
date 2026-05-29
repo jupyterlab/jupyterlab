@@ -35,6 +35,13 @@ test('should load the example', async ({ page }) => {
   page.on('console', handleMessage);
 
   await page.goto(URL);
+  await page.addStyleTag({
+    content: `
+      .cm-cursor {
+        visibility: hidden !important;
+      }
+    `
+  });
 
   await expect.soft(page.locator('#jupyter-config-data')).toHaveCount(1);
 

@@ -41,7 +41,7 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
 /**
  * Define an IPython mathematical expression parser for Markdown.
  *
- * @param latexParser CodeMirror {@link Parser} for LaTeX mathematical expression
+ * @param latexParser CodeMirror parser for LaTeX mathematical expression
  * @returns Markdown extension
  */
 export function parseMathIPython(latexParser?: Parser): MarkdownConfig {

@@ -282,7 +282,7 @@ def ensure_app(app_dir):
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jlpm run build:core` then `jupyter lab build` ",
+        "Please run `jlpm build:core` then `jupyter lab build` ",
         "or use a different app directory",
     ]
     return msgs
@@ -1388,7 +1388,7 @@ class _AppHandler:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in [".yarnrc.yml", "yarn.js"]:
+        for fname in [".yarnrc.yml"]:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, "staging", fname), target)
 

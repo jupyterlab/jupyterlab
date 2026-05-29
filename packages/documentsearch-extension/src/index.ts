@@ -182,7 +182,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    palette: ICommandPalette,
+    palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null
   ) => {
     const trans = translator.load('jupyterlab');
