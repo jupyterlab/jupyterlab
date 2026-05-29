@@ -39,13 +39,19 @@
   "dependencies": {
     "@jupyterlab/application": "^4.7.0-alpha.2",
     "@jupyterlab/apputils": "^4.8.0-alpha.2",
+    "@jupyterlab/codeeditor": "^4.7.0-alpha.2",
+    "@jupyterlab/codemirror": "^4.7.0-alpha.2",
     "@jupyterlab/coreutils": "^6.7.0-alpha.2",
+    "@jupyterlab/docregistry": "^4.7.0-alpha.2",
     "@jupyterlab/documentsearch": "^4.7.0-alpha.2",
+    "@jupyterlab/fileeditor": "^4.7.0-alpha.2",
     "@jupyterlab/markdownviewer": "^4.7.0-alpha.2",
     "@jupyterlab/rendermime": "^4.7.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.7.0-alpha.2",
     "@jupyterlab/toc": "^6.7.0-alpha.2",
-    "@jupyterlab/translation": "^4.7.0-alpha.2"
+    "@jupyterlab/translation": "^4.7.0-alpha.2",
+    "@lumino/disposable": "^2.1.6",
+    "@lumino/signaling": "^2.1.6"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
