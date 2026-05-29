@@ -83,15 +83,17 @@ test.describe('General', () => {
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowUp');
 
-    await cell.click();
-    await page.keyboard.press('ContextMenu');
-    await page.click('text=Create New View for Cell Output');
-
-    // wait for the debugger bug icon to settle (needs to be before drag-and-drop)
+    // Wait for the debugger bug icon to settle.
+    // This needs to be before switching to a different panel, whether via
+    // drag-and-drop or opening a new view as otherwise the icon does not update.
     const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
     await panel
       .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
       .waitFor();
+
+    await cell.click();
+    await page.keyboard.press('ContextMenu');
+    await page.click('text=Create New View for Cell Output');
 
     // Emulate drag and drop
     const viewerHandle = page.locator(
