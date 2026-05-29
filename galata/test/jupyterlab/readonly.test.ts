@@ -17,6 +17,13 @@ test.describe('test readonly status', () => {
     // which adds a semi-transparent layer above the notification.
     await page.notebook.open('notebook.ipynb', { noKernel: true });
 
+    await page.notebook.addCell('code', '');
+    const notSavedIndicator = page
+      .getByRole('main')
+      .getByRole('tablist')
+      .locator('.jp-mod-dirty');
+    await notSavedIndicator.waitFor();
+
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
