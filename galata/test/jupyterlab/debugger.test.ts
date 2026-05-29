@@ -358,7 +358,6 @@ test.describe('Debugger Tests', () => {
       ).toHaveCount(0);
 
       await page.getByRole('menu').press('Escape');
-      await page.click('jp-button[title^=Continue]');
     });
 
     test('Copy to globals not available from kernel', async ({
@@ -396,12 +395,9 @@ test.describe('Debugger Tests', () => {
       await expect(
         page.getByRole('menuitem', { name: 'Copy to Clipboard' })
       ).toHaveCount(0);
-
-      await page.click('jp-button[title^=Continue]');
     });
 
     test('Copy to clipboard', async ({ page, tmpPath, browserName }) => {
-      test.skip(browserName === 'firefox', 'Flaky on Firefox');
       await init({ page, tmpPath });
 
       // Don't wait as it will be blocked.
@@ -434,8 +430,6 @@ test.describe('Debugger Tests', () => {
       await expect(
         page.getByRole('menuitem', { name: 'Copy to Clipboard' })
       ).toHaveCount(0);
-
-      await page.click('jp-button[title^=Continue]');
     });
 
     test('Kernel Sources panel updates after execute_reply', async ({
