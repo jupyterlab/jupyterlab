@@ -282,3 +282,67 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 ## Paste code cells without output
 
 When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+
+(notebook-links)=
+
+## How Links are Handled in Notebooks
+
+JupyterLab processes links in notebook Markdown cells through a combination of
+rendering, path resolution, and an optional link handler. This section describes
+how different types of links behave.
+
+### Markdown Links
+
+Links written in Markdown cells using standard Markdown syntax (e.g.
+`[text](path)`) or raw `<a>` tags are resolved as follows:
+
+- **Web URLs** (e.g. `https://example.com`, `http://localhost:8888`) open in a
+  new browser tab. They are rendered with `target="_blank"` and `rel="noopener"`
+  for security.
+- **Relative paths** (e.g. `./other-notebook.ipynb`,
+  `../data/results.csv`) are resolved relative to the notebook file's location
+  in the JupyterLab file system. When clicked, the link handler opens the target
+  file in JupyterLab (e.g. opening another notebook or a text editor).
+- **Absolute paths** (e.g. `/home/user/data.csv`) are treated as local file
+  paths and resolved through the Jupyter server. If the path maps to a resource
+  the server can serve, JupyterLab will attempt to open it.
+- **Anchor links** (e.g. `#my-heading`, `#cell-id=my-cell-id`) scroll to the
+  corresponding heading or cell within the same notebook. Headings are
+  automatically assigned anchor IDs when the Markdown cell is rendered. See
+  {ref}`Linking Notebook Sections <url-tree>` in the URLs documentation for
+  details.
+
+### Auto-linking
+
+JupyterLab automatically detects and links certain patterns in Markdown cell
+content, similar to how Visual Studio Code auto-links text:
+
+- **Web URLs** and `www.`-prefixed addresses are automatically converted to
+  clickable links that open in a new tab.
+- **File paths** (POSIX-style paths like `./file.py` or `~/project/data.csv`,
+  and Windows-style paths like `C:\project\file.py`) are automatically linked.
+  Clicking an auto-linked file path opens it in a JupyterLab editor.
+- Paths can include line and column specifiers (e.g. `./script.py:42:10`) to
+  scroll to a specific location in the opened file.
+
+### Internal vs External Links
+
+| Link Type | Example | Behavior |
+|---|---|---|
+| Web URL | `https://example.com` | Opens in new tab |
+| Relative file | `./notebook.ipynb` | Opens in JupyterLab |
+| Absolute file | `/home/user/data.csv` | Opens in JupyterLab if served |
+| Anchor | `#section-title` | Scrolls within notebook |
+| Auto-linked URL | `www.example.com` | Opens in new tab |
+| Auto-linked path | `./script.py:10` | Opens in JupyterLab editor |
+
+### Trust and Security
+
+Trusted and untrusted notebooks handle links differently:
+
+- In **trusted** notebooks, Markdown links and auto-links are fully functional.
+- In **non-trusted** notebooks, Markdown cells are sanitized, and links to local
+  files are disabled for security reasons. Web URLs remain functional even in
+  non-trusted notebooks.
+
+For more details about file URLs and workspace URLs, see {ref}`urls`.
