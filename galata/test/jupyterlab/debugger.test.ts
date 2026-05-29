@@ -139,11 +139,17 @@ for (const c of showSourcesCases) {
       await page.debugger.waitForCallStack();
 
       await page.debugger.waitForVariables();
+
+      // Wait for the expected global variable to render
+      await page
+        .getByRole('treeitem', { name: `${globalVar}:` })
+        .waitFor({ state: 'visible' });
+
       const variablesPanel = await page.debugger.getVariablesPanelLocator();
       const variablesBox = await variablesPanel.boundingBox();
 
       if (!c.expectSourcesPanel) {
-        /* Variables panel snapshot only when the sources panel is not displayed*/
+        /* Variables panel snapshot only when the sources panel is not displayed */
         expect
           .soft(variablesBox?.height)
           .toBeGreaterThan(
@@ -182,6 +188,7 @@ for (const c of showSourcesCases) {
       await page.debugger.waitForCallStack();
       await page.debugger.waitForVariables();
 
+      // Wait for the expected local variable to render
       await page
         .getByRole('treeitem', { name: `${localVar}:` })
         .waitFor({ state: 'visible' });
