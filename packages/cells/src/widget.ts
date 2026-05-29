@@ -639,6 +639,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
+
+    this.refreshTags();
   }
 
   /**
@@ -702,6 +704,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Refresh the data attribute for cell tags, allowing users to style
+   * cells via CSS using `[data-jp-tag~="tagname"]`.
+   */
+  protected refreshTags(): void {
+    if (this.placeholder) {
+      return;
+    }
+    const tags: string[] = (this.model.getMetadata('tags') as string[]) ?? [];
+    if (tags.length > 0) {
+      this.node.dataset.jpTag = tags.join(' ');
+    } else {
+      delete this.node.dataset.jpTag;
+    }
+  }
+
+  /**
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(model: CellModel, args: IMapChange): void {
@@ -715,6 +733,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
         if (this.syncEditable) {
           this.loadEditableState();
         }
+        break;
+      case 'tags':
+        this.refreshTags();
         break;
       default:
         break;
