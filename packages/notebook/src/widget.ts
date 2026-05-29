@@ -2097,13 +2097,19 @@ export class Notebook extends StaticNotebook {
     if (from > to) {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to + idx]);
+          const widget = this.widgets[to + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     } else {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to - n + 1 + idx]);
+          const widget = this.widgets[to - n + 1 + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     }
