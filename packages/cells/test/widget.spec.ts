@@ -1096,9 +1096,6 @@ describe('cells/widget', () => {
 
       it('should show markdown help placeholder in edit mode', async () => {
         const model = new MarkdownCellModel();
-        const host = document.createElement('div');
-        host.classList.add('jp-Notebook', 'jp-mod-editMode');
-        document.body.appendChild(host);
         const widget = new MarkdownCell({
           model,
           rendermime,
@@ -1106,25 +1103,19 @@ describe('cells/widget', () => {
           placeholder: false
         });
         widget.initializeState();
-        Widget.attach(widget, host);
-        widget.addClass('jp-mod-active');
+        Widget.attach(widget, document.body);
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
-        widget.setEditorPlaceholderMode('edit');
         widget.editor!.focus();
         await framePromise();
         const placeholder = widget.node.querySelector('.cm-placeholder');
         expect(placeholder?.textContent).toBe(
           'You can use Markdown and LaTeX: $ α^2 $'
         );
-        host.remove();
       });
 
       it('should not show a placeholder in command mode', async () => {
         const model = new MarkdownCellModel();
-        const host = document.createElement('div');
-        host.classList.add('jp-Notebook', 'jp-mod-commandMode');
-        document.body.appendChild(host);
         const widget = new MarkdownCell({
           model,
           rendermime,
@@ -1132,16 +1123,12 @@ describe('cells/widget', () => {
           placeholder: false
         });
         widget.initializeState();
-        Widget.attach(widget, host);
-        widget.addClass('jp-mod-active');
+        Widget.attach(widget, document.body);
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
-        widget.setEditorPlaceholderMode('command');
-        widget.editor!.focus();
         await framePromise();
         const placeholder = widget.node.querySelector('.cm-placeholder');
         expect(placeholder).toBeNull();
-        host.remove();
       });
     });
 

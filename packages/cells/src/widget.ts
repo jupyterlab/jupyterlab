@@ -2487,17 +2487,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   protected showEditor(): void {
     this.removeClass(RENDERED_CLASS);
     if (!this.placeholder && !this.isDisposed) {
-      const notebook = this.node.closest('.jp-Notebook');
-      if (!notebook) {
-        this.setEditorPlaceholderMode('edit');
-      } else {
-        this.setEditorPlaceholderMode(
-          notebook.classList.contains('jp-mod-editMode') &&
-            this.node.classList.contains('jp-mod-active')
-            ? 'edit'
-            : 'command'
-        );
-      }
       this.inputArea!.showEditor();
       this._updateEditorPlaceholder();
       // if this is going to be a heading, place the cursor accordingly
@@ -2534,16 +2523,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       })
     ];
     return base;
-  }
-
-  /**
-   * Update the markdown editor placeholder for notebook mode.
-   */
-  setEditorPlaceholderMode(mode: 'command' | 'edit'): void {
-    if (this._placeholderMode !== mode) {
-      this._placeholderMode = mode;
-    }
-    this._updateEditorPlaceholder();
   }
 
   /*
@@ -2619,8 +2598,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (!editorView) {
       return;
     }
-    const placeholderText =
-      this._placeholderMode === 'edit' ? this._editModePlaceholder : null;
+    const placeholderText = this._shouldShowEditModePlaceholder(editorView)
+      ? this._editModePlaceholder
+      : null;
     if (placeholderText === this._activePlaceholderText) {
       return;
     }
@@ -2630,6 +2610,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         placeholderText === null ? [] : editorPlaceholder(placeholderText)
       )
     });
+  }
+
+  /**
+   * Whether the markdown help placeholder should be shown in the editor.
+   */
+  private _shouldShowEditModePlaceholder(view: EditorView): boolean {
+    return !this._rendered && view.hasFocus;
   }
 
   /**
@@ -2665,7 +2652,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
   private _placeholderCompartment = new Compartment();
-  private _placeholderMode: 'command' | 'edit' = 'command';
   private _placeholderEditorView: EditorView | null = null;
   private _activePlaceholderText: string | null = null;
   private _editModePlaceholder: string;
