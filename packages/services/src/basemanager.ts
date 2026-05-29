@@ -102,7 +102,7 @@ export abstract class BaseManager implements IManager {
 }
 
 /**
- * The namespace for `BaseManager` class statics.
+ * The namespace for `BaseManager` class statistics.
  */
 export namespace BaseManager {
   /**

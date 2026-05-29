@@ -44,7 +44,7 @@ export function GroupItem(
 }
 
 /**
- * A namespace for GroupItem statics.
+ * A namespace for GroupItem statistics.
  */
 export namespace GroupItem {
   /**

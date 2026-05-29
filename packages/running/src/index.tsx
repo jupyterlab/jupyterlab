@@ -747,7 +747,7 @@ export class Section extends PanelWithToolbar {
 }
 
 /**
- * Statics for Section.
+ * Statistics for Section.
  */
 namespace Section {
   /**
@@ -1207,7 +1207,7 @@ export class SearchableSessionsList extends Panel {
 }
 
 /**
- * The namespace for the `IRunningSessions` class statics.
+ * The namespace for the `IRunningSessions` class statistics.
  */
 export namespace IRunningSessions {
   /**

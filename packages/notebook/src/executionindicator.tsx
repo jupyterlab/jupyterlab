@@ -189,7 +189,7 @@ export function ExecutionIndicatorComponent(
 }
 
 /**
- * A namespace for ExecutionIndicatorComponent statics.
+ * A namespace for ExecutionIndicatorComponent statistics.
  */
 namespace ExecutionIndicatorComponent {
   /**
@@ -264,7 +264,7 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
 }
 
 /**
- * A namespace for ExecutionIndicator statics.
+ * A namespace for ExecutionIndicator statistics.
  */
 export namespace ExecutionIndicator {
   /**

@@ -102,7 +102,7 @@ export class KernelSourcesBody extends ReactWidget {
 }
 
 /**
- * A namespace for SourcesBody `statics`.
+ * A namespace for SourcesBody `statistics`.
  */
 export namespace KernelSourcesBody {
   /**

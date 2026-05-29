@@ -226,7 +226,7 @@ export class StateDB<
 }
 
 /**
- * A namespace for StateDB statics.
+ * A namespace for StateDB statistics.
  */
 export namespace StateDB {
   /**

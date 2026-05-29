@@ -1626,7 +1626,7 @@ export class Drive implements Contents.IDrive {
 }
 
 /**
- * A namespace for ContentsManager statics.
+ * A namespace for ContentsManager statistics.
  */
 export namespace ContentsManager {
   /**
@@ -1646,7 +1646,7 @@ export namespace ContentsManager {
 }
 
 /**
- * A namespace for Drive statics.
+ * A namespace for Drive statistics.
  */
 export namespace Drive {
   /**
@@ -1891,7 +1891,7 @@ export class RestContentProvider implements IContentProvider {
 }
 
 /**
- * The namespace for RestContentProvider statics.
+ * The namespace for RestContentProvider statistics.
  */
 export namespace RestContentProvider {
   /**

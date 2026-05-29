@@ -102,7 +102,7 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
 }
 
 /**
- * The namespace for the `renderHTML` function statics.
+ * The namespace for the `renderHTML` function statistics.
  */
 export namespace renderHTML {
   /**
@@ -202,7 +202,7 @@ export async function renderImage(
 }
 
 /**
- * The namespace for the `renderImage` function statics.
+ * The namespace for the `renderImage` function statistics.
  */
 export namespace renderImage {
   /**
@@ -277,7 +277,7 @@ export async function renderLatex(
 }
 
 /**
- * The namespace for the `renderLatex` function statics.
+ * The namespace for the `renderLatex` function statistics.
  */
 export namespace renderLatex {
   /**
@@ -357,7 +357,7 @@ export async function renderMarkdown(
 }
 
 /**
- * The namespace for the `renderMarkdown` function statics.
+ * The namespace for the `renderMarkdown` function statistics.
  */
 export namespace renderMarkdown {
   /**
@@ -469,7 +469,7 @@ export async function renderSVG(
 }
 
 /**
- * The namespace for the `renderSVG` function statics.
+ * The namespace for the `renderSVG` function statistics.
  */
 export namespace renderSVG {
   /**
@@ -935,7 +935,7 @@ function renderTextual(
 }
 
 /**
- * The namespace for the `renderText` function statics.
+ * The namespace for the `renderText` function statistics.
  */
 export namespace renderText {
   /**
@@ -1111,7 +1111,7 @@ function mergeNodes(
 }
 
 /**
- * The namespace for the `renderError` function statics.
+ * The namespace for the `renderError` function statistics.
  */
 export namespace renderError {
   /**

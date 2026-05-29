@@ -735,7 +735,7 @@ export class FileBrowserModel implements IDisposable {
 }
 
 /**
- * The namespace for the `FileBrowserModel` class statics.
+ * The namespace for the `FileBrowserModel` class statistics.
  */
 export namespace FileBrowserModel {
   /**

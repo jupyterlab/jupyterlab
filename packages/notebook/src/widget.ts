@@ -1193,7 +1193,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 }
 
 /**
- * The namespace for the `StaticNotebook` class statics.
+ * The namespace for the `StaticNotebook` class statistics.
  */
 export namespace StaticNotebook {
   /**
@@ -3660,7 +3660,7 @@ export class Notebook extends StaticNotebook {
 }
 
 /**
- * The namespace for the `Notebook` class statics.
+ * The namespace for the `Notebook` class statistics.
  */
 export namespace Notebook {
   /**

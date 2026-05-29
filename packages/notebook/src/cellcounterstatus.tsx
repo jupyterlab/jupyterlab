@@ -19,7 +19,7 @@ import React from 'react';
 import type { Notebook } from '.';
 
 /**
- * A namespace for CellNumberFormComponent statics.
+ * A namespace for CellNumberFormComponent statistics.
  */
 namespace CellNumberFormComponent {
   /**
@@ -353,7 +353,7 @@ export class CellCounterStatus extends VDomRenderer<CellCounterStatus.Model> {
 }
 
 /**
- * A namespace for CellCounterStatus statics.
+ * A namespace for CellCounterStatus statistics.
  */
 export namespace CellCounterStatus {
   /**

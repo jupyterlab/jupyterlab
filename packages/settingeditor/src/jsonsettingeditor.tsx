@@ -326,7 +326,7 @@ export class JsonSettingEditor extends SplitPanel {
 }
 
 /**
- * A namespace for `JsonSettingEditor` statics.
+ * A namespace for `JsonSettingEditor` statistics.
  */
 export namespace JsonSettingEditor {
   /**

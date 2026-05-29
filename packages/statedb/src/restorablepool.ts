@@ -346,7 +346,7 @@ export class RestorablePool<
 }
 
 /**
- * A namespace for `RestorablePool` statics.
+ * A namespace for `RestorablePool` statistics.
  */
 export namespace RestorablePool {
   /**

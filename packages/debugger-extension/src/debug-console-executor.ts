@@ -99,7 +99,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
 }
 
 /**
- * A namespace for DebugConsoleCellExecutor statics.
+ * A namespace for DebugConsoleCellExecutor statistics.
  */
 export namespace DebugConsoleCellExecutor {
   /**

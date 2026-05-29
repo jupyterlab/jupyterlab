@@ -31,7 +31,7 @@ describe('csvviewer/toolbar', () => {
         widget.dispose();
       });
 
-      it('should allow pre-selecting the delimiter', () => {
+      it('should allow preselecting the delimiter', () => {
         const wanted = (delimiter = DELIMITERS[DELIMITERS.length - 1]);
         const widget = new CSVDelimiter({ widget: mockViewer() });
         expect(widget.selectNode.value).toBe(wanted);

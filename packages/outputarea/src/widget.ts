@@ -917,7 +917,7 @@ export class SimplifiedOutputArea extends OutputArea {
 }
 
 /**
- * A namespace for OutputArea statics.
+ * A namespace for OutputArea statistics.
  */
 export namespace OutputArea {
   /**

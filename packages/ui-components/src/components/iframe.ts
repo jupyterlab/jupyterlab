@@ -98,7 +98,7 @@ export class IFrame extends Widget {
 }
 
 /**
- * A namespace for IFrame widget statics.
+ * A namespace for IFrame widget statistics.
  */
 export namespace IFrame {
   /**

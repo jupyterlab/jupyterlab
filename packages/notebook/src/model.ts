@@ -497,7 +497,7 @@ close the notebook without saving it.`,
 }
 
 /**
- * The namespace for the `NotebookModel` class statics.
+ * The namespace for the `NotebookModel` class statistics.
  */
 export namespace NotebookModel {
   /**

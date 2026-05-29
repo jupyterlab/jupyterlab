@@ -147,7 +147,7 @@ export class KernelSpecManager
 }
 
 /**
- * The namespace for `KernelManager` class statics.
+ * The namespace for `KernelManager` class statistics.
  */
 export namespace KernelSpecManager {
   /**

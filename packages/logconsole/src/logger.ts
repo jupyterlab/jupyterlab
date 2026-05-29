@@ -412,7 +412,7 @@ export class Logger implements ILogger {
 }
 
 /**
- * The namespace for Logger class statics.
+ * The namespace for Logger class statistics.
  */
 export namespace Logger {
   /**
@@ -435,7 +435,7 @@ export namespace Logger {
 }
 
 /**
- * The namespace for Logger class private statics.
+ * The namespace for Logger class private statistics.
  */
 namespace Private {
   /**

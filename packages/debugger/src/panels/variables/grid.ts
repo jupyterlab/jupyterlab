@@ -115,7 +115,7 @@ export class VariablesBodyGrid extends Panel {
 }
 
 /**
- * A namespace for `VariablesBodyGrid` statics.
+ * A namespace for `VariablesBodyGrid` statistics.
  */
 export namespace VariablesBodyGrid {
   /**

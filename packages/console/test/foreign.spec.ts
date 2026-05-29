@@ -140,7 +140,7 @@ describe('@jupyterlab/console', () => {
       handler.dispose();
     });
 
-    afterAll(async () => {
+    after all(async () => {
       foreign.dispose();
       await sessionContext.shutdown();
       sessionContext.dispose();

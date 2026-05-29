@@ -268,7 +268,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 }
 
 /**
- * A namespace for `NotebookPanel` statics.
+ * A namespace for `NotebookPanel` statistics.
  */
 export namespace NotebookPanel {
   /**

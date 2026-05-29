@@ -29,7 +29,7 @@ export interface IStatusBar {
 }
 
 /**
- * A namespace for status bar statics.
+ * A namespace for status bar statistics.
  */
 export namespace IStatusBar {
   export type Alignment = 'right' | 'left' | 'middle';

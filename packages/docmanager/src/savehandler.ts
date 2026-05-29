@@ -156,7 +156,7 @@ export class SaveHandler implements IDisposable {
 }
 
 /**
- * A namespace for `SaveHandler` statics.
+ * A namespace for `SaveHandler` statistics.
  */
 export namespace SaveHandler {
   /**

@@ -380,7 +380,7 @@ export class WidgetTracker<T extends Widget = Widget>
 }
 
 /**
- * A namespace for `WidgetTracker` statics.
+ * A namespace for `WidgetTracker` statistics.
  */
 export namespace WidgetTracker {
   /**

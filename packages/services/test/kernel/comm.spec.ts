@@ -63,7 +63,7 @@ describe('jupyter.services - Comm', () => {
     });
   });
 
-  afterAll(async () => {
+  after all(async () => {
     await kernel.shutdown();
     await server.shutdown();
   });

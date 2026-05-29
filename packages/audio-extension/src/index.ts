@@ -120,7 +120,7 @@ export class AudioViewer extends Widget {
 }
 
 /**
- * The namespace for AudioViewer class statics.
+ * The namespace for AudioViewer class statistics.
  */
 export namespace AudioViewer {
   /**
@@ -149,7 +149,7 @@ export class AudioDocumentWidget extends DocumentWidget<AudioViewer> {
 }
 
 /**
- * The namespace for AudioDocumentWidget class statics.
+ * The namespace for AudioDocumentWidget class statistics.
  */
 export namespace AudioDocumentWidget {
   /**
@@ -193,7 +193,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
 }
 
 /**
- * The namespace for AudioViewerFactory class statics.
+ * The namespace for AudioViewerFactory class statistics.
  */
 export namespace AudioViewerFactory {
   /**

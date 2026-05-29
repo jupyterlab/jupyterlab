@@ -38,7 +38,7 @@ export class RunMenu extends RankedMenu implements IRunMenu {
 }
 
 /**
- * A namespace for RunMenu statics.
+ * A namespace for RunMenu statistics.
  */
 export namespace IRunMenu {
   /**

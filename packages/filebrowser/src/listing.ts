@@ -1877,7 +1877,7 @@ export class DirListing extends Widget {
    *
    * Go up one level in the directory tree.
    */
-  async goUp() {
+  async group() {
     const model = this.model;
     if (model.path === model.rootPath) {
       return;
@@ -2844,7 +2844,7 @@ export class DirListing extends Widget {
 }
 
 /**
- * The namespace for the `DirListing` class statics.
+ * The namespace for the `DirListing` class statistics.
  */
 export namespace DirListing {
   /**

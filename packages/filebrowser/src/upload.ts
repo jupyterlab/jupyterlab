@@ -84,7 +84,7 @@ export class Uploader extends ToolbarButton {
 }
 
 /**
- * The namespace for Uploader class statics.
+ * The namespace for Uploader class statistics.
  */
 export namespace Uploader {
   /**

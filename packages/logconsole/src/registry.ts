@@ -123,7 +123,7 @@ export class LoggerRegistry implements ILoggerRegistry {
 }
 
 /**
- * The namespace for LoggerRegistry class statics.
+ * The namespace for LoggerRegistry class statistics.
  */
 export namespace LoggerRegistry {
   /**

@@ -304,7 +304,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 }
 
 /**
- * The namespace for `JupyterLab` class statics.
+ * The namespace for `JupyterLab` class statistics.
  */
 export namespace JupyterLab {
   /**

@@ -292,7 +292,7 @@ export class RawEditor extends SplitPanel {
 }
 
 /**
- * A namespace for `RawEditor` statics.
+ * A namespace for `RawEditor` statistics.
  */
 export namespace RawEditor {
   /**

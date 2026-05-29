@@ -142,7 +142,7 @@ export class NotebookHandler implements IDisposable {
 }
 
 /**
- * A namespace for NotebookHandler statics.
+ * A namespace for NotebookHandler statistics.
  */
 export namespace NotebookHandler {
   /**

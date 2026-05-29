@@ -63,7 +63,7 @@ function RunningSessionsComponent(
 }
 
 /**
- * A namespace for RunningSessionsComponents statics.
+ * A namespace for RunningSessionsComponents statistics.
  */
 namespace RunningSessionsComponent {
   /**
@@ -213,7 +213,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
 }
 
 /**
- * A namespace for RunningSessions statics.
+ * A namespace for RunningSessions statistics.
  */
 export namespace RunningSessions {
   /**

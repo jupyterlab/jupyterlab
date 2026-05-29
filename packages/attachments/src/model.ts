@@ -297,7 +297,7 @@ export class AttachmentsModel implements IAttachmentsModel {
 }
 
 /**
- * The namespace for AttachmentsModel class statics.
+ * The namespace for AttachmentsModel class statistics.
  */
 export namespace AttachmentsModel {
   /**
@@ -392,7 +392,7 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
 }
 
 /**
- * The namespace for `AttachmentsResolver` class statics.
+ * The namespace for `AttachmentsResolver` class statistics.
  */
 export namespace AttachmentsResolver {
   /**

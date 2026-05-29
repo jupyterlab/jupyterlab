@@ -321,7 +321,7 @@ export class ObservableMap<T> implements IObservableMap<T> {
 }
 
 /**
- * The namespace for `ObservableMap` class statics.
+ * The namespace for `ObservableMap` class statistics.
  */
 export namespace ObservableMap {
   /**

@@ -559,7 +559,7 @@ export class DocumentWidgetManager implements IDisposable {
 }
 
 /**
- * A namespace for document widget manager statics.
+ * A namespace for document widget manager statistics.
  */
 export namespace DocumentWidgetManager {
   /**

@@ -138,7 +138,7 @@ export class ConsoleHandler implements IDisposable {
 }
 
 /**
- * A namespace for ConsoleHandler `statics`.
+ * A namespace for ConsoleHandler `statistics`.
  */
 export namespace ConsoleHandler {
   /**

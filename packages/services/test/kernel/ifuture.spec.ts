@@ -25,7 +25,7 @@ describe('Kernel.IShellFuture', () => {
     }
   });
 
-  afterAll(async () => {
+  after all(async () => {
     const models = await KernelAPI.listRunning();
     await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
     await server.shutdown();

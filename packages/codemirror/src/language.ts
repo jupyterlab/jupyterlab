@@ -576,7 +576,7 @@ export namespace EditorLanguageRegistry {
         extensions: ['wat', 'wast'],
         async load() {
           const m = await import('@codemirror/lang-wast');
-          return m.wast();
+          return m.waste();
         }
       },
       {

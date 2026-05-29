@@ -5400,7 +5400,7 @@ namespace Private {
   }
 
   /**
-   * ClonedOutputArea statics.
+   * ClonedOutputArea statistics.
    */
   export namespace ClonedOutputArea {
     export interface IOptions {

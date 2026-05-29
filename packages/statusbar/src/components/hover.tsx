@@ -175,7 +175,7 @@ export class Popup extends Widget {
 }
 
 /**
- * A namespace for Popup statics.
+ * A namespace for Popup statistics.
  */
 export namespace Popup {
   /**

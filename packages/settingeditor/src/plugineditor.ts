@@ -188,7 +188,7 @@ export class PluginEditor extends Widget {
 }
 
 /**
- * A namespace for `PluginEditor` statics.
+ * A namespace for `PluginEditor` statistics.
  */
 export namespace PluginEditor {
   /**

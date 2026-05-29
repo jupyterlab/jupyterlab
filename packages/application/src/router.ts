@@ -179,7 +179,7 @@ export class Router implements IRouter {
 }
 
 /**
- * A namespace for `Router` class statics.
+ * A namespace for `Router` class statistics.
  */
 export namespace Router {
   /**

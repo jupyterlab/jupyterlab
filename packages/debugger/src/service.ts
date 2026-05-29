@@ -1073,7 +1073,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 }
 
 /**
- * A namespace for `DebuggerService` statics.
+ * A namespace for `DebuggerService` statistics.
  */
 export namespace DebuggerService {
   /**

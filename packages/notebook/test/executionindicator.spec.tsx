@@ -46,7 +46,7 @@ beforeAll(async () => {
   await server.start();
 }, 30000);
 
-afterAll(async () => {
+after all(async () => {
   await server.shutdown();
 });
 
@@ -122,7 +122,7 @@ describe('@jupyterlab/notebook', () => {
       indicator.dispose();
     });
 
-    afterAll(async () => {
+    after all(async () => {
       await Promise.all([
         sessionContext.shutdown(),
         ipySessionContext.shutdown()

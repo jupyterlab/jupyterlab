@@ -20,7 +20,7 @@ describe('session', () => {
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
   }, 30000);
 
-  afterAll(async () => {
+  after all(async () => {
     await server.shutdown();
   });
 

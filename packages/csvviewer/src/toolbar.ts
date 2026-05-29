@@ -80,7 +80,7 @@ export class CSVDelimiter extends Widget {
 }
 
 /**
- * A namespace for `CSVToolbar` statics.
+ * A namespace for `CSVToolbar` statistics.
  */
 export namespace CSVToolbar {
   /**

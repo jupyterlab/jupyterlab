@@ -427,7 +427,7 @@ export class CSVViewer extends Widget {
 }
 
 /**
- * A namespace for `CSVViewer` statics.
+ * A namespace for `CSVViewer` statistics.
  */
 export namespace CSVViewer {
   /**

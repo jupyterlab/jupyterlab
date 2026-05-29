@@ -1055,7 +1055,7 @@ export class WindowedList<
       this.viewModel.scrollOffset = scrollOffset;
       this._scrollUpdateWasRequested = true;
 
-      // Scroll will happen in udpate() routine
+      // Scroll will happen in update() routine
       this.update();
     } else {
       // No further scrolling will happen
@@ -1592,7 +1592,7 @@ export class WindowedList<
   }
 
   /**
-   * Mark the current promise for programmatic scrolling as compelted.
+   * Mark the current promise for programmatic scrolling as completed.
    */
   private _markProgrammaticScrollingDone() {
     if (this._isScrolling) {
@@ -2236,7 +2236,7 @@ export namespace WindowedList {
   }
 
   /**
-   * Renderer statics.
+   * Renderer statistics.
    */
   export namespace IRenderer {
     /**

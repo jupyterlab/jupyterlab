@@ -186,7 +186,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 }
 
 /**
- * A namespace for ConsolePanel statics.
+ * A namespace for ConsolePanel statistics.
  */
 export namespace ConsolePanel {
   /**

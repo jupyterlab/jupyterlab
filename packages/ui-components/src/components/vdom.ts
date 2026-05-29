@@ -283,7 +283,7 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
 }
 
 /**
- * The namespace for VDomRenderer statics.
+ * The namespace for VDomRenderer statistics.
  */
 export namespace VDomRenderer {
   /**

@@ -255,7 +255,7 @@ export class Tooltip extends Widget {
 }
 
 /**
- * A namespace for tooltip widget statics.
+ * A namespace for tooltip widget statistics.
  */
 export namespace Tooltip {
   /**

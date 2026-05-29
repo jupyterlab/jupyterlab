@@ -150,7 +150,7 @@ export class ForeignHandler implements IDisposable {
 }
 
 /**
- * A namespace for `ForeignHandler` statics.
+ * A namespace for `ForeignHandler` statistics.
  */
 export namespace ForeignHandler {
   /**

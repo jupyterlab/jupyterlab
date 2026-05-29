@@ -108,7 +108,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
 }
 
 /**
- * The namespace for `NotebookWidgetFactory` statics.
+ * The namespace for `NotebookWidgetFactory` statistics.
  */
 export namespace NotebookWidgetFactory {
   /**

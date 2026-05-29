@@ -319,7 +319,7 @@ export class DebuggerSession implements IDebugger.ISession {
 }
 
 /**
- * A namespace for `DebuggerSession` statics.
+ * A namespace for `DebuggerSession` statistics.
  */
 export namespace DebuggerSession {
   /**

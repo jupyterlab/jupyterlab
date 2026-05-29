@@ -109,7 +109,7 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
 }
 
 /**
- * The namespace for notebook model factory statics.
+ * The namespace for notebook model factory statistics.
  */
 export namespace NotebookModelFactory {
   /**

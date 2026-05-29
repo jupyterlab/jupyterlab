@@ -162,7 +162,7 @@ export class DebuggerSidebar extends SidePanel {
 }
 
 /**
- * A namespace for DebuggerSidebar statics
+ * A namespace for DebuggerSidebar statistics
  */
 export namespace DebuggerSidebar {
   /**

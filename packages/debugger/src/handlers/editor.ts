@@ -475,7 +475,7 @@ export class EditorHandler implements IDisposable {
 }
 
 /**
- * A namespace for EditorHandler `statics`.
+ * A namespace for EditorHandler `statistics`.
  */
 export namespace EditorHandler {
   /**

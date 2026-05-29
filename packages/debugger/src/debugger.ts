@@ -39,7 +39,7 @@ import { DebuggerSidebar } from './sidebar';
 import { DebuggerSources } from './sources';
 
 /**
- * A namespace for `Debugger` statics.
+ * A namespace for `Debugger` statistics.
  */
 export namespace Debugger {
   /**

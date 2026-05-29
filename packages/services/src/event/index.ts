@@ -126,7 +126,7 @@ export class EventManager implements Event.IManager {
 }
 
 /**
- * A namespace for `EventManager` statics.
+ * A namespace for `EventManager` statistics.
  */
 export namespace EventManager {
   /**

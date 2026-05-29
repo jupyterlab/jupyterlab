@@ -781,7 +781,7 @@ export class DocumentRegistry implements IDisposable {
 }
 
 /**
- * The namespace for the `DocumentRegistry` class statics.
+ * The namespace for the `DocumentRegistry` class statistics.
  */
 export namespace DocumentRegistry {
   /**

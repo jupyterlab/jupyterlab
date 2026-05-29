@@ -12,7 +12,7 @@ import React from 'react';
 import type { IDocumentManager } from './tokens';
 
 /**
- * A namespace for SavingStatusComponent statics.
+ * A namespace for SavingStatusComponent statistics.
  */
 namespace SavingStatusComponent {
   /**
@@ -82,7 +82,7 @@ export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
 }
 
 /**
- * A namespace for SavingStatus statics.
+ * A namespace for SavingStatus statistics.
  */
 export namespace SavingStatus {
   /**

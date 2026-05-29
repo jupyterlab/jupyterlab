@@ -22,7 +22,7 @@ describe('JupyterPluginRegistry', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  it('should log plugin activation time with dependant count', async () => {
+  it('should log plugin activation time with dependent count', async () => {
     const slowPluginToken = new Token<any>('Test:SlowPlugin');
     const mockPlugins: IPlugin<any, any>[] = [
       {

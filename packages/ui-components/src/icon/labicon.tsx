@@ -21,7 +21,7 @@ import { classes, getReactAttrs } from '../utils';
 
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /** *********
-   * statics *
+   * statistics *
    ***********/
 
   /**
@@ -653,7 +653,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 }
 
 /**
- * A namespace for LabIcon statics.
+ * A namespace for LabIcon statistics.
  */
 export namespace LabIcon {
   /** ***********

@@ -10,7 +10,7 @@ import React from 'react';
 import type { IDocumentManager } from './tokens';
 
 /**
- * A namespace for PathStatusComponent statics.
+ * A namespace for PathStatusComponent statistics.
  */
 namespace PathStatusComponent {
   /**
@@ -68,7 +68,7 @@ export class PathStatus extends VDomRenderer<PathStatus.Model> {
 }
 
 /**
- * A namespace for PathStatus statics.
+ * A namespace for PathStatus statistics.
  */
 export namespace PathStatus {
   /**

@@ -388,7 +388,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
 }
 
 /**
- * The namespace for `CellModel` statics.
+ * The namespace for `CellModel` statistics.
  */
 export namespace CellModel {
   /**
@@ -496,7 +496,7 @@ export abstract class AttachmentsCellModel extends CellModel {
 }
 
 /**
- * The namespace for `AttachmentsCellModel` statics.
+ * The namespace for `AttachmentsCellModel` statistics.
  */
 export namespace AttachmentsCellModel {
   /**
@@ -927,7 +927,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 }
 
 /**
- * The namespace for `CodeCellModel` statics.
+ * The namespace for `CodeCellModel` statistics.
  */
 export namespace CodeCellModel {
   /**

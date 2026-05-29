@@ -183,7 +183,7 @@ export class TerminalAPIClient implements ITerminalAPIClient {
 }
 
 /**
- * Namespace for private statics.
+ * Namespace for private statistics.
  */
 namespace Private {
   /**

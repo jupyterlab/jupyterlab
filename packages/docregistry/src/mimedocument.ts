@@ -211,7 +211,7 @@ export class MimeContent extends Widget {
 }
 
 /**
- * The namespace for MimeDocument class statics.
+ * The namespace for MimeDocument class statistics.
  */
 export namespace MimeContent {
   /**
@@ -327,7 +327,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
 }
 
 /**
- * The namespace for MimeDocumentFactory class statics.
+ * The namespace for MimeDocumentFactory class statistics.
  */
 export namespace MimeDocumentFactory {
   /**

@@ -4,7 +4,7 @@
 import * as React from 'react';
 
 /**
- * A namespace for TextItem statics.
+ * A namespace for TextItem statistics.
  */
 export namespace TextItem {
   /**

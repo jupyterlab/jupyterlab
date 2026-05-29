@@ -59,7 +59,7 @@ export class KernelConnector extends DataConnector<
 }
 
 /**
- * A namespace for kernel connector statics.
+ * A namespace for kernel connector statistics.
  */
 export namespace KernelConnector {
   /**

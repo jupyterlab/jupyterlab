@@ -105,7 +105,7 @@ namespace CommandIDs {
 
   export const goToPath = 'filebrowser:go-to-path';
 
-  export const goUp = 'filebrowser:go-up';
+  export const group = 'filebrowser:go-up';
 
   export const openPath = 'filebrowser:open-path';
 
@@ -1417,7 +1417,7 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.goUp, {
+  commands.addCommand(CommandIDs.group, {
     label: trans.__('Go Up'),
     execute: async () => {
       const browserForPath = Private.getBrowserForPath('', browser, factory);
@@ -1426,7 +1426,7 @@ function addCommands(
       }
       const { model } = browserForPath;
       await model.restored;
-      void browserForPath.goUp();
+      void browserForPath.group();
     },
     describedBy: {
       args: {

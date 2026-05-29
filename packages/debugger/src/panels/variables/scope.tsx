@@ -99,7 +99,7 @@ export class ScopeSwitcher extends ReactWidget {
 }
 
 /**
- * A namespace for ScopeSwitcher statics
+ * A namespace for ScopeSwitcher statistics
  */
 export namespace ScopeSwitcher {
   /**

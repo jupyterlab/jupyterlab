@@ -263,7 +263,7 @@ export class RecentsManager implements IRecentsManager {
 }
 
 /**
- * Namespace for RecentsManager statics.
+ * Namespace for RecentsManager statistics.
  */
 export namespace RecentsManager {
   /**

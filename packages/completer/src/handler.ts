@@ -593,7 +593,7 @@ export class CompletionHandler implements IDisposable {
 }
 
 /**
- * A namespace for cell completion handler statics.
+ * A namespace for cell completion handler statistics.
  */
 export namespace CompletionHandler {
   /**

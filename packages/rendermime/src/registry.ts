@@ -284,7 +284,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
 }
 
 /**
- * The namespace for `RenderMimeRegistry` class statics.
+ * The namespace for `RenderMimeRegistry` class statistics.
  */
 export namespace RenderMimeRegistry {
   /**

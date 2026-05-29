@@ -86,7 +86,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
 }
 
 /**
- * The namespace for `ActivityMonitor` statics.
+ * The namespace for `ActivityMonitor` statistics.
  */
 export namespace ActivityMonitor {
   /**

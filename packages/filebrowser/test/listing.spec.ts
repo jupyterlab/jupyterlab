@@ -183,7 +183,7 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#rename', () => {
-      it('backspace during rename does not trigger goUp method', async () => {
+      it('backspace during rename does not trigger group method', async () => {
         dirListing.selectNext();
         const newNamePromise = dirListing.rename();
         const goUpSpy = jest.spyOn(dirListing as any, 'goUp');

@@ -10,7 +10,7 @@ import type { Menu } from '@lumino/widgets';
 import React from 'react';
 
 /**
- * A namespace for TabSpaceComponent statics.
+ * A namespace for TabSpaceComponent statistics.
  */
 namespace TabSpaceComponent {
   /**
@@ -135,7 +135,7 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
 }
 
 /**
- * A namespace for TabSpace statics.
+ * A namespace for TabSpace statistics.
  */
 export namespace TabSpaceStatus {
   /**

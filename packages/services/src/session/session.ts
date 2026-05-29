@@ -183,7 +183,7 @@ export interface ISessionConnection extends IObservableDisposable {
 }
 
 /**
- * A namespace for ISessionConnection statics.
+ * A namespace for ISessionConnection statistics.
  */
 export namespace ISessionConnection {
   /**

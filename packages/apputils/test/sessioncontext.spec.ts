@@ -80,7 +80,7 @@ describe('@jupyterlab/apputils', () => {
     });
   }, 30000);
 
-  afterAll(async () => {
+  after all(async () => {
     await server.shutdown();
   });
 

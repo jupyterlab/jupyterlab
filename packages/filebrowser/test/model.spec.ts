@@ -476,7 +476,7 @@ describe('filebrowser/model', () => {
           );
         });
 
-        afterAll(() => {
+        after all(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
       });
@@ -575,7 +575,7 @@ describe('filebrowser/model', () => {
           await uploaded;
         });
 
-        afterAll(() => {
+        after all(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
       });

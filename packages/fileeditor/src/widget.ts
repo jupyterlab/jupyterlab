@@ -175,7 +175,7 @@ export class FileEditor extends Widget {
 }
 
 /**
- * The namespace for editor widget statics.
+ * The namespace for editor widget statistics.
  */
 export namespace FileEditor {
   /**
@@ -285,7 +285,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
 }
 
 /**
- * The namespace for `FileEditorFactory` class statics.
+ * The namespace for `FileEditorFactory` class statistics.
  */
 export namespace FileEditorFactory {
   /**

@@ -565,7 +565,7 @@ export class LayoutRestorer implements ILayoutRestorer {
 }
 
 /**
- * A namespace for `LayoutRestorer` statics.
+ * A namespace for `LayoutRestorer` statistics.
  */
 export namespace LayoutRestorer {
   /**

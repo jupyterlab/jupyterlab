@@ -613,8 +613,8 @@ export class FileBrowser
    *
    * Go up one level in the directory tree.
    */
-  async goUp() {
-    return this.listing.goUp();
+  async group() {
+    return this.listing.group();
   }
 
   /**
@@ -787,7 +787,7 @@ export class FileBrowser
 }
 
 /**
- * The namespace for the `FileBrowser` class statics.
+ * The namespace for the `FileBrowser` class statistics.
  */
 export namespace FileBrowser {
   /**

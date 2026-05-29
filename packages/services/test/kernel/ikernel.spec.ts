@@ -33,7 +33,7 @@ describe('Kernel.IKernel', () => {
     defaultKernel.dispose();
   });
 
-  afterAll(async () => {
+  after all(async () => {
     await kernelManager.shutdownAll();
     await server.shutdown();
   });

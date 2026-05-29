@@ -206,7 +206,7 @@ export class WidgetLSPAdapterTracker<
 }
 
 /**
- * A namespace for `WidgetLSPAdapterTracker` statics.
+ * A namespace for `WidgetLSPAdapterTracker` statistics.
  */
 export namespace WidgetLSPAdapterTracker {
   /**

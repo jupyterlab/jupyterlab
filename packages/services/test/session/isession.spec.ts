@@ -55,7 +55,7 @@ describe('session', () => {
     }
   });
 
-  afterAll(async () => {
+  after all(async () => {
     await defaultSession.shutdown();
     await server.shutdown();
   });

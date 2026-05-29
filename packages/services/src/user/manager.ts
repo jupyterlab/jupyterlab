@@ -193,7 +193,7 @@ export class UserManager extends BaseManager implements User.IManager {
 }
 
 /**
- * A namespace for `UserManager` statics.
+ * A namespace for `UserManager` statistics.
  */
 export namespace UserManager {
   /**

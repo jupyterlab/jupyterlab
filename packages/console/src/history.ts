@@ -343,7 +343,7 @@ export class ConsoleHistory implements IConsoleHistory {
 }
 
 /**
- * A namespace for ConsoleHistory statics.
+ * A namespace for ConsoleHistory statistics.
  */
 export namespace ConsoleHistory {
   /**

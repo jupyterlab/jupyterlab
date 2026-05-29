@@ -15,7 +15,7 @@ import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 /**
- * A namespace for DebuggerEvaluateDialog statics.
+ * A namespace for DebuggerEvaluateDialog statistics.
  */
 export namespace DebuggerEvaluateDialog {
   /**

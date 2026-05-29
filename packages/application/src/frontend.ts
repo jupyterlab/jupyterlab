@@ -215,7 +215,7 @@ export abstract class JupyterFrontEnd<
 }
 
 /**
- * The namespace for `JupyterFrontEnd` class statics.
+ * The namespace for `JupyterFrontEnd` class statistics.
  */
 export namespace JupyterFrontEnd {
   /**

@@ -103,7 +103,7 @@ export class FileHandler implements IDisposable {
 }
 
 /**
- * A namespace for FileHandler `statics`.
+ * A namespace for FileHandler `statistics`.
  */
 export namespace FileHandler {
   /**

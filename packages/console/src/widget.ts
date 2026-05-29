@@ -1253,7 +1253,7 @@ export class CodeConsole extends Widget {
 }
 
 /**
- * A namespace for CodeConsole statics.
+ * A namespace for CodeConsole statistics.
  */
 export namespace CodeConsole {
   /**

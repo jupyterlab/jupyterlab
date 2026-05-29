@@ -169,7 +169,7 @@ export class AttachmentModel implements IAttachmentModel {
 }
 
 /**
- * The namespace for AttachmentModel statics.
+ * The namespace for AttachmentModel statistics.
  */
 export namespace AttachmentModel {
   /**

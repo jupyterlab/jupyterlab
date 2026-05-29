@@ -81,7 +81,7 @@ export class Palette implements ICommandPalette {
 }
 
 /**
- * A namespace for `Palette` statics.
+ * A namespace for `Palette` statistics.
  */
 export namespace Palette {
   /**

@@ -250,7 +250,7 @@ export class OutputModel implements IOutputModel {
 }
 
 /**
- * The namespace for OutputModel statics.
+ * The namespace for OutputModel statistics.
  */
 export namespace OutputModel {
   /**

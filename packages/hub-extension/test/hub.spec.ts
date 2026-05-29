@@ -27,7 +27,7 @@ describe('@jupyterlab/hub-extension', () => {
     windowOpenSpy = jest.spyOn(window, 'open');
   });
 
-  afterAll(() => {
+  after all(() => {
     // Restore original
     window.open = open;
   });

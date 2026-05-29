@@ -738,7 +738,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
 }
 
 /**
- * The namespace for Toolbar class statics.
+ * The namespace for Toolbar class statistics.
  */
 export namespace Toolbar {
   /**

@@ -81,7 +81,7 @@ export class Breakpoints extends PanelWithToolbar {
 }
 
 /**
- * A namespace for Breakpoints `statics`.
+ * A namespace for Breakpoints `statistics`.
  */
 export namespace Breakpoints {
   /**

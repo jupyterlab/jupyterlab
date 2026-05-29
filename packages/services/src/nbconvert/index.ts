@@ -121,7 +121,7 @@ export class NbConvertManager implements NbConvert.IManager {
 }
 
 /**
- * A namespace for `NbConvertManager` statics.
+ * A namespace for `NbConvertManager` statistics.
  */
 export namespace NbConvertManager {
   /**

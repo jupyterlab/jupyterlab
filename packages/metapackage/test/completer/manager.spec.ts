@@ -100,7 +100,7 @@ describe('completer/manager', () => {
     await (sessionContext as SessionContext).initialize();
   });
 
-  afterAll(() => sessionContext.shutdown());
+  after all(() => sessionContext.shutdown());
 
   beforeEach(() => {
     manager = new CompletionProviderManager();

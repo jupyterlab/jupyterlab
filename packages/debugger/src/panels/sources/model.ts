@@ -146,7 +146,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
 }
 
 /**
- * A namespace for SourcesModel `statics`.
+ * A namespace for SourcesModel `statistics`.
  */
 export namespace SourcesModel {
   /**

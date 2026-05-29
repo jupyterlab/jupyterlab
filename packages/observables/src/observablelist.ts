@@ -692,7 +692,7 @@ export class ObservableList<T> implements IObservableList<T> {
 }
 
 /**
- * The namespace for `ObservableList` class statics.
+ * The namespace for `ObservableList` class statistics.
  */
 export namespace ObservableList {
   /**

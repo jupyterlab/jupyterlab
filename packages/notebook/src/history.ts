@@ -380,7 +380,7 @@ export class NotebookHistory implements INotebookHistory {
 }
 
 /**
- * A namespace for NotebookHistory statics.
+ * A namespace for NotebookHistory statistics.
  */
 export namespace NotebookHistory {
   /**

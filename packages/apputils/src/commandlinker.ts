@@ -313,7 +313,7 @@ export class CommandLinker implements IDisposable {
 }
 
 /**
- * A namespace for command linker statics.
+ * A namespace for command linker statistics.
  */
 export namespace CommandLinker {
   /**
@@ -328,7 +328,7 @@ export namespace CommandLinker {
 }
 
 /**
- * A namespace for Private command linker statics.
+ * A namespace for Private command linker statistics.
  */
 namespace Private {
   /**

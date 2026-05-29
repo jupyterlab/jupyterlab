@@ -40,7 +40,7 @@ beforeAll(async () => {
   await server.start();
 }, 30000);
 
-afterAll(async () => {
+after all(async () => {
   await server.shutdown();
 });
 
@@ -1216,7 +1216,7 @@ describe('@jupyter/notebook', () => {
           throw new Error('anchor must equal head if select is false');
         }
 
-        // Set up the test by pre-selecting appropriate cells if select is true.
+        // Set up the test by preselecting appropriate cells if select is true.
         if (select) {
           for (
             let i = Math.min(anchor, head);

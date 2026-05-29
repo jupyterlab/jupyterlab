@@ -766,7 +766,7 @@ export class DocumentManager implements IDocumentManager {
 }
 
 /**
- * A namespace for document manager statics.
+ * A namespace for document manager statistics.
  */
 export namespace DocumentManager {
   /**

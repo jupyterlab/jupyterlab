@@ -507,7 +507,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 }
 
 /**
- * A namespace for DebuggerHandler `statics`
+ * A namespace for DebuggerHandler `statistics`
  */
 export namespace DebuggerHandler {
   /**

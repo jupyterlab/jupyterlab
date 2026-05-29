@@ -4,7 +4,7 @@
 import * as React from 'react';
 
 /**
- * A namespace for ProgressBar statics.
+ * A namespace for ProgressBar statistics.
  */
 export namespace ProgressBar {
   /**
@@ -47,7 +47,7 @@ export function ProgressBar(props: ProgressBar.IProps): JSX.Element {
 }
 
 /**
- * A namespace for Filler statics.
+ * A namespace for Filler statistics.
  */
 namespace Filler {
   /**

@@ -143,7 +143,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
 }
 
 /**
- * A namespace for SourcesModel `statics`.
+ * A namespace for SourcesModel `statistics`.
  */
 export namespace KernelSourcesModel {
   /**

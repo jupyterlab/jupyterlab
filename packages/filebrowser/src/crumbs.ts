@@ -937,7 +937,7 @@ export class BreadCrumbs extends Widget {
 }
 
 /**
- * The namespace for the `BreadCrumbs` class statics.
+ * The namespace for the `BreadCrumbs` class statistics.
  */
 export namespace BreadCrumbs {
   /**

@@ -115,7 +115,7 @@ export class BuildManager {
 }
 
 /**
- * A namespace for `BuildManager` statics.
+ * A namespace for `BuildManager` statistics.
  */
 export namespace BuildManager {
   /**

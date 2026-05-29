@@ -198,7 +198,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 }
 
 /**
- * A namespace for inspection handler statics.
+ * A namespace for inspection handler statistics.
  */
 export namespace InspectionHandler {
   /**

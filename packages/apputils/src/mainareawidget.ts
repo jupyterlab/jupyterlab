@@ -303,7 +303,7 @@ export class MainAreaWidget<T extends Widget = Widget>
 }
 
 /**
- * The namespace for the `MainAreaWidget` class statics.
+ * The namespace for the `MainAreaWidget` class statistics.
  */
 export namespace MainAreaWidget {
   /**

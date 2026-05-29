@@ -2678,7 +2678,7 @@ namespace Private {
   }
 
   /**
-   * The namespace for the `SideBarHandler` statics.
+   * The namespace for the `SideBarHandler` statistics.
    */
   export namespace SideBarHandler {
     /**

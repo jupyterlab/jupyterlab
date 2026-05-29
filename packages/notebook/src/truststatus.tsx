@@ -66,7 +66,7 @@ function NotebookTrustComponent(
 }
 
 /**
- * A namespace for NotebookTrustComponent statics.
+ * A namespace for NotebookTrustComponent statistics.
  */
 namespace NotebookTrustComponent {
   /**
@@ -133,7 +133,7 @@ export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model>
 }
 
 /**
- * A namespace for NotebookTrust statics.
+ * A namespace for NotebookTrust statistics.
  */
 export namespace NotebookTrustStatus {
   /**

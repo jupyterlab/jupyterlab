@@ -310,7 +310,7 @@ export interface IInlineCompleterFactory {
 }
 
 /**
- * A namespace for inline completer factory statics.
+ * A namespace for inline completer factory statistics.
  */
 export namespace IInlineCompleterFactory {
   /**

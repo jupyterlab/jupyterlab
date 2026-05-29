@@ -211,7 +211,7 @@ export namespace InputDialog {
     /**
      * Selection range
      *
-     * Number of characters to pre-select when dialog opens.
+     * Number of characters to preselect when dialog opens.
      * Default is to select the whole input text if present.
      */
     selectionRange?: number;

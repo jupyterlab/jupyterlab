@@ -339,7 +339,7 @@ describe('rendermime/registry', () => {
         });
       });
 
-      afterAll(() => {
+      after all(() => {
         return session.shutdown();
       });
 

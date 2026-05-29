@@ -79,7 +79,7 @@ export class EditorAdapter implements IDisposable {
 }
 
 /**
- * A namespace for EditorAdapter `statics`.
+ * A namespace for EditorAdapter `statistics`.
  */
 export namespace EditorAdapter {
   /**

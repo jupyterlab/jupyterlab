@@ -31,7 +31,7 @@ const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
 const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
 
 /**
- * The namespace for Toolbar class statics.
+ * The namespace for Toolbar class statistics.
  */
 export namespace Toolbar {
   /**

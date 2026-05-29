@@ -97,7 +97,7 @@ describe('@jupyterlab/completer', () => {
     });
   });
 
-  afterAll(() => sessionContext.shutdown());
+  after all(() => sessionContext.shutdown());
 
   describe('CompletionHandler', () => {
     describe('#constructor()', () => {
@@ -373,7 +373,7 @@ describe('@jupyterlab/completer', () => {
         handler.autoCompletion = true;
       });
 
-      afterAll(() => {
+      after all(() => {
         anchor.dispose();
         handler.completer.dispose();
         handler.dispose();

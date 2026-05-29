@@ -63,7 +63,7 @@ export class Sources extends PanelWithToolbar {
 }
 
 /**
- * A namespace for `Sources` statics.
+ * A namespace for `Sources` statistics.
  */
 export namespace Sources {
   /**

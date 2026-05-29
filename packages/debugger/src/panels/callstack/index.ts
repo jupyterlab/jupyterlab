@@ -92,7 +92,7 @@ export class Callstack extends PanelWithToolbar {
 }
 
 /**
- * A namespace for Callstack `statics`.
+ * A namespace for Callstack `statistics`.
  */
 export namespace Callstack {
   /**

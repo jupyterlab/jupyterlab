@@ -239,7 +239,7 @@ export class CodeEditorWrapper extends Widget {
 }
 
 /**
- * The namespace for the `CodeEditorWrapper` statics.
+ * The namespace for the `CodeEditorWrapper` statistics.
  */
 export namespace CodeEditorWrapper {
   /**

@@ -35,7 +35,7 @@ describe('session/manager', () => {
     await server.start();
   }, 30000);
 
-  afterAll(async () => {
+  after all(async () => {
     const sessions = await SessionAPI.listRunning();
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
     await server.shutdown();

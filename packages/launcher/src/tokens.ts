@@ -38,7 +38,7 @@ export interface ILauncher {
 }
 
 /**
- * The namespace for `ILauncher` class statics.
+ * The namespace for `ILauncher` class statistics.
  */
 export namespace ILauncher {
   /**

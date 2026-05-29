@@ -16,7 +16,7 @@ beforeAll(async () => {
   await server.start();
 }, 30000);
 
-afterAll(async () => {
+after all(async () => {
   await server.shutdown();
 });
 
@@ -27,7 +27,7 @@ class UnavailableTerminalAPIClient extends TerminalAPIClient {
 }
 
 describe('terminal', () => {
-  afterAll(async () => {
+  after all(async () => {
     const models = await TerminalAPI.listRunning();
     await Promise.all(models.map(m => TerminalAPI.shutdownTerminal(m.name)));
   });

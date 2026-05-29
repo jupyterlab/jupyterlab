@@ -17,7 +17,7 @@ import type { CodeEditor } from './editor';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 /**
- * A namespace for LineFormComponent statics.
+ * A namespace for LineFormComponent statistics.
  */
 namespace LineFormComponent {
   /**
@@ -325,7 +325,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
 }
 
 /**
- * A namespace for LineCol statics.
+ * A namespace for LineCol statistics.
  */
 export namespace LineCol {
   /**

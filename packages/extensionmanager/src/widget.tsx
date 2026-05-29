@@ -198,7 +198,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
 }
 
 /**
- * The namespace for extension entry statics.
+ * The namespace for extension entry statistics.
  */
 namespace ListEntry {
   export interface IProperties {
@@ -284,7 +284,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
 }
 
 /**
- * The namespace for list view widget statics.
+ * The namespace for list view widget statistics.
  */
 namespace ListView {
   export interface IProperties {

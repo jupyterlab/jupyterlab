@@ -320,7 +320,7 @@ export class ObservableValue implements IObservableValue {
 }
 
 /**
- * The namespace for the `ObservableValue` class statics.
+ * The namespace for the `ObservableValue` class statistics.
  */
 export namespace ObservableValue {
   /**
@@ -567,7 +567,7 @@ export class ModelDB implements IModelDB {
 }
 
 /**
- * A namespace for the `ModelDB` class statics.
+ * A namespace for the `ModelDB` class statistics.
  */
 export namespace ModelDB {
   /**

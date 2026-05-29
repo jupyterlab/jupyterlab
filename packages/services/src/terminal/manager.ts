@@ -289,7 +289,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
 }
 
 /**
- * The namespace for TerminalManager statics.
+ * The namespace for TerminalManager statistics.
  */
 export namespace TerminalManager {
   /**

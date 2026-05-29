@@ -291,7 +291,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 }
 
 /**
- * The namespace for NotebookTools class statics.
+ * The namespace for NotebookTools class statistics.
  */
 export namespace NotebookTools {
   /**

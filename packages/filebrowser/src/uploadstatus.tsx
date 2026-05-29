@@ -38,7 +38,7 @@ function FileUploadComponent(
 }
 
 /**
- * A namespace for FileUploadComponent statics.
+ * A namespace for FileUploadComponent statistics.
  */
 namespace FileUploadComponent {
   /**
@@ -126,7 +126,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
 }
 
 /**
- * A namespace for FileUpload class statics.
+ * A namespace for FileUpload class statistics.
  */
 export namespace FileUploadStatus {
   /**

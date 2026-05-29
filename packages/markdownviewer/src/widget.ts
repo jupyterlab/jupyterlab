@@ -221,7 +221,7 @@ export class MarkdownViewer extends Widget {
 }
 
 /**
- * The namespace for MarkdownViewer class statics.
+ * The namespace for MarkdownViewer class statistics.
  */
 export namespace MarkdownViewer {
   /**
@@ -336,7 +336,7 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
 }
 
 /**
- * The namespace for MarkdownViewerFactory class statics.
+ * The namespace for MarkdownViewerFactory class statistics.
  */
 export namespace MarkdownViewerFactory {
   /**

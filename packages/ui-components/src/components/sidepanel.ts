@@ -122,7 +122,7 @@ export class SidePanel extends Widget {
 }
 
 /**
- * The namespace for the `SidePanel` class statics.
+ * The namespace for the `SidePanel` class statistics.
  */
 export namespace SidePanel {
   /**

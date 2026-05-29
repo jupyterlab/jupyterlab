@@ -456,7 +456,7 @@ namespace Private {
 <!ENTITY copy "&#169;">
 <!ENTITY crarr "&#8629;">
 <!ENTITY cup "&#8746;">
-<!ENTITY curren "&#164;">
+<!ENTITY current "&#164;">
 <!ENTITY dagger "&#8224;">
 <!ENTITY Dagger "&#8225;">
 <!ENTITY darr "&#8595;">

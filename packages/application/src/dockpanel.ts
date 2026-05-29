@@ -254,7 +254,7 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
   private _intervalId = 0;
 }
 
-/** Namespace for OptimizedDockPanelSvg statics */
+/** Namespace for OptimizedDockPanelSvg statistics */
 namespace Private {
   export interface IFrozenElement {
     element: HTMLElement;

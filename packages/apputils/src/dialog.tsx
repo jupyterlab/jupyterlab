@@ -549,7 +549,7 @@ export class Dialog<T> extends Widget {
 }
 
 /**
- * The namespace for Dialog class statics.
+ * The namespace for Dialog class statistics.
  */
 export namespace Dialog {
   /**

@@ -121,7 +121,7 @@ export class Grid extends Panel {
 }
 
 /**
- * A namespace for VariablesGrid `statics`.
+ * A namespace for VariablesGrid `statistics`.
  */
 namespace Grid {
   /**

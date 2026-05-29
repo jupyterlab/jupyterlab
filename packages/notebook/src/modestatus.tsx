@@ -29,7 +29,7 @@ function CommandEditComponent(
 }
 
 /**
- * A namespace for CommandEditComponent statics.
+ * A namespace for CommandEditComponent statistics.
  */
 namespace CommandEditComponent {
   /**
@@ -96,7 +96,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
 }
 
 /**
- * A namespace for CommandEdit statics.
+ * A namespace for CommandEdit statistics.
  */
 export namespace CommandEditStatus {
   /**

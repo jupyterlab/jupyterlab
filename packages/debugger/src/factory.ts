@@ -54,7 +54,7 @@ export class ReadOnlyEditorFactory {
 }
 
 /**
- * The namespace for `ReadOnlyEditorFactory` class statics.
+ * The namespace for `ReadOnlyEditorFactory` class statistics.
  */
 export namespace ReadOnlyEditorFactory {
   /**

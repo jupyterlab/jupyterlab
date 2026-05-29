@@ -1028,7 +1028,7 @@ or load the version on disk (revert)?`,
 }
 
 /**
- * A namespace for `Context` statics.
+ * A namespace for `Context` statistics.
  */
 export namespace Context {
   /**

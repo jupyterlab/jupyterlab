@@ -631,7 +631,7 @@ export class ListModel extends VDomModel {
 }
 
 /**
- * ListModel statics.
+ * ListModel statistics.
  */
 export namespace ListModel {
   /**

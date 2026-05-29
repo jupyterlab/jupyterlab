@@ -141,7 +141,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
 }
 
 /**
- * A namespace for EditorSyntax statics.
+ * A namespace for EditorSyntax statistics.
  */
 export namespace EditorSyntaxStatus {
   /**

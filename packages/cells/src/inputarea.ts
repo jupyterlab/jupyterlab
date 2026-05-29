@@ -155,7 +155,7 @@ export class InputArea extends Widget {
 }
 
 /**
- * A namespace for `InputArea` statics.
+ * A namespace for `InputArea` statistics.
  */
 export namespace InputArea {
   /**

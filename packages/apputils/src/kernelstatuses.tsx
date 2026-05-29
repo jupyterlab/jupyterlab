@@ -68,7 +68,7 @@ function KernelStatusComponent(
 }
 
 /**
- * A namespace for KernelStatusComponent statics.
+ * A namespace for KernelStatusComponent statistics.
  */
 namespace KernelStatusComponent {
   /**
@@ -150,7 +150,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
 }
 
 /**
- * A namespace for KernelStatus statics.
+ * A namespace for KernelStatus statistics.
  */
 export namespace KernelStatus {
   /**

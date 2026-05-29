@@ -960,7 +960,7 @@ export class SessionContext implements ISessionContext {
     }
 
     // Use a UUID for the path to overcome a race condition on the server
-    // where it will re-use a session for a given path but only after
+    // where it will reuse a session for a given path but only after
     // the kernel finishes starting.
     // We later switch to the real path below.
     // Use the correct directory so the kernel will be started in that directory.
@@ -1277,7 +1277,7 @@ export class SessionContext implements ISessionContext {
 }
 
 /**
- * A namespace for `SessionContext` statics.
+ * A namespace for `SessionContext` statistics.
  */
 export namespace SessionContext {
   /**

@@ -678,7 +678,7 @@ export class DSVModel extends DataModel implements IDisposable {
 }
 
 /**
- * The namespace for the `DSVModel` class statics.
+ * The namespace for the `DSVModel` class statistics.
  */
 export namespace DSVModel {
   /**

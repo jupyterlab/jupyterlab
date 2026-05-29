@@ -776,7 +776,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 }
 
 /**
- * The namespace for the `Cell` class statics.
+ * The namespace for the `Cell` class statistics.
  */
 export namespace Cell {
   /**
@@ -1721,7 +1721,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
 }
 
 /**
- * The namespace for the `CodeCell` class statics.
+ * The namespace for the `CodeCell` class statistics.
  */
 export namespace CodeCell {
   /**
@@ -2591,7 +2591,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 }
 
 /**
- * The namespace for the `CodeCell` class statics.
+ * The namespace for the `CodeCell` class statistics.
  */
 export namespace MarkdownCell {
   /**
@@ -2653,7 +2653,7 @@ export class RawCell extends Cell<IRawCellModel> {
 }
 
 /**
- * The namespace for the `RawCell` class statics.
+ * The namespace for the `RawCell` class statistics.
  */
 export namespace RawCell {
   /**

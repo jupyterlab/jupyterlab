@@ -207,7 +207,7 @@ export class ServiceManager implements ServiceManager.IManager {
 }
 
 /**
- * The namespace for `ServiceManager` statics.
+ * The namespace for `ServiceManager` statistics.
  */
 export namespace ServiceManager {
   /**

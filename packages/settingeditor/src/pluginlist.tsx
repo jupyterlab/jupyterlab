@@ -479,7 +479,7 @@ export class PluginList extends ReactWidget {
 }
 
 /**
- * A namespace for `PluginList` statics.
+ * A namespace for `PluginList` statistics.
  */
 export namespace PluginList {
   /**
@@ -670,7 +670,7 @@ export namespace PluginList {
   }
 
   /**
-   * A namespace for `PluginList.Model` statics.
+   * A namespace for `PluginList.Model` statistics.
    */
   export namespace Model {
     /**

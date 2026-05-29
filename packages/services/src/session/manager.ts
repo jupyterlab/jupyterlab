@@ -350,7 +350,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
 }
 
 /**
- * The namespace for `SessionManager` class statics.
+ * The namespace for `SessionManager` class statistics.
  */
 export namespace SessionManager {
   /**

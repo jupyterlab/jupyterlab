@@ -47,7 +47,7 @@ export interface INotebookTools extends Widget {
 }
 
 /**
- * The namespace for NotebookTools class statics.
+ * The namespace for NotebookTools class statistics.
  */
 export namespace INotebookTools {
   /**

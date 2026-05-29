@@ -407,7 +407,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 };
 
 /**
- * A namespace for VariablesBodyTree `statics`.
+ * A namespace for VariablesBodyTree `statistics`.
  */
 namespace VariablesBodyTree {
   /**

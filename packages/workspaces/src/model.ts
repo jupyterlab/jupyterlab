@@ -149,7 +149,7 @@ export class WorkspacesModel implements IWorkspacesModel {
 }
 
 /**
- * The namespace for the `WorkspacesModel` class statics.
+ * The namespace for the `WorkspacesModel` class statistics.
  */
 export namespace WorkspacesModel {
   /**

@@ -959,7 +959,7 @@ export class Settings
 }
 
 /**
- * A namespace for `SettingRegistry` statics.
+ * A namespace for `SettingRegistry` statistics.
  */
 export namespace SettingRegistry {
   /**
@@ -1336,7 +1336,7 @@ export namespace SettingRegistry {
 }
 
 /**
- * A namespace for `Settings` statics.
+ * A namespace for `Settings` statistics.
  */
 export namespace Settings {
   /**

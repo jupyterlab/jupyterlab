@@ -495,7 +495,7 @@ export class OutputAreaModel implements IOutputAreaModel {
 }
 
 /**
- * The namespace for OutputAreaModel class statics.
+ * The namespace for OutputAreaModel class statistics.
  */
 export namespace OutputAreaModel {
   /**

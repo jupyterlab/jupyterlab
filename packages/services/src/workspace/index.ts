@@ -126,7 +126,7 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
 }
 
 /**
- * A namespace for `WorkspaceManager` statics.
+ * A namespace for `WorkspaceManager` statistics.
  */
 export namespace WorkspaceManager {
   /**

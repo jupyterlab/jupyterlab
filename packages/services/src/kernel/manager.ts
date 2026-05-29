@@ -385,7 +385,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 }
 
 /**
- * The namespace for `KernelManager` class statics.
+ * The namespace for `KernelManager` class statistics.
  */
 export namespace KernelManager {
   /**

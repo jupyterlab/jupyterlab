@@ -292,7 +292,7 @@ export class DebuggerSources implements IDebugger.ISources {
   private _editorTracker: IEditorTracker | null;
 }
 /**
- * A namespace for `DebuggerSources` statics.
+ * A namespace for `DebuggerSources` statistics.
  */
 export namespace DebuggerSources {
   /**

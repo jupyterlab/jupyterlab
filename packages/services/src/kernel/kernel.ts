@@ -623,7 +623,7 @@ export interface IKernelConnection extends IObservableDisposable {
 }
 
 /**
- * The namespace for `IKernelConnection` statics.
+ * The namespace for `IKernelConnection` statistics.
  */
 export namespace IKernelConnection {
   /**

@@ -57,7 +57,7 @@ export class MimeModel implements IRenderMime.IMimeModel {
 }
 
 /**
- * The namespace for MimeModel class statics.
+ * The namespace for MimeModel class statistics.
  */
 export namespace MimeModel {
   /**

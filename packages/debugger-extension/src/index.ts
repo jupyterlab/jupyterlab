@@ -912,7 +912,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     };
 
     // When debugger session ends, close the auto-opened source preview.
-    // This signal is emitted when user stops, toggles, or restarts debuggger and when they restart the kernel.
+    // This signal is emitted when user stops, toggles, or restarts debugger and when they restart the kernel.
     service.stopped.connect(closeAutoOpenedSourcePreview);
 
     let delayedCleanupId: ReturnType<typeof setTimeout> | null = null;

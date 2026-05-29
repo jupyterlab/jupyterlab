@@ -117,7 +117,7 @@ export class VideoViewer extends Widget {
 }
 
 /**
- * The namespace for VideoViewer class statics.
+ * The namespace for VideoViewer class statistics.
  */
 export namespace VideoViewer {
   /**
@@ -146,7 +146,7 @@ export class VideoDocumentWidget extends DocumentWidget<VideoViewer> {
 }
 
 /**
- * The namespace for VideoDocumentWidget class statics.
+ * The namespace for VideoDocumentWidget class statistics.
  */
 export namespace VideoDocumentWidget {
   /**
@@ -190,7 +190,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
 }
 
 /**
- * The namespace for VideoViewerFactory class statics.
+ * The namespace for VideoViewerFactory class statistics.
  */
 export namespace VideoViewerFactory {
   /**

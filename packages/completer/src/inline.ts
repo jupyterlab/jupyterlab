@@ -610,7 +610,7 @@ export interface ISuggestionsChangedArgs {
 }
 
 /**
- * A namespace for inline completer statics.
+ * A namespace for inline completer statistics.
  */
 export namespace InlineCompleter {
   /**

@@ -162,7 +162,7 @@ export const convertType = (variable: IDebugger.IVariable): string | number => {
 };
 
 /**
- * A namespace for Variables `statics`.
+ * A namespace for Variables `statistics`.
  */
 export namespace Variables {
   /**

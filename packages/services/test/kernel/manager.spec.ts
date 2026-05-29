@@ -18,7 +18,7 @@ describe('kernel/manager', () => {
     kernel = await KernelAPI.startNew();
   }, 30000);
 
-  afterAll(async () => {
+  after all(async () => {
     await server.shutdown();
   });
 
@@ -34,7 +34,7 @@ describe('kernel/manager', () => {
       manager.dispose();
     });
 
-    afterAll(async () => {
+    after all(async () => {
       const models = await KernelAPI.listRunning();
       await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
     });

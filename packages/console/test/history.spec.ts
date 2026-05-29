@@ -63,7 +63,7 @@ describe('console/history', () => {
     sessionContext = await createSessionContext();
   });
 
-  afterAll(() => sessionContext.shutdown());
+  after all(() => sessionContext.shutdown());
 
   describe('ConsoleHistory', () => {
     describe('#constructor()', () => {

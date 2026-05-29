@@ -21,7 +21,7 @@ beforeAll(() => {
     .mockImplementation(() => {});
 });
 
-afterAll(() => {
+after all(() => {
   scrollIntoViewSpy.mockRestore();
 });
 const DIRS = ['alpha', 'beta', 'gamma'];

@@ -332,7 +332,7 @@ export class JSONEditor extends Widget {
 }
 
 /**
- * The static namespace JSONEditor class statics.
+ * The static namespace JSONEditor class statistics.
  */
 export namespace JSONEditor {
   /**

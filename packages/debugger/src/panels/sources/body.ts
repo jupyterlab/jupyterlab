@@ -120,7 +120,7 @@ export class SourcesBody extends Widget {
 }
 
 /**
- * A namespace for SourcesBody `statics`.
+ * A namespace for SourcesBody `statistics`.
  */
 export namespace SourcesBody {
   /**

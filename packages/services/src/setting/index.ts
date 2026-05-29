@@ -126,7 +126,7 @@ export class SettingManager extends DataConnector<
 }
 
 /**
- * A namespace for `SettingManager` statics.
+ * A namespace for `SettingManager` statistics.
  */
 export namespace SettingManager {
   /**
