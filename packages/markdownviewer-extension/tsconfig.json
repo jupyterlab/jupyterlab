@@ -13,10 +13,22 @@
       "path": "../apputils"
     },
     {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
       "path": "../coreutils"
     },
     {
+      "path": "../docregistry"
+    },
+    {
       "path": "../documentsearch"
+    },
+    {
+      "path": "../fileeditor"
     },
     {
       "path": "../markdownviewer"

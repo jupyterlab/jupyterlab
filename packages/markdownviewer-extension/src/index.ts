@@ -13,6 +13,7 @@ import { ILayoutRestorer } from '@jupyterlab/application';
 import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
@@ -28,6 +29,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
+import { MarkdownScrollSyncManager } from './scrollsync';
 
 import { markdownViewerSearchProviderFactory } from './searchprovider';
 
@@ -60,7 +62,8 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
     ISettingRegistry,
     ITableOfContentsRegistry,
     ISearchProviderRegistry,
-    ISanitizer
+    ISanitizer,
+    IEditorTracker
   ],
   autoStart: true
 };
@@ -76,7 +79,8 @@ function activate(
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
   searchRegistry: ISearchProviderRegistry | null,
-  sanitizer: IRenderMime.ISanitizer | null
+  sanitizer: IRenderMime.ISanitizer | null,
+  editorTracker: IEditorTracker | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
   const { commands, docRegistry } = app;
@@ -97,6 +101,16 @@ function activate(
     );
   }
 
+  // Synchronize scrolling between Markdown source editors and their previews.
+  // Only available when the file editor tracker is present.
+  const scrollSync = editorTracker
+    ? new MarkdownScrollSyncManager({
+        editorTracker,
+        markdownTracker: tracker,
+        rendermime
+      })
+    : null;
+
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
   };
@@ -105,7 +119,11 @@ function activate(
    * Update the settings of a widget.
    */
   function updateWidget(widget: MarkdownViewer): void {
-    Object.keys(config).forEach((k: keyof MarkdownViewer.IConfig) => {
+    (
+      Object.keys(
+        MarkdownViewer.defaultConfig
+      ) as (keyof MarkdownViewer.IConfig)[]
+    ).forEach(k => {
       widget.setOption(k, config[k] ?? null);
     });
   }
@@ -113,6 +131,7 @@ function activate(
   if (settingRegistry) {
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
       config = settings.composite as Partial<MarkdownViewer.IConfig>;
+      scrollSync?.setEnabled(settings.composite['syncScrolling'] === true);
       tracker.forEach(widget => {
         updateWidget(widget.content);
       });
