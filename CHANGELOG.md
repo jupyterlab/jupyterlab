@@ -8494,7 +8494,7 @@ We are very excited to add Eric Charles to the core team this month!
 
 ### Bugfixes
 
-- Typo: fix extensino to extension
+- Typo: fix spelling of extension
   ([#8512](https://github.com/jupyterlab/jupyterlab/pull/8512))
 - Close correct tab with close tab
   ([#8529](https://github.com/jupyterlab/jupyterlab/pull/8529))
