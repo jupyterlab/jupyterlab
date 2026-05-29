@@ -8,21 +8,14 @@ import { expect, galata, test } from '@jupyterlab/galata';
 test.describe('test readonly status', () => {
   test('test readonly status', async ({ page }) => {
     await page.notebook.createNew('notebook.ipynb');
-    // We need to save the notebook to preserve the default kernel choice
-    // otherwise when we reopen it, it would show "Select Kernel" dialog,
-    // which adds a semi-transparent layer above the notification.
-    const notSavedIndicator = page
-      .getByRole('main')
-      .getByRole('tablist')
-      .locator('.jp-mod-dirty');
-    await notSavedIndicator.waitFor();
-    await page.notebook.save();
-
     await galata.Mock.makeNotebookReadonly(page);
 
     // have to open and close notebook for notification to show up
     await page.notebook.close();
-    await page.notebook.open('notebook.ipynb');
+
+    // We open the notebook without the kernel to avoid "Select Kernel",
+    // which adds a semi-transparent layer above the notification.
+    await page.notebook.open('notebook.ipynb', { noKernel: true });
 
     await page.keyboard.press('Control+s');
 

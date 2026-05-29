@@ -67,9 +67,10 @@ export class NotebookHelper {
    * The notebook needs to exist in the current folder.
    *
    * @param name Notebook name
+   * @param options.noKernel If true, the notebook will be opened without a kernel
    * @returns Action success status
    */
-  async open(name: string): Promise<boolean> {
+  async open(name: string, options?: { noKernel?: boolean }): Promise<boolean> {
     try {
       // The notebook may not be rendered on the list if the upload
       // has just completed but the listing was not refreshed yet.
@@ -80,7 +81,16 @@ export class NotebookHelper {
       return false;
     }
 
-    await this.filebrowser.open(name);
+    if (options?.noKernel) {
+      await this.page.click(`.jp-DirListing-item span:has-text("${name}")`, {
+        button: 'right'
+      });
+      await Utils.waitForCondition(() => this.menu.isAnyOpen());
+      await this.page.hover('text=Open With');
+      await this.page.click('text=Notebook (no kernel)');
+    } else {
+      await this.filebrowser.open(name);
+    }
 
     return await this.isOpen(name);
   }
