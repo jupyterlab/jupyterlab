@@ -703,6 +703,8 @@ Here are some good practices to follow when writing integration tests:
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
 - If your change introduces subpixel change to dozens of snapshots, consider if it is necessary;
   such a change often requires many extensions to update their snapshots too, leading to significant cost downstream.
+- When testing the notebook UI without executing code, open the notebook without the kernel to preserve resources
+  (starting hundreds of kernels slows down the test suite)
 
 ## Contributing to the debugger front-end
 
