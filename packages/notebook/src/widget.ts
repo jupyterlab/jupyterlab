@@ -1960,13 +1960,20 @@ export class Notebook extends StaticNotebook {
 
     this._ensureFocus();
 
-    if (newValue === oldValue) {
-      return;
+    if (
+      cell instanceof MarkdownCell &&
+      cell.numberChildNodes > 0 &&
+      cell.headingCollapsed
+    ) {
+      for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          this.select(this.widgets[i]);
+        }
+      }
     }
 
-    this.deselectAll();
-    if (cell) {
-      this.select(cell);
+    if (newValue === oldValue) {
+      return;
     }
     this._trimSelections();
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
