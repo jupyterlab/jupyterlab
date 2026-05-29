@@ -4088,12 +4088,18 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.6.0
     "@jupyterlab/apputils": ^4.7.0
+    "@jupyterlab/codeeditor": ^4.6.0
+    "@jupyterlab/codemirror": ^4.6.0
     "@jupyterlab/coreutils": ^6.6.0
+    "@jupyterlab/docregistry": ^4.6.0
+    "@jupyterlab/fileeditor": ^4.6.0
     "@jupyterlab/markdownviewer": ^4.6.0
     "@jupyterlab/rendermime": ^4.6.0
     "@jupyterlab/settingregistry": ^4.6.0
     "@jupyterlab/toc": ^6.6.0
     "@jupyterlab/translation": ^4.6.0
+    "@lumino/disposable": ^2.1.5
+    "@lumino/signaling": ^2.1.5
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
