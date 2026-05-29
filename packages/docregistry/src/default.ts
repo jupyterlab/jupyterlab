@@ -631,7 +631,6 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
-    this._handleReadOnlyState();
   }
 
   /**
@@ -651,17 +650,15 @@ export class DocumentWidget<
    * Handle the read-only state of the context model.
    */
   private _handleReadOnlyState(): void {
-    if (!this.context.model.dirty) {
-      if (this.context.contentsModel?.writable === false) {
-        const readOnlyIndicator = createReadonlyLabel(this);
-        let roi = this.toolbar.insertBefore(
-          'kernelName',
-          'read-only-indicator',
-          readOnlyIndicator
-        );
-        if (!roi) {
-          this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
-        }
+    if (this.context.contentsModel?.writable === false) {
+      const readOnlyIndicator = createReadonlyLabel(this);
+      let roi = this.toolbar.insertBefore(
+        'kernelName',
+        'read-only-indicator',
+        readOnlyIndicator
+      );
+      if (!roi) {
+        this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
       }
     }
   }
