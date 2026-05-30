@@ -52,11 +52,20 @@ test.describe('Default', () => {
 
     // Wait for kernel to settle on idle
     await page
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
-    await page
       .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
       .waitFor();
+
+    const debuggerActive = page.locator(
+      '.jp-DebuggerBugButton[aria-disabled="false"]'
+    );
+    // The debugger icon flickering is a persistent source of flakiness,
+    // we see it appear, disappear and appear again; while we want to
+    // fix this properly, it is not trivial as seen in attempts to address
+    // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
+    // so for now to ease the snapshot updates we just wait for it to settle.
+    await debuggerActive.waitFor();
+    await page.waitForTimeout(1250);
+    await debuggerActive.waitFor();
 
     expect(
       await page
