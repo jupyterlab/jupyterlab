@@ -111,6 +111,11 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
+    // Focus the cell after rearranging panels to resolve a CodeMirror glitch
+    // where some lines are shifted by less than one pixel, and then focus back.
+    await cell.click();
+    await viewerHandle.click();
+
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
