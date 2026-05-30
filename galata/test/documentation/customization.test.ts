@@ -28,6 +28,9 @@ test.describe('Default', () => {
 
     await page.locator('.jp-Terminal').waitFor();
 
+    // Wait for the tab to show "Terminal 1"
+    await page.locator('div[role="main"] >> text="Terminal 1"');
+
     expect(await page.screenshot()).toMatchSnapshot(
       'default-terminal-position-single.png'
     );
