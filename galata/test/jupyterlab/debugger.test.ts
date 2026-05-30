@@ -249,9 +249,11 @@ for (const c of showSourcesCases) {
           .toBeGreaterThan(
             140
           ); /* Variables panel is higher (149 px high) when sources panel is displayed */
-        expect(await variablesPanel.screenshot()).toMatchSnapshot(
-          `start-debug-session-script-variables${c.screenshotSuffix}.png`
-        );
+        expect
+          .soft(await variablesPanel.screenshot())
+          .toMatchSnapshot(
+            `start-debug-session-script-variables${c.screenshotSuffix}.png`
+          );
       } else {
         /* Sources panel snapshot only when the source panel is displayed */
         expect(variablesBox?.height).toBeLessThan(
@@ -269,8 +271,14 @@ for (const c of showSourcesCases) {
 
 /* Non parametrized tests */
 test.describe('Debugger Tests', () => {
-  test.afterEach(async ({ page }) => {
-    await page.click('jp-button[title^=Continue]');
+  test.afterEach(async ({ page }, testInfo) => {
+    if (
+      !testInfo.annotations.some(
+        annotation => annotation.type === 'skip-continue'
+      )
+    ) {
+      await page.click('jp-button[title^=Continue]');
+    }
     await page.debugger.switchOff();
     await page.waitForTimeout(500);
     await page.notebook.close();
@@ -428,6 +436,28 @@ test.describe('Debugger Tests', () => {
       ).toHaveCount(0);
 
       await page.click('jp-button[title^=Continue]');
+    });
+
+    test('Kernel Sources panel updates after execute_reply', async ({
+      page,
+      tmpPath
+    }) => {
+      test.info().annotations.push({
+        type: 'skip-continue',
+        description: 'This test does not pause on a debugger breakpoint'
+      });
+
+      await init({ page, tmpPath });
+
+      await page.notebook.addCell('code', 'import anyio');
+      await page.notebook.runCell(2);
+
+      await page.waitForCondition(async () => {
+        const texts = await page
+          .locator('.jp-DebuggerKernelSource-source')
+          .allInnerTexts();
+        return texts.some(t => t.includes('anyio'));
+      });
     });
   });
 });

@@ -399,6 +399,10 @@ export class LayoutRestorer implements ILayoutRestorer {
       size: area.size
     };
 
+    if (area.collapsed !== undefined) {
+      dehydrated.collapsed = area.collapsed;
+    }
+
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -442,6 +446,9 @@ export class LayoutRestorer implements ILayoutRestorer {
           )
           .filter(widget => !!widget);
     return {
+      ...(typeof area.collapsed === 'boolean'
+        ? { collapsed: area.collapsed }
+        : {}),
       currentWidget: currentWidget!,
       size: area.size ?? 0.0,
       widgets: widgets as Widget[] | null
@@ -738,6 +745,11 @@ namespace Private {
    * The restorable description of the down area in the user interface
    */
   export interface IDownArea extends PartialJSONObject {
+    /**
+     * Whether the down area is collapsed.
+     */
+    collapsed?: boolean | null;
+
     /**
      * The current widget that has application focus.
      */
