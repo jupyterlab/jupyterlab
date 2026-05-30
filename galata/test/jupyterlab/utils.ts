@@ -40,29 +40,11 @@ export async function positionCellPartiallyBelowViewport(
 ): Promise<void> {
   const scroller = notebook.locator(OUTER_SELECTOR).first();
 
-  // Helper to measure actual visible pixels of the cell
-  const measureVisiblePixels = async (): Promise<number> => {
-    const notebookBbox = await scroller.boundingBox();
-    const cellBbox = await cell.boundingBox();
-    const cellTop = cellBbox.y;
-    const cellBottom = cellBbox.y + cellBbox.height;
-    const viewportTop = notebookBbox.y;
-    const viewportBottom = notebookBbox.y + notebookBbox.height;
-
-    if (cellBottom <= viewportTop || cellTop >= viewportBottom) {
-      return 0; // Cell not in viewport
-    }
-
-    const visibleTop = Math.max(cellTop, viewportTop);
-    const visibleBottom = Math.min(cellBottom, viewportBottom);
-    return visibleBottom - visibleTop;
-  };
-
   // Calculate target visible pixels
   const cellBbox = await cell.boundingBox();
   const targetPixels = cellBbox.height * ratio;
 
-  // Initial scroll estimate
+  // Initial scroll estimate: put cell bottom at viewport bottom minus slack
   const notebookBbox = await scroller.boundingBox();
   await page.mouse.move(notebookBbox.x, notebookBbox.y);
 
@@ -70,20 +52,25 @@ export async function positionCellPartiallyBelowViewport(
     cellBbox.y - notebookBbox.y - notebookBbox.height + targetPixels;
   await page.mouse.wheel(0, initialScrollOffset);
 
-  // Optimization loop to refine positioning
+  // Refine positioning using direct position calculation.
+  // The target is: cell top = viewportBottom - targetPixels.
+  // Correction = (currentCellTop - desiredCellTop) / 2, which converges
+  // regardless of whether the cell overshot above or below the viewport.
   const MAX_ITERATIONS = 10;
   const TOLERANCE = 1; // 1 pixel tolerance
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
-    const actualPixels = await measureVisiblePixels();
-    const error = actualPixels - targetPixels;
+    const newNotebookBbox = await scroller.boundingBox();
+    const newCellBbox = await cell.boundingBox();
 
-    if (Math.abs(error) <= TOLERANCE) {
-      break; // Achieved target within tolerance
+    const desiredCellTop =
+      newNotebookBbox.y + newNotebookBbox.height - targetPixels;
+    const correction = (newCellBbox.y - desiredCellTop) / 2;
+
+    if (Math.abs(correction) <= TOLERANCE / 2) {
+      break;
     }
 
-    // Correct by half the error amount
-    const correction = -error / 2;
     await page.mouse.wheel(0, correction);
   }
 }

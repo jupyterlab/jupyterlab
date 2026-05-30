@@ -743,8 +743,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       // calculate the correct scroll delta) before invoking scrolling in editor.
       const inWindowedContainer = this._inViewport !== null;
       const preventDefault = inWindowedContainer && !this._inViewport;
+      const cursorMoved = range.head !== this._lastScrollHead;
+      this._lastScrollHead = range.head;
       this._scrollRequested.emit({
-        defaultPrevented: preventDefault,
+        defaultPrevented: preventDefault && cursorMoved,
         scrollWithinCell: () => {
           view.dispatch({
             effects: EditorView.scrollIntoView(range, options)
@@ -757,6 +759,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   private _editorConfig: Record<string, any> = {};
   private _editorExtensions: Extension[] = [];
+  private _lastScrollHead: number = -1;
   private _input: InputArea | null;
   private _inputHidden = false;
   private _inputWrapper: Widget | null;

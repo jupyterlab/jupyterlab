@@ -1188,10 +1188,16 @@ export class WindowedList<
       event.currentTarget as HTMLDivElement;
 
     // TBC Firefox is emitting two events one with 1px diff then the _real_ scroll
-    if (
-      !this._scrollUpdateWasRequested &&
-      Math.abs(this.viewModel.scrollOffset - scrollTop) > 1
-    ) {
+    // When _scrollUpdateWasRequested is true, a programmatic scroll was queued.
+    // If the observed scrollTop significantly diverges from the programmatic
+    // target (viewModel.scrollOffset), treat it as a user scroll and cancel
+    // the programmatic one so the pending rAF does not override the user's
+    // intended scroll position.
+    const isUserScroll =
+      !this._scrollUpdateWasRequested ||
+      Math.abs(this.viewModel.scrollOffset - scrollTop) > 1;
+
+    if (isUserScroll && Math.abs(this.viewModel.scrollOffset - scrollTop) > 1) {
       // Test if the scroll event is jumping to the list bottom
       // if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
       //   // FIXME Does not work because it happens in multiple segments in between which the sizing is changing
@@ -1207,6 +1213,13 @@ export class WindowedList<
       this._renderScrollbar();
 
       if (this.viewModel.windowingActive) {
+        // A user-initiated scroll (or one that conflicts with a pending
+        // programmatic scroll) cancels both the scroll-to-item target and any
+        // pending programmatic scroll. Without this, soft-hiding the active
+        // cell would trigger _scrollBackToItemOnResize, pulling the cell back
+        // into view against the user's intent; and stale programmatic rAFs
+        // would override the user's scroll position.
+        this._scrollToItem = null;
         this._scrollUpdateWasRequested = false;
 
         if (this._viewport.dataset.isScrolling != 'true') {
