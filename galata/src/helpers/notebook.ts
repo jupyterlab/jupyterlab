@@ -333,6 +333,25 @@ export class NotebookHelper {
   }
 
   /**
+   * Wait until kernel is ready to schedule cell execution.
+   *
+   * This is not the same as waiting for it to be idle.
+   * If this is not awaited and `enableKernelInitNotification` setting is off
+   * (which is the default) the tests can randomly fail without any error
+   * because the kernel ignores execution requests before startup completes.
+   * Also see: https://github.com/jupyterlab/jupyterlab/issues/15420
+   */
+  private async _waitUntilKernelReadyToScheduleExecution() {
+    await this.page.waitForFunction(() => {
+      const text =
+        document.querySelector('#jp-main-statusbar')?.textContent ?? '';
+      return !['Connecting', 'Initializing', 'Starting'].some(s =>
+        text.includes(s)
+      );
+    });
+  }
+
+  /**
    * Revert changes to the currently active notebook
    *
    * @returns Action success status
@@ -364,6 +383,9 @@ export class NotebookHelper {
     await this.page.evaluate(() => {
       window.galata.resetExecutionCount();
     });
+
+    await this._waitUntilKernelReadyToScheduleExecution();
+
     await this.menu.clickMenuItem('Run>Run All Cells');
     await this.waitForRun();
 
@@ -380,6 +402,7 @@ export class NotebookHelper {
     if (!(await this.isAnyActive())) {
       return false;
     }
+    await this._waitUntilKernelReadyToScheduleExecution();
 
     let callbackName = '';
 
