@@ -796,7 +796,7 @@ export class FileBrowser
   private _sortNotebooksFirst: boolean = false;
   private _sortFileNamesNaturally: boolean = true;
   private _allowFileUploads: boolean = true;
-  private _timestampFormat: Time.TimestampFormat = 'absolute';
+  private _timestampFormat: Time.TimestampFormat = 'relative';
   private _selectionChanged = new Signal<this, void>(this);
   private _sectionChanged = new Signal<this, void>(this);
   private _accordion: AccordionPanel | null = null;
