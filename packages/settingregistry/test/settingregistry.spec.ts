@@ -36,6 +36,49 @@ class TestConnector extends StateDB {
   }
 }
 
+function createDeferred<T>(): {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+} {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(value => {
+    resolve = value;
+  });
+  return { promise, resolve };
+}
+
+class SaveRaceConnector extends TestConnector {
+  readonly saveRequests: string[] = [];
+
+  get firstSaveFetchStarted(): Promise<void> {
+    return this._firstSaveFetchStarted.promise;
+  }
+
+  releaseFirstSaveFetch(): void {
+    this._firstSaveFetchRelease.resolve(undefined);
+  }
+
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
+    this._fetchCount += 1;
+
+    if (this._fetchCount === 2) {
+      this._firstSaveFetchStarted.resolve(undefined);
+      await this._firstSaveFetchRelease.promise;
+    }
+
+    return super.fetch(id);
+  }
+
+  async save(id: string, raw: string): Promise<void> {
+    this.saveRequests.push(raw);
+    return super.save(id, raw);
+  }
+
+  private _fetchCount = 0;
+  private _firstSaveFetchRelease = createDeferred<void>();
+  private _firstSaveFetchStarted = createDeferred<void>();
+}
+
 describe('@jupyterlab/settingregistry', () => {
   describe('DefaultSchemaValidator', () => {
     describe('#constructor()', () => {
@@ -146,6 +189,41 @@ describe('@jupyterlab/settingregistry', () => {
         await registry.load(id);
         await registry.set(id, key, value);
         expect(called).toBe(true);
+      });
+    });
+
+    describe('#set()', () => {
+      it('should preserve queued updates while a previous save is in-flight', async () => {
+        const id = 'foo';
+        const key = 'enabled';
+        const connector = new SaveRaceConnector();
+        const registry = new SettingRegistry({ connector, timeout });
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: 'boolean' }
+          }
+        };
+
+        await registry.load(id);
+
+        const firstSave = registry.set(id, key, true);
+        await connector.firstSaveFetchStarted;
+
+        const secondSave = registry.set(id, key, false);
+        connector.releaseFirstSaveFetch();
+
+        await Promise.all([firstSave, secondSave]);
+
+        expect(connector.saveRequests).toHaveLength(2);
+        expect(json5.parse(connector.saveRequests[0])[key]).toBe(true);
+        expect(json5.parse(connector.saveRequests[1])[key]).toBe(false);
+
+        const saved = await registry.get(id, key);
+        expect(saved.user).toBe(false);
+
+        await connector.clear();
       });
     });
 

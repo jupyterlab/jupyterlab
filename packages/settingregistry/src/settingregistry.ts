@@ -622,6 +622,7 @@ export class SettingRegistry implements ISettingRegistry {
    */
   private async _save(plugin: string): Promise<void> {
     const previousSave = this._saveQueue.get(plugin) ?? Promise.resolve();
+    const snapshot = this.plugins[plugin]?.raw;
     const savePlugin = async (): Promise<void> => {
       const plugins = this.plugins;
 
@@ -629,13 +630,19 @@ export class SettingRegistry implements ISettingRegistry {
         throw new Error(`${plugin} does not exist in setting registry.`);
       }
 
+      if (snapshot === undefined) {
+        throw new Error(`${plugin} does not exist in setting registry.`);
+      }
+
+      const snapshotPlugin = { ...plugins[plugin], raw: snapshot };
+
       try {
-        await this._validate(plugins[plugin]);
+        await this._validate(snapshotPlugin);
       } catch (errors) {
         console.warn(`${plugin} validation errors:`, errors);
         throw new Error(`${plugin} failed to validate; check console.`);
       }
-      await this.connector.save(plugin, plugins[plugin].raw);
+      await this.connector.save(plugin, snapshot);
 
       // Fetch and reload the data to guarantee server and client are in sync.
       const fetched = await this.connector.fetch(plugin);
