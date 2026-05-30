@@ -308,7 +308,6 @@ export namespace ConsolePanel {
   /**
    * The console renderer token.
    */
-  // eslint-disable-next-line no-useless-assignment
   export const IContentFactory = new Token<ConsolePanel.IContentFactory>(
     '@jupyterlab/console:IContentFactory',
     'A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.'
