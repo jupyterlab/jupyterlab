@@ -31,6 +31,13 @@ repos:
     hooks:
       - id: check-github-workflows
 
+  # Check zizmor version is aligned with the one in .github/workflows/zizmor.yml
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9 # frozen: v1.25.2
+    hooks:
+      - id: zizmor
+        args: ["--offline"]
+
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.12
