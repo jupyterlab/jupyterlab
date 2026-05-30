@@ -68,6 +68,15 @@ test.describe('General', () => {
 
     await page.click('div[role="main"] >> text=Lorenz.ipynb');
 
+    // Wait for the debugger bug icon to settle.
+    // This needs to be before running any cells/switching to a different panel.
+    // We need to fix it cleanely later but for now let's make tests less flaky,
+    // and if it has to fail, fail fast (after 10 seconds, not 1 minute).
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor({ timeout: 10000 });
+
     await page.notebook.run();
 
     const cell = page.locator(
@@ -82,14 +91,6 @@ test.describe('General', () => {
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowUp');
-
-    // Wait for the debugger bug icon to settle.
-    // This needs to be before switching to a different panel, whether via
-    // drag-and-drop or opening a new view as otherwise the icon does not update.
-    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
-    await panel
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
 
     await cell.click();
     await page.keyboard.press('ContextMenu');
