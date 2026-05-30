@@ -10,7 +10,7 @@
 
 name: Comment on the pull request
 
-on:
+on: # zizmor: ignore[dangerous-triggers] required to comment results from artifact produced by unprivileged workflow
   workflow_run:
     workflows: ['Benchmark Tests']
     types:

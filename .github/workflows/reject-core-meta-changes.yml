@@ -7,6 +7,8 @@ on:
     paths:
       - 'packages/core-meta/core.package.json'
 
+permissions: read-all
+
 jobs:
   core-meta-check:
     runs-on: ubuntu-latest

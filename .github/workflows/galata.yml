@@ -21,6 +21,9 @@ on:
         default: 1
         type: number
 
+permissions:
+  contents: read
+
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
 

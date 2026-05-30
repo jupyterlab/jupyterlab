@@ -133,6 +133,9 @@ pre-commit run zizmor --files .github/workflows/<workflow>.yml
 
 This helps catch GitHub Actions security findings locally before pushing.
 The local hook is pinned and kept aligned with the CI `zizmor` version.
+Running `pre-commit run zizmor --all-files` audits all files matched by
+the `zizmor` hook configuration in this repository.
+For day-to-day development, prefer targeted runs with `--files`.
 You may also install [ruff integration](https://docs.astral.sh/ruff/integrations)
 into your text editor to format code automatically.
 
