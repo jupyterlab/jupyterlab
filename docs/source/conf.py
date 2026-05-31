@@ -69,11 +69,16 @@ if SPELLING_BUILD_ENABLED:
     globals()["suppress_warnings"] = suppress_warnings
 
 if SPELLING_BUILD_ENABLED:
+    enchant_available = False
     try:
-        import enchant  # noqa: F401
+        __import__("enchant")
     except ImportError:
-        pass
+        # Skip spelling extension when enchant backend is unavailable.
+        enchant_available = False
     else:
+        enchant_available = True
+
+    if enchant_available:
         extensions += ["sphinxcontrib.spelling"]
 
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
