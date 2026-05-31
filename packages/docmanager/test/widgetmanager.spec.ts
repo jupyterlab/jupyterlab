@@ -1,19 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   Context,
   DocumentRegistry,
   DocumentWidget,
-  IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { acceptDialog, dangerDialog, dismissDialog } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IMessageHandler } from '@lumino/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { DocumentWidgetManager } from '../src';
 
@@ -291,8 +292,8 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should prompt the user before closing', async () => {
-        // Populate the model with content.
-        context.model.fromString('foo');
+        // Mark the model as dirty.
+        context.model.dirty = true;
 
         const widget = manager.createWidget(widgetFactory, context);
         const closed = manager.onClose(widget);
@@ -304,7 +305,7 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should ask confirmation when a dirty widget is closing', async () => {
         manager.confirmClosingDocument = true;
-        context.model.fromString('foo');
+        context.model.dirty = true;
 
         const widget = manager.createWidget(widgetFactory, context);
         const closed = manager.onClose(widget);
@@ -323,8 +324,8 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should not prompt if the other widget is writable', async () => {
-        // Populate the model with content.
-        context.model.fromString('foo');
+        // Mark the model as dirty.
+        context.model.dirty = true;
 
         const one = manager.createWidget(widgetFactory, context);
         const two = manager.createWidget(widgetFactory, context);
@@ -337,8 +338,8 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should prompt if the only other widget has a readonly factory', async () => {
-        // Populate the model with content.
-        context.model.fromString('foo');
+        // Mark the model as dirty.
+        context.model.dirty = true;
 
         const writable = manager.createWidget(widgetFactory, context);
         const readonly = manager.createWidget(readOnlyFactory, context);
@@ -353,7 +354,7 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should close the widget', async () => {
-        context.model.fromString('foo');
+        context.model.dirty = true;
         const widget = manager.createWidget(widgetFactory, context);
         const promise = manager.onClose(widget);
         await dismissDialog();

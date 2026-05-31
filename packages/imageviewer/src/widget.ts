@@ -5,16 +5,15 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import { Printing } from '@jupyterlab/apputils';
 
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
@@ -35,6 +34,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this.context = context;
     this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
+    this.addClass('jp-zoom-target');
 
     this._img = document.createElement('img');
     this.node.appendChild(this._img);

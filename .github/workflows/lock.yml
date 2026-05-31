@@ -14,10 +14,11 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/lock-threads@v5
+      - uses: dessant/lock-threads@7266a7ce5c1df01b1c6db85bf8cd86c737dadbe7 # v6
         with:
           github-token: ${{ github.token }}
-          issue-lock-inactive-days: '180'
-          issue-lock-labels: 'status:resolved-locked'
-          pr-lock-inactive-days: '180'
-          pr-lock-labels: 'status:resolved-locked'
+          issue-inactive-days: '180'
+          add-issue-labels: 'status:resolved-locked'
+          pr-inactive-days: '180'
+          add-pr-labels: 'status:resolved-locked'
+          process-only: 'issues, prs'

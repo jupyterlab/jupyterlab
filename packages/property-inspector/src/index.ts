@@ -5,19 +5,19 @@
  * @module property-inspector
  */
 
-import { ILabShell } from '@jupyterlab/application';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ILabShell } from '@jupyterlab/application';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ReactWidget } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
-import * as React from 'react';
-import { IPropertyInspector, IPropertyInspectorProvider } from './token';
+import type * as React from 'react';
+import type { IPropertyInspector } from './token';
+import { IPropertyInspectorProvider } from './token';
 
-export { IPropertyInspector, IPropertyInspectorProvider };
+export type { IPropertyInspector };
+export { IPropertyInspectorProvider };
 
 /**
  * The implementation of the PropertyInspector.

@@ -3,18 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {
-  JSONExt,
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableJSON } from '@jupyterlab/observables';
+import { ObservableJSON } from '@jupyterlab/observables';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
   JSONObject,
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { MimeModel } from './mimemodel';
+import { JSONExt } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { MimeModel } from './mimemodel';
 
 /**
  * The interface for an attachment model.

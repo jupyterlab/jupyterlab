@@ -2,11 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { LoggerRegistry } from '@jupyterlab/logconsole';
-import {
-  IRenderMimeRegistry,
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {

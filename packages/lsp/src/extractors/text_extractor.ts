@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { LanguageIdentifier } from '../lsp';
+import type { LanguageIdentifier } from '../lsp';
 import { positionAtOffset } from '../positioning';
 
-import { IExtractedCode, IForeignCodeExtractor } from './types';
+import type { IExtractedCode, IForeignCodeExtractor } from './types';
 
 /**
  * The code extractor for the raw and markdown text.

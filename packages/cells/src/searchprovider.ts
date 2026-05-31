@@ -1,23 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
   CodeMirrorEditor,
-  EditorSearchProvider,
   IHighlightAdjacentMatchOptions
 } from '@jupyterlab/codemirror';
+import { EditorSearchProvider } from '@jupyterlab/codemirror';
 import { signalToPromise } from '@jupyterlab/coreutils';
-import {
-  GenericSearchProvider,
+import type {
   IBaseSearchProvider,
   IFilters,
   IReplaceOptions,
   ISearchMatch
 } from '@jupyterlab/documentsearch';
-import { OutputArea } from '@jupyterlab/outputarea';
-import { ICellModel } from './model';
-import { Cell, CodeCell, MarkdownCell } from './widget';
+import { GenericSearchProvider } from '@jupyterlab/documentsearch';
+import type { OutputArea } from '@jupyterlab/outputarea';
+import type { ICellModel } from './model';
+import type { Cell, CodeCell, MarkdownCell } from './widget';
 
 /**
  * Class applied on highlighted search matches

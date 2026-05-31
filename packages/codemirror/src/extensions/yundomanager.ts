@@ -14,14 +14,12 @@
  * - simplified `YUndoManagerConfig` by removing public methods
  * - moved `_onStackItemAdded`, `_onStackItemPopped` and `_storeSelection` definitions out of constructor
  */
-import {
-  EditorView,
-  PluginValue,
-  ViewPlugin,
-  ViewUpdate
-} from '@codemirror/view';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { PluginValue, ViewUpdate } from '@codemirror/view';
+import { EditorView, ViewPlugin } from '@codemirror/view';
 import { Facet } from '@codemirror/state';
-import { YRange, ySyncAnnotation, YSyncConfig, ySyncFacet } from './ybinding';
+import type { YRange, YSyncConfig } from './ybinding';
+import { ySyncAnnotation, ySyncFacet } from './ybinding';
 import type { UndoManager } from 'yjs';
 
 interface IStackItem {

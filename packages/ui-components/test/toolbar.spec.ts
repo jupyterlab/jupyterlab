@@ -13,8 +13,9 @@ import {
 } from '@jupyterlab/ui-components';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { PanelLayout } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();

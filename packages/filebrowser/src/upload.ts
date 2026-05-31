@@ -2,15 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { fileUploadIcon, ToolbarButton } from '@jupyterlab/ui-components';
-import { FileBrowserModel } from './model';
-import { Contents } from '@jupyterlab/services';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { FileBrowserModel } from './model';
+import type { Contents } from '@jupyterlab/services';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * A widget which provides an upload button.

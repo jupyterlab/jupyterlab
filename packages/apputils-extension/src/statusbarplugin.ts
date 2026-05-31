@@ -3,14 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   IKernelStatusModel,
-  ISessionContext,
   ISessionContextDialogs,
   KernelStatus,
   RunningSessions,
@@ -19,9 +19,9 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IDisposable } from '@lumino/disposable';
-import { Title, Widget } from '@lumino/widgets';
-import { KeyboardEvent } from 'react';
+import type { IDisposable } from '@lumino/disposable';
+import type { Title, Widget } from '@lumino/widgets';
+import type { KeyboardEvent } from 'react';
 
 /**
  * A plugin that provides a kernel status item to the status bar.

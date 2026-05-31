@@ -4,19 +4,16 @@
  */
 
 import { JSONExt } from '@lumino/coreutils';
-import { Context } from '@jupyterlab/docregistry';
-import {
-  INotebookModel,
-  NotebookPanel,
-  NotebookTools,
-  NotebookTracker
-} from '@jupyterlab/notebook';
+import type { Context } from '@jupyterlab/docregistry';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookTools, NotebookTracker } from '@jupyterlab/notebook';
 import {
   initNotebookContext,
   NBTestUtils
 } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer, sleep } from '@jupyterlab/testing';
-import { MetadataForm, MetadataFormWidget } from '../src';
+import type { MetadataForm } from '../src';
+import { MetadataFormWidget } from '../src';
 
 const server = new JupyterServer();
 

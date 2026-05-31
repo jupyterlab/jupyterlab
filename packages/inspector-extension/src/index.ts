@@ -1,15 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module inspector-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -26,7 +27,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the inspector plugin.
@@ -77,6 +78,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector = new MainAreaWidget({
           content: new InspectorPanel({ translator })
         });
+        inspector.disposed.connect(() => {
+          delete document.body.dataset[datasetKey];
+        });
         inspector.id = 'jp-inspector';
         inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;
@@ -97,8 +101,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       return inspector;
     }
     function closeInspector(): void {
-      inspector.dispose();
-      delete document.body.dataset[datasetKey];
+      if (isInspectorOpen()) {
+        inspector.dispose();
+      }
     }
 
     // Add inspector:open command to registry.
@@ -235,8 +240,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
-    consoles: IConsoleTracker,
-    translator: ITranslator
+    consoles: IConsoleTracker
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};

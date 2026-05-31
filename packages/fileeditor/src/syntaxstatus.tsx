@@ -3,14 +3,17 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { Popup } from '@jupyterlab/statusbar';
+import { showPopup, TextItem } from '@jupyterlab/statusbar';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONObject } from '@lumino/coreutils';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JSONObject } from '@lumino/coreutils';
 import { Menu } from '@lumino/widgets';
 import React from 'react';
 

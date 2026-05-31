@@ -2,18 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 //
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import React from 'react';
-import { FileBrowser, FileBrowserModel, IUploadModel } from '.';
+import type { FileBrowser, FileBrowserModel, IUploadModel } from '.';
 
 /**
  * Half-spacing between items in the overall status item.

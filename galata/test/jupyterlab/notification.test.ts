@@ -74,9 +74,7 @@ test.describe('Toast', () => {
     await handle.waitFor();
 
     expect(await handle.screenshot({ animations: 'disabled' })).toMatchSnapshot(
-      {
-        name: `notification-with-actions.png`
-      }
+      { name: `notification-with-actions.png` }
     );
 
     await Promise.all([
@@ -188,9 +186,7 @@ test.describe('Toast', () => {
       page.evaluate(id => {
         return window.jupyterapp.commands.execute(
           'apputils:dismiss-notification',
-          {
-            id
-          }
+          { id }
         );
       }, id)
     ]);
@@ -200,9 +196,7 @@ test.describe('Toast', () => {
 test.describe('Notification center', () => {
   test('should display no notification by default', async ({ page }) => {
     const status = page.locator('.jp-Notification-Status');
-    expect(await status.getAttribute('class')).not.toMatch(
-      /\s?jp-mod-selected\s?/
-    );
+    await expect(status).not.toHaveClass(/jp-mod-selected/);
     await expect(status).toHaveText('0');
 
     await status.click();
@@ -220,8 +214,7 @@ test.describe('Notification center', () => {
     });
 
     const status = page.locator('.jp-Notification-Status');
-    // TODO: sometimes we receive "lm-Widget jp-Notification-Status jp-StatusBar-Item"
-    expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
+    await expect(status).toHaveClass(/jp-mod-selected/);
     await expect(status).toHaveText('1');
 
     await status.click();
@@ -254,9 +247,7 @@ test.describe('Notification center', () => {
       )
       .click();
 
-    expect(await status.getAttribute('class')).not.toMatch(
-      /\s?jp-mod-selected\s?/
-    );
+    await expect(status).not.toHaveClass(/jp-mod-selected/);
     await expect(status).toHaveText('1');
   });
 

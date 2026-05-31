@@ -15,7 +15,6 @@
 //  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // The implementation below uses case fallthrough as part of the algorithm.
-/* eslint-disable no-fallthrough */
 
 const m = 0x5bd1e995;
 const encoder = new TextEncoder();
@@ -54,8 +53,10 @@ export function murmur2(str: string, seed: number): number {
   switch (len) {
     case 3:
       h ^= (data[i + 2] & 0xff) << 16;
+    // eslint-disable-next-line no-fallthrough
     case 2:
       h ^= (data[i + 1] & 0xff) << 8;
+    // eslint-disable-next-line no-fallthrough
     case 1:
       h ^= data[i] & 0xff;
       h = (h & 0xffff) * m + ((((h >>> 16) * m) & 0xffff) << 16);

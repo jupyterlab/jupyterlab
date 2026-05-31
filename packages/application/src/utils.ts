@@ -2,11 +2,13 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { SemanticCommand } from '@jupyterlab/apputils';
-import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
-import { JupyterFrontEnd } from './frontend';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JupyterFrontEnd } from './frontend';
 
 export interface ISemanticCommandDefault {
   /**

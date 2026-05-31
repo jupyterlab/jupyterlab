@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Text } from '@jupyterlab/coreutils';
-import { KernelMessage } from '@jupyterlab/services';
-import { SourceChange } from '@jupyter/ydoc';
-import { JSONObject } from '@lumino/coreutils';
-import { CompletionHandler } from '../handler';
-import { ICompletionContext, ICompletionProvider } from '../tokens';
-import { Completer } from '../widget';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { SourceChange } from '@jupyter/ydoc';
+import type { JSONObject } from '@lumino/coreutils';
+import type { CompletionHandler } from '../handler';
+import type { ICompletionContext, ICompletionProvider } from '../tokens';
+import type { Completer } from '../widget';
 import { isHintableMimeType } from '../utils';
 
 export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';

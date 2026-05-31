@@ -1,26 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelSpec, Session } from '@jupyterlab/services';
+import type { KernelSpec, Session } from '@jupyterlab/services';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import { Debouncer } from '@lumino/polling';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
-import { VariablesModel } from './panels/variables/model';
+import type { VariablesModel } from './panels/variables/model';
 
-import { IDebugger } from './tokens';
-import { IDebuggerDisplayRegistry } from './tokens';
+import type { IDebugger } from './tokens';
+import type { IDebuggerDisplayRegistry } from './tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+
+/**
+ * Rate limit for debouncing kernel modules display.
+ */
+const DISPLAY_MODULES_DEBOUNCE_MS = 500;
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -41,10 +46,18 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._session = null;
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model({
-      displayRegistry: options.displayRegistry
+      displayRegistry: options.displayRegistry,
+      getSource: this.getSource.bind(this),
+      mimeTypeService: options.mimeTypeService || null
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
+    this.displayModules = this.displayModules.bind(this);
+
+    this._displayModulesDebouncer = new Debouncer(
+      this._applyKernelSources.bind(this),
+      DISPLAY_MODULES_DEBOUNCE_MS
+    );
   }
 
   /**
@@ -164,7 +177,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Whether there exists a thread in stopped state.
    */
   hasStoppedThreads(): boolean {
-    return this._model?.stoppedThreads.size > 0 ?? false;
+    return this._model.stoppedThreads.size > 0;
   }
 
   /**
@@ -215,12 +228,12 @@ export class DebuggerService implements IDebugger, IDisposable {
       if (!this.session) {
         throw new Error('No active debugger session');
       }
-      await this.session.sendRequest('continue', {
-        threadId: this._currentThread()
-      });
       this._model.stoppedThreads.delete(this._currentThread());
       this._clearModel();
       this._clearSignals();
+      await this.session.sendRequest('continue', {
+        threadId: this._currentThread()
+      });
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -396,14 +409,18 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const modules = await this.session.sendRequest('modules', {});
-    this._model.kernelSources.kernelSources = modules.body.modules.map(
-      module => {
-        return {
-          name: module.name as string,
-          path: module.path as string
-        };
-      }
-    );
+    this._pendingKernelSources = modules.body.modules.map(module => ({
+      name: module.name as string,
+      path: module.path as string
+    }));
+
+    void this._displayModulesDebouncer.invoke();
+  }
+
+  private _applyKernelSources(): void {
+    if (this._pendingKernelSources) {
+      this._model.kernelSources.kernelSources = this._pendingKernelSources;
+    }
   }
 
   /**
@@ -1050,6 +1067,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
   private _pauseOnExceptionChanged = new Signal<IDebugger, void>(this);
+  private _displayModulesDebouncer: Debouncer;
+  private _pendingKernelSources: IDebugger.KernelSource[] | null = null;
   private _stoppedSignal = new Signal<IDebugger, void>(this);
 }
 
@@ -1085,5 +1104,10 @@ export namespace DebuggerService {
      * The display registry.
      */
     displayRegistry?: IDebuggerDisplayRegistry | null;
+
+    /**
+     * The mimetype service.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

@@ -1,12 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   classes,
   LabIcon,
@@ -14,12 +12,13 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { ArrayExt, map } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ILauncher } from './tokens';
+import type { ILauncher } from './tokens';
 
 /**
  * The class name added to Launcher instances.
@@ -111,11 +110,6 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
       return null;
     }
 
-    const knownCategories = [
-      this._trans.__('Notebook'),
-      this._trans.__('Console'),
-      this._trans.__('Other')
-    ];
     const kernelCategories = [
       this._trans.__('Notebook'),
       this._trans.__('Console')
@@ -145,15 +139,32 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
-    const orderedCategories: string[] = [];
-    for (const cat of knownCategories) {
-      orderedCategories.push(cat);
-    }
-    for (const cat in categories) {
-      if (knownCategories.indexOf(cat) === -1) {
-        orderedCategories.push(cat);
-      }
-    }
+    const defaultCategoryRanks: Record<string, number> = {
+      [this._trans.__('Notebook')]: 0,
+      [this._trans.__('Console')]: 20,
+      [this._trans.__('Other')]: 100
+    };
+
+    const orderedCategories = Object.keys(categories).sort((a, b) => {
+      const getRank = (cat: string): number => {
+        const items = categories[cat] ?? [];
+
+        const defaultRank = defaultCategoryRanks[cat] ?? Infinity;
+
+        return Math.min(
+          ...items.map(
+            (item: ILauncher.IItemOptions) => item.categoryRank ?? defaultRank
+          )
+        );
+      };
+
+      const rankA = getRank(a);
+      const rankB = getRank(b);
+
+      if (rankA !== rankB) return rankA - rankB;
+
+      return a.localeCompare(b);
+    });
 
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
@@ -200,7 +211,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
     // Wrap the sections in body and content divs.
     return (
-      <div className="jp-Launcher-body">
+      <div className="jp-Launcher-body jp-zoom-target">
         <div className="jp-Launcher-content">
           <div className="jp-Launcher-cwd">
             <h3>{this.cwd}</h3>
@@ -275,9 +286,14 @@ function Card(
   };
 
   // With tabindex working, you can now pick a kernel by tabbing around and
-  // pressing Enter.
+  // pressing Enter or Space.
   const onkeypress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
+    if (
+      event.key === 'Enter' ||
+      event.key === ' ' ||
+      event.key === 'Spacebar'
+    ) {
+      event.preventDefault();
       onclick();
     }
   };

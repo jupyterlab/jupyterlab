@@ -16,11 +16,19 @@
       "type": "string",
       "title": "Hidden mode of main panel widgets",
       "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge. Similar performance gains are seen with `contentVisibility` which is only available in Chromium-based browsers.",
-      "enum": ["display", "scale", "contentVisibility"],
+      "oneOf": [
+        { "const": "display", "title": "Display" },
+        { "const": "scale", "title": "Scale" },
+        { "const": "contentVisibility", "title": "Content visibility" }
+      ],
       "default": "display"
     },
     "startMode": {
-      "enum": ["", "single", "multiple"],
+      "oneOf": [
+        { "const": "", "title": "Default" },
+        { "const": "single", "title": "Single" },
+        { "const": "multiple", "title": "Multiple" }
+      ],
       "title": "Start mode: ``, `single` or `multiple`",
       "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
       "default": ""
@@ -49,6 +57,35 @@
         "multiple": {}
       },
       "additionalProperties": false
+    },
+    "dockPanelPadding": {
+      "type": "boolean",
+      "title": "Dock panel padding",
+      "description": "Whether to show padding around the main dock panel area. Disable for a more compact layout.",
+      "default": true
+    },
+    "activityBarPosition": {
+      "type": "string",
+      "title": "Activity bar position",
+      "description": "Position of the side activity bars. `side` keeps each activity bar on the natural side of its area. `top` or `bottom` moves both activity bars to the top or bottom of their respective area, displaying the tabs horizontally.",
+      "oneOf": [
+        { "const": "side", "title": "Side" },
+        { "const": "top", "title": "Top" },
+        { "const": "bottom", "title": "Bottom" }
+      ],
+      "default": "side"
+    },
+    "optimizeResize": {
+      "type": "boolean",
+      "title": "Optimize panel resize",
+      "description": "Freeze panel dimensions during handle drag to improve resize performance when panels contain heavy DOM content.",
+      "default": true
+    },
+    "zoomOnWheel": {
+      "type": "boolean",
+      "title": "Enable Ctrl+ Scroll Zoom",
+      "description": "Zoom the widget under the mouse when using Ctrl+ mouse wheel.",
+      "default": false
     }
   },
   "additionalProperties": false,
@@ -61,7 +98,12 @@
           "type": "object",
           "properties": {
             "area": {
-              "enum": ["main", "left", "right", "down"]
+              "oneOf": [
+                { "const": "main", "title": "Main" },
+                { "const": "left", "title": "Left" },
+                { "const": "right", "title": "Right" },
+                { "const": "down", "title": "Down" }
+              ]
             },
             "options": {
               "$ref": "#/definitions/options"
@@ -76,13 +118,13 @@
       "properties": {
         "mode": {
           "type": "string",
-          "enum": [
-            "split-top",
-            "split-left",
-            "split-right",
-            "split-bottom",
-            "tab-before",
-            "tab-after"
+          "oneOf": [
+            { "const": "split-top", "title": "Split top" },
+            { "const": "split-left", "title": "Split left" },
+            { "const": "split-right", "title": "Split right" },
+            { "const": "split-bottom", "title": "Split bottom" },
+            { "const": "tab-before", "title": "Tab before" },
+            { "const": "tab-after", "title": "Tab after" }
           ]
         },
         "rank": { "type": "number", "minimum": 0 },

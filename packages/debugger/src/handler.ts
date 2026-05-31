@@ -1,22 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { ConsolePanel } from '@jupyterlab/console';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentWidget } from '@jupyterlab/docregistry';
-import { FileEditor } from '@jupyterlab/fileeditor';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ConsolePanel } from '@jupyterlab/console';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { DocumentWidget } from '@jupyterlab/docregistry';
+import type { FileEditor } from '@jupyterlab/fileeditor';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { IAnyMessageArgs } from '@jupyterlab/services/src/kernel/kernel';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';
 import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
-import { IDebugger } from './tokens';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IDebugger } from './tokens';
+import { Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
@@ -92,6 +96,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._shell = options.shell;
     this._service = options.service;
     this._translator = options.translator || nullTranslator;
+    this._executionDone = new Signal(this);
   }
 
   /**
@@ -101,6 +106,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null {
     return this._activeWidget;
+  }
+
+  /**
+   * Returns a signal when receiving the execute_reply message on the shell websocket.
+   */
+  get executionDone(): ISignal<this, void> {
+    return this._executionDone;
   }
 
   /**
@@ -167,6 +179,23 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     connection.iopubMessage.connect(iopubMessage);
     this._iopubMessageHandlers[widget.id] = iopubMessage;
     this._activeWidget = widget;
+
+    const shellMessage = (
+      _: Session.ISessionConnection,
+      args: IAnyMessageArgs
+    ): void => {
+      const { msg, direction } = args;
+      if (direction === 'recv' && msg.header.msg_type === 'execute_reply') {
+        this._executionDone.emit();
+      }
+    };
+    const shellMessageHandler = this._shellMessageHandlers[widget.id];
+    if (shellMessageHandler) {
+      connection.anyMessage.disconnect(shellMessageHandler);
+    }
+
+    connection.anyMessage.connect(shellMessage);
+    this._shellMessageHandlers[widget.id] = shellMessage;
 
     return this.updateWidget(widget, connection);
   }
@@ -265,6 +294,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       if (!handler) {
         return;
       }
+
       handler.dispose();
       delete this._handlers[widget.id];
       delete this._kernelChangedHandlers[widget.id];
@@ -467,6 +497,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _iconButtons: {
     [id: string]: ToolbarButton | undefined;
   } = {};
+  private _shellMessageHandlers: {
+    [id: string]: (
+      sender: Session.ISessionConnection,
+      args: IAnyMessageArgs
+    ) => void;
+  } = {};
+  private _executionDone: Signal<this, void>;
 }
 
 /**

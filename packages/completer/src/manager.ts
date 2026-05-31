@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { ProviderReconciliator } from './reconciliator';
 import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
@@ -9,7 +11,7 @@ import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
 import { CompletionHandler } from './handler';
 import { CompleterModel } from './model';
 import { InlineCompleter } from './inline';
-import {
+import type {
   ICompleterSelection,
   ICompletionContext,
   ICompletionProvider,

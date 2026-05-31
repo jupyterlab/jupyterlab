@@ -3,8 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   PanelWithToolbar,
   ReactWidget,
@@ -12,7 +13,7 @@ import {
   viewBreakpointIcon
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 import { SourcesBody } from './body';
 import { SourcePathComponent } from './sourcepath';
 

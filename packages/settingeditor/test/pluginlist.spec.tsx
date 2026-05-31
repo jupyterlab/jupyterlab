@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { PluginList } from '../src/pluginlist';
 import { signalToPromise } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TestConnector, TestRegistry } from './utils';
 
 describe('@jupyterlab/settingeditor', () => {

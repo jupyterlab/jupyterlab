@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';
@@ -39,12 +39,53 @@ export async function positionCellPartiallyBelowViewport(
   ratio: number
 ): Promise<void> {
   const scroller = notebook.locator(OUTER_SELECTOR).first();
-  const notebookBbox = await scroller.boundingBox();
+
+  // Helper to measure actual visible pixels of the cell
+  const measureVisiblePixels = async (): Promise<number> => {
+    const notebookBbox = await scroller.boundingBox();
+    const cellBbox = await cell.boundingBox();
+    const cellTop = cellBbox.y;
+    const cellBottom = cellBbox.y + cellBbox.height;
+    const viewportTop = notebookBbox.y;
+    const viewportBottom = notebookBbox.y + notebookBbox.height;
+
+    if (cellBottom <= viewportTop || cellTop >= viewportBottom) {
+      return 0; // Cell not in viewport
+    }
+
+    const visibleTop = Math.max(cellTop, viewportTop);
+    const visibleBottom = Math.min(cellBottom, viewportBottom);
+    return visibleBottom - visibleTop;
+  };
+
+  // Calculate target visible pixels
   const cellBbox = await cell.boundingBox();
+  const targetPixels = cellBbox.height * ratio;
+
+  // Initial scroll estimate
+  const notebookBbox = await scroller.boundingBox();
   await page.mouse.move(notebookBbox.x, notebookBbox.y);
-  const scrollOffset =
-    cellBbox.y - notebookBbox.y - notebookBbox.height + cellBbox.height * ratio;
-  await page.mouse.wheel(0, scrollOffset);
+
+  const initialScrollOffset =
+    cellBbox.y - notebookBbox.y - notebookBbox.height + targetPixels;
+  await page.mouse.wheel(0, initialScrollOffset);
+
+  // Optimization loop to refine positioning
+  const MAX_ITERATIONS = 10;
+  const TOLERANCE = 1; // 1 pixel tolerance
+
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const actualPixels = await measureVisiblePixels();
+    const error = actualPixels - targetPixels;
+
+    if (Math.abs(error) <= TOLERANCE) {
+      break; // Achieved target within tolerance
+    }
+
+    // Correct by half the error amount
+    const correction = -error / 2;
+    await page.mouse.wheel(0, correction);
+  }
 }
 
 /**
@@ -116,7 +157,5 @@ export async function changeCodeFontSize(
   page: IJupyterLabPageFixture,
   menuOption: string
 ): Promise<void> {
-  await page.click('text=Settings');
-  await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-  await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
+  await page.menu.clickMenuItem(`Settings>Theme>${menuOption}`);
 }

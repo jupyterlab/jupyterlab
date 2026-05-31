@@ -10,7 +10,7 @@
 
 import { expect } from '@jest/globals';
 import { PluginList } from '../src/pluginlist';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TestConnector, TestRegistry } from './utils';
 
 describe('Configurable toSkip functionality', () => {

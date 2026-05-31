@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IEditorLanguageRegistry } from './token';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IEditorLanguageRegistry } from './token';
 
 /**
  * The mime type service for CodeMirror.
@@ -29,9 +30,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
       }
     );
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 
@@ -52,9 +53,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     }
     const mode = this.languages.findByFileName(path);
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 }

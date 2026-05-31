@@ -1,12 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { ITranslator } from '@jupyterlab/translation';
-import { IRecentsManager, RecentDocument } from '@jupyterlab/docmanager';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { IRecentsManager, RecentDocument } from '@jupyterlab/docmanager';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
 
 /**

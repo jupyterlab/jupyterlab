@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MimeData } from '@lumino/coreutils';
-import { Drag } from '@lumino/dragdrop';
-import { Message } from '@lumino/messaging';
+import type { MimeData } from '@lumino/coreutils';
+import type { Drag } from '@lumino/dragdrop';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { CodeEditor } from './';
+import type { CodeEditor } from './';
 
 /**
  * The class name added to an editor widget that has a primary selection.

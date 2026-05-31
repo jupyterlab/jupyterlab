@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { DebuggerDisplayRegistry } from '../../displayregistry';
-import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IConsoleTracker } from '@jupyterlab/console';
+import type { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { IConsoleTracker } from '@jupyterlab/console';
 /**
  * A model for a callstack.
  */

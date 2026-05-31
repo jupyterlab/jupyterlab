@@ -152,6 +152,24 @@ from the context menu:
 </div>
 ```
 
+## Autosave
+
+JupyterLab automatically saves your files and notebooks every 1 minute (60 seconds) by default.
+
+You can configure this behavior in the **Settings Editor**:
+
+1. Go to **Settings** → **Settings Editor**.
+2. Select **Document Manager** in the left sidebar.
+3. Adjust the following settings:
+   - **Autosave Documents**: Toggle this checkbox to enable or disable the feature.
+   - **Autosave Interval**: Change the frequency by entering a value in **seconds**. (Set to 60 for 1 minute).
+
+```{image} ./images/autosave-settings.png
+:align: center
+:alt: The Snapshot of the autosave settings.
+:class: jp-screenshot
+```
+
 ## Uploading and Downloading
 
 (file-upload)=
@@ -256,3 +274,30 @@ Hidden files and folders can be displayed in JupyterLab by combining two paramet
 ## Single-Click Navigation
 
 Single-click navigation for files and folders can be enabled via the settings editor under the `File Browser` option: `Navigate files and directories with single click`
+
+## Editable Breadcrumbs
+
+You can click on the empty space to the right of the breadcrumb path to enter
+edit mode. This opens a text input pre-filled with the current path and a
+completion dropdown that suggests matching subdirectories as you type, allowing
+you to quickly navigate to any folder.
+
+## File name sort order
+
+(file-sort-order)=
+
+You can choose how file names are ordered when sorting by name in the file browser:
+
+- **Sort file names naturally** (default, when enabled): Names are ordered in natural order, e.g. `file1.txt`, `file2.txt`, `file10.txt`.
+
+- When disabled: Names are ordered lexicographically, e.g. `file1.txt`, `file10.txt`, `file2.txt`.
+
+Change this in **Settings → Settings Editor → File Browser** via the “Sort file names naturally” checkbox, or in **Settings → Advanced Settings Editor → File Browser**:
+
+```json
+{
+  "@jupyterlab/filebrowser-extension:browser": {
+    "sortFileNamesNaturally": true
+  }
+}
+```

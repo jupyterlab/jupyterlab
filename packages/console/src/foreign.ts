@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
-import { CodeCell } from '@jupyterlab/cells';
-import * as nbformat from '@jupyterlab/nbformat';
-import { KernelMessage } from '@jupyterlab/services';
-import { IDisposable } from '@lumino/disposable';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { CodeCell } from '@jupyterlab/cells';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
@@ -93,6 +93,7 @@ export class ForeignHandler implements IDisposable {
     const parentHeader = msg.parent_header as KernelMessage.IHeader;
     const parentMsgId = parentHeader.msg_id as string;
     let cell: CodeCell | undefined;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
       case 'execute_input': {
         const inputMsg = msg as KernelMessage.IExecuteInputMsg;

@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { KernelMessage } from '@jupyterlab/services';
-import { IDisposable } from '@lumino/disposable';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 /**

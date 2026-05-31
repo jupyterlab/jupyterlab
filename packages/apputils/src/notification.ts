@@ -3,9 +3,11 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ReadonlyJSONValue, UUID } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ReadonlyJSONValue } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * Notification manager

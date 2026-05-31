@@ -161,6 +161,59 @@ test.describe('Notebook Search', () => {
     await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
   });
 
+  test('Populate search box with text selected in rendered markdown', async ({
+    page
+  }) => {
+    // Render the markdown cell to be able to select text from it.
+    await page.notebook.runCell(1, true);
+    const cell = await page.notebook.getCellLocator(1);
+
+    await cell!.locator('.jp-MarkdownOutput').evaluate(element => {
+      const textToSelect = 'notebook';
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.textContent && node.textContent.includes(textToSelect)) {
+          const startIndex = node.textContent.indexOf(textToSelect);
+          const endIndex = startIndex + textToSelect.length;
+
+          const range = document.createRange();
+          range.setStart(node, startIndex);
+          range.setEnd(node, endIndex);
+
+          const selection = window.getSelection();
+          if (selection) {
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+          break;
+        }
+      }
+    });
+
+    // Open the search box.
+    await page.keyboard.press('Control+f');
+
+    const searchInput = page.getByPlaceholder('Find');
+    // Check if the search box is populated with the selected text.
+    await expect(searchInput).toHaveValue('notebook');
+    await expect(searchInput).toBeFocused();
+
+    // Check that the search box content is selected.
+    expect(await searchInput.evaluate(getSelectionRange)).toStrictEqual({
+      start: 0,
+      end: 'notebook'.length
+    });
+
+    // Expect that the search found a match.
+    await page.locator('text=2/2').waitFor();
+  });
+
   test('Restore previous search query if there is no selection', async ({
     page
   }) => {
@@ -229,7 +282,7 @@ test.describe('Notebook Search', () => {
 
     // First escape should NOT close the search box (but leave the editing mode)
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(250);
+    await page.getByText(`Mode: Command`, { exact: true }).waitFor();
     expect(await page.notebook.isCellInEditingMode(0)).toBeFalsy();
     expect(await page.isVisible('.jp-DocumentSearch-overlay')).toBeTruthy();
 
@@ -293,14 +346,20 @@ test.describe('Notebook Search', () => {
     let cell = await page.notebook.getCellLocator(0);
     await cell!.locator('.jp-InputPrompt').click();
 
-    // Select two cells below
+    // Select three cells below
+    await page.keyboard.press('Shift+ArrowDown');
     await page.keyboard.press('Shift+ArrowDown');
     await page.keyboard.press('Shift+ArrowDown');
 
     // Expect the filter text to be updated
-    await page.locator('text=Search in 3 Selected Cells').waitFor();
+    await page.locator('text=Search in 4 Selected Cells').waitFor();
 
-    // Reset selection, switch to third cell, preserving command mode
+    // Wait for the counter to be properly updated
+    await page
+      .locator('.jp-DocumentSearch-index-counter:has-text("1/19")')
+      .waitFor({ timeout: 10000 });
+
+    // Reset selection, switch to a middle cell, preserving command mode.
     cell = await page.notebook.getCellLocator(2);
     await cell!.locator('.jp-InputPrompt').click();
 
@@ -308,7 +367,7 @@ test.describe('Notebook Search', () => {
     // Wait for the counter to be properly updated
     await page
       .locator('.jp-DocumentSearch-index-counter:has-text("1/10")')
-      .waitFor();
+      .waitFor({ timeout: 10000 });
 
     // Select cell above
     await page.keyboard.press('Shift+ArrowUp');
@@ -723,6 +782,9 @@ test.describe('Auto search in any selection', async () => {
     await editor.click();
     await page.keyboard.press('Control+Home');
     await page.keyboard.press('Shift+End');
+
+    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18462
+    await page.waitForTimeout(200);
 
     // Open search box (filters should already be shown)
     await page.keyboard.press('Control+f');

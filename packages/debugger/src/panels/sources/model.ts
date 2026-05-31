@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { DebuggerDisplayRegistry } from '../../displayregistry';
-import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import type { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -16,13 +18,50 @@ export class SourcesModel implements IDebugger.Model.ISources {
    * @param options The Sources.Model instantiation options.
    */
   constructor(options: SourcesModel.IOptions) {
-    this.currentFrameChanged = options.currentFrameChanged;
+    this._currentSource = null;
+    this._currentFrame = null;
+
     this._displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();
+
+    if (options.mimeTypeService) {
+      this._mimeTypeService = options.mimeTypeService;
+    }
+
+    options.currentFrameChanged.connect(async (_, frame) => {
+      if (!frame) {
+        this._currentFrame = null;
+        this.currentSource = null;
+        return;
+      }
+
+      const displayPath = this.getDisplayName(frame);
+
+      const source = await options.getSource({
+        sourceReference: 0,
+        path: frame?.source?.path
+      });
+
+      const { content, mimeType } = source;
+
+      const editorMimeType =
+        mimeType ||
+        this._mimeTypeService?.getMimeTypeByFilePath(frame.source?.path ?? '');
+
+      this._currentFrame = frame;
+
+      this.currentSource = {
+        content: content,
+        mimeType: editorMimeType,
+        path: displayPath
+      };
+    });
   }
 
   /**
    * Signal emitted when the current frame changes.
+   *
+   * @deprecated since 4.6.0, will be removed in 5.0.
    */
   readonly currentFrameChanged: ISignal<
     IDebugger.Model.ICallstack,
@@ -61,6 +100,13 @@ export class SourcesModel implements IDebugger.Model.ISources {
   }
 
   /**
+   * Return the current frame.
+   */
+  get currentFrame(): IDebugger.IStackFrame | null {
+    return this._currentFrame;
+  }
+
+  /**
    * Open a source in the main area.
    */
   open(): void {
@@ -95,6 +141,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
     IDebugger.Source | null
   >(this);
   private _displayRegistry: IDebuggerDisplayRegistry;
+  private _mimeTypeService: IEditorMimeTypeService | null = null;
+  private _currentFrame: IDebugger.IStackFrame | null;
 }
 
 /**
@@ -114,8 +162,21 @@ export namespace SourcesModel {
     >;
 
     /**
+     * Get source
+     */
+    getSource(args: {
+      sourceReference: number;
+      path: string | undefined;
+    }): Promise<IDebugger.Source>;
+
+    /**
      * The display registry.
      */
+
     displayRegistry?: IDebuggerDisplayRegistry;
+    /**
+     * The mimetype service.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

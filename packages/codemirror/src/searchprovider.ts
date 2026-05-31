@@ -30,26 +30,25 @@
   THE SOFTWARE.
 */
 
-import { ISearchMatch } from '@jupyterlab/documentsearch';
-import { CodeMirrorEditor } from './editor';
-import {
-  EditorSelection,
-  Extension,
-  StateEffect,
-  StateEffectType,
-  StateField
-} from '@codemirror/state';
-import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  GenericSearchProvider,
+import type { ISearchMatch } from '@jupyterlab/documentsearch';
+import type { CodeMirrorEditor } from './editor';
+import type { Extension, StateEffectType } from '@codemirror/state';
+import { EditorSelection, StateEffect, StateField } from '@codemirror/state';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView } from '@codemirror/view';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
   IBaseSearchProvider,
   IFilters,
-  IReplaceOptions,
+  IReplaceOptions
+} from '@jupyterlab/documentsearch';
+import {
+  GenericSearchProvider,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import { ISignal, Signal } from '@lumino/signaling';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 /**
  * Defines from which position the search should be executed.
@@ -93,8 +92,7 @@ export interface IHighlightAdjacentMatchOptions extends IHighlightMatchOptions {
  */
 export abstract class EditorSearchProvider<
   T extends CodeEditor.IModel = CodeEditor.IModel
-> implements IBaseSearchProvider
-{
+> implements IBaseSearchProvider {
   /**
    * Constructor
    */

@@ -23,6 +23,9 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
   await page
     .locator('.jp-DirListing-item:has-text("untitled.txt")')
     .waitFor({ state: 'visible' });
+  // Wait a short while as the file initializes before renaming, see
+  // https://github.com/jupyterlab/jupyterlab/issues/18455
+  await page.waitForTimeout(100);
   await page.contents.renameFile(
     `${tmpPath}/dir1/dir2/untitled.txt`,
     `${tmpPath}/dir1/dir2/${fileName}`
@@ -49,12 +52,20 @@ test('File rename input respects UI font size', async ({ page }) => {
     .locator('.jp-DirListing-item:has-text("untitled.txt")')
     .waitFor({ state: 'visible' });
 
+  const initialFontSize = await getFileListFontSize(page);
+
   await changeCodeFontSize(page, 'Increase UI Font Size');
   await changeCodeFontSize(page, 'Increase UI Font Size');
   await changeCodeFontSize(page, 'Increase UI Font Size');
 
-  // Get the filename's font size when we are not renaming
-  const normalFontSize = await getFileListFontSize(page);
+  const normalFontSize = initialFontSize + 3;
+
+  // Wait for the filename's font size to be updated
+  // (it can take a while as this requires three settings API round-trips)
+  await expect(async () => {
+    const fontSize = await getFileListFontSize(page);
+    expect(fontSize).toBe(normalFontSize);
+  }).toPass();
 
   // Trigger rename
   await page
@@ -70,4 +81,34 @@ test('File rename input respects UI font size', async ({ page }) => {
   );
 
   expect(inputFontSize).toEqual(normalFontSize);
+});
+
+test('Filter input is cleared after navigating into a subdirectory', async ({
+  page,
+  tmpPath
+}) => {
+  await page.contents.createDirectory(`${tmpPath}/mydir`);
+  await page.contents.uploadContent(
+    'data',
+    'text',
+    `${tmpPath}/mydir/file.txt`
+  );
+  await page.contents.uploadContent('data', 'text', `${tmpPath}/other.txt`);
+  await page.filebrowser.openDirectory(tmpPath);
+
+  const filterInput = page.locator('input[placeholder="Filter files by name"]');
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('filebrowser:toggle-file-filter')
+  );
+  await filterInput.fill('mydir');
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
+
+  await page.locator('.jp-DirListing-item:has-text("mydir")').dblclick();
+
+  await expect(
+    page.locator('.jp-DirListing-item:has-text("file.txt")')
+  ).toBeVisible();
+
+  await expect(filterInput).toHaveValue('');
 });

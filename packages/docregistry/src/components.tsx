@@ -4,11 +4,12 @@
  */
 
 import { ReactWidget } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
-import { IDocumentWidget } from './index';
+import type { IDocumentWidget } from './index';
 
 /**
  * create readonly label toolbar item

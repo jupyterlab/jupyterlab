@@ -7,7 +7,6 @@
   height: 100%;
   position: relative;
   overflow: auto;
-  overflow-anchor: none;
 }
 
 .jp-WindowedPanel-inner {

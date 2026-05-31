@@ -2,14 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-import {
-  DisposableDelegate,
-  DisposableSet,
-  IDisposable
-} from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IStatusBar } from './tokens';
+import type { IStatusBar } from './tokens';
 
 /**
  * Main status bar object which contains all items.

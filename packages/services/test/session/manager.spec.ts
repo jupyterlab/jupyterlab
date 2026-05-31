@@ -3,10 +3,10 @@
 
 import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
+import type { Session } from '../../src';
 import {
   KernelManager,
   ServerConnection,
-  Session,
   SessionAPI,
   SessionManager
 } from '../../src';

@@ -1,14 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters';
+import type { WidgetLSPAdapter } from './adapters';
 import { LSPConnection } from './connection';
-import { ClientCapabilities } from './lsp';
-import { AskServersToSendTraceNotifications } from './plugin';
-import {
+import type { ClientCapabilities } from './lsp';
+import type { AskServersToSendTraceNotifications } from './plugin';
+import type {
   Document,
   IDocumentConnectionData,
   ILanguageServerManager,
@@ -21,18 +23,17 @@ import {
   TServerKeys
 } from './tokens';
 import { expandDottedPaths, sleep, untilReady } from './utils';
-import { VirtualDocument } from './virtual/document';
+import type { VirtualDocument } from './virtual/document';
 
 import type * as protocol from 'vscode-languageserver-protocol';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * Each Widget with a document (whether file or a notebook) has the same DocumentConnectionManager
  * (see JupyterLabWidgetAdapter). Using id_path instead of uri led to documents being overwritten
  * as two identical id_paths could be created for two different notebooks.
  */
-export class DocumentConnectionManager
-  implements ILSPDocumentConnectionManager
-{
+export class DocumentConnectionManager implements ILSPDocumentConnectionManager {
   constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
     this.documents = new Map();
@@ -258,7 +259,9 @@ export class DocumentConnectionManager
       }
       const rawSettings = allServerSettings[languageServerId]!;
 
-      const parsedSettings = expandDottedPaths(rawSettings.configuration || {});
+      const parsedSettings = expandDottedPaths(
+        (rawSettings.configuration as ReadonlyJSONObject) || {}
+      );
 
       const serverSettings: protocol.DidChangeConfigurationParams = {
         settings: parsedSettings

@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-  IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
   InputDialog,
@@ -16,7 +14,7 @@ import {
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { FileDialog, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import { Contents, Workspace } from '@jupyterlab/services';
+import type { Contents, Workspace } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICommandPalette } from '@jupyterlab/apputils';

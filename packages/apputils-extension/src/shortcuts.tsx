@@ -2,12 +2,13 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { CommandRegistry } from '@lumino/commands';
 import { Selector } from '@lumino/domutils';
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The class name for each row of ContextShortcutTable
@@ -184,9 +185,20 @@ export function displayShortcuts(options: IOptions) {
   }
 
   const body = (
-    <table>
-      <tbody>{bindingTable}</tbody>
-    </table>
+    <div tabIndex={0} className="jp-Shortcuts-Container">
+      <table>
+        <caption className="jp-sr-only">
+          {trans.__('Keyboard Shortcuts')}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{trans.__('Command')}</th>
+            <th scope="col">{trans.__('Keybinding')}</th>
+          </tr>
+        </thead>
+        <tbody>{bindingTable}</tbody>
+      </table>
+    </div>
   );
 
   return showDialog({
@@ -196,6 +208,7 @@ export function displayShortcuts(options: IOptions) {
       Dialog.cancelButton({
         label: trans.__('Close')
       })
-    ]
+    ],
+    focusNodeSelector: '.jp-Shortcuts-Container' // Focus the table container instead of the button
   });
 }

@@ -33,22 +33,18 @@ If you find a problem in JupyterLab, please follow the steps below to diagnose a
    >    ```
    >    jupyter lab
    >    ```
-
    - I cannot reproduce this issue in a clean environment: The problem is probably not in JupyterLab itself. Go to step 2.
    - I can reproduce this issue in a clean environment: Go to step 3.
 
 2. Perhaps the issue is in one of the JupyterLab extensions you had installed. Install any JupyterLab extensions you had one at a time, checking for the issue after each one.
-
    - I can reproduce the issue after installing a particular extension: That extension may be causing the problem. File an issue with that extension's issue tracker. Be sure to mention what you have done here to narrow the problem down.
    - I cannot reproduce the issue after installing all my extensions: Good news! Likely all you have to do is update your JupyterLab and extensions. If that fixes the issue, great! If it doesn't fix the issue, you may have a more complicated issue. Go directly to {ref}`create-issue`.
 
 3. Try to reproduce the issue in the classic Jupyter Notebook. Launch the classic notebook from the JupyterLab help menu to ensure you are getting exactly the same notebook server that JupyterLab is using.
-
    - I can reproduce the issue with the classic Jupyter Notebook: The problem is probably not from JupyterLab. It may be in the [Jupyter Notebook server](https://github.com/jupyter/notebook), your kernel, etc. Use your best judgement to file an issue with the appropriate project.
    - I cannot reproduce the issue in classic Jupyter Notebook: Go to step 4.
 
 4. Try to reproduce the issue in your browser incognito or private browsing mode. Running in private browser mode ensures your browser state is clean.
-
    - I cannot reproduce the issue in private browsing mode: Perhaps resetting your cookies or other browser state would help.
    - I can reproduce the issue in private browsing mode: Go to {ref}`create-issue`.
 
@@ -67,7 +63,6 @@ Before creating an issue, search in the issue tracker for relevant issues. If yo
 To create an issue, collect the following contextual information:
 
 - relevant package versions, including:
-
   - `jupyterlab` and `notebook` versions
   - browser versions affected (please try to reproduce in Chrome and Firefox at least)
   - operating system and version

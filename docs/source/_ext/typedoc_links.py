@@ -28,7 +28,7 @@ class TypeDocReference(SphinxRole):
 
         if "." in target:
             # Parse `module.Member` links
-            module, name = target.rsplit(".", 1)
+            _, name = target.rsplit(".", 1)
         else:
             # Handle `module` links
             name = target

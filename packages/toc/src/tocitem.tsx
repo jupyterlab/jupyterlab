@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { TableOfContents } from './tokens';
-import { TreeItem, TreeItemElement } from '@jupyter/react-components';
+import type { TableOfContents } from './tokens';
+import type { TreeItemElement } from '@jupyter/react-components';
+import { TreeItem } from '@jupyter/react-components';
 
 /**
  * Interface describing component properties.

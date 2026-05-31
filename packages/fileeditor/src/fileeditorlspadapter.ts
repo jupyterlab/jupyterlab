@@ -2,18 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition,
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
+import { VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { FileEditor } from './widget';
+import type { FileEditor } from './widget';
 
 export interface IFileEditorAdapterOptions extends IAdapterOptions {
   /**
@@ -77,7 +79,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   get mimeType(): string {
     const mimeTypeFromModel = this.editor.model.mimeType;
     const codeMirrorMimeType: string = Array.isArray(mimeTypeFromModel)
-      ? mimeTypeFromModel[0] ?? IEditorMimeTypeService.defaultMimeType
+      ? (mimeTypeFromModel[0] ?? IEditorMimeTypeService.defaultMimeType)
       : mimeTypeFromModel;
     const contentsModel = this.editor.context.contentsModel;
 

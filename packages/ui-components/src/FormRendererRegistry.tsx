@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IFormRenderer, IFormRendererRegistry } from './tokens';
+import type { IFormRenderer, IFormRendererRegistry } from './tokens';
 
 /**
  * A registry for property renderers used in the FormEditor component.

@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import { ConsoleHistory } from '@jupyterlab/console';
-import { KernelMessage } from '@jupyterlab/services';
+import type { KernelMessage } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import { signalToPromise } from '@jupyterlab/testing';
 

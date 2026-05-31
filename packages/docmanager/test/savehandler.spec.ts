@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Context,
-  DocumentRegistry,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+import type { ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   signalToPromise,
@@ -99,7 +96,7 @@ describe('docregistry/savehandler', () => {
 
       it('should trigger a save', () => {
         const promise = signalToPromise(context.fileChanged);
-        context.model.fromString('bar');
+        context.model.dirty = true;
         expect(handler.isActive).toBe(false);
         handler.saveInterval = 0.1;
         handler.start();
@@ -114,12 +111,12 @@ describe('docregistry/savehandler', () => {
           find: () => {
             called++;
             if (called === 1) {
-              context.model.fromString('bar');
+              context.model.dirty = true;
             }
             return called === 2;
           }
         });
-        context.model.fromString('foo');
+        context.model.dirty = true;
         expect(handler.isActive).toBe(false);
         handler.saveInterval = 0.1;
         handler.start();
@@ -132,6 +129,7 @@ describe('docregistry/savehandler', () => {
         handler.start();
 
         context.model.fromString('foo');
+        context.model.dirty = true;
         jest.advanceTimersByTime(120000); // in ms
         await signalToPromise(context.fileChanged);
 
@@ -139,6 +137,7 @@ describe('docregistry/savehandler', () => {
           .spyOn(handler as any, '_isConnectedCallback')
           .mockReturnValue(false);
         context.model.fromString('bar');
+        context.model.dirty = true;
         jest.advanceTimersByTime(240000);
         jest
           .spyOn(handler as any, '_isConnectedCallback')
@@ -155,6 +154,7 @@ describe('docregistry/savehandler', () => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         context.model.fromString('foo');
+        context.model.dirty = true;
         await context.initialize(true);
 
         // The context allows up to 0.5 difference in timestamps before complaining.
@@ -167,6 +167,7 @@ describe('docregistry/savehandler', () => {
           handler.saveInterval = 1;
           handler.start();
           context.model.fromString('baz');
+          context.model.dirty = true;
           context.fileChanged.connect(() => {
             expect(context.model.toString()).toBe('baz');
             delegate.resolve(undefined);
@@ -196,7 +197,7 @@ describe('docregistry/savehandler', () => {
         (handler as any)._multiplier = 1;
 
         await context.initialize(true);
-        context.model.fromString('foo');
+        context.model.dirty = true;
         context.fileChanged.connect(() => {
           expect(context.model.toString()).toBe('bar');
           delegate.resolve(undefined);

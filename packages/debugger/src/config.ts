@@ -3,7 +3,7 @@
 
 import { murmur2 } from './hash';
 
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
 
 /**
  * A class that holds debugger configuration for all kernels.

@@ -9,15 +9,17 @@
 // but without language deemed unnecessary following the Berne Convention." (Wikipedia).
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
 
-import { ConsoleLogger, listen, MessageConnection } from 'vscode-ws-jsonrpc';
+import type { MessageConnection } from 'vscode-ws-jsonrpc';
+import { ConsoleLogger, listen } from 'vscode-ws-jsonrpc';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import {
   registerServerCapability,
   unregisterServerCapability
 } from './server-capability-registration';
-import { IDocumentInfo, ILspConnection, ILspOptions } from './types';
+import type { IDocumentInfo, ILspConnection, ILspOptions } from './types';
 
 import type * as protocol from 'vscode-languageserver-protocol';
 
