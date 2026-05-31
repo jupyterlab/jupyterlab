@@ -81,7 +81,7 @@
     "postinstall": "node scripts/ensure-buildutils.js",
     "integrity": "node scripts/ensure-buildutils.js && node buildutils/lib/ensure-repo.js",
     "lint": "jlpm && jlpm prettier && jlpm oxlint && jlpm eslint && jlpm stylelint && jlpm shellcheck",
-    "lint:check": "bash scripts/lint-check.sh",
+    "lint:check": "jlpm oxlint:check && jlpm prettier:check && jlpm eslint:check && jlpm stylelint:check && jlpm shellcheck",
     "patch:release": "node buildutils/lib/patch-release.js",
     "prepare:python-release": "node buildutils/lib/prepare-python-release.js",
     "prepublish:check": "node buildutils/lib/prepublish-check.js",
