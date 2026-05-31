@@ -28,8 +28,17 @@ test.describe('Default', () => {
 
     await page.locator('.jp-Terminal').waitFor();
 
-    // Wait for the tab to show "Terminal 1"
-    await page.locator('div[role="main"] >> text="Terminal 1"');
+    // Wait for the terminal tab title to settle. It starts as '...' while the
+    // terminal process is initializing, then updates to the actual title.
+    const terminalTabLabel = page.locator(
+      '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
+    );
+    await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+
+    // Normalise the tab title to "Terminal 1" so the snapshot is consistent
+    // across environments because locally it would show the user's shell prompt path,
+    // and sometimes on CI it can show "Terminal 2" when multiple tests run in parallel.
+    await terminalTabLabel.evaluate(el => (el.textContent = 'Terminal 1'));
 
     expect(await page.screenshot()).toMatchSnapshot(
       'default-terminal-position-single.png'
