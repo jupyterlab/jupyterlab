@@ -23,7 +23,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-import importlib.util
 import json
 import os
 import shutil
@@ -57,7 +56,9 @@ extensions = [
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
-if os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1":
+SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
+
+if SPELLING_BUILD_ENABLED:
     # TypeDoc references are not needed for spelling checks and can require
     # generated API artifacts that are intentionally skipped in this builder.
     extensions = [ext for ext in extensions if ext != "typedoc_links"]
@@ -67,8 +68,13 @@ if os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1":
         suppress_warnings.append("myst.xref_missing")
     globals()["suppress_warnings"] = suppress_warnings
 
-if importlib.util.find_spec("enchant") is not None:
-    extensions += ["sphinxcontrib.spelling"]
+if SPELLING_BUILD_ENABLED:
+    try:
+        import enchant  # noqa: F401
+    except ImportError:
+        pass
+    else:
+        extensions += ["sphinxcontrib.spelling"]
 
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
