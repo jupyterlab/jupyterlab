@@ -477,6 +477,7 @@ export namespace NotebookActions {
       const undoManager = (model.sharedModel as YNotebook).undoManager;
       const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
       lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'merge');
     }
 
     // If the original cell is a markdown cell, make sure
@@ -1607,10 +1608,12 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const trans = nullTranslator.load('jupyterlab');
     notebook.mode = 'command';
 
     // Capture execution context from the stack item being popped.
     let storedExecutions: Private.IStoredCellExecution[] | undefined;
+    let executionCaptureSource: Private.IExecutionCaptureSource | undefined;
     const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
     const onStackItemPopped = ({
       stackItem
@@ -1620,13 +1623,17 @@ export namespace NotebookActions {
       storedExecutions = stackItem.meta.get(Private.CELL_EXECUTION_META_KEY) as
         | Private.IStoredCellExecution[]
         | undefined;
+      executionCaptureSource = stackItem.meta.get(
+        Private.CELL_EXECUTION_SOURCE_META_KEY
+      ) as Private.IExecutionCaptureSource | undefined;
     };
     undoManager.on('stack-item-popped', onStackItemPopped);
     notebook.model.sharedModel.undo();
     undoManager.off('stack-item-popped', onStackItemPopped);
 
     // Restore execution state on resurrected cell widgets.
-    storedExecutions?.forEach(({ cellId, future, isDone, buffered }) => {
+    storedExecutions?.forEach(storedExecution => {
+      const { cellId, future, isDone } = storedExecution;
       const cell = notebook.widgets.find(w => w.model.id === cellId);
       if (!(cell instanceof CodeCell)) {
         return;
@@ -1634,32 +1641,66 @@ export namespace NotebookActions {
       if (isDone()) {
         // Execution finished or was interrupted before undo - ensure state is idle.
         cell.model.executionState = 'idle';
+        // "Show new outputs" applies only to undoing cell deletion.
+        if (executionCaptureSource !== 'delete') {
+          storedExecution.buffered.length = 0;
+          return;
+        }
+        const bufferedOutputChanges =
+          Private.takeBufferedOutputChanges(storedExecution);
+        if (bufferedOutputChanges.length === 0) {
+          return;
+        }
+        let notificationId = '';
+        let dismissTimeout = 0;
+        notificationId = Notification.info(
+          trans.__('A restored cell has newer outputs available.'),
+          {
+            autoClose: Private.NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE,
+            actions: [
+              {
+                label: trans.__('Show new outputs'),
+                displayType: 'link',
+                callback: () => {
+                  if (dismissTimeout) {
+                    window.clearTimeout(dismissTimeout);
+                    dismissTimeout = 0;
+                  }
+                  if (
+                    !Private.replayBufferedOutput(
+                      cell,
+                      future,
+                      bufferedOutputChanges
+                    )
+                  ) {
+                    return;
+                  }
+                  Private.syncExecutionStateWithFuture(cell, future);
+                  bufferedOutputChanges.length = 0;
+                  if (notificationId) {
+                    Notification.dismiss(notificationId);
+                  }
+                }
+              }
+            ]
+          }
+        );
+        dismissTimeout = window.setTimeout(() => {
+          bufferedOutputChanges.length = 0;
+          if (notificationId) {
+            Notification.dismiss(notificationId);
+          }
+        }, Private.NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE);
         return;
       }
       // Still running - reconnect the future so the cell receives remaining
       // output and stdin requests (e.g. input()), and tracks the idle transition.
-      cell.outputArea.reattachFuture(future);
-      // Replay any IOPub messages that arrived while the future was detached.
-      // After reattachFuture, future.onIOPub routes to the new output area.
-      for (const msg of buffered) {
-        void future.onIOPub(msg);
+      if (
+        !Private.replayBufferedOutput(cell, future, storedExecution.buffered)
+      ) {
+        return;
       }
-      // The original execute() call targeted the old cell widget, so it will
-      // not update executionCount/executionState on this resurrected cell.
-      // Drive the idle transition here instead.
-      const cellRef = cell;
-      void future.done.then(
-        reply => {
-          if (!cellRef.isDisposed) {
-            cellRef.model.executionCount = reply.content.execution_count;
-          }
-        },
-        () => {
-          if (!cellRef.isDisposed) {
-            cellRef.model.executionState = 'idle';
-          }
-        }
-      );
+      Private.syncExecutionStateWithFuture(cell, future);
     });
 
     notebook.deselectAll();
@@ -2567,6 +2608,11 @@ export function setCellExecutor(executor: INotebookCellExecutor): void {
 namespace Private {
   /** Key used to store cell execution state in Y.js undo stack item metadata. */
   export const CELL_EXECUTION_META_KEY = Symbol('cellExecutionState');
+  /** Key used to store the action kind that captured execution context. */
+  export const CELL_EXECUTION_SOURCE_META_KEY = Symbol('cellExecutionSource');
+  export const NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE = 10000;
+
+  export type IExecutionCaptureSource = 'delete' | 'merge' | 'change-cell-type';
 
   export interface IStoredCellExecution {
     cellId: string;
@@ -2577,6 +2623,87 @@ namespace Private {
     isDone: () => boolean;
     /** IOPub messages that arrived while the future was detached. */
     buffered: KernelMessage.IIOPubMessage[];
+  }
+
+  function isOutputChangingIOPubMessage(
+    msg: KernelMessage.IIOPubMessage
+  ): boolean {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (msg.header.msg_type) {
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+      case 'clear_output':
+      case 'update_display_data':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  export function takeBufferedOutputChanges(
+    storedExecution: IStoredCellExecution
+  ): KernelMessage.IIOPubMessage[] {
+    const outputChanges = storedExecution.buffered.filter(
+      isOutputChangingIOPubMessage
+    );
+    storedExecution.buffered.length = 0;
+    return outputChanges;
+  }
+
+  /**
+   * Reattach a future and replay buffered IOPub messages on a cell.
+   *
+   * Returns whether the replay was applied to the cell.
+   */
+  export function replayBufferedOutput(
+    cell: CodeCell,
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >,
+    buffered: KernelMessage.IIOPubMessage[]
+  ): boolean {
+    const currentFuture = cell.outputArea.future;
+    if (currentFuture && currentFuture !== future) {
+      return false;
+    }
+
+    cell.outputArea.reattachFuture(future);
+    // Replay any IOPub messages that arrived while the future was detached.
+    // After reattachFuture, future.onIOPub routes to the new output area.
+    for (const msg of buffered) {
+      void future.onIOPub(msg);
+    }
+    buffered.length = 0;
+    return true;
+  }
+
+  /**
+   * The original execute() call targeted a previous cell widget instance, so it
+   * may not update executionCount/executionState on the resurrected one.
+   */
+  export function syncExecutionStateWithFuture(
+    cell: CodeCell,
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >
+  ): void {
+    const cellRef = cell;
+    void future.done.then(
+      reply => {
+        if (!cellRef.isDisposed) {
+          cellRef.model.executionCount = reply.content.execution_count;
+        }
+      },
+      () => {
+        if (!cellRef.isDisposed) {
+          cellRef.model.executionState = 'idle';
+        }
+      }
+    );
   }
 
   /**
@@ -3082,6 +3209,10 @@ namespace Private {
           lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, [
             storedExecution
           ]);
+          lastItem?.meta.set(
+            Private.CELL_EXECUTION_SOURCE_META_KEY,
+            'change-cell-type'
+          );
         }
       } else if (value === 'markdown' && headingLevel !== undefined) {
         notebookSharedModel.transact(() => {
@@ -3173,6 +3304,7 @@ namespace Private {
         const lastItem =
           undoManager.undoStack[undoManager.undoStack.length - 1];
         lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+        lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'delete');
       }
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
