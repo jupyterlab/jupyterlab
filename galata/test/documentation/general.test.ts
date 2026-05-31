@@ -52,6 +52,7 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
@@ -584,6 +585,7 @@ test.describe('General', () => {
     await page.dblclick('text=Data.ipynb');
 
     // Open a terminal
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');

@@ -24,6 +24,9 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
+    // Pre-load the terminal font before xterm.js initializes.
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
+
     await page.menu.clickMenuItem('File>New>Terminal');
 
     await page.locator('.jp-Terminal').waitFor();
@@ -221,6 +224,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.menu.clickMenuItem('File>New>Terminal');
 
     await page.locator('.jp-Terminal').waitFor();
