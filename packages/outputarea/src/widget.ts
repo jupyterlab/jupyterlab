@@ -24,6 +24,7 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import type { IOutputAreaModel } from './model';
+import type { IPageHandler } from './tokens';
 
 /**
  * The class name added to an output area widget.
@@ -110,6 +111,7 @@ export class OutputArea extends Widget {
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
+    this._pageHandler = options.pageHandler ?? null;
 
     const model = (this.model = options.model);
     for (
@@ -175,13 +177,6 @@ export class OutputArea extends Widget {
    * of outputs. Emits the current number of outputs.
    */
   readonly outputLengthChanged = new Signal<this, number>(this);
-
-  /**
-   * A static signal that emits when a page payload is requested.
-   */
-  static pageRequested = new Signal<typeof OutputArea, OutputArea.IPageRequest>(
-    OutputArea
-  );
 
   /**
    * The kernel future associated with the output area.
@@ -838,10 +833,8 @@ export class OutputArea extends Widget {
       return;
     }
 
-    const page = pages[0];
-    const request: OutputArea.IPageRequest = { payload: page, handled: false };
-    OutputArea.pageRequested.emit(request);
-    if (request.handled) {
+    const page = pages[0] as ReadonlyJSONObject;
+    if (this._pageHandler?.handlePage(page)) {
       return;
     }
 
@@ -899,6 +892,7 @@ export class OutputArea extends Widget {
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
   private _showInputPlaceholder: boolean = true;
+  private _pageHandler: IPageHandler | null = null;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -978,22 +972,11 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
-  }
-
-  /**
-   * payload request for a 'page' source.
-   */
-  export interface IPageRequest {
-    /**
-     * The message content payload.
-     */
-    payload: any;
 
     /**
-     * Whether the request has been handled.
-     * If true, the output area will skip default rendering.
+     * Optional handler for pager payloads (`source: page`).
      */
-    handled: boolean;
+    pageHandler?: IPageHandler;
   }
 
   /**

@@ -3,19 +3,24 @@
 
 import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
+import type {
+  IOutputAreaModel,
+  IPageHandler,
+  Stdin
+} from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputAreaModel,
   SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
-import type { Kernel } from '@jupyterlab/services';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
 import { KernelManager } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -302,6 +307,39 @@ describe('outputarea/widget', () => {
         expect(reply!.content.execution_count).toBeTruthy();
         expect(model.length).toBe(1);
       });
+    });
+
+    it('should delegate page payloads to an optional page handler', () => {
+      widget.dispose();
+      model.dispose();
+
+      model = new OutputAreaModel({ trusted: true });
+      const receivedPayloads: ReadonlyJSONObject[] = [];
+      const pageHandler: IPageHandler = {
+        handlePage: payload => {
+          receivedPayloads.push(payload);
+          return true;
+        }
+      };
+      widget = new LogOutputArea({ rendermime, model, pageHandler });
+
+      const message = {
+        content: {
+          status: 'ok',
+          payload: [
+            {
+              source: 'page',
+              data: { 'text/plain': 'pager output' }
+            }
+          ]
+        }
+      } as unknown as KernelMessage.IExecuteReplyMsg;
+
+      (widget as any)._onExecuteReply(message);
+
+      expect(receivedPayloads).toHaveLength(1);
+      expect(receivedPayloads[0]['source']).toBe('page');
+      expect(model.length).toBe(0);
     });
 
     describe('#onModelChanged()', () => {

@@ -47,6 +47,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       manager,
       modelFactory,
       sessionContext,
+      pageHandler,
       translator
     } = options;
     this.translator = translator ?? nullTranslator;
@@ -84,6 +85,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       mimeTypeService,
       contentFactory,
       modelFactory,
+      pageHandler,
       translator
     });
     this.content.addWidget(this.console);
@@ -257,6 +259,11 @@ export namespace ConsolePanel {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: CodeConsole.IOptions['pageHandler'];
 
     /**
      * A function to call when the kernel is busy.

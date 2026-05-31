@@ -90,7 +90,7 @@ import {
   ToolbarItems
 } from '@jupyterlab/notebook';
 import type { IObservableList } from '@jupyterlab/observables';
-import { OutputArea } from '@jupyterlab/outputarea';
+import { IPageHandler } from '@jupyterlab/outputarea';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 import {
   IMarkdownParser,
@@ -130,6 +130,7 @@ import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type {
   JSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
@@ -390,8 +391,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   requires: [
     INotebookWidgetFactory,
     IEditorExtensionRegistry,
-    INotebookCellExecutor,
-    IRenderMimeRegistry
+    INotebookCellExecutor
   ],
   optional: [
     ICommandPalette,
@@ -870,10 +870,28 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       IRenderMimeRegistry,
       IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
+    optional: [
+      ISettingRegistry,
+      ISessionContextDialogs,
+      ITranslator,
+      IPageHandler
+    ],
     activate: activateWidgetFactory,
     autoStart: true
   };
+
+/**
+ * The pager output handler provider.
+ */
+const pageHandlerPlugin: JupyterFrontEndPlugin<IPageHandler> = {
+  id: '@jupyterlab/notebook-extension:page-handler',
+  description: 'Provides a handler for pager output payloads.',
+  autoStart: true,
+  provides: IPageHandler,
+  requires: [IRenderMimeRegistry],
+  optional: [ISettingRegistry, ITranslator],
+  activate: activatePageHandler
+};
 
 /**
  * The cloned output provider.
@@ -1294,6 +1312,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   cellExecutor,
   factory,
   trackerPlugin,
+  pageHandlerPlugin,
   executionIndicator,
   exportPlugin,
   tools,
@@ -1370,6 +1389,85 @@ function activateNotebookTools(
 }
 
 /**
+ * Activate the pager output handler provider.
+ */
+function activatePageHandler(
+  app: JupyterFrontEnd,
+  rendermime: IRenderMimeRegistry,
+  settingRegistry: ISettingRegistry | null,
+  translator_: ITranslator | null
+): IPageHandler {
+  const translator = translator_ ?? nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  let helpInBottomPanel = false;
+  let helpWidget: MainAreaWidget<Panel> | null = null;
+
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+
+  const updateConfig = (settings: ISettingRegistry.ISettings): void => {
+    helpInBottomPanel = settings.get('helpInBottomPanel').composite as boolean;
+  };
+
+  void fetchSettings
+    .then(settings => {
+      updateConfig(settings);
+      settings.changed.connect(() => {
+        updateConfig(settings);
+      });
+    })
+    .catch((reason: Error) => {
+      console.warn(reason.message);
+    });
+
+  return {
+    handlePage: payload => {
+      if (!helpInBottomPanel) {
+        return false;
+      }
+
+      const data = payload['data'];
+      if (!data || typeof data !== 'object') {
+        return false;
+      }
+
+      const mimeData = data as nbformat.IMimeBundle;
+      const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
+      const mimeType = rendermime.preferredMimeType(mimeData, 'any');
+      if (!mimeType) {
+        return false;
+      }
+
+      if (!helpWidget || helpWidget.isDisposed) {
+        const content = new Panel();
+        content.addClass('jp-HelpPanel');
+        helpWidget = new MainAreaWidget({ content });
+        helpWidget.id = 'jp-help-panel';
+        helpWidget.title.label = trans.__('Help');
+        helpWidget.title.closable = true;
+      }
+
+      const content = helpWidget.content;
+      content.widgets.forEach(widget => widget.dispose());
+
+      const renderer = rendermime.createRenderer(mimeType);
+      void renderer.renderModel(
+        new MimeModel({ data: mimeData, metadata, trusted: true })
+      );
+      content.addWidget(renderer);
+
+      if (!helpWidget.isAttached) {
+        app.shell.add(helpWidget, 'down');
+      }
+      app.shell.activateById(helpWidget.id);
+      return true;
+    }
+  };
+}
+
+/**
  * Activate the notebook widget factory.
  */
 function activateWidgetFactory(
@@ -1380,7 +1478,8 @@ function activateWidgetFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
   settingRegistry: ISettingRegistry | null,
   sessionContextDialogs_: ISessionContextDialogs | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  pageHandler: IPageHandler | null
 ): NotebookWidgetFactory.IFactory {
   const translator = translator_ ?? nullTranslator;
   const sessionContextDialogs =
@@ -1461,6 +1560,7 @@ function activateWidgetFactory(
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
+    pageHandler: pageHandler ?? undefined,
     mimeTypeService: editorServices.mimeTypeService,
     toolbarFactory,
     translator
@@ -1878,7 +1978,6 @@ function activateNotebookHandler(
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
   executor: INotebookCellExecutor,
-  rendermime: IRenderMimeRegistry,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1928,45 +2027,6 @@ function activateNotebookHandler(
   fetchSettings
     .then(settings => {
       updateConfig(settings);
-      let helpWidget: MainAreaWidget<Panel> | null = null;
-
-      OutputArea.pageRequested.connect((sender, args) => {
-        const helpInBottomPanel = settings.get('helpInBottomPanel')
-          .composite as boolean;
-        if (!helpInBottomPanel) {
-          return;
-        }
-
-        args.handled = true;
-
-        if (!helpWidget || helpWidget.isDisposed) {
-          const content = new Panel();
-          content.addClass('jp-HelpPanel');
-          helpWidget = new MainAreaWidget({ content });
-          helpWidget.id = 'jp-help-panel';
-          helpWidget.title.label = trans.__('Help');
-          helpWidget.title.closable = true;
-        }
-
-        const content = helpWidget.content;
-        content.widgets.forEach(w => w.dispose());
-
-        const { data, metadata } = args.payload;
-        const mimeType = rendermime.preferredMimeType(data, 'any');
-
-        if (mimeType) {
-          const renderer = rendermime.createRenderer(mimeType);
-          void renderer.renderModel(
-            new MimeModel({ data, metadata, trusted: true })
-          );
-          content.addWidget(renderer);
-        }
-
-        if (!helpWidget.isAttached) {
-          shell.add(helpWidget, 'down');
-        }
-        shell.activateById(helpWidget.id);
-      });
 
       settings.changed.connect(() => {
         updateConfig(settings);

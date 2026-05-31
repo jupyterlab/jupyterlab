@@ -137,6 +137,7 @@ export class CodeConsole extends Widget {
     this.modelFactory = options.modelFactory ?? CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
     this.sessionContext = options.sessionContext;
+    this._pageHandler = options.pageHandler;
     this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
@@ -934,6 +935,7 @@ export class CodeConsole extends Widget {
       rendermime,
       contentFactory,
       editorConfig,
+      pageHandler: this._pageHandler,
       placeholder: false,
       translator: this._translator
     };
@@ -1245,6 +1247,7 @@ export class CodeConsole extends Widget {
   } | null = null;
   private _drag: Drag | null = null;
   private _focusedCell: Cell | null = null;
+  private _pageHandler: CodeCell.IOptions['pageHandler'];
   private _translator: ITranslator;
   private _splitPanel: SplitPanel;
   private _promptResizeObserver: ResizeObserver | null = null;
@@ -1329,6 +1332,11 @@ export namespace CodeConsole {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: CodeCell.IOptions['pageHandler'];
   }
 
   /**
