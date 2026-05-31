@@ -37,6 +37,13 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('No Kernel');
 
+      await page.menu.clickMenuItem('File>Save Notebook');
+
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'Cancel' })
+        .click();
+
       await Promise.all([
         page
           .getByRole('tab', { name: 'Untitled.ipynb' })

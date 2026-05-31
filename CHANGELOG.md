@@ -165,7 +165,6 @@ Language packs can now be installed directly from within JupyterLab by selecting
 src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
 class="jp-screenshot">
 
-
 ### Terminal enhancements
 
 Pressing <kbd>Shift</kbd>+<kbd>Enter</kbd> in the terminal now inserts a newline without executing the current line. This matches the behavior expected by certain terminal applications.
@@ -779,6 +778,61 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.6.0b1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0b0...c3322018930fc7820a08aae9621389c252671936))
+
+### Enhancements made
+
+- Update lumino to `v2026.5.25` [#18942](https://github.com/jupyterlab/jupyterlab/pull/18942) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Improve scroll overlay icon placement [#18907](https://github.com/jupyterlab/jupyterlab/pull/18907) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Refactor shared document dirty state [#18739](https://github.com/jupyterlab/jupyterlab/pull/18739) ([@davidbrochart](https://github.com/davidbrochart), [@SylvainCorlay](https://github.com/SylvainCorlay), [@brichet](https://github.com/brichet), [@krassowski](https://github.com/krassowski))
+- Automatically refresh Kernel Sources after cell execution [#18081](https://github.com/jupyterlab/jupyterlab/pull/18081) ([@arjxn-py](https://github.com/arjxn-py), [@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski), [@martinRenou](https://github.com/martinRenou))
+- Use no-op manager if terminals are unavailable [#17930](https://github.com/jupyterlab/jupyterlab/pull/17930) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout), [@jtpio](https://github.com/jtpio))
+
+### Bugs fixed
+
+- Forward port CodeMirror DOM compatibility patch [#18947](https://github.com/jupyterlab/jupyterlab/pull/18947) ([@krassowski](https://github.com/krassowski), [@Darshan808](https://github.com/Darshan808))
+- Prevent dialog from hanging when `getValue()` throws [#18938](https://github.com/jupyterlab/jupyterlab/pull/18938) ([@AliMahmoudDev](https://github.com/AliMahmoudDev), [@krassowski](https://github.com/krassowski))
+- Treat TypeDoc validation warnings as errors and and TSDoc linting [#18859](https://github.com/jupyterlab/jupyterlab/pull/18859) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Fix opening notebook without a kernel if the kernel already exists by adding `shouldReuse` preference [#18856](https://github.com/jupyterlab/jupyterlab/pull/18856) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Update minimum mermaid to 11.15.0 and marked 17.0.6 [#18958](https://github.com/jupyterlab/jupyterlab/pull/18958) ([@bollwyvl](https://github.com/bollwyvl), [@krassowski](https://github.com/krassowski))
+- Ignore conda.io in addition to docs.conda.io [#18954](https://github.com/jupyterlab/jupyterlab/pull/18954) ([@krassowski](https://github.com/krassowski), [@Darshan808](https://github.com/Darshan808), [@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix completer test failures on CI [#18946](https://github.com/jupyterlab/jupyterlab/pull/18946) ([@krassowski](https://github.com/krassowski), [@brichet](https://github.com/brichet))
+- Update to Playwright 1.60 [#18939](https://github.com/jupyterlab/jupyterlab/pull/18939) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Fix path navigator font and breadcrumbs test [#18927](https://github.com/jupyterlab/jupyterlab/pull/18927) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Fix flaky example UI snapshot test by disabling cursor blinking [#18925](https://github.com/jupyterlab/jupyterlab/pull/18925) ([@tsharma-dev](https://github.com/tsharma-dev), [@krassowski](https://github.com/krassowski))
+- Fix flaky test: wait for kernel startup before pressing Shift+Enter [#18924](https://github.com/jupyterlab/jupyterlab/pull/18924) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Wait for cell toolbar before snapshot in markdown tests [#18922](https://github.com/jupyterlab/jupyterlab/pull/18922) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Hash-pin all GitHub Actions [#18912](https://github.com/jupyterlab/jupyterlab/pull/18912) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Remove vendored `yarn.js` [#18823](https://github.com/jupyterlab/jupyterlab/pull/18823) ([@bollwyvl](https://github.com/bollwyvl), [@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+- Turn on `verbatimModuleSyntax` [#18446](https://github.com/jupyterlab/jupyterlab/pull/18446) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+- Turn on Typescript `strictBindCallApply` option [#18418](https://github.com/jupyterlab/jupyterlab/pull/18418) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Mention JupyterLab 4.6.0 beta in installation guide and via a banner [#18941](https://github.com/jupyterlab/jupyterlab/pull/18941) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- User-facing changelog for 4.6 release [#18932](https://github.com/jupyterlab/jupyterlab/pull/18932) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Add `jupyter-builder` section in Extension Migration guide [#18904](https://github.com/jupyterlab/jupyterlab/pull/18904) ([@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+
+### Other merged PRs
+
+- Bump @tootallnate/once from 2.0.0 to 2.0.1 [#18930](https://github.com/jupyterlab/jupyterlab/pull/18930) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-05-20&to=2026-05-28&type=c))
+
+@AliMahmoudDev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAliMahmoudDev+updated%3A2026-05-20..2026-05-28&type=Issues)) | @arjxn-py ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarjxn-py+updated%3A2026-05-20..2026-05-28&type=Issues)) | @bollwyvl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2026-05-20..2026-05-28&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-05-20..2026-05-28&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-05-20..2026-05-28&type=Issues)) | @davidbrochart ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2026-05-20..2026-05-28&type=Issues)) | @jasongrout ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2026-05-20..2026-05-28&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-05-20..2026-05-28&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-05-20..2026-05-28&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2026-05-20..2026-05-28&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-05-20..2026-05-28&type=Issues)) | @statxc ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Astatxc+updated%3A2026-05-20..2026-05-28&type=Issues)) | @SylvainCorlay ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2026-05-20..2026-05-28&type=Issues)) | @tsharma-dev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atsharma-dev+updated%3A2026-05-20..2026-05-28&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.6.0b0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0a5...0a16fa6f3f405411833414093fe16ed40bf1f3bf))
@@ -862,8 +916,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-04-29&to=2026-05-20&type=c))
 
 @afshin ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2026-04-29..2026-05-20&type=Issues)) | @bollwyvl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2026-04-29..2026-05-20&type=Issues)) | @boskodev790 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aboskodev790+updated%3A2026-04-29..2026-05-20&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Carreau ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACarreau+updated%3A2026-04-29..2026-05-20&type=Issues)) | @chenjiahan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Achenjiahan+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Copilot ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACopilot+updated%3A2026-04-29..2026-05-20&type=Issues)) | @CrafterKolyan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACrafterKolyan+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-04-29..2026-05-20&type=Issues)) | @dhgoal ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adhgoal+updated%3A2026-04-29..2026-05-20&type=Issues)) | @fcollonval ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2026-04-29..2026-05-20&type=Issues)) | @github29tani ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub29tani+updated%3A2026-04-29..2026-05-20&type=Issues)) | @HaudinFlorence ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2026-04-29..2026-05-20&type=Issues)) | @IsabelParedes ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AIsabelParedes+updated%3A2026-04-29..2026-05-20&type=Issues)) | @jasongrout ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2026-04-29..2026-05-20&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-04-29..2026-05-20&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Meriem-BenIsmail ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMeriem-BenIsmail+updated%3A2026-04-29..2026-05-20&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-04-29..2026-05-20&type=Issues)) | @RRosio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Siddhazntx ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASiddhazntx+updated%3A2026-04-29..2026-05-20&type=Issues)) | @soniya-malviy ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asoniya-malviy+updated%3A2026-04-29..2026-05-20&type=Issues)) | @tsharma-dev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atsharma-dev+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Yahiewi ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYahiewi+updated%3A2026-04-29..2026-05-20&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-04-29..2026-05-20&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.6.0a5
 
