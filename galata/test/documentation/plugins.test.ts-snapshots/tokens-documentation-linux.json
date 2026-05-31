@@ -70,6 +70,7 @@
   "@jupyterlab/notebook:INotebookTools": "A service for the \"Notebook Tools\" panel in the\n  right sidebar. Use this to add your own functionality to the panel.",
   "@jupyterlab/notebook:INotebookTracker": "A widget tracker for notebooks.\n  Use this if you want to be able to iterate over and interact with notebooks\n  created by the application.",
   "@jupyterlab/notebook:INotebookWidgetFactory": "A service to create the notebook viewer.",
+  "@jupyterlab/outputarea:IPageHandler": "A service to handle pager output display.",
   "@jupyterlab/pluginmanager:IPluginManager": "A canary for plugin manager presence, with a method to open the plugin manager widget.",
   "@jupyterlab/property-inspector:IPropertyInspectorProvider": "A service to register new widgets in the property inspector side panel.",
   "@jupyterlab/rendermime:ILatexTypesetter": "A service for the LaTeX typesetter for the application. Use this if you want to typeset math in your extension.",
