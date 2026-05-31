@@ -753,9 +753,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
       return Promise.all(
-        widget.content.widgets.map(cell => {
-          findHeadingElement(cell);
-        })
+        widget.content.widgets.map(cell => findHeadingElement(cell))
       );
     };
 
