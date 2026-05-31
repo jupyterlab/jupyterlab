@@ -2311,6 +2311,7 @@ describe('@jupyterlab/notebook', () => {
         const finalOutput = 'after\n';
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
+        cell.model.outputs.clear();
         cell.model.outputs.add({
           output_type: 'stream',
           name: 'stdout',
@@ -2392,6 +2393,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
         const cellId = cell.model.id;
+        cell.model.outputs.clear();
         cell.model.outputs.add({
           output_type: 'stream',
           name: 'stdout',
