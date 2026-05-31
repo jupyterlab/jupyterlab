@@ -752,9 +752,11 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       // Create a new mapping
       headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
-      widget.content.widgets.forEach(cell => {
-        findHeadingElement(cell);
-      });
+      return Promise.all(
+        widget.content.widgets.map(cell => {
+          findHeadingElement(cell);
+        })
+      );
     };
 
     const onHeadingCollapsed = (
@@ -793,7 +795,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     const onCellInViewportChanged = (_: unknown, cell: Cell) => {
       if (cell.inViewport) {
-        findHeadingElement(cell);
+        findHeadingElement(cell)?.catch(console.warn);
       } else {
         // Needed to remove prefix in cell outputs
         TableOfContentsUtils.clearNumbering(cell.node);
@@ -801,7 +803,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     void widget.context.ready.then(() => {
-      onHeadingsChanged(model);
+      onHeadingsChanged(model)?.catch(console.warn);
 
       model.activeHeadingChanged.connect(onActiveHeadingChanged);
       model.headingsChanged.connect(onHeadingsChanged);
