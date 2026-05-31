@@ -37,7 +37,10 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('No Kernel');
 
-      await page.menu.clickMenuItem('File>Save Notebook');
+      // Save notebook via galata (otherwise we would need
+      // to save and wait until dirty icon goes away to avoid
+      // another dialog showing up randomly on close due to race).
+      page.notebook.save();
 
       await page
         .locator('.jp-Dialog')
