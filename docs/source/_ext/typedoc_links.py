@@ -6,12 +6,15 @@ Sphinx extension for TypeDoc cross-references.
 Provides semantic roles for linking to TypeDoc-generated API documentation.
 """
 
+import os
 from pathlib import Path
 
 from docutils import nodes
 from sphinx.application import Sphinx
 from sphinx.domains import Domain
 from sphinx.util.docutils import SphinxRole
+
+SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
 
 
 class TypeDocReference(SphinxRole):
@@ -35,6 +38,8 @@ class TypeDocReference(SphinxRole):
 
         api_dir = Path(self.env.srcdir) / "api"
         if not api_dir.exists():
+            if SPELLING_BUILD_ENABLED:
+                return [self._as_literal(name)], []
             msg = "JupyterLab API Reference directory not found"
             raise ValueError(msg)
 
@@ -59,6 +64,8 @@ class TypeDocReference(SphinxRole):
                 break
 
         if not actual_file:
+            if SPELLING_BUILD_ENABLED:
+                return [self._as_literal(name)], []
             msg = f"Target not found :ts:{self.api_type}:`{target}` in API Reference. Check type, module name, and typos."
             raise ValueError(msg)
 
@@ -74,6 +81,10 @@ class TypeDocReference(SphinxRole):
         ref_node.append(code_node)
 
         return [ref_node], []
+
+    def _as_literal(self, name: str) -> nodes.literal:
+        """Return a fallback literal node when link targets are unavailable."""
+        return nodes.literal(text=f"{name}", classes=["typescript", self.api_type])
 
 
 class TypeScriptDomain(Domain):
