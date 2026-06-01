@@ -109,8 +109,6 @@ for (const c of showSourcesCases) {
           140
         ); /* Variables panel is higher (149 px high) when sources panel is displayed */
       }
-
-      await page.click('jp-button[title^=Continue]');
     });
 
     test('Rich variables inspector', async ({ page, tmpPath }) => {
