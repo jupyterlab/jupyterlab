@@ -39,6 +39,8 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const currentRepository = `${owner}/${repo}`.toLowerCase();
+            const prBody = pr?.body ?? '';
+            const prBodyLower = prBody.toLowerCase();
 
             if (!pr || !pr.user?.login) {
               console.warn('Missing pull request payload details; skipping.');
@@ -200,6 +202,28 @@ jobs:
             if (duplicateCandidates.length === 0) {
               console.log(
                 `No recent duplicate candidates found for PR #${pr.number}; leaving it open.`
+              );
+              return;
+            }
+
+            const referencedDuplicate = duplicateCandidates.find(candidate => {
+              const prNumberReference = new RegExp(
+                `(?:^|[^\\w/])#${candidate.prNumber}(?:\\b|$)`
+              );
+              const fullUrlReference = candidate.url
+                ? prBodyLower.includes(candidate.url.toLowerCase())
+                : false;
+              const shortRepoReference = prBodyLower.includes(
+                `${currentRepository}#${candidate.prNumber}`
+              );
+              return (
+                prNumberReference.test(prBody) || fullUrlReference || shortRepoReference
+              );
+            });
+
+            if (referencedDuplicate) {
+              console.log(
+                `Skipping PR #${pr.number}: body references existing PR #${referencedDuplicate.prNumber}, likely intentional follow-up work.`
               );
               return;
             }
