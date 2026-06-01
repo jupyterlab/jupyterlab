@@ -233,8 +233,6 @@ test.describe('Terminal', () => {
   });
 
   test('Terminal web link', async ({ page, tmpPath, browserName }) => {
-    test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
       .waitFor();
@@ -252,16 +250,14 @@ test.describe('Terminal', () => {
       timeout: 5000
     });
 
-    // Hover over the link layer to trigger link highlighting
-    await Promise.all([
-      terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-      terminal.locator('canvas.xterm-link-layer').hover({
-        position: {
-          x: 60,
-          y: 23
-        }
-      })
-    ]);
+    // Hover over the link to trigger link highlighting.
+    await terminal.hover({ position: { x: 6, y: 27 } });
+
+    // We need to retry once with 2s pause to avoid flakiness.
+    await page.waitForTimeout(2000);
+    await terminal.hover({ position: { x: 10, y: 27 } });
+
+    await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
 
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
   });
