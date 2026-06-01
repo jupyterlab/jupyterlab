@@ -42,11 +42,6 @@ test.describe('Kernel', () => {
       // another dialog showing up randomly on close due to race).
       await page.notebook.save();
 
-      await page
-        .locator('.jp-Dialog')
-        .getByRole('button', { name: 'Cancel' })
-        .click();
-
       await Promise.all([
         page
           .getByRole('tab', { name: 'Untitled.ipynb' })
