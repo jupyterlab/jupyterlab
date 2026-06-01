@@ -118,6 +118,7 @@ import {
   duplicateIcon,
   fastForwardIcon,
   IFormRendererRegistry,
+  infoIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -1446,6 +1447,7 @@ function activatePageHandler(
         helpWidget = new MainAreaWidget({ content });
         helpWidget.id = 'jp-help-panel';
         helpWidget.title.label = trans.__('Help');
+        helpWidget.title.icon = infoIcon;
         helpWidget.title.closable = true;
       }
 
