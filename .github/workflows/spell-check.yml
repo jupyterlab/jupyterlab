@@ -69,7 +69,7 @@ jobs:
           fi
           changed_docs=()
           for path in "${changed_docs_raw[@]}"; do
-            changed_docs+=("${path#docs/source/}")
+            changed_docs+=("${path}")
           done
           printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs[@]}"
           python -m sphinx -b spelling -W --keep-going docs/source docs/build/spelling "${changed_docs[@]}"
