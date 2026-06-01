@@ -7,7 +7,8 @@ on:
     paths:
       - 'packages/core-meta/core.package.json'
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   core-meta-check:
