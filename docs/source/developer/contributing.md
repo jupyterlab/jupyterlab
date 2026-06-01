@@ -496,12 +496,17 @@ dev mode, extensions will not be activated by default - refer
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
-If you want to change the TypeScript code and rebuild on the fly
-(needs page refresh after each rebuild):
+If you want to change the TypeScript code in the core packages and
+rebuild on the fly (needs page refresh after each rebuild):
 
 ```bash
 jupyter lab --dev-mode --watch
 ```
+
+The watch mode rebuilds TypeScript sources in the JupyterLab repository.
+When developing a separate extension, run that extension's build or watch
+command as well so its TypeScript changes are compiled before refreshing
+JupyterLab.
 
 ### Build and Run the Tests
 
