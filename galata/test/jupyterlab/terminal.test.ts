@@ -40,6 +40,15 @@ async function runCommand(
   await page.keyboard.press('Enter');
 }
 
+async function waitForTerminal(page: Page) {
+  const terminal = page.locator(TERMINAL_SELECTOR);
+  await terminal.waitFor();
+  const terminalTabLabel = page.locator(
+    '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
+  );
+  await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+}
+
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
@@ -60,7 +69,7 @@ test.describe('Terminal', () => {
   test.describe('Theme', () => {
     test('Light theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
         'inherit'
@@ -73,9 +82,10 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'light-term-light.png'
       );
@@ -83,7 +93,7 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
       await terminal.focus();
@@ -94,7 +104,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
@@ -108,7 +118,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
@@ -120,7 +130,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
@@ -132,7 +142,7 @@ test.describe('Terminal', () => {
   test.describe('Search', () => {
     test('should highlight matches', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
 
       // Display some content in terminal.
       await runCommand(page, terminal, 'seq 1006 2 1024');
@@ -159,7 +169,7 @@ test.describe('Terminal', () => {
       const terminal = page.locator(TERMINAL_SELECTOR);
       const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
 
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await terminalInput.waitFor();
 
       // Focus terminal input.
@@ -209,7 +219,7 @@ test.describe('Terminal', () => {
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
     const terminal = page.locator(TERMINAL_SELECTOR);
-    await terminal.waitFor();
+    await waitForTerminal(page);
 
     // use the local helper to run basename
     await runCommand(page, terminal, 'basename $PWD', true);
@@ -232,7 +242,7 @@ test.describe('Terminal', () => {
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
     const terminal = page.locator(TERMINAL_SELECTOR);
-    await terminal.waitFor();
+    await waitForTerminal(page);
 
     await runCommand(page, terminal, 'echo https://jupyter.org/', true);
 
