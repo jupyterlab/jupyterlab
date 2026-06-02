@@ -24,6 +24,14 @@ test.describe('test readonly status', () => {
     await page.notebook.close();
     await page.notebook.open('notebook.ipynb');
 
+    // The read-only indicator should be shown in the toolbar as soon as a
+    // read-only document is opened (regression check for #18739).
+    const readOnlyIndicator = page
+      .getByRole('main')
+      .locator('[data-jp-item-name="read-only-indicator"]');
+    await expect(readOnlyIndicator).toBeVisible();
+    await expect(readOnlyIndicator).toContainText('read-only');
+
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
