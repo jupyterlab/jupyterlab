@@ -19,11 +19,83 @@ import { offlineBoltIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { Widget } from '@lumino/widgets';
 import { LLMOptimizer, RuleBasedOptimizer } from '@jupyterlab/code-optimizer';
+//import { summarizeNotebook, NotebookCell } from '../../summarizer/src/summarizer';
 
 function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+interface NotebookCellForSummary {
+  text: string;
+  type: 'markdown' | 'code';
+}
+
+interface SummaryResult {
+  summary: string;
+  cellCount: number;
+}
+
+function summarizeNotebook(cells: NotebookCellForSummary[]): SummaryResult {
+  const activeCells = cells.filter(cell => cell.text.trim().length > 0);
+
+  if (activeCells.length === 0) {
+    return { summary: 'No content to summarize.', cellCount: 0 };
+  }
+
+  const parts: string[] = [];
+
+  for (const cell of activeCells) {
+    const text = cell.text.trim();
+    const firstLine = text.split('\n').find(line => line.trim().length > 0) ?? '';
+
+    if (cell.type === 'markdown') {
+      const cleaned = firstLine.replace(/^#+\s*/, '');
+      parts.push(`Markdown: ${cleaned.slice(0, 200)}`);
+    } else {
+      parts.push(`Code: ${firstLine.slice(0, 200)}`);
+    }
+  }
+
+  let summary = parts.join('\n');
+
+  if (activeCells.length >= 50 && summary.length > 2000) {
+    summary = summary.slice(0, 2000) + '...';
+  }
+
+  return {
+    summary,
+    cellCount: activeCells.length
+  };
+}
+function showNotebookSummaryPanel(
+  app: JupyterFrontEnd,
+  summary: string,
+  cellCount: number
+): void {
+  const panel = new Widget();
+  panel.id = 'jp-notebook-summary-output-panel';
+  panel.title.label = 'Notebook Summary';
+  panel.title.closable = true;
+
+  panel.node.innerHTML = `
+    <div style="padding:16px; max-width:900px;">
+      <h2 style="margin-top:0;">Notebook Summary</h2>
+      <p><strong>Cells summarized:</strong> ${cellCount}</p>
+      <pre style="
+        white-space:pre-wrap;
+        background:#f5f5f5;
+        padding:12px;
+        border-radius:6px;
+        font-size:13px;
+        line-height:1.5;
+        overflow:auto;
+      ">${escapeHtml(summary)}</pre>
+    </div>
+  `;
+
+  app.shell.add(panel, 'main');
+  app.shell.activateById(panel.id);
 }
 
 const plugin: JupyterFrontEndPlugin<void> = {
@@ -45,6 +117,36 @@ const plugin: JupyterFrontEndPlugin<void> = {
       .catch(err => {
         console.error('Could not load code optimizer settings:', err);
       });
+
+
+      app.commands.addCommand('code-optimizer:summarize-notebook', {
+  caption: 'Summarize the current notebook',
+  describedBy: { args: {} } as any,
+  execute: async () => {
+    const notebookPanel = tracker.currentWidget;
+
+    if (!notebookPanel) {
+      showNotebookSummaryPanel(app, 'No active notebook found.', 0);
+      return;
+    }
+
+   // const cells: NotebookCell[] = [];
+    const cells: NotebookCellForSummary[] = [];
+
+    notebookPanel.content.widgets.forEach(cell => {
+      const text = cell.model.sharedModel.getSource();
+      const type = cell.model.type === 'markdown' ? 'markdown' : 'code';
+
+      cells.push({
+        text,
+        type
+      });
+    });
+
+    const result = summarizeNotebook(cells);
+    showNotebookSummaryPanel(app, result.summary, result.cellCount);
+  }
+});
 
     // Per-cell optimize command — shows in the cell toolbar via schema registration
     app.commands.addCommand('code-optimizer:optimize-active-cell', {
@@ -139,6 +241,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
     });
 
     const addButtonsToPanel = (notebookPanel: NotebookPanel) => {
+      const summarizeButton = new ToolbarButton({
+  label: 'Summarize',
+  tooltip: 'Summarize this notebook',
+  onClick: () => {
+    void app.commands.execute('code-optimizer:summarize-notebook');
+  }
+});
+
+notebookPanel.toolbar.insertItem(11, 'summarizeNotebook', summarizeButton);
       // "Optimize All" — Gemini first if API key set, rule-based fallback
       const optimizeAllButton = new ToolbarButton({
         icon: offlineBoltIcon,
