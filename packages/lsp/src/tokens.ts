@@ -250,7 +250,7 @@ export interface ILanguageServerManager extends IDisposable {
    *
    * Register a runtime language server provider.
    */
-  registerProvider(provider: ILanguageServerProvider): IDisposable;
+  registerProvider?(provider: ILanguageServerProvider): IDisposable;
 
   /**
    * @alpha
