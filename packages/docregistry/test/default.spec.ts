@@ -626,8 +626,7 @@ describe('docregistry/default', () => {
           get: () => ({ ...baseModel!, writable: false })
         });
 
-        // The read-only state is handled once the context is ready, so a
-        // fresh widget is needed to exercise the constructor path.
+        // The read-only state is handled once the context is ready.
         const readOnlyWidget = new DocumentWidget({
           context,
           content: new Widget()
