@@ -76,6 +76,86 @@ export type TSpecsMap = Map<TServerKeys, SCHEMA.LanguageServerSpec>;
  */
 export type TLanguageId = string;
 
+/**
+ * @alpha
+ *
+ * Runtime language server session/spec provider.
+ */
+export interface ILanguageServerProvider {
+  /**
+   * @alpha
+   *
+   * Signal emitted when provider sessions/specs are changed.
+   */
+  readonly sessionsChanged?: ISignal<ILanguageServerProvider, void>;
+
+  /**
+   * @alpha
+   *
+   * Fetch runtime language server data.
+   */
+  fetch(): Promise<ILanguageServerProvider.IFetchResult | null>;
+}
+
+export namespace ILanguageServerProvider {
+  /**
+   * Arguments used to create a transport for a specific language server.
+   */
+  export interface ITransportOptions {
+    /**
+     * Language server identifier.
+     */
+    languageServerId: TLanguageServerId;
+
+    /**
+     * Default websocket URL for the server.
+     */
+    socketUrl: string;
+
+    /**
+     * Jupyter server connection settings.
+     */
+    settings: ServerConnection.ISettings;
+  }
+
+  /**
+   * Transport factory for runtime language server connections.
+   */
+  export type TTransportFactory = (options: ITransportOptions) => WebSocket;
+
+  /**
+   * Per-server transport factories.
+   */
+  export interface ITransportFactoryMap {
+    [key: string]: TTransportFactory;
+  }
+
+  /**
+   * Runtime language server data contributed by a provider.
+   */
+  export interface IFetchResult {
+    /**
+     * Runtime sessions for language servers.
+     */
+    sessions?: TSessionMap | SCHEMA.Sessions;
+
+    /**
+     * Runtime specs for language servers.
+     */
+    specs?: TSpecsMap | SCHEMA.LanguageServerSpecsMap;
+
+    /**
+     * Provider status code.
+     */
+    statusCode?: number;
+
+    /**
+     * Optional transport factory/factories.
+     */
+    transport?: ITransportFactoryMap;
+  }
+}
+
 export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
@@ -143,7 +223,7 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
-   * An ordered list of matching >running< sessions, with servers of higher rank higher in the list
+   * An ordered list of matching running sessions, with servers of higher rank higher in the list
    */
   getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
@@ -164,6 +244,13 @@ export interface ILanguageServerManager extends IDisposable {
    * Set the configuration for language servers
    */
   setConfiguration(configuration: TLanguageServerConfigurations): void;
+
+  /**
+   * @alpha
+   *
+   * Register a runtime language server provider.
+   */
+  registerProvider(provider: ILanguageServerProvider): IDisposable;
 
   /**
    * @alpha
@@ -453,7 +540,8 @@ export interface ILSPDocumentConnectionManager {
 
   /**
    * Create a new connection to the language server
-   * @return A promise of the LSP connection
+   *
+   * Returns a promise of the LSP connection.
    */
   connect(
     options: ISocketConnectionOptions,
@@ -622,7 +710,7 @@ export interface IWidgetLSPAdapterTracker<
   /**
    * Find the first instance in the tracker that satisfies a filter function.
    *
-   * @param fn The filter function to call on each instance.
+   * @param fn - The filter function to call on each instance.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.
