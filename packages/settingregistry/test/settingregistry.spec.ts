@@ -48,14 +48,27 @@ function createDeferred<T>(): {
 }
 
 class SaveRaceConnector extends TestConnector {
+  constructor(options: { blockSecondSaveFetch?: boolean } = {}) {
+    super();
+    this._blockSecondSaveFetch = options.blockSecondSaveFetch ?? false;
+  }
+
   readonly saveRequests: string[] = [];
 
   get firstSaveFetchStarted(): Promise<void> {
     return this._firstSaveFetchStarted.promise;
   }
 
+  get secondSaveFetchStarted(): Promise<void> {
+    return this._secondSaveFetchStarted.promise;
+  }
+
   releaseFirstSaveFetch(): void {
     this._firstSaveFetchRelease.resolve(undefined);
+  }
+
+  releaseSecondSaveFetch(): void {
+    this._secondSaveFetchRelease.resolve(undefined);
   }
 
   async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
@@ -64,6 +77,11 @@ class SaveRaceConnector extends TestConnector {
     if (this._fetchCount === 2) {
       this._firstSaveFetchStarted.resolve(undefined);
       await this._firstSaveFetchRelease.promise;
+    }
+
+    if (this._blockSecondSaveFetch && this._fetchCount === 3) {
+      this._secondSaveFetchStarted.resolve(undefined);
+      await this._secondSaveFetchRelease.promise;
     }
 
     return super.fetch(id);
@@ -75,8 +93,11 @@ class SaveRaceConnector extends TestConnector {
   }
 
   private _fetchCount = 0;
+  private _blockSecondSaveFetch = false;
   private _firstSaveFetchRelease = createDeferred<void>();
   private _firstSaveFetchStarted = createDeferred<void>();
+  private _secondSaveFetchRelease = createDeferred<void>();
+  private _secondSaveFetchStarted = createDeferred<void>();
 }
 
 describe('@jupyterlab/settingregistry', () => {
@@ -222,6 +243,71 @@ describe('@jupyterlab/settingregistry', () => {
 
         const saved = await registry.get(id, key);
         expect(saved.user).toBe(false);
+
+        await connector.clear();
+      });
+    });
+
+    describe('#upload()', () => {
+      it('should not emit stale plugin changes while a newer save is queued', async () => {
+        const id = 'foo';
+        const key = 'settings';
+        const connector = new SaveRaceConnector({
+          blockSecondSaveFetch: true
+        });
+        const registry = new SettingRegistry({ connector, timeout });
+        const changed: string[] = [];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: {
+              type: 'object',
+              properties: {
+                first: { type: 'boolean' },
+                second: { type: 'boolean' }
+              }
+            }
+          }
+        };
+
+        await registry.load(id);
+        registry.pluginChanged.connect((_sender, plugin) => {
+          if (plugin === id) {
+            changed.push(registry.plugins[id].raw);
+          }
+        });
+
+        const firstSave = registry.upload(
+          id,
+          JSON.stringify({ [key]: { first: true } })
+        );
+        await connector.firstSaveFetchStarted;
+
+        const secondSave = registry.upload(
+          id,
+          JSON.stringify({ [key]: { first: true, second: true } })
+        );
+        await Promise.resolve();
+        expect(json5.parse(registry.plugins[id].raw)[key]).toEqual({
+          first: true,
+          second: true
+        });
+        connector.releaseFirstSaveFetch();
+
+        await connector.secondSaveFetchStarted;
+        await firstSave;
+
+        expect(changed).toHaveLength(0);
+
+        connector.releaseSecondSaveFetch();
+        await secondSave;
+
+        expect(changed).toHaveLength(1);
+        expect(json5.parse(changed[0])[key]).toEqual({
+          first: true,
+          second: true
+        });
 
         await connector.clear();
       });

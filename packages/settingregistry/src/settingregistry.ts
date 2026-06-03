@@ -623,6 +623,7 @@ export class SettingRegistry implements ISettingRegistry {
   private async _save(plugin: string): Promise<void> {
     const previousSave = this._saveQueue.get(plugin) ?? Promise.resolve();
     const snapshot = this.plugins[plugin]?.raw;
+    let queuedSave: Promise<void>;
     const savePlugin = async (): Promise<void> => {
       const plugins = this.plugins;
 
@@ -637,15 +638,21 @@ export class SettingRegistry implements ISettingRegistry {
       const snapshotPlugin = { ...plugins[plugin], raw: snapshot };
 
       try {
-        await this._validate(snapshotPlugin);
+        this._validateData(snapshotPlugin);
       } catch (errors) {
         console.warn(`${plugin} validation errors:`, errors);
         throw new Error(`${plugin} failed to validate; check console.`);
       }
       await this.connector.save(plugin, snapshot);
+      if (this._saveQueue.get(plugin) !== queuedSave) {
+        return;
+      }
 
       // Fetch and reload the data to guarantee server and client are in sync.
       const fetched = await this.connector.fetch(plugin);
+      if (this._saveQueue.get(plugin) !== queuedSave) {
+        return;
+      }
       if (fetched === undefined) {
         throw [
           {
@@ -661,7 +668,7 @@ export class SettingRegistry implements ISettingRegistry {
     };
 
     // Continue save queue even if the previous request failed.
-    const queuedSave = previousSave.then(savePlugin, savePlugin);
+    queuedSave = previousSave.then(savePlugin, savePlugin);
 
     this._saveQueue.set(plugin, queuedSave);
 
@@ -717,14 +724,21 @@ export class SettingRegistry implements ISettingRegistry {
    */
   private async _validate(plugin: ISettingRegistry.IPlugin): Promise<void> {
     // Validate the user data and create the composite data.
+    this._validateData(plugin);
+
+    // Apply a transformation if necessary and set the local copy.
+    this.plugins[plugin.id] = await this._transform('compose', plugin);
+  }
+
+  /**
+   * Validate a plugin without updating the registry cache.
+   */
+  private _validateData(plugin: ISettingRegistry.IPlugin): void {
     const errors = this.validator.validateData(plugin);
 
     if (errors) {
       throw errors;
     }
-
-    // Apply a transformation if necessary and set the local copy.
-    this.plugins[plugin.id] = await this._transform('compose', plugin);
   }
 
   private _pluginChanged = new Signal<this, string>(this);
