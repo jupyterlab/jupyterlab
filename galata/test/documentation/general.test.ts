@@ -52,6 +52,7 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
@@ -67,6 +68,15 @@ test.describe('General', () => {
     await page.dblclick('text=lorenz.py');
 
     await page.click('div[role="main"] >> text=Lorenz.ipynb');
+
+    // Wait for the debugger bug icon to settle.
+    // This needs to be before running any cells/switching to a different panel.
+    // We need to fix it cleanely later but for now let's make tests less flaky,
+    // and if it has to fail, fail fast (after 10 seconds, not 1 minute).
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor({ timeout: 10000 });
 
     await page.notebook.run();
 
@@ -102,12 +112,6 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    // wait for the debugger bug icon to settle
-    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
-    await panel
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
-
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -130,9 +134,22 @@ test.describe('General', () => {
       (document.activeElement as HTMLElement).blur();
     });
 
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 31, x: 0, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_left.png');
+
+    await page.click('[title="Running Terminals and Kernels"]');
+    await page.click('[aria-label="Open Tabs Section"]', {
+      button: 'right',
+      position: { x: 10, y: 10 }
+    });
     expect(
-      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('interface_left.png');
+      await page.screenshot({ clip: { y: 31, x: 0, width: 330, height: 400 } })
+    ).toMatchSnapshot('sidebar_context_menu.png');
   });
 
   test('Right Sidebar', async ({ page, tmpPath }) => {
@@ -147,11 +164,13 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right.png');
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
@@ -476,11 +495,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
+    // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
+    // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
+    await page.getByText('Cell 1/6').waitFor();
+
     const trustIndictor = page.locator('.jp-StatusItem-trust');
 
-    expect(await trustIndictor.screenshot()).toMatchSnapshot(
-      'notebook_not_trusted.png'
-    );
+    expect
+      .soft(await trustIndictor.screenshot())
+      .toMatchSnapshot('notebook_not_trusted.png');
 
     // Open trust dialog
     // Note: we do not `await` here as it only resolves once dialog is closed
@@ -562,6 +585,7 @@ test.describe('General', () => {
     await page.dblclick('text=Data.ipynb');
 
     // Open a terminal
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');

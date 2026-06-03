@@ -335,7 +335,7 @@ Run the following commands:
 
 ```shell
 pip install -e .
-jupyter labextension develop . --overwrite
+jupyter-builder develop . --overwrite
 jupyter lab
 ```
 

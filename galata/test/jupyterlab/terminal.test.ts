@@ -3,14 +3,55 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { expect, test } from '@jupyterlab/galata';
+import path from 'path';
+import { type Locator, type Page } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
 const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
+/**
+ * Run a shell command in the visible terminal panel.
+ *
+ * @param page Playwright page (provided by galata fixture)
+ * @param terminalLocator Locator that matches the terminal container
+ * @param command Shell command to run
+ */
+async function runCommand(
+  page: Page,
+  terminalLocator: Locator,
+  command: string,
+  verify = false
+): Promise<void> {
+  await terminalLocator.waitFor({ state: 'visible' });
+  await terminalLocator.locator('.jp-Terminal-body').focus();
+
+  await terminalLocator
+    .locator(TERMINAL_INPUT_SELECTOR)
+    .waitFor({ state: 'visible' });
+
+  await page.keyboard.type(command);
+  if (verify) {
+    await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
+      command
+    );
+  }
+  await page.keyboard.press('Enter');
+}
+
+async function waitForTerminal(page: Page) {
+  const terminal = page.locator(TERMINAL_SELECTOR);
+  await terminal.waitFor();
+  const terminalTabLabel = page.locator(
+    '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
+  );
+  await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+}
+
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.menu.clickMenuItem('File>New>Terminal');
     await page.locator(TERMINAL_SELECTOR).waitFor();
   });
@@ -28,7 +69,7 @@ test.describe('Terminal', () => {
   test.describe('Theme', () => {
     test('Light theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
         'inherit'
@@ -41,9 +82,10 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'light-term-light.png'
       );
@@ -51,7 +93,7 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
       await terminal.focus();
@@ -62,7 +104,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
@@ -76,7 +118,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
@@ -88,7 +130,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
@@ -100,12 +142,10 @@ test.describe('Terminal', () => {
   test.describe('Search', () => {
     test('should highlight matches', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
 
       // Display some content in terminal.
-      await page.locator('div.xterm-screen').click();
-      await page.keyboard.type('seq 1006 2 1024');
-      await page.keyboard.press('Enter');
+      await runCommand(page, terminal, 'seq 1006 2 1024');
 
       // Perform search.
       const searchText = '101';
@@ -121,56 +161,122 @@ test.describe('Terminal', () => {
       expect(await terminal.screenshot()).toMatchSnapshot('search.png');
     });
   });
+
+  test.describe('Focus', () => {
+    test('should move focus away from terminal input on second Escape', async ({
+      page
+    }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
+
+      await waitForTerminal(page);
+      await terminalInput.waitFor();
+
+      // Focus terminal input.
+      await page.locator('div.xterm-screen').click();
+      await expect(terminalInput).toBeFocused();
+
+      // First Escape keeps focus on input.
+      await page.keyboard.press('Escape');
+      await expect(terminalInput).toBeFocused();
+
+      // Second Escape moves focus to terminal viewport.
+      await page.keyboard.press('Escape');
+      await expect(terminal.locator('.xterm-viewport')).toBeFocused();
+
+      await page.waitForTimeout(100);
+      expect(await terminal.screenshot()).toMatchSnapshot('focus.png');
+    });
+  });
 });
 
-test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
-  await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
-
-  await page.locator('[role="main"] >> p:has-text("Terminal")').click();
-
-  const terminal = page.locator(TERMINAL_SELECTOR);
-  await terminal.waitFor();
-
-  await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-  await page.keyboard.type('basename $PWD');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(1000);
-  expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
-});
-
-test('Terminal web link', async ({ page, tmpPath, browserName }) => {
-  test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
-  await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
-
-  await page.locator('[role="main"] >> p:has-text("Terminal")').click();
-
-  const terminal = page.locator(TERMINAL_SELECTOR);
-  await terminal.waitFor();
-
-  await terminal.locator(TERMINAL_INPUT_SELECTOR).waitFor();
-  await page.keyboard.type('echo https://jupyter.org/');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(1000);
-  await Promise.all([
-    terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-    terminal.locator('canvas.xterm-link-layer').hover({
-      position: {
-        x: 60,
-        y: 23
+test.describe('Terminal', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/terminal-extension:plugin': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/terminal-extension:plugin'],
+        screenReaderMode: true
       }
-    })
-  ]);
-  expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
+    },
+    tmpPath: 'terminal-test'
+  });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.createDirectory(tmpPath);
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
+  });
+
+  test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
+    await page
+      .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
+      .waitFor();
+
+    await page.locator('[role="main"] >> p:has-text("Terminal")').click();
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // use the local helper to run basename
+    await runCommand(page, terminal, 'basename $PWD', true);
+
+    // Wait for the basename to appear in the terminal output
+    const basename = path.basename(tmpPath);
+    const terminalBody = terminal.locator('.jp-Terminal-body:visible');
+    await expect(terminalBody).toContainText(basename, { timeout: 5000 });
+
+    expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
+  });
+
+  test('Terminal web link', async ({ page, tmpPath, browserName }) => {
+    await page
+      .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
+      .waitFor();
+
+    await page.locator('[role="main"] >> p:has-text("Terminal")').click();
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
+
+    // Wait for the URL to appear in the terminal output
+    const terminalBody = terminal.locator('.jp-Terminal-body:visible');
+    await expect(terminalBody).toContainText('https://jupyter.org/', {
+      timeout: 5000
+    });
+
+    // Hover over the link to trigger link highlighting.
+    await terminal.hover({ position: { x: 6, y: 27 } });
+
+    // We need to retry once with 2s pause to avoid flakiness.
+    await page.waitForTimeout(2000);
+    await terminal.hover({ position: { x: 10, y: 27 } });
+
+    await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
+
+    expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
+  });
 });
 
 test.describe('Open in Terminal from File Browser', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/terminal-extension:plugin': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/terminal-extension:plugin'],
         screenReaderMode: true
       }
     }
+  });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.createDirectory(tmpPath);
   });
 
   // Ensure a clean state before each test
@@ -206,7 +312,7 @@ test.describe('Open in Terminal from File Browser', () => {
     );
     await expect(terminalTabLocator).toHaveCount(1);
 
-    // Get visible terminal panel
+    // Get visible terminal panel (container)
     const terminalPanelLocator = page.locator(
       '.lm-DockPanel .jp-Terminal:visible'
     );
@@ -216,8 +322,8 @@ test.describe('Open in Terminal from File Browser', () => {
     await terminalPanelLocator.locator('.jp-Terminal-body').waitFor();
     await terminalPanelLocator.click();
 
-    await page.keyboard.type('pwd');
-    await page.keyboard.press('Enter');
+    // Use helper to execute pwd in the visible terminal container
+    await runCommand(page, terminalPanelLocator, 'pwd');
 
     await expect(terminalPanelLocator).toContainText(folderName, {
       timeout: 5000
@@ -340,18 +446,13 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(1, { timeout: 10000 });
 
     // Verify content is the directory
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
-
-    if ((await tabs.count()) > 0) {
-      await tabs.first().click();
-    }
+    const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
     await activeTerminal.waitFor({ state: 'visible' });
 
-    await activeTerminal.click();
-    await page.keyboard.type('pwd');
-    await page.keyboard.press('Enter');
+    await runCommand(page, activeTerminal, 'pwd');
 
-    await expect(activeTerminal).toContainText(folderName, { timeout: 5000 });
+    const activeBody = activeTerminal.locator('.jp-Terminal-body:visible');
+    await expect(activeBody).toContainText(folderName, { timeout: 5000 });
   });
 
   test('should not show the context menu item for files', async ({

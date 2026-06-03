@@ -6,7 +6,7 @@
 Process Playwright test reports and unpack snapshots to their correct locations.
 
 This script reads JSON test reports from Playwright's JSON reporter and extracts
-snapshot images from the test-results directory, placing them in the correct
+snapshot files from the test-results directory, placing them in the correct
 snapshot directories based on the test file locations.
 
 Format:
@@ -18,6 +18,8 @@ import json
 import shutil
 import sys
 from pathlib import Path
+
+SNAPSHOT_EXTENSIONS = (".png", ".json")
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -87,44 +89,59 @@ def to_artifact_source_path(source_relative: Path, artifact_dir: Path) -> Path:
     return artifact_dir / source_relative
 
 
+def collect_snapshot_attachments(
+    attachments: list[dict],
+) -> tuple[dict[str, dict], dict[str, dict]]:
+    """Collect expected and actual snapshot attachments keyed by base name."""
+    expected_by_base: dict[str, dict] = {}
+    actual_by_base: dict[str, dict] = {}
+
+    for attachment in attachments:
+        name = attachment.get("name", "")
+        path_value = attachment.get("path", "")
+
+        if not path_value:
+            continue
+
+        for extension in SNAPSHOT_EXTENSIONS:
+            expected_suffix = f"-expected{extension}"
+            if name.endswith(expected_suffix):
+                expected_by_base[name[: -len(expected_suffix)]] = attachment
+                break
+
+            actual_suffix = f"-actual{extension}"
+            if name.endswith(actual_suffix):
+                actual_by_base[name[: -len(actual_suffix)]] = attachment
+                break
+
+    return expected_by_base, actual_by_base
+
+
 def process_result(
     result: dict,
     artifact_dir: Path,
     root_dir: str | None,
     dry_run: bool = False,
 ) -> int:
-    """Process failed test result attachments by copying actual image to expected path."""
+    """Process failed test result attachments by copying actual snapshots to expected paths."""
     if result.get("status") != "failed":
         return 0
 
     attachments = result.get("attachments", [])
-    expected_by_base: dict[str, dict] = {}
-    actual_by_base: dict[str, dict] = {}
-
-    for attachment in attachments:
-        name = attachment.get("name", "")
-        content_type = attachment.get("contentType", "")
-        path_value = attachment.get("path", "")
-
-        if not path_value or content_type != "image/png":
-            continue
-
-        if name.endswith("-expected.png"):
-            expected_by_base[name[: -len("-expected.png")]] = attachment
-        elif name.endswith("-actual.png"):
-            actual_by_base[name[: -len("-actual.png")]] = attachment
+    expected_by_base, actual_by_base = collect_snapshot_attachments(attachments)
 
     copied = 0
     for base_name, actual in actual_by_base.items():
         expected = expected_by_base.get(base_name)
         if expected is None:
+            sys.stderr.write(f"Warning: Missing expected snapshot attachment for '{base_name}'\n")
             continue
 
         source_relative = to_repo_relative(actual["path"], root_dir)
         source_path = to_artifact_source_path(source_relative, artifact_dir)
         if not source_path.exists():
             sys.stderr.write(
-                f"Warning: Could not locate actual image in artifact: {actual['path']}\n"
+                f"Warning: Could not locate actual snapshot in artifact: {actual['path']}\n"
             )
             continue
 

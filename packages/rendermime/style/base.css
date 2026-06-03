@@ -46,6 +46,8 @@
   color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
 }
 
+/* stylelint-disable declaration-property-value-allowed-list */
+
 /* console foregrounds and backgrounds */
 .jp-RenderedText pre .ansi-black-fg {
   color: #3e424d;
@@ -190,6 +192,8 @@
   background-color: #a1a6b2;
   padding: var(--jp-private-code-span-padding) 0;
 }
+
+/* stylelint-enable declaration-property-value-allowed-list */
 
 .jp-RenderedText pre .ansi-default-inverse-fg {
   color: var(--jp-ui-inverse-font-color0);

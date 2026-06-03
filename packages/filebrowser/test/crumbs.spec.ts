@@ -105,8 +105,16 @@ describe('filebrowser/model', () => {
       it('should create a new BreadCrumbs instance', () => {
         const bread = new BreadCrumbs({ model });
         expect(bread).toBeInstanceOf(BreadCrumbs);
+        // Before attachment, the breadcrumb container is empty (items are
+        // populated during onUpdateRequest which runs after attach).
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
-        expect(items.length).toBe(1);
+        expect(items.length).toBe(0);
+        // After attachment, the root node should have two child elements:
+        // the breadcrumb container and the path navigator.
+        Widget.attach(bread, document.body);
+        expect(bread.node.children.length).toBe(2);
+        Widget.detach(bread);
+        bread.dispose();
       });
 
       it('should add the jp-BreadCrumbs class', () => {

@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*
  * This code is inspired by
@@ -911,6 +912,7 @@ export class WindowedList<
 
     const viewport = innerElement.appendChild(renderer.createViewport());
     viewport.classList.add('jp-WindowedPanel-viewport');
+    viewport.classList.add('jp-zoom-target');
 
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();

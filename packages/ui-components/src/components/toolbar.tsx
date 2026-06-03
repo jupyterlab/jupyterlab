@@ -1157,9 +1157,10 @@ class ToolbarPopup extends Widget {
   /**
    *  Construct a new ToolbarPopup
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     super({ node: document.createElement('jp-toolbar') });
-    this.node.setAttribute('aria-label', 'Responsive popup toolbar');
+    this.node.setAttribute('aria-label', trans.__('Responsive popup toolbar'));
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
     this.addClass('jp-ThemedContainer');
@@ -1246,7 +1247,7 @@ class ToolbarPopupOpener extends ToolbarButton {
     });
     this.addClass('jp-Toolbar-responsive-opener');
 
-    this.popup = new ToolbarPopup();
+    this.popup = new ToolbarPopup(props.translator);
   }
 
   /**

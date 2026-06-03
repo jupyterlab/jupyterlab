@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module markedparser-extension
@@ -192,7 +193,8 @@ namespace Private {
     const renderer = new Renderer_();
     const originalCode = renderer.code;
 
-    renderer.code = ({ text, lang, escaped }) => {
+    renderer.code = token => {
+      const { text, lang } = token;
       // handle block renderers
       for (const block of _blocks) {
         if (lang && block.languages.includes(lang)) {
@@ -211,7 +213,7 @@ namespace Private {
       }
 
       // fall back to calling with the renderer as `this`
-      return originalCode.call(renderer, { text, lang, escaped });
+      return originalCode.call(renderer, token);
     };
 
     return renderer;

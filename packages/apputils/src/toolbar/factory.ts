@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';

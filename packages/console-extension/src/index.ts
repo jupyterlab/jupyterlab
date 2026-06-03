@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module console-extension
@@ -30,8 +31,8 @@ import {
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
-import type { CodeConsole } from '@jupyterlab/console';
 import {
+  CodeConsole,
   ConsolePanel,
   IConsoleCellExecutor,
   IConsoleTracker
@@ -562,10 +563,18 @@ async function activateConsole(
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
-      // Update future promptCells
-      widget.console.editorConfig = promptCellConfig;
-      // Update promptCell already on screen
-      widget.console.promptCell?.editor?.setOptions(promptCellConfig);
+      // Update future promptCells - merge with defaults to preserve tabFocusable: false for output cells
+      // But prompt cells will have tabFocusable: true set explicitly in newPromptCell()
+      widget.console.editorConfig = {
+        ...CodeConsole.defaultEditorConfig,
+        ...promptCellConfig
+      };
+      // Update promptCell already on screen - ensure it's tabbable (input should be accessible)
+      widget.console.promptCell?.editor?.setOptions({
+        ...CodeConsole.defaultEditorConfig,
+        ...promptCellConfig,
+        tabFocusable: true
+      });
       // Set other config options
       widget.console.setConfig({
         clearCellsOnExecute,

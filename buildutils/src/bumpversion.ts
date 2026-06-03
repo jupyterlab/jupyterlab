@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { program as commander } from 'commander';
 import * as utils from './utils';
@@ -30,7 +31,7 @@ commander
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
-      let cmd = 'jlpm run patch:release --all';
+      let cmd = 'jlpm patch:release --all';
       if (opts.force) {
         cmd += ' --force';
       }

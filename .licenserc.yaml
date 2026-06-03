@@ -33,6 +33,7 @@ header:
     - 'examples/federated/example.cert'
     - 'galata/test/jupyterlab/notebooks/'
     - 'galata/test/*/*/*.txt'
+    - 'galata/test/documentation/add.py'
     - 'jupyterlab.desktop'
     - 'jupyterlab/staging'
     - 'packages/codemirror/test/foo.grammar'

@@ -35,6 +35,11 @@ export interface IRenderMimeRegistry {
   readonly linkHandler: IRenderMime.ILinkHandler | null;
 
   /**
+   * The object used to register trusted render boundaries.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
+
+  /**
    * The LaTeX typesetter for the rendermime.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
@@ -169,6 +174,11 @@ export namespace IRenderMimeRegistry {
      * The new path handler.
      */
     linkHandler?: IRenderMime.ILinkHandler;
+
+    /**
+     * The new trust handler.
+     */
+    trustHandler?: IRenderMime.ITrustHandler;
 
     /**
      * The new LaTeX typesetter.

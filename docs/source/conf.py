@@ -52,6 +52,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
@@ -119,7 +120,7 @@ def build_api_docs(out_dir: Path):
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
-    jlpm = ["node", str(root / "jupyterlab" / "staging" / "yarn.js")]
+    jlpm = ["jlpm"]
 
     if api_index.exists():
         # avoid rebuilding docs because it takes forever
@@ -375,7 +376,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
+    "announcement": '🚀 You can now test JupyterLab 4.6.0 Beta · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6-beta">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -541,6 +542,7 @@ def setup(app):
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
+    app.add_js_file("js/plugin_playground_embed.js")
     # Skip we are dealing with internationalization
     outdir = Path(app.outdir)
     if outdir.name != "gettext":

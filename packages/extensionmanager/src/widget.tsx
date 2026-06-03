@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
@@ -496,7 +497,7 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -601,7 +602,7 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
