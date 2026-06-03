@@ -287,7 +287,10 @@ export class SettingRegistry implements ISettingRegistry {
         .forEach(plugin => this._unloadedPlugins.set(plugin.id, plugin));
 
       // Preload with any available data at instantiation-time.
-      this._ready = this._preload(options.plugins);
+      this._isReady = false;
+      this._ready = this._preload(options.plugins).then(() => {
+        this._isReady = true;
+      });
     }
   }
 
@@ -445,7 +448,9 @@ export class SettingRegistry implements ISettingRegistry {
    */
   async remove(plugin: string, key: string): Promise<void> {
     // Wait for data preload before allowing normal operation.
-    await this._ready;
+    if (!this._isReady) {
+      await this._ready;
+    }
 
     const plugins = this.plugins;
 
@@ -477,7 +482,9 @@ export class SettingRegistry implements ISettingRegistry {
    */
   async set(plugin: string, key: string, value: JSONValue): Promise<void> {
     // Wait for data preload before allowing normal operation.
-    await this._ready;
+    if (!this._isReady) {
+      await this._ready;
+    }
 
     const plugins = this.plugins;
 
@@ -549,7 +556,9 @@ export class SettingRegistry implements ISettingRegistry {
    */
   async upload(plugin: string, raw: string): Promise<void> {
     // Wait for data preload before allowing normal operation.
-    await this._ready;
+    if (!this._isReady) {
+      await this._ready;
+    }
 
     const plugins = this.plugins;
 
@@ -624,6 +633,7 @@ export class SettingRegistry implements ISettingRegistry {
     const previousSave = this._saveQueue.get(plugin) ?? Promise.resolve();
     const snapshot = this.plugins[plugin]?.raw;
     let queuedSave: Promise<void>;
+
     const savePlugin = async (): Promise<void> => {
       const plugins = this.plugins;
 
@@ -742,6 +752,7 @@ export class SettingRegistry implements ISettingRegistry {
   }
 
   private _pluginChanged = new Signal<this, string>(this);
+  private _isReady = true;
   private _ready = Promise.resolve();
   private _saveQueue = new Map<string, Promise<void>>();
   private _transformers: {
