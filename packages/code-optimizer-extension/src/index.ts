@@ -26,17 +26,20 @@ function escapeHtml(text: string): string {
   div.textContent = text;
   return div.innerHTML;
 }
-interface NotebookCellForSummary {
+interface INotebookCellForSummary {
   text: string;
   type: 'markdown' | 'code';
 }
 
-interface SummaryResult {
+interface ISummaryResult {
   summary: string;
   cellCount: number;
 }
 
-function summarizeNotebook(cells: NotebookCellForSummary[]): SummaryResult {
+const MAX_CELL_CONTRIBUTION = 200;
+const MAX_SUMMARY_LENGTH = 2000;
+
+function summarizeNotebook(cells: INotebookCellForSummary[]): ISummaryResult {
   const activeCells = cells.filter(cell => cell.text.trim().length > 0);
 
   if (activeCells.length === 0) {
@@ -46,28 +49,70 @@ function summarizeNotebook(cells: NotebookCellForSummary[]): SummaryResult {
   const parts: string[] = [];
 
   for (const cell of activeCells) {
-    const text = cell.text.trim();
-    const firstLine = text.split('\n').find(line => line.trim().length > 0) ?? '';
+    const contribution =
+      cell.type === 'markdown'
+        ? _summarizeMarkdownCell(cell.text)
+        : _summarizeCodeCell(cell.text);
 
-    if (cell.type === 'markdown') {
-      const cleaned = firstLine.replace(/^#+\s*/, '');
-      parts.push(`Markdown: ${cleaned.slice(0, 200)}`);
-    } else {
-      parts.push(`Code: ${firstLine.slice(0, 200)}`);
+    if (contribution) {
+      parts.push(contribution);
     }
   }
 
   let summary = parts.join('\n');
 
-  if (activeCells.length >= 50 && summary.length > 2000) {
-    summary = summary.slice(0, 2000) + '...';
+  if (cells.length >= 50 && summary.length > MAX_SUMMARY_LENGTH) {
+    summary = summary.slice(0, MAX_SUMMARY_LENGTH);
   }
 
   return {
     summary,
-    cellCount: activeCells.length
+    cellCount: cells.length
   };
 }
+
+function _summarizeMarkdownCell(text: string): string | null {
+  const lines = text.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      continue;
+    }
+
+    if (/^#{1,6}\s/.test(trimmed)) {
+      return trimmed;
+    }
+
+    return trimmed.slice(0, MAX_CELL_CONTRIBUTION);
+  }
+
+  return null;
+}
+
+function _summarizeCodeCell(text: string): string | null {
+  const lines = text.split('\n');
+
+  const commentLines = lines.filter(line => line.trim().startsWith('#'));
+
+  if (commentLines.length > 0) {
+    const comment = commentLines[0].trim().slice(0, MAX_CELL_CONTRIBUTION);
+
+    return `Code: ${comment}`;
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed) {
+      return `Code: ${trimmed.slice(0, MAX_CELL_CONTRIBUTION)}`;
+    }
+  }
+
+  return null;
+}
+
 function showNotebookSummaryPanel(
   app: JupyterFrontEnd,
   summary: string,
@@ -118,35 +163,34 @@ const plugin: JupyterFrontEndPlugin<void> = {
         console.error('Could not load code optimizer settings:', err);
       });
 
+    app.commands.addCommand('code-optimizer:summarize-notebook', {
+      caption: 'Summarize the current notebook',
+      describedBy: { args: {} } as any,
+      execute: async () => {
+        const notebookPanel = tracker.currentWidget;
 
-      app.commands.addCommand('code-optimizer:summarize-notebook', {
-  caption: 'Summarize the current notebook',
-  describedBy: { args: {} } as any,
-  execute: async () => {
-    const notebookPanel = tracker.currentWidget;
+        if (!notebookPanel) {
+          showNotebookSummaryPanel(app, 'No active notebook found.', 0);
+          return;
+        }
 
-    if (!notebookPanel) {
-      showNotebookSummaryPanel(app, 'No active notebook found.', 0);
-      return;
-    }
+        // const cells: NotebookCell[] = [];
+        const cells: INotebookCellForSummary[] = [];
 
-   // const cells: NotebookCell[] = [];
-    const cells: NotebookCellForSummary[] = [];
+        notebookPanel.content.widgets.forEach(cell => {
+          const text = cell.model.sharedModel.getSource();
+          const type = cell.model.type === 'markdown' ? 'markdown' : 'code';
 
-    notebookPanel.content.widgets.forEach(cell => {
-      const text = cell.model.sharedModel.getSource();
-      const type = cell.model.type === 'markdown' ? 'markdown' : 'code';
+          cells.push({
+            text,
+            type
+          });
+        });
 
-      cells.push({
-        text,
-        type
-      });
+        const result = summarizeNotebook(cells);
+        showNotebookSummaryPanel(app, result.summary, result.cellCount);
+      }
     });
-
-    const result = summarizeNotebook(cells);
-    showNotebookSummaryPanel(app, result.summary, result.cellCount);
-  }
-});
 
     // Per-cell optimize command — shows in the cell toolbar via schema registration
     app.commands.addCommand('code-optimizer:optimize-active-cell', {
@@ -242,14 +286,18 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const addButtonsToPanel = (notebookPanel: NotebookPanel) => {
       const summarizeButton = new ToolbarButton({
-  label: 'Summarize',
-  tooltip: 'Summarize this notebook',
-  onClick: () => {
-    void app.commands.execute('code-optimizer:summarize-notebook');
-  }
-});
+        label: 'Summarize',
+        tooltip: 'Summarize this notebook',
+        onClick: () => {
+          void app.commands.execute('code-optimizer:summarize-notebook');
+        }
+      });
 
-notebookPanel.toolbar.insertItem(11, 'summarizeNotebook', summarizeButton);
+      notebookPanel.toolbar.insertItem(
+        11,
+        'summarizeNotebook',
+        summarizeButton
+      );
       // "Optimize All" — Gemini first if API key set, rule-based fallback
       const optimizeAllButton = new ToolbarButton({
         icon: offlineBoltIcon,
