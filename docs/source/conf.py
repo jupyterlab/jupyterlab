@@ -59,6 +59,7 @@ extensions = [
 SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
 
 if SPELLING_BUILD_ENABLED:
+    extensions = [ext for ext in extensions if ext != "sphinx.ext.intersphinx"]
     # Keep spelling runs focused on spelling failures only.
     suppress_warnings = list(globals().get("suppress_warnings", []))
     if "myst.xref_missing" not in suppress_warnings:
@@ -570,6 +571,9 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):
+    if SPELLING_BUILD_ENABLED:
+        return
+
     # Enable Plausible.io stats
     app.add_js_file("https://plausible.io/js/pa-Tem97Eeu4LJFfSRY89aW1.js", loading_method="async")
     app.add_js_file(
