@@ -15,6 +15,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableList } from '@jupyterlab/observables';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
@@ -1192,7 +1193,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
-  private _pageHandler: CodeCell.IOptions['pageHandler'];
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -1251,7 +1252,7 @@ export namespace StaticNotebook {
     /**
      * Optional handler for pager payloads (`source: page`).
      */
-    pageHandler?: CodeCell.IOptions['pageHandler'];
+    pageHandler?: IPageHandler;
   }
 
   /**

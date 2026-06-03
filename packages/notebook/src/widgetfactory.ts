@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { CodeCell } from '@jupyterlab/cells';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory } from '@jupyterlab/docregistry';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { INotebookModel } from './model';
@@ -108,7 +108,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
 
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
-  private _pageHandler: CodeCell.IOptions['pageHandler'];
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -149,7 +149,7 @@ export namespace NotebookWidgetFactory {
     /**
      * Optional handler for pager payloads (`source: page`).
      */
-    pageHandler?: CodeCell.IOptions['pageHandler'];
+    pageHandler?: IPageHandler;
 
     /**
      * The application language translator.

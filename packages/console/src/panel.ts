@@ -9,6 +9,7 @@ import {
 } from '@jupyterlab/apputils';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time } from '@jupyterlab/coreutils';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ServiceManager } from '@jupyterlab/services';
@@ -263,7 +264,7 @@ export namespace ConsolePanel {
     /**
      * Optional handler for pager payloads (`source: page`).
      */
-    pageHandler?: CodeConsole.IOptions['pageHandler'];
+    pageHandler?: IPageHandler;
 
     /**
      * A function to call when the kernel is busy.
