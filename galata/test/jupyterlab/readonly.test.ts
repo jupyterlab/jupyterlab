@@ -24,6 +24,14 @@ test.describe('test readonly status', () => {
       .locator('.jp-mod-dirty');
     await notSavedIndicator.waitFor();
 
+    // The read-only indicator should show in the toolbar when a read-only
+    // document is opened.
+    const readOnlyIndicator = page
+      .getByRole('main')
+      .locator('[data-jp-item-name="read-only-indicator"]');
+    await expect(readOnlyIndicator).toBeVisible();
+    await expect(readOnlyIndicator).toContainText('read-only');
+
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
