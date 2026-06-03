@@ -77,15 +77,16 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Restore Playwright browsers cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        if: ${{ github.event_name != 'release' }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
         id: playwright-cache
         with:
           path: /home/runner/pw-browsers
           key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}
 
       - name: Restore ${{ matrix.group }} cache
-        if: ${{ matrix.cache-path }}
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        if: ${{ matrix.cache-path && github.event_name != 'release' }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
         with:
           path: ${{ matrix.cache-path }}
           key: |-
