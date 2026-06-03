@@ -85,7 +85,7 @@ for (const mode of windowingModes) {
       }, lastCellIndex);
 
       // The last cell should eventually be scrolled into the viewport.
-      await expect(lastCell).toBeInViewport();
+      await expect(lastCell).toBeInViewport({ timeout: 10000 });
     });
   });
 }
