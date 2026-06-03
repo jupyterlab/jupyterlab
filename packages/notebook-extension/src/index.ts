@@ -371,7 +371,7 @@ const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
  * Documentation page describing notebook export support.
  */
 const NOTEBOOK_EXPORT_DOCS_URL =
-  'https://jupyterlab.readthedocs.io/en/latest/user/export.html';
+  'https://jupyterlab.readthedocs.io/en/stable/user/export.html';
 
 /**
  * An interface describing how export guidance is presented to users.
