@@ -103,7 +103,7 @@ export class Context<
     this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
       contents: manager.contents,
-      kernelId: () => this.sessionContext.session?.kernel?.id
+      getKernelId: () => this.sessionContext.session?.kernel?.id
     });
   }
 

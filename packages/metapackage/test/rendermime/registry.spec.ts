@@ -501,7 +501,7 @@ describe('rendermime/registry', () => {
           const resolver = new RenderMimeRegistry.UrlResolver({
             path: pathParent + '/pr%25 ' + UUID.uuid4(),
             contents: localContents,
-            kernelId: () => kernelId
+            getKernelId: () => kernelId
           });
           const settings = localContents.serverSettings as IWritableSettings;
           const previousFetch = settings.fetch;

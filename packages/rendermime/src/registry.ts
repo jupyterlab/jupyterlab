@@ -354,7 +354,7 @@ export namespace RenderMimeRegistry {
     constructor(options: IUrlResolverOptions) {
       this._path = options.path;
       this._contents = options.contents;
-      this._kernelId = options.kernelId;
+      this._getKernelId = options.getKernelId;
     }
 
     /**
@@ -454,7 +454,7 @@ export namespace RenderMimeRegistry {
       }
 
       const params: Private.IResolvePathQuery = { path };
-      const kernelId = this._kernelId?.();
+      const kernelId = this._getKernelId?.();
       if (kernelId) {
         // `kernel` is expected by jupyter-server resolvePath handler.
         params.kernel = kernelId;
@@ -556,7 +556,7 @@ export namespace RenderMimeRegistry {
 
     private _path: string;
     private _contents: Contents.IManager;
-    private _kernelId?: () => string | null | undefined;
+    private _getKernelId?: () => string | null | undefined;
     private _resolvePathApiAvailable: boolean | null = null;
   }
 
@@ -578,9 +578,9 @@ export namespace RenderMimeRegistry {
     contents: Contents.IManager;
 
     /**
-     * The current kernel id used by the `resolvePath` endpoint.
+     * Get the current kernel id used by the `resolvePath` endpoint.
      */
-    kernelId?: () => string | null | undefined;
+    getKernelId?: () => string | null | undefined;
   }
 
   /**

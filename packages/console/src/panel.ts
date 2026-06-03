@@ -74,7 +74,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     const resolver = new RenderMimeRegistry.UrlResolver({
       path,
       contents: manager.contents,
-      kernelId: () => sessionContext?.session?.kernel?.id
+      getKernelId: () => sessionContext?.session?.kernel?.id
     });
     rendermime = rendermime.clone({ resolver });
 
