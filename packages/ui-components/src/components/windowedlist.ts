@@ -1117,7 +1117,6 @@ export class WindowedList<
     this._resetScrollToItem();
 
     if (!this.viewModel.windowingActive) {
-      console.log("I'm here!");
       // The requested item may not be attached to the DOM yet.
       // Wait for it to be inserted before computing its position.
       void this._waitForItem(index).then(item => {
