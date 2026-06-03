@@ -428,7 +428,7 @@
   border-spacing: 0;
   border: none;
   color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-content-font-size1);
   table-layout: fixed;
   margin-left: auto;
   margin-bottom: 1em;
