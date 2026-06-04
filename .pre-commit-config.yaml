@@ -18,13 +18,15 @@ repos:
       - id: check-executables-have-shebangs
       - id: requirements-txt-fixer
       - id: check-added-large-files
-      - id: check-case-conflict
       - id: check-toml
       - id: check-yaml
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
         exclude: .bumpversion.cfg
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: mixed-line-ending
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.37.2
