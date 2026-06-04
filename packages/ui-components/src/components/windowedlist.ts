@@ -1199,7 +1199,7 @@ export class WindowedList<
         observer.disconnect();
         const item = this._innerElement.querySelector(selector);
         resolve(item instanceof HTMLElement ? item : null);
-      }, MAXIMUM_TIME_REMAINING);
+      }, 5000);
     });
   }
 
