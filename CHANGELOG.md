@@ -603,6 +603,32 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.8
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.7...8d30d481fbab784096e04d85dfa3b0c36e77be2c))
+
+### Bugs fixed
+
+- Prevent dialog from hanging when `getValue()` throws [#18938](https://github.com/jupyterlab/jupyterlab/pull/18938) ([@AliMahmoudDev](https://github.com/AliMahmoudDev))
+- Add `packaging` min version pin [#18910](https://github.com/jupyterlab/jupyterlab/pull/18910) ([@krassowski](https://github.com/krassowski))
+- Use CSS `anchor` for prompt overlay [#18840](https://github.com/jupyterlab/jupyterlab/pull/18840) ([@CrafterKolyan](https://github.com/CrafterKolyan))
+
+### Maintenance and upkeep improvements
+
+- Fix completer test failures on CI [#18946](https://github.com/jupyterlab/jupyterlab/pull/18946) ([@krassowski](https://github.com/krassowski))
+- Bump license webpack plugin [#18929](https://github.com/jupyterlab/jupyterlab/pull/18929) ([@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-04-29&to=2026-06-04&type=c))
+
+@AliMahmoudDev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAliMahmoudDev+updated%3A2026-04-29..2026-06-04&type=Issues)) | @CrafterKolyan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACrafterKolyan+updated%3A2026-04-29..2026-06-04&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-04-29..2026-06-04&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-04-29..2026-06-04&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.7
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.6...66fe9adfc1d501d1368404037f26925870741933))
@@ -643,8 +669,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-03-11&to=2026-04-29&type=c))
 
 @Carreau ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACarreau+updated%3A2026-03-11..2026-04-29&type=Issues)) | @filipeoliveira05 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afilipeoliveira05+updated%3A2026-03-11..2026-04-29&type=Issues)) | @flaviomartins ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aflaviomartins+updated%3A2026-03-11..2026-04-29&type=Issues)) | @itsmejay80 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmejay80+updated%3A2026-03-11..2026-04-29&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-03-11..2026-04-29&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-03-11..2026-04-29&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2026-03-11..2026-04-29&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-03-11..2026-04-29&type=Issues)) | @utsav-develops ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Autsav-develops+updated%3A2026-03-11..2026-04-29&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.6
 
