@@ -41,7 +41,7 @@ dependencies = [
     "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
-    "jupyter_server>=2.4.0,<3",
+    "jupyter_server>=2.19.0,<3",
     "jupyter-lsp>=2.0.0",
     "jupyterlab_server>=2.28.0,<3",
     "notebook_shim>=0.2",
@@ -261,9 +261,9 @@ exclude = ["*.ipynb"]
 target-version = "py310"
 line-length = 100
 lint.select = [
-  "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
-  "PLC", "PLE", "PLR", "PLW", "Q", "RUF", "S", "SIM", "T", "TID", "UP",
-  "W", "YTT",
+  "A", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
+  "ICN", "LOG", "N", "PERF", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RSE",
+  "RUF", "S", "SIM", "SLOT", "T", "TC", "TID", "UP", "W", "YTT",
 ]
 lint.ignore = [
 # FBT001 Boolean positional arg in function definition
