@@ -60,6 +60,43 @@ jobs:
               return;
             }
 
+            if (context.payload.action === 'reopened' && context.payload.sender?.login) {
+              try {
+                const senderAssociation = context.payload.sender.author_association;
+                const timelineEvents = await github.paginate(
+                  github.rest.issues.listEventsForTimeline,
+                  {
+                    owner,
+                    repo,
+                    issue_number: pr.number
+                  }
+                );
+
+                const reopenedEvent = timelineEvents
+                  .filter(
+                    event =>
+                      event.event === 'reopened' &&
+                      event.actor?.login === context.payload.sender.login
+                  )
+                  .pop();
+
+                const reopenerAssociation =
+                  senderAssociation ?? reopenedEvent?.author_association ?? 'NONE';
+                if (SAFE_AUTHOR_ASSOCIATIONS.has(reopenerAssociation)) {
+                  console.log(
+                    `Skipping PR #${pr.number}: reopened by @${context.payload.sender.login} with author association ${reopenerAssociation}.`
+                  );
+                  return;
+                }
+              } catch (error) {
+                console.warn(
+                  `Could not verify reopener association for @${context.payload.sender.login}; skipping duplicate auto-close.`
+                );
+                console.warn(String(error));
+                return;
+              }
+            }
+
             const { data: author } = await github.rest.users.getByUsername({
               username: pr.user.login
             });
