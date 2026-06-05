@@ -895,6 +895,12 @@
       "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
       "type": "boolean",
       "default": false
+    },
+    "preserveCellMetadataForCopiedCells": {
+      "title": "Preserve cell metadata of copied cells",
+      "description": "When enabled, the copied and pasted cells will preserve all their cell metadata.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,
