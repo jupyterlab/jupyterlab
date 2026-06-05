@@ -9,7 +9,8 @@ import {
   OutputAreaModel,
   SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
-import type { Kernel } from '@jupyterlab/services';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
 import { KernelManager } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
@@ -300,6 +301,73 @@ describe('outputarea/widget', () => {
         widget.future = future;
         const reply = await future.done;
         expect(reply!.content.execution_count).toBeTruthy();
+        expect(model.length).toBe(1);
+      });
+    });
+
+    describe('#pagePayloadRegistry', () => {
+      const replyWithPage = (data: nbformat.IMimeBundle) =>
+        ({
+          channel: 'shell',
+          content: {
+            status: 'ok',
+            execution_count: 1,
+            user_expressions: {},
+            payload: [{ source: 'page', data, start: 0 }]
+          }
+        }) as unknown as KernelMessage.IExecuteReplyMsg;
+
+      it('should inline a `page` payload by default', () => {
+        widget.model.clear();
+        const reply = replyWithPage({ 'text/plain': 'docs for math.pi' });
+        // The OutputArea wires `_onExecuteReply` to `value.onReply` when a
+        // future is set; for unit testing we invoke the same code path
+        // directly via the typed test seam below.
+        (widget as any)._onExecuteReply(reply);
+        expect(model.length).toBe(1);
+        expect(model.toJSON()[0].data).toEqual({
+          'text/plain': 'docs for math.pi'
+        });
+      });
+
+      it('should skip the inline render when a registered handler claims the payload', () => {
+        widget.dispose();
+        const claimed: OutputArea.IPagePayload[] = [];
+        const registry: OutputArea.IPagePayloadRegistry = {
+          register: () => undefined,
+          handle: payload => {
+            claimed.push(payload);
+            return true;
+          }
+        };
+        widget = new LogOutputArea({
+          rendermime,
+          model,
+          pagePayloadRegistry: registry
+        });
+        widget.model.clear();
+        const data = { 'text/plain': 'docs for math.pi' };
+        (widget as any)._onExecuteReply(replyWithPage(data));
+        expect(claimed.length).toBe(1);
+        expect(claimed[0].data).toEqual(data);
+        expect(model.length).toBe(0);
+      });
+
+      it('should fall through to inline render when the handler returns false', () => {
+        widget.dispose();
+        const registry: OutputArea.IPagePayloadRegistry = {
+          register: () => undefined,
+          handle: () => false
+        };
+        widget = new LogOutputArea({
+          rendermime,
+          model,
+          pagePayloadRegistry: registry
+        });
+        widget.model.clear();
+        (widget as any)._onExecuteReply(
+          replyWithPage({ 'text/plain': 'docs' })
+        );
         expect(model.length).toBe(1);
       });
     });

@@ -106,6 +106,7 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory ?? OutputArea.defaultContentFactory;
     this.rendermime = options.rendermime;
+    this._pagePayloadRegistry = options.pagePayloadRegistry;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
@@ -831,9 +832,13 @@ export class OutputArea extends Widget {
       return;
     }
     const page = JSON.parse(JSON.stringify(pages[0]));
+    const data = (page as any).data as nbformat.IMimeBundle;
+    if (this._pagePayloadRegistry?.handle({ data })) {
+      return;
+    }
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data,
       metadata: {}
     };
     model.add(output);
@@ -877,6 +882,7 @@ export class OutputArea extends Widget {
   private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _initialize = new Signal<OutputArea, void>(this);
+  private _pagePayloadRegistry: OutputArea.IPagePayloadRegistry | undefined;
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -940,6 +946,15 @@ export namespace OutputArea {
     rendermime: IRenderMimeRegistry;
 
     /**
+     * Optional registry for handling kernel `page` payloads.
+     *
+     * If set, the registry is consulted before the default inline render of
+     * a page payload. If a registered handler returns `true`, the inline
+     * render is skipped.
+     */
+    pagePayloadRegistry?: IPagePayloadRegistry;
+
+    /**
      * The maximum number of output items to display on top and bottom of cell output.
      */
     maxNumberOutputs?: number;
@@ -963,6 +978,50 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
+  }
+
+  /**
+   * A handler for kernel `page` payloads.
+   */
+  export interface IPagePayloadHandler {
+    /**
+     * Handle a page payload.
+     *
+     * @param payload - The page payload to handle.
+     * @returns `true` if the payload was claimed (suppressing the default
+     *   inline render); `false` to fall through to the next handler.
+     */
+    handle(payload: IPagePayload): boolean;
+  }
+
+  /**
+   * A page payload from a kernel `execute_reply`.
+   */
+  export interface IPagePayload {
+    /**
+     * The MIME bundle of the payload.
+     */
+    data: nbformat.IMimeBundle;
+  }
+
+  /**
+   * A registry of `page` payload handlers.
+   *
+   * Mirrors the registry pattern used by `DebuggerDisplayRegistry`: handlers
+   * are tried in registration order, and the first one to return `true` from
+   * `handle` claims the payload.
+   */
+  export interface IPagePayloadRegistry {
+    /**
+     * Register a handler.
+     */
+    register(handler: IPagePayloadHandler): void;
+
+    /**
+     * Try each registered handler in turn. Returns `true` if any handler
+     * claimed the payload, otherwise `false`.
+     */
+    handle(payload: IPagePayload): boolean;
   }
 
   /**
