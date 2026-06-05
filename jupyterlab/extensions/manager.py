@@ -361,7 +361,7 @@ class ExtensionManager(PluginManager):
     @property
     def metadata(self) -> ExtensionManagerMetadata:
         """Extension manager metadata."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def get_latest_version(self, extension: str) -> str | None:
         """Return the latest available version for a given extension.
@@ -371,7 +371,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The latest available version
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def list_packages(
         self, query: str, page: int, per_page: int
@@ -386,7 +386,7 @@ class ExtensionManager(PluginManager):
             The available extensions in a mapping {name: metadata}
             The results last page; None if the manager does not support pagination
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def install(self, extension: str, version: str | None = None) -> ActionResult:
         """Install the required extension.
@@ -402,7 +402,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The action result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def uninstall(self, extension: str) -> ActionResult:
         """Uninstall the required extension.
@@ -417,7 +417,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The action result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @staticmethod
     def get_semver_version(version: str) -> str:

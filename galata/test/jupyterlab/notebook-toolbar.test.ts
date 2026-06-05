@@ -398,10 +398,19 @@ test.describe('Reactive toolbar', () => {
     const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
     await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
 
-    // Wait for bug button to settle before taking a snapshot
-    await page
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
+    const debuggerActive = page.locator(
+      '.jp-DebuggerBugButton[aria-disabled="false"]'
+    );
+
+    // The debugger icon flickering is a persistent source of flakiness,
+    // we see it appear, disappear and appear again; while we want to
+    // fix this properly, it is not trivial as seen in attempts to address
+    // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
+    // so for now to ease the snapshot updates we just wait for it to settle.
+    await debuggerActive.waitFor();
+    await page.waitForTimeout(1250);
+    await debuggerActive.waitFor();
+
     expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
   });
 });
