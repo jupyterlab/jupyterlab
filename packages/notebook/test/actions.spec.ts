@@ -1710,7 +1710,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it('should not delete metadata.deletable', () => {
+      it('should delete metadata.deletable', () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
