@@ -803,7 +803,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             entry_point = EXT_MANAGERS.get(provider)
             if entry_point is None:
                 self.log.error(f"Extension Manager: No manager defined for provider '{provider}'.")
-                raise NotImplementedError()
+                raise NotImplementedError
             else:
                 self.log.info(f"Extension Manager is '{provider}'.")
             manager_factory = entry_point.load()
