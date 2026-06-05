@@ -8,8 +8,8 @@ import {
   LanguageServerManager,
   VirtualDocument,
   WidgetLSPAdapterTracker
-} from '@jupyterlab/lsp';
-import type { ILanguageServerProvider } from '@jupyterlab/lsp';
+} from '../src';
+import type { ILanguageServerProvider } from '../src';
 import { LabShell } from '@jupyterlab/application';
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -104,6 +104,18 @@ describe('@jupyterlab/lsp', () => {
         expect(manager.disconnectDocumentSignals).toHaveBeenCalled();
       });
     });
+    describe('#dispose()', () => {
+      it('should dispose of an uninitialized connection without errors', () => {
+        const connection = new LSPConnection({
+          capabilities: {},
+          languageId: '',
+          rootUri: '',
+          serverUri: ''
+        });
+        connection.dispose();
+        expect(connection.isDisposed).toBe(true);
+      });
+    });
     describe('#connect()', () => {
       it('should use provider transport when available', async () => {
         /* eslint-disable camelcase */
@@ -151,46 +163,46 @@ describe('@jupyterlab/lsp', () => {
             (this as any)._isInitialized = true;
           });
 
-        languageServerManager.setConfiguration({
-          pyright: { rank: 100 }
-        } as any);
-        languageServerManager.registerProvider(provider);
-        await languageServerManager.fetchSessions();
-        await manager.connect({
-          capabilities: {},
-          hasLspSupportedFile: false,
-          language: 'python',
-          virtualDocument: document
+        const defaultImplementation = spy.getMockImplementation();
+        spy.mockImplementation(() => {
+          return Promise.reject(new Error('offline'));
         });
 
-        expect(transportFactory).toHaveBeenCalledWith(
-          expect.objectContaining({
-            languageServerId: 'pyright',
-            settings: languageServerManager.settings
-          })
-        );
-        expect(transportFactory.mock.calls[0][0].socketUrl).toContain(
-          'lsp/ws/pyright'
-        );
-        expect(connectSpy).toHaveBeenCalledWith(socket);
+        try {
+          languageServerManager.setConfiguration({
+            pyright: { rank: 100 }
+          } as any);
+          languageServerManager.registerProvider(provider);
+          await languageServerManager.fetchSessions();
+          const connection = await manager.connect(
+            {
+              capabilities: {},
+              hasLspSupportedFile: false,
+              language: 'python',
+              virtualDocument: document
+            },
+            0,
+            0
+          );
 
-        manager.disconnect('pyright' as any);
-        connectSpy.mockRestore();
+          expect(transportFactory).toHaveBeenCalledWith(
+            expect.objectContaining({
+              languageServerId: 'pyright',
+              settings: languageServerManager.settings
+            })
+          );
+          expect(transportFactory.mock.calls[0][0].socketUrl).toContain(
+            'lsp/ws/pyright'
+          );
+          expect(connectSpy).toHaveBeenCalledWith(socket);
+          expect(connection).toBeDefined();
+        } finally {
+          manager.disconnect('pyright' as any);
+          connectSpy.mockRestore();
+          spy.mockImplementation(defaultImplementation!);
+        }
       });
-    });
-    describe('#dispose()', () => {
-      it('should dispose of an uninitialized connection without errors', () => {
-        const connection = new LSPConnection({
-          capabilities: {},
-          languageId: '',
-          rootUri: '',
-          serverUri: ''
-        });
-        connection.dispose();
-        expect(connection.isDisposed).toBe(true);
-      });
-    });
-    describe('#connect()', () => {
+
       it('should deduplicate concurrent connects for the same URI', async () => {
         const connectPromise = new PromiseDelegate<LSPConnection | undefined>();
         const connection = { isReady: true } as LSPConnection;
