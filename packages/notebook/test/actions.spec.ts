@@ -1710,7 +1710,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it('should delete metadata.deletable', () => {
+      it('should not delete metadata.deletable', () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
@@ -1720,6 +1720,19 @@ describe('@jupyterlab/notebook', () => {
           expect(
             ((cell as JSONObject).metadata as JSONObject).deletable
           ).toBeUndefined();
+        });
+      });
+
+      it('should preserve all cell metadata', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        NotebookActions.copy(widget, true);
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeFalsy();
         });
       });
     });
@@ -1765,6 +1778,21 @@ describe('@jupyterlab/notebook', () => {
           expect(
             ((cell as JSONObject).metadata as JSONObject).deletable
           ).toBeUndefined();
+        });
+      });
+
+      it('should preserve all cell metadata', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        await NotebookActions.copyToSystemClipboard(widget, true);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeFalsy();
         });
       });
     });
