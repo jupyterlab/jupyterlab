@@ -260,8 +260,7 @@ def _format_command_arguments(args_schema: dict) -> str:
 
 def _format_scope_name(scope: str) -> str:
     """Format scope name for display."""
-    if scope.endswith("-extension"):
-        scope = scope[: -len("-extension")]
+    scope = scope.removesuffix("-extension")
 
     compound_suffixes = ["browser", "manager", "menu", "editor", "console", "viewer", "search"]
     for suffix in compound_suffixes:
@@ -414,7 +413,7 @@ html_theme_options = {
     "switcher": {
         # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
         # otherwise older versions won't list newer versions
-        "json_url": "/".join(
+        "json_url": "/".join(  # noqa: FLY002
             ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
         ),
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
