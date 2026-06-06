@@ -1630,6 +1630,14 @@ export namespace NotebookActions {
     undoManager.on('stack-item-popped', onStackItemPopped);
     notebook.model.sharedModel.undo();
     undoManager.off('stack-item-popped', onStackItemPopped);
+    if (storedExecutions) {
+      const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+      redoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      redoItem?.meta.set(
+        Private.CELL_EXECUTION_SOURCE_META_KEY,
+        executionCaptureSource
+      );
+    }
 
     // Restore execution state on resurrected cell widgets.
     storedExecutions?.forEach(storedExecution => {
@@ -1637,6 +1645,11 @@ export namespace NotebookActions {
       const cell = notebook.widgets.find(w => w.model.id === cellId);
       if (!(cell instanceof CodeCell)) {
         return;
+      }
+      if (
+        !JSONExt.deepEqual(cell.model.outputs.toJSON(), storedExecution.outputs)
+      ) {
+        cell.model.outputs.fromJSON(storedExecution.outputs);
       }
       if (isDone()) {
         // Execution finished or was interrupted before undo - ensure state is idle.
@@ -1721,9 +1734,16 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const redoExecutions = Private.captureRedoExecutions(notebook);
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
 
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
+    if (redoExecutions) {
+      const undoItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      undoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, redoExecutions);
+      undoItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'delete');
+    }
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2616,6 +2636,8 @@ namespace Private {
 
   export interface IStoredCellExecution {
     cellId: string;
+    /** Cell outputs as they were when the execution was detached. */
+    outputs: nbformat.IOutput[];
     future: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
@@ -2719,6 +2741,7 @@ namespace Private {
     if (!future) {
       return null;
     }
+    const outputs = cell.model.outputs.toJSON();
     let done = false;
     void future.done.finally(() => {
       done = true;
@@ -2727,7 +2750,44 @@ namespace Private {
     future.onIOPub = msg => {
       buffered.push(msg);
     };
-    return { cellId: cell.model.id, future, isDone: () => done, buffered };
+    return {
+      cellId: cell.model.id,
+      outputs,
+      future,
+      isDone: () => done,
+      buffered
+    };
+  }
+
+  /**
+   * Recapture a running cell before redoing its deletion.
+   */
+  export function captureRedoExecutions(
+    notebook: Notebook
+  ): IStoredCellExecution[] | null {
+    if (!notebook.model) {
+      return null;
+    }
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const stackItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+    if (stackItem?.meta.get(CELL_EXECUTION_SOURCE_META_KEY) !== 'delete') {
+      return null;
+    }
+    const storedExecutions = stackItem.meta.get(CELL_EXECUTION_META_KEY) as
+      | IStoredCellExecution[]
+      | undefined;
+    const recapturedExecutions: IStoredCellExecution[] = [];
+    storedExecutions?.forEach(({ cellId }) => {
+      const cell = notebook.widgets.find(w => w.model.id === cellId);
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      const recaptured = captureExecution(cell);
+      if (recaptured) {
+        recapturedExecutions.push(recaptured);
+      }
+    });
+    return recapturedExecutions.length === 0 ? null : recapturedExecutions;
   }
 
   /**

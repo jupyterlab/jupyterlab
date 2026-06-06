@@ -103,6 +103,49 @@ function createResolvedFuture(
   >;
 }
 
+function createPendingFuture(): {
+  future: Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  resolve: (executionCount?: number) => void;
+} {
+  let resolveDone: (msg: KernelMessage.IExecuteReplyMsg) => void = () => {
+    return;
+  };
+  const done = new Promise<KernelMessage.IExecuteReplyMsg>(resolve => {
+    resolveDone = resolve;
+  });
+  const future = {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  return {
+    future,
+    resolve: (executionCount = 1) => {
+      resolveDone(
+        KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+          channel: 'shell',
+          msgType: 'execute_reply',
+          session: UUID.uuid4(),
+          content: {
+            status: 'ok',
+            execution_count: executionCount,
+            user_expressions: {},
+            payload: []
+          }
+        })
+      );
+    }
+  };
+}
+
 function createStreamMessage(text: string): KernelMessage.IStreamMsg {
   return KernelMessage.createMessage<KernelMessage.IStreamMsg>({
     channel: 'iopub',
@@ -2438,6 +2481,48 @@ describe('@jupyterlab/notebook', () => {
         } finally {
           notificationInfo.mockRestore();
         }
+      });
+
+      it('should keep stream output contiguous across repeated deletion undo', async () => {
+        const initialVisibleOutput = '0\n1\n2\n3\n4\n5\n';
+        const firstBufferedOutput = '6\n7\n8\n9\n10\n';
+        const secondBufferedOutput = '11\n12\n13\n14\n15\n16\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.outputs.clear();
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: initialVisibleOutput
+        });
+        const { future, resolve } = createPendingFuture();
+        cell.outputArea.reattachFuture(future);
+
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage(firstBufferedOutput));
+        NotebookActions.undo(widget);
+
+        let cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          initialVisibleOutput + firstBufferedOutput
+        );
+
+        NotebookActions.redo(widget);
+        void future.onIOPub(createStreamMessage(secondBufferedOutput));
+        NotebookActions.undo(widget);
+
+        cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          initialVisibleOutput + firstBufferedOutput + secondBufferedOutput
+        );
+
+        resolve(3);
+        await future.done;
       });
     });
 
