@@ -102,7 +102,8 @@ export class Context<
 
     this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => this.sessionContext.session?.kernel?.id
     });
   }
 
@@ -977,7 +978,7 @@ or load the version on disk (revert)?`,
   }
 
   private _createSaveOptions(): Partial<Contents.IModel> {
-    let content: PartialJSONValue = null;
+    let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = this._model.toJSON();
     } else {
