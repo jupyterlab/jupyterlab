@@ -445,8 +445,16 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         newCell[state] = view[state];
       }
 
-      if (newCell.model.type === 'code') {
-        (newCell.model as CodeCellModel).isDirty = dirtyState[i];
+      if (from > boundedTo) {
+        if (this.widgets[boundedTo + i].model.type === 'code') {
+          (this.widgets[boundedTo + i].model as CodeCellModel).isDirty =
+            dirtyState[i];
+        }
+      } else {
+        if (this.widgets[boundedTo + i - n + 1].model.type === 'code') {
+          (this.widgets[boundedTo + i - n + 1].model as CodeCellModel).isDirty =
+            dirtyState[i];
+        }
       }
     }
     this._refreshCollapsedHeadingVisibility();
