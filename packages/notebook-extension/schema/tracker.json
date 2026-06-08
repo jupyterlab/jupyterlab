@@ -898,7 +898,7 @@
     },
     "helpInBottomPanel": {
       "title": "Show Help in Bottom Panel",
-      "description": "Whether to display help output (e.g. from 'source: page' payloads) in a bottom panel inspector instead of inlining it.",
+      "description": "Whether to display help output (e.g. pager output from 'source: page' payloads) in a bottom panel inspector instead of inlining it.",
       "type": "boolean",
       "default": false
     }
