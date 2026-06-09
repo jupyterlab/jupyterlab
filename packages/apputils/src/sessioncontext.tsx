@@ -10,7 +10,7 @@ import type {
   KernelSpec,
   Session
 } from '@jupyterlab/services';
-import { ServerConnection } from '@jupyterlab/services';
+import type { ServerConnection } from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
