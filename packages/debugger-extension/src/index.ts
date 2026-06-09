@@ -52,7 +52,6 @@ import {
 } from '@jupyterlab/rendermime';
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { NullTranslator } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
@@ -101,9 +100,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
     consoleTracker: IConsoleTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator,
+    translator: ITranslator | null,
     displayRegistry: IDebuggerDisplayRegistry | null
   ) => {
+    if (!translator) {
+      translator = nullTranslator;
+    }
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
 
@@ -123,6 +125,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       service: debug,
       translator: translator
     });
+
+    handler.executionDone.connect(debug.displayModules.bind(debug));
 
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
@@ -204,8 +208,11 @@ const files: JupyterFrontEndPlugin<void> = {
     editorTracker: IEditorTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator
+    translator: ITranslator | null
   ) => {
+    if (!translator) {
+      translator = nullTranslator;
+    }
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
 
@@ -225,6 +232,8 @@ const files: JupyterFrontEndPlugin<void> = {
       service: debug,
       translator: translator
     });
+
+    handler.executionDone.connect(debug.displayModules.bind(debug));
 
     const activeSessions: {
       [id: string]: Session.ISessionConnection;
@@ -329,6 +338,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       service,
       translator: translator
     });
+
+    handler.executionDone.connect(service.displayModules.bind(service));
 
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {

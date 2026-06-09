@@ -4,7 +4,8 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
-    "types": ["node"]
+    "types": ["node"],
+    "verbatimModuleSyntax": false
   },
   "include": ["src/*"],
   "references": [

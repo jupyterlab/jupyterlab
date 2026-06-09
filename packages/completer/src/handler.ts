@@ -344,6 +344,8 @@ export class CompletionHandler implements IDisposable {
     if (!editor) {
       return;
     }
+    const position = editor.getCursorPosition();
+    const state = this.getState(editor, position);
     if (
       model &&
       this._autoCompletion &&
@@ -351,12 +353,10 @@ export class CompletionHandler implements IDisposable {
       (await this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
-      ))
+      )) &&
+      this._isCurrentState(editor, state)
     ) {
-      void this._makeRequest(
-        editor.getCursorPosition(),
-        CompletionTriggerKind.TriggerCharacter
-      );
+      void this._makeRequest(position, CompletionTriggerKind.TriggerCharacter);
     }
 
     const inlineModel = this.inlineCompleter?.model;
@@ -436,6 +436,10 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
+        if (!this._isCurrentState(editor, state)) {
+          return;
+        }
+
         const model = this._updateModel(state, reply.start, reply.end);
         if (!model) {
           return;
@@ -455,6 +459,19 @@ export class CompletionHandler implements IDisposable {
       .catch(p => {
         /* Fails silently. */
       });
+  }
+
+  private _isCurrentState(
+    editor: CodeEditor.IEditor,
+    state: Completer.ITextState
+  ): boolean {
+    const position = editor.getCursorPosition();
+    return (
+      editor === this.editor &&
+      state.text === editor.model.sharedModel.getSource() &&
+      state.line === position.line &&
+      state.column === position.column
+    );
   }
 
   private async _makeInlineRequest(

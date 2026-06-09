@@ -80,6 +80,12 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   align-items: center;
 }
 
+.jp-ToolbarButtonComponent::part(control):focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+}
+
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;
@@ -87,7 +93,6 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
 
 .jp-Toolbar-responsive-popup.jp-ThemedContainer {
   position: absolute;
-  height: fit-content;
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);

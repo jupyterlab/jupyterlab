@@ -66,7 +66,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
-    const CONFIG_SECTION_NAME = announcements.id.replace(/[^\w]/g, '');
+    const CONFIG_SECTION_NAME = announcements.id.replace(/\W/g, '');
 
     void Promise.all([
       app.restored,

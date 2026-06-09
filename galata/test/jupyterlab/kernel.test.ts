@@ -37,6 +37,11 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('No Kernel');
 
+      // Save notebook via galata (otherwise we would need
+      // to save and wait until dirty icon goes away to avoid
+      // another dialog showing up randomly on close due to race).
+      await page.notebook.save();
+
       await Promise.all([
         page
           .getByRole('tab', { name: 'Untitled.ipynb' })
