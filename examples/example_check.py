@@ -24,7 +24,11 @@ from jupyterlab.labapp import get_app_dir
 here = Path(__file__).parent.resolve()
 TEST_FILE = here / "example.spec.ts"
 REF_SNAPSHOT = Path(TEST_FILE.with_suffix(".ts-snapshots").name) / "example-linux.png"
-UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "").lower() in {"1", "true", "yes"}
+PLAYWRIGHT_CONFIG = """\
+module.exports = {
+  reporter: [['json', { outputFile: 'test-results/report.json' }]]
+};
+"""
 
 
 def main():
@@ -88,6 +92,7 @@ async def run_browser(url):
         str(TEST_FILE),
         str(test_target),
     )
+    (target / "playwright.config.js").write_text(PLAYWRIGHT_CONFIG)
     # Copy reference snapshot
     example_dir = Path(sys.argv[-1])
     snapshot = example_dir / REF_SNAPSHOT
@@ -97,8 +102,6 @@ async def run_browser(url):
         snapshot_target = target / REF_SNAPSHOT
         snapshot_target.parent.mkdir(exist_ok=True)
         shutil.copy(str(snapshot), str(snapshot_target))
-    else:
-        snapshot_target = target / REF_SNAPSHOT
 
     results_target = target / "test-results"
     dst = example_dir / results_target.name
@@ -111,16 +114,9 @@ async def run_browser(url):
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
     current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
-    current_env["PLAYWRIGHT_JSON_OUTPUT_FILE"] = str(results_target / "report.json")
-    test_command = ["npx", "playwright", "test", "--reporter=json"]
-    if UPDATE_SNAPSHOTS:
-        test_command.append("--update-snapshots")
 
     try:
-        await run_async_process(test_command, env=current_env, cwd=str(target))
-        if UPDATE_SNAPSHOTS and snapshot_target.exists():
-            snapshot.parent.mkdir(exist_ok=True)
-            shutil.copy(str(snapshot_target), str(snapshot))
+        await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
     finally:
         # Copy back test-results folder to analyze snapshot error
         if results_target.exists():
