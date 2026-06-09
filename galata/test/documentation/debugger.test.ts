@@ -172,11 +172,13 @@ test.describe('Debugger', () => {
       state: 'visible',
       timeout: 1000
     });
-    expect(
-      await page.screenshot({
-        clip: { y: 110, x: 300, width: 300, height: 80 }
-      })
-    ).toMatchSnapshot('debugger_stop_on_unhandled_exception.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 110, x: 300, width: 300, height: 80 }
+        })
+      )
+      .toMatchSnapshot('debugger_stop_on_unhandled_exception.png');
 
     await page.click('jp-button[title^=Continue]');
     await page.notebook.waitForRun(0);

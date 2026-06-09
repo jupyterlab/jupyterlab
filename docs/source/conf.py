@@ -52,6 +52,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
@@ -119,7 +120,7 @@ def build_api_docs(out_dir: Path):
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
-    jlpm = ["node", str(root / "jupyterlab" / "staging" / "yarn.js")]
+    jlpm = ["jlpm"]
 
     if api_index.exists():
         # avoid rebuilding docs because it takes forever
@@ -259,8 +260,7 @@ def _format_command_arguments(args_schema: dict) -> str:
 
 def _format_scope_name(scope: str) -> str:
     """Format scope name for display."""
-    if scope.endswith("-extension"):
-        scope = scope[: -len("-extension")]
+    scope = scope.removesuffix("-extension")
 
     compound_suffixes = ["browser", "manager", "menu", "editor", "console", "viewer", "search"]
     for suffix in compound_suffixes:
@@ -375,6 +375,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
+    "announcement": '🚀 You can now test JupyterLab 4.6.0 Beta · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6-beta">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -412,7 +413,7 @@ html_theme_options = {
     "switcher": {
         # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
         # otherwise older versions won't list newer versions
-        "json_url": "/".join(
+        "json_url": "/".join(  # noqa: FLY002
             ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
         ),
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
