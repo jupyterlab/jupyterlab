@@ -10,8 +10,13 @@ import {
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
-import type { Contents, ServiceManager, Session } from '@jupyterlab/services';
-import { Drive } from '@jupyterlab/services';
+import type {
+  Contents,
+  ServerConnection,
+  ServiceManager,
+  Session
+} from '@jupyterlab/services';
+import { ContentsManager, Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import type { JSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
@@ -50,6 +55,10 @@ const fooFactory: IRenderMime.IRendererFactory = {
   safe: true,
   defaultRank: 1000,
   createRenderer: options => new RenderedText(options)
+};
+
+type IWritableSettings = Omit<ServerConnection.ISettings, 'fetch'> & {
+  fetch: ServerConnection.ISettings['fetch'];
 };
 
 describe('rendermime/registry', () => {
@@ -416,6 +425,115 @@ describe('rendermime/registry', () => {
         it('should ignore urls that have a protocol', async () => {
           const path = await resolverPath.getDownloadUrl('http://foo');
           expect(path).toBe('http://foo');
+        });
+      });
+
+      describe('#resolvePath()', () => {
+        let restoreFetch: (() => void) | undefined;
+        let getSpy: jest.SpiedFunction<Contents.IManager['get']> | undefined;
+
+        afterEach(() => {
+          getSpy?.mockRestore();
+          restoreFetch?.();
+          restoreFetch = undefined;
+          getSpy = undefined;
+        });
+
+        it('should fallback to legacy resolution when resolvePath API is unavailable', async () => {
+          const localContents = new ContentsManager();
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            path: pathParent + '/pr%25 ' + UUID.uuid4(),
+            contents: localContents
+          });
+          const settings = localContents.serverSettings as IWritableSettings;
+          const previousFetch = settings.fetch;
+          settings.fetch = jest
+            .fn()
+            .mockResolvedValue(new Response('', { status: 404 }));
+          restoreFetch = () => {
+            settings.fetch = previousFetch;
+          };
+          getSpy = jest
+            .spyOn(localContents, 'get')
+            .mockResolvedValue({ path: 'foo.py' } as Contents.IModel);
+
+          const resolved = await resolver.resolvePath('./foo.py');
+          expect(resolved).toEqual({ scope: 'server', path: 'foo.py' });
+          expect(getSpy).toHaveBeenCalled();
+        });
+
+        it('should prefer server-scoped result from resolvePath API when available', async () => {
+          const localContents = new ContentsManager();
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            path: pathParent + '/pr%25 ' + UUID.uuid4(),
+            contents: localContents
+          });
+          const settings = localContents.serverSettings as IWritableSettings;
+          const previousFetch = settings.fetch;
+          const fetchMock = jest.fn().mockResolvedValue(
+            new Response(
+              JSON.stringify({
+                resolved: [
+                  { scope: 'kernel', path: '/tmp/foo.py' },
+                  { scope: 'server', path: 'my-dir/foo.py' }
+                ]
+              }),
+              { status: 200 }
+            )
+          );
+          settings.fetch = fetchMock as ServerConnection.ISettings['fetch'];
+          restoreFetch = () => {
+            settings.fetch = previousFetch;
+          };
+          getSpy = jest
+            .spyOn(localContents, 'get')
+            .mockResolvedValue({ path: 'legacy-foo.py' } as Contents.IModel);
+
+          const resolved = await resolver.resolvePath('/tmp/foo.py');
+          expect(resolved).toEqual({ scope: 'server', path: 'my-dir/foo.py' });
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+          expect(getSpy).not.toHaveBeenCalled();
+        });
+
+        it('should use unresolved kernel scope response without retrying', async () => {
+          const kernelId = UUID.uuid4();
+          const localContents = new ContentsManager();
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            path: pathParent + '/pr%25 ' + UUID.uuid4(),
+            contents: localContents,
+            getKernelId: () => kernelId
+          });
+          const settings = localContents.serverSettings as IWritableSettings;
+          const previousFetch = settings.fetch;
+          const fetchMock = jest.fn().mockResolvedValue(
+            new Response(
+              JSON.stringify({
+                resolved: [{ scope: 'server', path: 'foo.py' }],
+                unresolved: [
+                  {
+                    scope: 'kernel',
+                    reason: `Kernel ${kernelId} could not be found`
+                  }
+                ]
+              }),
+              { status: 200 }
+            )
+          );
+          settings.fetch = fetchMock as ServerConnection.ISettings['fetch'];
+          restoreFetch = () => {
+            settings.fetch = previousFetch;
+          };
+          getSpy = jest
+            .spyOn(localContents, 'get')
+            .mockResolvedValue({ path: 'legacy-foo.py' } as Contents.IModel);
+
+          const resolved = await resolver.resolvePath('./foo.py');
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+          const firstUrl = (fetchMock.mock.calls[0][0] as Request).url;
+          expect(firstUrl).toContain('/api/resolvePath?path=.%2Ffoo.py');
+          expect(firstUrl).toContain(`&kernel=${kernelId}`);
+          expect(resolved).toEqual({ scope: 'server', path: 'foo.py' });
+          expect(getSpy).not.toHaveBeenCalled();
         });
       });
 

@@ -81,6 +81,25 @@ describe('@jupyterlab/coreutils', () => {
         expect(url).toEqual(`http://localhost/lab/tree${path}`);
       });
 
+      it('should honor an explicit workspace option over the page config value', () => {
+        PageConfig.setOption('workspace', 'config-ws');
+        const url = PageConfig.getUrl({ workspace: 'options-ws' });
+        expect(url).toEqual('http://localhost/lab/workspaces/options-ws');
+      });
+
+      it('should fall back to the page config workspace when option is absent', () => {
+        PageConfig.setOption('workspace', 'config-ws');
+        const url = PageConfig.getUrl({});
+        expect(url).toEqual('http://localhost/lab/workspaces/config-ws');
+      });
+
+      it('should URL-encode a workspace name that contains special characters', () => {
+        const url = PageConfig.getUrl({ workspace: 'my ws/with spaces' });
+        expect(url).toEqual(
+          'http://localhost/lab/workspaces/my%20ws%2Fwith%20spaces'
+        );
+      });
+
       describe('hub environment', () => {
         const shareUrl = 'http://hub.host.lab/hub/user-redirect';
 

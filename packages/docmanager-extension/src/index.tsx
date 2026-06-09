@@ -153,7 +153,7 @@ const contextsPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     widgetOpener: IDocumentWidgetOpener,
-    status: ILabStatus
+    status: ILabStatus | null
   ) => {
     const contexts = new WeakSet<DocumentRegistry.Context>();
     widgetOpener.opened.connect((_, widget) => {
