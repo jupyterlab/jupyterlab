@@ -1193,11 +1193,11 @@ export class WindowedList<
     // target (viewModel.scrollOffset), treat it as a user scroll and cancel
     // the programmatic one so the pending rAF does not override the user's
     // intended scroll position.
+    const scrollDifference = Math.abs(this.viewModel.scrollOffset - scrollTop);
     const isUserScroll =
-      !this._scrollUpdateWasRequested ||
-      Math.abs(this.viewModel.scrollOffset - scrollTop) > 1;
+      !this._scrollUpdateWasRequested || scrollDifference > 1;
 
-    if (isUserScroll && Math.abs(this.viewModel.scrollOffset - scrollTop) > 1) {
+    if (isUserScroll && scrollDifference > 1) {
       // Test if the scroll event is jumping to the list bottom
       // if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
       //   // FIXME Does not work because it happens in multiple segments in between which the sizing is changing
