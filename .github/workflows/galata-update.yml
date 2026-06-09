@@ -117,3 +117,84 @@ jobs:
           gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-example-snapshots:
+    name: Update Example References
+    if: github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update example snapshots') ||
+        contains(github.event.comment.body, 'please update examples snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
+    timeout-minutes: 80
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
+
+      - name: Install dependencies
+        env:
+          GROUP: examples
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Update example snapshots
+        env:
+          GROUP: examples
+          UPDATE_SNAPSHOTS: "1"
+        run: |
+          bash ./scripts/ci_script.sh
+
+      - name: Compress snapshots
+        run: |
+          sudo apt-get install -y optipng
+          echo "::group::Optimize PNG files"
+          git ls-files --exclude-standard -om -- ':(glob)examples/**/*-snapshots/*.png' | xargs -r optipng
+          echo "::endgroup::"
+
+      - name: Upload snapshots as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: updated-example-snapshots
+          path: examples/**/*-snapshots/*.*
+
+      - name: Commit new snapshots
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git pull --no-tags
+          git add -- ':(glob)examples/**/*-snapshots/*.*'
+
+          if git diff --cached --quiet; then
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "Update Example Playwright Snapshots"
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push new snapshots
+        if: steps.commit.outputs.has-changes == 'true'
+        run: |
+          git config push.default upstream
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment back on the PR
+        run: |
+          if [[ "${{ steps.commit.outputs.has-changes }}" == "true" ]]; then
+            BODY="Example snapshots updated."
+          else
+            BODY="No example snapshot updates were detected."
+          fi
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field "body=${BODY}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
