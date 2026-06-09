@@ -1492,11 +1492,8 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
-      } catch (reason) {
-        if (
-          reason instanceof ServerConnection.ResponseError &&
-          reason.response.status === 404
-        ) {
+      } catch (reason: any) {
+        if (reason.response.status === 404) {
           reason.message = trans.__('Could not find path: %1', path);
         }
         return showErrorMessage(

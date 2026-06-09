@@ -1487,15 +1487,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
         } else {
           this._onWSClose(evt);
         }
-      } catch (err) {
+      } catch (err: any) {
         // Try again, if there is a network failure
         // Handle network errors, as well as cases where we are on a
         // JupyterHub and the server is not running. JupyterHub returns a
         // 503 (<2.0) or 424 (>2.0) in that case.
         if (
           err instanceof ServerConnection.NetworkError ||
-          (err instanceof ServerConnection.ResponseError &&
-            (err.response.status === 503 || err.response.status === 424))
+          err.response?.status === 503 ||
+          err.response?.status === 424
         ) {
           const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
           setTimeout(getKernelModel, timeout, evt);

@@ -218,14 +218,15 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     let models: Terminal.IModel[];
     try {
       models = await this._terminalAPIClient.listRunning();
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.
       if (
         err instanceof ServerConnection.NetworkError ||
-        (err instanceof ServerConnection.ResponseError &&
-          (err.response.status === 503 || err.response.status === 424))
+        err.response?.status === 503 ||
+        err.response?.status === 424
       ) {
         this._connectionFailure.emit(err);
       }

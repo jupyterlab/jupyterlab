@@ -122,7 +122,7 @@ export async function runCell({
             onCellExecuted({
               cell,
               success: false,
-              error: reason instanceof KernelError ? reason : null
+              error: reason as KernelError
             });
             throw reason;
           }

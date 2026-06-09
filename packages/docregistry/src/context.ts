@@ -14,7 +14,7 @@ import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { Contents, ServiceManager } from '@jupyterlab/services';
-import { ServerConnection } from '@jupyterlab/services';
+import type { ServerConnection } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -318,19 +318,13 @@ export class Context<
         content: false
       });
       await this._maybeOverWrite(newPath);
-    } catch (err) {
-      if (
-        err instanceof ServerConnection.ResponseError &&
-        err.response.status === 404
-      ) {
-        // File doesn't exist, proceed with save
-      } else if (err instanceof ServerConnection.ResponseError) {
-        throw err;
-      } else if (err instanceof Error && err.message === 'Cancelled') {
-        // User cancelled dialog
-        return false;
-      } else {
-        // Unexpected error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      if (!err.response || err.response.status !== 404) {
+        // Dialog rejection (user cancelled)
+        if (!err.response) {
+          return false;
+        }
         throw err;
       }
     }
@@ -662,16 +656,10 @@ export class Context<
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const file = PathExt.basename(localPath);
-      if (
-        err instanceof Error ||
-        err instanceof ServerConnection.ResponseError
-      ) {
-        void this._handleError(
-          err,
-          this._trans.__('File Save Error for %1', file)
-        );
-      }
-
+      void this._handleError(
+        err as Error,
+        this._trans.__('File Save Error for %1', file)
+      );
       // Emit failure.
       this._saveState.emit('failed');
       throw err;
@@ -733,7 +721,7 @@ export class Context<
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(
-          err,
+          err as Error,
           this._trans.__('File Load Error for %1', name)
         );
         throw err;
@@ -978,15 +966,10 @@ or load the version on disk (revert)?`,
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
-      if (
-        err instanceof Error ||
-        err instanceof ServerConnection.ResponseError
-      ) {
-        void this._handleError(
-          err,
-          this._trans.__('File Save Error for %1', name)
-        );
-      }
+      void this._handleError(
+        err as Error,
+        this._trans.__('File Save Error for %1', name)
+      );
 
       // Emit failure.
       this._saveState.emit('failed');
