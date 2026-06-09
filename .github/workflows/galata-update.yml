@@ -4,13 +4,14 @@ on:
   issue_comment:
     types: [created, edited]
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   update-galata-snapshots:
     name: Update Galata References
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.issue.pull_request && (
         contains(github.event.comment.body, 'please update galata snapshots') ||
         contains(github.event.comment.body, 'please update snapshots')
@@ -51,6 +52,9 @@ jobs:
 
   update-documentation-snapshots:
     name: Update Documentation Snapshots
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.issue.pull_request && (
         contains(github.event.comment.body, 'please update documentation snapshots') ||
         contains(github.event.comment.body, 'please update snapshots')
@@ -120,6 +124,9 @@ jobs:
 
   update-example-snapshots:
     name: Update Example References
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.event.issue.pull_request && (
         contains(github.event.comment.body, 'please update example snapshots') ||
         contains(github.event.comment.body, 'please update examples snapshots') ||
@@ -190,11 +197,13 @@ jobs:
 
       - name: Comment back on the PR
         run: |
-          if [[ "${{ steps.commit.outputs.has-changes }}" == "true" ]]; then
+          if [[ "$HAS_CHANGES" == "true" ]]; then
             BODY="Example snapshots updated."
           else
             BODY="No example snapshot updates were detected."
           fi
-          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field "body=${BODY}"
+          gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --raw-field "body=${BODY}"
         env:
+          HAS_CHANGES: ${{ steps.commit.outputs.has-changes }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.issue.number }}
