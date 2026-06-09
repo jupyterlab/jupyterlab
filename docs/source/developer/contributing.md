@@ -635,7 +635,7 @@ Galata generates a user friendly test result report which can be used to inspect
 UI tests. Result report shows the failure reason, call-stack up to the failure and
 detailed information on visual regression issues. For visual regression errors, reference
 image and test capture image, along with diff image generated during comparison are
-provided in the report. You can use these information to debug failing tests. Galata test
+provided in the report. You can use this information to debug failing tests. Galata test
 report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
 named `galata-report` and once you extract it, you can access the report by launching
 a server to serve the files `python -m http.server -d <path-to-extracted-report>`.
@@ -703,6 +703,8 @@ Here are some good practices to follow when writing integration tests:
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
 - If your change introduces subpixel change to dozens of snapshots, consider if it is necessary;
   such a change often requires many extensions to update their snapshots too, leading to significant cost downstream.
+- When testing the notebook UI without executing code, open the notebook without the kernel to preserve resources
+  (starting hundreds of kernels slows down the test suite)
 
 ## Contributing to the debugger front-end
 
