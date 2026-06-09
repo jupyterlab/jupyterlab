@@ -39,13 +39,6 @@ export async function positionCellPartiallyBelowViewport(
   ratio: number
 ): Promise<void> {
   const scroller = notebook.locator(OUTER_SELECTOR).first();
-  const scrollBy = async (offset: number): Promise<void> => {
-    await scroller.evaluate((node, delta) => {
-      node.scrollTop += delta;
-    }, offset);
-    // Yield for scroll handlers and layout before measuring again.
-    await page.waitForTimeout(0);
-  };
 
   // Helper to measure actual visible pixels of the cell
   const measureVisiblePixels = async (): Promise<number> => {
@@ -71,10 +64,11 @@ export async function positionCellPartiallyBelowViewport(
 
   // Initial scroll estimate
   const notebookBbox = await scroller.boundingBox();
+  await page.mouse.move(notebookBbox.x, notebookBbox.y);
 
   const initialScrollOffset =
     cellBbox.y - notebookBbox.y - notebookBbox.height + targetPixels;
-  await scrollBy(initialScrollOffset);
+  await page.mouse.wheel(0, initialScrollOffset);
 
   // Optimization loop to refine positioning
   const MAX_ITERATIONS = 10;
@@ -88,7 +82,9 @@ export async function positionCellPartiallyBelowViewport(
       break; // Achieved target within tolerance
     }
 
-    await scrollBy(-error);
+    // Correct by half the error amount
+    const correction = -error / 2;
+    await page.mouse.wheel(0, correction);
   }
 }
 
