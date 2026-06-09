@@ -44,7 +44,7 @@ function isProtocolAllowed(url: string): boolean {
   try {
     const parsed = new URL(url, window.location.href);
     const protocol = parsed.protocol.toLowerCase();
-    return ['http:', 'https:', 'mailto:'].includes(protocol);
+    return ['http:', 'https:'].includes(protocol);
   } catch {
     return false;
   }
