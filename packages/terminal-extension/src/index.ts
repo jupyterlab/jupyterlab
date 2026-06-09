@@ -580,9 +580,8 @@ function addCommands(
           current.content.activate();
         }
       } catch (err) {
-        if (err instanceof Error) {
-          Private.showErrorMessage(err);
-        }
+        const error = err instanceof Error ? err : new Error(String(err));
+        Private.showErrorMessage(error);
       }
     },
     icon: args =>
@@ -709,9 +708,8 @@ function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
-          if (err instanceof Error) {
-            Private.showErrorMessage(err);
-          }
+          const error = err instanceof Error ? err : new Error(String(err));
+          Private.showErrorMessage(error);
         }
       }
     },
@@ -731,9 +729,8 @@ function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
-          if (err instanceof Error) {
-            Private.showErrorMessage(err);
-          }
+          const error = err instanceof Error ? err : new Error(String(err));
+          Private.showErrorMessage(error);
         }
       }
     },
@@ -777,10 +774,8 @@ function addCommands(
         await settingRegistry.set(plugin.id, 'theme', theme);
         commands.notifyCommandChanged(CommandIDs.setTheme);
       } catch (err) {
-        console.log(err);
-        if (err instanceof Error) {
-          Private.showErrorMessage(err);
-        }
+        const error = err instanceof Error ? err : new Error(String(err));
+        Private.showErrorMessage(error);
       }
     },
     describedBy: {

@@ -326,9 +326,12 @@ export class Context<
         // File doesn't exist, proceed with save
       } else if (err instanceof ServerConnection.ResponseError) {
         throw err;
-      } else {
+      } else if (err instanceof Error && err.message === 'Cancelled') {
         // User cancelled dialog
         return false;
+      } else {
+        // Unexpected error
+        throw err;
       }
     }
     await this._finishSaveAs(newPath);

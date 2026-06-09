@@ -853,7 +853,9 @@ export class SessionContext implements ISessionContext {
           const session = manager.connectTo({ model });
           this._handleNewSession(session);
         } catch (err) {
-          void this._handleSessionError(err);
+          // Route all connection errors through the session error handler so that
+          // a user-visible dialog is shown, regardless of the specific error type.
+          void this._handleSessionError(err as any);
           return Promise.reject(err);
         }
       }
@@ -954,9 +956,9 @@ export class SessionContext implements ISessionContext {
         await this._session.changeKernel(model);
         return this._session.kernel;
       } catch (err) {
-        if (err instanceof ServerConnection.ResponseError) {
-          void this._handleSessionError(err);
-        }
+        // Route all connection errors through the session error handler so that
+        // a user-visible dialog is shown, regardless of the specific error type.
+        void this._handleSessionError(err as any);
         throw err;
       }
     }
@@ -996,9 +998,9 @@ export class SessionContext implements ISessionContext {
       }
       return this._handleNewSession(session);
     } catch (err) {
-      if (err instanceof ServerConnection.ResponseError) {
-        void this._handleSessionError(err);
-      }
+      // Route all connection errors through the session error handler so that
+      // a user-visible dialog is shown, regardless of the specific error type.
+      void this._handleSessionError(err as any);
       throw err;
     }
   }
