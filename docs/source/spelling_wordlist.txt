@@ -1,0 +1,20 @@
+# Project and ecosystem names
+Jupyter
+JupyterLab
+Lumino
+CodeMirror
+Galata
+TypeDoc
+ReadTheDocs
+Gettext
+
+# Common technical terms in docs
+frontend
+backend
+filesystem
+websocket
+json
+config
+configs
+tokenize
+customizable

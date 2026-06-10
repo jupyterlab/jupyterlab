@@ -277,7 +277,7 @@ set in the settings editor.
 
 The “Show Workspace Indicator” command has been added to the command palette
 and the “Send Code to Console” shortcut has been restored. The previous issue
-involving editing shortcuts on Safari loosing focus, has been resolved.
+involving editing shortcuts on Safari losing focus, has been resolved.
 
 ### Settings
 
@@ -1129,7 +1129,7 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 - Update to marked 17.0.2 and mermaid 11.12.3 [#18526](https://github.com/jupyterlab/jupyterlab/pull/18526) ([@bollwyvl](https://github.com/bollwyvl), [@krassowski](https://github.com/krassowski))
 - Debugger: delete the thread from the stopped before sending the 'continue' request [#18509](https://github.com/jupyterlab/jupyterlab/pull/18509) ([@brichet](https://github.com/brichet), [@HaudinFlorence](https://github.com/HaudinFlorence), [@krassowski](https://github.com/krassowski))
 - Fix flaky completer tokens test [#18506](https://github.com/jupyterlab/jupyterlab/pull/18506) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
-- Fixe a few issues in config tests [#18496](https://github.com/jupyterlab/jupyterlab/pull/18496) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix a few issues in config tests [#18496](https://github.com/jupyterlab/jupyterlab/pull/18496) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
 - Fix more flaky tests [#18495](https://github.com/jupyterlab/jupyterlab/pull/18495) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
 - Fix CodeQL `self` warnings [#18494](https://github.com/jupyterlab/jupyterlab/pull/18494) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
 - Fix continued flakiness in 'Search in multiple selected cells' test [#18493](https://github.com/jupyterlab/jupyterlab/pull/18493) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
@@ -2815,7 +2815,7 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 - Fix typos [#16832](https://github.com/jupyterlab/jupyterlab/pull/16832) ([@algonell](https://github.com/algonell))
 - Update to the latest Lumino [#16804](https://github.com/jupyterlab/jupyterlab/pull/16804) ([@jtpio](https://github.com/jtpio))
 - Fix typo in the `IPropertyInspectorProvider` plugin description [#16797](https://github.com/jupyterlab/jupyterlab/pull/16797) ([@jtpio](https://github.com/jtpio))
-- Replace link to accessiblity project with a link to accessiblity issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
+- Replace link to accessibility project with a link to accessibility issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
 - Remove Python 2 from documentation [#16771](https://github.com/jupyterlab/jupyterlab/pull/16771) ([@JasonWeill](https://github.com/JasonWeill))
 - Fix compatibility with server-side execution extensions [#16764](https://github.com/jupyterlab/jupyterlab/pull/16764) ([@krassowski](https://github.com/krassowski))
 - Document mandatory steps before running JupyterLab in dev mode [#16761](https://github.com/jupyterlab/jupyterlab/pull/16761) ([@cmarmo](https://github.com/cmarmo))
@@ -6553,7 +6553,7 @@ No merged PRs
 
 - Fix `release_test` [#11390](https://github.com/jupyterlab/jupyterlab/pull/11390) ([@fcollonval](https://github.com/fcollonval))
 - Removed `cat package.json` [#11372](https://github.com/jupyterlab/jupyterlab/pull/11372) ([@ceesu](https://github.com/ceesu))
-- Relax `@playright/test` dependency in Galata [#11371](https://github.com/jupyterlab/jupyterlab/pull/11371) ([@jtpio](https://github.com/jtpio))
+- Relax `@playwright/test` dependency in Galata [#11371](https://github.com/jupyterlab/jupyterlab/pull/11371) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
 
@@ -7050,7 +7050,7 @@ No merged PRs
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
   with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
-- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
+- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future versions will enable restoring the previous behaviour of per-cell undo/redo.
 - Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/toc.html).
 - The debugger received many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
@@ -8546,7 +8546,7 @@ We are very excited to add Eric Charles to the core team this month!
 
 ### Bugfixes
 
-- Typo: fix extensino to extension
+- Typo: fix spelling of extension
   ([#8512](https://github.com/jupyterlab/jupyterlab/pull/8512))
 - Close correct tab with close tab
   ([#8529](https://github.com/jupyterlab/jupyterlab/pull/8529))
