@@ -23,7 +23,6 @@
     "noUnusedLocals": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true,
     "sourceMap": true,
     "strictBindCallApply": true,
     "strictBuiltinIteratorReturn": true,
