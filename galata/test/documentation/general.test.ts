@@ -95,8 +95,9 @@ test.describe('General', () => {
     await page.keyboard.press('ArrowUp');
 
     await cell.click();
-    await page.keyboard.press('ContextMenu');
-    await page.click('text=Create New View for Cell Output');
+    await page.evaluate(async () => {
+      await window.galata.app.commands.execute('notebook:create-output-view');
+    });
 
     // Emulate drag and drop
     const viewerHandle = page.locator(
