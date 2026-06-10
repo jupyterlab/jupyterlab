@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import fs from 'fs';
 import path from 'path';
 import {
   filterContent,
@@ -29,7 +30,7 @@ test.use({
 });
 
 test.describe('General', () => {
-  test('Welcome', async ({ page }) => {
+  test('Welcome', async ({ page }, testInfo) => {
     await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
     await page.addStyleTag({
@@ -112,7 +113,30 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
+    const documentationSnapshot = 'jupyterlab.png';
+    const shouldUpdateDocumentationSnapshot =
+      testInfo.config.updateSnapshots === 'all' ||
+      testInfo.config.updateSnapshots === 'changed' ||
+      (testInfo.config.updateSnapshots === 'missing' &&
+        !fs.existsSync(testInfo.snapshotPath(documentationSnapshot)));
+
+    if (shouldUpdateDocumentationSnapshot) {
+      expect
+        .soft(await page.screenshot())
+        .toMatchSnapshot(documentationSnapshot);
+    }
+
+    const solveLorenzCellContent = cell.locator(
+      'xpath=ancestor::*[@aria-label="Code Cell Content with Output"][1]'
+    );
+    const solveLorenzInput = solveLorenzCellContent.locator('.jp-InputArea');
+    await solveLorenzInput.waitFor();
+
+    expect(
+      await page.screenshot({
+        mask: [solveLorenzInput]
+      })
+    ).toMatchSnapshot('jupyterlab-visual-test.png');
   });
 
   test('Left Sidebar', async ({ page }) => {
