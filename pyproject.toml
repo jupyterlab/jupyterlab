@@ -77,6 +77,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 docs = [
     "sphinx>=1.8,<8.2.0",
     "sphinx-copybutton",
+    "sphinxcontrib-spelling",
     "pydata-sphinx-theme>=0.13.0",
     "shellcheck-py",
     "pytest",
@@ -123,7 +124,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.15.9",
+    "ruff==0.15.15",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
