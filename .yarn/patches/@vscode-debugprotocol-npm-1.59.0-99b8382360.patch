@@ -8,6 +8,6 @@ index a3d58691e95eaaba0c4e636610dddcd37cd05b6d..ecd0af8b0fb66317497bdd2c749c9f84
  */
 -export declare module DebugProtocol {
 +export declare namespace DebugProtocol {
- 
+
  	/** Base class of requests, responses, and events. */
  	interface ProtocolMessage {
