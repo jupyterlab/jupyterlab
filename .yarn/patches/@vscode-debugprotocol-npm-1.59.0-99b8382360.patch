@@ -1,0 +1,13 @@
+diff --git a/lib/debugProtocol.d.ts b/lib/debugProtocol.d.ts
+index a3d58691e95eaaba0c4e636610dddcd37cd05b6d..ecd0af8b0fb66317497bdd2c749c9f842adbd5f8 100644
+--- a/lib/debugProtocol.d.ts
++++ b/lib/debugProtocol.d.ts
+@@ -6,7 +6,7 @@
+ /** Declaration module describing the VS Code debug protocol.
+ 	Auto-generated from json schema. Do not edit manually.
+ */
+-export declare module DebugProtocol {
++export declare namespace DebugProtocol {
+ 
+ 	/** Base class of requests, responses, and events. */
+ 	interface ProtocolMessage {
