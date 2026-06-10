@@ -2874,6 +2874,7 @@ __metadata:
     "@jupyterlab/filebrowser": ^4.6.0-beta.1
     "@jupyterlab/launcher": ^4.6.0-beta.1
     "@jupyterlab/mainmenu": ^4.6.0-beta.1
+    "@jupyterlab/outputarea": ^4.6.0-beta.1
     "@jupyterlab/rendermime": ^4.6.0-beta.1
     "@jupyterlab/settingregistry": ^4.6.0-beta.1
     "@jupyterlab/translation": ^4.6.0-beta.1
@@ -2900,6 +2901,7 @@ __metadata:
     "@jupyterlab/coreutils": ^6.6.0-beta.1
     "@jupyterlab/nbformat": ^4.6.0-beta.1
     "@jupyterlab/observables": ^5.6.0-beta.1
+    "@jupyterlab/outputarea": ^4.6.0-beta.1
     "@jupyterlab/rendermime": ^4.6.0-beta.1
     "@jupyterlab/services": ^7.6.0-beta.1
     "@jupyterlab/testing": ^4.6.0-beta.1
@@ -4473,6 +4475,7 @@ __metadata:
     "@jupyterlab/nbformat": ^4.6.0-beta.1
     "@jupyterlab/notebook": ^4.6.0-beta.1
     "@jupyterlab/observables": ^5.6.0-beta.1
+    "@jupyterlab/outputarea": ^4.6.0-beta.1
     "@jupyterlab/property-inspector": ^4.6.0-beta.1
     "@jupyterlab/rendermime": ^4.6.0-beta.1
     "@jupyterlab/services": ^7.6.0-beta.1
@@ -4512,6 +4515,7 @@ __metadata:
     "@jupyterlab/markedparser-extension": ^4.6.0-beta.1
     "@jupyterlab/nbformat": ^4.6.0-beta.1
     "@jupyterlab/observables": ^5.6.0-beta.1
+    "@jupyterlab/outputarea": ^4.6.0-beta.1
     "@jupyterlab/rendermime": ^4.6.0-beta.1
     "@jupyterlab/services": ^7.6.0-beta.1
     "@jupyterlab/settingregistry": ^4.6.0-beta.1

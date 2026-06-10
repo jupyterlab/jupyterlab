@@ -24,7 +24,11 @@ import type { DirListing } from '@jupyterlab/filebrowser';
 
 import type * as nbformat from '@jupyterlab/nbformat';
 
-import type { IOutputPrompt, IStdin } from '@jupyterlab/outputarea';
+import type {
+  IOutputPrompt,
+  IPageHandler,
+  IStdin
+} from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputPrompt,
@@ -1085,6 +1089,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const contentFactory = this.contentFactory;
     const model = this.model;
     this.maxNumberOutputs = options.maxNumberOutputs;
+    this._pageHandler = options.pageHandler ?? null;
 
     // Note that modifying the below label warrants one to also modify
     // the same in this._outputLengthHandler. Ideally, this label must
@@ -1101,6 +1106,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       rendermime,
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
+      pageHandler: this._pageHandler ?? undefined,
       translator: this.translator,
       promptOverlay: true,
       inputHistoryScope: options.inputHistoryScope,
@@ -1570,6 +1576,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       model: this.model,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
+      pageHandler: this._pageHandler ?? undefined,
       placeholder: false,
       translator: this.translator
     });
@@ -1582,7 +1589,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     return new SimplifiedOutputArea({
       model: this.model.outputs!,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime
+      rendermime: this._rendermime,
+      pageHandler: this._pageHandler ?? undefined
     });
   }
 
@@ -1718,6 +1726,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _lastOnCaretMovedHandler: () => void;
   private _lastTarget: HTMLElement | null = null;
   private _lastOutputHeight = '';
+  private _pageHandler: IPageHandler | null = null;
 }
 
 /**
@@ -1736,6 +1745,11 @@ export namespace CodeCell {
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**

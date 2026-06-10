@@ -15,6 +15,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableList } from '@jupyterlab/observables';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
@@ -245,6 +246,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._updateNotebookConfig();
+    this._pageHandler = options.pageHandler;
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
     this.kernelHistory = options.kernelHistory;
@@ -726,6 +728,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
+      pageHandler: this._pageHandler,
       rendermime,
       translator: this.translator
     };
@@ -1190,6 +1193,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -1244,6 +1248,11 @@ export namespace StaticNotebook {
      * The renderer used by the underlying windowed list.
      */
     renderer?: WindowedList.IRenderer;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**
