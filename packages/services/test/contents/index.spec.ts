@@ -458,6 +458,19 @@ describe('contents', () => {
       expect(model.created).toBe(DEFAULT_FILE.created);
     });
 
+    it('should overwrite a file', async () => {
+      // Rename
+      handleRequest(contents, 200, DEFAULT_FILE);
+      // Delete
+      handleRequest(contents, 204, DEFAULT_FILE);
+      // Overwrite
+      handleRequest(contents, 200, DEFAULT_FILE);
+
+      const rename = contents.overwrite('/foo/bar.txt', '/foo/baz.txt');
+      const model = await rename;
+      expect(model.created).toBe(DEFAULT_FILE.created);
+    });
+
     it('should rename a file on an additional drive', async () => {
       const other = new Drive({ name: 'other', serverSettings });
       contents.addDrive(other);

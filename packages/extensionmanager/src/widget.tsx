@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
@@ -39,6 +40,16 @@ function getExtensionGitHubUser(entry: IEntry) {
   return null;
 }
 
+function isProtocolAllowed(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const protocol = parsed.protocol.toLowerCase();
+    return ['http:', 'https:'].includes(protocol);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * VDOM for visualizing an extension entry.
  */
@@ -74,7 +85,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            {entry.homepage_url ? (
+            {entry.homepage_url && isProtocolAllowed(entry.homepage_url) ? (
               <a
                 href={entry.homepage_url}
                 target="_blank"
@@ -367,6 +378,7 @@ class Header extends ReactWidget {
           )}
         </div>
         <FilterBox
+          initialQuery={this.model.query || undefined}
           placeholder={this.trans.__('Search extensions')}
           disabled={!this.model.isDisclaimed}
           updateFilter={(fn, query) => {
@@ -768,6 +780,24 @@ export class ExtensionsPanel extends SidePanel {
       }
     }
     super.onActivateRequest(msg);
+  }
+
+  /**
+   * Set the search query programmatically.
+   *
+   * @param query - The search query string.
+   */
+  setQuery(query: string): void {
+    const input = this._searchInputRef.current;
+    if (input) {
+      // Update the search input value and dispatch an event so that
+      // FilterBox's internal state and the model stay in sync.
+      input.value = query;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      // Fallback when the search input has not rendered yet.
+      this.model.query = query;
+    }
   }
 
   private _onStateChanged(): void {

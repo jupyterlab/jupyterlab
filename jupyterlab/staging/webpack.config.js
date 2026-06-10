@@ -15,11 +15,11 @@ const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin =
   require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
+const baseConfig = require('@jupyter/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = rspack.container;
 
-const Build = require('@jupyterlab/builder').Build;
-const WPPlugin = require('@jupyterlab/builder').WPPlugin;
+const Build = require('@jupyter/builder').Build;
+const WPPlugin = require('@jupyter/builder').WPPlugin;
 const packageData = require('./package.json');
 
 // Handle the extensions.
@@ -274,6 +274,21 @@ const plugins = [
 ];
 
 if (process.env.WEBPACK_BUNDLE_ANALYZER) {
+  // rspack 2.0: stats.toJson() without args no longer includes assets/modules/chunks.
+  // webpack-bundle-analyzer calls it without args, so patch the stats object before it runs.
+  plugins.push({
+    apply(compiler) {
+      compiler.hooks.done.tapAsync(
+        'PatchStatsForBundleAnalyzer',
+        (stats, callback) => {
+          const original = stats.toJson.bind(stats);
+          stats.toJson = options =>
+            original(options ?? { assets: true, modules: true, chunks: true });
+          callback();
+        }
+      );
+    }
+  });
   plugins.push(
     new BundleAnalyzerPlugin({
       analyzerMode: 'static',

@@ -375,7 +375,7 @@ namespace Private {
    * Remove YAML front matter from source.
    */
   export function removeFrontMatter(source: string): string {
-    const re = /^---\n[^]*?\n(---|...)\n/;
+    const re = /^---\n[\s\S]*?\n(?:---|\.\.\.)\n/;
     const match = source.match(re);
     if (!match) {
       return source;

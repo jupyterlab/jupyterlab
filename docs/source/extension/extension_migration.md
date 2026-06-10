@@ -8,6 +8,42 @@
 
 ## JupyterLab 4.5 to 4.6 (not released yet)
 
+### Migrating to `jupyter-builder`
+
+JupyterLab's build tooling has moved out of the JupyterLab repository into a standalone package: [`jupyter-builder`](https://pypi.org/project/jupyter-builder/) (PyPI) and [`@jupyter/builder`](https://www.npmjs.com/package/@jupyter/builder) (npm). Existing extensions continue to work, but we recommend migrating so your build no longer depends on a full JupyterLab installation.
+
+The migration is two small changes.
+
+#### 1. Update `pyproject.toml`
+
+Replace `jupyterlab` in your build requirements with `jupyter-builder`:
+
+```toml
+# Before
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0.3.2"]
+
+# After
+requires = ["hatchling>=1.5.0", "hatch-nodejs-version>=0.3.2", "jupyter-builder>=1.0.0"]
+```
+
+#### 2. Update `package.json`
+
+Replace `@jupyterlab/builder` with `@jupyter/builder` in your dependencies:
+
+```json
+"@jupyter/builder": "^1.0.0"
+```
+
+Then update your build scripts to use the new CLI:
+
+```json
+"build:labextension": "jupyter-builder build .",
+"build:labextension:dev": "jupyter-builder build --development True .",
+"watch:labextension": "jupyter-builder watch ."
+```
+
+That's it. Your extension now builds without pulling in all of JupyterLab.
+
 ### Building extensions with Rspack
 
 In the upcoming 4.6, JupyterLab will use [Rspack](https://rspack.rs/) instead of
@@ -24,10 +60,23 @@ Webpack config to Rspack.
   - new `--jp-datagrid-font-size` variable controlling the font size; if not specified by a theme, the fallback of 12px will be used,
   - new `--jp-datagrid-font-family` variable controlling the font family; if not specified, `--jp-content-font-family` will be used as a fallback.
 
+- Document search buttons no longer rely on theme-specific opacity variables; instead, they use layout and brand colors to indicate state. The following variables are neither defined in built-in themes nor used by core packages:
+  - `--jp-search-toggle-off-opacity` (removed)
+  - `--jp-search-toggle-hover-opacity` (removed)
+  - `--jp-search-toggle-on-opacity` (removed)
+
+- JupyterLab now uses focus-outline variables for keyboard navigation (`:focus-visible` states) across the application. Components such as tabs, buttons, menus, side panels, cells, and others use these variables for `:focus-visible` styling:
+  - new `--jp-focus-outline-color` to define the color of the focus ring
+  - new `--jp-focus-outline-width` variable to set the width of the focus outline (minimum 2px width for accessibility)
+
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
 - The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
+- Synchronization properties (`syncEditable` and `syncCollapse`) of the {ts:class}`cells.Cell` class and its derivatives, as well as `CodeCell.syncScrolled`, now default to `undefined` rather than `false`. In notebook initialization, these values are now only set to `true` if `undefined`, so custom notebook content factories ({ts:interface}`notebook.NotebookPanel.IContentFactory`) can explicitly set them to `true` or `false` without being overwritten later.
+- JupyterLab now depends on `@jupyter/ydoc` v4, which sets the shared document dirty state to `true`
+  after every change, except for `setSource()` (and the `source` setter) which is used for document
+  initialization. With that, JupyterLab's document dirty indicator is now fully backed by a shared model.
 
 ### Testing with Galata
 
@@ -445,7 +494,7 @@ nodeLinker: node-modules
 .yarn/
 ```
 
-- Run `jlpm install`
+- Run `jlpm`
   This will reset your `yarn.lock` content as its format has changed.
 
 :::{note}
@@ -1020,13 +1069,13 @@ index 6f1562f..3fcdf37 100644
 -    "build": "tsc",
 -    "build:labextension": "npm run clean:labextension && mkdirp myextension/labextension && cd myextension/labextension && npm pack ../..",
 -    "clean": "rimraf lib tsconfig.tsbuildinfo",
-+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
-+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
++    "build": "jlpm build:lib && jlpm build:labextension:dev",
++    "build:prod": "jlpm build:lib && jlpm build:labextension",
 +    "build:lib": "tsc",
-+    "build:labextension": "jupyter labextension build .",
-+    "build:labextension:dev": "jupyter labextension build --development True .",
++    "build:labextension": "jupyter-builder build .",
++    "build:labextension:dev": "jupyter-builder build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
-+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
++    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
    "clean:labextension": "rimraf myextension/labextension",
    "eslint": "eslint . --ext .ts,.tsx --fix",
    "eslint:check": "eslint . --ext .ts,.tsx",
@@ -1063,8 +1112,8 @@ The diff also shows the new `@jupyterlab/builder` as a `devDependency`.
 It hides away internal dependencies such as `webpack`, and produces the assets that can then be distributed as part of a Python package.
 
 Extension developers do not need to interact with `@jupyterlab/builder` directly, but instead can use the
-`jupyter labextension build` command. This command is run automatically as part of the `build` script
-(`jlpm run build`).
+`jupyter-builder build` command. This command is run automatically as part of the `build` script
+(`jlpm build`).
 
 For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`
 

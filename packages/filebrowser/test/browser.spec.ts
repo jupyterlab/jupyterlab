@@ -10,7 +10,7 @@ import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import type { ServiceManager } from '@jupyterlab/services';
-import { signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
@@ -27,6 +27,10 @@ class TestFileBrowser extends FileBrowser {
     // Allows us to spy on onUpdateRequest.
     this.renameCalled.emit();
     return result;
+  }
+
+  get fileFilterInput(): HTMLInputElement | null {
+    return (this as any)._fileFilterRef.current;
   }
 }
 
@@ -68,6 +72,10 @@ describe('filebrowser/browser', () => {
       };
       fileBrowser = new TestFileBrowser(options);
       Widget.attach(fileBrowser, document.body);
+    });
+
+    afterEach(() => {
+      fileBrowser.dispose();
     });
 
     describe('#constructor', () => {
@@ -177,8 +185,7 @@ describe('filebrowser/browser', () => {
           'keydown',
           {
             ctrlKey: true,
-            key: ' ',
-            keyCode: 32
+            key: ' '
           }
         );
 
@@ -206,7 +213,6 @@ describe('filebrowser/browser', () => {
           throw new Error('Item node not found');
         }
         simulate(editNode, 'keydown', {
-          keyCode: 13,
           key: 'Enter'
         });
         await created;
@@ -231,11 +237,56 @@ describe('filebrowser/browser', () => {
           throw new Error('Item node not found');
         }
         simulate(editNode, 'keydown', {
-          keyCode: 13,
           key: 'Enter'
         });
         await created;
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#clearFilterOnNavigation', () => {
+      let dirName: string;
+
+      beforeEach(async () => {
+        const items = Array.from(model.items());
+        const dir = items.find(item => item.type === 'directory');
+        dirName = dir!.name;
+      });
+
+      afterEach(async () => {
+        model.setFilter(() => ({}));
+        await model.cd('/');
+      });
+
+      it('should clear the filter when navigating to a new directory', async () => {
+        fileBrowser.showFileFilter = true;
+        await framePromise();
+
+        const input = fileBrowser.fileFilterInput!;
+        input.value = 'notebook';
+
+        model.setFilter(value => (value.type === 'notebook' ? {} : null));
+        await model.cd(dirName);
+        await model.cd('/');
+
+        const items = Array.from(model.items());
+        expect(items.some(item => item.type !== 'notebook')).toBe(true);
+      });
+
+      it('should not clear the filter when clearFilterOnNavigation is false', async () => {
+        fileBrowser.clearFilterOnNavigation = false;
+        fileBrowser.showFileFilter = true;
+        await framePromise();
+
+        const input = fileBrowser.fileFilterInput!;
+        input.value = 'notebook';
+
+        model.setFilter(value => (value.type === 'notebook' ? {} : null));
+        await model.cd(dirName);
+        await model.cd('/');
+
+        const items = Array.from(model.items());
+        expect(items.every(item => item.type === 'notebook')).toBe(true);
       });
     });
   });
@@ -296,7 +347,6 @@ describe('FileBrowser with Drives', () => {
         throw new Error('Item node not found');
       }
       simulate(editNode, 'keydown', {
-        keyCode: 13,
         key: 'Enter'
       });
       const fileModel = await created;

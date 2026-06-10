@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module running
@@ -7,6 +8,10 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import type {
+  IMovableSectionSource,
+  ISectionEntry
+} from '@jupyterlab/apputils';
 import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -34,6 +39,7 @@ import { ElementExt } from '@lumino/domutils';
 import type { Message } from '@lumino/messaging';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+import type { AccordionPanel } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
 import type { ReactNode } from 'react';
 import React, { isValidElement, useCallback, useRef } from 'react';
@@ -504,7 +510,7 @@ class ListWidget extends ReactWidget {
  *
  * It is specialized for each based on its props.
  */
-class Section extends PanelWithToolbar {
+export class Section extends PanelWithToolbar {
   constructor(options: Section.IOptions) {
     super();
     this._listView = (options.viewMode ?? 'tree') === 'list';
@@ -768,7 +774,7 @@ namespace Section {
 /**
  * The interface exposing the running sessions sidebar widget properties.
  */
-export interface IRunningSessionSidebar {
+export interface IRunningSessionSidebar extends IMovableSectionSource {
   /**
    * The toolbar of the running sidebar.
    */
@@ -811,6 +817,9 @@ export class RunningSessions
     managers.items().forEach(manager => this.addSection(managers, manager));
     managers.added.connect(this.addSection, this);
   }
+  get accordionPanel(): AccordionPanel {
+    return this.content as AccordionPanel;
+  }
 
   /**
    * Dispose the resources held by the widget
@@ -821,6 +830,31 @@ export class RunningSessions
     }
     this.managers.added.disconnect(this.addSection, this);
     super.dispose();
+  }
+
+  // IMovableSectionSource implementation
+
+  /**
+   * Remove a section by manager name and return the widget.
+   *
+   * @param managerName - The name of the manager whose section to remove.
+   * @returns The removed section widget, or null if not found.
+   */
+  removeSectionById(managerName: string): Widget | null {
+    const widget = this._sectionMap.get(managerName) ?? null;
+    if (widget) {
+      widget.parent = null;
+    }
+    return widget;
+  }
+
+  /**
+   * Re-insert a previously removed section back into the sidebar.
+   *
+   * @param widget - The section widget to re-insert.
+   */
+  reinsertSection(widget: Widget): void {
+    this.addWidget(widget);
   }
 
   /**
@@ -834,6 +868,7 @@ export class RunningSessions
     manager: IRunningSessions.IManager
   ) {
     const section = new Section({ manager, translator: this.translator });
+    this._sectionMap.set(manager.name, section);
     this.addWidget(section);
 
     const state = await this._getState();
@@ -848,6 +883,16 @@ export class RunningSessions
         await this._updateState(sectionId, viewState.mode);
       }
     );
+
+    const panel = this.content as AccordionPanel;
+    const idx = Array.from(panel.widgets).indexOf(section);
+    if (idx >= 0) {
+      this._sectionAdded.emit({
+        id: manager.name,
+        titleNode: panel.titles[idx],
+        widget: section
+      });
+    }
   }
 
   /**
@@ -881,9 +926,33 @@ export class RunningSessions
     );
   }
 
+  /**
+   * Signal emitted when a section is added to this sidebar.
+   */
+  get sectionAdded(): ISignal<this, ISectionEntry> {
+    return this._sectionAdded;
+  }
+
+  /**
+   * Return the currently-available sections with their accordion title nodes.
+   */
+  getSections(): ReadonlyArray<ISectionEntry> {
+    const panel = this.content as AccordionPanel;
+    const result: ISectionEntry[] = [];
+    for (const [id, widget] of this._sectionMap) {
+      const idx = Array.from(panel.widgets).indexOf(widget);
+      if (idx >= 0 && panel.titles[idx]) {
+        result.push({ id, titleNode: panel.titles[idx], widget: widget });
+      }
+    }
+    return result;
+  }
+
   protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
   private _stateDB: IStateDB | null;
+  private _sectionMap = new Map<string, Widget>();
+  private readonly _sectionAdded = new Signal<this, ISectionEntry>(this);
 }
 
 /**

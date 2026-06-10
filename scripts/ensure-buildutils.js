@@ -66,7 +66,6 @@ function ensurePackage(p) {
 }
 
 ensurePackage('buildutils');
-ensurePackage('builder');
 
 // uncomment to time script
 // var end = new Date() - start;

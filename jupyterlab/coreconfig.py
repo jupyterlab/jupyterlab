@@ -2,10 +2,11 @@
 # Distributed under the terms of the Modified BSD License.
 
 import json
+import os
 import os.path as osp
 from itertools import filterfalse
 
-from .jlpmapp import HERE
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def pjoin(*args):
@@ -101,10 +102,7 @@ class CoreConfig:
             data["jupyterlab"]["mimeExtensions"],
         )
         for m in maps:
-            try:
-                del m[name]
-            except KeyError:
-                pass
+            m.pop(name, None)
 
         data["jupyterlab"]["singletonPackages"].remove(name)
 

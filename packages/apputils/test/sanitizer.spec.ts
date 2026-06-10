@@ -72,6 +72,25 @@ describe('sanitizer', () => {
       expect(sanitizer.sanitize(button)).toBe(expectedButton);
     });
 
+    it('should drop command linker attributes when allowCommandLinker is false', () => {
+      const button =
+        '<button data-commandlinker-command="terminal:create-new" data-commandlinker-args=\'{"name":"foo"}\' onClick={some evil code}>Create Terminal</button>';
+      sanitizer.setAllowCommandLinker(false);
+      const expectedButton = '<button>Create Terminal</button>';
+      expect(sanitizer.sanitize(button)).toBe(expectedButton);
+      // Reset to default
+      sanitizer.setAllowCommandLinker(true);
+    });
+
+    it('should preserve command linker attributes when allowCommandLinker is true', () => {
+      const button =
+        '<button data-commandlinker-command="terminal:create-new" data-commandlinker-args=\'{"name":"foo"}\' onClick={some evil code}>Create Terminal</button>';
+      const expectedButton =
+        '<button data-commandlinker-command="terminal:create-new" data-commandlinker-args="{&quot;name&quot;:&quot;foo&quot;}">Create Terminal</button>';
+      sanitizer.setAllowCommandLinker(true);
+      expect(sanitizer.sanitize(button)).toBe(expectedButton);
+    });
+
     it('should allow the class attribute for code tags', () => {
       const code = '<code class="foo">bar</code>';
       expect(sanitizer.sanitize(code)).toBe(code);

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';

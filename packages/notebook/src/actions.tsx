@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   ISessionContext,
@@ -11,13 +12,9 @@ import {
   showDialog,
   SystemClipboard
 } from '@jupyterlab/apputils';
-import type {
-  Cell,
-  CodeCell,
-  ICellModel,
-  ICodeCellModel
-} from '@jupyterlab/cells';
+import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
 import {
+  CodeCell,
   CodeCellModel,
   isMarkdownCellModel,
   isRawCellModel,
@@ -26,8 +23,9 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import type { KernelMessage } from '@jupyterlab/services';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
 import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
@@ -447,6 +445,22 @@ export namespace NotebookActions {
           : undefined
     };
 
+    // Detach kernel futures from cells about to be deleted so OutputArea.dispose()
+    // does not terminate them - they stay live in kernel._futures for reconnection
+    // after undo. Handlers are cleared by detachFuture() so the future no
+    // longer holds references to the (soon-to-be-disposed) output area.
+    const storedExecutions: Private.IStoredCellExecution[] = [];
+    [active, ...toDelete].forEach(index => {
+      const cell = notebook.widgets[index];
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      const stored = Private.captureExecution(cell);
+      if (stored) {
+        storedExecutions.push(stored);
+      }
+    });
+
     // Make the changes while preserving history.
     model.sharedModel.transact(() => {
       model.sharedModel.deleteCell(active);
@@ -457,6 +471,14 @@ export namespace NotebookActions {
           model.sharedModel.deleteCell(index);
         });
     });
+
+    // Store execution context in the undo stack item so undo() can restore state.
+    if (storedExecutions.length > 0) {
+      const undoManager = (model.sharedModel as YNotebook).undoManager;
+      const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+    }
+
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
     if (primary instanceof MarkdownCell) {
@@ -632,7 +654,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value, translator);
+    Private.changeCellType(notebook, value, { translator });
     void Private.handleState(notebook, state);
   }
 
@@ -1585,9 +1607,61 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     notebook.mode = 'command';
+
+    // Capture execution context from the stack item being popped.
+    let storedExecutions: Private.IStoredCellExecution[] | undefined;
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const onStackItemPopped = ({
+      stackItem
+    }: {
+      stackItem: { meta: Map<unknown, unknown> };
+    }) => {
+      storedExecutions = stackItem.meta.get(Private.CELL_EXECUTION_META_KEY) as
+        | Private.IStoredCellExecution[]
+        | undefined;
+    };
+    undoManager.on('stack-item-popped', onStackItemPopped);
     notebook.model.sharedModel.undo();
+    undoManager.off('stack-item-popped', onStackItemPopped);
+
+    // Restore execution state on resurrected cell widgets.
+    storedExecutions?.forEach(({ cellId, future, isDone, buffered }) => {
+      const cell = notebook.widgets.find(w => w.model.id === cellId);
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      if (isDone()) {
+        // Execution finished or was interrupted before undo - ensure state is idle.
+        cell.model.executionState = 'idle';
+        return;
+      }
+      // Still running - reconnect the future so the cell receives remaining
+      // output and stdin requests (e.g. input()), and tracks the idle transition.
+      cell.outputArea.reattachFuture(future);
+      // Replay any IOPub messages that arrived while the future was detached.
+      // After reattachFuture, future.onIOPub routes to the new output area.
+      for (const msg of buffered) {
+        void future.onIOPub(msg);
+      }
+      // The original execute() call targeted the old cell widget, so it will
+      // not update executionCount/executionState on this resurrected cell.
+      // Drive the idle transition here instead.
+      const cellRef = cell;
+      void future.done.then(
+        reply => {
+          if (!cellRef.isDisposed) {
+            cellRef.model.executionCount = reply.content.execution_count;
+          }
+        },
+        () => {
+          if (!cellRef.isDisposed) {
+            cellRef.model.executionState = 'idle';
+          }
+        }
+      );
+    });
+
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -1984,6 +2058,36 @@ export namespace NotebookActions {
   }
 
   /**
+   * Select the last modified cell and pop it from the back stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function selectLastModifiedCell(
+    notebook: Notebook
+  ): Promise<void> {
+    const cell = notebook.popLastModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.indexOf(cell);
+      await notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
+   * Select the next modified cell and pop it from the forward stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function selectNextModifiedCell(
+    notebook: Notebook
+  ): Promise<void> {
+    const cell = notebook.popNextModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.indexOf(cell);
+      await notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.
@@ -2007,15 +2111,12 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
 
     level = Math.min(Math.max(level, 1), 6);
-    notebook.widgets.forEach((child, index) => {
-      if (notebook.isSelectedOrActive(child)) {
-        Private.setMarkdownHeader(cells.get(index), level);
-      }
+    Private.changeCellType(notebook, 'markdown', {
+      translator,
+      headingLevel: level
     });
-    Private.changeCellType(notebook, 'markdown', translator);
     void Private.handleState(notebook, state);
   }
 
@@ -2310,12 +2411,12 @@ export namespace NotebookActions {
   export function trust(
     notebook: Notebook,
     translator?: ITranslator
-  ): Promise<void> {
+  ): Promise<{ trusted: boolean }> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
     if (!notebook.model) {
-      return Promise.resolve();
+      return Promise.resolve({ trusted: false });
     }
     // Do nothing if already trusted.
 
@@ -2347,7 +2448,7 @@ export namespace NotebookActions {
       return showDialog({
         body: trans.__('Notebook is already trusted'),
         buttons: [Dialog.okButton()]
-      }).then(() => undefined);
+      }).then(() => ({ trusted: true }));
     }
 
     return showDialog({
@@ -2367,7 +2468,9 @@ export namespace NotebookActions {
             cell.trusted = true;
           }
         }
+        return { trusted: true };
       }
+      return { trusted: false };
     });
   }
 
@@ -2462,6 +2565,44 @@ export function setCellExecutor(executor: INotebookCellExecutor): void {
  * A namespace for private data.
  */
 namespace Private {
+  /** Key used to store cell execution state in Y.js undo stack item metadata. */
+  export const CELL_EXECUTION_META_KEY = Symbol('cellExecutionState');
+
+  export interface IStoredCellExecution {
+    cellId: string;
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+    isDone: () => boolean;
+    /** IOPub messages that arrived while the future was detached. */
+    buffered: KernelMessage.IIOPubMessage[];
+  }
+
+  /**
+   * Detach the kernel future from a code cell, buffering any IOPub messages
+   * that arrive while it is detached so they can be replayed on reattach.
+   *
+   * Returns null if the cell has no active future.
+   */
+  export function captureExecution(
+    cell: CodeCell
+  ): IStoredCellExecution | null {
+    const future = cell.outputArea.detachFuture();
+    if (!future) {
+      return null;
+    }
+    let done = false;
+    void future.done.finally(() => {
+      done = true;
+    });
+    const buffered: KernelMessage.IIOPubMessage[] = [];
+    future.onIOPub = msg => {
+      buffered.push(msg);
+    };
+    return { cellId: cell.model.id, future, isDone: () => done, buffered };
+  }
+
   /**
    * Notebook cell executor
    */
@@ -2866,8 +3007,12 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    options?: {
+      translator?: ITranslator;
+      headingLevel?: number;
+    }
   ): void {
+    const { translator, headingLevel } = options ?? {};
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
@@ -2877,8 +3022,7 @@ namespace Private {
         child.model.type === 'code' &&
         (child as CodeCell).outputArea.pendingInput
       ) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when input is pending
         void showDialog({
           title: trans.__('Cell type not changed due to pending input'),
@@ -2890,8 +3034,7 @@ namespace Private {
         return;
       }
       if (child.model.getMetadata('editable') == false) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
           title: trans.__('Cell is read-only'),
@@ -2902,6 +3045,15 @@ namespace Private {
       }
       if (child.model.type !== value) {
         const raw = child.model.toJSON();
+        let newSource = raw.source as string;
+        if (headingLevel !== undefined) {
+          newSource = Private.setMarkdownHeader(newSource, headingLevel);
+        }
+        // Detach future before the transaction so dispose() does not cancel it.
+        const storedExecution =
+          child instanceof CodeCell
+            ? Private.captureExecution(child)
+            : undefined;
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
@@ -2915,13 +3067,30 @@ namespace Private {
           const newCell = notebookSharedModel.insertCell(index, {
             id: raw.id,
             cell_type: value,
-            source: raw.source,
+            source: newSource,
             metadata: raw.metadata
           });
           if (raw.attachments && ['markdown', 'raw'].includes(value)) {
             (newCell as ISharedAttachmentsCell).attachments =
               raw.attachments as nbformat.IAttachments;
           }
+        });
+        if (storedExecution) {
+          const undoManager = (notebookSharedModel as YNotebook).undoManager;
+          const lastItem =
+            undoManager.undoStack[undoManager.undoStack.length - 1];
+          lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, [
+            storedExecution
+          ]);
+        }
+      } else if (value === 'markdown' && headingLevel !== undefined) {
+        notebookSharedModel.transact(() => {
+          child.model.sharedModel.setSource(
+            Private.setMarkdownHeader(
+              child.model.sharedModel.getSource(),
+              headingLevel
+            )
+          );
         });
       }
       if (value === 'markdown') {
@@ -2963,6 +3132,19 @@ namespace Private {
 
     // If cells are not deletable, we may not have anything to delete.
     if (toDelete.length > 0) {
+      // Detach futures before the transaction so dispose() does not cancel them.
+      const storedExecutions: Private.IStoredCellExecution[] = [];
+      toDelete.forEach(index => {
+        const cell = notebook.widgets[index];
+        if (!(cell instanceof CodeCell)) {
+          return;
+        }
+        const stored = Private.captureExecution(cell);
+        if (stored) {
+          storedExecutions.push(stored);
+        }
+      });
+
       // Delete the cells as one undo event.
       sharedModel.transact(() => {
         // Delete cells in reverse order to maintain the correct indices.
@@ -2986,6 +3168,12 @@ namespace Private {
           });
         }
       });
+      if (storedExecutions.length > 0) {
+        const undoManager = (sharedModel as YNotebook).undoManager;
+        const lastItem =
+          undoManager.undoStack[undoManager.undoStack.length - 1];
+        lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      }
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
       // Note: The activeCellIndex is clamped to the available cells,
@@ -3001,19 +3189,18 @@ namespace Private {
   }
 
   /**
-   * Set the markdown header level of a cell.
+   * Set the markdown header level of a cell source.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number): void {
+  export function setMarkdownHeader(source: string, level: number): string {
     // Remove existing header or leading white space.
-    let source = cell.sharedModel.getSource();
-    const regex = /^(#+\s*)|^(\s*)/;
+    const regex = /^#+\s*|^\s*/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
 
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.sharedModel.setSource(newHeader + source);
+    return newHeader + source;
   }
 
   /** Functionality related to collapsible headings */

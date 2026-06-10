@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 import { Text } from '@jupyterlab/coreutils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
@@ -103,7 +102,7 @@ export namespace MenuFactory {
     menu.addItem({
       ...newItem,
       submenu: submenu ? dataToMenu(submenu, menuFactory) : null
-    } as any);
+    } as ContextMenu.IItemOptions);
   }
 
   /**
@@ -123,7 +122,7 @@ export namespace MenuFactory {
     menu.addItem({
       ...newItem,
       submenu: submenu ? dataToMenu(submenu, menuFactory) : null
-    } as any);
+    } as Menu.IItemOptions);
   }
 
   /**

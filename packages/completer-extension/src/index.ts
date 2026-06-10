@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module completer-extension
@@ -407,9 +408,8 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         return;
       }
       const target = event.target as Element;
-      switch (event.keyCode) {
-        case 9: {
-          // Tab key
+      switch (event.key) {
+        case 'Tab': {
           const potentialTabBindings = [
             // Note: `accept` should come ahead of `invoke` due to specificity
             keyBindings[CommandIDs.acceptInline],

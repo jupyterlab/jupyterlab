@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { MimeData } from '@lumino/coreutils';
+import { Dialog, showDialog } from './dialog';
+import type { TranslationBundle } from '@jupyterlab/translation';
 
 // 'string' is allowed so as to make it non-breaking for any 1.x releases
 export type ClipboardData = string | MimeData;
@@ -95,6 +98,16 @@ export namespace Clipboard {
         sel.addRange(savedRanges[i]);
       }
     }
+  }
+
+  export function showPasteUnavailableDialog(trans: TranslationBundle): void {
+    void showDialog({
+      title: trans.__('Paste Unavailable'),
+      body: trans.__(
+        'Due to browser security restrictions, pasting from the context menu may not be supported.\n\nPlease use Ctrl + V (or ⌘ + V on macOS) instead.'
+      ),
+      buttons: [Dialog.okButton({ label: trans.__('OK') })]
+    });
   }
 }
 

@@ -70,6 +70,11 @@ export namespace ITerminal {
      * changes if the terminal theme is 'inherit'.
      */
     themeChanged: ISignal<this, void>;
+
+    /**
+     * A signal emitted when users should be reminded how to leave terminal focus.
+     */
+    escapeHintRequested: ISignal<this, void>;
   }
   /**
    * Options for the terminal widget.
