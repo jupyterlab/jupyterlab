@@ -42,7 +42,7 @@ function getExtensionGitHubUser(entry: IEntry) {
 
 function isProtocolAllowed(url: string): boolean {
   try {
-    const parsed = new URL(url, window.location.href);
+    const parsed = new URL(url);
     const protocol = parsed.protocol.toLowerCase();
     return ['http:', 'https:'].includes(protocol);
   } catch {
