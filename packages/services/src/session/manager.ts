@@ -255,10 +255,13 @@ export class SessionManager extends BaseManager implements Session.IManager {
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.
       const isNetworkError = err instanceof ServerConnection.NetworkError;
-      const status =
-        err instanceof ServerConnection.ResponseError
-          ? err.response.status
-          : undefined;
+      // Check structurally rather than with instanceof, as the error may
+      // come from a different copy of @jupyterlab/services.
+      const hasResponse =
+        typeof err === 'object' && err !== null && 'response' in err;
+      const status = hasResponse
+        ? (err.response as Response | undefined)?.status
+        : undefined;
 
       if (isNetworkError || status === 503 || status === 424) {
         this._connectionFailure.emit(

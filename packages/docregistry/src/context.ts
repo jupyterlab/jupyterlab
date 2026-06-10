@@ -13,8 +13,11 @@ import { PathExt } from '@jupyterlab/coreutils';
 import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type { Contents, ServiceManager } from '@jupyterlab/services';
-import { ServerConnection } from '@jupyterlab/services';
+import type {
+  Contents,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -319,11 +322,16 @@ export class Context<
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
-      const responseError =
-        err instanceof ServerConnection.ResponseError ? err : null;
-      if (responseError?.response.status !== 404) {
+      // Check structurally rather than with instanceof, as the error may
+      // come from a different copy of @jupyterlab/services.
+      const hasResponse =
+        typeof err === 'object' && err !== null && 'response' in err;
+      const status = hasResponse
+        ? (err.response as Response | undefined)?.status
+        : undefined;
+      if (status !== 404) {
         // Dialog rejection (user cancelled)
-        if (!responseError) {
+        if (!hasResponse) {
           return false;
         }
         throw err;
