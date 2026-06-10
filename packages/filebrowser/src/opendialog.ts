@@ -199,7 +199,7 @@ class OpenDialogBody
         this._browser = browser;
 
         // Add toolbar items
-        setToolbar(this._browser, (browser: any) => [
+        setToolbar(this._browser, () => [
           {
             name: 'new-folder',
             widget: new ToolbarButton({
@@ -215,7 +215,7 @@ class OpenDialogBody
             widget: new ToolbarButton({
               icon: refreshIcon,
               onClick: () => {
-                browser.model.refresh().catch((reason: any) => {
+                browser.model.refresh().catch(reason => {
                   console.error(
                     'Failed to refresh file browser in open dialog.',
                     reason

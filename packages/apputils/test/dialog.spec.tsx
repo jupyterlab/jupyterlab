@@ -530,7 +530,10 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should create the footer of the dialog with checkbox', () => {
-          const buttons = [Dialog.okButton, { label: 'foo' }];
+          const buttons = [
+            Dialog.okButton(),
+            Dialog.createButton({ label: 'foo' })
+          ];
           const nodes = buttons.map((button: Dialog.IButton) => {
             return renderer.createButtonNode(button);
           });

@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ServiceManager,
-  Session,
-  Terminal
-} from '@jupyterlab/services';
+import type { ServiceManager, Session, Terminal } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {

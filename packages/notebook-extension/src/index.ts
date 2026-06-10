@@ -1022,7 +1022,8 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
       sanitizer,
       app.commands
     );
-    tocRegistry.add(nbTocFactory);
+
+    tocRegistry.add(nbTocFactory as any);
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
         .then(([_, setting]) => {
@@ -2604,27 +2605,21 @@ function addCommands(
   };
 
   // Set up signal handler to keep the collapse state consistent
-  tracker.currentChanged.connect(
-    (sender, panel) => {
-      if (!panel?.content?.model?.cells) {
-        return;
-      }
-      panel.content.model.cells.changed.connect(
-        (list, args) => {
-          // Might be overkill to refresh this every time, but
-          // it helps to keep the collapse state consistent.
-          refreshCellCollapsed(panel.content);
-        }
-      );
-      panel.content.activeCellChanged.connect(
-        (notebook, cell) => {
-          if (cell) {
-            NotebookActions.expandParent(cell, notebook);
-          }
-        }
-      );
+  tracker.currentChanged.connect((sender, panel) => {
+    if (!panel?.content?.model?.cells) {
+      return;
     }
-  );
+    panel.content.model.cells.changed.connect((list, args) => {
+      // Might be overkill to refresh this every time, but
+      // it helps to keep the collapse state consistent.
+      refreshCellCollapsed(panel.content);
+    });
+    panel.content.activeCellChanged.connect((notebook, cell) => {
+      if (cell) {
+        NotebookActions.expandParent(cell, notebook);
+      }
+    });
+  });
 
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);

@@ -691,7 +691,9 @@ namespace Private {
         settings
       );
     } catch (error: unknown) {
-      throw new ServerConnection.NetworkError(error as TypeError);
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();

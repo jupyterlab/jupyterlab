@@ -747,13 +747,13 @@ class BenchmarkReporter implements Reporter {
     };
   }
 
-  protected config: FullConfig;
-  protected suite: Suite;
+  protected config!: FullConfig;
+  protected suite!: Suite;
   private _comparison: 'snapshot' | 'project';
   private _expectedReference: string;
   private _outputFile: string;
   private _reference: string;
-  private _report: IReportRecord[];
+  private _report!: IReportRecord[];
   private _buildVegaLiteGraph: (
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'

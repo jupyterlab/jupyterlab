@@ -960,7 +960,13 @@ export class SessionContext implements ISessionContext {
         await this._session.changeKernel(model);
         return this._session.kernel;
       } catch (err) {
-        void this._handleSessionError(err instanceof ServerConnection.ResponseError ? err : new ServerConnection.ResponseError(new Response(null, { status: 500, statusText: String(err) })));
+        void this._handleSessionError(
+          err instanceof ServerConnection.ResponseError
+            ? err
+            : new ServerConnection.ResponseError(
+                new Response(null, { status: 500, statusText: String(err) })
+              )
+        );
         throw err;
       }
     }
@@ -1000,7 +1006,13 @@ export class SessionContext implements ISessionContext {
       }
       return this._handleNewSession(session);
     } catch (err) {
-      void this._handleSessionError(err instanceof ServerConnection.ResponseError ? err : new ServerConnection.ResponseError(new Response(null, { status: 500, statusText: String(err) })));
+      void this._handleSessionError(
+        err instanceof ServerConnection.ResponseError
+          ? err
+          : new ServerConnection.ResponseError(
+              new Response(null, { status: 500, statusText: String(err) })
+            )
+      );
       throw err;
     }
   }

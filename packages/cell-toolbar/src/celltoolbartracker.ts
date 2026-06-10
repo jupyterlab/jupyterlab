@@ -263,7 +263,9 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _getCell(model: ICellModel): Cell | undefined {
-    return this._panel?.content.widgets.find((widget: Cell) => widget.model === model);
+    return this._panel?.content.widgets.find(
+      (widget: Cell) => widget.model === model
+    );
   }
 
   private _removeToolbar(model: ICellModel): void {

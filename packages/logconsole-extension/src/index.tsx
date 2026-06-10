@@ -189,11 +189,16 @@ function activateLogConsole(
       notifyCommands();
     });
 
-    logConsolePanel.sourceDisplayed.connect((panel: LogConsolePanel, { source, version }: { source: string | null, version: number | null }) => {
-      if (source !== null && version !== null) {
-        status.model.sourceDisplayed(source, version);
+    logConsolePanel.sourceDisplayed.connect(
+      (
+        panel: LogConsolePanel,
+        { source, version }: { source: string | null; version: number | null }
+      ) => {
+        if (source !== null && version !== null) {
+          status.model.sourceDisplayed(source, version);
+        }
       }
-    });
+    );
 
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;

@@ -302,34 +302,38 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     const handlers: { [id: string]: InspectionHandler } = {};
 
     // Create a handler for each notebook that is created.
-    notebooks.widgetAdded.connect((sender: INotebookTracker, parent: NotebookPanel) => {
-      const sessionContext = parent.sessionContext;
-      const rendermime = parent.content.rendermime;
-      const connector = new KernelConnector({ sessionContext });
-      const handler = new InspectionHandler({ connector, rendermime });
+    notebooks.widgetAdded.connect(
+      (sender: INotebookTracker, parent: NotebookPanel) => {
+        const sessionContext = parent.sessionContext;
+        const rendermime = parent.content.rendermime;
+        const connector = new KernelConnector({ sessionContext });
+        const handler = new InspectionHandler({ connector, rendermime });
 
-      // Associate the handler to the widget.
-      handlers[parent.id] = handler;
+        // Associate the handler to the widget.
+        handlers[parent.id] = handler;
 
-      // Set the initial editor.
-      const cell = parent.content.activeCell;
-      handler.editor = cell && cell.editor;
+        // Set the initial editor.
+        const cell = parent.content.activeCell;
+        handler.editor = cell && cell.editor;
 
-      // Listen for active cell changes.
-      parent.content.activeCellChanged.connect((sender: Notebook, cell: Cell | null) => {
-        void cell?.ready.then(() => {
-          if (cell === parent.content.activeCell) {
-            handler.editor = cell!.editor;
+        // Listen for active cell changes.
+        parent.content.activeCellChanged.connect(
+          (sender: Notebook, cell: Cell | null) => {
+            void cell?.ready.then(() => {
+              if (cell === parent.content.activeCell) {
+                handler.editor = cell!.editor;
+              }
+            });
           }
-        });
-      });
+        );
 
-      // Listen for parent disposal.
-      parent.disposed.connect(() => {
-        delete handlers[parent.id];
-        handler.dispose();
-      });
-    });
+        // Listen for parent disposal.
+        parent.disposed.connect(() => {
+          delete handlers[parent.id];
+          handler.dispose();
+        });
+      }
+    );
 
     // Keep track of notebook instances and set inspector source.
     const setSource = (widget: Widget | null): void => {

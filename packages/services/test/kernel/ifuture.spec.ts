@@ -52,7 +52,10 @@ describe('Kernel.IShellFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IShellFuture;
+      let future: Kernel.IShellFuture<
+        KernelMessage.IExecuteRequestMsg,
+        KernelMessage.IExecuteReplyMsg
+      >;
       let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
@@ -145,7 +148,10 @@ describe('Kernel.IShellFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IShellFuture;
+      let future: Kernel.IShellFuture<
+        KernelMessage.IExecuteRequestMsg,
+        KernelMessage.IExecuteReplyMsg
+      >;
       let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
@@ -218,7 +224,10 @@ describe('Kernel.IShellFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IShellFuture;
+      let future: Kernel.IShellFuture<
+        KernelMessage.IExecuteRequestMsg,
+        KernelMessage.IExecuteReplyMsg
+      >;
 
       tester.onMessage(message => {
         // send a reply
@@ -288,7 +297,10 @@ describe('Kernel.IShellFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IShellFuture;
+      let future: Kernel.IShellFuture<
+        KernelMessage.IExecuteRequestMsg,
+        KernelMessage.IExecuteReplyMsg
+      >;
 
       const toDelete = (msg: KernelMessage.IIOPubMessage) => {
         calls.push('delete');

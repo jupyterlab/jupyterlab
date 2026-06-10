@@ -2436,7 +2436,7 @@ namespace Private {
           expansionStates: boolean[] | null;
         };
       } = {};
-      this._stackedPanel.widgets.forEach((w) => {
+      this._stackedPanel.widgets.forEach(w => {
         const sidePanel = w as SidePanel;
         if (sidePanel.id && sidePanel.content instanceof SplitPanel) {
           widgetStates[sidePanel.id] = {
@@ -2502,8 +2502,8 @@ namespace Private {
         this.collapse();
       }
       if (data.widgetStates) {
-        this._stackedPanel.widgets.forEach((w) => {
-        const sidePanel = w as SidePanel;
+        this._stackedPanel.widgets.forEach(w => {
+          const sidePanel = w as SidePanel;
           if (sidePanel.id && sidePanel.content instanceof SplitPanel) {
             const state = data.widgetStates[sidePanel.id] ?? {};
             sidePanel.content.widgets.forEach((wi, widx) => {
@@ -2513,9 +2513,9 @@ namespace Private {
                 sidePanel.content instanceof AccordionPanel
               ) {
                 if (expansion) {
-                  w.content.expand(widx);
+                  sidePanel.content.expand(widx);
                 } else {
-                  w.content.collapse(widx);
+                  sidePanel.content.collapse(widx);
                 }
               }
             });

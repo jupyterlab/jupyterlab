@@ -584,7 +584,7 @@ describe('outputarea/widget', () => {
             },
             prompt: 'hello',
             password: false,
-            future
+            future: future as unknown as Kernel.IShellFuture
           };
           expect(factory.createStdin(options)).toBeInstanceOf(Widget);
           await kernel.shutdown();

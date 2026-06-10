@@ -126,10 +126,7 @@ window.DataTransfer = DataTransferMock;
 
 // https://github.com/jsdom/jsdom/issues/1568
 class ClipboardEventMock extends Event implements ClipboardEvent {
-  constructor(
-    type: string,
-    eventInitDict?: ClipboardEventInit
-  ) {
+  constructor(type: string, eventInitDict?: ClipboardEventInit) {
     super(type);
     this.clipboardData = (eventInitDict as any)?.clipboardData || null;
   }

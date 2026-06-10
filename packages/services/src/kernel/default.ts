@@ -1482,7 +1482,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     let alreadyCalledOnclose = false;
 
-    const getKernelModel = async (evt: CloseEvent | ErrorEvent) => {
+    const getKernelModel = async (evt: Event) => {
       if (this._isDisposed) {
         return;
       }
@@ -1502,7 +1502,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
         // JupyterHub and the server is not running. JupyterHub returns a
         // 503 (<2.0) or 424 (>2.0) in that case.
         const isNetworkError = err instanceof ServerConnection.NetworkError;
-        const hasResponse = typeof err === 'object' && err !== null && 'response' in err;
+        const hasResponse =
+          typeof err === 'object' && err !== null && 'response' in err;
         const status = hasResponse ? (err as any).response?.status : undefined;
 
         if (isNetworkError || status === 503 || status === 424) {
@@ -1516,7 +1517,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       return;
     };
 
-    const earlyClose = async (evt: CloseEvent | ErrorEvent) => {
+    const earlyClose = async (evt: Event) => {
       // If the websocket was closed early, that could mean
       // that the kernel is actually dead. Try getting
       // information about the kernel from the API call,
@@ -1826,7 +1827,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle a websocket close event.
    */
-  private _onWSClose = (evt: CloseEvent | ErrorEvent) => {
+  private _onWSClose = (evt: Event) => {
     if (this.isDisposed) {
       return;
     }

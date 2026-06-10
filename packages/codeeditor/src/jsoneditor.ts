@@ -1,12 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IObservableJSON } from '@jupyterlab/observables';
-import type { ISharedFile, SourceChange } from '@jupyter/ydoc';
+import type { IObservableJSON, IObservableMap } from '@jupyterlab/observables';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
-import type { JSONObject, ReadonlyPartialJSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type {
+  JSONObject,
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -219,7 +223,7 @@ export class JSONEditor extends Widget {
   /**
    * Handle change events.
    */
-  private _onModelChanged(model: ISharedFile, change: SourceChange): void {
+  private _onModelChanged(model: ISharedText, change: SourceChange): void {
     if (change.sourceChange) {
       let valid = true;
       try {

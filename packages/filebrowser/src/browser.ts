@@ -2,10 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import type {
-  Dialog,
-  IMovableSectionDestination
-} from '@jupyterlab/apputils';
+import type { Dialog, IMovableSectionDestination } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
@@ -535,7 +532,10 @@ export class FileBrowser
       await this.rename();
       return model;
     } catch (err) {
-      void showErrorMessage(this._trans.__('Error'), err as string | Dialog.IError);
+      void showErrorMessage(
+        this._trans.__('Error'),
+        err as string | Dialog.IError
+      );
       throw err;
     }
   }

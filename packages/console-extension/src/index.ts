@@ -1439,7 +1439,8 @@ async function activateConsole(
           args['interactionMode'] as string
         );
       } catch (reason: unknown) {
-        const message = reason instanceof Error ? reason.message : String(reason);
+        const message =
+          reason instanceof Error ? reason.message : String(reason);
         console.error(`Failed to set ${pluginId}:${key} - ${message}`);
       }
     },
@@ -1517,22 +1518,27 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-  const updateCompleter = async (_: IConsoleTracker, consolePanel: ConsolePanel) => {
+  const updateCompleter = async (
+    _: IConsoleTracker,
+    consolePanel: ConsolePanel
+  ) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,
       widget: consolePanel
     };
     await manager.updateCompleter(completerContext);
-    consolePanel.console.promptCellCreated.connect((codeConsole: CodeConsole, cell: CodeCell) => {
-      const newContext = {
-        editor: cell.editor,
-        session: codeConsole.sessionContext.session,
-        widget: consolePanel,
-        sanitzer: sanitizer
-      };
-      manager.updateCompleter(newContext).catch(console.error);
-    });
+    consolePanel.console.promptCellCreated.connect(
+      (codeConsole: CodeConsole, cell: CodeCell) => {
+        const newContext = {
+          editor: cell.editor,
+          session: codeConsole.sessionContext.session,
+          widget: consolePanel,
+          sanitzer: sanitizer
+        };
+        manager.updateCompleter(newContext).catch(console.error);
+      }
+    );
     consolePanel.console.sessionContext.sessionChanged.connect(() => {
       const newContext = {
         editor: consolePanel.console.promptCell?.editor ?? null,

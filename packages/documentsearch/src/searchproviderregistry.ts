@@ -35,7 +35,10 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     key: string,
     provider: ISearchProviderFactory<T>
   ): IDisposable {
-    this._providerMap.set(key, provider as any);
+    this._providerMap.set(
+      key,
+      provider as unknown as ISearchProviderFactory<Widget>
+    );
     this._changed.emit();
     return new DisposableDelegate(() => {
       this._providerMap.delete(key);

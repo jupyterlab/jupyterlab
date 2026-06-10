@@ -37,7 +37,9 @@ export async function requestTranslationsAPI<T>(
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
   } catch (error) {
-    throw new ServerConnection.NetworkError(error instanceof TypeError ? error : new TypeError(String(error)));
+    throw new ServerConnection.NetworkError(
+      error instanceof TypeError ? error : new TypeError(String(error))
+    );
   }
 
   let data: any = await response.text();

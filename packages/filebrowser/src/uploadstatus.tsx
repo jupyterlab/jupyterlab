@@ -183,7 +183,11 @@ export namespace FileUploadStatus {
           progress: uploads.newValue.progress * 100,
           complete: false
         });
-      } else if (uploads.name === 'update' && uploads.oldValue && uploads.newValue) {
+      } else if (
+        uploads.name === 'update' &&
+        uploads.oldValue &&
+        uploads.newValue
+      ) {
         const idx = ArrayExt.findFirstIndex(
           this._items,
           val => val.path === uploads.oldValue!.path

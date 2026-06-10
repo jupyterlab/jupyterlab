@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { MainAreaWidget, setToolbar, ToolbarRegistry } from '@jupyterlab/apputils';
+import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -469,7 +470,11 @@ export abstract class ABCWidgetFactory<
     // Add toolbar
     setToolbar(
       widget,
-      (this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)) as (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> | ToolbarRegistry.IToolbarItem[]
+      (this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)) as (
+        widget: Widget
+      ) =>
+        | IObservableList<ToolbarRegistry.IToolbarItem>
+        | ToolbarRegistry.IToolbarItem[]
     );
 
     // Emit widget created signal
@@ -555,7 +560,8 @@ export class DocumentWidget<
 {
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
-    const opts = options as MainAreaWidget.IOptions<T> & DocumentWidget.IOptions<T, U>;
+    const opts = options as MainAreaWidget.IOptions<T> &
+      DocumentWidget.IOptions<T, U>;
     opts.reveal = Promise.all([opts.reveal, options.context.ready]);
     super(opts);
     this._trans = (opts.translator ?? nullTranslator).load('jupyterlab');
@@ -586,7 +592,7 @@ export class DocumentWidget<
   /**
    * Handle a title change.
    */
-  private async _onTitleChanged(_sender: Title<this>) {
+  private async _onTitleChanged(_sender: Title<Widget>) {
     const validNameExp = /[/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name

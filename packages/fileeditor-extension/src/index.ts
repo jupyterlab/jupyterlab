@@ -285,7 +285,10 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
-    registry.add('jp-fileeditorSearchProvider', FileEditorSearchProvider as any);
+    registry.add(
+      'jp-fileeditorSearchProvider',
+      FileEditorSearchProvider as any
+    );
   }
 };
 

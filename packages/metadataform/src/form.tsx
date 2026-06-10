@@ -45,7 +45,7 @@ export class FormWidget extends ReactWidget {
         uiSchema={this._props.uiSchema}
         liveValidate
         idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
-        onChange={(e) => {
+        onChange={e => {
           this._props.metadataFormWidget.updateMetadata(e.formData || {});
         }}
         compact={true}

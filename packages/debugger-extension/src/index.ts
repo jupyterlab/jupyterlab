@@ -63,7 +63,7 @@ import type { Widget } from '@lumino/widgets';
 import type { DebugProtocol } from '@vscode/debugprotocol';
 
 function notifyCommands(commands: CommandRegistry): void {
-  Object.values(Debugger.CommandIDs).forEach((command) => {
+  Object.values(Debugger.CommandIDs).forEach(command => {
     if (commands.hasCommand(command)) {
       commands.notifyCommandChanged(command);
     }
@@ -402,11 +402,13 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
       });
     } else {
-      notebookTracker.currentChanged.connect((_: any, notebookPanel: NotebookPanel | null) => {
-        if (notebookPanel) {
-          void updateHandlerAndCommands(notebookPanel);
+      notebookTracker.currentChanged.connect(
+        (_: any, notebookPanel: NotebookPanel | null) => {
+          if (notebookPanel) {
+            void updateHandlerAndCommands(notebookPanel);
+          }
         }
-      });
+      );
     }
 
     if (palette) {
@@ -1406,14 +1408,16 @@ const main: JupyterFrontEndPlugin<void> = {
       );
 
       model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
-      model.breakpoints.clicked.connect(async (_, breakpoint: IDebugger.IBreakpoint) => {
-        const path = breakpoint.source?.path;
-        const source = await service.getSource({
-          sourceReference: 0,
-          path
-        });
-        sourceViewer.open(source, breakpoint);
-      });
+      model.breakpoints.clicked.connect(
+        async (_, breakpoint: IDebugger.IBreakpoint) => {
+          const path = breakpoint.source?.path;
+          const source = await service.getSource({
+            sourceReference: 0,
+            path
+          });
+          sourceViewer.open(source, breakpoint);
+        }
+      );
     }
   }
 };
@@ -1507,11 +1511,13 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
 
       // Close console when debugger is terminated
-      service.eventMessage.connect((_, event: IDebugger.ISession.Event): void => {
-        if (labShell && event.event === 'terminated') {
-          debugConsoleWidget?.dispose();
+      service.eventMessage.connect(
+        (_, event: IDebugger.ISession.Event): void => {
+          if (labShell && event.event === 'terminated') {
+            debugConsoleWidget?.dispose();
+          }
         }
-      });
+      );
 
       const notifyCommands = () => {
         app.commands.notifyCommandChanged(CommandIDs.evaluate);

@@ -101,7 +101,8 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
     app.commands.addCommand(CommandIDs.scale, {
       execute: async (args: ReadonlyPartialJSONObject) => {
         const md = await typesetter.mathDocument();
-        const scale = (typeof args['scale'] === 'number' ? args['scale'] : null) || 1.0;
+        const scale =
+          (typeof args['scale'] === 'number' ? args['scale'] : null) || 1.0;
         md.outputJax.options.scale = scale;
         md.rerender();
 

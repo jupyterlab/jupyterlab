@@ -231,8 +231,9 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key) => {
-      (options as any)[key] = settings.composite[key as keyof ITerminal.IOptions];
+    Object.keys(settings.composite).forEach(key => {
+      (options as any)[key] =
+        settings.composite[key as keyof ITerminal.IOptions];
     });
   }
 
@@ -244,8 +245,11 @@ function activate(
     if (!terminal) {
       return;
     }
-    Object.keys(options).forEach((key) => {
-      terminal.setOption(key as keyof ITerminal.IOptions, options[key as keyof ITerminal.IOptions]);
+    Object.keys(options).forEach(key => {
+      terminal.setOption(
+        key as keyof ITerminal.IOptions,
+        options[key as keyof ITerminal.IOptions]
+      );
     });
   }
 

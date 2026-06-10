@@ -13,11 +13,8 @@ import { PathExt } from '@jupyterlab/coreutils';
 import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type {
-  Contents,
-  ServerConnection,
-  ServiceManager
-} from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -322,10 +319,11 @@ export class Context<
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
-      const hasResponse = err && typeof err === 'object' && 'response' in err;
-      if (!hasResponse || (err as any).response?.status !== 404) {
+      const responseError =
+        err instanceof ServerConnection.ResponseError ? err : null;
+      if (responseError?.response.status !== 404) {
         // Dialog rejection (user cancelled)
-        if (!hasResponse) {
+        if (!responseError) {
           return false;
         }
         throw err;
@@ -649,7 +647,8 @@ export class Context<
     } catch (err) {
       // If the save has been canceled by the user, throw the error
       // so that whoever called save() can decide what to do.
-      const name = err && typeof err === 'object' && 'name' in err ? (err as any).name : undefined;
+      const name =
+        err && typeof err === 'object' && 'name' in err ? err.name : undefined;
       if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
         throw err;
       }
@@ -958,10 +957,7 @@ or load the version on disk (revert)?`,
       // throw the error so that whoever called save()
       // can decide what to do.
       const message = err instanceof Error ? err.message : String(err);
-      if (
-        message === 'Cancel' ||
-        message === 'Modal is already displayed'
-      ) {
+      if (message === 'Cancel' || message === 'Modal is already displayed') {
         throw err;
       }
 

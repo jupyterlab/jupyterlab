@@ -48,7 +48,10 @@ function isCodeMirrorElement(element: Element | null): boolean {
 /**
  * Subclass IntersectionObserver to allow suspending callbacks when notebook is scrolling.
  */
-(window.IntersectionObserver as any) = class extends window.IntersectionObserver {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window.IntersectionObserver as any) = class extends (
+  window.IntersectionObserver
+) {
   constructor(
     protected callback: IntersectionObserverCallback,
     options: IntersectionObserverInit

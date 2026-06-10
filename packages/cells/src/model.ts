@@ -480,10 +480,7 @@ export abstract class AttachmentsCellModel extends CellModel {
   /**
    * Handle a change to the code cell value.
    */
-  private _onSharedModelChanged(
-    slot: ISharedCell,
-    change: CellChange
-  ): void {
+  private _onSharedModelChanged(slot: ISharedCell, change: CellChange): void {
     if (change.attachmentsChange) {
       const cell = this.sharedModel as ISharedAttachmentsCell;
       globalModelDBMutex(() =>
@@ -802,7 +799,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           break;
         }
         case 'set': {
-          const newValues = event.newValues.map((output: any) => output.toJSON());
+          const newValues = event.newValues.map((output: any) =>
+            output.toJSON()
+          );
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,

@@ -100,7 +100,8 @@ async function setToolbarItems(
         })
         .concat([(schema[TOOLBAR_KEY] ?? {})[factoryName] ?? []])
         .reduceRight(
-          (acc, val) => SettingRegistry.reconcileToolbarItems(acc, val, true) ?? [],
+          (acc, val) =>
+            SettingRegistry.reconcileToolbarItems(acc, val, true) ?? [],
           [] as ISettingRegistry.IToolbarItem[]
         );
 
@@ -428,7 +429,8 @@ export function setToolbar(
               name => item.name === name
             );
             if (existingIndex >= 0) {
-              (Array.from(toolbar_.children())[existingIndex] as any).parent = null;
+              (Array.from(toolbar_.children())[existingIndex] as any).parent =
+                null;
             }
 
             toolbar_.insertItem(

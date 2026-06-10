@@ -572,7 +572,10 @@ export class NotebookToCModel extends TableOfContentsModel<
 /**
  * Table of content model factory for Notebook files.
  */
-export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel, INotebookHeading> {
+export class NotebookToCFactory extends TableOfContentsFactory<
+  NotebookPanel,
+  INotebookHeading
+> {
   /**
    * Constructor
    *
@@ -746,7 +749,9 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel, IN
       ).then(() => undefined);
     };
 
-    const onHeadingsChanged = (model: TableOfContents.IModel<INotebookHeading>) => {
+    const onHeadingsChanged = (
+      model: TableOfContents.IModel<INotebookHeading>
+    ) => {
       if (!this.parser) {
         return;
       }
@@ -784,7 +789,10 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel, IN
       }
     };
     const onCellCollapsed = (_: unknown, cell: Cell<ICellModel>) => {
-      if (model.configuration.syncCollapseState && cell instanceof MarkdownCell) {
+      if (
+        model.configuration.syncCollapseState &&
+        cell instanceof MarkdownCell
+      ) {
         const h = model.getCellHeadings(cell)[0];
         if (h) {
           model.toggleCollapse({
