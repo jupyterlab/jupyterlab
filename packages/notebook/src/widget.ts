@@ -437,24 +437,27 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this.model!.sharedModel.moveCells(from, boundedTo, n);
 
     for (let i = 0; i < n; i++) {
-      const newCell = this.widgets[to + i];
+      const newIndex = from > boundedTo ? boundedTo + i : boundedTo - n + 1 + i;
+      const newCell = this.widgets[newIndex];
       const view = viewModel[i];
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
       }
 
-      if (from > to) {
-        if (this.widgets[to + i].model.type === 'code') {
-          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+      if (from > boundedTo) {
+        if (this.widgets[boundedTo + i].model.type === 'code') {
+          (this.widgets[boundedTo + i].model as CodeCellModel).isDirty =
+            dirtyState[i];
         }
       } else {
-        if (this.widgets[to + i - n + 1].model.type === 'code') {
-          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+        if (this.widgets[boundedTo + i - n + 1].model.type === 'code') {
+          (this.widgets[boundedTo + i - n + 1].model as CodeCellModel).isDirty =
             dirtyState[i];
         }
       }
     }
+    this._refreshCollapsedHeadingVisibility();
   }
 
   /**
@@ -902,6 +905,35 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       .catch(error => {
         console.warn('Failed to resolve headings: ', error);
       });
+  }
+
+  /**
+   * Recompute hidden cells from the current collapsed heading structure.
+   */
+  private _refreshCollapsedHeadingVisibility(): void {
+    for (const cell of this.widgets) {
+      cell.setHidden(false);
+    }
+
+    for (const cell of this.widgets) {
+      if (!(cell instanceof MarkdownCell) || !cell.headingCollapsed) {
+        continue;
+      }
+      if (cell.headingsResolved) {
+        NotebookActions.setHeadingCollapse(cell, true, this);
+        continue;
+      }
+      cell
+        .getHeadings()
+        .then(() => {
+          if (!cell.isDisposed && cell.headingCollapsed) {
+            this._refreshCollapsedHeadingVisibility();
+          }
+        })
+        .catch(error => {
+          console.warn('Failed to resolve headings: ', error);
+        });
+    }
   }
 
   /**
