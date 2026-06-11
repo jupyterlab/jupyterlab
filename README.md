@@ -88,7 +88,7 @@ If you encounter an error like "Command 'jupyter' not found", please make sure `
 
 ### Prerequisites and Supported Browsers
 
-The latest versions of the fellowing browsers are currently _known to work_:
+The latest versions of the following browsers are currently _known to work_:
 
 - Firefox
 - Chrome
