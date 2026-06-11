@@ -133,7 +133,7 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  export const showPanel = 'filebrowser:show-panel';
+  export const openDirectory = 'filebrowser:open-directory';
 
   export const shutdown = 'filebrowser:shutdown';
 
@@ -141,7 +141,7 @@ namespace CommandIDs {
   export const activateBrowser = 'filebrowser:activate-browser';
 
   /**
-   * @deprecated Use `filebrowser:show-panel` instead.
+   * @deprecated Use `filebrowser:open-directory` instead.
    */
   export const activate = 'filebrowser:activate';
 
@@ -703,7 +703,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           }
         }
       },
-      execute: args => commands.execute(CommandIDs.showPanel, args)
+      execute: args => commands.execute(CommandIDs.openDirectory, args)
     });
 
     // Backward-compatible alias for older command ID.
@@ -718,7 +718,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       execute: args => commands.execute(CommandIDs.activateBrowser, args)
     });
 
-    commands.addCommand(CommandIDs.showPanel, {
+    commands.addCommand(CommandIDs.openDirectory, {
       label: trans.__('Open the file browser for the provided `path`.'),
       describedBy: {
         args: {
@@ -808,7 +808,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     // mode, open file browser.
     void labShell.restored.then(layout => {
       if (layout.fresh && labShell.mode !== 'single-document') {
-        void commands.execute(CommandIDs.showPanel, void 0);
+        void commands.execute(CommandIDs.openDirectory, void 0);
       }
     });
 
@@ -1420,7 +1420,7 @@ function addCommands(
     },
     execute: async args => {
       const path = (args.path as string) || '';
-      const showPanel = !(args?.dontShowBrowser ?? false);
+      const openDirectory = !(args?.dontShowBrowser ?? false);
       try {
         const item = await Private.navigateToPath(
           path,
@@ -1428,7 +1428,7 @@ function addCommands(
           factory,
           translator
         );
-        if (item.type !== 'directory' && showPanel) {
+        if (item.type !== 'directory' && openDirectory) {
           const browserForPath = Private.getBrowserForPath(
             path,
             browser,
@@ -1446,8 +1446,8 @@ function addCommands(
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
-      if (showPanel) {
-        return commands.execute(CommandIDs.showPanel, { path });
+      if (openDirectory) {
+        return commands.execute(CommandIDs.openDirectory, { path });
       }
     }
   });
@@ -2023,7 +2023,7 @@ function addCommands(
         );
         return;
       }
-      await commands.execute(CommandIDs.showPanel);
+      await commands.execute(CommandIDs.openDirectory);
       const targetBrowser = tracker.currentWidget ?? browser;
       targetBrowser.editPath();
     },

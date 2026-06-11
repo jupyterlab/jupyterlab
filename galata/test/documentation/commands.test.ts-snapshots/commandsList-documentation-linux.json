@@ -2759,7 +2759,7 @@
     }
   },
   {
-    "id": "filebrowser:show-panel",
+    "id": "filebrowser:open-directory",
     "label": "Open the file browser for the provided `path`.",
     "caption": "",
     "shortcuts": [],
