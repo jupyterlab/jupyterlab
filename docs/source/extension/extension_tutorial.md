@@ -329,9 +329,9 @@ jlpm build
 ```
 
 :::{note}
-This tutorial uses `jlpm` to install Javascript packages and
+This tutorial uses `jlpm` to install JavaScript packages and
 run build commands, which is JupyterLab's bundled
-version of `yarn`. If you prefer, you can use another Javascript
+version of `yarn`. If you prefer, you can use another JavaScript
 package manager like `npm` or `yarn` itself.
 :::
 
@@ -463,7 +463,7 @@ If your widget is not behaving, compare your code with the reference
 project state at the [01-show-a-panel
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-01-show-a-panel).
 You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all&fromURLToFolder=step-1">Plugin Playground</a>.
-Once you've got everything working properly, git commit your changes and
+Once you have got everything working properly, git commit your changes and
 carry on.
 
 ```bash
@@ -813,7 +813,7 @@ class APODWidget extends Widget {
 }
 ```
 
-You've written all of the code before. All you've done is restructure it
+You have written all of the code before. All you have done is restructure it
 to use instance variables and move the image request to its own
 function.
 
@@ -1048,7 +1048,7 @@ git add src/index.ts
 git commit -m 'Restore panel state'
 ```
 
-Congratulations! You've implemented all of the behaviors laid out at the start
+Congratulations! You have implemented all of the behaviors laid out at the start
 of this tutorial.
 
 (packaging-your-extension)=
@@ -1139,7 +1139,7 @@ check out the documentation: <https://github.com/jupyter-server/jupyter_releaser
 
 ## Learn more
 
-You've completed the tutorial. Nicely done! If you want to keep
+You have completed the tutorial. Nicely done! If you want to keep
 learning, here are some suggestions about what to try next:
 
 - Add the image description that comes in the API response to the panel.

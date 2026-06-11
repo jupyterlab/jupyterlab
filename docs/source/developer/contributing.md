@@ -34,7 +34,7 @@ please assume that no one else is working on it (even if someone previously
 volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
-If you believe you’ve found a security vulnerability in JupyterLab or
+If you believe you have found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
 prefer to encrypt your security reports, you can use [this PGP public
 key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
@@ -178,7 +178,7 @@ related to it will also be closed. If there is additional discussion
 around implementation the issue may be re-opened. Once 30 days have
 passed with no additional discussion, the [lock
 bot](https://github.com/apps/lock) will lock the issue. If additional
-discussion is desired, or if the pull request doesn't fully address the
+discussion is desired, or if the pull request does not fully address the
 locked issue, please open a new issue referencing the locked issue.
 
 New issues are subject to triage. A developer with triage permissions
