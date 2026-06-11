@@ -7,3 +7,5 @@ combining existing core packages with custom packages combined through the
 ![preview](./example.spec.ts-snapshots/example-linux.png)
 
 <figcaption>Pink rectangles mask transient data.</figcaption>
+
+<!-- for testing purpose -->

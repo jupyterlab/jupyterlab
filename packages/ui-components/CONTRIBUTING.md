@@ -115,3 +115,5 @@ The following icons were originally taken from a set of material design icons:
   - originally `ic_tab_24px.svg`
 - `statusbar/kernel.svg`
   - originally `ic_memory_24px.svg`
+
+<!-- for testing purpose -->

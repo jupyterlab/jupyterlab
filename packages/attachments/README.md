@@ -6,3 +6,5 @@ These attachments can be connected to both markdown and raw [cells](../cells).
 Attachments are able to render several different mime types, which are implemented
 in the [rendermime](../rendermime) package. This list of mime types may be extended via
 the simplified mime-extension interface defined in [@jupyterlab/rendermime-interfaces](../rendermime-interfaces).
+
+<!-- for testing purpose -->

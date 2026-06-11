@@ -330,3 +330,5 @@ hand, an icon rendered as an inline svg node is fully exposed to the
 CSS. This allows us to dynamically change icon styling as needed simply by
 modifying our CSS. Most importantly, this allows us to recolor icons
 according to Jupyterlab’s current theme.
+
+<!-- for testing purpose -->

@@ -232,3 +232,5 @@ accessibility work in JupyterLab:
 - [Axe Accessibility Linter](https://marketplace.visualstudio.com/items?itemName=deque-systems.vscode-axe-linter),
   extension for VS Code
 - And of course, screen readers such as JAWS, NVDA, and VoiceOver.
+
+<!-- for testing purpose -->

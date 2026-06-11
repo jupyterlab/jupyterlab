@@ -10,3 +10,5 @@ For example, all of the icons in JupyterLab core can be reused via
 `LabIcon`. You can also use `LabIcon` to create your own custom
 icons that will be able to automatically change color to match the
 current JupyterLab theme.
+
+<!-- for testing purpose -->

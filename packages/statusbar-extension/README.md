@@ -6,3 +6,5 @@ extensions to add custom elements into the statusbar.
 ## Dependencies
 
 - JupyterLab
+
+<!-- for testing purpose -->

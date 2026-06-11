@@ -32,3 +32,5 @@ Language servers setting page.
 :::
 
 Please note that this settings page will be replaced by a more sophisticated editor accessible under _Language Servers_ section when `jupyterlab-lsp` is installed.
+
+<!-- for testing purpose -->

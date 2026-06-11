@@ -2,3 +2,5 @@
 
 A JupyterLab extension for rendering math with
 [MathJax](https://github.com/mathjax/mathjax).
+
+<!-- for testing purpose -->

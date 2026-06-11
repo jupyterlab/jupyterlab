@@ -6,3 +6,5 @@ The result of cell execution is shown in an output area,
 which is implemented in [@jupyterlab/outputarea](../outputarea).
 Markdown and raw cells can have attachments,
 which is implemented in [@jupyterlab/attachments](../attachments).
+
+<!-- for testing purpose -->

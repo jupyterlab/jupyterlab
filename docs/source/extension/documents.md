@@ -160,3 +160,5 @@ The _Document Manager_ handles:
 
 The _File Browser_ uses the _Document Manager_ to open documents and
 manage them.
+
+<!-- for testing purpose -->

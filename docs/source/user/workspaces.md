@@ -110,3 +110,5 @@ void restorer.restore(tracker, {
 ```
 
 Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.
+
+<!-- for testing purpose -->

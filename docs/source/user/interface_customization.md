@@ -466,3 +466,5 @@ If you need to completely disable plugin functionality, consider:
 - Disabling extensions entirely via the Extension Manager
 - Using `page_config.json` to disable specific plugins
 - Using the command line: `jupyter labextension disable package-name:plugin-name`
+
+<!-- for testing purpose -->

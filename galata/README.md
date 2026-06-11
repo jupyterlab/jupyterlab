@@ -703,3 +703,5 @@ Galata framework is named after [Galata Tower](https://en.wikipedia.org/wiki/Gal
 ## Acknowledgment
 
 Development of this project began under [Bloomberg](https://github.com/bloomberg) organization by [Mehmet Bektas](https://github.com/mbektas), then it was transferred to [JupyterLab](https://github.com/jupyterlab) organization. We gratefully acknowledge **Bloomberg** for the generous contribution and supporting open-source software community.
+
+<!-- for testing purpose -->

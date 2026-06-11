@@ -367,3 +367,5 @@ to render the corresponding model, which returns a JavaScript promise.
 The renderer creates a container _lumino widget_ which it hands back
 synchronously to the OutputArea, and then fills the container with the
 rendered _ipywidget_ when the promise resolves.
+
+<!-- for testing purpose -->

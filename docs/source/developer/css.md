@@ -241,3 +241,5 @@ intended to be used for adding context menu items and keyboard shortcuts.
 - `[data-jp-isdir]`: applied to describe whether file browser items are directories
 - `[data-jp-undoer]`: applied to widgets that can undo
 - `[data-type]`: applied to describe the type of element, such as "document-title", "submenu", "inline"
+
+<!-- for testing purpose -->

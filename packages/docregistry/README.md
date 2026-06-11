@@ -7,3 +7,5 @@ Extensions may register new document types with the document registry to allow t
 An example of this may be found in the [@jupyterlab/notebook](../notebook) package.
 
 The document registry is a singleton on the [application](../application).
+
+<!-- for testing purpose -->

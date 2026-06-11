@@ -278,3 +278,5 @@ vegalite R package, or Vegas (Scala/Spark).
 
 A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be
 found [here](https://github.com/jupyterlab/jupyter-renderers).
+
+<!-- for testing purpose -->

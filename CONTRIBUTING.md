@@ -5,3 +5,5 @@ JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at [JupyterLab's contributor documentation](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html)
 on Read the Docs.
+
+<!-- for testing purpose -->

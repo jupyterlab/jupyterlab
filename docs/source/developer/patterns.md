@@ -152,3 +152,5 @@ Buttons in dialogs with a single, dismissal button (e.g., _About JupyterLab_) sh
 
 - Button variant: Cancel (`Dialog.cancelButton()`)
 - Label: `Close`
+
+<!-- for testing purpose -->

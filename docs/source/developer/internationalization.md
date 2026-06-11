@@ -149,3 +149,5 @@ This requires the following manual actions to be executed (in that order):
 5. Acknowledge the grant for the bot
 6. Update the [github action list](https://github.com/jupyterlab/language-packs/blob/814ee5589fd83ceaeb6ecaefa8ad2db741f3a2df/.github/workflows/release_publish.yml#L42)
 7. Update the [conda-forge variant list](https://github.com/conda-forge/jupyterlab-language-packs-feedstock/blob/master/recipe/conda_build_config.yaml)
+
+<!-- for testing purpose -->

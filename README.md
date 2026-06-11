@@ -187,3 +187,5 @@ Anyone is welcome to attend, if they would like to discuss a topic or just liste
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 
 > Notes are archived on [GitHub Jupyter Frontends team compass](https://github.com/jupyterlab/frontends-team-compass/issues).
+
+<!-- for testing purpose -->

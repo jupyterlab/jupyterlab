@@ -282,3 +282,5 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 ## Paste code cells without output
 
 When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+
+<!-- for testing purpose -->

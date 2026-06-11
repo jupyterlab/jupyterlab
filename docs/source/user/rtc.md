@@ -12,3 +12,5 @@ the extension [jupyter_collaboration](https://github.com/jupyterlab/jupyter_coll
 For more information about Real-Time Collaboration in JupyterLab, please check out
 `jupyter_collaboration` documentation
 [here](https://jupyterlab-realtime-collaboration.readthedocs.io).
+
+<!-- for testing purpose -->
