@@ -138,6 +138,11 @@ export class SettingsFormEditor extends React.Component<
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.settings !== this.props.settings) {
+      prevProps.settings.changed.disconnect(this._syncFormDataWithSettings);
+      this.props.settings.changed.connect(this._syncFormDataWithSettings);
+      this._formData = this.props.settings.composite as ReadonlyJSONObject;
+      this._changeId++;
+      this._lastSettledChangeId = this._changeId;
       this.setState(previousState => ({
         formContext: {
           ...previousState.formContext,
@@ -149,29 +154,43 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentWillUnmount(): void {
+    this.props.settings.changed.disconnect(this._syncFormDataWithSettings);
     this._debouncer.dispose();
   }
 
   /**
    * Handler for edits made in the form editor.
    */
-  handleChange(): void {
+  handleChange(formData: ReadonlyJSONObject, changeId: number): void {
+    if (changeId !== this._changeId) {
+      return;
+    }
+
     // Prevent unnecessary save when opening settings that haven't been modified.
     if (
       !this.props.settings.isModified &&
-      this._formData &&
-      this.props.settings.isDefault(this._formData)
+      this.props.settings.isDefault(formData)
     ) {
+      this._lastSettledChangeId = changeId;
       this.props.updateDirtyState(false);
       return;
     }
     this.props.settings
-      .save(JSON.stringify(this._formData, undefined, JSON_INDENTATION))
+      .save(JSON.stringify(formData, undefined, JSON_INDENTATION))
       .then(() => {
+        if (changeId !== this._changeId) {
+          return;
+        }
+        this._lastSettledChangeId = changeId;
+        this._formData = this.props.settings.composite as ReadonlyJSONObject;
         this.props.updateDirtyState(false);
         this.setState({ isModified: this.props.settings.isModified });
       })
       .catch((reason: string) => {
+        if (changeId !== this._changeId) {
+          return;
+        }
+        this._lastSettledChangeId = changeId;
         this.props.updateDirtyState(false);
         const trans = this.props.translator.load('jupyterlab');
         void showErrorMessage(trans.__('Error saving settings.'), reason);
@@ -185,6 +204,8 @@ export class SettingsFormEditor extends React.Component<
    */
   reset = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
+    this._changeId++;
+    this._lastSettledChangeId = this._changeId;
     for (const field in this.props.settings.user) {
       await this.props.settings.remove(field);
     }
@@ -193,6 +214,9 @@ export class SettingsFormEditor extends React.Component<
   };
 
   private _syncFormDataWithSettings = () => {
+    if (this._changeId !== this._lastSettledChangeId) {
+      return;
+    }
     this._formData = this.props.settings.composite as ReadonlyJSONObject;
     this.setState((prevState, props) => ({
       isModified: props.settings.isModified
@@ -264,10 +288,11 @@ export class SettingsFormEditor extends React.Component<
 
     // Convert back to ReadonlyJSONObject for this._formData
     this._formData = updatedFormData as ReadonlyJSONObject;
+    const changeId = ++this._changeId;
 
     if (e.errors.length === 0) {
       this.props.updateDirtyState(true);
-      void this._debouncer.invoke();
+      void this._debouncer.invoke(this._formData, changeId);
     }
     this.props.onSelect(this.props.settings.id);
   };
@@ -350,6 +375,8 @@ export class SettingsFormEditor extends React.Component<
     return filteredFormData as ReadonlyJSONObject;
   }
 
-  private _debouncer: Debouncer<void, any>;
+  private _changeId = 0;
+  private _debouncer: Debouncer<void, unknown, [ReadonlyJSONObject, number]>;
   private _formData: ReadonlyJSONObject;
+  private _lastSettledChangeId = 0;
 }
