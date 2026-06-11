@@ -44,7 +44,6 @@ import {
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
-import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
