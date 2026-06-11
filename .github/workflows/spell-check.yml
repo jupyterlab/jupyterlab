@@ -62,13 +62,13 @@ jobs:
           spell_source="$(mktemp -d)"
           spell_build="$(mktemp -d)"
           changed_files="$(mktemp)"
-          line_map="$(mktemp)"
+          source_map="$(mktemp)"
           codespell_report="$(mktemp)"
           spelling_reports="$(mktemp)"
-          trap 'rm -rf "${spell_source}" "${spell_build}" "${changed_files}" "${line_map}" "${codespell_report}" "${spelling_reports}"' EXIT
+          trap 'rm -rf "${spell_source}" "${spell_build}" "${changed_files}" "${source_map}" "${codespell_report}" "${spelling_reports}"' EXIT
           export SPELL_SOURCE="${spell_source}"
           export CHANGED_FILES="${changed_files}"
-          export LINE_MAP="${line_map}"
+          export SOURCE_MAP="${source_map}"
 
           python - <<'PY'
           import json
@@ -95,8 +95,11 @@ jobs:
           )
 
           changed_files = set()
-          lines = ["# Spelling check", ""]
-          line_map = {}
+          source_map = {}
+          source_dir = Path(os.environ["SPELL_SOURCE"])
+          changed_lines_dir = source_dir / "changed_lines"
+          changed_lines_dir.mkdir()
+          toctree_entries = []
           hunk_re = re.compile(r"@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,\d+)? @@")
           is_text_file = re.compile(r"\.(md|rst|txt)$", re.IGNORECASE).search
           current_path = None
@@ -119,14 +122,15 @@ jobs:
               if line.startswith("+") and not line.startswith("+++"):
                   text = line[1:].strip()
                   if text:
-                      synthetic_lineno = len(lines) + 1
+                      synthetic_name = f"{len(toctree_entries) + 1:06d}.md"
+                      synthetic_path = changed_lines_dir / synthetic_name
                       changed_files.add(current_path)
-                      line_map[str(synthetic_lineno)] = {
+                      source_map[synthetic_name] = {
                           "path": current_path,
                           "line": new_lineno,
                       }
-                      lines.append(f"> {text}")
-                      lines.append("")
+                      synthetic_path.write_text(f"{text}\n", encoding="utf-8")
+                      toctree_entries.append(f"changed_lines/{synthetic_path.stem}")
                   new_lineno += 1
               elif line.startswith("-") or line.startswith("\\"):
                   continue
@@ -136,9 +140,13 @@ jobs:
           Path(os.environ["CHANGED_FILES"]).write_text(
               "".join(f"{path}\n" for path in sorted(changed_files))
           )
-          Path(os.environ["LINE_MAP"]).write_text(json.dumps(line_map), encoding="utf-8")
+          Path(os.environ["SOURCE_MAP"]).write_text(json.dumps(source_map), encoding="utf-8")
           Path(os.environ["SPELL_SOURCE"], "index.md").write_text(
-              "\n".join(lines) + "\n",
+              "# Spelling check\n\n"
+              "```{toctree}\n"
+              ":maxdepth: 1\n\n"
+              + "\n".join(toctree_entries)
+              + "\n```\n",
               encoding="utf-8",
           )
           PY
@@ -152,18 +160,18 @@ jobs:
           printf 'Running spelling checks for changed lines in text files:\n%s\n' "$(cat "${changed_files}")"
 
           map_spelling_output() {
-            python - "${line_map}" "$1" <<'PY'
+            python - "${source_map}" "$1" <<'PY'
           import json
           import re
           import sys
           from pathlib import Path
 
-          line_map = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          source_map = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
           output = Path(sys.argv[2]).read_text(encoding="utf-8")
-          reference_re = re.compile(r"[^:\n]*index\.md:(?P<line>\d+):")
+          reference_re = re.compile(r"(?P<path>[^:\n]+\.md):(?P<line>\d+):")
 
           def replace_reference(match):
-              mapped = line_map.get(match.group("line"))
+              mapped = source_map.get(Path(match.group("path")).name)
               if mapped is None:
                   return match.group(0)
               return f"{mapped['path']}:{mapped['line']}:"
@@ -173,7 +181,7 @@ jobs:
           }
 
           codespell_status=0
-          if ! codespell --ignore-words=.codespellignore "${spell_source}/index.md" > "${codespell_report}" 2>&1; then
+          if ! codespell --ignore-words=.codespellignore "${spell_source}/changed_lines" > "${codespell_report}" 2>&1; then
             codespell_status=1
           fi
           if [ "${codespell_status}" -ne 0 ]; then
@@ -181,7 +189,7 @@ jobs:
             map_spelling_output "${codespell_report}"
           fi
 
-          python -m sphinx -Q -b spelling --keep-going -c docs/source "${spell_source}" "${spell_build}" "${spell_source}/index.md"
+          python -m sphinx -Q -b spelling --keep-going -c docs/source "${spell_source}" "${spell_build}"
 
           find "${spell_build}" -name '*.spelling' -type f -size +0c -print > "${spelling_reports}"
           sphinx_status=0
