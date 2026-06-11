@@ -2449,7 +2449,7 @@
     }
   },
   {
-    "id": "filebrowser:activate-browser",
+    "id": "filebrowser:show-panel",
     "label": "File Browser",
     "caption": "",
     "shortcuts": [

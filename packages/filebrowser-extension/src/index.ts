@@ -138,7 +138,7 @@ namespace CommandIDs {
   export const shutdown = 'filebrowser:shutdown';
 
   // For main browser only.
-  export const activateBrowser = 'filebrowser:activate-browser';
+  export const showPanel = 'filebrowser:show-panel';
 
   /**
    * @deprecated Use `filebrowser:open-directory` instead.
@@ -170,7 +170,7 @@ namespace CommandIDs {
   export const editPath = 'filebrowser:edit-path';
 
   /**
-   * @deprecated Use `filebrowser:activate-browser` instead.
+   * @deprecated Use `filebrowser:show-panel` instead.
    */
   export const toggleMain = 'filebrowser:toggle-main';
 }
@@ -429,7 +429,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
       const binding = app.commands.keyBindings.find(
-        b => b.command === CommandIDs.activateBrowser
+        b => b.command === CommandIDs.showPanel
       );
       if (binding) {
         const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
@@ -676,7 +676,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
-    commands.addCommand(CommandIDs.activateBrowser, {
+    commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('File Browser'),
       describedBy: {
         args: {
@@ -715,7 +715,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: args => commands.execute(CommandIDs.activateBrowser, args)
+      execute: args => commands.execute(CommandIDs.showPanel, args)
     });
 
     commands.addCommand(CommandIDs.openDirectory, {
