@@ -89,12 +89,13 @@ jobs:
           } > "${spell_source}/index.md"
           printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs_raw[@]}"
           python -m sphinx -b spelling --keep-going -c docs/source "${spell_source}" docs/build/spelling "${changed_docs[@]}"
-          mapfile -t spelling_reports < <(find docs/build/spelling -name '*.spelling' -type f)
-          if [ "${#spelling_reports[@]}" -gt 0 ]; then
+          spelling_reports="$(mktemp)"
+          find docs/build/spelling -name '*.spelling' -type f -size +0c -print > "${spelling_reports}"
+          if [ -s "${spelling_reports}" ]; then
             printf 'Spelling errors found:\n'
-            for report in "${spelling_reports[@]}"; do
+            while IFS= read -r report; do
               printf '\n%s\n' "${report}"
               cat "${report}"
-            done
+            done < "${spelling_reports}"
             exit 1
           fi
