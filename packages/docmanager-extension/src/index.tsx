@@ -1512,7 +1512,7 @@ function addLabCommands(
         return;
       }
 
-      // 'show-panel' is needed if this command is selected in the "open tabs" sidebar
+      // 'open-directory' is needed if this command is selected in the "open tabs" sidebar
       await commands.execute('filebrowser:open-directory', {
         path: context.path
       });
