@@ -14,6 +14,7 @@ import {
 import type { INotebookModel } from '@jupyterlab/notebook';
 import {
   Notebook,
+  NotebookActions,
   NotebookModel,
   NotebookPanel,
   StaticNotebook
@@ -32,6 +33,10 @@ import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser
+} from '@jupyterlab/rendermime';
 import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();
@@ -684,6 +689,112 @@ describe('@jupyter/notebook', () => {
     });
 
     describe('#moveCell()', () => {
+      it('should refresh hidden cells after moving a collapsed heading down', async () => {
+        const getMarkdownHeading = (
+          content: string
+        ): { level: number; text: string } | null => {
+          let level = 0;
+          while (
+            level < content.length &&
+            level < 6 &&
+            content[level] === '#'
+          ) {
+            level++;
+          }
+          if (level === 0 || ![' ', '\t'].includes(content[level])) {
+            return null;
+          }
+          return { level, text: content.slice(level).trim() };
+        };
+        const headingParser: IMarkdownParser = {
+          render: async (content: string) => {
+            const heading = getMarkdownHeading(content);
+            if (!heading) {
+              return content;
+            }
+            return `<h${heading.level}>${heading.text}</h${heading.level}>`;
+          },
+          getHeadingTokens: async (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => {
+            return content
+              .split('\n')
+              .map((line, lineNumber) => ({ line: lineNumber, raw: line }))
+              .filter(token => getMarkdownHeading(token.raw) !== null);
+          }
+        };
+        const widget = new LogStaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({ markdownParser: headingParser })
+        });
+        widget.model = new NotebookModel();
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'markdown',
+              source: '# Title',
+              metadata: {}
+            },
+            {
+              cell_type: 'markdown',
+              source: '## First section',
+              metadata: {}
+            },
+            {
+              cell_type: 'code',
+              source: 'first = 1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'second = 2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'markdown',
+              source: '## Second section',
+              metadata: {}
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const firstHeading = widget.widgets[1] as MarkdownCell;
+        await Promise.all(
+          widget.widgets
+            .filter(
+              (cell): cell is MarkdownCell => cell instanceof MarkdownCell
+            )
+            .map(cell => cell.getHeadings())
+        );
+        NotebookActions.setHeadingCollapse(firstHeading, true, widget);
+
+        expect(widget.widgets[2].isHidden).toBe(true);
+        expect(widget.widgets[3].isHidden).toBe(true);
+
+        widget.moveCell(1, 3);
+
+        expect(
+          widget.widgets.map(cell => cell.model.sharedModel.getSource())
+        ).toEqual([
+          '# Title',
+          'first = 1',
+          'second = 2',
+          '## First section',
+          '## Second section'
+        ]);
+        expect(widget.widgets[1].isHidden).toBe(false);
+        expect(widget.widgets[2].isHidden).toBe(false);
+        expect(widget.widgets[3].isHidden).toBe(false);
+        expect((widget.widgets[3] as MarkdownCell).headingCollapsed).toBe(true);
+      });
+
       it('should preserve isDirty state after moving a code cell', () => {
         const widget = createWidget();
         widget.model!.sharedModel.insertCells(0, [
