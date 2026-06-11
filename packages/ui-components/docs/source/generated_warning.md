@@ -10,5 +10,3 @@ Instead, make changes to docs sources in `packages/ui-components/docs`,
 then run "jlpm docs:init" to refresh the built docs
 -->
 ```
-
-<!-- for testing purpose -->

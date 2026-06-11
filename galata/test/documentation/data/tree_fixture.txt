@@ -35,5 +35,3 @@ $ tree . -L 2
 └── tasks.py
 
 6 directories, 27 files
-
-# for testing purpose

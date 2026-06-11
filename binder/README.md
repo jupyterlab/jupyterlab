@@ -30,5 +30,3 @@ observed from a _Terminal_ with the command:
 ```bash
 tail -f .jupyter-server-log.txt
 ```
-
-<!-- for testing purpose -->

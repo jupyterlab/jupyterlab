@@ -855,5 +855,3 @@ Finally, you will need to configure babel with a `babel.config.js` file containi
 ```javascript
 module.exports = require('@jupyterlab/testutils/lib/babel.config');
 ```
-
-<!-- for testing purpose -->

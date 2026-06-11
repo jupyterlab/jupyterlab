@@ -16,5 +16,3 @@ milestone on GitHub for the full list of pull requests and issues closed.
 {%-          endfor -%}
 {%- endif %})
 {%   endfor %}
-
-# for testing purpose

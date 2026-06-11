@@ -1311,5 +1311,3 @@ For full API documentation and examples of how to use
 the new icon support based on `LabIcon` from `@jupyterlab/ui-components`,
 [consult the repository](https://github.com/jupyterlab/jupyterlab/tree/main/packages/ui-components#readme).
 :::
-
-<!-- for testing purpose -->

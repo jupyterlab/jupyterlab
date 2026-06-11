@@ -15,5 +15,3 @@ Javascript('alert("hello world");')
 ## Development
 
 See the [JupyterLab Contributor Documentation](https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md).
-
-<!-- for testing purpose -->

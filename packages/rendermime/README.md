@@ -8,5 +8,3 @@ A simplified interface for adding new mime renderers to the application
 can be found in [@jupyterlab/rendermime-interfaces](../rendermime-interfaces).
 
 The rendermime is a singleton on the [application](../application).
-
-<!-- for testing purpose -->

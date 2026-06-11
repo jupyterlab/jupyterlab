@@ -269,5 +269,3 @@ should prefer the "Testing for Optional Features" approach and target the
 
 For an explanation of JupyterLab's plugin system and JupyterLab's Provider-Consumer pattern (a type of [dependency-injection](https://en.wikipedia.org/wiki/Dependency_injection)
 pattern), read the {ref}`Extension Development document <dependency-injection-basic-info>`.
-
-<!-- for testing purpose -->

@@ -62,5 +62,3 @@ On Mac OS, the `Ctrl` key should be replaced by `Cmd`.
 .. include:: commands_list.md
    :parser: myst_parser.sphinx_
 ```
-
-<!-- for testing purpose -->

@@ -18,5 +18,3 @@
 ```{eval-rst}
 .. include:: _build/labicon.rst
 ```
-
-<!-- for testing purpose -->

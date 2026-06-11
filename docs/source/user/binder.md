@@ -57,5 +57,3 @@ set -eux
 mkdir -p ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
 cp overrides.json ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
 ```
-
-<!-- for testing purpose -->

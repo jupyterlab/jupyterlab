@@ -11,5 +11,3 @@
 ```{eval-rst}
 .. include:: labicon.rst
 ```
-
-<!-- for testing purpose -->

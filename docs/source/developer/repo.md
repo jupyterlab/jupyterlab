@@ -107,5 +107,3 @@ TypeScript sources and exercise their APIs.
 ### Test Utilities: `testutils/`
 
 A small `npm` package which is aids in running the tests in `tests/`.
-
-<!-- for testing purpose -->

@@ -62,5 +62,3 @@ now be shown, for this example in Simplified Chinese.
 :align: center
 :class: jp-screenshot
 ```
-
-<!-- for testing purpose -->

@@ -1196,5 +1196,3 @@ evolves.
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
   omit the type declarations when using a language other than
   TypeScript.
-
-<!-- for testing purpose -->

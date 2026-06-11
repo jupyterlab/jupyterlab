@@ -33,5 +33,3 @@ Users should be able to:
 # Design questions
 
 - Should the launcher show only when there are not tabs/panels open?
-
-<!-- for testing purpose -->

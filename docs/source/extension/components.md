@@ -72,5 +72,3 @@ The filebrowser example has two key source files:
 
 Reviewing the source code of each file will help you see the role that
 each file plays in the stand-alone filebrowser example.
-
-<!-- for testing purpose -->

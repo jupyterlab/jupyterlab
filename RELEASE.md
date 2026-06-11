@@ -487,5 +487,3 @@ new issues show up in the future:
 - Release team missing privileges on packages removed in 4.0: https://github.com/jupyterlab/jupyterlab/issues/15677
 - Issue publishing `4.3.0rc0`: Project size too large on PyPI: https://github.com/jupyterlab/jupyterlab/issues/16857
 - Issue publishing `4.4.0a0`: 403 Client Error: Server failed to authenticate the request: https://github.com/jupyterlab/jupyterlab/issues/16976
-
-<!-- for testing purpose -->

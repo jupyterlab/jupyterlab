@@ -558,5 +558,3 @@ quite long. If you have administrative access and are on Windows 10 or newer
 you can enable long paths by adding a dedicated
 [registry key](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation).
 :::
-
-<!-- for testing purpose -->

@@ -34,5 +34,3 @@ even to fix security issues.
 To help with the transition to JupyterLab 4, JupyterLab maintainers may
 make additional patch releases to JupyterLab 3 to fix critical issues
 until 31 December 2024.
-
-<!-- for testing purpose -->

@@ -100,5 +100,3 @@ Configure how widget communications use subshells via Settings → Advanced Sett
 - `disabled`: No subshells for communications
 - `perCommTarget`: One subshell per communication target (default)
 - `perComm`: One subshell per communication (can create many subshells)
-
-<!-- for testing purpose -->

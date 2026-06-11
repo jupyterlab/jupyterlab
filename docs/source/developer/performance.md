@@ -90,5 +90,3 @@ Each cell widget implements those three attributes:
 The notebook widget has the following helper :
 
 - `scrollToItem` to scroll to a specific cell index. Like for scrolling an element into view, various mode are available.
-
-<!-- for testing purpose -->

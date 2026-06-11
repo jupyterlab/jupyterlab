@@ -81,5 +81,3 @@ Users should be able to:
 # Design questions
 
 - Should there be a keyboard shortcut specific for the notebook, continue using the command palette as the lists of shortcuts, or redesign the command palette functionality?
-
-<!-- for testing purpose -->

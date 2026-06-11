@@ -12,5 +12,3 @@ what kind of mime bundle they are able to render, and a `Widget` with
 a `renderModel` method that renders the mime bundle.
 
 Examples can be found in [@jupyterlab/vega5-extension](../vega5-extension) and [@jupyterlab/pdf-extension](../pdf-extension).
-
-<!-- for testing purpose -->

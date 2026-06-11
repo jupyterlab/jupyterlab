@@ -1505,5 +1505,3 @@ class ExampleDocModel implements DocumentRegistry.IModel {
 ```
 
 For a complete example of a widget factory (although not using a content provider), see the [documents extension example](https://github.com/jupyterlab/extension-examples/tree/main/documents).
-
-<!-- for testing purpose -->

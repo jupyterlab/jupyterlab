@@ -40,5 +40,3 @@ Users should be able to:
 # Design questions
 
 - Should each help topic open in a single global R side panel help tab (current behavior), or should each open a new help tab that can be closed completely?
-
-<!-- for testing purpose -->

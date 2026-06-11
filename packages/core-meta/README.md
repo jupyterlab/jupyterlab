@@ -17,5 +17,3 @@ same version of JupyterLab.
 
 - `core.package.json` — copied from
   `jupyterlab/staging/package.json` of the matching JupyterLab release.
-
-<!-- for testing purpose -->

@@ -635,5 +635,3 @@ Dismissing a notification will remove it from the list of notifications without
 knowing if the user has seen it or not. Therefore it is recommended to not
 dismiss a notification.
 :::
-
-<!-- for testing purpose -->

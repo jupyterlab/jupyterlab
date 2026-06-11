@@ -40,5 +40,3 @@ The following tags are also used but not required: `published`, `summary`, and a
 ## Binder
 
 You will find how to deactivate those features on Binder at {ref}`binder`.
-
-<!-- for testing purpose -->

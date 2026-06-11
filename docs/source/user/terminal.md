@@ -62,5 +62,3 @@ For anyone using a \*nix shell, the default `Ctrl+Shift+C` conflicts with the de
 shortcut for toggling the command palette (`apputils:activate-command-palette`).
 If desired, that shortcut can be changed by editing the keyboard shortcuts in settings.
 Using `Ctrl+Shift+V` for paste works as usual.
-
-<!-- for testing purpose -->

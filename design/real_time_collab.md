@@ -76,5 +76,3 @@ possible without the instructors involvement (other than installing the RTC Jupy
 As the students work collaboratively, the master copies of the files are updated and at the end of the
 project, those master copies are turned in. During the project, students both run code in their
 own private kernels and a shared kernel.
-
-<!-- for testing purpose -->

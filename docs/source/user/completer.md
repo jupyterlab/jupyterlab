@@ -52,5 +52,3 @@ The appearance of the ghost text is customizable. In the Settings Editor, under 
 **Inline Completer** section, enable the **Syntax Highlighting for Ghost Text**
 setting to apply the language's syntax highlighting to suggestions, improving
 readability over the default gray text.
-
-<!-- for testing purpose -->

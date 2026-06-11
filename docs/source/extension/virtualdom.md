@@ -54,5 +54,3 @@ We currently do not have a way of embedding Lumino widgets inside of React compo
 We follow the [React documentation](https://reactjs.org/docs/thinking-in-react.html) and
 ["React & Redux in TypeScript - Static Typing Guide"](https://github.com/piotrwitek/react-redux-typescript-guide#readme)
 for best practices on using React in TypeScript.
-
-<!-- for testing purpose -->

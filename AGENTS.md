@@ -65,5 +65,3 @@ For Lumino patterns (disposables, signals, commands, etc.), see `docs/source/dev
 - Settings schemas: `packages/*/schema/*.json`
 - Jest test helpers: `testutils/` (`@jupyterlab/testutils`)
 - UI test framework: `galata/`
-
-<!-- for testing purpose -->

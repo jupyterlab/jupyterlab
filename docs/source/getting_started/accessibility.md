@@ -165,5 +165,3 @@ Thanks for your patience and understanding.
 - [jupyter-accessibility-repo-issues](https://github.com/jupyter/accessibility/issues/new)
 - [jupyterlab-repo-issues](https://github.com/jupyterlab/jupyterlab/issues/new)
 - [CZI - JupyterLab accessibility grant 2021-23 roadmap](https://jupyter-a11y.netlify.app/roadmap/intro.html).
-
-<!-- for testing purpose -->

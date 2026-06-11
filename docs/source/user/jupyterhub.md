@@ -29,5 +29,3 @@ c.Spawner.default_url = "/lab"
 
 For a fully-configured example of using JupyterLab with JupyterHub, see
 the [jupyterhub-deploy-teaching](https://github.com/jupyterhub/jupyterhub-deploy-teaching) repository.
-
-<!-- for testing purpose -->

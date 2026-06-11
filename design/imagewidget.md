@@ -23,5 +23,3 @@ Users should be able to:
 # Visual design
 
 - Imagewidget menu should follow design guidelines for all menus.
-
-<!-- for testing purpose -->

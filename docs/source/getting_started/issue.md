@@ -74,5 +74,3 @@ To create an issue, collect the following contextual information:
 [Create a new issue](https://github.com/jupyterlab/jupyterlab/issues/new). Include the contextual information from above. Describe how you followed the diagnosis steps above to conclude this was a JupyterLab issue.
 
 Communication in JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
-
-<!-- for testing purpose -->

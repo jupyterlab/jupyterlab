@@ -116,5 +116,3 @@ To change this behavior back to standard use the following command, then log out
 ```bash
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true
 ```
-
-<!-- for testing purpose -->

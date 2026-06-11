@@ -168,5 +168,3 @@ To fix this issue, pass the string directly:
 ```typescript
 trans.__('This translatable string will be found');
 ```
-
-<!-- for testing purpose -->
