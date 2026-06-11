@@ -88,4 +88,13 @@ jobs:
             printf '```\n'
           } > "${spell_source}/index.md"
           printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs_raw[@]}"
-          python -m sphinx -b spelling -W --keep-going -c docs/source "${spell_source}" docs/build/spelling "${changed_docs[@]}"
+          python -m sphinx -b spelling --keep-going -c docs/source "${spell_source}" docs/build/spelling "${changed_docs[@]}"
+          mapfile -t spelling_reports < <(find docs/build/spelling -name '*.spelling' -type f)
+          if [ "${#spelling_reports[@]}" -gt 0 ]; then
+            printf 'Spelling errors found:\n'
+            for report in "${spelling_reports[@]}"; do
+              printf '\n%s\n' "${report}"
+              cat "${report}"
+            done
+            exit 1
+          fi
