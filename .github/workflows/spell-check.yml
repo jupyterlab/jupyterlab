@@ -50,52 +50,150 @@ jobs:
           docs_deps = pyproject["project"]["optional-dependencies"]["docs"]
           subprocess.check_call([sys.executable, "-m", "pip", "install", *docs_deps, "pyenchant"])
           PY
+          python -m pip install codespell==2.4.1
 
-      - name: Run Sphinx spelling builder
+      - name: Run spelling checks
         env:
           JUPYTERLAB_SPELLING_BUILD: '1'
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          mapfile -t changed_docs_raw < <(
-            git diff --name-only --diff-filter=ACMR \
-              "$PR_BASE_SHA...$PR_HEAD_SHA" \
-              | grep -E '^docs/source/.*\.md$' || true
+          spell_source="$(mktemp -d)"
+          spell_build="$(mktemp -d)"
+          changed_files="$(mktemp)"
+          line_map="$(mktemp)"
+          codespell_report="$(mktemp)"
+          spelling_reports="$(mktemp)"
+          trap 'rm -rf "${spell_source}" "${spell_build}" "${changed_files}" "${line_map}" "${codespell_report}" "${spelling_reports}"' EXIT
+          export SPELL_SOURCE="${spell_source}"
+          export CHANGED_FILES="${changed_files}"
+          export LINE_MAP="${line_map}"
+
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          base = os.environ["PR_BASE_SHA"]
+          head = os.environ["PR_HEAD_SHA"]
+          diff = subprocess.check_output(
+              [
+                  "git",
+                  "diff",
+                  "--unified=0",
+                  "--diff-filter=ACMR",
+                  f"{base}...{head}",
+                  "--",
+                  "*.md",
+                  "*.rst",
+                  "*.txt",
+              ],
+              text=True,
           )
-          if [ "${#changed_docs_raw[@]}" -eq 0 ]; then
-            echo "No docs/source markdown files changed; skipping Sphinx spelling builder."
+
+          changed_files = set()
+          lines = ["# Spelling check", ""]
+          line_map = {}
+          hunk_re = re.compile(r"@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,\d+)? @@")
+          is_text_file = re.compile(r"\.(md|rst|txt)$", re.IGNORECASE).search
+          current_path = None
+          new_lineno = None
+          for line in diff.splitlines():
+              if line.startswith("+++ b/"):
+                  current_path = line[6:]
+                  if not is_text_file(current_path):
+                      current_path = None
+                  new_lineno = None
+                  continue
+              if current_path is None:
+                  continue
+              if line.startswith("@@"):
+                  match = hunk_re.search(line)
+                  new_lineno = int(match.group("start")) if match else None
+                  continue
+              if new_lineno is None:
+                  continue
+              if line.startswith("+") and not line.startswith("+++"):
+                  text = line[1:].strip()
+                  if text:
+                      synthetic_lineno = len(lines) + 1
+                      changed_files.add(current_path)
+                      line_map[str(synthetic_lineno)] = {
+                          "path": current_path,
+                          "line": new_lineno,
+                      }
+                      lines.append(f"> {text}")
+                      lines.append("")
+                  new_lineno += 1
+              elif line.startswith("-") or line.startswith("\\"):
+                  continue
+              else:
+                  new_lineno += 1
+
+          Path(os.environ["CHANGED_FILES"]).write_text(
+              "".join(f"{path}\n" for path in sorted(changed_files))
+          )
+          Path(os.environ["LINE_MAP"]).write_text(json.dumps(line_map), encoding="utf-8")
+          Path(os.environ["SPELL_SOURCE"], "index.md").write_text(
+              "\n".join(lines) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          if [ ! -s "${changed_files}" ]; then
+            echo "No added lines in markdown, reStructuredText, or text files; skipping spelling checks."
             exit 0
           fi
-          spell_source="$(mktemp -d)"
-          trap 'rm -rf "${spell_source}"' EXIT
+
           cp docs/source/spelling_wordlist.txt "${spell_source}/spelling_wordlist.txt"
-          changed_docs=()
-          for path in "${changed_docs_raw[@]}"; do
-            rel_path="${path#docs/source/}"
-            target="${spell_source}/${rel_path}"
-            mkdir -p "$(dirname "${target}")"
-            cp "${path}" "${target}"
-            changed_docs+=("${target}")
-          done
-          {
-            printf 'Spelling check\n==============\n\n'
-            printf '```{toctree}\n:maxdepth: 1\n\n'
-            for path in "${changed_docs_raw[@]}"; do
-              rel_path="${path#docs/source/}"
-              printf '%s\n' "${rel_path%.md}"
-            done
-            printf '```\n'
-          } > "${spell_source}/index.md"
-          printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs_raw[@]}"
-          python -m sphinx -Q -b spelling --keep-going -c docs/source "${spell_source}" docs/build/spelling "${changed_docs[@]}"
-          spelling_reports="$(mktemp)"
-          find docs/build/spelling -name '*.spelling' -type f -size +0c -print > "${spelling_reports}"
+          printf 'Running spelling checks for changed lines in text files:\n%s\n' "$(cat "${changed_files}")"
+
+          map_spelling_output() {
+            python - "${line_map}" "$1" <<'PY'
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          line_map = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          output = Path(sys.argv[2]).read_text(encoding="utf-8")
+          reference_re = re.compile(r"[^:\n]*index\.md:(?P<line>\d+):")
+
+          def replace_reference(match):
+              mapped = line_map.get(match.group("line"))
+              if mapped is None:
+                  return match.group(0)
+              return f"{mapped['path']}:{mapped['line']}:"
+
+          print(reference_re.sub(replace_reference, output), end="")
+          PY
+          }
+
+          codespell_status=0
+          if ! codespell --ignore-words=.codespellignore "${spell_source}/index.md" > "${codespell_report}" 2>&1; then
+            codespell_status=1
+          fi
+          if [ "${codespell_status}" -ne 0 ]; then
+            printf 'Codespell errors found in changed lines:\n'
+            map_spelling_output "${codespell_report}"
+          fi
+
+          python -m sphinx -Q -b spelling --keep-going -c docs/source "${spell_source}" "${spell_build}" "${spell_source}/index.md"
+
+          find "${spell_build}" -name '*.spelling' -type f -size +0c -print > "${spelling_reports}"
+          sphinx_status=0
           if [ -s "${spelling_reports}" ]; then
-            printf 'Spelling errors found:\n'
+            sphinx_status=1
+            printf 'Spelling errors found in changed lines:\n'
             while IFS= read -r report; do
-              printf '\n%s\n' "${report}"
-              cat "${report}"
+              printf '\n'
+              map_spelling_output "${report}"
             done < "${spelling_reports}"
+          fi
+
+          if [ "${codespell_status}" -ne 0 ] || [ "${sphinx_status}" -ne 0 ]; then
             exit 1
           fi
