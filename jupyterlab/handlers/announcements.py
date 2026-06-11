@@ -255,9 +255,7 @@ class NewsHandler(APIHandler):
                         link_node = links[0] if len(links) == 1 else None
                     entry_link = link_node.get("href") if link_node is not None else None
 
-                    message = (
-                        "\n".join([entry_title, entry_summary]) if entry_summary else entry_title
-                    )
+                    message = f"{entry_title}\n{entry_summary}" if entry_summary else entry_title
                     modified_at = format_datetime(entry_updated)
                     created_at = format_datetime(entry_published)
                     notification = Notification(

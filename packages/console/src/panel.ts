@@ -73,7 +73,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     const resolver = new RenderMimeRegistry.UrlResolver({
       path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => sessionContext?.session?.kernel?.id
     });
     rendermime = rendermime.clone({ resolver });
 
@@ -307,7 +308,7 @@ export namespace ConsolePanel {
   /**
    * The console renderer token.
    */
-  export const IContentFactory = new Token<IContentFactory>(
+  export const IContentFactory = new Token<ConsolePanel.IContentFactory>(
     '@jupyterlab/console:IContentFactory',
     'A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.'
   );

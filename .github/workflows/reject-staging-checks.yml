@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -33,7 +33,7 @@ jobs:
           # Filter to staging dir and exclude allowed files
           DISALLOWED=$(echo "$CHANGED_FILES" \
             | grep '^jupyterlab/staging/' \
-            | grep -v -E '^jupyterlab/staging/(yarn\.js|\.yarnrc\.yml)$' || true)
+            | grep -v -E '^jupyterlab/staging/\.yarnrc\.yml$' || true)
 
           if [[ -n "$DISALLOWED" ]]; then
             echo "Disallowed changes detected in jupyterlab/staging:" >&2
@@ -48,7 +48,7 @@ jobs:
             echo "$DISALLOWED" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Only \`yarn.js\` and \`.yarnrc.yml\` files are allowed to be modified in this directory." >> $GITHUB_STEP_SUMMARY
+            echo "Only \`.yarnrc.yml\` files are allowed to be modified in this directory." >> $GITHUB_STEP_SUMMARY
 
             exit 1
           else

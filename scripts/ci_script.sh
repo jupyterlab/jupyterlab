@@ -9,7 +9,7 @@ set -o pipefail
 # use a single global cache dir
 export YARN_ENABLE_GLOBAL_CACHE=1
 
-# display verbose output for pkg builds run during `jlpm install`
+# display verbose output for pkg builds run during `jlpm`
 export YARN_ENABLE_INLINE_BUILDS=1
 
 # Helper function to wait for a condition with timeout
@@ -51,12 +51,12 @@ if [[ $GROUP == js* ]]; then
     export PKG="${GROUP#*-}"
     pushd "packages/${PKG}"
 
-    jlpm run build:test; true
+    jlpm build:test; true
 
     export FORCE_COLOR=1
-    CMD="jlpm run test:cov"
+    CMD="jlpm test:cov"
     $CMD || $CMD || $CMD
-    jlpm run clean
+    jlpm clean
 fi
 
 
@@ -72,31 +72,31 @@ fi
 
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
-    jlpm run integrity --force
+    jlpm integrity --force
     # Validate the project
-    jlpm install --immutable  --immutable-cache
+    jlpm --immutable  --immutable-cache
     jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
     # Here we should not be stringent as yarn may clean
     # output of `yarn-berry-deduplicate`
-    jlpm install
+    jlpm
     if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
         git status
         git diff
         exit 1
     fi
     # Run a browser check in dev mode
-    jlpm run build
+    jlpm build
     python -m jupyterlab.browser_check --dev-mode
 fi
 
 
 if [[ $GROUP == lint ]]; then
     # Lint our files.
-    jlpm run prettier:check || (echo 'Please run `jlpm run prettier` locally and push changes' && exit 1)
-    jlpm run eslint:check || (echo 'Please run `jlpm run eslint` locally and push changes' && exit 1)
-    jlpm run eslint:check:typed || (echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
-    jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
-    jlpm run shellcheck || (echo 'Please run `jlpm run shellcheck` locally and push changes' && exit 1)
+    jlpm prettier:check || (echo 'Please run `jlpm prettier` locally and push changes' && exit 1)
+    jlpm eslint:check || (echo 'Please run `jlpm eslint` locally and push changes' && exit 1)
+    jlpm eslint:check:typed || (echo echo 'Please run `jlpm eslint:typed` locally and push changes' && exit 1)
+    jlpm stylelint:check || (echo 'Please run `jlpm stylelint` locally and push changes' && exit 1)
+    jlpm shellcheck || (echo 'Please run `jlpm shellcheck` locally and push changes' && exit 1)
 
     # Python checks
     ruff format .
@@ -110,10 +110,10 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm integrity
 
     # Build the packages individually.
-    jlpm run build:src
+    jlpm build:src
 
     # Make sure we can build for release
-    jlpm run build:dev:prod:release
+    jlpm build:dev:prod:release
 
     # Make sure we have CSS that can be converted with postcss
     jlpm dlx -p postcss -p postcss-cli postcss packages/**/style/*.css --dir /tmp --config scripts/postcss.config.js
@@ -157,7 +157,7 @@ if [[ $GROUP == integrity3 ]]; then
     jlpm bump:js:major console notebook --force
 
     # Make sure that a prepublish would include the proper files.
-    jlpm run prepublish:check
+    jlpm prepublish:check
 fi
 
 
@@ -171,8 +171,8 @@ if [[ $GROUP == release_test ]]; then
     node buildutils/lib/local-repository.js start
     npm whoami
 
-    jlpm run publish:js --yes
-    jlpm run prepare:python-release
+    jlpm publish:js --yes
+    jlpm prepare:python-release
     cat jupyterlab/staging/package.json
 
     ./scripts/release_test.sh
@@ -185,11 +185,11 @@ if [[ $GROUP == examples ]]; then
     jlpm integrity
 
     # Build the examples.
-    jlpm run build:packages
-    jlpm run build:examples
+    jlpm build:packages
+    jlpm build:examples
 
     # Test the examples
-    jlpm run test:examples
+    jlpm test:examples
 fi
 
 
@@ -299,12 +299,12 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension disable -h
 
     # Test cli tools
-    jlpm run get:dependency mocha
-    jlpm run update:dependency mocha
-    jlpm run remove:dependency mocha
-    jlpm run get:dependency @jupyterlab/buildutils
-    jlpm run get:dependency typescript
-    jlpm run get:dependency react-native
+    jlpm get:dependency mocha
+    jlpm update:dependency mocha
+    jlpm remove:dependency mocha
+    jlpm get:dependency @jupyterlab/buildutils
+    jlpm get:dependency typescript
+    jlpm get:dependency react-native
 
     # Use the extension upgrade script
     python -m pip install .[upgrade-extension]
@@ -327,7 +327,7 @@ if [[ $GROUP == usage2 ]]; then
     python -m jupyterlab.browser_check --dev-mode
 
     # Make sure core mode works
-    jlpm run build:core
+    jlpm build:core
     # Make sure we have a final released version of JupyterLab server
     python -m jupyterlab.browser_check --core-mode
 

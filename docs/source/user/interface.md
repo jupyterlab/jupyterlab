@@ -113,24 +113,6 @@ the {ref}`main work area <main-area>`, and the down area from the
 
 JupyterLab extensions can add additional panels to the sidebars.
 
-### Moving sections between panels
-
-Individual accordion sections can be moved between sidebar panels.
-
-1. Right-click the section header (e.g. "OPEN TABS") in the Running Sessions panel.
-2. Choose **Move to File Browser**.
-
-```{image} ../images/sidebar-context-menu.png
-:align: center
-:alt: The Running Sessions sidebar context menu with the “Move to File Browser” option highlighted.
-:class: jp-screenshot
-```
-
-The section appears inside the File Browser, where it can be dragged to reorder
-it above or below the file listing. To move it back, right-click the section
-header and choose **Move back to Running Sessions**. The layout is saved and
-restored on reload.
-
 (main-area)=
 
 ## Main Work Area
