@@ -88,6 +88,7 @@ iframes
 instantiation
 io
 ipywidget
+ipywidgets
 iteratively
 jlpm
 js
@@ -130,6 +131,7 @@ prebuilt
 preprocessor
 programmatically
 proxied
+pycrdt
 pydev
 Pygments
 pypi
