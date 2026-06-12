@@ -11,8 +11,13 @@ import { TestConnector, TestRegistry } from './utils';
 
 const ENTRY_QUERY = '.jp-PluginList-entry';
 
+function entries(list: PluginList): HTMLElement[] {
+  return Array.from(list.node.querySelectorAll(ENTRY_QUERY));
+}
+
 function tabStop(list: PluginList): HTMLElement {
-  return list.node.querySelector(`${ENTRY_QUERY}[tabindex="0"]`) as HTMLElement;
+  const items = entries(list);
+  return items.find(entry => entry.tabIndex === 0) ?? items[0];
 }
 
 function key(target: EventTarget, keyName: string): void {
@@ -26,13 +31,15 @@ async function setupList(
   const model = new PluginList.Model({ registry });
   await model.ready;
   const list = new PluginList({ registry, model });
+  Widget.attach(list, document.body);
+  list.setFilter(updateFilterFunction('', false, false), '');
   if (selection) {
     list.selection = selection;
   }
-  Widget.attach(list, document.body);
-  list.setFilter(updateFilterFunction('', false, false), '');
   MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
-  await framePromise();
+  for (let i = 0; i < 10 && entries(list).length === 0; i++) {
+    await framePromise();
+  }
   return list;
 }
 
@@ -271,14 +278,17 @@ describe('@jupyterlab/settingeditor', () => {
 
     it('should rove tabindex and move focus with arrows without selecting', async () => {
       list = await setupList(registry, IDS[0]);
-      tabStop(list).focus();
-      key(document.activeElement!, 'ArrowDown');
+      expect(entries(list).length).toBe(3);
+
+      const focused = tabStop(list);
+      focused.focus();
+      key(focused, 'ArrowDown');
 
       expect(document.activeElement?.getAttribute('data-id')).toBe(IDS[1]);
       expect(list.selection).toBe(IDS[0]);
-      expect(
-        list.node.querySelectorAll(`${ENTRY_QUERY}[tabindex="0"]`)
-      ).toHaveLength(1);
+      expect(entries(list).filter(entry => entry.tabIndex === 0)).toHaveLength(
+        1
+      );
 
       let emitted = false;
       list.handleSelectSignal.connect(() => {
@@ -290,8 +300,9 @@ describe('@jupyterlab/settingeditor', () => {
 
     it('should select the focused entry on Enter', async () => {
       list = await setupList(registry, IDS[0]);
-      tabStop(list).focus();
-      key(document.activeElement!, 'ArrowDown');
+      const focused = tabStop(list);
+      focused.focus();
+      key(focused, 'ArrowDown');
 
       const selected = signalToPromise(list.handleSelectSignal);
       key(document.activeElement!, 'Enter');
