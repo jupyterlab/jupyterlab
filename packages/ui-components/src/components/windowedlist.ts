@@ -1116,36 +1116,91 @@ export class WindowedList<
 
     this._resetScrollToItem();
 
-    let precomputed = undefined;
     if (!this.viewModel.windowingActive) {
-      const item = this._innerElement.querySelector(
-        `[data-windowed-list-index="${index}"]`
-      );
-      if (!item || !(item instanceof HTMLElement)) {
-        // Note: this can happen when scroll is requested when a cell is getting added
-        console.debug(`Element with index ${index} not found`);
-        return Promise.resolve();
-      }
-      precomputed = {
-        totalSize: this._outerElement.scrollHeight,
-        itemMetadata: {
-          offset: item.offsetTop,
-          size: item.clientHeight
-        },
-        currentOffset: this._outerElement.scrollTop
-      };
+      // The requested item may not be attached to the DOM yet.
+      // Wait for it to be inserted before computing its position.
+      void this._waitForItem(index).then(item => {
+        // A newer scroll request may have superseded this one while waiting.
+        if (this._isScrolling !== deletage) {
+          return;
+        }
+        if (!item) {
+          // Note: this can happen if the item never gets rendered.
+          console.debug(`Element with index ${index} not found`);
+          this._markProgrammaticScrollingDone();
+          return;
+        }
+        this.scrollTo(
+          this.viewModel.getOffsetForIndexAndAlignment(
+            Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
+            align,
+            margin,
+            {
+              totalSize: this._outerElement.scrollHeight,
+              itemMetadata: {
+                offset: item.offsetTop,
+                size: item.clientHeight
+              },
+              currentOffset: this._outerElement.scrollTop
+            },
+            alignPreference
+          )
+        );
+      });
+
+      return deletage.promise;
     }
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
         Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
         align,
         margin,
-        precomputed,
+        undefined,
         alignPreference
       )
     );
 
     return deletage.promise;
+  }
+
+  /**
+   * Wait for the item with the given index to be attached to the DOM.
+   * This resolves with the matching element once it
+   * is inserted, or with `null` if it does not appear within
+   * {@link MAXIMUM_TIME_REMAINING}.
+   *
+   * @param index Item index to wait for
+   */
+  private _waitForItem(index: number): Promise<HTMLElement | null> {
+    const selector = `[data-windowed-list-index="${index}"]`;
+    const existing = this._innerElement.querySelector(selector);
+    if (existing instanceof HTMLElement) {
+      return Promise.resolve(existing);
+    }
+    return new Promise<HTMLElement | null>(resolve => {
+      let timer: number | null = null;
+      const observer = new MutationObserver(() => {
+        const item = this._innerElement.querySelector(selector);
+        if (item instanceof HTMLElement) {
+          observer.disconnect();
+          if (timer !== null) {
+            window.clearTimeout(timer);
+          }
+          resolve(item);
+        }
+      });
+      observer.observe(this._innerElement, {
+        childList: true,
+        subtree: true
+      });
+      // Safety net to avoid leaking the observer if the item never gets
+      // rendered
+      timer = window.setTimeout(() => {
+        observer.disconnect();
+        const item = this._innerElement.querySelector(selector);
+        resolve(item instanceof HTMLElement ? item : null);
+      }, 30000);
+    });
   }
 
   /**

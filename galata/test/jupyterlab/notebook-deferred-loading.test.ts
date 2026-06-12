@@ -62,5 +62,30 @@ for (const mode of windowingModes) {
 
       expect(increased).toBe(true);
     });
+
+    test('should scroll to a cell that is not yet rendered', async ({
+      page
+    }) => {
+      // Ensure the notebook is attached (initial render complete).
+      const firstCell = await page.notebook.getCellLocator(0);
+      await firstCell!.waitFor({ state: 'visible', timeout: 3000 });
+
+      const lastCellIndex = 199;
+      const lastCell = page.locator(
+        `.jp-Cell[data-windowed-list-index="${lastCellIndex}"]`
+      );
+
+      // Request a scroll to the last cell while it is (very likely) still a
+      // placeholder being rendered progressively during idle time.
+      await page.evaluate(async index => {
+        const panel = window.jupyterapp.shell.currentWidget as any;
+        const notebook = panel.content;
+        const cell = notebook.widgets[index];
+        await notebook.scrollToCell(cell);
+      }, lastCellIndex);
+
+      // The last cell should eventually be scrolled into the viewport.
+      await expect(lastCell).toBeInViewport({ timeout: 30000 });
+    });
   });
 }
