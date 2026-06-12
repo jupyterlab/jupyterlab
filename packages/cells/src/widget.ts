@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Compartment } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
 
 import { placeholder as editorPlaceholder, EditorView } from '@codemirror/view';
@@ -2488,7 +2487,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     this.removeClass(RENDERED_CLASS);
     if (!this.placeholder && !this.isDisposed) {
       this.inputArea!.showEditor();
-      this._updateEditorPlaceholder();
       // if this is going to be a heading, place the cursor accordingly
       let numHashAtStart = (this.model.sharedModel
         .getSource()
@@ -2514,13 +2512,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     const base = super.getEditorOptions() ?? {};
     base.extensions = [
       ...(base.extensions ?? []),
-      this._placeholderCompartment.of([]),
-      EditorView.updateListener.of(update => {
-        this._placeholderEditorView = update.view;
-        if (update.focusChanged || update.docChanged || update.selectionSet) {
-          this._updateEditorPlaceholder(update.view);
-        }
-      })
+      editorPlaceholder(this._editModePlaceholder)
     ];
     return base;
   }
@@ -2590,35 +2582,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return Promise.resolve();
   }
 
-  private _updateEditorPlaceholder(view?: EditorView): void {
-    if (this.placeholder || this.isDisposed) {
-      return;
-    }
-    const editorView = view ?? this._placeholderEditorView;
-    if (!editorView) {
-      return;
-    }
-    const placeholderText = this._shouldShowEditModePlaceholder(editorView)
-      ? this._editModePlaceholder
-      : null;
-    if (placeholderText === this._activePlaceholderText) {
-      return;
-    }
-    this._activePlaceholderText = placeholderText;
-    editorView.dispatch({
-      effects: this._placeholderCompartment.reconfigure(
-        placeholderText === null ? [] : editorPlaceholder(placeholderText)
-      )
-    });
-  }
-
-  /**
-   * Whether the markdown help placeholder should be shown in the editor.
-   */
-  private _shouldShowEditModePlaceholder(view: EditorView): boolean {
-    return !this._rendered && view.hasFocus;
-  }
-
   /**
    * Clone the cell, using the same model.
    */
@@ -2651,9 +2614,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
-  private _placeholderCompartment = new Compartment();
-  private _placeholderEditorView: EditorView | null = null;
-  private _activePlaceholderText: string | null = null;
   private _editModePlaceholder: string;
 }
 

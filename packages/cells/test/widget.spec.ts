@@ -1114,7 +1114,7 @@ describe('cells/widget', () => {
         );
       });
 
-      it('should not show a placeholder in command mode', async () => {
+      it('should leave the markdown help placeholder unfocused in command mode', async () => {
         const model = new MarkdownCellModel();
         const widget = new MarkdownCell({
           model,
@@ -1127,8 +1127,12 @@ describe('cells/widget', () => {
         widget.rendered = false;
         await signalToPromise(widget.renderedChanged);
         await framePromise();
+        const editor = widget.node.querySelector('.cm-editor');
         const placeholder = widget.node.querySelector('.cm-placeholder');
-        expect(placeholder).toBeNull();
+        expect(editor?.classList.contains('cm-focused')).toBe(false);
+        expect(placeholder?.textContent).toBe(
+          'You can use Markdown and LaTeX: $ α^2 $'
+        );
       });
     });
 
