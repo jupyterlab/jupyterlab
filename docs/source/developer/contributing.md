@@ -878,7 +878,7 @@ Documentation is written in Markdown. To ensure that the Read the Docs page buil
 need to install the documentation dependencies with `pip`:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e . --group docs
 ```
 
 To test the docs run:

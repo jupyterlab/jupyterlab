@@ -6,6 +6,9 @@ build:
     python: latest
     nodejs: latest
   jobs:
+    install:
+     - pip install --upgrade pip
+     - pip install --group 'docs' --group 'builder'
     post_install:
       # this should have already run, but show some errors/warnings more cleanly
       - jlpm
@@ -16,10 +19,3 @@ build:
 
 sphinx:
   configuration: docs/source/conf.py
-
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs

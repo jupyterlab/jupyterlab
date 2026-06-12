@@ -40,16 +40,7 @@ jobs:
       - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
-          python - <<'PY'
-          import subprocess
-          import sys
-          import tomllib
-          from pathlib import Path
-
-          pyproject = tomllib.loads(Path("pyproject.toml").read_text())
-          docs_deps = pyproject["project"]["optional-dependencies"]["docs"]
-          subprocess.check_call([sys.executable, "-m", "pip", "install", *docs_deps, "pyenchant"])
-          PY
+          python -m pip install --group docs
 
       - name: Run Sphinx spelling builder
         env:
