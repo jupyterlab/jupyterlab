@@ -110,6 +110,7 @@ export async function startSession(
     method: 'POST',
     body: JSON.stringify(options)
   };
+
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
     const err = await ServerConnection.ResponseError.create(response);
@@ -129,6 +130,7 @@ export async function updateSession(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
   const url = getSessionUrl(settings.baseUrl, model.id);
+
   const init = {
     method: 'PATCH',
     body: JSON.stringify(model)
