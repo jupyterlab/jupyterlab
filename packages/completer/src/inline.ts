@@ -577,20 +577,20 @@ export class InlineCompleter extends Widget {
   private _clearHoverTimeout: number | null = null;
   private _current: number = 0;
   private _editor: CodeEditor.IEditor | null | undefined = null;
-  private _ghostManager: GhostTextManager;
+  private _ghostManager!: GhostTextManager;
   private _lastItem: CompletionHandler.IInlineItem | null = null;
-  private _maxLines: number;
-  private _minLines: number;
+  private _maxLines!: number;
+  private _minLines!: number;
   private _model: InlineCompleter.IModel | null = null;
   private _providerWidget = new Widget();
   private _showShortcuts = InlineCompleter.defaultSettings.showShortcuts;
   private _showWidget = InlineCompleter.defaultSettings.showWidget;
   private _suggestionsCounter = new Widget();
-  private _trans: TranslationBundle;
+  private _trans!: TranslationBundle;
   private _toolbar = new Toolbar<Widget>();
-  private _progressBar: HTMLElement;
-  private _reserveSpaceForLongest: boolean;
-  private _suppressIfTabCompleterActive: boolean;
+  private _progressBar!: HTMLElement;
+  private _reserveSpaceForLongest!: boolean;
+  private _suppressIfTabCompleterActive!: boolean;
 }
 
 /**
@@ -862,6 +862,6 @@ export namespace InlineCompleter {
     private _isDisposed = false;
     private _completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null =
       null;
-    private _cursor: CodeEditor.IPosition;
+    private _cursor!: CodeEditor.IPosition;
   }
 }

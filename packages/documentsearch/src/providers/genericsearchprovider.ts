@@ -434,8 +434,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     this._stateChanged.emit();
   }
 
-  private _query: RegExp | null;
-  private _currentMatchIndex: number;
+  private _query!: RegExp | null;
+  private _currentMatchIndex!: number;
   private _matches: IHTMLSearchMatch[] = [];
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)

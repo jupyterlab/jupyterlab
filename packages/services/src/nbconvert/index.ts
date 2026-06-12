@@ -33,7 +33,7 @@ export class NbConvertManager implements NbConvert.IManager {
   /**
    * The server settings used to make API requests.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Fetch and cache the export formats from the expensive nbconvert handler.
@@ -116,7 +116,8 @@ export class NbConvertManager implements NbConvert.IManager {
     window?.open(url, '_blank', 'noopener');
   }
 
-  protected _requestingFormats: PromiseDelegate<NbConvert.IExportFormats> | null;
+  protected _requestingFormats: PromiseDelegate<NbConvert.IExportFormats> | null =
+    null;
   protected _exportFormats: NbConvert.IExportFormats | null = null;
 }
 

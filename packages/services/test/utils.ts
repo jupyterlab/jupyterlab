@@ -265,7 +265,7 @@ class SocketTester implements IService {
   private _ready: PromiseDelegate<void> | null = null;
   private _server: WebSocket.Server | null = null;
   private _onConnect: ((ws: WebSocket) => void) | null = null;
-  protected settings: ServerConnection.ISettings;
+  protected settings!: ServerConnection.ISettings;
 }
 
 export class FakeKernelManager extends KernelManager {
@@ -709,7 +709,7 @@ export class SessionTester extends SocketTester {
   }
 
   readonly serverSessionId = UUID.uuid4();
-  private _session: Session.ISessionConnection;
+  private _session!: Session.ISessionConnection;
   private _onMessage: ((msg: KernelMessage.IMessage) => void) | null = null;
   private _sessionManager: Session.IManager | null = null;
 }

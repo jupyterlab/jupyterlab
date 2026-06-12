@@ -391,8 +391,8 @@ export class PluginListModel extends VDomModel {
           ];
         })
       );
-    } catch (reason) {
-      this.statusError = reason.toString();
+    } catch (reason: unknown) {
+      this.statusError = String(reason);
     } finally {
       this._isLoading = false;
       this.stateChanged.emit();
@@ -442,8 +442,10 @@ export class PluginListModel extends VDomModel {
         init,
         settings
       );
-    } catch (error) {
-      throw new ServerConnection.NetworkError(error);
+    } catch (error: unknown) {
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();
@@ -464,7 +466,7 @@ export class PluginListModel extends VDomModel {
   }
 
   private _trackerDataChanged: Signal<PluginListModel, void> = new Signal(this);
-  private _available: Map<string, IEntry>;
+  private _available!: Map<string, IEntry>;
   private _isLoading = false;
   private _pendingActions: Promise<any>[] = [];
   private _serverSettings: ServerConnection.ISettings;

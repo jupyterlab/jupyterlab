@@ -632,7 +632,7 @@ export class DirListing extends Widget {
       await state.remove(key);
     }
   }
-  private _stateColumnsKey: string;
+  private _stateColumnsKey!: string;
 
   /**
    * Save the current column sizes and sort state to the state database.
@@ -2536,10 +2536,10 @@ export class DirListing extends Widget {
   private async _delete(paths: string[]): Promise<void> {
     await Promise.all(
       paths.map(path =>
-        this._model.manager.deleteFile(path).catch(err => {
+        this._model.manager.deleteFile(path).catch((err: unknown) => {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Delete Failed'),
-            err
+            err as string | Dialog.IError
           );
         })
       )
@@ -2621,7 +2621,7 @@ export class DirListing extends Widget {
         if (error !== 'File not renamed') {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Rename Error'),
-            error
+            error as string | Dialog.IError
           );
         }
         finalFilename = original;

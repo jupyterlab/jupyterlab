@@ -885,7 +885,7 @@ describe('rendermime/factories', () => {
           const clonedNode = originalCloneNode.apply(this, args);
 
           // Annotate as a node created by cloning.
-          clonedNode.wasCloned = true;
+          (clonedNode as Node & { wasCloned?: boolean }).wasCloned = true;
 
           return clonedNode;
         };

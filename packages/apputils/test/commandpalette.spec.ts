@@ -6,7 +6,6 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import type { JSONObject } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
 import { CommandPalette, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -90,7 +89,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#execute()', () => {
       it('should hide and reset when a command is executed', () => {
         commands.addCommand('mock-command', {
-          execute: (args: JSONObject) => {
+          execute: args => {
             return args;
           }
         });

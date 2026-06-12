@@ -21,6 +21,7 @@ import {
   showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CommandToolbarButton,
@@ -364,7 +365,7 @@ function activateJSON(
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
-        editorFactory: options => {
+        editorFactory: (options: CodeEditor.IOptions) => {
           const cmEditor = editorFactory({
             ...options,
             extensions: [
@@ -571,8 +572,8 @@ function activateJSON(
           widget.title.icon = fileUploadIcon;
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);
-        } catch (error) {
-          await showErrorMessage('Failed to import settings', error);
+        } catch (error: unknown) {
+          await showErrorMessage('Failed to import settings', error as any);
         }
       });
 

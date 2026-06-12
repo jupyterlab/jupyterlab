@@ -168,7 +168,7 @@ export abstract class VDomRenderer<
     super.dispose();
   }
 
-  private _model: T;
+  private _model!: T;
   private _modelChanged = new Signal<this, void>(this);
 }
 

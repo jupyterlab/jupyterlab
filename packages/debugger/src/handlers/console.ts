@@ -85,7 +85,7 @@ export class ConsoleHandler implements IDisposable {
   /**
    * Whether the handler is disposed.
    */
-  isDisposed: boolean;
+  isDisposed = false;
 
   /**
    * Dispose the handler.

@@ -235,7 +235,7 @@ export class LanguageServerManager implements ILanguageServerManager {
   /**
    * Version number of sever session.
    */
-  protected version: number;
+  protected version!: number;
 
   /**
    * Check if input language option maths the language server spec.

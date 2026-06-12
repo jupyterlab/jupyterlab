@@ -426,8 +426,8 @@ export class ListModel extends VDomModel {
         refresh: force ? 1 : 0
       });
       this._installed = extensions.sort(Private.installedComparator);
-    } catch (reason) {
-      this.installedError = reason.toString();
+    } catch (reason: unknown) {
+      this.installedError = String(reason);
     } finally {
       this._isLoadingInstalledExtensions = false;
       this.stateChanged.emit();
@@ -472,8 +472,8 @@ export class ListModel extends VDomModel {
       this._lastSearchResult = extensions.filter(
         pkg => !installedNames.includes(pkg.name)
       );
-    } catch (reason) {
-      this.searchError = reason.toString();
+    } catch (reason: unknown) {
+      this.searchError = String(reason);
     } finally {
       this._isSearching = false;
       this.stateChanged.emit();
@@ -690,8 +690,10 @@ namespace Private {
         init,
         settings
       );
-    } catch (error) {
-      throw new ServerConnection.NetworkError(error);
+    } catch (error: unknown) {
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();

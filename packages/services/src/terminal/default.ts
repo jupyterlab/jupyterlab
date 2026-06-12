@@ -63,7 +63,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   /**
    * The server settings for the session.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the session is disposed.
@@ -315,7 +315,9 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     });
   };
 
-  private _onWSClose = (evt: CloseEvent) => {
+  private _onWSClose = (event: Event) => {
+    // Also used as the `onerror` handler, which receives a plain `Event`.
+    const evt = event as CloseEvent;
     console.warn(`Terminal websocket closed: ${evt.code}`);
 
     if (this.isDisposed) {

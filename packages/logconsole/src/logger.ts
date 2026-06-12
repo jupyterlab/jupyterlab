@@ -173,7 +173,7 @@ export class LoggerOutputAreaModel
     }
   }
 
-  private _maxLength: number;
+  private _maxLength!: number;
 }
 
 export namespace LoggerOutputAreaModel {

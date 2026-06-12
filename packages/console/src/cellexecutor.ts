@@ -19,7 +19,7 @@ export async function runCell({
   onCellExecuted,
   sessionContext
 }: IConsoleCellExecutor.IRunCellOptions): Promise<boolean> {
-  const onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
+  const onSuccess = (value: KernelMessage.IExecuteReplyMsg | void) => {
     if (value && value.content.status === 'ok') {
       const content = value.content;
       // Use deprecated payloads for backwards compatibility.
@@ -61,12 +61,13 @@ export async function runCell({
     return false;
   };
 
-  const onFailure = (reason: any) => {
+  const onFailure = (reason: unknown) => {
+    const message = reason instanceof Error ? reason.message : String(reason);
     onCellExecuted({
       cell,
       executionDate: new Date(),
       success: false,
-      error: new Error(reason)
+      error: new Error(message)
     });
     return false;
   };

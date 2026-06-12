@@ -746,9 +746,9 @@ export class GalataInpage implements IGalataInpage {
     return this._app;
   }
 
-  private _app: JupyterFrontEnd;
+  private _app!: JupyterFrontEnd;
   protected listeners = new WeakMap<
     (arg: unknown) => void,
-    (sender: unknown, args: unknown) => void
+    (sender: any, args: any) => void
   >();
 }

@@ -45,13 +45,13 @@
     "jest-environment-jsdom": "^29.3.0",
     "jest-junit": "^15.0.0",
     "simulate-event": "~1.4.0",
-    "ts-jest": "^29.1.0"
+    "ts-jest": "^29.4.5"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
-    "@types/node": "^20.14.8",
+    "@types/node": "^20.19.37",
     "rimraf": "~5.0.5",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "peerDependencies": {
     "typescript": ">=4.3"

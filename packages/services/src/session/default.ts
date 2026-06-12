@@ -165,7 +165,7 @@ export class SessionConnection implements Session.ISessionConnection {
   /**
    * The server settings of the session.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the session has been disposed.

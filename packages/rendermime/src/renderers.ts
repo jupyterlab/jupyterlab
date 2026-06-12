@@ -624,7 +624,11 @@ class WebLinker implements ILinker {
  */
 class PathLinker implements ILinker {
   regex = ILinker.pathLinkRegex;
-  createAnchor(path: string, label: string, locators: Record<string, string>) {
+  createAnchor(
+    path: string,
+    label: string,
+    locators: Record<string, string> = {}
+  ) {
     const anchor = document.createElement('a');
 
     // Store the path in dataset.

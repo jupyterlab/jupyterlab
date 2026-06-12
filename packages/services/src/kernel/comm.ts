@@ -419,16 +419,16 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     };
   } = {};
 
-  private _commsOverSubshells: CommsOverSubshells;
+  private _commsOverSubshells!: CommsOverSubshells;
   private _subshellId: string | null = null;
 
   private _target = '';
   private _id = '';
   private _kernel: Kernel.IKernelConnection;
-  private _onClose: (
-    msg: KernelMessage.ICommCloseMsg<'iopub'>
+  private _onClose!: (
+    msg: KernelMessage.ICommCloseMsg<'iopub' | 'shell'>
   ) => void | PromiseLike<void>;
-  private _onMsg: (msg: KernelMessage.ICommMsgMsg) => void | PromiseLike<void>;
+  private _onMsg!: (msg: KernelMessage.ICommMsgMsg) => void | PromiseLike<void>;
 }
 
 /**

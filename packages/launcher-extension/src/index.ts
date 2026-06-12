@@ -17,7 +17,7 @@ import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
 import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import type { JSONObject } from '@lumino/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 /**
@@ -87,7 +87,7 @@ function activate(
         }
       }
     },
-    execute: (args: JSONObject) => {
+    execute: (args: ReadonlyPartialJSONObject) => {
       const cwd = (args['cwd'] as string) ?? defaultBrowser?.model.path ?? '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {

@@ -322,9 +322,16 @@ export class Context<
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
-      if (!err.response || err.response.status !== 404) {
+      // Check structurally rather than with instanceof, as the error may
+      // come from a different copy of @jupyterlab/services.
+      const hasResponse =
+        typeof err === 'object' && err !== null && 'response' in err;
+      const status = hasResponse
+        ? (err.response as Response | undefined)?.status
+        : undefined;
+      if (status !== 404) {
         // Dialog rejection (user cancelled)
-        if (!err.response) {
+        if (!hasResponse) {
           return false;
         }
         throw err;
@@ -648,7 +655,8 @@ export class Context<
     } catch (err) {
       // If the save has been canceled by the user, throw the error
       // so that whoever called save() can decide what to do.
-      const { name } = err;
+      const name =
+        err && typeof err === 'object' && 'name' in err ? err.name : undefined;
       if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
         throw err;
       }
@@ -657,7 +665,7 @@ export class Context<
       const localPath = this._manager.contents.localPath(this._path);
       const file = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', file)
       );
 
@@ -956,10 +964,8 @@ or load the version on disk (revert)?`,
       // If the save has been canceled by the user,
       // throw the error so that whoever called save()
       // can decide what to do.
-      if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
-      ) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message === 'Cancel' || message === 'Modal is already displayed') {
         throw err;
       }
 
@@ -967,7 +973,7 @@ or load the version on disk (revert)?`,
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', name)
       );
 

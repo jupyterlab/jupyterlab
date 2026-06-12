@@ -9,6 +9,7 @@ import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils'
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import type { IFileSystemDirectoryEntryOptions } from '@jupyterlab/testing';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import type { Message } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -30,8 +31,8 @@ const createOptionsForConstructor: () => DirListing.IOptions = () => ({
 
 class TestDirListing extends DirListing {
   updated = new Signal<this, void>(this);
-  onUpdateRequest(...args: any[]) {
-    super.onUpdateRequest.apply(this, args);
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
     // Allows us to spy on onUpdateRequest.
     this.updated.emit();
   }

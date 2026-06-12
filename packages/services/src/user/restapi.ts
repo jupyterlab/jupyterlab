@@ -32,7 +32,7 @@ export class UserAPIClient implements IUserAPIClient {
   /**
    * The server settings for the client.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Fetch the user data.

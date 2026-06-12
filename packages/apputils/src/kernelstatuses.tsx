@@ -262,7 +262,7 @@ export namespace KernelStatus {
       }
     }
 
-    protected translation: ITranslator;
+    protected translation!: ITranslator;
     private _trans: TranslationBundle;
     private _activityName: string = '';
     private _kernelName: string = '';

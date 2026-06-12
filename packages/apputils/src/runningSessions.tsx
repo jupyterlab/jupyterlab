@@ -1,13 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ServiceManager,
-  Session,
-  SessionManager,
-  Terminal,
-  TerminalManager
-} from '@jupyterlab/services';
+import type { ServiceManager, Session, Terminal } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
@@ -187,7 +181,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
    * Set the number of kernel sessions when the list changes.
    */
   private _onSessionsRunningChanged(
-    manager: SessionManager,
+    manager: Session.IManager,
     sessions: Session.IModel[]
   ): void {
     this.model!.sessions = sessions.length;
@@ -197,7 +191,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
    * Set the number of terminal sessions when the list changes.
    */
   private _onTerminalsRunningChanged(
-    manager: TerminalManager,
+    manager: Terminal.IManager,
     terminals: Terminal.IModel[]
   ): void {
     this.model!.terminals = terminals.length;

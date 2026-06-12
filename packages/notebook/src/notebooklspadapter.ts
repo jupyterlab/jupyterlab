@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import type { Cell, ICellModel } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type {
@@ -176,7 +176,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param change - Changed data
    */
   async onKernelChanged(
-    _session: SessionContext,
+    _session: ISessionContext,
     change: Session.ISessionConnection.IKernelChangedArgs
   ): Promise<void> {
     if (!change.newValue) {
@@ -486,7 +486,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Metadata of the notebook
    */
-  private _languageInfo: ILanguageInfoMetadata;
+  private _languageInfo!: ILanguageInfoMetadata;
 
   private _type: nbformat.CellType = 'code';
 
