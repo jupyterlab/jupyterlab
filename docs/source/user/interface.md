@@ -217,13 +217,34 @@ The browser’s native context menu can be accessed by holding down
 
 As in the classic Notebook, you can navigate the user interface through keyboard
 shortcuts. You can find and customize the current list of keyboard shortcuts by
-selecting the Advanced Settings Editor item in the Settings menu, then selecting
-Keyboard Shortcuts in the Settings tab.
+selecting Settings Editor in the Settings menu, then selecting Keyboard Shortcuts.
+The Keyboard Shortcuts settings editor lets you search for commands, use **Add**
+to assign a shortcut to an existing command, or use the **+** button to create a
+shortcut for another command. For advanced edits, you can also open the JSON
+settings editor and update the Keyboard Shortcuts user preferences directly.
 
 ```{raw} html
 <div class="jp-youtube-video">
    <iframe src="https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </div>
+```
+
+Custom shortcuts are stored in the Keyboard Shortcuts user preferences as a
+list of shortcut definitions. Each definition includes the command identifier,
+the key combination, and a CSS selector that determines when the shortcut is
+active. For example, to create a shortcut for **New Console for Notebook**, add
+an entry for the `notebook:create-console` command:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "notebook:create-console",
+      "keys": ["Accel ."],
+      "selector": ".jp-Notebook:focus"
+    }
+  ]
+}
 ```
 
 To define a custom keyboard shortcut which runs more than one command, add a keyboard shortcut
