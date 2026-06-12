@@ -148,6 +148,7 @@ jobs:
           fetch-depth: 1
           token: ${{ secrets.BOT_USER_PAT }}
           path: repo
+          persist-credentials: false
 
       - name: Download test results
         env:
@@ -234,14 +235,16 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           gh repo fork --default-branch-only
-          git remote add bot "https://@github.com/galata-snapshots-bot/${REPO_NAME}.git"
+          git remote add bot "https://github.com/galata-snapshots-bot/${REPO_NAME}.git"
         working-directory: repo
 
       - name: Push to bot fork
         if: steps.check-changes.outputs.has-changes == 'true'
         env:
+          GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
           BRANCH_NAME: ${{ steps.create-branch.outputs.branch-name }}
         run: |
+          gh auth setup-git
           git push bot "$BRANCH_NAME" --force
         working-directory: repo
 

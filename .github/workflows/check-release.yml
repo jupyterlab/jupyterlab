@@ -8,6 +8,8 @@ on:
   release:
     types: [published]
 
+permissions: read-all
+
 jobs:
 
   check_release:

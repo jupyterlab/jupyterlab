@@ -3,6 +3,8 @@ name: Check internationalization changes
 on:
   pull_request:
 
+permissions: read-all
+
 jobs:
   check_i18n:
     runs-on: ubuntu-latest
