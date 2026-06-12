@@ -31,7 +31,7 @@ e.g. `# Title <a class="jp-toc-ignore"></a>`.
 :::
 
 Automatic section numbering will go through your Notebook and number your sections and
-subsection as designated by your headings. This means that if you've moved one or more big
+subsection as designated by your headings. This means that if you have moved one or more big
 sections around several times, you won't have to go through your document and renumber it,
 as well as all its subsections, yourself.
 
