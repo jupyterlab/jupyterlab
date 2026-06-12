@@ -124,7 +124,7 @@ collapser button on left of each cell:
    <iframe src="https://www.youtube-nocookie.com/embed/WgiX3ZRaTiY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </div>
 ```
-
+Additionally, JupyterLab allows collapsing cells while still displaying the first line of the cell. This helps users quickly identify the content of a cell without expanding it fully, improving readability when working with long notebooks.
 (enable-scrolling)=
 
 Enable scrolling for long outputs by right-clicking on a cell and
