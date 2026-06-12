@@ -36,6 +36,10 @@ test.describe('General', () => {
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
         border-top: none;
+      }
+      .cm-cursor,
+      .cm-dropCursor {
+        visibility: hidden !important;
       }`
     });
 
