@@ -1675,14 +1675,17 @@ export namespace NotebookActions {
         return; // cell was deleted (not moved) — handled via stored future below
       }
       // Cell still present → move undo. Fresh capture protects the future.
-      preCaptured.set(
-        stored.cellId,
-        Private.captureExecution(cell) ?? {
-          ...stored,
-          isDone: () => true,
-          buffered: []
-        }
-      );
+      const fresh = Private.captureExecution(cell) ?? {
+        ...stored,
+        isDone: () => true,
+        buffered: []
+      };
+      // The undo will roll the outputs back to their state at the time of
+      // the move; snapshot the current outputs so anything received since
+      // then can be re-applied after the undo.
+      fresh.outputs = cell.model.outputs.toJSON();
+      fresh.executionCount = cell.model.executionCount;
+      preCaptured.set(stored.cellId, fresh);
     });
 
     // Capture execution context from the stack item being popped.
@@ -2595,6 +2598,16 @@ namespace Private {
     isDone: () => boolean;
     /** IOPub messages that arrived while the future was detached. */
     buffered: KernelMessage.IIOPubMessage[];
+    /**
+     * Snapshot of the cell outputs to restore after an undo.
+     *
+     * The Y.js undo of a move (a delete + insert transaction) resurrects the
+     * cell as it was when the move happened, rolling back any output received
+     * since. Re-applying this snapshot after the undo prevents that loss.
+     */
+    outputs?: nbformat.IOutput[];
+    /** Execution count snapshot matching `outputs`. */
+    executionCount?: nbformat.ExecutionCount;
   }
 
   /**
@@ -2628,13 +2641,30 @@ namespace Private {
    */
   export function restoreExecution(
     notebook: Notebook,
-    { cellId, future, isDone, buffered }: IStoredCellExecution
+    {
+      cellId,
+      future,
+      isDone,
+      buffered,
+      outputs,
+      executionCount
+    }: IStoredCellExecution
   ): void {
     const cell = notebook.widgets.find(w => w.model.id === cellId);
     if (!(cell instanceof CodeCell)) {
       return;
     }
+    if (outputs && !JSONExt.deepEqual(outputs, cell.model.outputs.toJSON())) {
+      // Re-apply the output snapshot taken just before the undo
+      cell.model.outputs.fromJSON(outputs);
+    }
     if (isDone()) {
+      if (
+        executionCount !== undefined &&
+        cell.model.executionCount !== executionCount
+      ) {
+        cell.model.executionCount = executionCount;
+      }
       cell.model.executionState = 'idle';
       return;
     }
