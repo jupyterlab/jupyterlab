@@ -24,6 +24,11 @@ from jupyterlab.labapp import get_app_dir
 here = Path(__file__).parent.resolve()
 TEST_FILE = here / "example.spec.ts"
 REF_SNAPSHOT = Path(TEST_FILE.with_suffix(".ts-snapshots").name) / "example-linux.png"
+PLAYWRIGHT_CONFIG = """\
+module.exports = {
+  reporter: [['json', { outputFile: 'test-results/report.json' }]]
+};
+"""
 
 
 def main():
@@ -87,6 +92,7 @@ async def run_browser(url):
         str(TEST_FILE),
         str(test_target),
     )
+    (target / "playwright.config.js").write_text(PLAYWRIGHT_CONFIG)
     # Copy reference snapshot
     example_dir = Path(sys.argv[-1])
     snapshot = example_dir / REF_SNAPSHOT
@@ -102,10 +108,13 @@ async def run_browser(url):
     # Force creation of the results folder as it may be listed in the filebrowser to avoid
     # snapshots discrepancy
     dst.mkdir(exist_ok=True)
+    if results_target.exists():
+        shutil.rmtree(results_target)
 
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
     current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
+
     try:
         await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
     finally:

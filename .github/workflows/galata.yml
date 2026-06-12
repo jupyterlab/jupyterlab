@@ -64,6 +64,12 @@ jobs:
             shard: 2
             shards: 2
             optional_dependencies: "docs-screenshots"
+          - browser: chromium
+            project: examples
+            suite: examples
+            shard: 1
+            shards: 1
+            group: examples
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -109,6 +115,7 @@ jobs:
 
       - name: Install dependencies
         env:
+          GROUP: ${{ matrix.group || '' }}
           OPTIONAL_DEPENDENCIES: ${{ matrix.optional_dependencies || '' }}
         run: |
           set -ex
@@ -118,12 +125,13 @@ jobs:
         working-directory: core
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        if: ${{ matrix.project != 'documentation' }}
+        if: ${{ matrix.project != 'documentation' && matrix.project != 'examples' }}
         run: |
           uv pip install --system --upgrade --pre "ipykernel<=7.0.0a1"
         working-directory: core
 
       - name: Launch JupyterLab
+        if: ${{ matrix.project != 'examples' }}
         run: |
           set -ex
           cd core/galata
@@ -135,6 +143,7 @@ jobs:
           fi
 
       - name: Install browser
+        if: ${{ matrix.project != 'examples' }}
         run: |
           set -ex
           cd core/galata
@@ -142,19 +151,39 @@ jobs:
           jlpm playwright install ${{ matrix.browser }} --only-shell
 
       - name: Build galata
+        if: ${{ matrix.project != 'examples' }}
         run: |
           set -ex
           cd core/galata
           jlpm build
 
       - name: Wait for JupyterLab
+        if: ${{ matrix.project != 'examples' }}
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
         env:
+          GROUP: ${{ matrix.group || '' }}
           TEST_PATTERN: ${{ github.event.inputs.test_pattern || '' }}
           REPEAT_EACH: ${{ github.event.inputs.repeat_each || 1 }}
         run: |
+          if [[ "${{ matrix.project }}" == "examples" ]]; then
+            cd core
+            set +e
+            bash ./scripts/ci_script.sh
+            TEST_EXIT_CODE=$?
+
+            mkdir -p galata/test-results
+
+            find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
+              TARGET_DIR="galata/test-results/${RESULTS_DIR}"
+              mkdir -p "$TARGET_DIR"
+              cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
+            done
+
+            exit $TEST_EXIT_CODE
+          fi
+
           cd core/galata
           set +e  # we want to move the reports even if we fail
           MAX_REPEAT_EACH=50
@@ -201,7 +230,7 @@ jobs:
           if-no-files-found: ignore  # expected when no tests fail
 
       - name: Upload test report blob
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.project != 'examples' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
@@ -210,7 +239,7 @@ jobs:
           compression-level: 1
 
       - name: Print JupyterLab logs
-        if: always()
+        if: ${{ always() && matrix.project != 'examples' }}
         run: |
           cat /tmp/jupyterlab_server.log
 
