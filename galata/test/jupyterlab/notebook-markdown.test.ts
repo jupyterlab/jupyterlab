@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
@@ -102,6 +103,37 @@ test.describe('Notebook Markdown', () => {
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Render markdown tables with content font size', async ({ page }) => {
+    await page.evaluate(async () => {
+      const settings = (await window.galata.getPlugin(
+        '@jupyterlab/apputils-extension:settings'
+      )) as ISettingRegistry;
+      await settings.set('@jupyterlab/apputils-extension:themes', 'overrides', {
+        'content-font-size1': '24px',
+        'ui-font-size1': '10px'
+      });
+    });
+    await page.waitForFunction(() => {
+      const style = getComputedStyle(document.documentElement);
+      return (
+        style.getPropertyValue('--jp-content-font-size1').trim() === '24px' &&
+        style.getPropertyValue('--jp-ui-font-size1').trim() === '10px'
+      );
+    });
+
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'markdown',
+      '| A | B |\n| --- | --- |\n| Alpha | Beta |'
+    );
+    await page.notebook.runCell(0, true);
+
+    await expect(
+      page.locator('.jp-RenderedMarkdown table td').first()
+    ).toHaveCSS('font-size', '24px');
   });
 });
 
