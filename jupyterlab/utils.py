@@ -10,8 +10,6 @@ class jupyterlab_deprecation(Warning):  # noqa
     silences deprecations by default.
     """
 
-    pass
-
 
 class deprecated:  # noqa
     """Decorator to mark deprecated functions with warning.

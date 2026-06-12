@@ -718,7 +718,7 @@ class TestExtension(AppHandlerTest):
         def _mock_install(self, name, *args, **kwargs):
             assert name in ("mockextension", "mockextension@1.1.0")
             if name == "mockextension@1.1.0":
-                raise Success()
+                raise Success
             return orig_install(self, name, *args, **kwargs)
 
         p1 = patch.object(commands, "_fetch_package_metadata", _mock_metadata)
