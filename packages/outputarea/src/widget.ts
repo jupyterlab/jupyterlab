@@ -333,8 +333,14 @@ export class OutputArea extends Widget {
     future: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
-    >
+    >,
+    displayIdMap?: ReadonlyMap<string, readonly number[]>
   ) {
+    if (displayIdMap) {
+      this._setDisplayIdMap(displayIdMap);
+    } else {
+      this._rebuildDisplayIdMap();
+    }
     this._setFuture(future, false);
   }
 
@@ -453,6 +459,34 @@ export class OutputArea extends Widget {
           indices[i] -= count;
         }
       }
+    });
+  }
+
+  /**
+   * Rebuild display id indices from the output models.
+   */
+  private _rebuildDisplayIdMap(): void {
+    this._displayIdMap.clear();
+    for (let i = 0; i < this.model.length; i++) {
+      const output = this.model.get(i);
+      const displayId = Private.getDisplayId(output.transient);
+      if (displayId && output.type === 'display_data') {
+        const targets = this._displayIdMap.get(displayId) ?? [];
+        targets.push(i);
+        this._displayIdMap.set(displayId, targets);
+      }
+    }
+  }
+
+  /**
+   * Set display id indices from a captured map.
+   */
+  private _setDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): void {
+    this._displayIdMap.clear();
+    displayIdMap.forEach((indices, displayId) => {
+      this._displayIdMap.set(displayId, [...indices]);
     });
   }
 
@@ -766,7 +800,7 @@ export class OutputArea extends Widget {
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
     const transient = ((msg.content as any).transient || {}) as JSONObject;
-    const displayId = transient['display_id'] as string;
+    const displayId = Private.getDisplayId(transient);
     let targets: number[] | undefined;
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
@@ -784,7 +818,7 @@ export class OutputArea extends Widget {
       }
       case 'update_display_data':
         output = { ...msg.content, output_type: 'display_data' };
-        targets = this._displayIdMap.get(displayId);
+        targets = displayId ? this._displayIdMap.get(displayId) : undefined;
         if (targets) {
           for (const index of targets) {
             model.set(index, output);
@@ -1444,6 +1478,16 @@ export namespace Stdin {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Get a display id from transient output data.
+   */
+  export function getDisplayId(
+    transient?: ReadonlyPartialJSONObject
+  ): string | undefined {
+    const displayId = transient?.['display_id'];
+    return typeof displayId === 'string' ? displayId : undefined;
+  }
+
   /**
    * Create the node for an InputWidget.
    */
