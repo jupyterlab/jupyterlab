@@ -1608,7 +1608,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const trans = nullTranslator.load('jupyterlab');
+    const trans = notebook.translator.load('jupyterlab');
     notebook.mode = 'command';
 
     // Capture execution context from the stack item being popped.
@@ -1683,7 +1683,8 @@ export namespace NotebookActions {
                     !Private.replayBufferedOutput(
                       cell,
                       future,
-                      bufferedOutputChanges
+                      bufferedOutputChanges,
+                      storedExecution.displayIdMap
                     )
                   ) {
                     return;
@@ -1709,7 +1710,12 @@ export namespace NotebookActions {
       // Still running - reconnect the future so the cell receives remaining
       // output and stdin requests (e.g. input()), and tracks the idle transition.
       if (
-        !Private.replayBufferedOutput(cell, future, storedExecution.buffered)
+        !Private.replayBufferedOutput(
+          cell,
+          future,
+          storedExecution.buffered,
+          storedExecution.displayIdMap
+        )
       ) {
         return;
       }
@@ -2645,6 +2651,8 @@ namespace Private {
     isDone: () => boolean;
     /** IOPub messages that arrived while the future was detached. */
     buffered: KernelMessage.IIOPubMessage[];
+    /** Display id targets from the output area when execution was detached. */
+    displayIdMap: Map<string, number[]>;
   }
 
   function isOutputChangingIOPubMessage(
@@ -2685,14 +2693,15 @@ namespace Private {
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
     >,
-    buffered: KernelMessage.IIOPubMessage[]
+    buffered: KernelMessage.IIOPubMessage[],
+    displayIdMap?: Map<string, number[]>
   ): boolean {
     const currentFuture = cell.outputArea.future;
     if (currentFuture && currentFuture !== future) {
       return false;
     }
 
-    cell.outputArea.reattachFuture(future);
+    cell.outputArea.reattachFuture(future, displayIdMap);
     // Replay any IOPub messages that arrived while the future was detached.
     // After reattachFuture, future.onIOPub routes to the new output area.
     for (const msg of buffered) {
@@ -2700,6 +2709,25 @@ namespace Private {
     }
     buffered.length = 0;
     return true;
+  }
+
+  /**
+   * Get display id targets from the output models.
+   */
+  function getDisplayIdMap(
+    outputs: ICodeCellModel['outputs']
+  ): Map<string, number[]> {
+    const displayIdMap = new Map<string, number[]>();
+    for (let i = 0; i < outputs.length; i++) {
+      const output = outputs.get(i);
+      const displayId = output.transient?.['display_id'];
+      if (typeof displayId === 'string' && output.type === 'display_data') {
+        const targets = displayIdMap.get(displayId) ?? [];
+        targets.push(i);
+        displayIdMap.set(displayId, targets);
+      }
+    }
+    return displayIdMap;
   }
 
   /**
@@ -2742,6 +2770,7 @@ namespace Private {
       return null;
     }
     const outputs = cell.model.outputs.toJSON();
+    const displayIdMap = getDisplayIdMap(cell.model.outputs);
     let done = false;
     void future.done.finally(() => {
       done = true;
@@ -2755,7 +2784,8 @@ namespace Private {
       outputs,
       future,
       isDone: () => done,
-      buffered
+      buffered,
+      displayIdMap
     };
   }
 
