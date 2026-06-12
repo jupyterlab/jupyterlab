@@ -31,9 +31,12 @@ import { PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   DocumentManagerDialogs,
+  FileWatchController,
+  FileWatcherService,
   IDocumentManager,
   IDocumentManagerDialogs,
   IDocumentWidgetOpener,
+  IFileWatcherService,
   IRecentsManager,
   PathStatus,
   SavingStatus
@@ -601,6 +604,91 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that detects external file changes via OS-level filesystem
+ * notifications and either auto-reloads or notifies the user.
+ */
+const fileWatcherPlugin: JupyterFrontEndPlugin<IFileWatcherService> = {
+  id: '@jupyterlab/docmanager-extension:file-watcher',
+  description:
+    'Detects external file changes via OS-level filesystem notifications.',
+  autoStart: true,
+  provides: IFileWatcherService,
+  requires: [IDocumentManager, IDocumentWidgetOpener, ISettingRegistry],
+  optional: [ITranslator, ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    docManager: IDocumentManager,
+    widgetOpener: IDocumentWidgetOpener,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator | null,
+    labShell: ILabShell | null
+  ): IFileWatcherService => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const service = new FileWatcherService({
+      serverSettings: app.serviceManager.serverSettings
+    });
+
+    // Settings — read up-front so the controller always has a snapshot.
+    let watchEnabled = true;
+    let autoReload = true;
+    void settingRegistry
+      .load(docManagerPluginId)
+      .then(settings => {
+        const applySettings = () => {
+          watchEnabled = settings.get('watchForExternalChanges')
+            .composite as boolean;
+          autoReload = settings.get('externalChangeAutoReload')
+            .composite as boolean;
+        };
+        applySettings();
+        settings.changed.connect(applySettings);
+      })
+      .catch(console.error);
+
+    const controller = new FileWatchController({
+      service,
+      getSettings: () => ({ watchEnabled, autoReload }),
+      notifyDeleted: path => {
+        Notification.warning(trans.__('"%1" was deleted on disk.', path), {
+          autoClose: false
+        });
+      },
+      notifyChanged: (path, reload) => {
+        Notification.info(trans.__('"%1" was changed on disk.', path), {
+          autoClose: 8000,
+          actions: [{ label: trans.__('Reload'), callback: reload }]
+        });
+      }
+    });
+
+    widgetOpener.opened.connect((_, widget) => {
+      const context = docManager.contextForWidget(widget);
+      if (context) {
+        controller.track(context);
+      }
+    });
+
+    // When JupyterLab restores the previous session, widgets are opened
+    // before this plugin activates and the opened signal is missed.
+    // Iterate existing widgets after restore to catch them.
+    void app.restored.then(() => {
+      if (!labShell) {
+        return;
+      }
+      for (const widget of labShell.widgets('main')) {
+        const context = docManager.contextForWidget(widget);
+        if (context) {
+          controller.track(context);
+        }
+      }
+    });
+
+    return service;
+  }
+};
+
+/**
  * A plugin that provides the default dialogs for three document management operations:
  * Rename, Confirm Close, and Save Before Close.
  *
@@ -630,6 +718,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   openBrowserTabPlugin,
   openerPlugin,
   recentsManagerPlugin,
+  fileWatcherPlugin,
   dialogsPlugin
 ];
 export default plugins;

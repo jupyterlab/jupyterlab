@@ -74,6 +74,9 @@ Zulip = "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab"
 Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
+filewatcher = [
+    "watchdog>=3.0.0",
+]
 docs = [
     "sphinx>=1.8,<8.2.0",
     "sphinx-copybutton",
