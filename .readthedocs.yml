@@ -8,7 +8,7 @@ build:
   jobs:
     install:
      - pip install --upgrade pip
-     - pip install --group 'docs'
+     - pip install --group 'docs' --group 'builder'
     post_install:
       # this should have already run, but show some errors/warnings more cleanly
       - jlpm
