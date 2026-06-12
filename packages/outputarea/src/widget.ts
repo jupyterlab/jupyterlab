@@ -556,10 +556,6 @@ export class OutputArea extends Widget {
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
-    // Increase number of outputs to display the result up to the input request.
-    if (this.model.length >= this.maxNumberOutputs) {
-      this.maxNumberOutputs = this.model.length;
-    }
     this._inputRequested.emit(input);
 
     // Get the input node to ensure focus after updating the model upon user reply.

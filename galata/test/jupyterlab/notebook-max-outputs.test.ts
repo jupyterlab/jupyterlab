@@ -34,7 +34,7 @@ for i in range(10):
   );
 });
 
-test("Don't limit cell outputs if input is requested", async ({ page }) => {
+test('Limit cell outputs if input is requested', async ({ page }) => {
   await page.notebook.createNew();
 
   await page.locator(
@@ -49,9 +49,9 @@ input('Your age:')
 
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
-  expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
-    MAX_OUTPUTS
-  );
+  expect(
+    await page.locator('.jp-RenderedMarkdown').count()
+  ).toBeLessThanOrEqual(MAX_OUTPUTS);
 
   await page.keyboard.press('Enter');
 });

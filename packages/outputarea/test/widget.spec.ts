@@ -10,7 +10,7 @@ import {
   SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
 import type { Kernel } from '@jupyterlab/services';
-import { KernelManager } from '@jupyterlab/services';
+import { KernelManager, KernelMessage } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
@@ -29,6 +29,13 @@ const CODE = 'print("hello")';
 
 class LogOutputArea extends OutputArea {
   methods: string[] = [];
+
+  requestInputForTest(
+    msg: KernelMessage.IInputRequestMsg,
+    future: Kernel.IShellFuture
+  ): void {
+    this.onInputRequest(msg, future);
+  }
 
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
@@ -182,6 +189,37 @@ describe('outputarea/widget', () => {
           widget.maxNumberOutputs + 1
         );
         expect(widget.widgets.length).toBeLessThan(model.length);
+      });
+
+      test('should not expand visible outputs when input is requested', () => {
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+        const future = {
+          sendInputReply: jest.fn()
+        } as unknown as Kernel.IShellFuture;
+        const msg = KernelMessage.createMessage({
+          msgType: 'input_request',
+          channel: 'stdin',
+          username: 'test',
+          session: 'test',
+          content: {
+            prompt: 'Your age:',
+            password: false
+          }
+        });
+
+        try {
+          widget.requestInputForTest(msg, future);
+
+          expect(widget.maxNumberOutputs).toEqual(2);
+          expect(widget.widgets.length).toEqual(widget.maxNumberOutputs + 2);
+          expect(widget.node.querySelector('.jp-Stdin')).not.toBeNull();
+        } finally {
+          widget.dispose();
+        }
       });
     });
 
