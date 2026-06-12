@@ -22,6 +22,7 @@ import type {
   TLanguageServerId,
   TServerKeys
 } from './tokens';
+import { getLanguageServerTransport } from './runtime_transport';
 import { expandDottedPaths, sleep, untilReady } from './utils';
 import type { VirtualDocument } from './virtual/document';
 
@@ -370,7 +371,8 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
 
   /**
    * Create a new connection to the language server
-   * @return A promise of the LSP connection
+   *
+   * Returns a promise of the LSP connection.
    */
   async connect(
     options: ISocketConnectionOptions,
@@ -487,7 +489,7 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
   /**
    * Create the LSP connection for requested virtual document.
    *
-   * @return  Return the promise of the LSP connection.
+   * Returns a promise of the LSP connection.
    */
 
   private async _connectSocket(
@@ -725,8 +727,19 @@ namespace Private {
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
     if (!connection) {
-      const { settings } = Private.getLanguageServerManager();
-      const socket = new settings.WebSocket(uris.socket);
+      const serverManager = Private.getLanguageServerManager();
+      const { settings } = serverManager;
+      const transportFactory = getLanguageServerTransport(
+        serverManager,
+        languageServerId
+      );
+      const socket = transportFactory
+        ? transportFactory({
+            languageServerId,
+            socketUrl: uris.socket,
+            settings
+          })
+        : new settings.WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,

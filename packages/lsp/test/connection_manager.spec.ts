@@ -8,7 +8,8 @@ import {
   LanguageServerManager,
   VirtualDocument,
   WidgetLSPAdapterTracker
-} from '@jupyterlab/lsp';
+} from '../src';
+import type { ILanguageServerProvider } from '../src';
 import { LabShell } from '@jupyterlab/application';
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -55,10 +56,12 @@ spy.mockImplementation((status, method, setting) => {
 describe('@jupyterlab/lsp', () => {
   describe('LSPConnection', () => {
     let manager: DocumentConnectionManager;
+    let languageServerManager: LanguageServerManager;
     let document: VirtualDocument;
     beforeEach(() => {
+      languageServerManager = new LanguageServerManager({});
       manager = new DocumentConnectionManager({
-        languageServerManager: new LanguageServerManager({}),
+        languageServerManager,
         adapterTracker: new WidgetLSPAdapterTracker({
           shell: new LabShell()
         })
@@ -114,6 +117,92 @@ describe('@jupyterlab/lsp', () => {
       });
     });
     describe('#connect()', () => {
+      it('should use provider transport when available', async () => {
+        /* eslint-disable camelcase */
+        const runtimeSpec = {
+          argv: [''],
+          display_name: 'pyright',
+          env: {},
+          languages: ['python'],
+          mime_types: ['text/python'],
+          version: 2
+        };
+        const runtimeSpecs = {
+          pyright: runtimeSpec
+        };
+        const runtimeSessions = {
+          pyright: {
+            handler_count: 0,
+            last_handler_message_at: null,
+            last_server_message_at: null,
+            spec: runtimeSpec,
+            status: 'started'
+          }
+        };
+        /* eslint-enable camelcase */
+        const socket = { close: jest.fn() } as any as WebSocket;
+        const transportFactory = jest.fn(
+          (_options: ILanguageServerProvider.ITransportOptions) => socket
+        );
+        const provider: ILanguageServerProvider = {
+          fetch: async () => ({
+            sessions: runtimeSessions as any,
+            specs: runtimeSpecs as any,
+            transport: { pyright: transportFactory }
+          })
+        };
+        const connectSpy = jest
+          .spyOn(LSPConnection.prototype, 'connect')
+          .mockImplementation(function (
+            this: LSPConnection,
+            socket: WebSocket
+          ): void {
+            (this as any).socket = socket;
+            (this as any).connection = { dispose: jest.fn() };
+            (this as any)._isConnected = true;
+            (this as any)._isInitialized = true;
+          });
+
+        const defaultImplementation = spy.getMockImplementation();
+        spy.mockImplementation(() => {
+          return Promise.reject(new Error('offline'));
+        });
+
+        try {
+          languageServerManager.setConfiguration({
+            pyright: { rank: 100 }
+          } as any);
+          languageServerManager.registerProvider(provider);
+          await languageServerManager.fetchSessions();
+          const connection = await manager.connect(
+            {
+              capabilities: {},
+              hasLspSupportedFile: false,
+              language: 'python',
+              virtualDocument: document
+            },
+            0,
+            0
+          );
+
+          expect(transportFactory).toHaveBeenCalledWith(
+            expect.objectContaining({
+              languageServerId: 'pyright',
+              settings: languageServerManager.settings
+            })
+          );
+          expect(transportFactory.mock.calls[0][0].socketUrl).toContain(
+            'lsp/ws/pyright'
+          );
+          expect(connectSpy).toHaveBeenCalledWith(socket);
+          expect(connection).toBeDefined();
+        } finally {
+          manager.disconnect('pyright' as any);
+          connectSpy.mockRestore();
+          spy.mockImplementation(defaultImplementation!);
+        }
+      });
+
       it('should deduplicate concurrent connects for the same URI', async () => {
         const connectPromise = new PromiseDelegate<LSPConnection | undefined>();
         const connection = { isReady: true } as LSPConnection;
