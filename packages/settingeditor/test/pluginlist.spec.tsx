@@ -2,8 +2,39 @@
 // Distributed under the terms of the Modified BSD License.
 import { PluginList } from '../src/pluginlist';
 import { signalToPromise } from '@jupyterlab/coreutils';
+import { framePromise, simulate } from '@jupyterlab/testing';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { updateFilterFunction } from '@jupyterlab/ui-components';
+import { MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 import { TestConnector, TestRegistry } from './utils';
+
+const ENTRY_QUERY = '.jp-PluginList-entry';
+
+function tabStop(list: PluginList): HTMLElement {
+  return list.node.querySelector(`${ENTRY_QUERY}[tabindex="0"]`) as HTMLElement;
+}
+
+function key(target: EventTarget, keyName: string): void {
+  simulate(target, 'keydown', { key: keyName, bubbles: true });
+}
+
+async function setupList(
+  registry: TestRegistry,
+  selection?: string
+): Promise<PluginList> {
+  const model = new PluginList.Model({ registry });
+  await model.ready;
+  const list = new PluginList({ registry, model });
+  if (selection) {
+    list.selection = selection;
+  }
+  Widget.attach(list, document.body);
+  list.setFilter(updateFilterFunction('', false, false), '');
+  MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+  await framePromise();
+  return list;
+}
 
 describe('@jupyterlab/settingeditor', () => {
   describe('PluginList.Model', () => {
@@ -200,6 +231,70 @@ describe('@jupyterlab/settingeditor', () => {
         expect(Object.keys(model.settings)).toHaveLength(1);
         expect(model.settings[id].schema.transformed).toBe(true);
       });
+    });
+  });
+
+  describe('PluginList', () => {
+    let connector: TestConnector;
+    let registry: TestRegistry;
+    let list: PluginList;
+
+    const IDS = ['plugin-alpha', 'plugin-beta', 'plugin-gamma'];
+    const mkSchema = (title: string): ISettingRegistry.ISchema => ({
+      type: 'object',
+      title,
+      properties: { value: { type: 'string', default: 'x' } }
+    });
+
+    beforeAll(() => {
+      connector = new TestConnector();
+    });
+
+    beforeEach(async () => {
+      registry = new TestRegistry({ connector });
+      connector.schemas = {
+        [IDS[0]]: mkSchema('Alpha'),
+        [IDS[1]]: mkSchema('Beta'),
+        [IDS[2]]: mkSchema('Gamma')
+      };
+      await Promise.all(IDS.map(id => registry.load(id)));
+    });
+
+    afterEach(async () => {
+      list?.dispose();
+      if (list?.node.isConnected) {
+        Widget.detach(list);
+      }
+      connector.schemas = {};
+      await connector.clear();
+    });
+
+    it('should rove tabindex and move focus with arrows without selecting', async () => {
+      list = await setupList(registry, IDS[0]);
+      tabStop(list).focus();
+      key(document.activeElement!, 'ArrowDown');
+
+      expect(document.activeElement?.getAttribute('data-id')).toBe(IDS[1]);
+      expect(list.selection).toBe(IDS[0]);
+      expect(list.node.querySelectorAll(`${ENTRY_QUERY}[tabindex="0"]`)).toHaveLength(1);
+
+      let emitted = false;
+      list.handleSelectSignal.connect(() => {
+        emitted = true;
+      });
+      key(document.activeElement!, 'ArrowDown');
+      expect(emitted).toBe(false);
+    });
+
+    it('should select the focused entry on Enter', async () => {
+      list = await setupList(registry, IDS[0]);
+      tabStop(list).focus();
+      key(document.activeElement!, 'ArrowDown');
+
+      const selected = signalToPromise(list.handleSelectSignal);
+      key(document.activeElement!, 'Enter');
+      await expect(selected).resolves.toBe(IDS[1]);
+      expect(list.selection).toBe(IDS[1]);
     });
   });
 });
