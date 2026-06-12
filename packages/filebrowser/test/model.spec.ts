@@ -404,6 +404,95 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#runFileOperations()', () => {
+      it('should emit progress updates as operations complete', async () => {
+        const firstFile = await manager.newUntitled({ type: 'file' });
+        const secondFile = await manager.newUntitled({ type: 'file' });
+        const firstDestination = `${firstFile.path}.moved`;
+        const secondDestination = `${secondFile.path}.moved`;
+
+        const [start, firstUpdate, secondUpdate, finished] = signalToPromises(
+          model.uploadChanged,
+          4
+        );
+
+        const operation = model.runFileOperations([
+          (async () => {
+            await sleep(10);
+            return manager.rename(firstFile.path, firstDestination);
+          })(),
+          manager.rename(secondFile.path, secondDestination)
+        ]);
+
+        const startArgs = (await start)[1];
+        expect(startArgs.name).toBe('start');
+        expect(startArgs.oldValue).toBeNull();
+        expect(startArgs.newValue!.progress).toBe(0);
+
+        const firstUpdateArgs = (await firstUpdate)[1];
+        expect(firstUpdateArgs.name).toBe('update');
+        expect(firstUpdateArgs.oldValue!.path).toBe(startArgs.newValue!.path);
+        expect(firstUpdateArgs.newValue!.path).toBe(startArgs.newValue!.path);
+        expect(firstUpdateArgs.newValue!.progress).toBe(1 / 2);
+
+        const secondUpdateArgs = (await secondUpdate)[1];
+        expect(secondUpdateArgs.name).toBe('update');
+        expect(secondUpdateArgs.oldValue!.path).toBe(startArgs.newValue!.path);
+        expect(secondUpdateArgs.newValue!.path).toBe(startArgs.newValue!.path);
+        expect(secondUpdateArgs.newValue!.progress).toBe(1);
+
+        const finishedArgs = (await finished)[1];
+        expect(finishedArgs.name).toBe('finish');
+        expect(finishedArgs.oldValue!.path).toBe(startArgs.newValue!.path);
+        expect(finishedArgs.oldValue!.progress).toBe(1);
+        expect(finishedArgs.newValue).toBeNull();
+
+        await expect(operation).resolves.toHaveLength(2);
+      });
+
+      it('should emit failure and reject when one operation fails', async () => {
+        const firstFile = await manager.newUntitled({ type: 'file' });
+        const secondFile = await manager.newUntitled({ type: 'file' });
+        const firstDestination = `${firstFile.path}.moved`;
+        const secondDestination = `${secondFile.path}.moved`;
+        const failure = new Error('Operation failed');
+
+        const [start, firstUpdate, secondUpdate, failed] = signalToPromises(
+          model.uploadChanged,
+          4
+        );
+
+        const operation = model.runFileOperations([
+          manager.rename(firstFile.path, firstDestination),
+          (async () => {
+            await sleep(10);
+            await manager.rename(secondFile.path, secondDestination);
+            throw failure;
+          })()
+        ]);
+
+        const startArgs = (await start)[1];
+        expect(startArgs.name).toBe('start');
+        expect(startArgs.newValue!.progress).toBe(0);
+
+        const firstUpdateArgs = (await firstUpdate)[1];
+        expect(firstUpdateArgs.name).toBe('update');
+        expect(firstUpdateArgs.newValue!.progress).toBe(1 / 2);
+
+        const secondUpdateArgs = (await secondUpdate)[1];
+        expect(secondUpdateArgs.name).toBe('update');
+        expect(secondUpdateArgs.newValue!.progress).toBe(1);
+
+        const failedArgs = (await failed)[1];
+        expect(failedArgs.name).toBe('failure');
+        expect(failedArgs.oldValue).toBeNull();
+        expect(failedArgs.newValue!.path).toBe(startArgs.newValue!.path);
+        expect(failedArgs.newValue!.progress).toBe(1);
+
+        await expect(operation).rejects.toBe(failure);
+      });
+    });
+
     describe('#upload()', () => {
       it('should upload a file object', async () => {
         const fname = UUID.uuid4() + '.html';
