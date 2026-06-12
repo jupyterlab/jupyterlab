@@ -276,7 +276,9 @@ describe('@jupyterlab/settingeditor', () => {
 
       expect(document.activeElement?.getAttribute('data-id')).toBe(IDS[1]);
       expect(list.selection).toBe(IDS[0]);
-      expect(list.node.querySelectorAll(`${ENTRY_QUERY}[tabindex="0"]`)).toHaveLength(1);
+      expect(
+        list.node.querySelectorAll(`${ENTRY_QUERY}[tabindex="0"]`)
+      ).toHaveLength(1);
 
       let emitted = false;
       list.handleSelectSignal.connect(() => {
