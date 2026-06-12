@@ -32,6 +32,8 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
+import type { ValidateFunction } from 'ajv';
+import Ajv from 'ajv';
 import type { IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -384,8 +386,9 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
     return { ...this.defaultOptions, ...this._baseConfiguration };
   }
   set baseConfiguration(v: Record<string, any>) {
-    if (!JSONExt.deepEqual(v, this._baseConfiguration)) {
-      this._baseConfiguration = v;
+    const sanitized = this.sanitizeConfig(v);
+    if (!JSONExt.deepEqual(sanitized, this._baseConfiguration)) {
+      this._baseConfiguration = sanitized;
       for (const handler of this.handlers) {
         handler.setBaseOptions(this.baseConfiguration);
       }
@@ -433,7 +436,48 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
       };
       this.defaultOptions[factory.name] =
         this.configurationSchema[factory.name].default;
+      try {
+        this._validators.set(
+          factory.name,
+          this._ajv.compile(this.configurationSchema[factory.name])
+        );
+      } catch (err) {
+        console.warn(
+          `[EditorExtensionRegistry] Failed to compile schema for "${factory.name}":`,
+          err
+        );
+      }
     }
+  }
+
+  /**
+   * Validate a config object against the registered per-key schemas.
+   * Invalid values are replaced by the schema default and a warning is logged.
+   *
+   * Keys without a registered schema pass through unchanged.
+   */
+  protected sanitizeConfig(config: Record<string, any>): Record<string, any> {
+    const sanitized: Record<string, any> = {};
+    for (const [key, value] of Object.entries(config)) {
+      const validate = this._validators.get(key);
+      if (!validate) {
+        sanitized[key] = value;
+        continue;
+      }
+      if (validate(value)) {
+        sanitized[key] = value;
+      } else {
+        const fallback = this.defaultOptions[key];
+        console.warn(
+          `[EditorExtensionRegistry] Invalid value for "${key}": ${JSON.stringify(
+            value
+          )}. Falling back to default ${JSON.stringify(fallback)}.`,
+          validate.errors
+        );
+        sanitized[key] = fallback;
+      }
+    }
+    return sanitized;
   }
 
   /**
@@ -459,7 +503,9 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
 
     const handler = new ExtensionsHandler({
       baseConfiguration: this.baseConfiguration,
-      config: options.config,
+      config: options.config
+        ? this.sanitizeConfig(options.config)
+        : options.config,
       defaultExtensions: configuration
     });
 
@@ -479,7 +525,9 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
   protected defaultOptions: Record<string, any> = {};
   protected handlers = new Set<ExtensionsHandler>();
   protected immutableExtensions = new Set<string>();
+  private _ajv = new Ajv({ strict: false, useDefaults: false });
   private _baseConfiguration: Record<string, any> = {};
+  private _validators = new Map<string, ValidateFunction>();
 }
 
 /**
