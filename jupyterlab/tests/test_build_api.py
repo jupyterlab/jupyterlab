@@ -73,11 +73,11 @@ class TestBuildAPI:
         # up at the end of the test run.
         self.tempdirs = []
 
-        # TODO(@echarles) Move the cleanup in the fixture.
-        @self.addCleanup
-        def cleanup_tempdirs():
-            for d in self.tempdirs:
-                d.cleanup()
+        # Temporary directories are created and cleaned up via a pytest fixture.
+        @pytest.fixture
+        def tempdir():
+            with TemporaryDirectory() as td:
+                yield td
 
     #    @pytest.mark.timeout(timeout=30)
     #    @pytest.mark.gen_test(timeout=30)
