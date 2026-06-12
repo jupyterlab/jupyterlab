@@ -56,6 +56,29 @@ extensions = [
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
+SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
+
+if SPELLING_BUILD_ENABLED:
+    extensions = [ext for ext in extensions if ext != "sphinx.ext.intersphinx"]
+    # Keep spelling runs focused on spelling failures only.
+    suppress_warnings = list(globals().get("suppress_warnings", []))
+    if "myst.xref_missing" not in suppress_warnings:
+        suppress_warnings.append("myst.xref_missing")
+    globals()["suppress_warnings"] = suppress_warnings
+
+if SPELLING_BUILD_ENABLED:
+    enchant_available = False
+    try:
+        __import__("enchant")
+    except Exception:
+        # Skip spelling extension when enchant backend is unavailable.
+        enchant_available = False
+    else:
+        enchant_available = True
+
+    if enchant_available:
+        extensions += ["sphinxcontrib.spelling"]
+
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
 
@@ -106,6 +129,22 @@ gettext_compact = False
 exclude_patterns = [
     "api/media/*.md",
 ]
+
+if "sphinxcontrib.spelling" in extensions:
+    # Sphinx consumes these values dynamically by their module-global names.
+    globals().update(
+        {
+            "spelling_word_list_filename": ["spelling_wordlist.txt"],
+            "spelling_exclude_patterns": [
+                "api/**",
+                "getting_started/changelog.md",
+            ],
+            "spelling_filters": [
+                "spelling_filters.CodeIdentifierFilter",
+            ],
+            "spelling_show_suggestions": True,
+        }
+    )
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -375,7 +414,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 You can now test JupyterLab 4.6.0 Beta · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6-beta">RELEASE NOTES</a>',
+    "announcement": '🚀 You can now test JupyterLab 4.6.0 RC · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6-release-candidate">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -531,6 +570,9 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):
+    if SPELLING_BUILD_ENABLED:
+        return
+
     # Enable Plausible.io stats
     app.add_js_file("https://plausible.io/js/pa-Tem97Eeu4LJFfSRY89aW1.js", loading_method="async")
     app.add_js_file(
@@ -542,9 +584,9 @@ def setup(app):
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
     app.add_js_file("js/plugin_playground_embed.js")
-    # Skip we are dealing with internationalization
+    # Skip expensive API docs build for i18n and spelling-only builders.
     outdir = Path(app.outdir)
-    if outdir.name != "gettext":
+    if outdir.name not in {"gettext", "spelling"}:
         build_api_docs(outdir)
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)

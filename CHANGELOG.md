@@ -4,7 +4,7 @@
 
 # JupyterLab Changelog
 
-## v4.6 (beta)
+## v4.6 (Release Candidate)
 
 JupyterLab 4.6 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
@@ -92,7 +92,7 @@ A new "Date Created" column has been added to the file browser, showing when fil
 src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-date-created.png"
 class="jp-screenshot">
 
-The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/latest/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the edit button at the end of the breadcrumbs, or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
+The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/latest/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the area behind breadcrumbs (highlighted on hover), or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
 
 <img alt="The file browser showing an editable breadcrumb input field with a completion dropdown listing subdirectory names"
 src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-breadcrumbs-editable.png"
@@ -178,6 +178,13 @@ src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/ge
 class="jp-screenshot">
 
 Ghost text is now also shown for all active cursors in a multi-cursor editing session.
+
+### Miscellaneous
+
+- Tab widths are kept frozen while the mouse pointer hovers over them, making it easier to close multiple tabs with the mouse
+- Autocompletion heuristics were improved; the autocompletion (which remains opt-in) should no longer trigger in unexpected scenarios
+- The output scroll overlay collapse icon is now visible regardless of the output size and scroll state
+- The fonts used across components were standardized and fonts specified by themes or overrides are respected in every component of the application
 
 ## v4.5
 
@@ -277,7 +284,7 @@ set in the settings editor.
 
 The “Show Workspace Indicator” command has been added to the command palette
 and the “Send Code to Console” shortcut has been restored. The previous issue
-involving editing shortcuts on Safari loosing focus, has been resolved.
+involving editing shortcuts on Safari losing focus, has been resolved.
 
 ### Settings
 
@@ -778,6 +785,51 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.6.0rc0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0b1...4fd02163056f39ab5600b76df294452d0b289afa))
+
+### Enhancements made
+
+- Use resolvePath API for traceback path resolution [#18876](https://github.com/jupyterlab/jupyterlab/pull/18876) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Add automated spell check for documentation [#18398](https://github.com/jupyterlab/jupyterlab/pull/18398) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@Copilot](https://github.com/Copilot), [@krassowski](https://github.com/krassowski))
+
+### Bugs fixed
+
+- Fix XSS in extension manager's `homepage_url` [#19003](https://github.com/jupyterlab/jupyterlab/pull/19003) ([@Yann-P](https://github.com/Yann-P), [@krassowski](https://github.com/krassowski))
+- Fix too eager autocompletion heuristics [#19000](https://github.com/jupyterlab/jupyterlab/pull/19000) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Fix toolbar popup row clipping in Safari [#18998](https://github.com/jupyterlab/jupyterlab/pull/18998) ([@arun-357](https://github.com/arun-357), [@krassowski](https://github.com/krassowski))
+- Fix `HTMLSelect` dropdown icon misalignment in toolbar popup [#18996](https://github.com/jupyterlab/jupyterlab/pull/18996) ([@arun-357](https://github.com/arun-357), [@claude](https://github.com/claude), [@krassowski](https://github.com/krassowski))
+- Fix hidden cells after moving collapsed headings [#18992](https://github.com/jupyterlab/jupyterlab/pull/18992) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Deduplicate concurrent LSP document connects by URI [#18980](https://github.com/jupyterlab/jupyterlab/pull/18980) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Fix scrolling to heading in ToC, workspace opening and flaky UI tests [#18961](https://github.com/jupyterlab/jupyterlab/pull/18961) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Fix read-only indicator [#18960](https://github.com/jupyterlab/jupyterlab/pull/18960) ([@davidbrochart](https://github.com/davidbrochart), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Workaround flaky test for scrolling on page down in windowed notebook [#19004](https://github.com/jupyterlab/jupyterlab/pull/19004) ([@krassowski](https://github.com/krassowski), [@MUFFANUJ](https://github.com/MUFFANUJ))
+- Some linting improvements from the Scientific Python style guide [#18990](https://github.com/jupyterlab/jupyterlab/pull/18990) ([@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+- Add tests for the readonly indicator [#18982](https://github.com/jupyterlab/jupyterlab/pull/18982) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Clarify TypeScript watch builds in documentation [#18979](https://github.com/jupyterlab/jupyterlab/pull/18979) ([@nightcityblade](https://github.com/nightcityblade), [@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+- Fix typo in contributing docs [#18971](https://github.com/jupyterlab/jupyterlab/pull/18971) ([@TheChyeahhh](https://github.com/TheChyeahhh), [@krassowski](https://github.com/krassowski))
+- Fix typo in LSP documentation [#18970](https://github.com/jupyterlab/jupyterlab/pull/18970) ([@TheChyeahhh](https://github.com/TheChyeahhh), [@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Fix duplicated sentence in `showJumpToRecentExecutionButton` description [#18969](https://github.com/jupyterlab/jupyterlab/pull/18969) ([@TheChyeahhh](https://github.com/TheChyeahhh), [@krassowski](https://github.com/krassowski))
+- Fix typo in a shell test description [#18968](https://github.com/jupyterlab/jupyterlab/pull/18968) ([@TheChyeahhh](https://github.com/TheChyeahhh), [@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-05-28&to=2026-06-10&type=c))
+
+@arun-357 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarun-357+updated%3A2026-05-28..2026-06-10&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-05-28..2026-06-10&type=Issues)) | @claude ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aclaude+updated%3A2026-05-28..2026-06-10&type=Issues)) | @Copilot ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACopilot+updated%3A2026-05-28..2026-06-10&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-05-28..2026-06-10&type=Issues)) | @davidbrochart ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2026-05-28..2026-06-10&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-05-28..2026-06-10&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-05-28..2026-06-10&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-05-28..2026-06-10&type=Issues)) | @nightcityblade ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Anightcityblade+updated%3A2026-05-28..2026-06-10&type=Issues)) | @TheChyeahhh ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ATheChyeahhh+updated%3A2026-05-28..2026-06-10&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-05-28..2026-06-10&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.6.0b1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0b0...c3322018930fc7820a08aae9621389c252671936))
@@ -830,8 +882,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-05-20&to=2026-05-28&type=c))
 
 @AliMahmoudDev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAliMahmoudDev+updated%3A2026-05-20..2026-05-28&type=Issues)) | @arjxn-py ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarjxn-py+updated%3A2026-05-20..2026-05-28&type=Issues)) | @bollwyvl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2026-05-20..2026-05-28&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-05-20..2026-05-28&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-05-20..2026-05-28&type=Issues)) | @davidbrochart ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2026-05-20..2026-05-28&type=Issues)) | @jasongrout ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2026-05-20..2026-05-28&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-05-20..2026-05-28&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-05-20..2026-05-28&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2026-05-20..2026-05-28&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-05-20..2026-05-28&type=Issues)) | @statxc ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Astatxc+updated%3A2026-05-20..2026-05-28&type=Issues)) | @SylvainCorlay ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2026-05-20..2026-05-28&type=Issues)) | @tsharma-dev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atsharma-dev+updated%3A2026-05-20..2026-05-28&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.6.0b0
 
@@ -1129,7 +1179,7 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 - Update to marked 17.0.2 and mermaid 11.12.3 [#18526](https://github.com/jupyterlab/jupyterlab/pull/18526) ([@bollwyvl](https://github.com/bollwyvl), [@krassowski](https://github.com/krassowski))
 - Debugger: delete the thread from the stopped before sending the 'continue' request [#18509](https://github.com/jupyterlab/jupyterlab/pull/18509) ([@brichet](https://github.com/brichet), [@HaudinFlorence](https://github.com/HaudinFlorence), [@krassowski](https://github.com/krassowski))
 - Fix flaky completer tokens test [#18506](https://github.com/jupyterlab/jupyterlab/pull/18506) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
-- Fixe a few issues in config tests [#18496](https://github.com/jupyterlab/jupyterlab/pull/18496) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
+- Fix a few issues in config tests [#18496](https://github.com/jupyterlab/jupyterlab/pull/18496) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
 - Fix more flaky tests [#18495](https://github.com/jupyterlab/jupyterlab/pull/18495) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
 - Fix CodeQL `self` warnings [#18494](https://github.com/jupyterlab/jupyterlab/pull/18494) ([@krassowski](https://github.com/krassowski), [@jasongrout](https://github.com/jasongrout))
 - Fix continued flakiness in 'Search in multiple selected cells' test [#18493](https://github.com/jupyterlab/jupyterlab/pull/18493) ([@jasongrout](https://github.com/jasongrout), [@krassowski](https://github.com/krassowski))
@@ -2815,7 +2865,7 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 - Fix typos [#16832](https://github.com/jupyterlab/jupyterlab/pull/16832) ([@algonell](https://github.com/algonell))
 - Update to the latest Lumino [#16804](https://github.com/jupyterlab/jupyterlab/pull/16804) ([@jtpio](https://github.com/jtpio))
 - Fix typo in the `IPropertyInspectorProvider` plugin description [#16797](https://github.com/jupyterlab/jupyterlab/pull/16797) ([@jtpio](https://github.com/jtpio))
-- Replace link to accessiblity project with a link to accessiblity issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
+- Replace link to accessibility project with a link to accessibility issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
 - Remove Python 2 from documentation [#16771](https://github.com/jupyterlab/jupyterlab/pull/16771) ([@JasonWeill](https://github.com/JasonWeill))
 - Fix compatibility with server-side execution extensions [#16764](https://github.com/jupyterlab/jupyterlab/pull/16764) ([@krassowski](https://github.com/krassowski))
 - Document mandatory steps before running JupyterLab in dev mode [#16761](https://github.com/jupyterlab/jupyterlab/pull/16761) ([@cmarmo](https://github.com/cmarmo))
@@ -6553,7 +6603,7 @@ No merged PRs
 
 - Fix `release_test` [#11390](https://github.com/jupyterlab/jupyterlab/pull/11390) ([@fcollonval](https://github.com/fcollonval))
 - Removed `cat package.json` [#11372](https://github.com/jupyterlab/jupyterlab/pull/11372) ([@ceesu](https://github.com/ceesu))
-- Relax `@playright/test` dependency in Galata [#11371](https://github.com/jupyterlab/jupyterlab/pull/11371) ([@jtpio](https://github.com/jtpio))
+- Relax `@playwright/test` dependency in Galata [#11371](https://github.com/jupyterlab/jupyterlab/pull/11371) ([@jtpio](https://github.com/jtpio))
 
 ### Documentation improvements
 
@@ -7050,7 +7100,7 @@ No merged PRs
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
   with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
-- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
+- The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future versions will enable restoring the previous behaviour of per-cell undo/redo.
 - Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/toc.html).
 - The debugger received many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
@@ -8546,7 +8596,7 @@ We are very excited to add Eric Charles to the core team this month!
 
 ### Bugfixes
 
-- Typo: fix extensino to extension
+- Typo: fix spelling of extension
   ([#8512](https://github.com/jupyterlab/jupyterlab/pull/8512))
 - Close correct tab with close tab
   ([#8529](https://github.com/jupyterlab/jupyterlab/pull/8529))
