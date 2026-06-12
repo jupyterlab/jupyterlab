@@ -1722,6 +1722,19 @@ describe('@jupyterlab/notebook', () => {
           ).toBeUndefined();
         });
       });
+
+      it('should preserve all cell metadata', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        NotebookActions.copy(widget, true);
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeFalsy();
+        });
+      });
     });
 
     describe('#copyToSystemClipboard()', () => {
@@ -1765,6 +1778,21 @@ describe('@jupyterlab/notebook', () => {
           expect(
             ((cell as JSONObject).metadata as JSONObject).deletable
           ).toBeUndefined();
+        });
+      });
+
+      it('should preserve all cell metadata', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        await NotebookActions.copyToSystemClipboard(widget, true);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeFalsy();
         });
       });
     });
