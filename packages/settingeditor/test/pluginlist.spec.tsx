@@ -295,7 +295,8 @@ describe('@jupyterlab/settingeditor', () => {
 
       const selected = signalToPromise(list.handleSelectSignal);
       key(document.activeElement!, 'Enter');
-      await expect(selected).resolves.toBe(IDS[1]);
+      const [, pluginId] = await selected;
+      expect(pluginId).toBe(IDS[1]);
       expect(list.selection).toBe(IDS[1]);
     });
   });
