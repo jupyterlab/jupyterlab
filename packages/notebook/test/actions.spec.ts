@@ -2383,6 +2383,58 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterUndo.model.executionState).toBe('idle');
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
       }, 20000);
+
+      it('should preserve execution state and output after undoing a move of a running cell', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(0.2)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for at least one output to arrive before moving.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.id).toBe(cellId);
+
+        // Wait for another output to arrive while at the moved position.
+        await signalToPromise(cellAfterMove.outputArea.model.changed);
+        const outputAfterMove = cellAfterMove.outputArea.model.get(0).data[
+          STDOUT_TYPE
+        ] as string;
+        expect(outputAfterMove.length).toBeGreaterThan(0);
+
+        // Undo the move.
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo.model.id).toBe(cellId);
+
+        // All outputs accumulated up to the undo must survive it.
+        expect(cellAfterUndo.outputArea.model.length).toBeGreaterThan(0);
+        const output = cellAfterUndo.outputArea.model.get(0);
+        expect(output.data[STDOUT_TYPE]).toBe(outputAfterMove);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for execution to complete; the final output must be intact.
+        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          finalOutput
+        );
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 10000);
     });
 
     describe('#redo()', () => {
