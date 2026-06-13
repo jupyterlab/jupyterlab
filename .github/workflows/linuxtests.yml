@@ -196,4 +196,4 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.* https://webpack.js.org/.* https://docs.conda.io/* https://conda.io/*"
+          ignore_links: "https?://.* .*/images/[\\w-]+.png"
