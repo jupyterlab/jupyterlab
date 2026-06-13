@@ -663,6 +663,33 @@
     }
   },
   {
+    "id": "apputils:move-section-back",
+    "label": "Move back",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "apputils:move-section-to",
+    "label": "Move to ",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "targetId": {
+          "type": "string"
+        },
+        "targetLabel": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
     "id": "apputils:notify",
     "label": "Emit a notification",
     "caption": "Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
@@ -4081,6 +4108,16 @@
     }
   },
   {
+    "id": "notebook:copy-selected-text",
+    "label": "Copy Selected Text",
+    "caption": "Copy selected text from the active cell or output area",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:copy-to-clipboard",
     "label": "Copy Output to Clipboard",
     "caption": "",
@@ -4193,6 +4230,16 @@
           "description": "Whether to activate the notebook after execution"
         }
       }
+    }
+  },
+  {
+    "id": "notebook:cut-selected-text",
+    "label": "Cut Selected Text",
+    "caption": "Cut selected text from the active cell or output area",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -4682,6 +4729,16 @@
     }
   },
   {
+    "id": "notebook:paste-text",
+    "label": "Paste Text",
+    "caption": "Paste text from the clipboard into the active cell editor",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:reconnect-to-kernel",
     "label": "Reconnect to Kernel",
     "caption": "",
@@ -4905,8 +4962,28 @@
     }
   },
   {
+    "id": "notebook:select-last-modified-cell",
+    "label": "Select Last Modified Cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:select-last-run-cell",
     "label": "Select current running or last run cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "notebook:select-next-modified-cell",
+    "label": "Select Next Modified Cell",
     "caption": "",
     "shortcuts": [],
     "args": {

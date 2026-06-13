@@ -512,7 +512,13 @@ export class Dialog<T> extends Widget {
       body instanceof Widget &&
       typeof body.getValue === 'function'
     ) {
-      value = body.getValue();
+      try {
+        value = body.getValue();
+      } catch (err) {
+        this.dispose();
+        promise.reject(err);
+        return;
+      }
     }
     this.dispose();
     promise.resolve({
