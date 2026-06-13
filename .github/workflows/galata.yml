@@ -64,6 +64,11 @@ jobs:
             shard: 2
             shards: 2
             optional_dependencies: "docs-screenshots"
+          - browser: chromium
+            project: csp
+            suite: csp
+            shard: 1
+            shards: 1
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -124,6 +129,7 @@ jobs:
         working-directory: core
 
       - name: Launch JupyterLab
+        if: ${{ matrix.project != 'csp' }}
         run: |
           set -ex
           cd core/galata
@@ -148,6 +154,7 @@ jobs:
           jlpm build
 
       - name: Wait for JupyterLab
+        if: ${{ matrix.project != 'csp' }}
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
@@ -175,7 +182,11 @@ jobs:
             TEST_ARGS+=(--repeat-each "${REPEAT_EACH}")
           fi
 
-          jlpm test "${TEST_ARGS[@]}"
+          if [[ "${{ matrix.project }}" == "csp" ]]; then
+            jlpm test:csp "${TEST_ARGS[@]}"
+          else
+            jlpm test "${TEST_ARGS[@]}"
+          fi
           TEST_EXIT_CODE=$?
           mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
@@ -210,7 +221,7 @@ jobs:
           compression-level: 1
 
       - name: Print JupyterLab logs
-        if: always()
+        if: ${{ always() && matrix.project != 'csp' }}
         run: |
           cat /tmp/jupyterlab_server.log
 

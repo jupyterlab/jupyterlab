@@ -37,6 +37,7 @@
     "test:base:update": "playwright test --project galata jupyterlab --update-snapshots",
     "test:benchmark": "jlpm test -c playwright-benchmark.config.js",
     "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm test -c playwright-benchmark.config.js --update-snapshots",
+    "test:csp": "playwright test -c playwright-csp.config.js",
     "test:debug": "PWDEBUG=1 playwright test",
     "test:doc": "jlpm test --project documentation",
     "test:doc:update": "jlpm test --project documentation --update-snapshots",
