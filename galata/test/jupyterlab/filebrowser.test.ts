@@ -78,6 +78,7 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
 
   // Multi-select using Shift (deterministic selection)
   await file1Item.click();
+  await expect(file1Item).toHaveClass(/jp-mod-selected/);
   await page.keyboard.down('Shift');
   await file3Item.click();
   await page.keyboard.up('Shift');
@@ -167,12 +168,29 @@ test('Bulk rename should be blocked for different base names', async ({
 
   // Multi-select
   await file1Item.click();
+  await expect(file1Item).toHaveClass(/jp-mod-selected/);
   await page.keyboard.down('Shift');
   await file2Item.click();
   await page.keyboard.up('Shift');
 
+  // Wait for selection state to update - verify items are selected
+  await page.waitForFunction(() => {
+    const selected = document.querySelectorAll(
+      '.jp-DirListing-item.jp-mod-selected'
+    );
+    return selected.length === 2;
+  });
+
   // Open context menu
   await file1Item.click({ button: 'right' });
+
+  // Wait for context menu to appear
+  await page.waitForFunction(
+    () => {
+      return document.querySelector('.lm-Menu') !== null;
+    },
+    { timeout: 5000 }
+  );
 
   const menu = await page.menu.getOpenMenuLocator();
   const rename = menu!.locator('[data-command="filebrowser:rename"]');
@@ -208,6 +226,82 @@ test('Bulk rename should be blocked for different base names', async ({
   expect(
     await page.filebrowser.isFileListedInBrowser('renamed.txt')
   ).toBeFalsy();
+});
+
+test('Bulk rename should be blocked when target already exists', async ({
+  page,
+  tmpPath
+}) => {
+  const file1 = 'data.txt';
+  const file2 = 'data.py';
+  const file3 = 'existing.py';
+
+  await page.contents.uploadContent('data1', 'text', `${tmpPath}/${file1}`);
+  await page.contents.uploadContent('data2', 'text', `${tmpPath}/${file2}`);
+  await page.contents.uploadContent('existing', 'text', `${tmpPath}/${file3}`);
+
+  const file1Item = page.locator(`.jp-DirListing-item:has-text("${file1}")`);
+  const file2Item = page.locator(`.jp-DirListing-item:has-text("${file2}")`);
+  const file3Item = page.locator(`.jp-DirListing-item:has-text("${file3}")`);
+
+  await file1Item.waitFor();
+  await file2Item.waitFor();
+  await file3Item.waitFor();
+
+  // Multi-select data.txt and data.py
+  await file1Item.click();
+  await expect(file1Item).toHaveClass(/jp-mod-selected/);
+  await page.keyboard.down('Shift');
+  await file2Item.click();
+  await page.keyboard.up('Shift');
+
+  // Wait for selection state to update
+  await page.waitForFunction(() => {
+    const selected = document.querySelectorAll(
+      '.jp-DirListing-item.jp-mod-selected'
+    );
+    return selected.length === 2;
+  });
+
+  // Open context menu
+  await file1Item.click({ button: 'right' });
+
+  // Wait for context menu
+  await page.waitForFunction(
+    () => {
+      return document.querySelector('.lm-Menu') !== null;
+    },
+    { timeout: 5000 }
+  );
+
+  const menu = await page.menu.getOpenMenuLocator();
+  const rename = menu!.locator('[data-command="filebrowser:rename"]');
+
+  await rename.click();
+
+  // Dialog should appear
+  const dialog = page.locator('.jp-Dialog');
+  await expect(dialog).toBeVisible();
+
+  await dialog.locator('input').fill('existing');
+  await dialog.locator('.jp-Dialog-button.jp-mod-accept').click();
+
+  // ERROR dialog should appear
+  const errorDialog = page.locator('.jp-Dialog:has-text("Bulk Rename Error")');
+  await expect(errorDialog).toBeVisible();
+  await expect(errorDialog).toContainText('existing.py already exists');
+
+  // Close the error dialog
+  await errorDialog.locator('.jp-Dialog-button').click();
+  await errorDialog.waitFor({ state: 'hidden' });
+
+  // Files should remain unchanged
+  expect(await page.filebrowser.isFileListedInBrowser(file1)).toBeTruthy();
+  expect(await page.filebrowser.isFileListedInBrowser(file2)).toBeTruthy();
+  expect(await page.filebrowser.isFileListedInBrowser(file3)).toBeTruthy();
+
+  // Ensure no renamed versions were created
+  expect(await page.filebrowser.isFileListedInBrowser('existing.txt')).toBeFalsy();
 });
 
 test('File rename input respects UI font size', async ({ page }) => {

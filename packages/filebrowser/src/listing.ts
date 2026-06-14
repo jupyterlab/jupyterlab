@@ -1097,6 +1097,12 @@ export class DirListing extends Widget {
     this.removeClass(MULTI_SELECTED_CLASS);
     this.removeClass(SELECTED_CLASS);
 
+    // Ensure the focus index is within the valid range of items.
+    this._focusIndex = Math.max(
+      0,
+      Math.min(this._focusIndex, items.length - 1)
+    );
+
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
       content.removeChild(nodes.pop()!);
@@ -2244,6 +2250,9 @@ export class DirListing extends Widget {
       this.node.focus();
       return;
     }
+    // Clamp the index to the valid range.
+    index = Math.max(0, Math.min(index, items.length - 1));
+
     this._focusIndex = index;
     const node = items[index];
     const nameNode = this.renderer.getNameNode(node);
@@ -2394,118 +2403,121 @@ export class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private async _doRename(): Promise<string> {
+    if (this._inRename) {
+      return '';
+    }
     this._inRename = true;
 
-    const selectedItems = Array.from(this.selectedItems());
+    try {
+      const selectedItems = Array.from(this.selectedItems());
 
-    // Bail out if nothing has been selected.
-    if (selectedItems.length === 0) {
-      this._inRename = false;
-      return Promise.resolve('');
-    }
-
-    // Bulk rename if multiple items are selected
-    if (selectedItems.length > 1) {
-      return this._doBulkRename(selectedItems);
-    }
-
-    const selectedPaths = Object.keys(this.selection);
-
-    // Figure out which selected path to use for the rename.
-    const items = this._sortedItems;
-    let { path } = items[this._focusIndex];
-    if (!this.selection[path]) {
-      // If the currently focused item is not selected, then choose the last
-      // selected item.
-      path = selectedPaths.slice(-1)[0];
-    }
-
-    // Get the corresponding model, nodes, and file name.
-    const index = ArrayExt.findFirstIndex(items, value => value.path === path);
-    const row = this._items[index];
-    const item = items[index];
-    const nameNode = this.renderer.getNameNode(row);
-    const original = item.name;
-
-    // Seed the text input with current file name, and select and focus it.
-    this._editNode.value = original;
-    this._selectItem(index, false, true);
-
-    // Wait for user input
-    const newName = await Private.userInputForRename(
-      nameNode,
-      this._editNode,
-      original
-    );
-
-    // Check if the widget was disposed during the `await`.
-    if (this.isDisposed) {
-      this._inRename = false;
-      throw new Error('File browser is disposed.');
-    }
-
-    let finalFilename = newName;
-
-    if (!newName || newName === original) {
-      finalFilename = original;
-    } else if (!isValidFileName(newName)) {
-      void showErrorMessage(
-        this._trans.__('Rename Error'),
-        Error(
-          this._trans._p(
-            'showErrorMessage',
-            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-            newName
-          )
-        )
-      );
-      finalFilename = original;
-    } else {
-      // Attempt rename at the file system level.
-
-      const manager = this._manager;
-      const oldPath = PathExt.join(this._model.path, original);
-      const newPath = PathExt.join(this._model.path, newName);
-      try {
-        await renameFile(manager, oldPath, newPath);
-      } catch (error) {
-        if (error !== 'File not renamed') {
-          void showErrorMessage(
-            this._trans._p('showErrorMessage', 'Rename Error'),
-            error as any
-          );
-        }
-        finalFilename = original;
+      // Bail out if nothing has been selected.
+      if (selectedItems.length === 0) {
+        return '';
       }
+
+      // Bulk rename if multiple items are selected
+      if (selectedItems.length > 1) {
+        return await this._doBulkRename(selectedItems);
+      }
+
+      const selectedPaths = Object.keys(this.selection);
+
+      // Figure out which selected path to use for the rename.
+      const items = this._sortedItems;
+      let { path } = items[this._focusIndex];
+      if (!this.selection[path]) {
+        // If the currently focused item is not selected, then choose the last
+        // selected item.
+        path = selectedPaths.slice(-1)[0];
+      }
+
+      // Get the corresponding model, nodes, and file name.
+      const index = ArrayExt.findFirstIndex(items, value => value.path === path);
+      const row = this._items[index];
+      const item = items[index];
+      const nameNode = this.renderer.getNameNode(row);
+      const original = item.name;
+
+      // Seed the text input with current file name, and select and focus it.
+      this._editNode.value = original;
+      this._selectItem(index, false, true);
+
+      // Wait for user input
+      const newName = await Private.userInputForRename(
+        nameNode,
+        this._editNode,
+        original
+      );
 
       // Check if the widget was disposed during the `await`.
       if (this.isDisposed) {
-        this._inRename = false;
         throw new Error('File browser is disposed.');
       }
-    }
 
-    // If nothing else has been selected, then select the renamed file. In
-    // other words, don't select the renamed file if the user has clicked
-    // away to some other file.
-    if (
-      !this.isDisposed &&
-      Object.keys(this.selection).length === 1 &&
-      // We haven't updated the instance yet to reflect the rename, so unless
-      // the user or something else has updated the selection, the original file
-      // path and not the new file path will be in `this.selection`.
-      this.selection[item.path]
-    ) {
-      try {
-        await this._selectItemByName(finalFilename, true, true);
-      } catch {
-        // do nothing
-        console.warn('After rename, failed to select file', finalFilename);
+      let finalFilename = newName;
+
+      if (!newName || newName === original) {
+        finalFilename = original;
+      } else if (!isValidFileName(newName)) {
+        void showErrorMessage(
+          this._trans.__('Rename Error'),
+          Error(
+            this._trans._p(
+              'showErrorMessage',
+              '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+              newName
+            )
+          )
+        );
+        finalFilename = original;
+      } else {
+        // Attempt rename at the file system level.
+
+        const manager = this._manager;
+        const oldPath = PathExt.join(this._model.path, original);
+        const newPath = PathExt.join(this._model.path, newName);
+        try {
+          await renameFile(manager, oldPath, newPath);
+        } catch (error) {
+          if (error !== 'File not renamed') {
+            void showErrorMessage(
+              this._trans._p('showErrorMessage', 'Rename Error'),
+              error as any
+            );
+          }
+          finalFilename = original;
+        }
+
+        // Check if the widget was disposed during the `await`.
+        if (this.isDisposed) {
+          throw new Error('File browser is disposed.');
+        }
       }
-    }
 
-    this._inRename = false;
-    return finalFilename;
+      // If nothing else has been selected, then select the renamed file. In
+      // other words, don't select the renamed file if the user has clicked
+      // away to some other file.
+      if (
+        !this.isDisposed &&
+        Object.keys(this.selection).length === 1 &&
+        // We haven't updated the instance yet to reflect the rename, so unless
+        // the user or something else has updated the selection, the original file
+        // path and not the new file path will be in `this.selection`.
+        this.selection[item.path]
+      ) {
+        try {
+          await this._selectItemByName(finalFilename, true, true);
+        } catch {
+          // do nothing
+          console.warn('After rename, failed to select file', finalFilename);
+        }
+      }
+
+      return finalFilename;
+    } finally {
+      this._inRename = false;
+    }
   }
 
   /**
@@ -2527,7 +2539,6 @@ export class DirListing extends Widget {
     });
 
     if (!result.button.accept) {
-      this._inRename = false;
       return '';
     }
 
@@ -2536,22 +2547,22 @@ export class DirListing extends Widget {
     try {
       return await this._bulkRenameCore(items, newName);
     } catch (error) {
-      await showErrorMessage(
+      void showErrorMessage(
         trans._p('showErrorMessage', 'Bulk Rename Error'),
-        error as any
+        error instanceof Error ? error : new Error(String(error))
       );
       return '';
-    } finally {
-      this._inRename = false;
     }
   }
+
 
   /**
    * Core logic for bulk renaming multiple items.
    *
    * @param items - The items to rename.
    * @param newBaseName - The new base name for the items.
-   * @returns A promise that resolves with the new base name if successful, or an empty string.
+   * @returns A promise that resolves with the new base name.
+   * @throws Error if validation fails or rename conflicts occur.
    */
 
   private async _bulkRenameCore(
@@ -2561,7 +2572,17 @@ export class DirListing extends Widget {
     const trans = this._trans;
     const manager = this._manager;
 
-    // STEP 1: Validate selection (same base name)
+    // STEP 1: Validate extensions (must be unique)
+    const extensions = items.map(item => PathExt.extname(item.name));
+    const extSet = new Set(extensions);
+
+    if (extSet.size !== extensions.length) {
+      throw new Error(
+        trans.__('Cannot rename: multiple files would result in the same name.')
+      );
+    }
+
+    // STEP 2: Validate selection (same base name)
     const baseNames = new Set(
       items.map(item => PathExt.basename(item.name, PathExt.extname(item.name)))
     );
@@ -2571,16 +2592,6 @@ export class DirListing extends Widget {
         trans.__(
           'Cannot bulk rename: selected files must have the same base name.'
         )
-      );
-    }
-
-    // STEP 2: Validate extensions (must be unique)
-    const extensions = items.map(item => PathExt.extname(item.name));
-    const extSet = new Set(extensions);
-
-    if (extSet.size !== extensions.length) {
-      throw new Error(
-        trans.__('Cannot rename: multiple files would result in the same name.')
       );
     }
 
@@ -2644,7 +2655,6 @@ export class DirListing extends Widget {
       );
     }
     await this._model.refresh();
-    await new Promise(resolve => setTimeout(resolve, 0));
     return newBaseName;
   }
   /**

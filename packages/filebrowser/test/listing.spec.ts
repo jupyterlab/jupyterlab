@@ -302,7 +302,10 @@ describe('filebrowser/listing', () => {
           i => i.name
         );
 
-        await (dirListing as any)._bulkRenameCore(selected, 'newname');
+        await expect(
+          (dirListing as any)._bulkRenameCore(selected, 'newname')
+        ).rejects.toThrow(/same base name/);
+
         await dirListing.model.refresh();
         await signalToPromise(dirListing.updated);
 
@@ -340,7 +343,10 @@ describe('filebrowser/listing', () => {
           i => i.name
         );
 
-        await (dirListing as any)._bulkRenameCore(selected, 'test');
+        await expect(
+          (dirListing as any)._bulkRenameCore(selected, 'test')
+        ).rejects.toThrow(/same name/);
+
         await dirListing.model.refresh();
         await signalToPromise(dirListing.updated);
 
@@ -383,7 +389,10 @@ describe('filebrowser/listing', () => {
           i => i.name
         );
 
-        await (dirListing as any)._bulkRenameCore(selected, 'existing');
+        await expect(
+          (dirListing as any)._bulkRenameCore(selected, 'existing')
+        ).rejects.toThrow(/existing\.py/);
+
         await dirListing.model.refresh();
         await signalToPromise(dirListing.updated);
 
@@ -391,6 +400,56 @@ describe('filebrowser/listing', () => {
           i => i.name
         );
         expect(afterNames).toEqual(beforeNames);
+      });
+
+      it('should block rename for invalid file names', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'data.txt');
+
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'data.py');
+
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const selected = Array.from(dirListing.sortedItems()).filter(
+          item => item.name === 'data.txt' || item.name === 'data.py'
+        );
+
+        await expect(
+          (dirListing as any)._bulkRenameCore(selected, 'invalid/name')
+        ).rejects.toThrow();
+      });
+
+      it('should allow no-op rename when name is unchanged', async () => {
+        const item1 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        await dirListing.model.manager.rename(item1.path, 'test.txt');
+
+        const item2 = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
+        await dirListing.model.manager.rename(item2.path, 'test.py');
+
+        await dirListing.model.refresh();
+        await signalToPromise(dirListing.updated);
+
+        const selected = Array.from(dirListing.sortedItems()).filter(
+          item => item.name === 'test.txt' || item.name === 'test.py'
+        );
+
+        await expect(
+          (dirListing as any)._bulkRenameCore(selected, 'test')
+        ).resolves.toBe('test');
       });
     });
 
@@ -1009,13 +1068,13 @@ describe('filebrowser/listing', () => {
           name: string;
           type: 'file' | 'directory' | 'notebook';
         }[] = [
-          { name: '1.txt', type: 'file' },
-          { name: '2', type: 'directory' },
-          { name: '3.ipynb', type: 'notebook' },
-          { name: '4.txt', type: 'file' },
-          { name: '5', type: 'directory' },
-          { name: '6.ipynb', type: 'notebook' }
-        ];
+            { name: '1.txt', type: 'file' },
+            { name: '2', type: 'directory' },
+            { name: '3.ipynb', type: 'notebook' },
+            { name: '4.txt', type: 'file' },
+            { name: '5', type: 'directory' },
+            { name: '6.ipynb', type: 'notebook' }
+          ];
 
         // Create files that can be sorted alphabetically
         for (const file of files) {
