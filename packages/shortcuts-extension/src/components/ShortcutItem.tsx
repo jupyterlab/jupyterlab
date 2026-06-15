@@ -333,7 +333,7 @@ export class ShortcutItem extends React.Component<
 
   getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element[] {
     return binding.keys.map((keyboardKey: string, index: number) => (
-      <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
+      <div className="jp-Shortcuts-ShortcutKeysContainer" key={index} tabIndex={0}>
         <div className="jp-Shortcuts-ShortcutKeys">
           {this.toSymbols(keyboardKey)
             .split(' ')
@@ -382,14 +382,15 @@ export class ShortcutItem extends React.Component<
 
   getAddLink(): JSX.Element {
     return (
-      <a
+      <button
+        type="button"
         className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
         onClick={() => {
           this.toggleInputNew();
         }}
       >
         {this._trans.__('Add')}
-      </a>
+      </button>
     );
   }
 
