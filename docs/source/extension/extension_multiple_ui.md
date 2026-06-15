@@ -77,7 +77,7 @@ have, you can simply install it and it will seamlessly work in both JupyterLab
 and Notebook 7.
 
 An extension that adds a single self-contained text widget to the top bar
-of the UI, for instance, does not need to do anything at all to be compatible
+of the UI, for instance, doesn't need to do anything at all to be compatible
 with both JupyterLab and Notebook 7 (both apps have a top area that can hold the
 widget, so it will be visible in both JupyterLab and Notebook 7 upon install and
 after launch).

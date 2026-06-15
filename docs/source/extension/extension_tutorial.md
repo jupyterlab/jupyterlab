@@ -813,7 +813,7 @@ class APODWidget extends Widget {
 }
 ```
 
-You have written all of the code before. All you have done is restructure it
+You've written all of the code before. All you've done is restructure it
 to use instance variables and move the image request to its own
 function.
 
@@ -1048,7 +1048,7 @@ git add src/index.ts
 git commit -m 'Restore panel state'
 ```
 
-Congratulations! You have implemented all of the behaviors laid out at the start
+Congratulations! You've implemented all of the behaviors laid out at the start
 of this tutorial.
 
 (packaging-your-extension)=
@@ -1139,7 +1139,7 @@ check out the documentation: <https://github.com/jupyter-server/jupyter_releaser
 
 ## Learn more
 
-You have completed the tutorial. Nicely done! If you want to keep
+You've completed the tutorial. Nicely done! If you want to keep
 learning, here are some suggestions about what to try next:
 
 - Add the image description that comes in the API response to the panel.

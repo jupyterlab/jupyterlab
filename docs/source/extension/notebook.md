@@ -343,7 +343,7 @@ Open a notebook and observe the new "Header" widget.
 
 ### The _ipywidgets_ third party-extension
 
-This discussion will be a bit confusing since we have been using the term
+This discussion will be a bit confusing since we've been using the term
 _widget_ to refer to _lumino widgets_. In the discussion below,
 _Jupyter interactive widgets_ will be referred to as _ipywidgets_. There is no
 intrinsic relation between _lumino widgets_ and _Jupyter interactive widgets_.

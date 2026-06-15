@@ -606,7 +606,7 @@ Then rebuilding your extension and refreshing JupyterLab in the browser should p
 
 If using Windows, you may need to configure your operating system for the `develop` command described above to work, please see the note: {ref}`important-for-windows-users`
 
-If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with `jupyter lab --dev-mode --extensions-in-dev-mode` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension does not build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
+If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with `jupyter lab --dev-mode --extensions-in-dev-mode` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension doesn't build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
 
 If you are using TypeScript, the TypeScript compiler would complain because the dependencies of your extension may differ from those in JupyterLab. For that reason, you need to add to your `tsconfig.json` the path where to search for these dependencies by adding the option [paths](https://www.typescriptlang.org/tsconfig#paths):
 
@@ -743,7 +743,7 @@ the CSS files) are watched by the Rspack process. This means that if
 your extension is in TypeScript you'll have to run a `jlpm build`
 before the changes will be reflected in JupyterLab. To avoid this step
 you can also watch the TypeScript sources in your extension which is
-usually assigned to the `tsc -w` shortcut. If Rspack does not seem to
+usually assigned to the `tsc -w` shortcut. If Rspack doesn't seem to
 detect the changes, this can be related to [the number of available watches](https://github.com/webpack/docs/wiki/troubleshooting#not-enough-watchers).
 
 Note that the application is built against **released** versions of the
