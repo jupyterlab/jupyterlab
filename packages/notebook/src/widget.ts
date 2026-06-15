@@ -1992,18 +1992,6 @@ export class Notebook extends StaticNotebook {
 
     this._ensureFocus();
 
-    if (
-      cell instanceof MarkdownCell &&
-      cell.numberChildNodes > 0 &&
-      cell.headingCollapsed
-    ) {
-      for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
-        if (this.widgets[i]) {
-          this.select(this.widgets[i]);
-        }
-      }
-    }
-
     if (newValue === oldValue) {
       return;
     }
@@ -2198,11 +2186,8 @@ export class Notebook extends StaticNotebook {
     }
     if (changed) {
       this._selectionChanged.emit(void 0);
+      this.update();
     }
-    // Make sure we have a valid active cell.
-    // eslint-disable-next-line no-self-assign
-    this.activeCellIndex = this.activeCellIndex;
-    this.update();
   }
 
   /**
