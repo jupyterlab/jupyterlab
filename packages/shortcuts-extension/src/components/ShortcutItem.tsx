@@ -367,6 +367,16 @@ export class ShortcutItem extends React.Component<
         data-keybinding={index}
         data-shortcut={this.props.shortcut.id}
         onClick={() => this.toggleInputReplaceMethod(index)}
+        onKeyDown={event => {
+          const target = event.target as HTMLElement;
+          if (!target.classList.contains('jp-Shortcuts-ShortcutKeysContainer')) {
+            return;
+          }
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            this.toggleInputReplaceMethod(index);
+          }
+        }}
       >
         {this.isLocationBeingEdited(index)
           ? this.getShortCutAsInput(binding, index)
