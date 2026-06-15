@@ -512,9 +512,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       this._widgetPositions.set(name, index);
 
       // Invokes resizing to ensure correct display of items after an addition, only
-      // if the toolbar is rendered.
+      // if the toolbar is rendered. Call the resizer twice (callTwice = true) so that
+      // widgets that have not yet been painted (clientWidth === 0) get a chance to be
+      // rendered before the second pass recalculates the layout.
       if (this.isVisible) {
-        void this._resizer.invoke();
+        void this._resizer.invoke(true);
       }
     }
     return status;
@@ -526,7 +528,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
    * Invokes resizing to ensure correct display of items.
    */
   onAfterShow(msg: Message): void {
-    void this._resizer.invoke(true);
+    void this._resizer.stop().then(() => void this._resizer.invoke(true));
   }
 
   /**
@@ -1155,9 +1157,10 @@ class ToolbarPopup extends Widget {
   /**
    *  Construct a new ToolbarPopup
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     super({ node: document.createElement('jp-toolbar') });
-    this.node.setAttribute('aria-label', 'Responsive popup toolbar');
+    this.node.setAttribute('aria-label', trans.__('Responsive popup toolbar'));
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
     this.addClass('jp-ThemedContainer');
@@ -1244,7 +1247,7 @@ class ToolbarPopupOpener extends ToolbarButton {
     });
     this.addClass('jp-Toolbar-responsive-opener');
 
-    this.popup = new ToolbarPopup();
+    this.popup = new ToolbarPopup(props.translator);
   }
 
   /**

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
@@ -28,16 +29,6 @@ import type {
  * The class name added to CodeMirrorWidget instances.
  */
 const EDITOR_CLASS = 'jp-CodeMirrorEditor';
-
-/**
- * The key code for the up arrow key.
- */
-const UP_ARROW = 38;
-
-/**
- * The key code for the down arrow key.
- */
-const DOWN_ARROW = 40;
 
 /**
  * CodeMirror editor.
@@ -92,6 +83,28 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
+    // For backward-compatibility with consumers of older CodeMirror private API.
+    const content = host.querySelector('.cm-content');
+    if (content) {
+      const legacyCmView = {
+        view: this._editor,
+        dom: content
+      };
+      Object.defineProperty(content, 'cmView', {
+        configurable: true,
+        get: () => {
+          console.warn(
+            'Accessing cmView is deprecated. Use the public API EditorView.findFromDOM() instead.'
+          );
+          return legacyCmView;
+        }
+      });
+    }
+
+    const scroller = host.querySelector('.cm-scroller') as HTMLElement | null;
+    if (scroller) {
+      scroller.classList.add('jp-zoom-target');
+    }
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -549,7 +562,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           // If the relevant leaf token has been found, stop iterating.
           if (offset >= ref.from && offset <= ref.to) {
             let currentNode = ref;
-            // The syntax tree of the code lines ending with an incomplete string creates an erronous
+            // The syntax tree of the code lines ending with an incomplete string creates an erroneous
             // child of the last node, in this case the parent should be considered for the token.
             if (ref.name === '⚠' && ref.from === ref.to && ref.node.parent) {
               currentNode = ref.node.parent;
@@ -621,7 +634,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   protected onKeydown(event: KeyboardEvent): boolean {
     const position = this.state.selection.main.head;
 
-    if (position === 0 && event.keyCode === UP_ARROW) {
+    if (position === 0 && event.key === 'ArrowUp') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
       }
@@ -629,7 +642,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     const line = this.doc.lineAt(position).number;
-    if (line === 1 && event.keyCode === UP_ARROW) {
+    if (line === 1 && event.key === 'ArrowUp') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('topLine');
       }
@@ -637,7 +650,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     const length = this.doc.length;
-    if (position === length && event.keyCode === DOWN_ARROW) {
+    if (position === length && event.key === 'ArrowDown') {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
       }

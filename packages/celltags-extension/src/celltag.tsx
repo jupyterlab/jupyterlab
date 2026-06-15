@@ -162,7 +162,7 @@ export class CellTagField {
     return (
       <div className={CELL_TAGS_WIDGET_CLASS}>
         <div className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-          Cell Tags
+          {this._trans.__('Cell Tags')}
         </div>
         {allTags &&
           allTags.map((tag: string, i: number) => (

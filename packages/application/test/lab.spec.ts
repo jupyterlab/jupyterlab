@@ -11,6 +11,7 @@ describe('plugins', () => {
   let lab: JupyterLab;
   let plugin: JupyterFrontEndPlugin<void> = {
     id: '@jupyterlab/test-extension:plugin',
+    description: 'Test plugin',
     autoStart: true,
     activate: async () => {
       await new Promise(f => setTimeout(f, 5000));

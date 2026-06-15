@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { program as commander } from 'commander';
 import * as path from 'path';
@@ -39,7 +40,7 @@ commander
 
     if (!options.skipPublish) {
       if (!options.skipBuild) {
-        utils.run('jlpm run build:all');
+        utils.run('jlpm build:all');
       }
 
       if (!options.dryRun) {

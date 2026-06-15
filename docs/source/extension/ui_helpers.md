@@ -122,6 +122,213 @@ InputDialog.getPassword({ title: 'Input password' }).then(value => {
 });
 ```
 
+:::{note}
+Try these helpers in a browser playground:
+
+1. Click **Load Interactive Example**.
+2. In the playground editor toolbar (or command palette), run `Load Current File As Extension`.
+3. Use the **UI Helpers Playground** panel buttons to preview dialogs, notifications, and file dialogs.
+   :::
+
+```{raw} html
+<script type="text/plain" id="jp-plugin-playground-source-ui-helpers">
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+import {
+  Dialog,
+  ICommandPalette,
+  InputDialog,
+  MainAreaWidget,
+  Notification,
+  showDialog
+} from '@jupyterlab/apputils';
+
+import { FileDialog, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+
+import { Widget } from '@lumino/widgets';
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'ui-helpers-demo:plugin',
+  autoStart: true,
+  requires: [ICommandPalette, IDefaultFileBrowser],
+  activate: (
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    defaultBrowser: IDefaultFileBrowser
+  ) => {
+    const dialogCommand = 'ui-helpers-demo:dialog';
+    const inputCommand = 'ui-helpers-demo:input';
+    const notificationCommand = 'ui-helpers-demo:notification';
+    const openFileDialogCommand = 'ui-helpers-demo:file-dialog-open';
+    const openFolderDialogCommand = 'ui-helpers-demo:file-dialog-folder';
+    const openPanelCommand = 'ui-helpers-demo:open-panel';
+
+    const runDialog = async () => {
+      await showDialog({
+        title: 'UI Helpers Demo',
+        body: 'This dialog is shown from an interactive documentation example.',
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Sounds good' })]
+      });
+    };
+
+    const runInput = async () => {
+      const result = await InputDialog.getText({
+        title: 'What should the notification say?'
+      });
+
+      if (result.button.accept && result.value) {
+        Notification.info(result.value, { autoClose: 3000 });
+      }
+    };
+
+    const runNotification = () => {
+      Notification.success('This is a success notification from the docs demo.', {
+        autoClose: 3000
+      });
+    };
+
+    const runOpenFilesDialog = async () => {
+      const result = await FileDialog.getOpenFiles({
+        manager: defaultBrowser.model.manager
+      });
+      if (result.button.accept) {
+        Notification.info(`Selected ${result.value.length} item(s).`, {
+          autoClose: 3000
+        });
+      }
+    };
+
+    const runOpenFolderDialog = async () => {
+      const result = await FileDialog.getExistingDirectory({
+        manager: defaultBrowser.model.manager
+      });
+      if (result.button.accept) {
+        const selectedPaths = result.value.map(item => item.path);
+        const message =
+          selectedPaths.length === 1
+            ? `Selected folder: ${selectedPaths[0]}`
+            : `Selected folders: ${selectedPaths.join(', ')}`;
+        Notification.info(message, { autoClose: 3000 });
+      }
+    };
+
+    let panel: MainAreaWidget<Widget> | null = null;
+
+    const createActionButton = (
+      label: string,
+      action: () => Promise<void> | void
+    ): HTMLButtonElement => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.style.padding = '0.4rem 0.75rem';
+      button.style.border = '1px solid var(--jp-border-color2)';
+      button.style.borderRadius = '6px';
+      button.style.background = 'var(--jp-layout-color1)';
+      button.style.cursor = 'pointer';
+      button.addEventListener('click', () => {
+        void Promise.resolve(action()).catch(error => {
+          console.error(error);
+          Notification.error('Demo action failed.', { autoClose: 4000 });
+        });
+      });
+      return button;
+    };
+
+    const ensurePanel = (): MainAreaWidget<Widget> => {
+      if (panel && !panel.isDisposed) {
+        return panel;
+      }
+
+      const content = new Widget();
+      const intro = document.createElement('p');
+      intro.textContent =
+        'Use these buttons to preview dialogs, notifications, and file dialogs.';
+      intro.style.margin = '0 0 0.75rem 0';
+      content.node.style.padding = '1rem';
+      content.node.appendChild(intro);
+
+      const actions = document.createElement('div');
+      actions.style.display = 'grid';
+      actions.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+      actions.style.gap = '0.5rem';
+
+      actions.appendChild(createActionButton('Show Dialog', runDialog));
+      actions.appendChild(createActionButton('Ask For Text', runInput));
+      actions.appendChild(createActionButton('Show Notification', runNotification));
+      actions.appendChild(createActionButton('Open Files Dialog', runOpenFilesDialog));
+      actions.appendChild(createActionButton('Open Folder Dialog', runOpenFolderDialog));
+
+      content.node.appendChild(actions);
+
+      panel = new MainAreaWidget({ content });
+      panel.id = 'ui-helpers-demo:panel';
+      panel.title.label = 'UI Helpers Playground';
+      panel.title.closable = true;
+      return panel;
+    };
+
+    app.commands.addCommand(dialogCommand, {
+      label: 'UI Helpers Demo: Show Dialog',
+      execute: runDialog
+    });
+
+    app.commands.addCommand(inputCommand, {
+      label: 'UI Helpers Demo: Ask For Text',
+      execute: runInput
+    });
+
+    app.commands.addCommand(notificationCommand, {
+      label: 'UI Helpers Demo: Notify',
+      execute: runNotification
+    });
+
+    app.commands.addCommand(openFileDialogCommand, {
+      label: 'UI Helpers Demo: Open Files Dialog',
+      execute: runOpenFilesDialog
+    });
+
+    app.commands.addCommand(openFolderDialogCommand, {
+      label: 'UI Helpers Demo: Open Folder Dialog',
+      execute: runOpenFolderDialog
+    });
+
+    app.commands.addCommand(openPanelCommand, {
+      label: 'UI Helpers Demo: Open Playground Panel',
+      execute: () => {
+        const widget = ensurePanel();
+        if (!widget.isAttached) {
+          app.shell.add(widget, 'main');
+        }
+        app.shell.activateById(widget.id);
+      }
+    });
+
+    palette.addItem({ command: openPanelCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: dialogCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: inputCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: notificationCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: openFileDialogCommand, category: 'User Interface Helpers' });
+    palette.addItem({ command: openFolderDialogCommand, category: 'User Interface Helpers' });
+
+    void app.restored.then(() => {
+      void app.commands.execute(openPanelCommand);
+    });
+  }
+};
+
+export default plugin;
+</script>
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-source-id="jp-plugin-playground-source-ui-helpers"
+  data-playground-file-name="index.ts"
+  data-playground-title="User interface helpers interactive example"
+  data-playground-description="Interactive dialogs + notifications example."
+></div>
+```
+
 ### File Dialogs
 
 Two helper functions to ask a user to open a file or a folder are
@@ -158,9 +365,9 @@ if (result.button.accept) {
 
 :::{note}
 The document manager can be obtained in a plugin by
-requesting {ts:variable}`filebrowser.IFileBrowserFactory` token.
+requesting {ts:variable}`filebrowser.IDefaultFileBrowser` token.
 The `manager` will be accessed through
-`factory.defaultBrowser.model.manager`.
+`defaultBrowser.model.manager`.
 :::
 
 ## Notifications

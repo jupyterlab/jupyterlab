@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -279,6 +280,11 @@ export namespace ISessionContext {
      * A kernel should be started automatically (default `true`).
      */
     readonly shouldStart?: boolean;
+
+    /**
+     * Reuse an existing session on the current path (default `true`).
+     */
+    readonly shouldReuse?: boolean;
 
     /**
      * A kernel can be started (default `true`).
@@ -802,7 +808,8 @@ export class SessionContext implements ISessionContext {
    * @returns A promise that resolves with whether to ask the user to select a kernel.
    *
    * #### Notes
-   * If a server session exists on the current path, we will connect to it.
+   * If a server session exists on the current path, we will connect to it
+   * unless `kernelPreference.shouldReuse === false`.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -834,16 +841,21 @@ export class SessionContext implements ISessionContext {
     const manager = this.sessionManager;
     await manager.ready;
     await manager.refreshRunning();
-    const model = find(manager.running(), item => {
-      return item.path === this._path;
-    });
-    if (model) {
-      try {
-        const session = manager.connectTo({ model });
-        this._handleNewSession(session);
-      } catch (err) {
-        void this._handleSessionError(err);
-        return Promise.reject(err);
+    const preference = this.kernelPreference;
+    const shouldConnectToPathSession = preference.shouldReuse !== false;
+
+    if (shouldConnectToPathSession) {
+      const model = find(manager.running(), item => {
+        return item.path === this._path;
+      });
+      if (model) {
+        try {
+          const session = manager.connectTo({ model });
+          this._handleNewSession(session);
+        } catch (err) {
+          void this._handleSessionError(err);
+          return Promise.reject(err);
+        }
       }
     }
 

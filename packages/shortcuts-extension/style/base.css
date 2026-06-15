@@ -365,6 +365,10 @@
   background-color: var(--jp-layout-color0);
 }
 
+.jp-Shortcuts-TopNav > .jp-FilterBox {
+  width: 70%;
+}
+
 .jp-Shortcuts-Symbols {
   padding: 0 12px;
 }

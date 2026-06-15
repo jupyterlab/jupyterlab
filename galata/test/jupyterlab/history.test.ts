@@ -10,7 +10,9 @@ test.describe('test kernel history keybindings', () => {
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/notebook-extension:tracker': {
-        accessKernelHistory: true
+        accessKernelHistory: true,
+        // Use session scope to avoid race with concurrent test runs which also contribute to the global history
+        inputHistoryScope: 'session'
       }
     }
   });

@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
-import * as fs from 'fs-extra';
 
 test('All commands must have a default label and describedBy', async ({
   page
@@ -62,32 +61,13 @@ test('All commands must have a default label and describedBy', async ({
     return Promise.resolve(commands);
   });
 
-  if (!(await fs.pathExists(testInfo.snapshotDir))) {
-    await fs.mkdir(testInfo.snapshotDir);
-  }
-
-  const commandsSnapshotPath = testInfo.snapshotPath('commandsList.json');
-
-  const existingCommands: typeof commands =
-    await fs.readJSON(commandsSnapshotPath);
-
-  // Update snapshots only when explicitly requested with --update-snapshots
-  if (testInfo.config.updateSnapshots === 'all') {
-    await fs.writeJSON(commandsSnapshotPath, commands, {
-      encoding: 'utf-8',
-      spaces: 2
-    });
-  }
-
-  expect(
-    commands,
-    'Commands list has changed. Run with --update-snapshots to update.'
-  ).toEqual(existingCommands);
+  const commandsString = JSON.stringify(commands, null, 2) + '\n';
+  expect.soft(commandsString).toMatchSnapshot('commandsList.json');
 
   // All commands must at least define a label
   const missingLabel = commands.filter(command => !command.label);
 
-  expect(missingLabel).toEqual([]);
+  expect.soft(missingLabel).toEqual([]);
 
   // Check for commands missing describedBy information
   const missingDescribedBy = commands.filter(command => !command.args);
