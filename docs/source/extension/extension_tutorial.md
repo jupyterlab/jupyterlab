@@ -463,7 +463,7 @@ If your widget is not behaving, compare your code with the reference
 project state at the [01-show-a-panel
 tag](https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-01-show-a-panel).
 You can also open this state in <a href="https://jupyterlab-plugin-playground.readthedocs.io/en/latest/lite/lab/index.html?fromURL=https://raw.githubusercontent.com/jupyterlab/jupyterlab_apod/5024c4f5d0cc1d2e054255160f246cd1766b0500/src/index.ts&hide=all&fromURLToFolder=step-1">Plugin Playground</a>.
-Once you have got everything working properly, git commit your changes and
+Once you've got everything working properly, git commit your changes and
 carry on.
 
 ```bash
