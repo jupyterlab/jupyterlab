@@ -570,7 +570,7 @@ bumped their major version (following semver convention). We want to point out p
   - `CodeViewerWidget.IOptions` has changed to `{ factory, model, editorOptions }`.
 - `@jupyterlab/codemirror` from 3.x to 4.0
   : - Configuration parameters changes:
-  : - `fontFamily`, `fontSize` and `lineHeight`: grouped in a subdictionnary `customStyles`. - `insertSpaces`: changed for `indentUnit` that can take a value within ['Tab', '1', '2', '4', '8'] - `lineWrap`: changed - it is now a boolean. - `showTrailingSpace`: renamed `highlightTrailingWhitespace` - `coverGutterNextToScrollbar`: removed - `electricChars`: removed - `extraKeys`: removed - you should register new keymap using the CodeMirror extension `keymap.of(KeyBinding[])` - `handlePaste`: removed - `keymap`: removed - `lineSeparator`: removed - Line separator are normalized to `\n` - `lineWiseCopyCut`: removed - this is the default behavior - `scrollbarStyle`: removed - `styleSelectedText`: removed - `selectionPointer`: removed - `wordWrapColumn`: removed
+  : - `fontFamily`, `fontSize` and `lineHeight`: grouped in a nested `customStyles` dictionary. - `insertSpaces`: changed for `indentUnit` that can take a value within ['Tab', '1', '2', '4', '8'] - `lineWrap`: changed - it is now a boolean. - `showTrailingSpace`: renamed `highlightTrailingWhitespace` - `coverGutterNextToScrollbar`: removed - `electricChars`: removed - `extraKeys`: removed - you should register new keymap using the CodeMirror extension `keymap.of(KeyBinding[])` - `handlePaste`: removed - `keymap`: removed - `lineSeparator`: removed - Line separator are normalized to `\n` - `lineWiseCopyCut`: removed - this is the default behavior - `scrollbarStyle`: removed - `styleSelectedText`: removed - `selectionPointer`: removed - `wordWrapColumn`: removed
   - `Mode` has been removed. You can instead request the token `IEditorLanguageHandler`. That provides
     similar API:
     \- `Mode.registerModeInfo` -> `IEditorLanguageHandler.addLanguage`
@@ -860,7 +860,7 @@ To ease configuration, we have introduce a new helper function `jupyterlab.galat
 simplify the server configuration to be `jupyterlab.galata.configure_jupyter_server(c)`.
 :::
 
-Here are the changes in the Javascript package `@jupyterlab/galata` from 4.x to 5.x:
+Here are the changes in the JavaScript package `@jupyterlab/galata` from 4.x to 5.x:
 : - `ContentsHelper` and `galata.newContentsHelper` have new constructor arguments to use Playwright API request object:
 `new ContentsHelper(baseURL, page?, request?)` -> `new ContentsHelper(request?, page?)`
 `galata.newContentsHelper(baseURL, page?, request?)` -> `galata.newContentsHelper(request?, page?)`

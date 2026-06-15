@@ -4,7 +4,7 @@
 
 # JupyterLab Changelog
 
-## v4.6 (beta)
+## v4.6 (Release Candidate)
 
 JupyterLab 4.6 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
@@ -92,7 +92,7 @@ A new "Date Created" column has been added to the file browser, showing when fil
 src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-date-created.png"
 class="jp-screenshot">
 
-The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/latest/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the edit button at the end of the breadcrumbs, or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
+The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/latest/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the area behind breadcrumbs (highlighted on hover), or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
 
 <img alt="The file browser showing an editable breadcrumb input field with a completion dropdown listing subdirectory names"
 src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-breadcrumbs-editable.png"
@@ -178,6 +178,13 @@ src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/ge
 class="jp-screenshot">
 
 Ghost text is now also shown for all active cursors in a multi-cursor editing session.
+
+### Miscellaneous
+
+- Tab widths are kept frozen while the mouse pointer hovers over them, making it easier to close multiple tabs with the mouse
+- Autocompletion heuristics were improved; the autocompletion (which remains opt-in) should no longer trigger in unexpected scenarios
+- The output scroll overlay collapse icon is now visible regardless of the output size and scroll state
+- The fonts used across components were standardized and fonts specified by themes or overrides are respected in every component of the application
 
 ## v4.5
 

@@ -329,9 +329,9 @@ jlpm build
 ```
 
 :::{note}
-This tutorial uses `jlpm` to install Javascript packages and
+This tutorial uses `jlpm` to install JavaScript packages and
 run build commands, which is JupyterLab's bundled
-version of `yarn`. If you prefer, you can use another Javascript
+version of `yarn`. If you prefer, you can use another JavaScript
 package manager like `npm` or `yarn` itself.
 :::
 
