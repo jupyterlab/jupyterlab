@@ -294,6 +294,75 @@ test.describe('Notebook Edit (defer mode)', () => {
   });
 });
 
+test.describe('Prevent copy/cut/duplicate for non-editable cells', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+  });
+
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        preventCopyPasteForNonEditable: true
+      }
+    }
+  });
+
+  test('Copy Cell is disabled in context menu for non-editable cell', async ({
+    page
+  }) => {
+    await page.evaluate(() => {
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      nbPanel.content.activeCell.model.setMetadata('editable', false);
+    });
+
+    const cell = await page.notebook.getCellLocator(0);
+    await cell!.click({ button: 'right' });
+
+    const menu = page.locator('.lm-Menu').last();
+    const copyItem = menu.locator(
+      'li:has(div.lm-Menu-itemLabel:text-is("Copy Cell"))'
+    );
+    await expect(copyItem).toHaveClass(/lm-mod-disabled/);
+    await page.keyboard.press('Escape');
+  });
+
+  test('Cut Cell is disabled in context menu for non-editable cell', async ({
+    page
+  }) => {
+    await page.evaluate(() => {
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      nbPanel.content.activeCell.model.setMetadata('editable', false);
+    });
+
+    const cell = await page.notebook.getCellLocator(0);
+    await cell!.click({ button: 'right' });
+
+    const menu = page.locator('.lm-Menu').last();
+    const cutItem = menu.locator(
+      'li:has(div.lm-Menu-itemLabel:text-is("Cut Cell"))'
+    );
+    await expect(cutItem).toHaveClass(/lm-mod-disabled/);
+    await page.keyboard.press('Escape');
+  });
+
+  test('Duplicate Cell Below is disabled in cell toolbar for non-editable cell', async ({
+    page
+  }) => {
+    await page.evaluate(() => {
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      nbPanel.content.activeCell.model.setMetadata('editable', false);
+    });
+
+    await page.hover('.jp-Cell >> nth=0');
+    const duplicateButton = page
+      .locator('.jp-Cell [data-jp-item-name="duplicate-cell"] jp-button')
+      .first();
+    await expect(duplicateButton).toHaveAttribute('aria-disabled', 'true');
+  });
+});
+
 const getWindowingIndices = async (page: IJupyterLabPageFixture) => {
   const notebook = await page.notebook.getNotebookInPanelLocator();
   const cellElements = await notebook!
