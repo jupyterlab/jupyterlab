@@ -2584,7 +2584,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
-  private _showEditorForReadOnlyMarkdown = true;
+  private _showEditorForReadOnlyMarkdown = false;
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
@@ -2617,7 +2617,7 @@ export namespace MarkdownCell {
   /**
    * Default value for showEditorForReadOnlyMarkdown.
    */
-  export const defaultShowEditorForReadOnlyMarkdown = true;
+  export const defaultShowEditorForReadOnlyMarkdown = false;
 }
 
 /** ****************************************************************************
