@@ -87,7 +87,7 @@ export class PluginList extends ReactWidget {
       options.query ? updateFilterFunction(options.query, false, false) : null
     );
     this.setError = this.setError.bind(this);
-    this._evtMousedown = this._evtMousedown.bind(this);
+    this._evtClick = this._evtClick.bind(this);
     this._query = options.query ?? '';
 
     this._errors = {};
@@ -204,11 +204,11 @@ export class PluginList extends ReactWidget {
   }
 
   /**
-   * Handle the `'mousedown'` event for the plugin list.
+   * Handle the `'click'` event for the plugin list.
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtMousedown(event: React.MouseEvent<HTMLDivElement>): void {
+  private _evtClick(event: React.MouseEvent<HTMLDivElement>): void {
     const id = event.currentTarget.getAttribute('data-id');
     if (id) {
       this._selectPlugin(id);
@@ -673,7 +673,7 @@ export class PluginList extends ReactWidget {
           role="tab"
           aria-selected={id === this.selection}
           tabIndex={id === this._focusedId ? 0 : -1}
-          onClick={this._evtMousedown}
+          onClick={this._evtClick}
           className={classes(
             ENTRY_CLASS,
             id === this.selection ? 'jp-mod-selected' : '',
