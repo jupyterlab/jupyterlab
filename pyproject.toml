@@ -130,7 +130,6 @@ docs = [
     "jsx-lexer",
     "myst-parser",
     "pydata-sphinx-theme>=0.13.0",
-    "pyenchant",
     "pytest",
     "pytest-check-links",
     "pytest-jupyter",

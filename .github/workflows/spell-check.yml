@@ -40,7 +40,7 @@ jobs:
       - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --group docs
+          python -m pip install --group docs pyenchant
 
       - name: Run Sphinx spelling builder
         env:
