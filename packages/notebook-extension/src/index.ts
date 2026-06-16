@@ -2653,6 +2653,9 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+    commands.notifyCommandChanged(CommandIDs.copy);
+    commands.notifyCommandChanged(CommandIDs.cut);
+    commands.notifyCommandChanged(CommandIDs.duplicateBelow);
   });
   tracker.widgetAdded.connect((_, panel) => {
     panel.content.stateChanged.connect((_, args) => {
