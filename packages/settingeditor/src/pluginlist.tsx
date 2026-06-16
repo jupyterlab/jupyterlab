@@ -671,9 +671,7 @@ export class PluginList extends ReactWidget {
     const matchesId = hasMatchDetails
       ? `jp-PluginList-matches-${encodeURIComponent(id)}`
       : undefined;
-    const ariaLabel = this._errors[id]
-      ? trans.__('%1 (error)', title)
-      : title;
+    const ariaLabel = this._errors[id] ? trans.__('%1 (error)', title) : title;
 
     return (
       <li role="presentation" key={id}>
@@ -752,7 +750,11 @@ export class PluginList extends ReactWidget {
             <h1 className="jp-PluginList-header" id={MODIFIED_HEADER_ID}>
               {trans.__('Modified')}
             </h1>
-            <ul role="tablist" aria-labelledby={MODIFIED_HEADER_ID} aria-orientation="vertical">
+            <ul
+              role="tablist"
+              aria-labelledby={MODIFIED_HEADER_ID}
+              aria-orientation="vertical"
+            >
               {modifiedItems}
             </ul>
           </div>
@@ -762,7 +764,11 @@ export class PluginList extends ReactWidget {
             <h1 className="jp-PluginList-header" id={SETTINGS_HEADER_ID}>
               {trans.__('Settings')}
             </h1>
-            <ul role="tablist" aria-labelledby={SETTINGS_HEADER_ID} aria-orientation="vertical">
+            <ul
+              role="tablist"
+              aria-labelledby={SETTINGS_HEADER_ID}
+              aria-orientation="vertical"
+            >
               {otherItems}
             </ul>
           </div>
