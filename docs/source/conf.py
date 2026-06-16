@@ -89,6 +89,12 @@ templates_path = ["_templates"]
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
 source_suffix = {".md": "markdown"}
+if SPELLING_BUILD_ENABLED:
+    source_suffix.update(
+        {
+            ".txt": "restructuredtext",
+        }
+    )
 
 # The master toctree document.
 master_doc = "index"
@@ -129,6 +135,8 @@ gettext_compact = False
 exclude_patterns = [
     "api/media/*.md",
 ]
+if SPELLING_BUILD_ENABLED:
+    exclude_patterns += ["spelling_wordlist.txt", "docs/source/spelling_wordlist.txt"]
 
 if "sphinxcontrib.spelling" in extensions:
     # Sphinx consumes these values dynamically by their module-global names.
@@ -137,7 +145,9 @@ if "sphinxcontrib.spelling" in extensions:
             "spelling_word_list_filename": ["spelling_wordlist.txt"],
             "spelling_exclude_patterns": [
                 "api/**",
+                "docs/source/api/**",
                 "getting_started/changelog.md",
+                "docs/source/getting_started/changelog.md",
             ],
             "spelling_filters": [
                 "spelling_filters.CodeIdentifierFilter",
@@ -571,6 +581,19 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 def setup(app):
     if SPELLING_BUILD_ENABLED:
+        src_dir = Path(app.srcdir)
+        if (src_dir / "docs/source").exists():
+            src_dir = src_dir / "docs/source"
+        copy_code_files(src_dir / SNIPPETS_FOLDER)
+        document_commands_list(src_dir)
+        document_plugins_tokens_list(
+            HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / PLUGINS_LIST_PATH,
+            src_dir / PLUGINS_LIST_DOC,
+        )
+        document_plugins_tokens_list(
+            HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / TOKENS_LIST_PATH,
+            src_dir / TOKENS_LIST_DOC,
+        )
         return
 
     # Enable Plausible.io stats

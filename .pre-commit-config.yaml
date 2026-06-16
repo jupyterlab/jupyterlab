@@ -40,7 +40,7 @@ repos:
         args:
           - --ignore-words=.codespellignore
           - --skip=docs/source/api/**,docs/source/getting_started/changelog.md
-        files: \.(md|rst|txt)$
+        files: \.(md|txt)$
 
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -76,6 +76,13 @@ repos:
         additional_dependencies: [shellcheck-py==0.11.0.1]
         pass_filenames: false
         files: \.sh$
+      - id: sphinx-spelling
+        name: sphinx spelling
+        entry: python scripts/check_spelling.py --staged
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        files: ^(\.github/workflows/spell-check\.yml|docs/source/conf\.py|docs/source/spelling_wordlist\.txt|docs/source/_ext/.*|pyproject\.toml|scripts/check_spelling\.py|.*\.(md|txt))$
       - id: integrity
         name: integrity
         entry: 'npm run integrity --force'

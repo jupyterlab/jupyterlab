@@ -133,6 +133,14 @@ hook with `pre-commit install`, you can fix everything up using
 `pre-commit run --all-files`. You need to make the fixing commit
 yourself after that.
 
+To run the optional Sphinx spelling check on staged `.md`, `.txt`, or
+spelling-support changes, install the documentation dependencies and a native
+Enchant/Aspell backend with an English dictionary, then run:
+
+```
+pre-commit run sphinx-spelling --hook-stage manual
+```
+
 You may also use the prettier npm script (e.g. `npm run prettier` or
 `yarn prettier` or `jlpm prettier`) to format the entire code base.
 We recommend installing a prettier extension for your code editor and
