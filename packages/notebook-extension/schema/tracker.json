@@ -895,6 +895,12 @@
       "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
       "type": "boolean",
       "default": false
+    },
+    "preventCopyPasteForNonEditable": {
+      "title": "Prevent copy for non-editable cells",
+      "description": "When enabled, copy/cut/duplicate commands will be disabled for cells that are read-only.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,
