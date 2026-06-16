@@ -142,6 +142,7 @@ test.describe('General', () => {
 
       const notebook = notebookPanel.content;
       const targetCell = notebook.activeCell;
+      const scrollTop = notebook.outerNode.scrollTop;
 
       if (!targetCell) {
         throw new Error('Could not find active notebook cell.');
@@ -151,6 +152,7 @@ test.describe('General', () => {
       targetCell.editorWidget?.update();
       notebook.update();
       await waitForFrame();
+      notebook.outerNode.scrollTop = scrollTop;
       await waitForFrame();
     });
     await solveLorenzInput.waitFor();
