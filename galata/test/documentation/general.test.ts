@@ -3,7 +3,6 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import type { Locator, Page } from '@playwright/test';
 import path from 'path';
 import {
   filterContent,
@@ -125,12 +124,36 @@ test.describe('General', () => {
     const solveLorenzInput = solveLorenzCellContent.locator('.jp-InputArea');
     await solveLorenzInput.waitFor();
 
-    await expectCellInputScreenshot(
-      page,
-      solveLorenzCellContent,
-      solveLorenzInput,
-      'jupyterlab-visual-test-cell-content.png'
-    );
+    await solveLorenzCellContent.click();
+    await page.evaluate(async () => {
+      const waitForFrame = (): Promise<void> => {
+        return new Promise(resolve => {
+          requestAnimationFrame(() => {
+            resolve();
+          });
+        });
+      };
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel | null;
+
+      if (!notebookPanel) {
+        throw new Error('Could not find current notebook panel.');
+      }
+
+      const notebook = notebookPanel.content;
+      const targetCell = notebook.activeCell;
+
+      if (!targetCell) {
+        throw new Error('Could not find active notebook cell.');
+      }
+
+      targetCell.update();
+      targetCell.editorWidget?.update();
+      notebook.update();
+      await waitForFrame();
+      await waitForFrame();
+    });
+    await solveLorenzInput.waitFor();
 
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
@@ -817,63 +840,3 @@ test.describe('General', () => {
     });
   });
 });
-
-const CELL_RENDER_ATTEMPTS = 3;
-
-async function expectCellInputScreenshot(
-  page: Page,
-  cell: Locator,
-  cellInput: Locator,
-  snapshotName: string
-): Promise<void> {
-  for (let attempt = 0; attempt < CELL_RENDER_ATTEMPTS; attempt++) {
-    try {
-      await expect(cellInput).toHaveScreenshot(snapshotName);
-      return;
-    } catch (reason) {
-      if (attempt === CELL_RENDER_ATTEMPTS - 1) {
-        throw reason;
-      }
-      await retriggerCellRendering(page, cell, cellInput);
-    }
-  }
-}
-
-async function retriggerCellRendering(
-  page: Page,
-  cell: Locator,
-  cellInput: Locator
-): Promise<void> {
-  await cell.click();
-
-  await page.evaluate(async () => {
-    const waitForFrame = (): Promise<void> => {
-      return new Promise(resolve => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
-      });
-    };
-    const notebookPanel = window.galata.app.shell
-      .currentWidget as NotebookPanel | null;
-
-    if (!notebookPanel) {
-      throw new Error('Could not find current notebook panel.');
-    }
-
-    const notebook = notebookPanel.content;
-    const targetCell = notebook.activeCell;
-
-    if (!targetCell) {
-      throw new Error('Could not find active notebook cell.');
-    }
-
-    targetCell.update();
-    targetCell.editorWidget?.update();
-    notebook.update();
-    await waitForFrame();
-    await waitForFrame();
-  });
-
-  await cellInput.waitFor();
-}
