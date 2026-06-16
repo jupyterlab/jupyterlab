@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
+import type { FileWatcher } from './filewatcher';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type {
   DocumentRegistry,
@@ -460,3 +461,36 @@ export type RecentDocument = {
    */
   factory?: string;
 };
+
+/**
+ * The file watcher service token.
+ */
+export const IFileWatcherService = new Token<IFileWatcherService>(
+  '@jupyterlab/docmanager:IFileWatcherService',
+  'A service that detects external file changes via OS-level filesystem notifications.'
+);
+
+/**
+ * The interface for the file watcher service.
+ */
+export interface IFileWatcherService extends IDisposable {
+  /**
+   * Whether the backend watchdog library is available.
+   */
+  readonly isAvailable: boolean;
+
+  /**
+   * Signal emitted when a subscribed file changes on disk.
+   */
+  readonly fileChanged: ISignal<this, FileWatcher.IChangedArgs>;
+
+  /**
+   * Subscribe to change events for a file path.
+   */
+  subscribe(path: string): void;
+
+  /**
+   * Unsubscribe from change events for a file path.
+   */
+  unsubscribe(path: string): void;
+}

@@ -57,6 +57,7 @@ from .handlers.announcements import (
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
+from .handlers.file_watch_handler import FileWatchHandler, file_watch_handler_path
 from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
@@ -915,6 +916,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
+
+        # Add filesystem notification handler (requires watchdog; degrades gracefully otherwise)
+        handlers.append((file_watch_handler_path, FileWatchHandler))
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
