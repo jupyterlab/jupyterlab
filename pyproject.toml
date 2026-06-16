@@ -73,18 +73,6 @@ Zulip = "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab"
 Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
-docs = [
-    "sphinx>=1.8,<8.2.0",
-    "sphinx-copybutton",
-    "sphinxcontrib-spelling",
-    "pydata-sphinx-theme>=0.13.0",
-    "shellcheck-py",
-    "pytest",
-    "pytest-jupyter",
-    "pytest-check-links",
-    "jsx-lexer",
-    "myst-parser",
-]
 docs-screenshots = [
     # Freeze the packages to ensure consistent look and feel
     # IPython is frozen because its version is displayed in
@@ -135,7 +123,20 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=1.0.2"
+    "jupyter-builder>=1.0.2",
+]
+docs = [
+    { include-group = "builder" },
+    "jsx-lexer",
+    "myst-parser",
+    "pydata-sphinx-theme>=0.13.0",
+    "pytest",
+    "pytest-check-links",
+    "pytest-jupyter",
+    "shellcheck-py",
+    "sphinx>=1.8,<8.2.0",
+    "sphinx-copybutton",
+    "sphinxcontrib-spelling",
 ]
 
 [tool.check-wheel-contents]
