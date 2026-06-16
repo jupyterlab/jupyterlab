@@ -58,6 +58,18 @@ const SETTINGS_HEADER_ID = 'jp-PluginList-settings-header';
 const ENTRY_CLASS = 'jp-PluginList-entry';
 
 /**
+ * The class name for a plugin list entry search-match list.
+ */
+const MATCHES_CLASS = 'jp-PluginList-matches';
+
+/**
+ * Element with ARIA element reference properties.
+ */
+interface IElementAriaDescriptions {
+  ariaDescribedByElements: HTMLElement[];
+}
+
+/**
  * A list of plugins with editable settings.
  */
 export class PluginList extends ReactWidget {
@@ -200,7 +212,41 @@ export class PluginList extends ReactWidget {
         this._focusEntryElement(entry);
       }
     }
+    this._syncEntryAccessibleDescriptions();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Link plugin entry tabs to their search-match lists for screen readers.
+   */
+  private _syncEntryAccessibleDescriptions(): void {
+    const supportsElementReferences =
+      'ariaDescribedByElements' in HTMLElement.prototype;
+
+    for (const entry of this._getEntryElements()) {
+      const matchesList = entry.querySelector(
+        `:scope > ul.${MATCHES_CLASS}`
+      ) as HTMLUListElement | null;
+
+      if (supportsElementReferences) {
+        const entryWithAria = entry as HTMLElement & IElementAriaDescriptions;
+        entryWithAria.ariaDescribedByElements = matchesList
+          ? [matchesList]
+          : [];
+        continue;
+      }
+
+      if (matchesList) {
+        const pluginId = entry.getAttribute('data-id') ?? '';
+        const matchesId = `jp-PluginList-matches-${encodeURIComponent(pluginId)}`;
+        if (!matchesList.id) {
+          matchesList.id = matchesId;
+        }
+        entry.setAttribute('aria-describedby', matchesList.id);
+      } else {
+        entry.removeAttribute('aria-describedby');
+      }
+    }
   }
 
   /**
@@ -668,9 +714,6 @@ export class PluginList extends ReactWidget {
       : undefined;
     const hasMatchDetails =
       filteredProperties !== undefined && filteredProperties.length > 0;
-    const matchesId = hasMatchDetails
-      ? `jp-PluginList-matches-${encodeURIComponent(id)}`
-      : undefined;
     const ariaLabel = this._errors[id] ? trans.__('%1 (error)', title) : title;
 
     return (
@@ -679,7 +722,6 @@ export class PluginList extends ReactWidget {
           role="tab"
           aria-selected={id === this.selection}
           aria-label={ariaLabel}
-          aria-describedby={matchesId}
           tabIndex={id === this._focusedId ? 0 : -1}
           onClick={this._evtClick}
           className={classes(
@@ -703,7 +745,9 @@ export class PluginList extends ReactWidget {
               {hightlightedTitle}
             </span>
           </div>
-          <ul id={matchesId}>{filteredProperties}</ul>
+          <ul className={hasMatchDetails ? MATCHES_CLASS : undefined}>
+            {filteredProperties}
+          </ul>
         </div>
       </li>
     );
