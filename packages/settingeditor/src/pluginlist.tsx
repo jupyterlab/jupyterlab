@@ -742,7 +742,7 @@ export class PluginList extends ReactWidget {
             <h1 className="jp-PluginList-header" id={MODIFIED_HEADER_ID}>
               {trans.__('Modified')}
             </h1>
-            <ul role="tablist" aria-labelledby={MODIFIED_HEADER_ID}>
+            <ul role="tablist" aria-labelledby={MODIFIED_HEADER_ID} aria-orientation="vertical">
               {modifiedItems}
             </ul>
           </div>
@@ -752,7 +752,7 @@ export class PluginList extends ReactWidget {
             <h1 className="jp-PluginList-header" id={SETTINGS_HEADER_ID}>
               {trans.__('Settings')}
             </h1>
-            <ul role="tablist" aria-labelledby={SETTINGS_HEADER_ID}>
+            <ul role="tablist" aria-labelledby={SETTINGS_HEADER_ID} aria-orientation="vertical">
               {otherItems}
             </ul>
           </div>
