@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * 1'
