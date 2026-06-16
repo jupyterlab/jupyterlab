@@ -19,7 +19,10 @@ from tempfile import TemporaryDirectory
 ROOT = Path(__file__).resolve().parent.parent
 DOCS_SOURCE = ROOT / "docs" / "source"
 TEXT_DOCUMENT_SUFFIXES = {".md", ".txt"}
-EXCLUDED_TEXT_DOCUMENTS = {"docs/source/spelling_wordlist.txt"}
+EXCLUDED_TEXT_DOCUMENTS = {
+    "CHANGELOG.md",
+    "docs/source/spelling_wordlist.txt",
+}
 SUPPORT_FILE_PATHS = {
     ".github/workflows/spell-check.yml",
     "docs/source/conf.py",
@@ -78,6 +81,9 @@ def is_text_document(path: str) -> bool:
         return False
 
     suffix = Path(path).suffix.lower()
+    if suffix == ".txt" and path.startswith("galata/"):
+        return False
+
     return suffix in TEXT_DOCUMENT_SUFFIXES
 
 
