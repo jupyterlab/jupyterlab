@@ -666,12 +666,22 @@ export class PluginList extends ReactWidget {
           return <li key={`${id}-${fieldValue}`}> {highlighted} </li>;
         })
       : undefined;
+    const hasMatchDetails =
+      filteredProperties !== undefined && filteredProperties.length > 0;
+    const matchesId = hasMatchDetails
+      ? `jp-PluginList-matches-${encodeURIComponent(id)}`
+      : undefined;
+    const ariaLabel = this._errors[id]
+      ? trans.__('%1 (error)', title)
+      : title;
 
     return (
       <li role="presentation" key={id}>
         <div
           role="tab"
           aria-selected={id === this.selection}
+          aria-label={ariaLabel}
+          aria-describedby={matchesId}
           tabIndex={id === this._focusedId ? 0 : -1}
           onClick={this._evtClick}
           className={classes(
@@ -695,7 +705,7 @@ export class PluginList extends ReactWidget {
               {hightlightedTitle}
             </span>
           </div>
-          <ul>{filteredProperties}</ul>
+          <ul id={matchesId}>{filteredProperties}</ul>
         </div>
       </li>
     );
