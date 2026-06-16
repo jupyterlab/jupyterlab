@@ -227,8 +227,6 @@ def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
 
     copied_files = []
     for img in src.rglob("*.png"):
-        if "-visual-test-" in img.name:
-            continue
         target = temp_folder / (img.name.replace("-documentation-linux", ""))
         shutil.copyfile(str(img), str(target))
         copied_files.append(target)

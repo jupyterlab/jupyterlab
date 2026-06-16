@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { Locator, Page } from '@playwright/test';
 import path from 'path';
 import {
   filterContent,
@@ -123,7 +124,10 @@ test.describe('General', () => {
     const solveLorenzInput = solveLorenzCellContent.locator('.jp-InputArea');
     await solveLorenzInput.waitFor();
 
-    await expect(solveLorenzInput).toHaveScreenshot(
+    await expectCellInputScreenshot(
+      page,
+      solveLorenzCellContent,
+      solveLorenzInput,
       'jupyterlab-visual-test-cell-content.png'
     );
 
@@ -812,3 +816,39 @@ test.describe('General', () => {
     });
   });
 });
+
+const CELL_RENDER_ATTEMPTS = 3;
+
+async function expectCellInputScreenshot(
+  page: Page,
+  cell: Locator,
+  cellInput: Locator,
+  snapshotName: string
+): Promise<void> {
+  for (let attempt = 0; attempt < CELL_RENDER_ATTEMPTS; attempt++) {
+    try {
+      await expect(cellInput).toHaveScreenshot(snapshotName);
+      return;
+    } catch (reason) {
+      if (attempt === CELL_RENDER_ATTEMPTS - 1) {
+        throw reason;
+      }
+      await retriggerCellRendering(page, cell, cellInput);
+    }
+  }
+}
+
+async function retriggerCellRendering(
+  page: Page,
+  cell: Locator,
+  cellInput: Locator
+): Promise<void> {
+  await cell.scrollIntoViewIfNeeded();
+  await cell.click();
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  await cellInput.waitFor();
+}
