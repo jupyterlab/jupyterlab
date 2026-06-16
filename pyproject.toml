@@ -124,20 +124,21 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=1.0.0b1"
+    "jupyter-builder>=1.0.0b1",
 ]
 docs = [
+    { include-group = "builder" },
+    "jsx-lexer",
+    "myst-parser",
+    "pydata-sphinx-theme>=0.13.0",
+    "pyenchant",
+    "pytest",
+    "pytest-check-links",
+    "pytest-jupyter",
+    "shellcheck-py",
     "sphinx>=1.8,<8.2.0",
     "sphinx-copybutton",
     "sphinxcontrib-spelling",
-    "pydata-sphinx-theme>=0.13.0",
-    "shellcheck-py",
-    "pytest",
-    "pytest-jupyter",
-    "pytest-check-links",
-    "jsx-lexer",
-    "myst-parser",
-    "pyenchant",
 ]
 
 [tool.check-wheel-contents]
