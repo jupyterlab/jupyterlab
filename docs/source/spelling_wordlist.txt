@@ -11,11 +11,13 @@ IPython
 Jupyverse
 Quansight
 Yjs
+hatchling
 
 # Common technical terms in docs
 frontend
 frontends
 backend
+backends
 filesystem
 websocket
 json
