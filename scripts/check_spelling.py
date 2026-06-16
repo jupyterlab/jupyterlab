@@ -22,6 +22,7 @@ TEXT_DOCUMENT_SUFFIXES = {".md", ".txt"}
 EXCLUDED_TEXT_DOCUMENTS = {
     "CHANGELOG.md",
     "docs/source/spelling_wordlist.txt",
+    "scripts/release_template.txt",
 }
 SUPPORT_FILE_PATHS = {
     ".github/workflows/spell-check.yml",
