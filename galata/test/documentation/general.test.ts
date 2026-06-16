@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Locator, Page } from '@playwright/test';
 import path from 'path';
 import {
@@ -843,12 +844,36 @@ async function retriggerCellRendering(
   cell: Locator,
   cellInput: Locator
 ): Promise<void> {
-  await cell.scrollIntoViewIfNeeded();
   await cell.click();
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowUp');
+
+  await page.evaluate(async () => {
+    const waitForFrame = (): Promise<void> => {
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    };
+    const notebookPanel = window.galata.app.shell
+      .currentWidget as NotebookPanel | null;
+
+    if (!notebookPanel) {
+      throw new Error('Could not find current notebook panel.');
+    }
+
+    const notebook = notebookPanel.content;
+    const targetCell = notebook.activeCell;
+
+    if (!targetCell) {
+      throw new Error('Could not find active notebook cell.');
+    }
+
+    targetCell.update();
+    targetCell.editorWidget?.update();
+    notebook.update();
+    await waitForFrame();
+    await waitForFrame();
+  });
+
   await cellInput.waitFor();
 }
