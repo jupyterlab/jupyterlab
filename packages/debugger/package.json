@@ -50,7 +50,7 @@
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.14",
     "@jupyter/react-components": "^0.16.6",
-    "@jupyter/ydoc": "^4.0.0-b1",
+    "@jupyter/ydoc": "^4.0.0",
     "@jupyterlab/application": "^4.6.0-rc.0",
     "@jupyterlab/apputils": "^4.7.0-rc.0",
     "@jupyterlab/cells": "^4.6.0-rc.0",
