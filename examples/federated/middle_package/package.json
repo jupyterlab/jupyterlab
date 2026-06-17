@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-middle",
-  "version": "3.5.0-rc.0",
+  "version": "3.5.0-rc.1",
   "private": true,
   "scripts": {
     "build": "npm run clean && jupyter-builder build --core-package-file ../core_package/package.json .",

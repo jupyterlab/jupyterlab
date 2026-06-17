@@ -785,6 +785,48 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.6.0rc1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0rc0...ec0b487fa4f836a2ed68811243c27224807ffecd))
+
+### Bugs fixed
+
+- Fix flaky filebrowser filter navigation test [#19015](https://github.com/jupyterlab/jupyterlab/pull/19015) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Forbid relative URLs in extensionmanager [#19013](https://github.com/jupyterlab/jupyterlab/pull/19013) ([@Yann-P](https://github.com/Yann-P), [@krassowski](https://github.com/krassowski))
+- Avoid debugger toolbar button flicker during kernel startup [#19006](https://github.com/jupyterlab/jupyterlab/pull/19006) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Stabilize subpixel editor line shift on Welcome screenshot [#19039](https://github.com/jupyterlab/jupyterlab/pull/19039) ([@krassowski](https://github.com/krassowski), [@MUFFANUJ](https://github.com/MUFFANUJ))
+- Update `@jupyter/ydoc` to final 4.0 [#19034](https://github.com/jupyterlab/jupyterlab/pull/19034) ([@krassowski](https://github.com/krassowski))
+- Split external link checks and only run if diff includes a URL [#19029](https://github.com/jupyterlab/jupyterlab/pull/19029) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Baseline spelling cleanup for docs and README files [#19025](https://github.com/jupyterlab/jupyterlab/pull/19025) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Make docs dependencies a dependency group [#19024](https://github.com/jupyterlab/jupyterlab/pull/19024) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@bollwyvl](https://github.com/bollwyvl), [@krassowski](https://github.com/krassowski))
+- Update @jupyter/ydoc v4.0.0-b1 [#19023](https://github.com/jupyterlab/jupyterlab/pull/19023) ([@davidbrochart](https://github.com/davidbrochart), [@krassowski](https://github.com/krassowski))
+- Drop `setuptools` dependency [#19020](https://github.com/jupyterlab/jupyterlab/pull/19020) ([@krassowski](https://github.com/krassowski), [@Darshan808](https://github.com/Darshan808), [@MUFFANUJ](https://github.com/MUFFANUJ), [@bollwyvl](https://github.com/bollwyvl))
+
+### Documentation improvements
+
+- Update user-facing changelog for 4.6.0 RC [#19019](https://github.com/jupyterlab/jupyterlab/pull/19019) ([@krassowski](https://github.com/krassowski), [@Yann-P](https://github.com/Yann-P))
+
+### Other merged PRs
+
+- Bump markdown-it from 14.1.0 to 14.2.0 [#19041](https://github.com/jupyterlab/jupyterlab/pull/19041) ([@krassowski](https://github.com/krassowski))
+- Bump form-data from 4.0.5 to 4.0.6 [#19040](https://github.com/jupyterlab/jupyterlab/pull/19040) ([@krassowski](https://github.com/krassowski))
+- Bump dompurify from 3.4.0 to 3.4.10 [#19037](https://github.com/jupyterlab/jupyterlab/pull/19037) ([@krassowski](https://github.com/krassowski))
+- Bump @babel/core from 7.21.0 to 7.29.6 [#19036](https://github.com/jupyterlab/jupyterlab/pull/19036) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-10&to=2026-06-17&type=c))
+
+@bollwyvl ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2026-06-10..2026-06-17&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-06-10..2026-06-17&type=Issues)) | @davidbrochart ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2026-06-10..2026-06-17&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-10..2026-06-17&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-10..2026-06-17&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-06-10..2026-06-17&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.6.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0b1...4fd02163056f39ab5600b76df294452d0b289afa))
@@ -827,8 +869,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-05-28&to=2026-06-10&type=c))
 
 @arun-357 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarun-357+updated%3A2026-05-28..2026-06-10&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-05-28..2026-06-10&type=Issues)) | @claude ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aclaude+updated%3A2026-05-28..2026-06-10&type=Issues)) | @Copilot ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACopilot+updated%3A2026-05-28..2026-06-10&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-05-28..2026-06-10&type=Issues)) | @davidbrochart ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2026-05-28..2026-06-10&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-05-28..2026-06-10&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-05-28..2026-06-10&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-05-28..2026-06-10&type=Issues)) | @nightcityblade ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Anightcityblade+updated%3A2026-05-28..2026-06-10&type=Issues)) | @TheChyeahhh ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ATheChyeahhh+updated%3A2026-05-28..2026-06-10&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-05-28..2026-06-10&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.6.0b1
 
