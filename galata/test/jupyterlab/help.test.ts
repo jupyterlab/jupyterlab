@@ -33,7 +33,12 @@ test('Switch back and forth to reference page', async ({ page }) => {
   // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
   await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-  await page.menu.clickMenuItem('Help>Jupyter Reference');
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('help:open', {
+      url: 'https://jupyter.org/documentation',
+      text: 'Jupyter Reference'
+    });
+  });
 
   await expect(
     page
