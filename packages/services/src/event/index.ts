@@ -39,7 +39,7 @@ export class EventManager implements Event.IManager {
   /**
    * The server settings used to make API requests.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Whether the event manager is disposed.

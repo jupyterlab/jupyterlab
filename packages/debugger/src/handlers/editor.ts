@@ -92,7 +92,7 @@ export class EditorHandler implements IDisposable {
     );
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(
-      (_, frame: IDebugger.IStackFrame) => {
+      (_, frame: IDebugger.IStackFrame | null) => {
         const editor = this.editor;
         if (editor) {
           EditorHandler.clearHighlight(editor);
@@ -193,7 +193,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Whether the handler is disposed.
    */
-  isDisposed: boolean;
+  isDisposed = false;
 
   /**
    * Dispose the handler.

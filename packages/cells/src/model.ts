@@ -247,7 +247,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
 
-  readonly sharedModel: ISharedCell;
+  readonly sharedModel!: ISharedCell;
 
   /**
    * The type of cell.
@@ -480,10 +480,7 @@ export abstract class AttachmentsCellModel extends CellModel {
   /**
    * Handle a change to the code cell value.
    */
-  private _onSharedModelChanged(
-    slot: ISharedAttachmentsCell,
-    change: CellChange
-  ): void {
+  private _onSharedModelChanged(slot: ISharedCell, change: CellChange): void {
     if (change.attachmentsChange) {
       const cell = this.sharedModel as ISharedAttachmentsCell;
       globalModelDBMutex(() =>
@@ -690,7 +687,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return this._outputs;
   }
 
-  readonly sharedModel: ISharedCodeCell;
+  readonly sharedModel!: ISharedCodeCell;
 
   clearExecution(): void {
     this.outputs.clear();
@@ -792,7 +789,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
               );
             }
           }
-          const outputs = event.newValues.map(output => output.toJSON());
+          const outputs = event.newValues.map((output: any) => output.toJSON());
           codeCell.updateOutputs(
             event.newIndex,
             event.newIndex,
@@ -802,7 +799,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           break;
         }
         case 'set': {
-          const newValues = event.newValues.map(output => output.toJSON());
+          const newValues = event.newValues.map((output: any) =>
+            output.toJSON()
+          );
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,

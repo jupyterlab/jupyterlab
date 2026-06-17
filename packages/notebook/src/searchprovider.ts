@@ -929,7 +929,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   // used for testing only
-  protected delayedActiveCellChangeHandlerReady: Promise<void>;
+  protected delayedActiveCellChangeHandlerReady!: Promise<void>;
   private _currentProviderIndex: number | null = null;
   private _delayedActiveCellChangeHandler: number | null = null;
   private _filters: IFilters | undefined;

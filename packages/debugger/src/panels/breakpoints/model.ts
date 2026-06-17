@@ -109,7 +109,7 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
-  private _selectedBreakpoint: IDebugger.IBreakpoint;
+  private _selectedBreakpoint!: IDebugger.IBreakpoint;
   private _selectedChanged = new Signal<this, IDebugger.IBreakpoint>(this);
   private _displayRegistry: IDebuggerDisplayRegistry;
 }

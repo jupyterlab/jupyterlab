@@ -85,7 +85,7 @@ export class ConsoleHistory implements IConsoleHistory {
   /**
    * The client session used by the foreign handler.
    */
-  readonly sessionContext: ISessionContext | null;
+  readonly sessionContext!: ISessionContext | null;
 
   /**
    * The current editor used by the history manager.

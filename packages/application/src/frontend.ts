@@ -209,8 +209,8 @@ export abstract class JupyterFrontEnd<
     }
   }
 
-  private _contextMenuEvent: MouseEvent;
-  private _format: U;
+  private _contextMenuEvent!: MouseEvent;
+  private _format!: U;
   private _formatChanged = new Signal<this, U>(this);
 }
 

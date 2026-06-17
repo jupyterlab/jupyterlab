@@ -72,7 +72,7 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
   /**
    * Initial configuration for the language servers.
    */
-  initialConfigurations: TLanguageServerConfigurations;
+  initialConfigurations!: TLanguageServerConfigurations;
 
   /**
    * Signal emitted when the manager is initialized.

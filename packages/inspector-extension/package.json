@@ -39,6 +39,7 @@
   "dependencies": {
     "@jupyterlab/application": "^4.6.0-rc.0",
     "@jupyterlab/apputils": "^4.7.0-rc.0",
+    "@jupyterlab/cells": "^4.6.0-rc.0",
     "@jupyterlab/console": "^4.6.0-rc.0",
     "@jupyterlab/inspector": "^4.6.0-rc.0",
     "@jupyterlab/launcher": "^4.6.0-rc.0",
@@ -49,7 +50,7 @@
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "publishConfig": {
     "access": "public"

@@ -108,13 +108,15 @@
     "@rspack/cli": "2.0.2",
     "@rspack/core": "2.0.2",
     "@types/react": "^18.0.26",
+    "@vscode/debugprotocol@^1.51.0": "patch:@vscode/debugprotocol@npm%3A1.59.0#./.yarn/patches/@vscode-debugprotocol-npm-1.59.0-99b8382360.patch",
     "lodash": "^4.17.23",
     "lodash-es": "^4.18.1",
     "marked": "^17.0.6",
     "prettier": "^3.8.1",
     "react": "^18.2.0",
     "type-fest": "^4.30.0",
-    "yjs": "^13.5.40"
+    "yjs": "^13.5.40",
+    "mathjax-full@^3.2.2": "patch:mathjax-full@npm%3A3.2.2#./.yarn/patches/mathjax-full-npm-3.2.2-211c89f732.patch"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",

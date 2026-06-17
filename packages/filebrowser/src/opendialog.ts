@@ -199,7 +199,7 @@ class OpenDialogBody
         this._browser = browser;
 
         // Add toolbar items
-        setToolbar(this._browser, (browser: FileBrowser) => [
+        setToolbar(this._browser, () => [
           {
             name: 'new-folder',
             widget: new ToolbarButton({
@@ -296,7 +296,7 @@ class OpenDialogBody
   }
 
   private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
-  private _browser: FileBrowser;
+  private _browser!: FileBrowser;
 }
 
 namespace Private {

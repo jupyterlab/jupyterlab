@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import type { IMovableSectionDestination } from '@jupyterlab/apputils';
+import type { Dialog, IMovableSectionDestination } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
@@ -532,7 +532,10 @@ export class FileBrowser
       await this.rename();
       return model;
     } catch (err) {
-      void showErrorMessage(this._trans.__('Error'), err);
+      void showErrorMessage(
+        this._trans.__('Error'),
+        err as string | Dialog.IError
+      );
       throw err;
     }
   }
@@ -769,7 +772,7 @@ export class FileBrowser
   private _filePending: Promise<Contents.IModel> | null = null;
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
-  private _navigateToCurrentDirectory: boolean;
+  private _navigateToCurrentDirectory!: boolean;
   private _clearFilterOnNavigation: boolean = true;
   private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;

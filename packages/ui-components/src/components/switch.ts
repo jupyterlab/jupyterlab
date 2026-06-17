@@ -100,7 +100,7 @@ export class Switch extends Widget {
   private _button = document.createElement('button');
   private _label = document.createElement('label');
 
-  private _value: boolean;
+  private _value: boolean = false;
   private _valueChanged = new Signal<
     this,
     IChangedArgs<boolean, boolean, 'value'>

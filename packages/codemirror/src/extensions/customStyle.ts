@@ -31,7 +31,7 @@ export type CustomTheme = {
  * The first non-null value takes precedence
  */
 const customThemeConfig = Facet.define<CustomTheme, CustomTheme>({
-  combine(configs: CustomTheme[]) {
+  combine(configs: readonly CustomTheme[]): CustomTheme {
     return combineConfig(
       configs,
       {
@@ -44,7 +44,7 @@ const customThemeConfig = Facet.define<CustomTheme, CustomTheme>({
         fontSize: (a, b) => a ?? b,
         lineHeight: (a, b) => a ?? b
       }
-    );
+    ) as CustomTheme;
   }
 });
 

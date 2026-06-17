@@ -25,8 +25,8 @@ const EDITOR_CLASS = 'jp-DirListing-editor';
 
 class TestFileBrowser extends FileBrowser {
   renameCalled = new Signal<this, void>(this);
-  rename(...args: any[]) {
-    const result = super.rename.apply(this, args);
+  rename(...args: Parameters<FileBrowser['rename']>) {
+    const result = super.rename(...args);
     // Allows us to spy on onUpdateRequest.
     this.renameCalled.emit();
     return result;

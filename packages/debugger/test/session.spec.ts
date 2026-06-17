@@ -151,7 +151,7 @@ describe('protocol', () => {
 
     const stoppedFuture = new PromiseDelegate<void>();
     debugSession.eventMessage.connect(
-      (sender: Debugger.Session, event: IDebugger.ISession.Event) => {
+      (sender: IDebugger.ISession, event: IDebugger.ISession.Event) => {
         switch (event.event) {
           case 'thread': {
             const msg = event as DebugProtocol.ThreadEvent;

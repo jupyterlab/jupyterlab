@@ -250,7 +250,7 @@ export class RecentsManager implements IRecentsManager {
   }
 
   private _recentsChanged = new Signal<this, void>(this);
-  private _serverRoot: string;
+  private _serverRoot!: string;
   private _stateDB: IStateDB;
   private _contentsManager: Contents.IManager;
   private _recents: Private.RecentsDatabase = {

@@ -58,7 +58,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   /**
    * The server settings of the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.
@@ -222,12 +222,19 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.
-      if (
-        err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503 ||
-        err.response?.status === 424
-      ) {
-        this._connectionFailure.emit(err);
+      const isNetworkError = err instanceof ServerConnection.NetworkError;
+      // Check structurally rather than with instanceof, as the error may
+      // come from a different copy of @jupyterlab/services.
+      const hasResponse =
+        typeof err === 'object' && err !== null && 'response' in err;
+      const status = hasResponse
+        ? (err.response as Response | undefined)?.status
+        : undefined;
+
+      if (isNetworkError || status === 503 || status === 424) {
+        this._connectionFailure.emit(
+          err instanceof Error ? err : new Error(String(err))
+        );
       }
       throw err;
     }

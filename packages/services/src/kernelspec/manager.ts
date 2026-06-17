@@ -61,7 +61,7 @@ export class KernelSpecManager
   /**
    * The server settings for the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.

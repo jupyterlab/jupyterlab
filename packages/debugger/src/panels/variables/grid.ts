@@ -111,7 +111,7 @@ export class VariablesBodyGrid extends Panel {
   private _filter: Set<string> = new Set();
   private _grid: GridPanelModule.Grid | null = null;
   private _pending: Promise<unknown> | null = null;
-  private _scope: string;
+  private _scope!: string;
 }
 
 /**

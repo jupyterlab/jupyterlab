@@ -171,7 +171,7 @@ export class Popup extends Widget {
   private _body: Widget;
   private _anchor: Widget;
   private _align: 'left' | 'right' | undefined;
-  private _observer: ResizeObserver | null;
+  private _observer!: ResizeObserver | null;
 }
 
 /**

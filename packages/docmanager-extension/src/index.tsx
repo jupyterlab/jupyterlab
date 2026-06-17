@@ -1217,9 +1217,9 @@ function addCommands(
             if (!widget?.isDisposed) {
               await context!.createCheckpoint();
             }
-          } catch (err) {
+          } catch (err: unknown) {
             // If the save was canceled by user-action, do nothing.
-            if (err.name === 'ModalCancelError') {
+            if (err instanceof Error && err.name === 'ModalCancelError') {
               return;
             }
             throw err;

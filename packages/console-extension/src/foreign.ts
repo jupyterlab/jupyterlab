@@ -36,27 +36,29 @@ function activateForeign(
 ): void {
   const trans = translator.load('jupyterlab');
   const { shell } = app;
-  tracker.widgetAdded.connect((sender, widget) => {
-    const console = widget.console;
+  tracker.widgetAdded.connect(
+    (sender: IConsoleTracker, widget: ConsolePanel) => {
+      const console = widget.console;
 
-    const handler = new ForeignHandler({
-      sessionContext: console.sessionContext,
-      parent: console
-    });
-    Private.foreignHandlerProperty.set(console, handler);
-
-    // Property showAllKernelActivity configures foreign handler enabled on start.
-    void settingRegistry
-      .get('@jupyterlab/console-extension:tracker', 'showAllKernelActivity')
-      .then(({ composite }) => {
-        const showAllKernelActivity = composite as boolean;
-        handler.enabled = showAllKernelActivity;
+      const handler = new ForeignHandler({
+        sessionContext: console.sessionContext,
+        parent: console
       });
+      Private.foreignHandlerProperty.set(console, handler);
 
-    console.disposed.connect(() => {
-      handler.dispose();
-    });
-  });
+      // Property showAllKernelActivity configures foreign handler enabled on start.
+      void settingRegistry
+        .get('@jupyterlab/console-extension:tracker', 'showAllKernelActivity')
+        .then(({ composite }) => {
+          const showAllKernelActivity = composite as boolean;
+          handler.enabled = showAllKernelActivity;
+        });
+
+      console.disposed.connect(() => {
+        handler.dispose();
+      });
+    }
+  );
 
   const { commands } = app;
   const category = trans.__('Console');

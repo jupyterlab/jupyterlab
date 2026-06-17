@@ -1,0 +1,13 @@
+diff --git a/js/core/Tree/Factory.d.ts b/js/core/Tree/Factory.d.ts
+index ea61ac80333994aaafb7293b2da98feb21c628b1..d96535f419412fe058e8c629b3d1e587321197aa 100644
+--- a/js/core/Tree/Factory.d.ts
++++ b/js/core/Tree/Factory.d.ts
+@@ -2,7 +2,7 @@ export interface FactoryNode {
+     readonly kind: string;
+ }
+ export interface FactoryNodeClass<N extends FactoryNode> {
+-    new (factory: Factory<N, FactoryNodeClass<N>>, ...args: any[]): N;
++    new (factory: any, ...args: any[]): N;
+ }
+ export interface Factory<N extends FactoryNode, C extends FactoryNodeClass<N>> {
+     create(kind: string): N;

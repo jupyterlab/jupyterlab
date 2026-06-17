@@ -284,7 +284,7 @@ export class FileBrowserModel implements IDisposable {
     const services = this.manager.services;
     this._pending = services.contents
       .get(path, options)
-      .then(contents => {
+      .then((contents: Contents.IModel) => {
         if (this.isDisposed) {
           return;
         }
@@ -307,7 +307,7 @@ export class FileBrowserModel implements IDisposable {
         this.onRunningChanged(services.sessions, services.sessions.running());
         this._refreshed.emit(void 0);
       })
-      .catch(error => {
+      .catch((error: any) => {
         this._pendingPath = null;
         this._pending = null;
         const fallbackPath = this._root || '/';
@@ -327,7 +327,7 @@ export class FileBrowserModel implements IDisposable {
           this._connectionFailure.emit(error);
         }
       });
-    return this._pending;
+    return this._pending!;
   }
 
   /**

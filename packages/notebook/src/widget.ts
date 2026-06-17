@@ -1693,8 +1693,8 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     li.append(source);
     return li;
   }
-  private _executionIndicator: HTMLElement;
-  private _source: HTMLElement;
+  private _executionIndicator!: HTMLElement;
+  private _source!: HTMLElement;
 
   private _updateActive = () => {
     if (!this._element) {

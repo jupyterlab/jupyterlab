@@ -17,7 +17,7 @@
       "ES2020.String"
     ],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmitOnError": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,

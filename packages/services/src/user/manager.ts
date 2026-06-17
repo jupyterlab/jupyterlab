@@ -70,7 +70,7 @@ export class UserManager extends BaseManager implements User.IManager {
   /**
    * The server settings for the manager.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  declare readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the manager is ready.
@@ -183,8 +183,8 @@ export class UserManager extends BaseManager implements User.IManager {
   private _ready: Promise<void>;
   private _pollUser: Poll;
 
-  private _identity: User.IIdentity;
-  private _permissions: ReadonlyJSONObject;
+  private _identity!: User.IIdentity;
+  private _permissions!: ReadonlyJSONObject;
 
   private _userChanged = new Signal<this, User.IUser>(this);
   private _connectionFailure = new Signal<this, Error>(this);

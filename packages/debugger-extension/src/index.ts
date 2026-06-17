@@ -60,6 +60,7 @@ import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -401,11 +402,13 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
       });
     } else {
-      notebookTracker.currentChanged.connect((_, notebookPanel) => {
-        if (notebookPanel) {
-          void updateHandlerAndCommands(notebookPanel);
+      notebookTracker.currentChanged.connect(
+        (_: any, notebookPanel: NotebookPanel | null) => {
+          if (notebookPanel) {
+            void updateHandlerAndCommands(notebookPanel);
+          }
         }
-      });
+      );
     }
 
     if (palette) {
@@ -423,7 +426,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         getDisplayName(source: IDebugger.Source): string {
           let displayName = source.path ?? '';
 
-          notebookTracker.forEach(panel => {
+          notebookTracker.forEach((panel: NotebookPanel) => {
             for (const cell of panel.content.widgets) {
               const model = cell.model;
               if (!isCodeCellModel(model)) {
@@ -919,7 +922,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
-      frame: IDebugger.IStackFrame
+      frame: IDebugger.IStackFrame | null
     ): Promise<void> => {
       if (!showSourcesInMainArea) {
         /* display sources in the sources panel*/
@@ -1278,7 +1281,7 @@ const main: JupyterFrontEndPlugin<void> = {
         } else {
           let items: string[] = [];
           service.session?.exceptionBreakpointFilters?.forEach(
-            availableFilter => {
+            (availableFilter: DebugProtocol.ExceptionBreakpointsFilter) => {
               items.push(availableFilter.filter);
             }
           );
@@ -1323,7 +1326,7 @@ const main: JupyterFrontEndPlugin<void> = {
       setting.changed.connect(updateSettings);
     }
 
-    service.eventMessage.connect((_, event): void => {
+    service.eventMessage.connect((_, event: IDebugger.ISession.Event): void => {
       updateState(app.commands, service);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
@@ -1337,7 +1340,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    service.sessionChanged.connect(_ => {
+    service.sessionChanged.connect((_, session: IDebugger.ISession | null) => {
       updateState(app.commands, service);
     });
 
@@ -1387,31 +1390,34 @@ const main: JupyterFrontEndPlugin<void> = {
     if (sourceViewer) {
       const { model } = service;
       const onKernelSourceOpened = (
-        _: IDebugger.Model.IKernelSources | null,
-        source: IDebugger.Source,
-        breakpoint?: IDebugger.IBreakpoint
+        _: IDebugger.Model.IKernelSources,
+        source: IDebugger.Source | null
       ): void => {
         if (!source) {
           return;
         }
-        sourceViewer.open(source, breakpoint);
+        sourceViewer.open(source);
       };
 
       model.sources.currentSourceOpened.connect(
-        (_: IDebugger.Model.ISources | null, source: IDebugger.Source) => {
-          sourceViewer.open(source);
+        (_, source: IDebugger.Source | null) => {
+          if (source) {
+            sourceViewer.open(source);
+          }
         }
       );
 
       model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
-      model.breakpoints.clicked.connect(async (_, breakpoint) => {
-        const path = breakpoint.source?.path;
-        const source = await service.getSource({
-          sourceReference: 0,
-          path
-        });
-        sourceViewer.open(source, breakpoint);
-      });
+      model.breakpoints.clicked.connect(
+        async (_, breakpoint: IDebugger.IBreakpoint) => {
+          const path = breakpoint.source?.path;
+          const source = await service.getSource({
+            sourceReference: 0,
+            path
+          });
+          sourceViewer.open(source, breakpoint);
+        }
+      );
     }
   }
 };
@@ -1505,11 +1511,13 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
 
       // Close console when debugger is terminated
-      service.eventMessage.connect((_, event): void => {
-        if (labShell && event.event === 'terminated') {
-          debugConsoleWidget?.dispose();
+      service.eventMessage.connect(
+        (_, event: IDebugger.ISession.Event): void => {
+          if (labShell && event.event === 'terminated') {
+            debugConsoleWidget?.dispose();
+          }
         }
-      });
+      );
 
       const notifyCommands = () => {
         app.commands.notifyCommandChanged(CommandIDs.evaluate);
