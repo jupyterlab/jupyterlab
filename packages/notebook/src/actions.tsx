@@ -1336,7 +1336,7 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
-   * @param preserveMetadata - Whethere to preverse cell metadata.
+   * @param preserveMetadata - Whether to preserve cell metadata.
    */
   export function copy(
     notebook: Notebook,
