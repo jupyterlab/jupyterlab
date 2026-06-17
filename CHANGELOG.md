@@ -603,6 +603,29 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.9
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.8...26936727d7f197bab4f314ca50690cd162d50312))
+
+### Bugs fixed
+
+- Fix `jupyter labextension build` crash on `webpack ≥ 5.107` [#19021](https://github.com/jupyterlab/jupyterlab/pull/19021) ([@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+- Backport PR #18992: Fix hidden cells after moving collapsed headings [#19016](https://github.com/jupyterlab/jupyterlab/pull/19016) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Forbid relative URLs in extensionmanager [#19013](https://github.com/jupyterlab/jupyterlab/pull/19013) ([@Yann-P](https://github.com/Yann-P))
+- Fix XSS in extension manager's `homepage_url` [#19003](https://github.com/jupyterlab/jupyterlab/pull/19003) ([@Yann-P](https://github.com/Yann-P))
+- Fix toolbar popup row clipping in Safari [#18998](https://github.com/jupyterlab/jupyterlab/pull/18998) ([@arun-357](https://github.com/arun-357))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-04&to=2026-06-17&type=c))
+
+@arun-357 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarun-357+updated%3A2026-06-04..2026-06-17&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-06-04..2026-06-17&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-04..2026-06-17&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-04..2026-06-17&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-06-04..2026-06-17&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.8
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.7...8d30d481fbab784096e04d85dfa3b0c36e77be2c))
@@ -626,8 +649,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-04-29&to=2026-06-04&type=c))
 
 @AliMahmoudDev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAliMahmoudDev+updated%3A2026-04-29..2026-06-04&type=Issues)) | @CrafterKolyan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACrafterKolyan+updated%3A2026-04-29..2026-06-04&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-04-29..2026-06-04&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-04-29..2026-06-04&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.7
 
