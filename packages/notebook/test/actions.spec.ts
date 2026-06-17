@@ -70,6 +70,32 @@ function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
   });
 }
 
+/**
+ * Poll until the first stream output of a cell reaches at least `minLength`
+ * characters, returning the text.
+ *
+ * #### Notes
+ * After a move or undo the cell is reconstructed and its initial output models
+ * are created during `OutputAreaModel` construction, before `list.changed` is
+ * connected. As a result, in-place stream growth updates the output data but
+ * does not emit `OutputAreaModel.changed`, so waiting on that signal is
+ * unreliable. Polling the rendered text is deterministic for these cases.
+ */
+async function waitForStreamOutput(
+  cell: CodeCell,
+  minLength: number
+): Promise<string> {
+  for (let i = 0; i < 100; i++) {
+    const text =
+      (cell.outputArea.model.get(0)?.data[STDOUT_TYPE] as string) ?? '';
+    if (text.length >= minLength) {
+      return text;
+    }
+    await sleep(100);
+  }
+  throw new Error('Timed out waiting for stream output');
+}
+
 beforeAll(async () => {
   await server.start();
 }, 30000);
@@ -1754,9 +1780,12 @@ describe('@jupyterlab/notebook', () => {
         const cellAfterFirstMove = widget.widgets[1] as CodeCell;
 
         // Wait for another output to arrive while at the moved position.
-        await sleep(1500);
-        const outputAfterFirstMove = cellAfterFirstMove.outputArea.model.get(0)
-          .data[STDOUT_TYPE] as string;
+        // (Poll rather than wait on `model.changed`, which does not fire for
+        // in-place stream growth of a reconstructed cell's initial outputs.)
+        const outputAfterFirstMove = await waitForStreamOutput(
+          cellAfterFirstMove,
+          '0\n1\n'.length
+        );
         // Verify at least one extra print arrived after the first move.
         expect(outputAfterFirstMove.length).toBeGreaterThan('0\n'.length);
 
@@ -2389,8 +2418,11 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
         const cellId = cell.model.id;
+        // A one-second cadence keeps the cell streaming well past the move and
+        // the undo, so the output received after the move (the output at risk
+        // of being rolled back) is deterministically present.
         cell.model.sharedModel.setSource(
-          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(0.2)'
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
         );
 
         const executionStarted = waitForExecutionState(cell, 'running');
@@ -2401,18 +2433,20 @@ describe('@jupyterlab/notebook', () => {
         await executionStarted;
 
         // Wait for at least one output to arrive before moving.
-        await signalToPromise(cell.outputArea.model.changed);
+        await waitForStreamOutput(cell, '0\n'.length);
 
         NotebookActions.moveDown(widget);
         const cellAfterMove = widget.widgets[1] as CodeCell;
         expect(cellAfterMove.model.id).toBe(cellId);
 
-        // Wait for another output to arrive while at the moved position.
-        await signalToPromise(cellAfterMove.outputArea.model.changed);
+        // Wait until more output arrives at the moved position (the output at
+        // risk of being rolled back by the undo).
+        await waitForStreamOutput(cellAfterMove, '0\n1\n'.length);
+        // Capture synchronously, immediately before the undo, so it matches
+        // the snapshot the undo takes.
         const outputAfterMove = cellAfterMove.outputArea.model.get(0).data[
           STDOUT_TYPE
         ] as string;
-        expect(outputAfterMove.length).toBeGreaterThan(0);
 
         // Undo the move.
         NotebookActions.undo(widget);
@@ -2434,7 +2468,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(cellAfterUndo.model.executionState).toBe('idle');
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
-      }, 10000);
+      }, 20000);
     });
 
     describe('#redo()', () => {

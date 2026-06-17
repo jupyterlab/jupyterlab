@@ -803,7 +803,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // a cell is initialized from Y.js data after a move or undo). Without
     // this, stream text appended after a move is never synced back to Y.js,
     // causing a subsequent move to lose those outputs (stale toJSON).
-    if (event.type === 'add') {
+    // A 'set' event that replaces the output model (e.g. when the trusted
+    // state changes) also needs a fresh listener, as the previous one was
+    // bound to the now-discarded model.
+    if (
+      event.type === 'add' ||
+      (event.type === 'set' && event.oldValues[0] !== event.newValues[0])
+    ) {
       for (const output of event.newValues) {
         if (output.type === 'stream') {
           this._connectStreamListener(output, event.newIndex);

@@ -1684,7 +1684,6 @@ export namespace NotebookActions {
       // the move; snapshot the current outputs so anything received since
       // then can be re-applied after the undo.
       fresh.outputs = cell.model.outputs.toJSON();
-      fresh.executionCount = cell.model.executionCount;
       preCaptured.set(stored.cellId, fresh);
     });
 
@@ -2606,8 +2605,6 @@ namespace Private {
      * since. Re-applying this snapshot after the undo prevents that loss.
      */
     outputs?: nbformat.IOutput[];
-    /** Execution count snapshot matching `outputs`. */
-    executionCount?: nbformat.ExecutionCount;
   }
 
   /**
@@ -2641,45 +2638,43 @@ namespace Private {
    */
   export function restoreExecution(
     notebook: Notebook,
-    {
-      cellId,
-      future,
-      isDone,
-      buffered,
-      outputs,
-      executionCount
-    }: IStoredCellExecution
+    { cellId, future, isDone, buffered, outputs }: IStoredCellExecution
   ): void {
     const cell = notebook.widgets.find(w => w.model.id === cellId);
     if (!(cell instanceof CodeCell)) {
       return;
     }
     if (outputs && !JSONExt.deepEqual(outputs, cell.model.outputs.toJSON())) {
-      // Re-apply the output snapshot taken just before the undo
+      // Re-apply the output snapshot taken just before the undo: the Y.js
+      // undo rolled the outputs back to their state at the time of the
+      // undone action. Going through the output area model keeps the
+      // in-memory model and the shared model in sync (output changes are
+      // not tracked by the undo manager, so this does not pollute history).
       cell.model.outputs.fromJSON(outputs);
     }
-    if (isDone()) {
-      if (
-        executionCount !== undefined &&
-        cell.model.executionCount !== executionCount
-      ) {
-        cell.model.executionCount = executionCount;
-      }
-      cell.model.executionState = 'idle';
-      return;
-    }
+    // Reattach the future (without clearing existing outputs) and replay any
+    // IOPub messages buffered while it was detached. This is done whether or
+    // not the execution has already finished, so that final outputs that
+    // arrived while detached are not lost (e.g. if the kernel completed in the
+    // brief window during the undo).
     cell.outputArea.reattachFuture(future);
-    // executionState is ephemeral and not serialized to JSON, so the recreated
-    // cell widget starts as 'idle'. Restore it to 'running' explicitly.
-    cell.model.executionState = 'running';
     for (const msg of buffered) {
       void future.onIOPub(msg);
+    }
+    if (!isDone()) {
+      // executionState is ephemeral and not serialized to JSON, so the
+      // recreated cell widget starts as 'idle'. Restore it to 'running'.
+      cell.model.executionState = 'running';
     }
     const cellRef = cell;
     void future.done.then(
       reply => {
         if (!cellRef.isDisposed) {
+          // The future is authoritative for the prompt number; a snapshot
+          // taken before completion would be stale (still null). Setting a
+          // non-null execution count also flips the state back to 'idle'.
           cellRef.model.executionCount = reply.content.execution_count;
+          cellRef.model.executionState = 'idle';
         }
       },
       () => {
