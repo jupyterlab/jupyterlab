@@ -199,7 +199,7 @@ The following environment variables are respected
 
 By default, there are two extension managers provided by JupyterLab:
 
-- `pypi`: [default] Allow to un-/install extensions from PyPI.org
+- `pypi`: [default] Allow installing or uninstalling extensions from PyPI.org
 - `readonly`: Display installed extensions (with the ability to dis-/en-able them)
 
 You can specify the manager with the command line option `--LabApp.extension_manager`;
@@ -478,10 +478,10 @@ follows:
 See {ref}`documentation on LabConfig directories <labconfig-directories>` for
 more information.
 
-## Un-/Installing using `jupyter labextension`
+## Installing or Uninstalling using `jupyter labextension`
 
 :::{note}
-This way of un-/installing JupyterLab extensions is highly discouraged.
+This way of installing or uninstalling JupyterLab extensions is highly discouraged.
 :::
 
 The `jupyter labextension` command enables you to install or uninstall

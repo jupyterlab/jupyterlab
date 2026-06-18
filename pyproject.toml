@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.21.1", "jupyter-builder>=1.0.0b1"]
+requires = ["hatchling>=1.21.1", "jupyter-builder>=1.0.2"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter-builder>=1.0.0b1",
+    "jupyter-builder>=1.0.2",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -46,7 +46,6 @@ dependencies = [
     "jupyterlab_server>=2.28.0,<3",
     "notebook_shim>=0.2",
     "packaging>=23.2",
-    "setuptools>=41.1.0",
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
@@ -74,17 +73,6 @@ Zulip = "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab"
 Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
-docs = [
-    "sphinx>=1.8,<8.2.0",
-    "sphinx-copybutton",
-    "pydata-sphinx-theme>=0.13.0",
-    "shellcheck-py",
-    "pytest",
-    "pytest-jupyter",
-    "pytest-check-links",
-    "jsx-lexer",
-    "myst-parser",
-]
 docs-screenshots = [
     # Freeze the packages to ensure consistent look and feel
     # IPython is frozen because its version is displayed in
@@ -123,7 +111,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.15.9",
+    "ruff==0.15.15",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -135,7 +123,20 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=1.0.0b1"
+    "jupyter-builder>=1.0.2",
+]
+docs = [
+    { include-group = "builder" },
+    "jsx-lexer",
+    "myst-parser",
+    "pydata-sphinx-theme>=0.13.0",
+    "pytest",
+    "pytest-check-links",
+    "pytest-jupyter",
+    "shellcheck-py",
+    "sphinx>=1.8,<8.2.0",
+    "sphinx-copybutton",
+    "sphinxcontrib-spelling",
 ]
 
 [tool.check-wheel-contents]
