@@ -97,7 +97,7 @@ jobs:
           fi
 
   pr-title-spelling:
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout base repository
