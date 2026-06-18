@@ -2588,6 +2588,15 @@ namespace Private {
   /** Key used to store cell execution state in Y.js undo stack item metadata. */
   export const CELL_EXECUTION_META_KEY = Symbol('cellExecutionState');
 
+  /**
+   * A kernel message that arrived while the future was detached, tagged with
+   * its channel so it can be dispatched to the right handler on replay.
+   */
+  export type IBufferedMessage =
+    | { channel: 'iopub'; msg: KernelMessage.IIOPubMessage }
+    | { channel: 'stdin'; msg: KernelMessage.IStdinMessage }
+    | { channel: 'reply'; msg: KernelMessage.IExecuteReplyMsg };
+
   export interface IStoredCellExecution {
     cellId: string;
     future: Kernel.IShellFuture<
@@ -2595,8 +2604,11 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >;
     isDone: () => boolean;
-    /** IOPub messages that arrived while the future was detached. */
-    buffered: KernelMessage.IIOPubMessage[];
+    /**
+     * Kernel messages (IOPub, stdin and reply) that arrived while the future
+     * was detached, in arrival order, so they can be replayed on reattach.
+     */
+    buffered: IBufferedMessage[];
     /**
      * Snapshot of the cell outputs to restore after an undo.
      *
@@ -2608,8 +2620,12 @@ namespace Private {
   }
 
   /**
-   * Detach the kernel future from a code cell, buffering any IOPub messages
-   * that arrive while it is detached so they can be replayed on reattach.
+   * Detach the kernel future from a code cell, buffering any messages that
+   * arrive while it is detached so they can be replayed on reattach.
+   *
+   * `detachFuture` clears the IOPub, stdin and reply handlers, so all three
+   * channels are buffered here; otherwise a message arriving during the
+   * detached window (e.g. an `input()` request on stdin) would be dropped.
    *
    * Returns null if the cell has no active future.
    */
@@ -2624,9 +2640,15 @@ namespace Private {
     void future.done.finally(() => {
       done = true;
     });
-    const buffered: KernelMessage.IIOPubMessage[] = [];
+    const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
-      buffered.push(msg);
+      buffered.push({ channel: 'iopub', msg });
+    };
+    future.onStdin = msg => {
+      buffered.push({ channel: 'stdin', msg });
+    };
+    future.onReply = msg => {
+      buffered.push({ channel: 'reply', msg });
     };
     return { cellId: cell.model.id, future, isDone: () => done, buffered };
   }
@@ -2653,13 +2675,23 @@ namespace Private {
       cell.model.outputs.fromJSON(outputs);
     }
     // Reattach the future (without clearing existing outputs) and replay any
-    // IOPub messages buffered while it was detached. This is done whether or
-    // not the execution has already finished, so that final outputs that
-    // arrived while detached are not lost (e.g. if the kernel completed in the
-    // brief window during the undo).
+    // messages buffered while it was detached, in arrival order. This is done
+    // whether or not the execution has already finished, so that final outputs
+    // (or a pending stdin request) that arrived while detached are not lost
+    // (e.g. if the kernel completed in the brief window during the undo).
     cell.outputArea.reattachFuture(future);
-    for (const msg of buffered) {
-      void future.onIOPub(msg);
+    for (const buf of buffered) {
+      switch (buf.channel) {
+        case 'iopub':
+          void future.onIOPub(buf.msg);
+          break;
+        case 'stdin':
+          void future.onStdin(buf.msg);
+          break;
+        case 'reply':
+          void future.onReply(buf.msg);
+          break;
+      }
     }
     if (isDone()) {
       // The execution already finished (e.g. it completed or was interrupted

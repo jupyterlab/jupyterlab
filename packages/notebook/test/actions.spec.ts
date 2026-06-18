@@ -72,14 +72,14 @@ function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
 
 /**
  * Poll until the first stream output of a cell reaches at least `minLength`
- * characters, returning the text.
+ * characters, returning the stream text from the output model.
  *
  * #### Notes
  * After a move or undo the cell is reconstructed and its initial output models
  * are created during `OutputAreaModel` construction, before `list.changed` is
- * connected. As a result, in-place stream growth updates the output data but
- * does not emit `OutputAreaModel.changed`, so waiting on that signal is
- * unreliable. Polling the rendered text is deterministic for these cases.
+ * connected. As a result, in-place stream growth updates the output model data
+ * but does not emit `OutputAreaModel.changed`, so waiting on that signal is
+ * unreliable. Polling the output model is deterministic for these cases.
  */
 async function waitForStreamOutput(
   cell: CodeCell,
