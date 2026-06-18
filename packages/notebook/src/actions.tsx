@@ -2661,9 +2661,14 @@ namespace Private {
     for (const msg of buffered) {
       void future.onIOPub(msg);
     }
-    if (!isDone()) {
-      // executionState is ephemeral and not serialized to JSON, so the
-      // recreated cell widget starts as 'idle'. Restore it to 'running'.
+    if (isDone()) {
+      // The execution already finished (e.g. it completed or was interrupted
+      // during the undo). The resurrected cell may carry a stale 'running'
+      // state from its restored snapshot, so reset it synchronously rather
+      // than relying solely on the asynchronous `future.done` handler below.
+      cell.model.executionState = 'idle';
+    } else {
+      // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
     const cellRef = cell;
