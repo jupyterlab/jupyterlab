@@ -121,4 +121,4 @@ jobs:
           printf '%s\n' "${PR_TITLE}" > "${title_file}"
 
           python -m pip install codespell==2.4.1
-          python -m codespell --ignore-words=.codespellignore "${title_file}"
+          codespell --ignore-words=.codespellignore "${title_file}"
