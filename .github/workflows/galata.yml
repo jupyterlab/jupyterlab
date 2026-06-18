@@ -57,19 +57,13 @@ jobs:
             suite: documentation
             shard: 1
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
           - browser: chromium
             project: documentation
             suite: documentation
             shard: 2
             shards: 2
-            optional_dependencies: "docs-screenshots"
-          - browser: chromium
-            project: examples
-            suite: examples
-            shard: 1
-            shards: 1
-            group: examples
+            optional_dependencies: 'docs-screenshots'
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -95,7 +89,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
-          python_package_manager: "uv pip"
+          python_package_manager: 'uv pip'
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
 
       - name: Find out Playwright version
@@ -115,7 +109,6 @@ jobs:
 
       - name: Install dependencies
         env:
-          GROUP: ${{ matrix.group || '' }}
           OPTIONAL_DEPENDENCIES: ${{ matrix.optional_dependencies || '' }}
         run: |
           set -ex
@@ -125,13 +118,12 @@ jobs:
         working-directory: core
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        if: ${{ matrix.project != 'documentation' && matrix.project != 'examples' }}
+        if: ${{ matrix.project != 'documentation' }}
         run: |
           uv pip install --system --upgrade --pre "ipykernel<=7.0.0a1"
         working-directory: core
 
       - name: Launch JupyterLab
-        if: ${{ matrix.project != 'examples' }}
         run: |
           set -ex
           cd core/galata
@@ -143,7 +135,6 @@ jobs:
           fi
 
       - name: Install browser
-        if: ${{ matrix.project != 'examples' }}
         run: |
           set -ex
           cd core/galata
@@ -151,39 +142,19 @@ jobs:
           jlpm playwright install ${{ matrix.browser }} --only-shell
 
       - name: Build galata
-        if: ${{ matrix.project != 'examples' }}
         run: |
           set -ex
           cd core/galata
           jlpm build
 
       - name: Wait for JupyterLab
-        if: ${{ matrix.project != 'examples' }}
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
         env:
-          GROUP: ${{ matrix.group || '' }}
           TEST_PATTERN: ${{ github.event.inputs.test_pattern || '' }}
           REPEAT_EACH: ${{ github.event.inputs.repeat_each || 1 }}
         run: |
-          if [[ "${{ matrix.project }}" == "examples" ]]; then
-            cd core
-            set +e
-            bash ./scripts/ci_script.sh
-            TEST_EXIT_CODE=$?
-
-            mkdir -p galata/test-results
-
-            find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
-              TARGET_DIR="galata/test-results/${RESULTS_DIR}"
-              mkdir -p "$TARGET_DIR"
-              cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
-            done
-
-            exit $TEST_EXIT_CODE
-          fi
-
           cd core/galata
           set +e  # we want to move the reports even if we fail
           MAX_REPEAT_EACH=50
@@ -227,10 +198,10 @@ jobs:
         with:
           name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
           path: core/galata/test-results
-          if-no-files-found: ignore  # expected when no tests fail
+          if-no-files-found: ignore # expected when no tests fail
 
       - name: Upload test report blob
-        if: ${{ !cancelled() && matrix.project != 'examples' }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
@@ -239,14 +210,80 @@ jobs:
           compression-level: 1
 
       - name: Print JupyterLab logs
-        if: ${{ always() && matrix.project != 'examples' }}
+        if: always()
         run: |
           cat /tmp/jupyterlab_server.log
+
+  examples:
+    name: Example Tests
+    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          path: core
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: 'uv pip'
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+        working-directory: core
+
+      - name: Set up browser cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
+
+      - name: Install dependencies
+        env:
+          GROUP: examples
+        run: |
+          set -ex
+          bash ./scripts/ci_install.sh
+        working-directory: core
+
+      - name: Test examples
+        env:
+          GROUP: examples
+        run: |
+          cd core
+          set +e
+          bash ./scripts/ci_script.sh
+          TEST_EXIT_CODE=$?
+
+          mkdir -p galata/test-results
+
+          find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
+            TARGET_DIR="galata/test-results/${RESULTS_DIR}"
+            mkdir -p "$TARGET_DIR"
+            cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
+          done
+
+          exit $TEST_EXIT_CODE
+
+      - name: Upload test assets
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-test-assets-chromium-examples-1
+          path: core/galata/test-results
+          if-no-files-found: ignore # expected when no tests fail
 
   merge-reports:
     name: Merge Test Reports and Results
     if: ${{ !cancelled() }}
-    needs: test
+    needs: [test, examples]
     runs-on: ubuntu-22.04
     permissions:
       contents: read
