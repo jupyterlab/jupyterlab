@@ -352,7 +352,9 @@ test.describe('Prevent copy/cut/duplicate for non-editable cells', () => {
   }) => {
     await page.evaluate(() => {
       const nbPanel = window.jupyterapp.shell.currentWidget as any;
-      nbPanel.content.activeCell.model.setMetadata('editable', false);
+      const notebook = nbPanel.content;
+      notebook.activeCell.model.setMetadata('editable', false);
+      notebook.activeCellChanged.emit(notebook.activeCell);
     });
 
     await page.hover('.jp-Cell >> nth=0');

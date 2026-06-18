@@ -434,8 +434,10 @@ test.describe('Toolbar buttons for non-editable cells', () => {
     page
   }) => {
     await page.evaluate(() => {
-      const notebookPanel = window.jupyterapp.shell.currentWidget as any;
-      notebookPanel.content.activeCell.model.setMetadata('editable', false);
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      const notebook = nbPanel.content;
+      notebook.activeCell.model.setMetadata('editable', false);
+      notebook.activeCellChanged.emit(notebook.activeCell);
     });
 
     const copyButton = await page.notebook.getToolbarItemLocator('copy');
@@ -449,8 +451,10 @@ test.describe('Toolbar buttons for non-editable cells', () => {
     page
   }) => {
     await page.evaluate(() => {
-      const notebookPanel = window.jupyterapp.shell.currentWidget as any;
-      notebookPanel.content.activeCell.model.setMetadata('editable', false);
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      const notebook = nbPanel.content;
+      notebook.activeCell.model.setMetadata('editable', false);
+      notebook.activeCellChanged.emit(notebook.activeCell);
     });
 
     const cutButton = await page.notebook.getToolbarItemLocator('cut');
