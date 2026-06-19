@@ -169,6 +169,96 @@ describe('@jupyterlab/codemirror', () => {
       });
     });
 
+    describe('schema validation (issue #18827)', () => {
+      it('should not pass invalid config values to extension factories', () => {
+        const registry = new EditorExtensionRegistry();
+        const received: unknown[] = [];
+        registry.addExtension({
+          name: 'rangedNumber',
+          default: 5,
+          factory: () =>
+            EditorExtensionRegistry.createConfigurableExtension(v => {
+              received.push(v);
+              return [];
+            }),
+          schema: {
+            type: 'number',
+            minimum: 1,
+            maximum: 10,
+            default: 5
+          }
+        });
+
+        const handler = registry.createNew({
+          inline: false,
+          model: {} as CodeEditor.IModel,
+          // Out-of-range value violates schema (max 10)
+          config: { rangedNumber: 999 }
+        });
+        handler.getInitialExtensions();
+
+        // Bug: invalid value 999 reaches the extension factory unchecked.
+        expect(received).not.toContain(999);
+      });
+
+      it('should not pass wrong-type config values via baseConfiguration', () => {
+        const registry = new EditorExtensionRegistry();
+        const received: unknown[] = [];
+        registry.addExtension({
+          name: 'flag',
+          default: false,
+          factory: () =>
+            EditorExtensionRegistry.createConfigurableExtension(v => {
+              received.push(v);
+              return [];
+            }),
+          schema: {
+            type: 'boolean',
+            default: false
+          }
+        });
+
+        // String violates `type: boolean` in schema
+        registry.baseConfiguration = { flag: 'not-a-boolean' };
+
+        const handler = registry.createNew({
+          inline: false,
+          model: {} as CodeEditor.IModel
+        });
+        handler.getInitialExtensions();
+
+        expect(received).not.toContain('not-a-boolean');
+      });
+
+      it('should not pass enum-violating value to factory', () => {
+        const registry = new EditorExtensionRegistry();
+        const received: unknown[] = [];
+        registry.addExtension({
+          name: 'mode',
+          default: 'a',
+          factory: () =>
+            EditorExtensionRegistry.createConfigurableExtension(v => {
+              received.push(v);
+              return [];
+            }),
+          schema: {
+            type: 'string',
+            enum: ['a', 'b', 'c'],
+            default: 'a'
+          }
+        });
+
+        const handler = registry.createNew({
+          inline: false,
+          model: {} as CodeEditor.IModel,
+          config: { mode: 'zzz' }
+        });
+        handler.getInitialExtensions();
+
+        expect(received).not.toContain('zzz');
+      });
+    });
+
     describe('#createNew', () => {
       it('should create a extension handler', () => {
         const registry = createRegistry();
