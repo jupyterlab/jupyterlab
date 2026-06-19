@@ -374,7 +374,8 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
           PW_VERSION: ${{ steps.pw-version.outputs.version }}
         run: |
-          npx "playwright@${PW_VERSION}" merge-reports --reporter html,json,github ./artifacts/final/
+          echo "module.exports = { testDir: '.' };" > merge.config.js
+          npx "playwright@${PW_VERSION}" merge-reports --config merge.config.js --reporter html,json,github ./artifacts/final/
 
       - name: Extract failing and flaky counts
         id: test-counts
