@@ -241,8 +241,10 @@ jobs:
         run: |
           set -e
           PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_PACKAGE_VERSION=$(echo "$PW_VERSION" | sed -E 's/^"playwright@npm:([^"]+)":/\1/')
           echo "Playwright version: $PW_VERSION"
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+          echo "package-version=$PW_PACKAGE_VERSION" >> $GITHUB_OUTPUT
         working-directory: core
 
       - name: Set up browser cache
@@ -262,6 +264,7 @@ jobs:
       - name: Test examples
         env:
           GROUP: examples
+          PLAYWRIGHT_VERSION: ${{ steps.pw-version.outputs.package-version }}
         run: |
           cd core
           set +e
@@ -269,11 +272,16 @@ jobs:
           TEST_EXIT_CODE=$?
 
           mkdir -p galata/test-results
+          mkdir -p galata/blob-report
 
           find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
             TARGET_DIR="galata/test-results/${RESULTS_DIR}"
             mkdir -p "$TARGET_DIR"
             cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
+          done
+
+          find examples packages/services/examples -type d -name blob-report | while read -r BLOB_DIR; do
+            cp -R "${BLOB_DIR}/." galata/blob-report/
           done
 
           exit $TEST_EXIT_CODE
@@ -285,6 +293,15 @@ jobs:
           name: galata-test-assets-chromium-examples-1
           path: core/galata/test-results
           if-no-files-found: ignore # expected when no tests fail
+
+      - name: Upload test report blob
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-blobs-chromium-examples-1
+          path: core/galata/blob-report
+          retention-days: 1
+          compression-level: 1
 
   merge-reports:
     name: Merge Test Reports and Results
