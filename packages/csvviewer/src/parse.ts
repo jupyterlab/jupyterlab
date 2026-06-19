@@ -552,7 +552,7 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
         // Set ncols to the number of fields we found.
         ncols = col;
       } else {
-        
+
 
         // If we know the number of columns we expect, find the field delimiters
         // up to that many columns.
