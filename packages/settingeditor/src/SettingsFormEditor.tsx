@@ -125,7 +125,7 @@ export class SettingsFormEditor extends React.Component<
       }
     };
     this.handleChange = this.handleChange.bind(this);
-    this._debouncer = new Debouncer(this.handleChange);
+    this._debouncer = new Debouncer(this._handleChange);
   }
 
   componentDidMount(): void {
@@ -161,7 +161,14 @@ export class SettingsFormEditor extends React.Component<
   /**
    * Handler for edits made in the form editor.
    */
-  handleChange(formData: ReadonlyJSONObject, changeId: number): void {
+  handleChange(): void {
+    this._handleChange(this._formData, this._changeId);
+  }
+
+  private _handleChange = (
+    formData: ReadonlyJSONObject,
+    changeId: number
+  ): void => {
     if (changeId !== this._changeId) {
       return;
     }
@@ -195,7 +202,7 @@ export class SettingsFormEditor extends React.Component<
         const trans = this.props.translator.load('jupyterlab');
         void showErrorMessage(trans.__('Error saving settings.'), reason);
       });
-  }
+  };
 
   /**
    * Handler for the "Restore to defaults" button - clears all
