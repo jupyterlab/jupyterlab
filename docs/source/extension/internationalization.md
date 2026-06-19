@@ -34,7 +34,7 @@ characters.
 Domain are normalized by replacing `-` with `_` characters.
 :::
 
-3. Wraps all translatable strings with one of the [gettext functions](https://jupyterlab.readthedocs.io/en/stable/api/modules/translation.html#translationbundle).
+3. Wraps all translatable strings with one of the [gettext functions](https://jupyterlab.readthedocs.io/en/4.5.x/api/modules/translation.html#translationbundle).
 
 Examples:
 
