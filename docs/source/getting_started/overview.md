@@ -6,7 +6,7 @@
 
 # Get Started
 
-[JupyterLab](https://jupyterlab.readthedocs.io/en/latest/) is a next-generation web-based user interface for
+[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/) is a next-generation web-based user interface for
 [Project Jupyter](https://docs.jupyter.org/en/latest/).
 
 ```{image} ../images/interface-jupyterlab.png

@@ -876,7 +876,7 @@ function addCommands(
           kernelPreference: {
             type: 'object',
             description:
-              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.',
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/stable/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.',
             properties: {
               id: {
                 type: 'string',
