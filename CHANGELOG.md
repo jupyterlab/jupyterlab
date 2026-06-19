@@ -4,7 +4,7 @@
 
 # JupyterLab Changelog
 
-## v4.6 (Release Candidate)
+## v4.6
 
 JupyterLab 4.6 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
