@@ -49,9 +49,10 @@ input('Your age:')
 
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
-  expect(
-    await page.locator('.jp-RenderedMarkdown').count()
-  ).toBeLessThanOrEqual(MAX_OUTPUTS);
+  await expect(page.locator('.jp-RenderedMarkdown')).toHaveCount(MAX_OUTPUTS);
+  await expect(page.locator('.jp-TrimmedOutputs')).toHaveText(
+    'Show more outputs'
+  );
 
   await page.keyboard.press('Enter');
 });

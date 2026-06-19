@@ -114,6 +114,23 @@ describe('outputarea/widget', () => {
     });
 
     describe('#maxNumberOutputs', () => {
+      function requestInput(widget: LogOutputArea): void {
+        const future = {
+          sendInputReply: jest.fn()
+        } as unknown as Kernel.IShellFuture;
+        const msg = KernelMessage.createMessage({
+          msgType: 'input_request',
+          channel: 'stdin',
+          username: 'test',
+          session: 'test',
+          content: {
+            prompt: 'Your age:',
+            password: false
+          }
+        });
+        widget.requestInputForTest(msg, future);
+      }
+
       test.each([20, 6, 5, 2])(
         'should control the list of visible outputs',
         maxNumberOutputs => {
@@ -197,26 +214,79 @@ describe('outputarea/widget', () => {
           model,
           maxNumberOutputs: 2
         });
-        const future = {
-          sendInputReply: jest.fn()
-        } as unknown as Kernel.IShellFuture;
-        const msg = KernelMessage.createMessage({
-          msgType: 'input_request',
-          channel: 'stdin',
-          username: 'test',
-          session: 'test',
-          content: {
-            prompt: 'Your age:',
-            password: false
-          }
-        });
 
         try {
-          widget.requestInputForTest(msg, future);
+          requestInput(widget);
 
           expect(widget.maxNumberOutputs).toEqual(2);
           expect(widget.widgets.length).toEqual(widget.maxNumberOutputs + 2);
           expect(widget.node.querySelector('.jp-Stdin')).not.toBeNull();
+        } finally {
+          widget.dispose();
+        }
+      });
+
+      test('should preserve pending input when a hidden output is removed', () => {
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        try {
+          requestInput(widget);
+
+          const input = widget.node.querySelector('.jp-Stdin');
+          const widgetCount = widget.widgets.length;
+          expect(input).not.toBeNull();
+
+          model.remove(widget.maxNumberOutputs + 1);
+
+          expect(widget.node.querySelector('.jp-Stdin')).toBe(input);
+          expect(widget.widgets.length).toBe(widgetCount);
+        } finally {
+          widget.dispose();
+        }
+      });
+
+      test('should preserve the trimmed marker when a hidden output is removed', () => {
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        try {
+          requestInput(widget);
+
+          const trimmed = widget.node.querySelector('.jp-TrimmedOutputs');
+          expect(trimmed).not.toBeNull();
+
+          model.remove(widget.maxNumberOutputs);
+
+          expect(widget.node.querySelector('.jp-TrimmedOutputs')).toBe(trimmed);
+        } finally {
+          widget.dispose();
+        }
+      });
+
+      test('should backfill visible outputs when a visible output is removed', () => {
+        const maxNumberOutputs = 2;
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs
+        });
+
+        try {
+          model.remove(0);
+
+          expect(widget.widgets.length).toBe(maxNumberOutputs + 1);
+          expect(
+            widget.widgets[maxNumberOutputs].node.querySelector(
+              '.jp-TrimmedOutputs'
+            )
+          ).not.toBeNull();
         } finally {
           widget.dispose();
         }
