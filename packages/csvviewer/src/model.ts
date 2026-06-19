@@ -411,15 +411,6 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Compute the column count if we don't already have it.
     if (this._columnCount === undefined) {
-      // Get number of columns in first row
-      // this._columnCount = PARSERS[this._parser]({
-      //   data: this._rawData,
-      //   delimiter: this._delimiter,
-      //   rowDelimiter: this._rowDelimiter,
-      //   quote: this._quote,
-      //   columnOffsets: true,
-      //   maxRows: 1
-      // }).ncols;
       this._columnCount = maxColumnCount(
         this._rawData,
         this._delimiter,
