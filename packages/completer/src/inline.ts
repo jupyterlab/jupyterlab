@@ -535,7 +535,7 @@ export class InlineCompleter extends Widget {
     }
 
     const host =
-      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host.closest<HTMLElement>('.jp-MainAreaWidget > .lm-Widget') ??
       editor.host;
 
     let anchor: DOMRect;
