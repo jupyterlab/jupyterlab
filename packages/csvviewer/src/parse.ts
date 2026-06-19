@@ -107,7 +107,6 @@ export namespace IParser {
      * The number of columns parsed, or 0 if only row offsets are returned.
      */
     ncols: number;
-
     /**
      * The index offsets into the data string for the rows or data items.
      *
@@ -553,6 +552,8 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
         // Set ncols to the number of fields we found.
         ncols = col;
       } else {
+        
+
         // If we know the number of columns we expect, find the field delimiters
         // up to that many columns.
         while (colIndex !== -1 && col < ncols) {
@@ -575,4 +576,40 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
   }
 
   return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
+}
+export function maxColumnCount(
+  data: string,
+  delimiter: string,
+  rowDelimiter: string,
+  maxRows = 500
+): number {
+  let maxCols = 0;
+  let pos = 0;
+  let rows = 0;
+
+  while (pos < data.length && rows < maxRows) {
+    const rowEnd = data.indexOf(rowDelimiter, pos);
+    const end = rowEnd === -1 ? data.length : rowEnd;
+
+    const row = data.slice(pos, end);
+
+    let cols = 1;
+    let idx = row.indexOf(delimiter);
+
+    while (idx !== -1) {
+      cols++;
+      idx = row.indexOf(delimiter, idx + 1);
+    }
+
+    maxCols = Math.max(maxCols, cols);
+
+    if (rowEnd === -1) {
+      break;
+    }
+
+    pos = rowEnd + rowDelimiter.length;
+    rows++;
+  }
+
+  return maxCols;
 }
