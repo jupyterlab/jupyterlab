@@ -98,7 +98,7 @@ export namespace ConfigSection {
   /**
    * Internal function to set the config section manager.
    *
-   * @deprecated This function is an internal helper kept for backward compatiblity.
+   * @deprecated This function is an internal helper kept for backward compatibility.
    * It is not part of the public API and may be removed in a future version.
    */
   export function _setConfigSectionManager(manager: ConfigSectionManager) {

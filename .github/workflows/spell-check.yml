@@ -1,0 +1,94 @@
+name: Documentation Spell Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '**/*.rst'
+      - '**/*.txt'
+      - '.codespellignore'
+      - '.pre-commit-config.yaml'
+      - 'docs/source/conf.py'
+      - 'docs/source/_ext/**'
+      - 'docs/source/spelling_wordlist.txt'
+      - 'pyproject.toml'
+      - '.github/workflows/spell-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sphinx-spelling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies for enchant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libenchant-2-2 aspell aspell-en
+
+      - name: Install documentation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --group docs pyenchant
+
+      - name: Run Sphinx spelling builder
+        env:
+          JUPYTERLAB_SPELLING_BUILD: '1'
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          mapfile -t changed_docs_raw < <(
+            git diff --name-only --diff-filter=ACMR \
+              "$PR_BASE_SHA...$PR_HEAD_SHA" \
+              | grep -E '^docs/source/.*\.md$' || true
+          )
+          if [ "${#changed_docs_raw[@]}" -eq 0 ]; then
+            echo "No docs/source markdown files changed; skipping Sphinx spelling builder."
+            exit 0
+          fi
+          spell_source="$(mktemp -d)"
+          spell_build="$(mktemp -d)"
+          spelling_reports="$(mktemp)"
+          trap 'rm -rf "${spell_source}" "${spell_build}" "${spelling_reports}"' EXIT
+          cp docs/source/spelling_wordlist.txt "${spell_source}/spelling_wordlist.txt"
+          changed_docs=()
+          for path in "${changed_docs_raw[@]}"; do
+            rel_path="${path#docs/source/}"
+            target="${spell_source}/${rel_path}"
+            mkdir -p "$(dirname "${target}")"
+            cp "${path}" "${target}"
+            changed_docs+=("${target}")
+          done
+          {
+            printf 'Spelling check\n==============\n\n'
+            printf '```{toctree}\n:maxdepth: 1\n\n'
+            for path in "${changed_docs_raw[@]}"; do
+              rel_path="${path#docs/source/}"
+              printf '%s\n' "${rel_path%.md}"
+            done
+            printf '```\n'
+          } > "${spell_source}/index.md"
+          printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs_raw[@]}"
+          python -m sphinx -Q -b spelling --keep-going -c docs/source "${spell_source}" "${spell_build}" "${changed_docs[@]}"
+
+          find "${spell_build}" -name '*.spelling' -type f -size +0c -print > "${spelling_reports}"
+          if [ -s "${spelling_reports}" ]; then
+            printf 'Spelling errors found in changed docs:\n'
+            while IFS= read -r report; do
+              printf '\n'
+              cat "${report}"
+            done < "${spelling_reports}"
+            exit 1
+          fi

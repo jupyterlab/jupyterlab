@@ -62,7 +62,7 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
-    python -m pip install .[docs]
+    python -m pip install --group docs
     pushd docs
     make html
     make shellcheck

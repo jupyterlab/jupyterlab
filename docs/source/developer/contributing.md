@@ -34,7 +34,7 @@ please assume that no one else is working on it (even if someone previously
 volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
-If you believe you’ve found a security vulnerability in JupyterLab or
+If you believe you've found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
 prefer to encrypt your security reports, you can use [this PGP public
 key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
@@ -500,12 +500,17 @@ dev mode, extensions will not be activated by default - refer
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
-If you want to change the TypeScript code and rebuild on the fly
-(needs page refresh after each rebuild):
+If you want to change the TypeScript code in the core packages and
+rebuild on the fly (needs page refresh after each rebuild):
 
 ```bash
 jupyter lab --dev-mode --watch
 ```
+
+The watch mode rebuilds TypeScript sources in the JupyterLab repository.
+When developing a separate extension, run that extension's build or watch
+command as well so its TypeScript changes are compiled before refreshing
+JupyterLab.
 
 ### Build and Run the Tests
 
@@ -703,6 +708,8 @@ Here are some good practices to follow when writing integration tests:
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
 - If your change introduces subpixel change to dozens of snapshots, consider if it is necessary;
   such a change often requires many extensions to update their snapshots too, leading to significant cost downstream.
+- When testing the notebook UI without executing code, open the notebook without the kernel to preserve resources
+  (starting hundreds of kernels slows down the test suite)
 
 ## Contributing to the debugger front-end
 
@@ -871,7 +878,7 @@ Documentation is written in Markdown. To ensure that the Read the Docs page buil
 need to install the documentation dependencies with `pip`:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e . --group docs
 ```
 
 To test the docs run:

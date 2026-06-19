@@ -4,6 +4,7 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import {
+  ensureMathTypeset,
   filterContent,
   freeezeKernelIds,
   generateArrow,
@@ -52,6 +53,13 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
+    // Force the Lorenz equations to typeset at their correct size while the
+    // notebook is still the active tab. Otherwise MathJax can render them too
+    // small (see `ensureMathTypeset`), which shifts the cells below by a
+    // sub-pixel and makes the code cell screenshot flaky by one row.
+    await ensureMathTypeset(page);
+
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
@@ -67,6 +75,15 @@ test.describe('General', () => {
     await page.dblclick('text=lorenz.py');
 
     await page.click('div[role="main"] >> text=Lorenz.ipynb');
+
+    // Wait for the debugger bug icon to settle.
+    // This needs to be before running any cells/switching to a different panel.
+    // We need to fix it cleanely later but for now let's make tests less flaky,
+    // and if it has to fail, fail fast (after 10 seconds, not 1 minute).
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor({ timeout: 10000 });
 
     await page.notebook.run();
 
@@ -101,12 +118,6 @@ test.describe('General', () => {
     await page.mouse.down();
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
-
-    // wait for the debugger bug icon to settle
-    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
-    await panel
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
 
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
@@ -581,6 +592,7 @@ test.describe('General', () => {
     await page.dblclick('text=Data.ipynb');
 
     // Open a terminal
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
