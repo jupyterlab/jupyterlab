@@ -295,7 +295,7 @@ export class PluginList extends ReactWidget {
    */
   private _getScrollElement(): HTMLElement {
     return (
-      (this.node.querySelector('.jp-PluginList-wrapper') as HTMLElement) ??
+      this.node.querySelector<HTMLElement>('.jp-PluginList-wrapper') ??
       this.node
     );
   }
