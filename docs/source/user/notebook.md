@@ -283,6 +283,15 @@ JupyterLab includes built-in support for rendering Mermaid diagrams in Markdown 
 
 Mermaid diagrams can be added using fenced code blocks with the `mermaid` language identifier:
 
+~~markdown
+```mermaid
+graph TD
+  A --> B
+```
+~~~
+
+which renders as:
+
 ```mermaid
 graph TD
   A --> B
