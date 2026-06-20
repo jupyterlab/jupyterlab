@@ -138,21 +138,21 @@ def pjoin(*args):
     return osp.abspath(osp.join(*args))
 
 
-def get_user_settings_dir():
+def get_user_settings_dir() -> str:
     """Get the configured JupyterLab user settings directory."""
     settings_dir = os.environ.get("JUPYTERLAB_SETTINGS_DIR")
     settings_dir = settings_dir or pjoin(jupyter_config_dir(), "lab", "user-settings")
     return osp.abspath(settings_dir)
 
 
-def get_workspaces_dir():
+def get_workspaces_dir() -> str:
     """Get the configured JupyterLab workspaces directory."""
     workspaces_dir = os.environ.get("JUPYTERLAB_WORKSPACES_DIR")
     workspaces_dir = workspaces_dir or pjoin(jupyter_config_dir(), "lab", "workspaces")
     return osp.abspath(workspaces_dir)
 
 
-def get_app_dir():
+def get_app_dir() -> str:
     """Get the configured JupyterLab app directory."""
     # Default to the override environment variable.
     if os.environ.get("JUPYTERLAB_DIR"):
@@ -228,7 +228,7 @@ def dedupe_yarn(path, logger=None):
         yarn_proc.wait()
 
 
-def ensure_node_modules(cwd, logger=None):
+def ensure_node_modules(cwd, logger=None) -> bool:
     """Ensure that node_modules is up to date.
 
     Returns true if the node_modules was updated.
@@ -248,7 +248,7 @@ def ensure_node_modules(cwd, logger=None):
     return ret != 0
 
 
-def ensure_dev(logger=None):
+def ensure_dev(logger=None) -> None:
     """Ensure that the dev assets are available."""
     logger = _ensure_logger(logger)
     target = pjoin(DEV_DIR, "static")
@@ -259,7 +259,7 @@ def ensure_dev(logger=None):
         yarn_proc.wait()
 
 
-def ensure_core(logger=None):
+def ensure_core(logger=None) -> None:
     """Ensure that the core assets are available."""
     staging = pjoin(HERE, "staging")
     logger = _ensure_logger(logger)
@@ -272,7 +272,7 @@ def ensure_core(logger=None):
         yarn_proc.wait()
 
 
-def ensure_app(app_dir):
+def ensure_app(app_dir) -> list[str] | None:
     """Ensure that an application directory is available.
 
     If it does not exist, return a list of messages to prompt the user.
