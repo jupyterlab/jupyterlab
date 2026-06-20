@@ -17,10 +17,3 @@ body[data-jp-theme-light='true'] .jp-DebuggerEditor-highlight {
   background-color: var(--md-brown-100, #d7ccc8);
   outline-color: var(--md-brown-300, #a1887f);
 }
-
-.jp-DebuggerEditor-marker {
-  position: absolute;
-  left: -34px;
-  top: -1px;
-  color: var(--jp-error-color1);
-}

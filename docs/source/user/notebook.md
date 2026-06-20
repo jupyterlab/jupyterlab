@@ -291,3 +291,9 @@ graph TD
 Mermaid support is bundled with JupyterLab and does not require installing an additional extension.
 
 Mermaid diagrams are rendered automatically in Markdown cells in notebooks opened in JupyterLab. The diagram source remains visible when editing the Markdown cell.
+
+(paste-code-cells-without-output)=
+
+## Paste code cells without output
+
+When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.

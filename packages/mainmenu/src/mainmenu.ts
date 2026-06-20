@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
@@ -161,8 +162,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
       'rank' in options
         ? options.rank
         : 'rank' in menu
-        ? (menu as any).rank
-        : IRankedMenu.DEFAULT_RANK;
+          ? (menu as any).rank
+          : IRankedMenu.DEFAULT_RANK;
     const rankItem = { menu, rank };
     const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 

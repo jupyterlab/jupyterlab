@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
   JupyterFrontEnd,
@@ -186,8 +187,8 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                 type === 'default'
                   ? null
                   : type === 'in-progress'
-                  ? icons?.spinner ?? null
-                  : icons && icons[type];
+                    ? (icons?.spinner ?? null)
+                    : icons && icons[type];
               return (
                 <li
                   className="jp-Notification-List-Item"
@@ -801,11 +802,10 @@ namespace Private {
   /**
    * Interface for CloseButton component
    */
-  export interface ICloseButtonProps
-    extends React.DetailedHTMLProps<
-      React.ButtonHTMLAttributes<HTMLButtonElement>,
-      HTMLButtonElement
-    > {
+  export interface ICloseButtonProps extends React.DetailedHTMLProps<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+  > {
     /**
      * A function to handle a close event when the CloseButton is clicked
      */

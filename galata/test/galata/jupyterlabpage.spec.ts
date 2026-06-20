@@ -59,7 +59,7 @@ test.describe('listeners', () => {
       window.galata.on('dialog', d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 100);
+        setTimeout(() => d?.reject(), 200);
       });
     });
 
@@ -79,7 +79,7 @@ test.describe('listeners', () => {
       const callback = d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 100);
+        setTimeout(() => d?.reject(), 200);
         window.galata.off('dialog', callback);
       };
       window.galata.on('dialog', callback);
@@ -108,7 +108,7 @@ test.describe('listeners', () => {
       const callback = d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 100);
+        setTimeout(() => d?.reject(), 200);
       };
       window.galata.once('dialog', callback);
     });
@@ -140,9 +140,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
       });
@@ -169,9 +167,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
         window.galata.off('notification', callback);
@@ -215,9 +211,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
       };

@@ -26,6 +26,8 @@ from threading import Event
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
+from jupyter_builder.jlpm import YARN_PATH
+from jupyter_builder.jupyterlab_semver import Range, gt, gte, lt, lte, make_semver
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
@@ -42,8 +44,8 @@ from traitlets import Bool, HasTraits, Instance, List, Unicode, default
 
 from jupyterlab._version import __version__
 from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.jlpmapp import HERE, YARN_PATH
-from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 # The regex for expecting the rspack output.
 # TODO: check if we can just keep the theme.css regex like is commented below
@@ -280,7 +282,7 @@ def ensure_app(app_dir):
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jlpm run build:core` then `jupyter lab build` ",
+        "Please run `jlpm build:core` then `jupyter lab build` ",
         "or use a different app directory",
     ]
     return msgs
@@ -1002,7 +1004,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise
         """
         should_rebuild = False
-        for extname, _ in self.info["extensions"].items():
+        for extname in self.info["extensions"]:
             uninstalled = self.uninstall_extension(extname)
             should_rebuild = should_rebuild or uninstalled
         return should_rebuild
@@ -1013,7 +1015,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         should_rebuild = False
-        for extname, _ in self.info["extensions"].items():
+        for extname in self.info["extensions"]:
             if extname in self.info["local_extensions"]:
                 continue
             updated = self._update_extension(extname)
@@ -1338,10 +1340,7 @@ class _AppHandler:
             locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
-        disabled_core = []
-        for key in info["core_extensions"]:
-            if key in info["disabled"]:
-                disabled_core.append(key)
+        disabled_core = [key for key in info["core_extensions"] if key in info["disabled"]]
 
         info["disabled_core"] = disabled_core
 
@@ -1386,7 +1385,7 @@ class _AppHandler:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in [".yarnrc.yml", "yarn.js"]:
+        for fname in [".yarnrc.yml"]:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, "staging", fname), target)
 
@@ -1472,11 +1471,6 @@ class _AppHandler:
                     jlab["linkedPackages"][name] = local_path
                 if name in data["resolutions"]:
                     data["resolutions"][name] = local_path
-
-            # splice the builder as well
-            local_path = osp.abspath(pjoin(REPO_ROOT, "builder"))
-            data["devDependencies"]["@jupyterlab/builder"] = local_path
-            target = osp.join(staging, "node_modules", "@jupyterlab", "builder")
 
             # Remove node_modules so it gets re-populated
             node_modules = pjoin(staging, "node_modules")

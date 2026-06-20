@@ -219,6 +219,7 @@ intended to be used for adding context menu items and keyboard shortcuts.
 - `jp-SettingEditor`: applied to setting editors
 - `jp-SideBar`: applied to sidebars
 - `jp-Terminal`: applied to terminals
+- `jp-zoom-target`: applied to the element within a widget that should respond to zoom actions. Extensions can add this class to define where per-widget zoom should be applied.
 
 **CSS classes that describe the state of a widget**
 
@@ -230,6 +231,7 @@ intended to be used for adding context menu items and keyboard shortcuts.
 - `jp-mod-in-leading-whitespace`: applied to editors that have a selection within the beginning whitespace of a line
 - `jp-mod-at-line-beginning`: applied to editors that can host a completer and have a selection within the beginning whitespace of a line
 - `jp-mod-tooltip`: applied to the body when a tooltip exists on the page
+- `jp-mod-trusted`: applied to widgets that include trusted content; do _not_ use this as source of truth about trust status
 
 **CSS selectors that target data attributes**
 

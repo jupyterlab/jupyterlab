@@ -26,6 +26,7 @@ test.describe('Notebook Edit', () => {
     const imageName = 'run-cell.png';
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -37,6 +38,7 @@ test.describe('Notebook Edit', () => {
     const imageName = 'reedit-cell.png';
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -96,6 +98,7 @@ test.describe('Notebook Edit', () => {
     const imageName = 'execute-again.png';
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -109,6 +112,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Paste Cell Above');
     let nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -122,6 +126,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Paste Cell Below');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -135,6 +140,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Paste Cell and Replace');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -146,6 +152,10 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Delete Cell');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    // Here the toolbar should be hidden due to overlap with Markdown cell text
+    await nbPanel!
+      .locator('.jp-mod-active .jp-cell-toolbar')
+      .waitFor({ state: 'hidden' });
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -156,6 +166,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Select All Cells');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -166,6 +177,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Deselect All Cells');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -176,7 +188,16 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Move Cell Up');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    await page.waitForTimeout(200);
+    // Here the toolbar should be hidden due to overlap with Markdown cell text
+    await nbPanel!
+      .locator('.jp-mod-active .jp-cell-toolbar')
+      .waitFor({ state: 'hidden' });
+
+    // Also wait for the heading collapser icon to appear
+    await nbPanel!
+      .locator('.jp-mod-active .jp-collapseHeadingButton')
+      .waitFor();
+
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -187,6 +208,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Move Cell Down');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -202,6 +224,7 @@ test.describe('Notebook Edit', () => {
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -214,6 +237,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Merge Selected Cells');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });

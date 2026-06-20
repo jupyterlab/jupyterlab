@@ -8,6 +8,44 @@
 
 ## JupyterLab 4.5 to 4.6 (not released yet)
 
+### Migrating to `jupyter-builder`
+
+JupyterLab's build tooling has moved out of the JupyterLab repository into a standalone package: [`jupyter-builder`](https://pypi.org/project/jupyter-builder/) (PyPI) and [`@jupyter/builder`](https://www.npmjs.com/package/@jupyter/builder) (npm). Existing extensions continue to work, but we recommend migrating so your build no longer depends on a full JupyterLab installation.
+
+JupyterLab 4.6 also no longer depends on `setuptools` at runtime. If your extension uses `setuptools`-based packaging or build hooks, add `setuptools` to your own package requirements explicitly, or migrate to a PEP 517/518 build backend in [`pyproject.toml`](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html).
+
+The migration to `jupyter-builder` is two small changes:
+
+#### 1. Update `pyproject.toml`
+
+Replace `jupyterlab` in your build requirements with `jupyter-builder`:
+
+```toml
+# Before
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0.3.2"]
+
+# After
+requires = ["hatchling>=1.5.0", "hatch-nodejs-version>=0.3.2", "jupyter-builder>=1.0.0"]
+```
+
+#### 2. Update `package.json`
+
+Replace `@jupyterlab/builder` with `@jupyter/builder` in your dependencies:
+
+```json
+"@jupyter/builder": "^1.0.0"
+```
+
+Then update your build scripts to use the new CLI:
+
+```json
+"build:labextension": "jupyter-builder build .",
+"build:labextension:dev": "jupyter-builder build --development True .",
+"watch:labextension": "jupyter-builder watch ."
+```
+
+That's it. Your extension now builds without pulling in all of JupyterLab.
+
 ### Building extensions with Rspack
 
 In the upcoming 4.6, JupyterLab will use [Rspack](https://rspack.rs/) instead of
@@ -18,9 +56,40 @@ However, if an extension uses the experimental {ref}`webpackConfig` option, it
 may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
 Webpack config to Rspack.
 
+### For theme authors
+
+- Fonts in data grids (used by CSV/TSV viewer, debugger variable table) can now be customized with:
+  - new `--jp-datagrid-font-size` variable controlling the font size; if not specified by a theme, the fallback of 12px will be used,
+  - new `--jp-datagrid-font-family` variable controlling the font family; if not specified, `--jp-content-font-family` will be used as a fallback.
+
+- Document search buttons no longer rely on theme-specific opacity variables; instead, they use layout and brand colors to indicate state. The following variables are neither defined in built-in themes nor used by core packages:
+  - `--jp-search-toggle-off-opacity` (removed)
+  - `--jp-search-toggle-hover-opacity` (removed)
+  - `--jp-search-toggle-on-opacity` (removed)
+
+- JupyterLab now uses focus-outline variables for keyboard navigation (`:focus-visible` states) across the application. Components such as tabs, buttons, menus, side panels, cells, and others use these variables for `:focus-visible` styling:
+  - new `--jp-focus-outline-color` to define the color of the focus ring
+  - new `--jp-focus-outline-width` variable to set the width of the focus outline (minimum 2px width for accessibility)
+
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
+- The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
+- Synchronization properties (`syncEditable` and `syncCollapse`) of the {ts:class}`cells.Cell` class and its derivatives, as well as `CodeCell.syncScrolled`, now default to `undefined` rather than `false`. In notebook initialization, these values are now only set to `true` if `undefined`, so custom notebook content factories ({ts:interface}`notebook.NotebookPanel.IContentFactory`) can explicitly set them to `true` or `false` without being overwritten later.
+- JupyterLab now depends on `@jupyter/ydoc` v4, which sets the shared document dirty state to `true`
+  after every change, except for `setSource()` (and the `source` setter) which is used for document
+  initialization. With that, JupyterLab's document dirty indicator is now fully backed by a shared model.
+
+### Testing with Galata
+
+- The `runCell()` method of notebook helper now takes `options: {inplace?: boolean; wait?: boolean}` as a second argument.
+  Setting the `wait` option to `false` skips waiting for the cell execution to finish, but still waits until the execution
+  has been scheduled.
+- When `autoGoto` is enabled, the workspace is now reset automatically; to opt out, set `resetWorkspace` fixture to `false`.
+- The galata's `page.waitForCondition()` now uses a default timeout of 15 seconds, simplifying debugging and reducing time to retry.
+  The `timeout` argument can be used to control the timeout duration.
+- Errors after page fixture teardown are now gracefully ignored to prevent the errors from delayed server requests
+  from failing tests during the teardown phase.
 
 ## JupyterLab 4.5.0 to 4.5.1
 
@@ -281,7 +350,6 @@ and is based on [FAST](https://www.fast.design/) library by Microsoft.
 See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more context on the change.
 
 - Changes the selectors of the `Toolbar` and `ToolbarButtonComponent`.
-
   - The DOM of `Toolbar` is now a `jp-toolbar` component instead of a `div`.
 
   - The DOM of `ToolbarButtonComponent` is now `jp-button` element instead of a `button`.
@@ -311,7 +379,7 @@ See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more c
 
 - Some CSS rules for `button` with the class `.jp-ToolbarButtonComponent` has been kept for backward compatibility.
 
-  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  These rules are now **deprecated** and will be removed in JupyterLab 5.
   The `button` elements in toolbars must be updated to `jp-button`, from
   [jupyter-ui-toolkit](https://github.com/jupyterlab-contrib/jupyter-ui-toolkit).
 
@@ -419,7 +487,6 @@ package configuration.
 - Create a file `.yarnrc.yml` containing:
 
 ```yaml
-enableImmutableInstalls: false
 nodeLinker: node-modules
 ```
 
@@ -429,7 +496,7 @@ nodeLinker: node-modules
 .yarn/
 ```
 
-- Run `jlpm install`
+- Run `jlpm`
   This will reset your `yarn.lock` content as its format has changed.
 
 :::{note}
@@ -503,7 +570,7 @@ bumped their major version (following semver convention). We want to point out p
   - `CodeViewerWidget.IOptions` has changed to `{ factory, model, editorOptions }`.
 - `@jupyterlab/codemirror` from 3.x to 4.0
   : - Configuration parameters changes:
-  : - `fontFamily`, `fontSize` and `lineHeight`: grouped in a subdictionnary `customStyles`. - `insertSpaces`: changed for `indentUnit` that can take a value within ['Tab', '1', '2', '4', '8'] - `lineWrap`: changed - it is now a boolean. - `showTrailingSpace`: renamed `highlightTrailingWhitespace` - `coverGutterNextToScrollbar`: removed - `electricChars`: removed - `extraKeys`: removed - you should register new keymap using the CodeMirror extension `keymap.of(KeyBinding[])` - `handlePaste`: removed - `keymap`: removed - `lineSeparator`: removed - Line separator are normalized to `\n` - `lineWiseCopyCut`: removed - this is the default behavior - `scrollbarStyle`: removed - `styleSelectedText`: removed - `selectionPointer`: removed - `wordWrapColumn`: removed
+  : - `fontFamily`, `fontSize` and `lineHeight`: grouped in a nested `customStyles` dictionary. - `insertSpaces`: changed for `indentUnit` that can take a value within ['Tab', '1', '2', '4', '8'] - `lineWrap`: changed - it is now a boolean. - `showTrailingSpace`: renamed `highlightTrailingWhitespace` - `coverGutterNextToScrollbar`: removed - `electricChars`: removed - `extraKeys`: removed - you should register new keymap using the CodeMirror extension `keymap.of(KeyBinding[])` - `handlePaste`: removed - `keymap`: removed - `lineSeparator`: removed - Line separator are normalized to `\n` - `lineWiseCopyCut`: removed - this is the default behavior - `scrollbarStyle`: removed - `styleSelectedText`: removed - `selectionPointer`: removed - `wordWrapColumn`: removed
   - `Mode` has been removed. You can instead request the token `IEditorLanguageHandler`. That provides
     similar API:
     \- `Mode.registerModeInfo` -> `IEditorLanguageHandler.addLanguage`
@@ -528,7 +595,6 @@ bumped their major version (following semver convention). We want to point out p
     \- `@jupyterlab/codemirror-extension:editor-syntax-status` -> `@jupyterlab/fileeditor-extension:editor-syntax-status`
 - `@jupyterlab/completer` from 3.x to 4.x
   : Major version was bumped following major refactor aimed at performance improvements and enabling easier third-party integration.
-
   - Adding custom completion suggestions (items):
     : - In 3.x and earlier adding custom completion items required re-registering the completer connector for each file/cell
     using `register` method of old manager provided by `ICompletionManager` token; in 4.x this token and associated
@@ -595,7 +661,6 @@ bumped their major version (following semver convention). We want to point out p
   - The method `TextModelFactory.createNew` receives a parameter `DocumentModel.IOptions`.
 - `@jupyterlab/documentsearch` from 3.x to 4.x
   : - `@jupyterlab/documentsearch:plugin` has been renamed to `@jupyterlab/documentsearch-extension:plugin`
-
   - `@jupyterlab/documentsearch:labShellWidgetListener` has been renamed to `@jupyterlab/documentsearch-extension:labShellWidgetListener`
 
   This may impact application configuration (for instance if the plugin was disabled).
@@ -721,6 +786,50 @@ bumped their major version (following semver convention). We want to point out p
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the [migration to react 18](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html).
 
+#### Code editor text handling
+
+In JupyterLab 4.x, extension authors should no longer update editor text
+by mutating `model.value.text` directly.
+
+In JupyterLab 3.x, the following pattern was commonly used:
+
+```ts
+widget.content.model.value.text = 'some text';
+```
+
+In JupyterLab 4.x, extensions should update editor contents exclusively through
+the shared model APIs to ensure correct synchronization and collaboration, e.g.:
+
+```ts
+widget.content.model.sharedModel.setSource('some text');
+```
+
+#### Notebook and cell metadata API changes
+
+In JupyterLab 4.x, access patterns for notebook and cell metadata have changed.
+Direct mutation of metadata objects is no longer supported.
+
+In JupyterLab 3.x, extensions commonly accessed metadata like:
+
+```ts
+cellModel.metadata.has(key);
+cellModel.metadata.get(key);
+cellModel.metadata.set(key, value);
+```
+
+In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
+model APIs instead:
+
+```ts
+cellModel.getMetadata(key);
+cellModel.setMetadata(key, value);
+cellModel.deleteMetadata(key);
+
+cellModel.metadataChanged.connect((sender, args) => {
+  // react to metadata updates
+});
+```
+
 ### Testing with Jest
 
 Jest has been updated to 29.2.0 (and _ts-jest_ to 29.0.0). And therefore the jest configuration provided by
@@ -751,7 +860,7 @@ To ease configuration, we have introduce a new helper function `jupyterlab.galat
 simplify the server configuration to be `jupyterlab.galata.configure_jupyter_server(c)`.
 :::
 
-Here are the changes in the Javascript package `@jupyterlab/galata` from 4.x to 5.x:
+Here are the changes in the JavaScript package `@jupyterlab/galata` from 4.x to 5.x:
 : - `ContentsHelper` and `galata.newContentsHelper` have new constructor arguments to use Playwright API request object:
 `new ContentsHelper(baseURL, page?, request?)` -> `new ContentsHelper(request?, page?)`
 `galata.newContentsHelper(baseURL, page?, request?)` -> `galata.newContentsHelper(request?, page?)`
@@ -962,13 +1071,13 @@ index 6f1562f..3fcdf37 100644
 -    "build": "tsc",
 -    "build:labextension": "npm run clean:labextension && mkdirp myextension/labextension && cd myextension/labextension && npm pack ../..",
 -    "clean": "rimraf lib tsconfig.tsbuildinfo",
-+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
-+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
++    "build": "jlpm build:lib && jlpm build:labextension:dev",
++    "build:prod": "jlpm build:lib && jlpm build:labextension",
 +    "build:lib": "tsc",
-+    "build:labextension": "jupyter labextension build .",
-+    "build:labextension:dev": "jupyter labextension build --development True .",
++    "build:labextension": "jupyter-builder build .",
++    "build:labextension:dev": "jupyter-builder build --development True .",
 +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
-+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
++    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
    "clean:labextension": "rimraf myextension/labextension",
    "eslint": "eslint . --ext .ts,.tsx --fix",
    "eslint:check": "eslint . --ext .ts,.tsx",
@@ -1005,8 +1114,8 @@ The diff also shows the new `@jupyterlab/builder` as a `devDependency`.
 It hides away internal dependencies such as `webpack`, and produces the assets that can then be distributed as part of a Python package.
 
 Extension developers do not need to interact with `@jupyterlab/builder` directly, but instead can use the
-`jupyter labextension build` command. This command is run automatically as part of the `build` script
-(`jlpm run build`).
+`jupyter-builder build` command. This command is run automatically as part of the `build` script
+(`jlpm build`).
 
 For more details about the new file structure and packaging of the extension, check out the extension tutorial: {ref}`extension-tutorial`
 

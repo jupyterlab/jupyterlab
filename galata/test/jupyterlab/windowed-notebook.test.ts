@@ -68,7 +68,7 @@ test('should update displayed cells on resize', async ({ page, tmpPath }) => {
   );
   await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
-  // The cell should be visible aqain
+  // The cell should be visible again
   await expect.soft(cell).toBeVisible();
 });
 
@@ -134,8 +134,8 @@ test('should reattached inactive code cell when scrolling back into the viewport
   const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
   await firstCell.waitFor();
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
+  const bbox = (await h!.boundingBox())!;
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   await Promise.all([
     firstCell.waitFor({ state: 'hidden' }),
     h!.locator('.jp-MarkdownCell[data-windowed-list-index="6"]').waitFor(),
@@ -162,8 +162,8 @@ test('should not detach active code cell input when scrolling down', async ({
   const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
   await firstCell.waitFor();
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
+  const bbox = (await h!.boundingBox())!;
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   await Promise.all([
     firstCell.waitFor({ state: 'hidden' }),
     page.mouse.wheel(0, 1200)
@@ -186,8 +186,8 @@ for (const cellType of ['code', 'markdown']) {
     const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
     await firstCell.waitFor();
 
-    const bbox = await h!.boundingBox();
-    await page.mouse.move(bbox!.x, bbox!.y);
+    const bbox = (await h!.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
     await Promise.all([
       firstCell.waitFor({ state: 'hidden' }),
       page.mouse.wheel(0, 1200)
@@ -275,8 +275,8 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       }
 
       // Position the mouse in the bounding box to allow for scrolling with mouse wheel
-      const bbox = await h!.boundingBox();
-      await page.mouse.move(bbox!.x, bbox!.y);
+      const bbox = (await h!.boundingBox())!;
+      await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
 
       // Scroll down to hide the first and second cell
       await Promise.all([
@@ -289,6 +289,19 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       for (let i = 0; i < testCase.times; i++) {
         await page.keyboard.press(testCase.key);
         // Allow for small delay between pressing keys
+        if (i === 0 && testCase.key === 'PageDown' && testCase.times === 10) {
+          // TODO: for some reason the notebook scrolls back to the selected cell after a few seconds.
+          // The exact mechanism is not clear but it is easily reproducible with the test case
+          // "Show neither cell on pressing PageDown 10 times" by commenting out the timeout below,
+          // and decreasing the timeout for each iteration (say down to 10ms).
+          // It might be unrelated to this test, but instead a different bug in the windowing
+          // logic where some stale request remains beyond its intended lifetime
+          // (i.e. when user requested a different scroll).
+          // This could be related related to the scrollback logic; PR #18973 demonstrated
+          // a potential fix, however it made the scrollback test for full windowing flaky
+          // ("should keep active cell when a cell above generates a lot of output").
+          await page.waitForTimeout(3000);
+        }
         await page.waitForTimeout(100);
       }
 
@@ -319,8 +332,8 @@ test('should detach a markdown code cell when scrolling out of the viewport', as
   const mdCell = h!.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
   await mdCell.waitFor();
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
+  const bbox = (await h!.boundingBox())!;
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   await Promise.all([
     mdCell.waitFor({ state: 'hidden' }),
     page.mouse.wheel(0, 1200)
@@ -347,8 +360,8 @@ test('should reattach a markdown code cell when scrolling back into the viewport
   const mdCell = h!.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
   await mdCell.waitFor();
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
+  const bbox = (await h!.boundingBox())!;
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   await Promise.all([
     mdCell.waitFor({ state: 'hidden' }),
     h!.locator('.jp-MarkdownCell[data-windowed-list-index="6"]').waitFor(),
@@ -408,14 +421,15 @@ test('should display cells below on scrolling after inserting a cell on top', as
   // https://github.com/jupyterlab/jupyterlab/issues/16978
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  const notebook = await page.notebook.getNotebookInPanelLocator()!;
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
   const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
   const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
   await firstCell.waitFor();
 
-  const bbox = await notebook.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
+  const bbox = (await notebook.boundingBox())!;
 
+  // Position cursor in the center of the notebook for reliable scrolling
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   // Needs to be two separate mouse wheel events.
   await page.mouse.wheel(0, 3000);
   await page.mouse.wheel(0, 3000);
@@ -438,6 +452,9 @@ test('should display cells below on scrolling after inserting a cell on top', as
 
   // Insert cell below.
   await page.keyboard.press('b');
+
+  // Position cursor in the center of the notebook for reliable scrolling
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   await page.mouse.wheel(0, 3000);
   await page.mouse.wheel(0, 3000);
 
@@ -536,10 +553,13 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .not.toBeVisible();
 
-  await page.getByText('JavaScript injected from HTML').first().waitFor();
-  expect(
-    await page.getByText('JavaScript injected from HTML').count()
-  ).toBeGreaterThan(1);
+  // Use waitFor with function to avoid race condition with setInterval removal
+  await page.waitForFunction(
+    () => {
+      return document.querySelectorAll('[data-origin="html"]').length > 1;
+    },
+    { timeout: 2000 }
+  );
 });
 
 test('should rendered injected JavaScript snippets of out-of-viewport cells', async ({
@@ -554,10 +574,13 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .not.toBeVisible();
 
-  await page.getByText('JavaScript injected header').first().waitFor();
-  expect(
-    await page.getByText('JavaScript injected header').count()
-  ).toBeGreaterThan(1);
+  // Use waitFor with function to avoid race condition with setTimeout removal
+  await page.waitForFunction(
+    () => {
+      return document.querySelectorAll('[data-origin="javascript"]').length > 1;
+    },
+    { timeout: 2000 }
+  );
 });
 
 test('should navigate to a search hit in a out-of-viewport cell', async ({

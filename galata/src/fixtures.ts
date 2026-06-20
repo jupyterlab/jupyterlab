@@ -57,6 +57,12 @@ export type GalataOptions = {
    */
   autoGoto: boolean;
   /**
+   * Whether to reset workspace state when loading the page.
+   *
+   * Default: true.
+   */
+  resetWorkspace: boolean;
+  /**
    * Kernels created during the test.
    *
    * Possible values are:
@@ -190,6 +196,12 @@ export const test: TestType<
    * Note: Setting it to false allows to register new route mock-ups for example.
    */
   autoGoto: [true, { option: true }],
+  /**
+   * Whether to reset workspace state when loading the page.
+   *
+   * Default: true.
+   */
+  resetWorkspace: [true, { option: true }],
   /**
    * Kernels created during the test.
    *
@@ -387,6 +399,7 @@ export const test: TestType<
       mockState,
       mockUser,
       page,
+      resetWorkspace,
       sessions,
       terminals,
       tmpPath,
@@ -394,22 +407,29 @@ export const test: TestType<
     },
     use
   ) => {
-    await use(
-      await galata.initTestPage(
-        appPath,
-        autoGoto,
-        baseURL!,
-        mockConfig,
-        mockSettings,
-        mockState,
-        mockUser,
-        page,
-        sessions,
-        terminals,
-        tmpPath,
-        waitForApplication,
-        kernels
-      )
-    );
+    try {
+      await use(
+        await galata.initTestPage(
+          appPath,
+          autoGoto,
+          baseURL!,
+          mockConfig,
+          mockSettings,
+          mockState,
+          mockUser,
+          page,
+          sessions,
+          terminals,
+          tmpPath,
+          waitForApplication,
+          kernels,
+          resetWorkspace
+        )
+      );
+    } finally {
+      if (!page.isClosed()) {
+        await page.unrouteAll({ behavior: 'ignoreErrors' });
+      }
+    }
   }
 });

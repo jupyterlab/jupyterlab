@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // We explicitly reference the jest typings since the jest.d.ts file shipped
 // with jest 26 masks the @types/jest typings
@@ -327,6 +328,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
 
   const thisObject: Contents.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
+    serverSettings: dummy.serverSettings,
     newUntitled: jest.fn(options => {
       const driveName = dummy.driveName(options?.path || '');
       const localPath = dummy.localPath(options?.path || '');
@@ -674,6 +676,7 @@ namespace Private {
   ): Contents.IModel {
     options = options || {};
     let name = UUID.uuid4();
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (options.type) {
       case 'directory':
         name = `Untitled Folder_${name}`;

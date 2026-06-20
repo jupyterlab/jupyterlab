@@ -92,8 +92,7 @@ export interface IHighlightAdjacentMatchOptions extends IHighlightMatchOptions {
  */
 export abstract class EditorSearchProvider<
   T extends CodeEditor.IModel = CodeEditor.IModel
-> implements IBaseSearchProvider
-{
+> implements IBaseSearchProvider {
   /**
    * Constructor
    */

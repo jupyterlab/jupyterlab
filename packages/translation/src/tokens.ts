@@ -95,12 +95,11 @@ export interface ILanguageList {
 /**
  * Translation connection interface.
  */
-export interface ITranslatorConnector
-  extends IDataConnector<
-    Language,
-    Language | ILanguageList,
-    { language: string } | undefined
-  > {
+export interface ITranslatorConnector extends IDataConnector<
+  Language,
+  Language | ILanguageList,
+  { language: string } | undefined
+> {
   /**
    * Fetch language list or given language.
    */

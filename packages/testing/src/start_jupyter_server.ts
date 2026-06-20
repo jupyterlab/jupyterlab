@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 /* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 
@@ -13,7 +12,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import type { JSONObject } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { sleep } from './common';
 
@@ -184,8 +183,11 @@ namespace Private {
   /**
    * Install a spec in the data directory.
    */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  export function installSpec(dataDir: string, name: string, spec: any): void {
+  export function installSpec(
+    dataDir: string,
+    name: string,
+    spec: JSONValue
+  ): void {
     const specDir = path.join(dataDir, 'kernels', name);
     fs.mkdirSync(specDir, { recursive: true });
     fs.writeFileSync(path.join(specDir, 'kernel.json'), JSON.stringify(spec));
@@ -368,7 +370,6 @@ namespace Private {
     baseUrl: string,
     startDelegate: PromiseDelegate<string>
   ): Promise<void> {
-    // eslint-disable-next-line
     while (true) {
       try {
         await fetch(URLExt.join(baseUrl, 'api'));

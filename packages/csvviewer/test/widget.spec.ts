@@ -62,12 +62,7 @@ describe('csvviewer/widget', () => {
         ],
         schema: {
           primaryKey: ['index'],
-          fields: [
-            {
-              name: 'a'
-            },
-            { name: 'b' }
-          ]
+          fields: [{ name: 'a' }, { name: 'b' }]
         }
       });
     }

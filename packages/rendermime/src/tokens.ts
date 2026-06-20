@@ -35,6 +35,11 @@ export interface IRenderMimeRegistry {
   readonly linkHandler: IRenderMime.ILinkHandler | null;
 
   /**
+   * The object used to register trusted render boundaries.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
+
+  /**
    * The LaTeX typesetter for the rendermime.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
@@ -171,6 +176,11 @@ export namespace IRenderMimeRegistry {
     linkHandler?: IRenderMime.ILinkHandler;
 
     /**
+     * The new trust handler.
+     */
+    trustHandler?: IRenderMime.ITrustHandler;
+
+    /**
      * The new LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
@@ -205,7 +215,30 @@ export const IMarkdownParser = new Token<IRenderMime.IMarkdownParser>(
   'A service for rendering markdown syntax as HTML content.'
 );
 
-export interface IMarkdownParser extends IRenderMime.IMarkdownParser {}
+export interface IMarkdownParser extends IRenderMime.IMarkdownParser {
+  /**
+   * Parse markdown and extract heading metadata.
+   *
+   * @param source - The markdown string to parse.
+   * @returns - A promise of heading metadata.
+   */
+  getHeadingTokens?: (source: string) => Promise<IMarkdownHeadingToken[]>;
+}
+
+/**
+ * Markdown heading metadata.
+ */
+export interface IMarkdownHeadingToken {
+  /**
+   * Line number in source markdown (0-based)
+   */
+  line: number;
+
+  /**
+   * Raw markdown text of the heading
+   */
+  raw: string;
+}
 
 /**
  * The URL resolver factory.

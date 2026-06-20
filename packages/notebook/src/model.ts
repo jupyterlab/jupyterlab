@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { ICellModel } from '@jupyterlab/cells';
@@ -15,6 +16,7 @@ import type {
 import { YNotebook } from '@jupyter/ydoc';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { JSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -160,19 +162,14 @@ export class NotebookModel implements INotebookModel {
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this._dirty;
+    const oldValue = this.dirty;
     if (newValue === oldValue) {
       return;
     }
-    this._dirty = newValue;
-    this.triggerStateChange({
-      name: 'dirty',
-      oldValue,
-      newValue
-    });
+    this.sharedModel.dirty = newValue;
   }
 
   /**
@@ -382,10 +379,9 @@ close the notebook without saving it.`,
         { cell_type: 'code', source: '', metadata: { trusted: true } }
       ];
     }
-    this.sharedModel.fromJSON(copy);
+    this.sharedModel.setSource(copy as JSONValue);
 
     this._ensureMetadata();
-    this.dirty = true;
   }
 
   /**
@@ -395,6 +391,7 @@ close the notebook without saving it.`,
     list: CellList,
     change: IObservableList.IChangedArgs<ICellModel>
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (change.type) {
       case 'add':
         change.newValues.forEach(cell => {
@@ -430,12 +427,7 @@ close the notebook without saving it.`,
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name === 'dirty') {
-          // Setting `dirty` will trigger the state change.
-          // We always set `dirty` because the shared model state
-          // and the local attribute are synchronized one way shared model -> _dirty
-          this.dirty = value.newValue;
-        } else if (value.oldValue !== value.newValue) {
+        if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
@@ -473,7 +465,6 @@ close the notebook without saving it.`,
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
   /**
@@ -493,7 +484,6 @@ close the notebook without saving it.`,
    */
   protected standaloneModel = false;
 
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -513,8 +503,7 @@ export namespace NotebookModel {
   /**
    * An options object for initializing a notebook model.
    */
-  export interface IOptions
-    extends DocumentRegistry.IModelOptions<ISharedNotebook> {
+  export interface IOptions extends DocumentRegistry.IModelOptions<ISharedNotebook> {
     /**
      * Default cell type.
      */

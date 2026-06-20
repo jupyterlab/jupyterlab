@@ -1,0 +1,133 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Launcher, LauncherModel } from '@jupyterlab/launcher';
+import { framePromise, simulate } from '@jupyterlab/testing';
+import { CommandRegistry } from '@lumino/commands';
+import { Widget } from '@lumino/widgets';
+
+describe('@jupyterlab/launcher', () => {
+  describe('Launcher keyboard interaction', () => {
+    const command = 'launcher:test-command';
+    let executeSpy: jest.Mock;
+    let launcher: Launcher;
+
+    beforeEach(async () => {
+      const commands = new CommandRegistry();
+      executeSpy = jest.fn().mockResolvedValue(undefined);
+
+      commands.addCommand(command, {
+        label: 'New Notebook',
+        caption: 'Create a new notebook',
+        execute: executeSpy
+      });
+
+      const model = new LauncherModel();
+      model.add({ category: 'Notebook', command });
+
+      launcher = new Launcher({
+        callback: () => undefined,
+        commands,
+        cwd: '/tmp',
+        model
+      });
+
+      Widget.attach(launcher, document.body);
+      await framePromise();
+      await framePromise();
+    });
+
+    afterEach(() => {
+      launcher.dispose();
+      document.body.textContent = '';
+    });
+
+    function getCard(): HTMLElement {
+      const card = launcher.node.querySelector('.jp-LauncherCard');
+      expect(card).not.toBeNull();
+      return card as HTMLElement;
+    }
+
+    it('should execute a command for Enter', () => {
+      const card = getCard();
+      simulate(card, 'keydown', { key: 'Enter' });
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should execute a command for Space', () => {
+      const card = getCard();
+      simulate(card, 'keydown', { key: ' ' });
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent default browser behavior for Space', () => {
+      const card = getCard();
+      const event = new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+        cancelable: true
+      });
+
+      card.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Launcher category ordering', () => {
+    it('should use categoryRank to influence category ordering', async () => {
+      const commands = new CommandRegistry();
+
+      commands.addCommand('test:a', {
+        label: 'A',
+        execute: jest.fn()
+      });
+
+      const model = new LauncherModel();
+
+      model.add({
+        category: 'Custom',
+        command: 'test:a',
+        categoryRank: 10
+      });
+
+      model.add({ category: 'Console', command: 'test:a' });
+      model.add({ category: 'Notebook', command: 'test:a' });
+      model.add({ category: 'Other', command: 'test:a' });
+
+      const launcher = new Launcher({
+        callback: () => undefined,
+        commands,
+        cwd: '/tmp',
+        model
+      });
+
+      Widget.attach(launcher, document.body);
+
+      await framePromise();
+      await framePromise();
+
+      const titles = Array.from(
+        launcher.node.querySelectorAll('.jp-Launcher-sectionTitle')
+      ).map(node => node.textContent);
+
+      const notebookIndex = titles.indexOf('Notebook');
+      const customIndex = titles.indexOf('Custom');
+      const consoleIndex = titles.indexOf('Console');
+      const otherIndex = titles.indexOf('Other');
+
+      expect(notebookIndex).toBeGreaterThan(-1);
+      expect(customIndex).toBeGreaterThan(-1);
+      expect(consoleIndex).toBeGreaterThan(-1);
+      expect(otherIndex).toBeGreaterThan(-1);
+
+      expect(notebookIndex).toBeLessThan(customIndex);
+      expect(customIndex).toBeLessThan(consoleIndex);
+      expect(consoleIndex).toBeLessThan(otherIndex);
+
+      launcher.dispose();
+      document.body.textContent = '';
+    });
+  });
+});

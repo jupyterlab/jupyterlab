@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
+const webpackWindow = window as unknown as Window & {
+  __webpack_public_path__: string;
+};
+webpackWindow.__webpack_public_path__ = URLExt.join(
   PageConfig.getBaseUrl(),
   'example/'
 );
@@ -145,8 +147,18 @@ function createApp(manager: ServiceManager.IManager): void {
     mime: 'text/x-ipythongfm',
     load: async () => {
       const m = await import('@codemirror/lang-markdown');
+      type TCodeLanguageResolver = Extract<
+        NonNullable<
+          NonNullable<Parameters<typeof m.markdown>[0]>['codeLanguages']
+        >,
+        (info: string) => unknown
+      >;
+      const codeLanguages: TCodeLanguageResolver = info =>
+        languages.findBest(
+          info
+        ) as unknown as ReturnType<TCodeLanguageResolver>;
       return m.markdown({
-        codeLanguages: (info: string) => languages.findBest(info) as any
+        codeLanguages
       });
     }
   });

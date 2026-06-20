@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 import {
   CommandToolbarButton,
   LabIcon,
@@ -13,6 +12,10 @@ import { Widget } from '@lumino/widgets';
 import type { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+
+interface IWidgetWithToolbar extends Widget {
+  toolbar: Toolbar;
+}
 
 /**
  * Concrete implementation of IToolbarWidgetRegistry interface
@@ -151,11 +154,12 @@ export function createDefaultFactory(
         const args = { toolbar: true, ...tArgs };
         const icon = tIcon ? LabIcon.resolve({ icon: tIcon }) : undefined;
 
-        const toolbar = (widget as any).toolbar as Toolbar;
+        const toolbar = (widget as IWidgetWithToolbar).toolbar;
 
         // If there is an icon, undefined label will results in no label
         // otherwise the label will be set using the setting or the command label
-        const label = icon ?? commands.icon(id, args) ? tLabel ?? '' : tLabel;
+        const label =
+          (icon ?? commands.icon(id, args)) ? (tLabel ?? '') : tLabel;
         return new CommandToolbarButton({
           commands,
           id,

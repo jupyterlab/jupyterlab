@@ -7,7 +7,18 @@ import { filterContent } from './utils';
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  viewport: { height: 720, width: 1280 },
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        // Use a font with full Simplified Chineese support for this test;
+        // Note, it also includes the `latin` subset so no fallback needed.
+        'content-font-family': '"Noto Sans SC Variable"',
+        'ui-font-family': '"Noto Sans SC Variable"'
+      }
+    }
+  }
 });
 
 test.describe('Internationalization', () => {
@@ -47,11 +58,14 @@ test.describe('Internationalization', () => {
     // Check UI is in Chinese
     await Promise.all([
       page.waitForURL(baseURL! + '/lab/tree/data'),
-      page.locator('#jupyterlab-splash').waitFor(),
       page.click('button:has-text("Change and reload")')
     ]);
 
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+
+    // Wait for fonts to be loaded (again, we are reloading)
+    await page.waitForLoadState('networkidle');
+    await page.evaluate(() => document.fonts.ready);
 
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {

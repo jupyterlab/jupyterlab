@@ -6,10 +6,9 @@
  */
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
-  PageConfig.getBaseUrl(),
-  'example/'
-);
+(
+  window as unknown as Window & { __webpack_public_path__: string }
+).__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
@@ -120,9 +119,7 @@ class MyList extends WindowedListModel {
     );
     if (!widget) {
       widget = new ContentWidget(
-        `item-${
-          (this.itemsList as ObservableList<{ index: number }>).get(i).index
-        }`
+        `item-${(this.itemsList as ObservableList<{ index: number }>).get(i).index}`
       );
       this.widgetsCache.set(
         (this.itemsList as ObservableList<{ index: number }>).get(i),

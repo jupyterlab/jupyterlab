@@ -40,10 +40,12 @@ describe('config', () => {
     });
 
     it('should accept server settings', async () => {
-      const config = await configSectionManager.create({
+      const serverSettings = getRequestHandler(200, { foo: 'bar' });
+      const manager = new ConfigSectionManager({ serverSettings });
+      const config = await manager.create({
         name: randomName()
       });
-      expect(Object.keys(config.data).length).toBe(0);
+      expect(config.data['foo']).toBe('bar');
     });
 
     it('should fail for an incorrect response', async () => {
@@ -70,7 +72,10 @@ describe('config', () => {
       const config = await configSectionManager.create({
         name: randomName()
       });
-      const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
+      const data: JSONObject = await config.update({
+        foo: 'baz',
+        spam: 'eggs'
+      });
       expect(data.foo).toBe('baz');
       expect(config.data['foo']).toBe('baz');
       expect(data['spam']).toBe('eggs');
@@ -136,14 +141,12 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
     it('should get a default config value with no class', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
-      const className = 'testclass';
       const section = await configSectionManager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
         section,
-        defaults,
-        className
+        defaults
       });
       const data = config.get('spam');
       expect(data).toBe('eggs');
@@ -172,8 +175,8 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       const className = 'testclass';
       const section = await configSectionManager.create({ name: randomName() });
       const config = new ConfigWithDefaults({ section, className });
-      let data: any = await config.set('foo', 'bar');
-      data = section.data['testclass'] as JSONObject;
+      await config.set('foo', 'bar');
+      const data = section.data['testclass'] as JSONObject;
       expect(data['foo']).toBe('bar');
     });
 

@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from 'react';
 
@@ -20,6 +21,7 @@ import {
 import { StringExt } from '@lumino/algorithm';
 import type { PartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { ElementExt } from '@lumino/domutils';
 import type { Message } from '@lumino/messaging';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -43,6 +45,17 @@ const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
  * icon label of a plugin.
  */
 const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
+
+/**
+ * DOM ids for plugin list section headers (used by aria-labelledby).
+ */
+const MODIFIED_HEADER_ID = 'jp-PluginList-modified-header';
+const SETTINGS_HEADER_ID = 'jp-PluginList-settings-header';
+
+/**
+ * The class name for a plugin list entry.
+ */
+const ENTRY_CLASS = 'jp-PluginList-entry';
 
 /**
  * A list of plugins with editable settings.
@@ -74,7 +87,7 @@ export class PluginList extends ReactWidget {
       options.query ? updateFilterFunction(options.query, false, false) : null
     );
     this.setError = this.setError.bind(this);
-    this._evtMousedown = this._evtMousedown.bind(this);
+    this._evtClick = this._evtClick.bind(this);
     this._query = options.query ?? '';
 
     this._errors = {};
@@ -122,6 +135,9 @@ export class PluginList extends ReactWidget {
   }
   set selection(selection: string) {
     this._selection = selection;
+    if (selection) {
+      this._focusedId = selection;
+    }
     this.update();
   }
 
@@ -137,6 +153,38 @@ export class PluginList extends ReactWidget {
   }
 
   /**
+   * Handle the DOM events for the plugin list.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      case 'focusin':
+        this._evtFocusIn(event as FocusEvent);
+        break;
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('keydown', this);
+    this.node.addEventListener('focusin', this);
+  }
+
+  /**
+   * A message handler invoked on a `'before-detach'` message.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('keydown', this);
+    this.node.removeEventListener('focusin', this);
+    super.onBeforeDetach(msg);
+  }
+
+  /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -144,39 +192,279 @@ export class PluginList extends ReactWidget {
     if (ul && this._scrollTop !== undefined) {
       ul.scrollTop = this._scrollTop;
     }
+    if (this._pendingEntryFocus) {
+      const id = this._pendingEntryFocus;
+      this._pendingEntryFocus = null;
+      const entry = this._getEntryById(id);
+      if (entry) {
+        this._focusEntryElement(entry);
+      }
+    }
     super.onUpdateRequest(msg);
   }
 
   /**
-   * Handle the `'mousedown'` event for the plugin list.
+   * Handle the `'click'` event for the plugin list.
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtMousedown(event: React.MouseEvent<HTMLDivElement>): void {
-    const target = event.currentTarget;
-    const id = target.getAttribute('data-id');
+  private _evtClick(event: React.MouseEvent<HTMLDivElement>): void {
+    const id = event.currentTarget.getAttribute('data-id');
+    if (id) {
+      this._selectPlugin(id);
+    }
+  }
 
+  /**
+   * Select a plugin in the list and notify listeners.
+   *
+   * @param id - The plugin id to select
+   */
+  private _selectPlugin(id: string): void {
+    if (this._confirm) {
+      this._confirm(id)
+        .then(() => {
+          this._applySelection(id);
+        })
+        .catch(() => {
+          this._pendingEntryFocus = null;
+        });
+    } else {
+      this._scrollTop = this.scrollTop;
+      this._applySelection(id);
+    }
+  }
+
+  /**
+   * Apply the current selection and focus state without confirmation.
+   *
+   * @param id - The plugin id to select
+   */
+  private _applySelection(id: string): void {
+    this._selection = id;
+    this._focusedId = id;
+    this._pendingEntryFocus = id;
+    this._handleSelectSignal.emit(id);
+    this._changed.emit(undefined);
+    this.update();
+  }
+
+  /**
+   * Resolve the plugin id that should hold the roving tab stop.
+   */
+  private _getTabStopId(visiblePluginIds: string[]): string {
+    if (this._focusedId && visiblePluginIds.includes(this._focusedId)) {
+      return this._focusedId;
+    }
+    if (this._selection && visiblePluginIds.includes(this._selection)) {
+      return this._selection;
+    }
+    return visiblePluginIds[0] ?? '';
+  }
+
+  /**
+   * Keep focus state aligned with the currently visible plugin entries.
+   */
+  private _syncFocusedId(visiblePluginIds: string[]): void {
+    const tabStopId = this._getTabStopId(visiblePluginIds);
+    if (tabStopId !== this._focusedId) {
+      this._focusedId = tabStopId;
+    }
+  }
+
+  /**
+   * Return plugin entries in DOM order across all visible lists.
+   */
+  private _getEntryElements(): HTMLElement[] {
+    return Array.from(
+      this.node.querySelectorAll(`.${ENTRY_CLASS}`)
+    ) as HTMLElement[];
+  }
+
+  /**
+   * Return a plugin entry element by plugin id.
+   */
+  private _getEntryById(id: string): HTMLElement | null {
+    return this.node.querySelector(
+      `.${ENTRY_CLASS}[data-id="${CSS.escape(id)}"]`
+    );
+  }
+
+  /**
+   * Return the scrollable container for plugin list entries.
+   */
+  private _getScrollElement(): HTMLElement {
+    return (
+      (this.node.querySelector('.jp-PluginList-wrapper') as HTMLElement) ??
+      this.node
+    );
+  }
+
+  /**
+   * Focus an entry element and sync the roving tab stop in the DOM.
+   *
+   * Used when keyboard navigation updates focus without a React re-render.
+   */
+  private _focusEntryElement(entry: HTMLElement): void {
+    const id = entry.getAttribute('data-id');
+    if (id) {
+      this._focusedId = id;
+    }
+    for (const item of this._getEntryElements()) {
+      item.tabIndex = item === entry ? 0 : -1;
+    }
+    entry.focus();
+    ElementExt.scrollIntoViewIfNeeded(this._getScrollElement(), entry);
+  }
+
+  /**
+   * Walk from an event target to the nearest plugin entry, if any.
+   */
+  private _resolveEntryFromEventTarget(
+    target: EventTarget | null
+  ): HTMLElement | null {
+    let node = target as HTMLElement | null;
+    while (node && node !== this.node) {
+      if (node.classList.contains(ENTRY_CLASS)) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  /**
+   * Whether the event target is inside the settings search input.
+   */
+  private _isFilterInputTarget(target: EventTarget | null): boolean {
+    let node = target as HTMLElement | null;
+    while (node && node !== this.node) {
+      const tag = node.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'JP-SEARCH') {
+        return true;
+      }
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  /**
+   * Index of the currently focused entry, falling back to the first entry.
+   */
+  private _getFocusedEntryIndex(entries: HTMLElement[]): number {
+    const index = entries.findIndex(
+      entry => entry.getAttribute('data-id') === this._focusedId
+    );
+    return index === -1 ? 0 : index;
+  }
+
+  /**
+   * Move keyboard focus to a plugin entry without changing the selection.
+   */
+  private _focusEntry(id: string): boolean {
+    if (!id || id === this._focusedId) {
+      return false;
+    }
+
+    const entry = this._getEntryById(id);
+    if (!entry) {
+      return false;
+    }
+
+    this._focusEntryElement(entry);
+    return true;
+  }
+
+  /**
+   * Move focus to the entry at the given index.
+   */
+  private _focusEntryAtIndex(index: number): boolean {
+    const entries = this._getEntryElements();
+    if (entries.length === 0) {
+      return false;
+    }
+
+    const nextIndex = Math.min(Math.max(index, 0), entries.length - 1);
+    const nextId = entries[nextIndex].getAttribute('data-id');
+    return nextId ? this._focusEntry(nextId) : false;
+  }
+
+  /**
+   * Move focus to another visible entry by index offset.
+   */
+  private _moveFocusByDelta(delta: number): boolean {
+    const entries = this._getEntryElements();
+    if (entries.length === 0) {
+      return false;
+    }
+
+    const nextIndex = this._getFocusedEntryIndex(entries) + delta;
+    if (nextIndex < 0 || nextIndex >= entries.length) {
+      return false;
+    }
+
+    return this._focusEntryAtIndex(nextIndex);
+  }
+
+  /**
+   * Handle the `'keydown'` event for the plugin list.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    if (this._isFilterInputTarget(event.target)) {
+      return;
+    }
+
+    const entry = this._resolveEntryFromEventTarget(event.target);
+    if (!entry) {
+      return;
+    }
+
+    const id = entry.getAttribute('data-id');
     if (!id) {
       return;
     }
 
-    if (this._confirm) {
-      this._confirm(id)
-        .then(() => {
-          this.selection = id!;
-          this._changed.emit(undefined);
-          this.update();
-        })
-        .catch(() => {
-          /* no op */
-        });
-    } else {
-      this._scrollTop = this.scrollTop;
-      this._selection = id!;
-      this._handleSelectSignal.emit(id!);
-      this._changed.emit(undefined);
-      this.update();
+    let handled = false;
+    switch (event.key) {
+      case 'ArrowDown':
+        handled = this._moveFocusByDelta(1);
+        break;
+      case 'ArrowUp':
+        handled = this._moveFocusByDelta(-1);
+        break;
+      case 'Home':
+        handled = this._focusEntryAtIndex(0);
+        break;
+      case 'End':
+        handled = this._focusEntryAtIndex(this._getEntryElements().length - 1);
+        break;
+      case 'Enter':
+      case ' ':
+        if (id !== this._selection) {
+          this._selectPlugin(id);
+        }
+        handled = true;
+        break;
+      default:
+        return;
     }
+
+    if (handled) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
+  /**
+   * Keep roving tabindex aligned when focus moves between entries via Tab.
+   */
+  private _evtFocusIn(event: FocusEvent): void {
+    const entry = this._resolveEntryFromEventTarget(event.target);
+    if (!entry || entry.getAttribute('data-id') === this._focusedId) {
+      return;
+    }
+
+    this._focusEntryElement(entry);
   }
 
   /**
@@ -378,34 +666,46 @@ export class PluginList extends ReactWidget {
           return <li key={`${id}-${fieldValue}`}> {highlighted} </li>;
         })
       : undefined;
+    const hasMatchDetails =
+      filteredProperties !== undefined && filteredProperties.length > 0;
+    const matchesId = hasMatchDetails
+      ? `jp-PluginList-matches-${encodeURIComponent(id)}`
+      : undefined;
+    const ariaLabel = this._errors[id] ? trans.__('%1 (error)', title) : title;
 
     return (
-      <div
-        onClick={this._evtMousedown}
-        className={`${
-          id === this.selection
-            ? 'jp-mod-selected jp-PluginList-entry'
-            : 'jp-PluginList-entry'
-        } ${this._errors[id] ? 'jp-ErrorPlugin' : ''}`}
-        data-id={id}
-        key={id}
-        title={itemTitle}
-      >
-        <div className="jp-PluginList-entry-label" role="tab">
-          <div className="jp-SelectedIndicator" />
-          <LabIcon.resolveReact
-            icon={icon || (iconClass ? undefined : settingsIcon)}
-            iconClass={classes(iconClass, 'jp-Icon')}
-            title={iconTitle}
-            tag="span"
-            stylesheet="settingsEditor"
-          />
-          <span className="jp-PluginList-entry-label-text">
-            {hightlightedTitle}
-          </span>
+      <li role="presentation" key={id}>
+        <div
+          role="tab"
+          aria-selected={id === this.selection}
+          aria-label={ariaLabel}
+          aria-describedby={matchesId}
+          tabIndex={id === this._focusedId ? 0 : -1}
+          onClick={this._evtClick}
+          className={classes(
+            ENTRY_CLASS,
+            id === this.selection ? 'jp-mod-selected' : '',
+            this._errors[id] ? 'jp-ErrorPlugin' : ''
+          )}
+          data-id={id}
+          title={itemTitle}
+        >
+          <div className="jp-PluginList-entry-label">
+            <div className="jp-SelectedIndicator" />
+            <LabIcon.resolveReact
+              icon={icon || (iconClass ? undefined : settingsIcon)}
+              iconClass={classes(iconClass, 'jp-Icon')}
+              title={iconTitle}
+              tag="span"
+              stylesheet="settingsEditor"
+            />
+            <span className="jp-PluginList-entry-label-text">
+              {hightlightedTitle}
+            </span>
+          </div>
+          <ul id={matchesId}>{filteredProperties}</ul>
         </div>
-        <ul>{filteredProperties}</ul>
-      </div>
+      </li>
     );
   }
 
@@ -423,12 +723,17 @@ export class PluginList extends ReactWidget {
     const modifiedPlugins = allPlugins.filter(plugin => {
       return this._model.settings[plugin.id]?.isModified;
     });
+    const otherPlugins = allPlugins.filter(plugin => {
+      return !modifiedPlugins.includes(plugin);
+    });
+    const visiblePluginIds = [
+      ...modifiedPlugins.map(plugin => plugin.id),
+      ...otherPlugins.map(plugin => plugin.id)
+    ];
+    this._syncFocusedId(visiblePluginIds);
+
     const modifiedItems = modifiedPlugins.map(this.mapPlugins);
-    const otherItems = allPlugins
-      .filter(plugin => {
-        return !modifiedPlugins.includes(plugin);
-      })
-      .map(this.mapPlugins);
+    const otherItems = otherPlugins.map(this.mapPlugins);
 
     return (
       <div className="jp-PluginList-wrapper">
@@ -442,14 +747,30 @@ export class PluginList extends ReactWidget {
         />
         {modifiedItems.length > 0 && (
           <div>
-            <h1 className="jp-PluginList-header">{trans.__('Modified')}</h1>
-            <ul>{modifiedItems}</ul>
+            <h1 className="jp-PluginList-header" id={MODIFIED_HEADER_ID}>
+              {trans.__('Modified')}
+            </h1>
+            <ul
+              role="tablist"
+              aria-labelledby={MODIFIED_HEADER_ID}
+              aria-orientation="vertical"
+            >
+              {modifiedItems}
+            </ul>
           </div>
         )}
         {otherItems.length > 0 && (
           <div>
-            <h1 className="jp-PluginList-header">{trans.__('Settings')}</h1>
-            <ul>{otherItems}</ul>
+            <h1 className="jp-PluginList-header" id={SETTINGS_HEADER_ID}>
+              {trans.__('Settings')}
+            </h1>
+            <ul
+              role="tablist"
+              aria-labelledby={SETTINGS_HEADER_ID}
+              aria-orientation="vertical"
+            >
+              {otherItems}
+            </ul>
           </div>
         )}
         {modifiedItems.length === 0 && otherItems.length === 0 && (
@@ -475,6 +796,8 @@ export class PluginList extends ReactWidget {
   private _confirm?: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';
+  private _focusedId = '';
+  private _pendingEntryFocus: string | null = null;
 }
 
 /**

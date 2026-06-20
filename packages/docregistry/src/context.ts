@@ -38,8 +38,7 @@ import type { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T>
-{
+> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
@@ -103,7 +102,8 @@ export class Context<
 
     this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => this.sessionContext.session?.kernel?.id
     });
   }
 
@@ -471,7 +471,6 @@ export class Context<
 
       if (oldPath !== this._path) {
         newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
 
         // Update client file model from folder change
         changeModel = {
@@ -715,7 +714,6 @@ export class Context<
         }
 
         this._updateContentsModel(contents);
-        model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }
@@ -980,7 +978,7 @@ or load the version on disk (revert)?`,
   }
 
   private _createSaveOptions(): Partial<Contents.IModel> {
-    let content: PartialJSONValue = null;
+    let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = this._model.toJSON();
     } else {

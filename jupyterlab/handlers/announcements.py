@@ -109,8 +109,8 @@ class CheckForUpdate(CheckForUpdateABC):
             if parse(self.version) < parse(last_version):
                 trans = translator.load("jupyterlab")
                 return (
-                    trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    trans.gettext(f"A newer version ({last_version}) of JupyterLab is available."),
+                    (trans.gettext("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None
@@ -255,9 +255,7 @@ class NewsHandler(APIHandler):
                         link_node = links[0] if len(links) == 1 else None
                     entry_link = link_node.get("href") if link_node is not None else None
 
-                    message = (
-                        "\n".join([entry_title, entry_summary]) if entry_summary else entry_title
-                    )
+                    message = f"{entry_title}\n{entry_summary}" if entry_summary else entry_title
                     modified_at = format_datetime(entry_updated)
                     created_at = format_datetime(entry_published)
                     notification = Notification(
