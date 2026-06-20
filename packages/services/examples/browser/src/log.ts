@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 export function log(content: unknown): void {
   const el = document.getElementById('output');
-  const message =
-    typeof content === 'string' ? content : JSON.stringify(content);
+  const text = typeof content === 'string' ? content : JSON.stringify(content);
   if (el) {
-    el.textContent = el.textContent + '\n' + message;
+    el.textContent = el.textContent + '\n' + text;
   }
-  console.debug(message);
+  console.debug(text);
 }
