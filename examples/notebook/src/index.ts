@@ -50,20 +50,30 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 import { ServiceManager } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { TranslationManager } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { COMMAND_IDS, setupCommands } from './commands';
 
-function main(): void {
+async function main(): Promise<void> {
+  const translator = new TranslationManager(
+    PageConfig.getOption('translationsApiUrl')
+  );
+  await translator.fetch('default');
+
   const manager = new ServiceManager();
   void manager.ready.then(() => {
-    createApp(manager);
+    createApp(manager, translator);
   });
 }
 
-function createApp(manager: ServiceManager.IManager): void {
+function createApp(
+  manager: ServiceManager.IManager,
+  translator: ITranslator
+): void {
   // Initialize the command registry with the bindings.
   const commands = new CommandRegistry();
   const useCapture = true;
@@ -82,7 +92,8 @@ function createApp(manager: ServiceManager.IManager): void {
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
     latexTypesetter: new MathJaxTypesetter(),
-    markdownParser: createMarkdownParser(languages)
+    markdownParser: createMarkdownParser(languages),
+    translator
   });
 
   const opener = {
@@ -101,11 +112,12 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   };
 
-  const docRegistry = new DocumentRegistry();
+  const docRegistry = new DocumentRegistry({ translator });
   const docManager = new DocumentManager({
     registry: docRegistry,
     manager,
-    opener
+    opener,
+    translator
   });
   const mFactory = new NotebookModelFactory({});
   const editorExtensions = () => {
@@ -170,7 +182,7 @@ function createApp(manager: ServiceManager.IManager): void {
   const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
-  const sessionContextDialogs = new SessionContextDialogs();
+  const sessionContextDialogs = new SessionContextDialogs({ translator });
   const toolbarFactory = (panel: NotebookPanel) =>
     [
       COMMAND_IDS.save,
@@ -193,18 +205,25 @@ function createApp(manager: ServiceManager.IManager): void {
         })
       }))
       .concat([
-        { name: 'cellType', widget: ToolbarItems.createCellTypeItem(panel) },
+        {
+          name: 'cellType',
+          widget: ToolbarItems.createCellTypeItem(panel, translator)
+        },
         { name: 'spacer', widget: Toolbar.createSpacerItem() },
         {
           name: 'kernelName',
           widget: AppToolbar.createKernelNameItem(
             panel.sessionContext,
-            sessionContextDialogs
+            sessionContextDialogs,
+            translator
           )
         },
         {
           name: 'executionProgress',
-          widget: ExecutionIndicator.createExecutionIndicatorItem(panel)
+          widget: ExecutionIndicator.createExecutionIndicatorItem(
+            panel,
+            translator
+          )
         }
       ]);
 
@@ -218,6 +237,7 @@ function createApp(manager: ServiceManager.IManager): void {
     rendermime,
     contentFactory,
     mimeTypeService,
+    translator,
     toolbarFactory,
     notebookConfig: {
       ...StaticNotebook.defaultNotebookConfig,
@@ -289,7 +309,14 @@ function createApp(manager: ServiceManager.IManager): void {
   window.addEventListener('resize', () => {
     panel.update();
   });
-  setupCommands(commands, palette, nbWidget, handler, sessionContextDialogs);
+  setupCommands(
+    commands,
+    palette,
+    nbWidget,
+    handler,
+    sessionContextDialogs,
+    translator
+  );
 
   console.debug('Example started!');
 }

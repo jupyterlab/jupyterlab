@@ -49,6 +49,7 @@ import {
   KernelSpecManager,
   SessionManager
 } from '@jupyterlab/services';
+import { TranslationManager } from '@jupyterlab/translation';
 
 import type { IYText } from '@jupyter/ydoc';
 
@@ -56,7 +57,13 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { BoxPanel, Widget } from '@lumino/widgets';
 
-function main(): void {
+async function main(): Promise<void> {
+  const translator = new TranslationManager(
+    PageConfig.getOption('translationsApiUrl')
+  );
+  await translator.fetch('default');
+  const trans = translator.load('jupyterlab');
+
   const kernelManager = new KernelManager();
   const specsManager = new KernelSpecManager();
   const sessionManager = new SessionManager({ kernelManager });
@@ -64,7 +71,8 @@ function main(): void {
     kernelManager,
     sessionManager,
     specsManager,
-    name: 'Example'
+    name: 'Example',
+    translator
   });
   const editorExtensions = () => {
     const themes = new EditorThemeRegistry();
@@ -121,14 +129,18 @@ function main(): void {
   );
 
   // Create the cell widget with a default rendermime instance.
-  const rendermime = new RenderMimeRegistry({ initialFactories });
+  const rendermime = new RenderMimeRegistry({
+    initialFactories,
+    translator
+  });
 
   const cellWidget = new CodeCell({
     contentFactory: new Cell.ContentFactory({
       editorFactory: factoryService.newInlineEditor.bind(factoryService)
     }),
     rendermime,
-    model: new CodeCellModel()
+    model: new CodeCellModel(),
+    translator
   }).initializeState();
 
   // Handle the mimeType for the current kernel asynchronously.
@@ -187,10 +199,10 @@ function main(): void {
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
-      tooltip: 'Interrupt the kernel'
+      tooltip: trans.__('Interrupt the kernel')
     })
   );
-  const dialogs = new SessionContextDialogs();
+  const dialogs = new SessionContextDialogs({ translator });
   toolbar.addItem(
     'restart',
     new ToolbarButton({
@@ -198,14 +210,17 @@ function main(): void {
       onClick: () => {
         void dialogs.restart(sessionContext);
       },
-      tooltip: 'Restart the kernel'
+      tooltip: trans.__('Restart the kernel')
     })
   );
   toolbar.addItem(
     'name',
-    AppToolbar.createKernelNameItem(sessionContext, dialogs)
+    AppToolbar.createKernelNameItem(sessionContext, dialogs, translator)
   );
-  toolbar.addItem('status', AppToolbar.createKernelStatusItem(sessionContext));
+  toolbar.addItem(
+    'status',
+    AppToolbar.createKernelStatusItem(sessionContext, translator)
+  );
 
   // Lay out the widgets.
   const panel = new BoxPanel();

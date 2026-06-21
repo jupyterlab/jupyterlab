@@ -18,6 +18,7 @@
     "@jupyterlab/rendermime": "^4.6.0",
     "@jupyterlab/services": "^7.6.0",
     "@jupyterlab/theme-light-extension": "^4.6.0",
+    "@jupyterlab/translation": "^4.6.0",
     "@jupyterlab/ui-components": "^4.6.0",
     "@lumino/commands": "^2.3.3",
     "@lumino/widgets": "^2.8.0"

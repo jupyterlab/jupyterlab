@@ -44,6 +44,7 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             "notebookPath": "test.ipynb",
             "fullStaticUrl": ujoin(self.base_url, "static", self.name),
             "frontendUrl": ujoin(self.base_url, "example/"),
+            "translationsApiUrl": ujoin("example", "api", "translations"),
         }
         return self.write(
             self.render_template(
@@ -73,6 +74,7 @@ class ExampleApp(LabServerApp):
     def initialize_handlers(self):
         """Add example handler to Lab Server's handler list."""
         self.handlers.append(("/example", ExampleHandler))
+        super().initialize_handlers()
 
 
 if __name__ == "__main__":
