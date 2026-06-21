@@ -289,7 +289,9 @@ test('Bulk rename should be blocked when target already exists', async ({
   // ERROR dialog should appear
   const errorDialog = page.locator('.jp-Dialog:has-text("Bulk Rename Error")');
   await expect(errorDialog).toBeVisible();
-  await expect(errorDialog).toContainText('existing.py already exists');
+  await expect(errorDialog.locator('.jp-Dialog-body')).toContainText(
+    'Cannot rename: file "existing.py" already exists.'
+  );
 
   // Close the error dialog
   await errorDialog.locator('.jp-Dialog-button').click();
@@ -301,7 +303,9 @@ test('Bulk rename should be blocked when target already exists', async ({
   expect(await page.filebrowser.isFileListedInBrowser(file3)).toBeTruthy();
 
   // Ensure no renamed versions were created
-  expect(await page.filebrowser.isFileListedInBrowser('existing.txt')).toBeFalsy();
+  expect(
+    await page.filebrowser.isFileListedInBrowser('existing.txt')
+  ).toBeFalsy();
 });
 
 test('File rename input respects UI font size', async ({ page }) => {

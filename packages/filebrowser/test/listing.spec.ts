@@ -1245,13 +1245,13 @@ describe('filebrowser/listing', () => {
           name: string;
           type: 'file' | 'directory' | 'notebook';
         }[] = [
-            { name: '1.txt', type: 'file' },
-            { name: '2', type: 'directory' },
-            { name: '3.ipynb', type: 'notebook' },
-            { name: '4.txt', type: 'file' },
-            { name: '5', type: 'directory' },
-            { name: '6.ipynb', type: 'notebook' }
-          ];
+          { name: '1.txt', type: 'file' },
+          { name: '2', type: 'directory' },
+          { name: '3.ipynb', type: 'notebook' },
+          { name: '4.txt', type: 'file' },
+          { name: '5', type: 'directory' },
+          { name: '6.ipynb', type: 'notebook' }
+        ];
 
         // Create files that can be sorted alphabetically
         for (const file of files) {

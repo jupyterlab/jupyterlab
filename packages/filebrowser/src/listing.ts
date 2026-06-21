@@ -2587,7 +2587,10 @@ export class DirListing extends Widget {
       }
 
       // Get the corresponding model, nodes, and file name.
-      const index = ArrayExt.findFirstIndex(items, value => value.path === path);
+      const index = ArrayExt.findFirstIndex(
+        items,
+        value => value.path === path
+      );
       const row = this._items[index];
       const item = items[index];
       const nameNode = this.renderer.getNameNode(row);
@@ -2708,7 +2711,6 @@ export class DirListing extends Widget {
       return '';
     }
   }
-
 
   /**
    * Core logic for bulk renaming multiple items.
