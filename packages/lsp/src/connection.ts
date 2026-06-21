@@ -30,6 +30,7 @@ import { LspWsConnection } from './ws-connection/ws-connection';
 
 import type * as lsp from 'vscode-languageserver-protocol';
 
+import { CancellationTokenSource } from 'vscode-jsonrpc';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
 /**
@@ -149,12 +150,6 @@ type AnyMethodType =
   | typeof Method.ClientNotification
   | typeof Method.ClientRequest
   | typeof Method.ServerRequest;
-type AnyMethod =
-  | Method.ServerNotification
-  | Method.ClientNotification
-  | Method.ClientRequest
-  | Method.ServerRequest;
-
 /**
  * Create a map between the request method and its handler
  */
@@ -178,9 +173,9 @@ enum MessageKind {
   responseForServer
 }
 
-interface IMessageLog<T extends AnyMethod = AnyMethod> {
-  method: T;
-  message: any;
+interface IMessageLog {
+  method: string;
+  message: unknown;
 }
 
 export class LSPConnection extends LspWsConnection implements ILSPConnection {
@@ -322,6 +317,63 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    */
   provides(capability: keyof lsp.ServerCapabilities): boolean {
     return !!(this.serverCapabilities && this.serverCapabilities[capability]);
+  }
+
+  /**
+   * Send a request to the language server.
+   */
+  async request<T = unknown>(
+    method: string,
+    params: lsp.LSPObject,
+    options: ILSPConnection.IRequestOptions = {}
+  ): Promise<T> {
+    if (this.isDisposed) {
+      throw new Error('Cannot send an LSP request on a disposed connection.');
+    }
+    if (!this.isReady) {
+      throw new Error(
+        'Cannot send an LSP request before the connection is ready.'
+      );
+    }
+
+    const { signal } = options;
+    if (signal?.aborted) {
+      throw (
+        signal.reason ??
+        new DOMException('The request was aborted.', 'AbortError')
+      );
+    }
+
+    const cancellation = signal ? new CancellationTokenSource() : undefined;
+    let rejectOnAbort: ((reason?: unknown) => void) | undefined;
+    const aborted = signal
+      ? new Promise<never>((_, reject) => {
+          rejectOnAbort = reject;
+        })
+      : undefined;
+    const cancel = () => {
+      cancellation?.cancel();
+      rejectOnAbort?.(
+        signal?.reason ??
+          new DOMException('The request was aborted.', 'AbortError')
+      );
+    };
+    signal?.addEventListener('abort', cancel, { once: true });
+
+    this.log(MessageKind.clientRequested, { method, message: params });
+    try {
+      const response = cancellation
+        ? this.connection.sendRequest<T>(method, params, cancellation.token)
+        : this.connection.sendRequest<T>(method, params);
+      const result = aborted
+        ? await Promise.race([response, aborted])
+        : await response;
+      this.log(MessageKind.resultForClient, { method, message: result });
+      return result;
+    } finally {
+      signal?.removeEventListener('abort', cancel);
+      cancellation?.dispose();
+    }
   }
 
   /**

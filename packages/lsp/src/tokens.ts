@@ -94,6 +94,13 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
+   * The known language server specifications.
+   */
+  readonly specs: TSpecsMap;
+
+  /**
+   * @alpha
+   *
    * Get server connection settings.
    */
   readonly settings: ServerConnection.ISettings;
@@ -1018,6 +1025,22 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
   /**
    * @alpha
    *
+   * Send a request to the language server.
+   *
+   * @param method - The LSP method to request.
+   * @param params - The parameters for the request.
+   * @param options - Options for the request.
+   * @returns The response from the language server.
+   */
+  request<T = unknown>(
+    method: string,
+    params: lsp.LSPObject,
+    options?: ILSPConnection.IRequestOptions
+  ): Promise<T>;
+
+  /**
+   * @alpha
+   *
    * Lists server capabilities.
    */
   serverCapabilities: lsp.ServerCapabilities;
@@ -1043,4 +1066,16 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * Send all changes to the server.
    */
   sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
+}
+
+export namespace ILSPConnection {
+  /**
+   * Options for an LSP request.
+   */
+  export interface IRequestOptions {
+    /**
+     * A signal used to cancel the request.
+     */
+    signal?: AbortSignal;
+  }
 }
