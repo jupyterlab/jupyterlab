@@ -8,46 +8,46 @@
 
 JupyterLab 4.6 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-5-to-4-6) which lists deprecations and changes to the public API.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-5-to-4-6) which lists deprecations and changes to the public API.
 
 ### Layout and interface customization
 
-The activity bar can now be positioned at the top or bottom of the interface, in addition to the default left and right placement. The setting is available under Settings → Interface → [Activity Bar Position](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#activity-bar-position).
+The activity bar can now be positioned at the top or bottom of the interface, in addition to the default left and right placement. The setting is available under Settings → Interface → [Activity Bar Position](https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html#activity-bar-position).
 
 <img alt="JupyterLab with the activity bar icons placed at the bottom of the left sidebar"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-activity-bar-bottom.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-activity-bar-bottom.png"
 class="jp-screenshot">
 
-Sections of accordion sidebars can now be [moved between panels](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#move-accordion-sections-between-panels) via a context menu. Right-clicking a section header shows a "Move To" menu. The placement and collapsed state of moved sections are persisted across sessions.
+Sections of accordion sidebars can now be [moved between panels](https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html#move-accordion-sections-between-panels) via a context menu. Right-clicking a section header shows a "Move To" menu. The placement and collapsed state of moved sections are persisted across sessions.
 
 <img alt="The 'Move To File Browser' context menu entry on Open Tabs section of Running panel"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-move-to-file-browser.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-move-to-file-browser.png"
 class="jp-screenshot">
 
 <img alt="Open Tabs section moved into the file browser"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-open-tabs-in-file-browser.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-open-tabs-in-file-browser.png"
 class="jp-screenshot">
 
-The sidebar panels themselves can be [moved between areas](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#move-open-widgets). Right-clicking a sidebar shows submenu with options to move it to the main area, a different sidebar, or the down area.
+The sidebar panels themselves can be [moved between areas](https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html#move-open-widgets). Right-clicking a sidebar shows submenu with options to move it to the main area, a different sidebar, or the down area.
 
 <img alt="The 'Move Widget To' context menu submenu, showing options to move a section to the main area, left sidebar, right sidebar, or down area."
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-move-sidebar-submenu.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-move-sidebar-submenu.png"
 class="jp-screenshot">
 
 <img alt="The File Browser moved into the main area."
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-filebrowser-in-mainarea.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-filebrowser-in-mainarea.png"
 class="jp-screenshot">
 
 Tabs can now be split in four directions using the "Split Tab" context menu item (or the command palette), which adds split left, right, up, and down options.
 
 <img alt="Split tab context menu"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-split-tab-menu.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-split-tab-menu.png"
 class="jp-screenshot">
 
 Individual panels can be zoomed in or out using <kbd>Ctrl</kbd> + mouse wheel (when "Enable Ctrl+ Scroll Zoom" is turned on in Settings → Interface) or via the command palette, without affecting other panels.
 
 <img alt="Zoom on ctrl + scroll setting"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-ctrl-scroll-zoom.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-ctrl-scroll-zoom.png"
 class="jp-screenshot">
 
 ### Performance
@@ -56,74 +56,74 @@ Panel resizing is now more responsive; the width of individual widgets inside re
 
 ### Notebook improvements
 
-Two new navigation commands, "Select previous last modified cell" and "Select next last modified cell", allow jumping back and forward through recently edited cells. The commands are accessible from the Command Palette and as buttons in the [Table Of Contents](https://jupyterlab.readthedocs.io/en/latest/user/toc.html) toolbar when a notebook is active.
+Two new navigation commands, "Select previous last modified cell" and "Select next last modified cell", allow jumping back and forward through recently edited cells. The commands are accessible from the Command Palette and as buttons in the [Table Of Contents](https://jupyterlab.readthedocs.io/en/stable/user/toc.html) toolbar when a notebook is active.
 
 <img alt="Select next previous last modified cell button in ToC"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-select-last-modified-cell.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-select-last-modified-cell.png"
 class="jp-screenshot">
 
 Copy, cut, and paste text commands have been added to the notebook context menu. This feature requires permission to access clipboard to work reliably and may not work in Firefox depending on version and additional restrictions.
 
 <img alt="Copy, cut and paste in context menu"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-copy-cut-paste-in-menu.png"
 class="jp-screenshot">
 
-The cell toolbar delete button now shows a confirmation dialog to prevent accidental deletion. The "Do not ask me again" checkbox is available and the preference is persisted in [Cell Toolbar](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#cell-toolbar) settings. The standard keyboard shortcut (<kbd>D</kbd>, <kbd>D</kbd>) is unaffected.
+The cell toolbar delete button now shows a confirmation dialog to prevent accidental deletion. The "Do not ask me again" checkbox is available and the preference is persisted in [Cell Toolbar](https://jupyterlab.readthedocs.io/en/stable/user/notebook.html#cell-toolbar) settings. The standard keyboard shortcut (<kbd>D</kbd>, <kbd>D</kbd>) is unaffected.
 
 <img alt="Delete Cell dialog asking Are you sure you want to delete this cell? with Do not ask me again checkbox"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-cell-toolbar-confirmation.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-cell-toolbar-confirmation.png"
 class="jp-screenshot">
 
-A new ["Paste code cells without output"](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#paste-code-cells-without-output) setting strips outputs and execution counts from code cells when pasting, producing clean cells without the output which may be stale or untrusted.
+A new ["Paste code cells without output"](https://jupyterlab.readthedocs.io/en/stable/user/notebook.html#paste-code-cells-without-output) setting strips outputs and execution counts from code cells when pasting, producing clean cells without the output which may be stale or untrusted.
 
 <img alt="Setting to paste code cells without outputs"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-paste-without-output.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-paste-without-output.png"
 class="jp-screenshot">
 
 Pressing <kbd>Ctrl</kbd> + <kbd>B</kbd> (<kbd>Cmd</kbd> + <kbd>B</kbd> on macOS) in a markdown cell wraps the selected text in bold formatting.
 
-When exporting a notebook as HTML via [File → Save and Export Notebook As → HTML](https://jupyterlab.readthedocs.io/en/latest/user/export.html), a dialog now asks whether to sanitize the HTML output before download.
+When exporting a notebook as HTML via [File → Save and Export Notebook As → HTML](https://jupyterlab.readthedocs.io/en/stable/user/export.html), a dialog now asks whether to sanitize the HTML output before download.
 
 ### File browser enhancements
 
 A new "Date Created" column has been added to the file browser, showing when files were created. The column can be toggled via Settings → File Browser → "Show date created column" or by right-clicking the column header. The latest `jupyter-server` (`v2.18`+) is required for accurate values across operating systems.
 
 <img alt="File listing sorted by creation date"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-date-created.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-date-created.png"
 class="jp-screenshot">
 
-The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/latest/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the area behind breadcrumbs (highlighted on hover), or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
+The breadcrumb bar now supports [direct path editing](https://jupyterlab.readthedocs.io/en/stable/user/files.html#editable-breadcrumbs) with tab-completion. Clicking the area behind breadcrumbs (highlighted on hover), or using the Command Palette, opens an editable text field where pressing Tab completes the longest common prefix of matching subdirectories.
 
 <img alt="The file browser showing an editable breadcrumb input field with a completion dropdown listing subdirectory names"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-breadcrumbs-editable.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-breadcrumbs-editable.png"
 class="jp-screenshot">
 
 A new "Open in Terminal" option in the file browser context menu opens a terminal navigated to the selected directory. When multiple directories are selected, one terminal is opened per directory.
 
 <img alt="Open in Terminal context menu option over selected directory"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-open-in-terminal.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-open-in-terminal.png"
 class="jp-screenshot">
 
-Additional file browser improvements include: a configurable [file name sort order](https://jupyterlab.readthedocs.io/en/latest/user/files.html#file-name-sort-order), persistence of the sort state across sessions, automatic clearing of the file filter when changing directories, and a loading animation during file browser refresh.
+Additional file browser improvements include: a configurable [file name sort order](https://jupyterlab.readthedocs.io/en/stable/user/files.html#file-name-sort-order), persistence of the sort state across sessions, automatic clearing of the file filter when changing directories, and a loading animation during file browser refresh.
 
 ### Debugger improvements
 
-The debugger Sources panel has been moved out of the debugger sidebar; the Sources now open as read-only editors in the main area, keeping the sidebar uncluttered while you [explore the code state](https://jupyterlab.readthedocs.io/en/latest/user/debugger.html#explore-the-code-state). The previous behavior can be restored by disabling the "Show Sources in Main Area" setting in the Debugger settings.
+The debugger Sources panel has been moved out of the debugger sidebar; the Sources now open as read-only editors in the main area, keeping the sidebar uncluttered while you [explore the code state](https://jupyterlab.readthedocs.io/en/stable/user/debugger.html#explore-the-code-state). The previous behavior can be restored by disabling the "Show Sources in Main Area" setting in the Debugger settings.
 
 <img alt="Read-only source from debugger displayed in the main area"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-debugger-source-in-main-panel.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-debugger-source-in-main-panel.png"
 class="jp-screenshot">
 
 An overlay with continue/step in/stop buttons has been added easing the control of the debugger steps:
 
 <img alt="The debugger overlay"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-debugger-overlay.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-debugger-overlay.png"
 class="jp-screenshot">
 
 The Kernel Sources filter bar has been moved to the toolbar and now supports live filtering, making it easier to search through kernel source files while debugging.
 
 <img alt="Kernel sources filter in the debugger sidebar toolbar"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-kernel-sources-filter.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-kernel-sources-filter.png"
 class="jp-screenshot">
 
 The refresh button for sources list was removed - the sources will not update automatically after each code execution.
@@ -148,7 +148,7 @@ Focus indicators have been improved across the interface, including the status b
 Shortcuts can now be added from the UI shortcut editor for any command (previously this required writing JSON in Advanced Settings Editor).
 
 <img alt="Shortcut editor"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-shortcut-editor.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-shortcut-editor.png"
 class="jp-screenshot">
 
 "Find and Replace" has been added to the Edit menu with the keyboard shortcut <kbd>Ctrl</kbd> + <kbd>H</kbd> (<kbd>Cmd</kbd> + <kbd>H</kbd> on macOS).
@@ -162,7 +162,7 @@ Pressing <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>, <kbd>4</kbd>, <kbd>5</kbd> an
 Language packs can now be installed directly from within JupyterLab by selecting "Install more languages..." at the bottom of the Settings → Language menu. This opens the Extension Manager pre-filled with a search for available language pack extensions.
 
 <img alt="Install more languages entry in Languages menu"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-install-more-languages.png"
 class="jp-screenshot">
 
 ### Terminal enhancements
@@ -171,10 +171,10 @@ Pressing <kbd>Shift</kbd>+<kbd>Enter</kbd> in the terminal now inserts a newline
 
 ### Inline completion enhancements
 
-[Inline completion suggestions](https://jupyterlab.readthedocs.io/en/latest/user/completer.html#inline-completer) can now be rendered with syntax highlighting that matches the active editor language. This can be enabled in Settings → Inline Completer → "Ghost text syntax highlighting".
+[Inline completion suggestions](https://jupyterlab.readthedocs.io/en/stable/user/completer.html#inline-completer) can now be rendered with syntax highlighting that matches the active editor language. This can be enabled in Settings → Inline Completer → "Ghost text syntax highlighting".
 
 <img alt="A code cell showing ghost text with syntax-highlighted completion, with the variable name in one color and the assignment in another"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.6-ghost-text-highlighting.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.6-ghost-text-highlighting.png"
 class="jp-screenshot">
 
 Ghost text is now also shown for all active cursors in a multi-cursor editing session.
@@ -190,7 +190,7 @@ Ghost text is now also shown for all active cursors in a multi-cursor editing se
 
 JupyterLab 4.5 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-4-to-4-5) which lists deprecations and changes to the public API.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-4-to-4-5) which lists deprecations and changes to the public API.
 
 ### Performance and windowing
 
@@ -207,7 +207,7 @@ and users can now open notebooks without starting a kernel, via the `Open With`
 context menu option.
 
 <img alt="File browser context menu with 'Open With → Notebook (No Kernel)' option"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-open-with-no-kernel.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.5-open-with-no-kernel.png"
 class="jp-screenshot">
 
 Markdown support has been expanded for using grid and flex based layouts and the
@@ -234,7 +234,7 @@ helping users relate breakpoints, call stacks and source code to the cells they 
 from.
 
 <img alt="Debugger panels with reference to execution counts and paused indicator as well as console evaluation"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-debugger-console.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.5-debugger-console.png"
 class="jp-screenshot">
 
 For the Log Console, users can now configure the default log level via settings,
@@ -246,7 +246,7 @@ The terminal now includes search functionality, with search highlights that adap
 theme changes.
 
 <img alt="Terminal panel showing the search bar with highlighted matches"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-terminal-search.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.5-terminal-search.png"
 class="jp-screenshot">
 
 ### Media and content support
@@ -255,7 +255,7 @@ JupyterLab now includes built-in audio and video viewers, allowing users to open
 audio and video files directly from within JupyterLab.
 
 <img alt="Video file opened in a JupyterLab tab"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-media-support.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.5-media-support.png"
 class="jp-screenshot">
 
 ### File browser enhancements
@@ -271,7 +271,7 @@ Users can now configure file browser breadcrumbs through the settings editor
 options `breadcrumbsLeftItems` and `breadcrumbsRightItems`.
 
 <img alt="File browser with the New menu expanded showing options to create Python, R, and Julia files; breadcrumb bar displayed above file list"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-filebrowser-newfiles-breadcrumbs.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.5-filebrowser-newfiles-breadcrumbs.png"
 class="jp-screenshot">
 
 Updates to file dialogs and navigation have addressed column spacing,
@@ -309,7 +309,7 @@ Keyboard navigation and tab order in the status bar has also been improved.
 
 JupyterLab 4.4 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-3-to-4-4) which lists deprecations and changes to the public API.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-3-to-4-4) which lists deprecations and changes to the public API.
 
 ### Code console improvements
 
@@ -323,7 +323,7 @@ The console toolbar now includes buttons to:
 - Clear the cells
 - Switch the kernel
 
-<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
 
 Additional settings for console behavior have been added:
 - Clear Code Content on Execute (enabled by default) – When disabled, the code submitted for execution remains in the code editor, allowing for further edits.
@@ -333,21 +333,21 @@ Additional settings for console behavior have been added:
 Toggling all the three new settings transforms the console into an interactive editor
 resembling an ephemeral notebook with a single cell.
 
-<img alt="Toggling all the three new settings transforms the console into a single cell" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console-singlecell.png" class="jp-screenshot">
+<img alt="Toggling all the three new settings transforms the console into a single cell" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.4-console-singlecell.png" class="jp-screenshot">
 
 ### Settings import and export
 
 Settings can now be exported to `overrides.json` from the Settings Editor,
 which can be used to pre-configure defaults in deployments or to restore settings.
 
-<img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
+<img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
 
 ### Workspace indicator
 
 An opt-in workspace indicator is displayed on the top bar (next to the menu bar). It can be enabled
 in the Settings → View → Appearance → Show Workspace Indicator.
 
-<img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
+<img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
 
 ### Support for collaboration without `RTC:` drive
 
@@ -375,7 +375,7 @@ over a notebook using a kernel supporting subshells
 and select "New Subshell Console for Notebook".
 A new console panel will open allowing access to variables from the main session.
 
-<img alt="The subshell console" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
+<img alt="The subshell console" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
 
 JupyterLab can automatically create subshells for comm messages if kernels support this feature.
 This enables concurrent execution of `ipywidgets` callbacks without requiring a user action.
@@ -400,7 +400,7 @@ in "Running Terminals and Kernels" (code name `showStatusBarItem`).
 
 JupyterLab 4.3 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-2-to-4-3) which lists deprecations and changes to the public API.
+Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-2-to-4-3) which lists deprecations and changes to the public API.
 
 ### Minimap
 
@@ -412,7 +412,7 @@ The virtual scrollbar now acts as a minimap and exposes information on whether a
 - is markdown/code (`[ ]`/`[*]`/`[1]` for code, nothing for markdown)
 - how much text/code it contains
 
-<img alt="The minimap view" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-minimap.png" class="jp-screenshot">
+<img alt="The minimap view" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.3-minimap.png" class="jp-screenshot">
 
 To enable the minimap, click on the hamburger icon (≡) which appears in the notebook's toolbar. If you do not see the hamburger icon, go to Settings → Notebook → Windowing mode and choose "full".
 
@@ -430,7 +430,7 @@ The file browser now:
 - supports navigation with a single click (opt-in)
 - has the file filter collapsed by default (funnel icon), increasing the space available
 
-<img alt="The file browser with resize handle and filter funnel icon" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-filebrowser.png" class="jp-screenshot">
+<img alt="The file browser with resize handle and filter funnel icon" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.3-filebrowser.png" class="jp-screenshot">
 
 ### Server-side execution and collaboration
 
@@ -461,21 +461,21 @@ In this release both the list and tree view show the kernel identifier stub.
 
 A new toolbar button was added in the kernel allowing to shut down unused kernels (kernels with no widget attached).
 
-<img alt="List view of the kernels in the sidebar, with the clear Shut Down Unused kernels button focused" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-kernels-sidebar.png" class="jp-screenshot">
+<img alt="List view of the kernels in the sidebar, with the clear Shut Down Unused kernels button focused" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.3-kernels-sidebar.png" class="jp-screenshot">
 
 The following dialog windows can now be dismissed or silenced:
 - the "Server Connection Error" dialog now has an option to dismiss it for the duration of the session,
 - the "Restart Kernel?" dialog now has an option to not ask again. This preference is persisted in settings ( `skipKernelRestartDialog`),
 
-<img alt="The new options added in the server/session dialog windows" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-dialogs.png" class="jp-screenshot">
+<img alt="The new options added in the server/session dialog windows" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.3-dialogs.png" class="jp-screenshot">
 
 ## v4.2
 
 ### Workspaces UI
 
-It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/latest/user/workspaces.html) from within JupyterLab.
+It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/stable/user/workspaces.html) from within JupyterLab.
 
-<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manage the workspace over which it was opened - clone, rename, reset, delete, export, and import." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
+<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manage the workspace over which it was opened - clone, rename, reset, delete, export, and import." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
 
 ### Recently opened/closed files
 
@@ -485,19 +485,19 @@ Users are now able to:
 
 - re-open recently used files from the main menu:
 
-   <img alt="An 'Open Recent' sub-menu in the 'File' menu allowing to re-open recently used files" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-recent-submenu.png" class="jp-screenshot">
+   <img alt="An 'Open Recent' sub-menu in the 'File' menu allowing to re-open recently used files" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.2-recent-submenu.png" class="jp-screenshot">
 
 - re-open recently closed files from the sidebar:
 
-   <img alt="A new 'Recently Closed' section in the 'Running' sidebar" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-recent-sidebar.png" class="jp-screenshot">
+   <img alt="A new 'Recently Closed' section in the 'Running' sidebar" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.2-recent-sidebar.png" class="jp-screenshot">
 
 - quickly jump to open tabs/recently closed files by using a new searchable modal dialog (press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd> to open the dialog, or click on the \[↗\] icon in the sidebar):
 
-   <img alt="A modal dialog for quickly jumping to open/closed files" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-recent-modal.png" class="jp-screenshot">
+   <img alt="A modal dialog for quickly jumping to open/closed files" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.2-recent-modal.png" class="jp-screenshot">
 
 ### Full notebook windowing mode by default
 
-Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. One limitation of `full` mode is that the search function in your browser may produce false negatives; using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/latest/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1, go to Settings → Settings Editor → Notebook, scroll to "Windowing mode", and choose `defer`.
+Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. One limitation of `full` mode is that the search function in your browser may produce false negatives; using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/stable/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1, go to Settings → Settings Editor → Notebook, scroll to "Windowing mode", and choose `defer`.
 
 ### Improved Shortcuts Editor
 
@@ -507,14 +507,14 @@ Among the numerous improvements and bug fixes for the keyboard shortcuts editor:
 - shortcuts are correctly sorted when using a language pack,
 - shortcuts with different arguments are now correctly displayed as individual entries.
 
-<img alt="A context menu opened over a keybinding in the Keyboard Shortcuts setting panel within the Settings widget" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-delete-shortcut.png" class="jp-screenshot">
+<img alt="A context menu opened over a keybinding in the Keyboard Shortcuts setting panel within the Settings widget" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.2-delete-shortcut.png" class="jp-screenshot">
 
 ### Dark high contrast theme
 
 A new theme, JupyterLab Dark High Contrast, which is intended to benefit users with the need for higher contrast, following the WCAG AAA accessibility standard for color contrast.
 To select this theme, from the menu bar, choose Settings → Theme → JupyterLab Dark High Contrast. Please provide feedback and suggestions on further improvements to this theme.
 
-<img alt="A dark high contrast theme" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-dark-high-contrast.png" class="jp-screenshot">
+<img alt="A dark high contrast theme" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.2-dark-high-contrast.png" class="jp-screenshot">
 
 ### Keyboard shortcuts improvements
 
@@ -525,7 +525,7 @@ Following feedback from users, implementation of certain shortcuts was moved fro
 
 ## v4.1
 
-JupyterLab 4.1 includes a number of new features (described below), bug fixes, and enhancements for extension developers. This release is compatible with extensions supporting JupyterLab 4.0. Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-0-to-4-1) which lists deprecations and changes to the public API.
+JupyterLab 4.1 includes a number of new features (described below), bug fixes, and enhancements for extension developers. This release is compatible with extensions supporting JupyterLab 4.0. Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-0-to-4-1) which lists deprecations and changes to the public API.
 
 ### Custom CSS
 
@@ -534,7 +534,7 @@ Themes are the recommended way for customizing the JupyterLab look and feel,
 while custom CSS is intended for minor personal adjustments.
 
 To opt in, start JupyterLab with the `--custom-css` flag.
-The location of the `custom.css` file is documented in the section on [customizing the user interface](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#custom-css).
+The location of the `custom.css` file is documented in the section on [customizing the user interface](https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html#custom-css).
 
 ```{note}
 `custom.css` is also available in Jupyter Notebook;
@@ -562,7 +562,7 @@ C -->|Two| E[Result 2]
 
 which renders as:
 
-<img alt="Rendered Mermaid diagram going from left to right with modern look; the diagram contains blueish square node with text Hard pointing to round square node with text Round; over the arrow connecting the two nodes there is a word Text; the second node further connects to a rhombus-shaped node with text Decision which then connects to two further nodes, Result 1 and Result 2." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-merimad-diagram.png" class="jp-screenshot">
+<img alt="Rendered Mermaid diagram going from left to right with modern look; the diagram contains blueish square node with text Hard pointing to round square node with text Round; over the arrow connecting the two nodes there is a word Text; the second node further connects to a rhombus-shaped node with text Decision which then connects to two further nodes, Result 1 and Result 2." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.1-merimad-diagram.png" class="jp-screenshot">
 
 ### Inline completer
 
@@ -571,7 +571,7 @@ allowing generative AI models to provide multi-line completions.
 The suggestions are provided by plugins implementing the ``IInlineCompletionProvider`` API;
 by default a single provider which uses kernel history is available.
 
-<img alt="In a code cell with `def fac` content a ghost text containing a suggestion representing further code of factorial function is shown; over the code cell there is a floating widget allowing to accept the suggestion and iterate between alternative suggestions" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-inline-completer.png" class="jp-screenshot">
+<img alt="In a code cell with `def fac` content a ghost text containing a suggestion representing further code of factorial function is shown; over the code cell there is a floating widget allowing to accept the suggestion and iterate between alternative suggestions" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.1-inline-completer.png" class="jp-screenshot">
 
 The suggestions can be invoked as-you-type or manually using a configurable shortcut (by default <kbd>Alt</kbd> + <kbd>\\</kbd>).
 The default keyboard shortcuts are displayed in the small widget shown when hovering over the ghost suggestion:
@@ -617,14 +617,14 @@ Paths to code files detected in tracebacks returned by kernels on execution erro
 These links will open the corresponding file for editing, if it is in the Jupyter root directory,
 or they will open a read-only preview if the file is outside of the root directory and the active kernel supports the debugger.
 
-<img alt="A link to the file with definition of imported module is shown in the traceback" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-traceback-links.png" class="jp-screenshot">
+<img alt="A link to the file with definition of imported module is shown in the traceback" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.1-traceback-links.png" class="jp-screenshot">
 
 ### Error indicator in the table of contents
 
 When a cell fails during execution, an error indicator will be displayed by the corresponding heading,
 increasing awareness of the notebook state and enabling users to quickly navigate to the cell which requires attention.
 
-<img alt="Error indicator in the shape of a triangle with exclamation sign (using ⚠ UTF character) shown next to one of the headings in the table of contents panel" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-toc-error-indicator.png" class="jp-screenshot">
+<img alt="Error indicator in the shape of a triangle with exclamation sign (using ⚠ UTF character) shown next to one of the headings in the table of contents panel" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.1-toc-error-indicator.png" class="jp-screenshot">
 
 ### Plugin Manager
 
@@ -632,18 +632,18 @@ Individual plugins can now be disabled or enabled from a new Plugin Manager user
 Each extension is composed of one or more plugins, and plugins form the basis of JupyterLab itself,
 thus the plugin manager enables more extensive customization of the JupyterLab experience.
 
-<img alt="An example search result in the plugin extension listing" src="https://jupyterlab.readthedocs.io/en/latest/_images/plugin-manager-search-notebook.png" class="jp-screenshot">
+<img alt="An example search result in the plugin extension listing" src="https://jupyterlab.readthedocs.io/en/stable/_images/plugin-manager-search-notebook.png" class="jp-screenshot">
 
-This feature is intended for advanced users and is documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#managing-plugins-with-plugin-manager).
+This feature is intended for advanced users and is documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#managing-plugins-with-plugin-manager).
 
-Administrators may want to [lock specific plugins](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#locking-and-unlocking-plugins) if they are required for any reason; this will prevent users from disabling the plugins via Plugin Manager and remote API calls. The Plugin Manager itself can be [disabled using the CLI](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#enabling-and-disabling-extensions).
+Administrators may want to [lock specific plugins](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#locking-and-unlocking-plugins) if they are required for any reason; this will prevent users from disabling the plugins via Plugin Manager and remote API calls. The Plugin Manager itself can be [disabled using the CLI](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#enabling-and-disabling-extensions).
 
 ### Virtual scrollbar for notebook in windowed mode
 
 The windowed notebook received an optional scrollbar delineating the active cell and selected cells.
 Users can jump to a specific cell.
 
-<img alt="Virtual scrollbar shown on the right side of notebook" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-virtual-scrollbar.png" class="jp-screenshot">
+<img alt="Virtual scrollbar shown on the right side of notebook" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.6.x/docs/source/getting_started/changelog_assets/4.1-virtual-scrollbar.png" class="jp-screenshot">
 
 To enable the virtual scrollbar, go to Settings → Notebook → Windowing mode, choose "full", and click on the hamburger icon (≡) which appears in the notebook's toolbar.
 
@@ -705,7 +705,7 @@ Developers can now provide editor extensions, like themes and programming langua
 #### New extension manager
 
 Starting with JupyterLab 3, extensions can be installed via Python packages
-(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html#prebuilt-extensions)).
+(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#prebuilt-extensions)).
 
 In JupyterLab 4, building on this feature, the Extension Manager now includes extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
 This removes the build step from installation of extension when using Extension Manager.
@@ -779,7 +779,7 @@ Here are the main tool updates that will benefit extension authors and developer
 
 We recommend using Node.js v18 or newer, because older versions will reach end of life in 2023 or earlier (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
 
-To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
+To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
 - the [JupyterLab Extensions by Examples](https://github.com/jupyterlab/extension-examples/pull/232)
 - the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
 
@@ -5198,9 +5198,9 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 
 JupyterLab 4 is released! :tada:
 
-Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html#v4-0
+Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/stable/getting_started/changelog.html#v4-0
 
-For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-3-x-to-4-x
+For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-3-x-to-4-x
 
 ______________________________________________________________________
 
@@ -7103,7 +7103,7 @@ No merged PRs
 
 ### Enhancements made
 
-- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/latest/user/files.html#displaying-hidden-files)
+- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/stable/user/files.html#displaying-hidden-files)
 - Restore Copy shareable link use of `shareUrl` [#11188](https://github.com/jupyterlab/jupyterlab/pull/11188) ([@fcollonval](https://github.com/fcollonval))
 - Add Galata in JupyterLab [#11179](https://github.com/jupyterlab/jupyterlab/pull/11179) ([@fcollonval](https://github.com/fcollonval))
 - Responsive Toolbar [#11178](https://github.com/jupyterlab/jupyterlab/pull/11178) ([@3coins](https://github.com/3coins))
@@ -7549,9 +7549,9 @@ No merged PRs
 - From JupyterLab 3.1, file documents and notebooks have collaborative
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
-  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
+  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html).
 - The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future versions will enable restoring the previous behaviour of per-cell undo/redo.
-- Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/toc.html).
+- Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/toc.html).
 - The debugger received many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
 - A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
@@ -8172,21 +8172,21 @@ extensions does not require rebuilding JupyterLab and does not require
 having NodeJS installed. The previous way of distributing extensions as
 npm packages requiring rebuilding JupyterLab is still available as well.
 See the
-[documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#extensions)
+[documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#extensions)
 for more details.
 
 #### The JupyterLab interface supports multiple languages
 
 JupyterLab now provides the ability to set the display language of the
 user interface. See the
-[documentation](https://jupyterlab.readthedocs.io/en/latest/user/language.html)
+[documentation](https://jupyterlab.readthedocs.io/en/stable/user/language.html)
 for more details.
 
 #### A new visual debugger
 
 JupyterLab now ships with a debugger front-end by default, available for
 kernels that support the new debugging protocol. See the
-[documentation](https://jupyterlab.readthedocs.io/en/latest/user/debugger.html)
+[documentation](https://jupyterlab.readthedocs.io/en/stable/user/debugger.html)
 for more details.
 
 #### Improvements to Simple Interface mode and Mobile

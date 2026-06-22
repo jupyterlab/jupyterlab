@@ -320,7 +320,7 @@ and then using the Anaconda command prompt for all installation steps.
 Building JupyterLab from its GitHub source code requires Node.js. The
 development version requires Node.js version 20+, as defined in the
 `engines` specification in
-[dev_mode/package.json](https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json).
+[dev_mode/package.json](https://github.com/jupyterlab/jupyterlab/blob/4.6.x/dev_mode/package.json).
 
 If you use [conda](https://conda.io), you can get it with:
 
@@ -630,7 +630,7 @@ More tests can be carried out manually on JupyterLab branches and run weekly on 
 ## Visual Regression and UI Tests
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-[Galata](https://github.com/jupyterlab/jupyterlab/tree/main/galata) is used for UI
+[Galata](https://github.com/jupyterlab/jupyterlab/tree/4.6.x/galata) is used for UI
 testing. Galata provides [Playwright](https://playwright.dev) helpers to control and
 inspect JupyterLab UI programmatically.
 
@@ -675,7 +675,7 @@ Main reasons for UI test failures are:
    > The bot will react with +1 emoji to indicate that the run started and then comment
    > back once it concluded.
 
-For more information on UI Testing, please read the [UI Testing developer documentation](https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md)
+For more information on UI Testing, please read the [UI Testing developer documentation](https://github.com/jupyterlab/jupyterlab/blob/4.6.x/galata/README.md)
 and [Playwright documentation](https://playwright.dev/docs/intro).
 
 ### Configure merge driver to reduce snapshot drift friction

@@ -183,7 +183,7 @@ A mime renderer plugin is an object with the fields listed in the
 {ts:interface}`rendermime_interfaces.IRenderMime.IExtension`
 object.
 
-JupyterLab has a [pdf mime renderer extension](https://github.com/jupyterlab/jupyterlab/tree/main/packages/pdf-extension), for example. In core JupyterLab, this is used to view pdf files and view pdf data mime data in a notebook.
+JupyterLab has a [pdf mime renderer extension](https://github.com/jupyterlab/jupyterlab/tree/4.6.x/packages/pdf-extension), for example. In core JupyterLab, this is used to view pdf files and view pdf data mime data in a notebook.
 
 We have a [MIME renderer example](https://github.com/jupyterlab/extension-examples/tree/master/mimerenderer) walking through creating a mime renderer extension which adds mp4 video rendering to JupyterLab. The [extension template](https://github.com/jupyterlab/extension-template) supports MIME renderer extensions.
 
@@ -202,7 +202,7 @@ A theme is a special application plugin that registers a theme with the `ThemeMa
 
 The extension package containing the theme plugin must include all static assets that are referenced by `@import` in its theme CSS files. Local URLs can be used to reference files relative to the location of the referring sibling CSS files. For example `url('images/foo.png')` or `url('../foo/bar.css')` can be used to refer local files in the theme. Absolute URLs (starting with a `/`) or external URLs (e.g. `https:`) can be used to refer to external assets.
 
-See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/main/packages/theme-light-extension) for an example.
+See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/4.6.x/packages/theme-light-extension) for an example.
 
 See the [TypeScript extension template](https://github.com/jupyterlab/extension-template) (choosing `theme` as `kind` ) for a quick start to developing a theme plugin.
 
@@ -348,10 +348,10 @@ For example, the JupyterLab `filebrowser-extension` package exports the `@jupyte
 }
 ```
 
-The file browser setting schema file (which specifies some default keyboard shortcuts and other settings for the filebrowser) is located in `schema/browser.json` (see [here](https://github.com/jupyterlab/jupyterlab/blob/main/packages/filebrowser-extension/schema/browser.json)).
+The file browser setting schema file (which specifies some default keyboard shortcuts and other settings for the filebrowser) is located in `schema/browser.json` (see [here](https://github.com/jupyterlab/jupyterlab/blob/4.6.x/packages/filebrowser-extension/schema/browser.json)).
 
 See the
-[fileeditor-extension](https://github.com/jupyterlab/jupyterlab/tree/main/packages/fileeditor-extension)
+[fileeditor-extension](https://github.com/jupyterlab/jupyterlab/tree/4.6.x/packages/fileeditor-extension)
 for another example of an extension that uses settings.
 
 Please ensure that the schema files are included in the `files` metadata in `package.json`.
