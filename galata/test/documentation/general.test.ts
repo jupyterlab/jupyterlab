@@ -4,6 +4,7 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import {
+  ensureMathTypeset,
   filterContent,
   freeezeKernelIds,
   generateArrow,
@@ -51,6 +52,12 @@ test.describe('General', () => {
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Lorenz.ipynb');
+
+    // Force the Lorenz equations to typeset at their correct size while the
+    // notebook is still the active tab. Otherwise MathJax can render them too
+    // small (see `ensureMathTypeset`), which shifts the cells below by a
+    // sub-pixel and makes the code cell screenshot flaky by one row.
+    await ensureMathTypeset(page);
 
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
