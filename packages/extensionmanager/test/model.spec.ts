@@ -99,6 +99,33 @@ describe('@jupyterlab/extensionmanager', () => {
       });
     });
 
+    describe('#canManage', () => {
+      it('should default to true when no metadata is provided', () => {
+        const model = createModel();
+        expect(model.canManage).toBe(true);
+      });
+
+      it('should reflect the can_manage metadata flag', () => {
+        const model = createModel({ can_manage: false });
+        expect(model.canManage).toBe(false);
+      });
+
+      it('should be independent of can_install so actions stay available', () => {
+        // A non-installable manager can still enable/disable extensions by
+        // default (e.g. the server read-only provider).
+        const model = createModel({ can_install: false });
+        expect(model.canInstall).toBe(false);
+        expect(model.canManage).toBe(true);
+      });
+    });
+
+    describe('#name', () => {
+      it('should fall back to a default when metadata omits the name', () => {
+        const model = createModel();
+        expect(model.name).toBe('Extension');
+      });
+    });
+
     describe('read-only listing (cannot install)', () => {
       it('should be disclaimed automatically when it cannot install', () => {
         const model = createModel({ can_install: false });

@@ -158,15 +158,19 @@ interface IExtensionManagerMetadata {
   /**
    * Extension manager name.
    */
-  name: string;
+  name?: string;
   /**
    * Whether the extension manager can un-/install extensions.
    */
-  can_install: boolean;
+  can_install?: boolean;
   /**
    * Extensions installation path.
    */
-  install_path: string | null;
+  install_path?: string | null;
+  /**
+   * Whether the extension manager can enable/disable extensions (default true).
+   */
+  can_manage?: boolean;
 }
 
 /**
@@ -207,10 +211,12 @@ export class ListModel extends VDomModel {
       PageConfig.getOption('extensionManager') || '{}'
     ) as IExtensionManagerMetadata;
 
-    this.name = metadata.name;
-    this.canInstall = metadata.can_install ?? false;
-    this.installPath = metadata.install_path;
     this.translator = translator || nullTranslator;
+    this.name =
+      metadata.name ?? this.translator.load('jupyterlab').__('Extension');
+    this.canInstall = metadata.can_install ?? false;
+    this.canManage = metadata.can_manage ?? true;
+    this.installPath = metadata.install_path ?? null;
     this._installed = [];
     this._lastSearchResult = [];
     this.serviceManager = serviceManager;
@@ -231,13 +237,25 @@ export class ListModel extends VDomModel {
   /**
    * Whether the extension manager supports installing extensions.
    *
-   * When `false`, the manager is a read-only listing: extensions are shown
-   * without a security disclaimer, remote search, or install, uninstall,
-   * enable or disable actions. Provide a custom model through the
+   * When `false`, the manager cannot install, uninstall or search a remote
+   * registry, and the security disclaimer does not apply: extensions are
+   * listed read-only. They can still be enabled or disabled when
+   * {@link canManage} is `true`. Provide a custom model through the
    * {@link IExtensionManager} token (overriding {@link ListModel.fetchInstalled})
    * to list extensions from a source other than the default server API.
    */
   readonly canInstall: boolean;
+
+  /**
+   * Whether the extension manager supports enabling and disabling extensions.
+   *
+   * Defaults to `true`: toggling already-installed extensions is independent
+   * of {@link canInstall}, so a read-only manager (such as the server
+   * read-only provider) still exposes enable and disable actions. Set it to
+   * `false` for a pure listing with no actions at all — for example a static
+   * gallery, or a server-less deployment that cannot toggle extensions yet.
+   */
+  readonly canManage: boolean;
 
   /**
    * Extensions installation path.

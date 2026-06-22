@@ -497,7 +497,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.canInstall && this.model.isDisclaimed}
+            canFetch={this.model.canManage && this.model.isDisclaimed}
             entries={this.model.installed.filter(pkg =>
               new RegExp(this.model.query.toLowerCase()).test(pkg.name)
             )}
@@ -507,7 +507,7 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.canInstall && this.model.isDisclaimed
+              this.model.canManage && this.model.isDisclaimed
                 ? this.onAction.bind(this)
                 : undefined
             }
@@ -606,7 +606,7 @@ class SearchResult extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.isDisclaimed}
+            canFetch={this.model.canManage && this.model.isDisclaimed}
             entries={this.model.searchResult}
             initialPage={this.model.page}
             numPages={this.model.lastPage}
@@ -614,7 +614,9 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
+              this.model.canManage && this.model.isDisclaimed
+                ? this.onAction.bind(this)
+                : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
