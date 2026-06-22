@@ -42,6 +42,8 @@ import {
   ProviderReconciliator
 } from '@jupyterlab/completer';
 
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+
 import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
@@ -108,6 +110,11 @@ function main(): void {
     extensions: editorExtensions(),
     languages
   });
+  const editorFactory = (options: CodeEditor.IOptions) =>
+    factoryService.newInlineEditor({
+      ...options,
+      config: { ...options.config, cursorBlinkRate: 0 }
+    });
   const mimeService = new CodeMirrorMimeTypeService(languages);
 
   // Initialize the command registry with the bindings.
@@ -128,7 +135,7 @@ function main(): void {
 
   const cellWidget = new CodeCell({
     contentFactory: new Cell.ContentFactory({
-      editorFactory: factoryService.newInlineEditor.bind(factoryService)
+      editorFactory
     }),
     rendermime,
     model: new CodeCellModel()

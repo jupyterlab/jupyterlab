@@ -26,6 +26,8 @@ import {
   ybinding
 } from '@jupyterlab/codemirror';
 
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { ConsolePanel } from '@jupyterlab/console';
 
 import {
@@ -129,7 +131,11 @@ function startApp(
     languages
   });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
-  const editorFactory = factoryService.newInlineEditor;
+  const editorFactory = (options: CodeEditor.IOptions) =>
+    factoryService.newInlineEditor({
+      ...options,
+      config: { ...options.config, cursorBlinkRate: 0 }
+    });
   const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
 
   const consolePanel = new ConsolePanel({

@@ -32,6 +32,7 @@ import {
   KernelCompleterProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
@@ -156,7 +157,11 @@ function createApp(manager: ServiceManager.IManager): void {
     languages
   });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
-  const editorFactory = factoryService.newInlineEditor;
+  const editorFactory = (options: CodeEditor.IOptions) =>
+    factoryService.newInlineEditor({
+      ...options,
+      config: { ...options.config, cursorBlinkRate: 0 }
+    });
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
   const sessionContextDialogs = new SessionContextDialogs();
