@@ -497,7 +497,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.isDisclaimed}
+            canFetch={!this.model.displayOnly && this.model.isDisclaimed}
             entries={this.model.installed.filter(pkg =>
               new RegExp(this.model.query.toLowerCase()).test(pkg.name)
             )}
@@ -507,7 +507,9 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
+              !this.model.displayOnly && this.model.isDisclaimed
+                ? this.onAction.bind(this)
+                : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -651,10 +653,11 @@ export class ExtensionsPanel extends SidePanel {
 
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
-    const warning = new Warning(model, this.trans);
-    warning.title.label = this.trans.__('Warning');
-
-    this.addWidget(warning);
+    if (!model.displayOnly) {
+      const warning = new Warning(model, this.trans);
+      warning.title.label = this.trans.__('Warning');
+      this.addWidget(warning);
+    }
 
     const installed = new PanelWithToolbar();
     installed.addClass('jp-extensionmanager-installedlist');
@@ -683,21 +686,23 @@ export class ExtensionsPanel extends SidePanel {
 
     this.addWidget(installed);
 
-    if (this.model.canInstall) {
+    if (!this.model.displayOnly && this.model.canInstall) {
       const searchResults = new SearchResult(model, this.trans);
       searchResults.addClass('jp-extensionmanager-searchresults');
       this.addWidget(searchResults);
     }
 
     this._wasDisclaimed = this.model.isDisclaimed;
-    if (this.model.isDisclaimed) {
-      (this.content as AccordionPanel).collapse(0);
-      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
-    } else {
-      // If warning is not disclaimed expand only the warning panel
-      (this.content as AccordionPanel).expand(0);
-      (this.content as AccordionPanel).collapse(1);
-      (this.content as AccordionPanel).collapse(2);
+    if (!this.model.displayOnly) {
+      if (this.model.isDisclaimed) {
+        (this.content as AccordionPanel).collapse(0);
+        (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
+      } else {
+        // If warning is not disclaimed expand only the warning panel
+        (this.content as AccordionPanel).expand(0);
+        (this.content as AccordionPanel).collapse(1);
+        (this.content as AccordionPanel).collapse(2);
+      }
     }
 
     this.model.stateChanged.connect(this._onStateChanged, this);

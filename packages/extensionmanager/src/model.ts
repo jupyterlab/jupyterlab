@@ -167,6 +167,10 @@ interface IExtensionManagerMetadata {
    * Extensions installation path.
    */
   install_path: string | null;
+  /**
+   * Whether the extension manager is display-only (read-only listing).
+   */
+  display_only?: boolean;
 }
 
 /**
@@ -209,12 +213,18 @@ export class ListModel extends VDomModel {
 
     this.name = metadata.name;
     this.canInstall = metadata.can_install;
+    this.displayOnly = metadata.display_only ?? false;
     this.installPath = metadata.install_path;
     this.translator = translator || nullTranslator;
     this._installed = [];
     this._lastSearchResult = [];
     this.serviceManager = serviceManager;
     this._debouncedSearch = new Debouncer(this.search.bind(this), 1000);
+
+    if (this.displayOnly) {
+      // Nothing to disclaim: it neither searches a registry nor installs.
+      this._isDisclaimed = true;
+    }
   }
 
   /**
@@ -226,6 +236,14 @@ export class ListModel extends VDomModel {
    * Whether the extension manager support installation methods or not.
    */
   readonly canInstall: boolean;
+
+  /**
+   * Whether the extension manager is display-only.
+   *
+   * When `true`, extensions are listed read-only: no security disclaimer, no
+   * remote search, and no install, uninstall, enable or disable actions.
+   */
+  readonly displayOnly: boolean;
 
   /**
    * Extensions installation path.
@@ -422,9 +440,7 @@ export class ListModel extends VDomModel {
     this._isLoadingInstalledExtensions = true;
     this.stateChanged.emit();
     try {
-      const [extensions] = await Private.requestAPI<IEntry[]>({
-        refresh: force ? 1 : 0
-      });
+      const extensions = await this.fetchInstalled(force);
       this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
       this.installedError = reason.toString();
@@ -435,6 +451,22 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Fetch the list of installed extensions.
+   *
+   * @param force Force refreshing the list of installed packages
+   *
+   * #### Notes
+   * This is the data source backing {@link refreshInstalled}; override it to
+   * list extensions from a source other than the default server API.
+   */
+  protected async fetchInstalled(force: boolean): Promise<IEntry[]> {
+    const [extensions] = await Private.requestAPI<IEntry[]>({
+      refresh: force ? 1 : 0
+    });
+    return extensions;
+  }
+
+  /**
    * Search with current query.
    *
    * Sets searchError and totalEntries as appropriate.
@@ -442,6 +474,11 @@ export class ListModel extends VDomModel {
    * @returns The extensions matching the current query.
    */
   protected async search(force = false): Promise<void> {
+    if (this.displayOnly) {
+      // No registry to search; re-render so the query filters the list locally.
+      this.stateChanged.emit();
+      return;
+    }
     if (!this.isDisclaimed) {
       return Promise.reject('Installation warning is not disclaimed.');
     }
