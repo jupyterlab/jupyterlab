@@ -77,8 +77,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // Create a view by default, so it can be restored when loading the workspace.
     let view: ExtensionsPanel | null = createView();
 
-    if (model.displayOnly) {
-      // Display-only managers are always enabled and pre-disclaimed.
+    if (!model.canInstall) {
+      // Read-only managers are always enabled and pre-disclaimed.
       model.isEnabled = true;
     }
 
@@ -86,8 +86,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // add or remove it from the left area.
     Promise.all([app.restored, registry.load(PLUGIN_ID)])
       .then(([, settings]) => {
-        if (model.displayOnly) {
-          // The disclaimer and enabled settings do not apply.
+        if (!model.canInstall) {
+          // The disclaimer and enabled settings do not apply to a read-only
+          // manager.
           return;
         }
         model.isDisclaimed = settings.get('disclaimed').composite as boolean;
@@ -177,8 +178,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
       },
       isToggled: () => model.isEnabled,
-      // Display-only managers cannot be disabled.
-      isVisible: () => !model.displayOnly,
+      // Read-only managers are always enabled and cannot be disabled.
+      isVisible: () => model.canInstall,
       describedBy: {
         args: {
           type: 'object',

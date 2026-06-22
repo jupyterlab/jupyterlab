@@ -497,7 +497,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={!this.model.displayOnly && this.model.isDisclaimed}
+            canFetch={this.model.canInstall && this.model.isDisclaimed}
             entries={this.model.installed.filter(pkg =>
               new RegExp(this.model.query.toLowerCase()).test(pkg.name)
             )}
@@ -507,7 +507,7 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              !this.model.displayOnly && this.model.isDisclaimed
+              this.model.canInstall && this.model.isDisclaimed
                 ? this.onAction.bind(this)
                 : undefined
             }
@@ -653,7 +653,7 @@ export class ExtensionsPanel extends SidePanel {
 
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
-    if (!model.displayOnly) {
+    if (model.canInstall) {
       const warning = new Warning(model, this.trans);
       warning.title.label = this.trans.__('Warning');
       this.addWidget(warning);
@@ -686,14 +686,14 @@ export class ExtensionsPanel extends SidePanel {
 
     this.addWidget(installed);
 
-    if (!this.model.displayOnly && this.model.canInstall) {
+    if (this.model.canInstall) {
       const searchResults = new SearchResult(model, this.trans);
       searchResults.addClass('jp-extensionmanager-searchresults');
       this.addWidget(searchResults);
     }
 
     this._wasDisclaimed = this.model.isDisclaimed;
-    if (!this.model.displayOnly) {
+    if (this.model.canInstall) {
       if (this.model.isDisclaimed) {
         (this.content as AccordionPanel).collapse(0);
         (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
@@ -806,7 +806,11 @@ export class ExtensionsPanel extends SidePanel {
   }
 
   private _onStateChanged(): void {
-    if (!this._wasDisclaimed && this.model.isDisclaimed) {
+    if (
+      this.model.canInstall &&
+      !this._wasDisclaimed &&
+      this.model.isDisclaimed
+    ) {
       (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
       (this.content as AccordionPanel).expand(2);

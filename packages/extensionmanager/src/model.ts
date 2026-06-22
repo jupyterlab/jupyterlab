@@ -167,10 +167,6 @@ interface IExtensionManagerMetadata {
    * Extensions installation path.
    */
   install_path: string | null;
-  /**
-   * Whether the extension manager is display-only (read-only listing).
-   */
-  display_only?: boolean;
 }
 
 /**
@@ -212,8 +208,7 @@ export class ListModel extends VDomModel {
     ) as IExtensionManagerMetadata;
 
     this.name = metadata.name;
-    this.canInstall = metadata.can_install;
-    this.displayOnly = metadata.display_only ?? false;
+    this.canInstall = metadata.can_install ?? false;
     this.installPath = metadata.install_path;
     this.translator = translator || nullTranslator;
     this._installed = [];
@@ -221,8 +216,9 @@ export class ListModel extends VDomModel {
     this.serviceManager = serviceManager;
     this._debouncedSearch = new Debouncer(this.search.bind(this), 1000);
 
-    if (this.displayOnly) {
-      // Nothing to disclaim: it neither searches a registry nor installs.
+    if (!this.canInstall) {
+      // A read-only manager neither searches a registry nor installs, so there
+      // is nothing to disclaim.
       this._isDisclaimed = true;
     }
   }
@@ -233,17 +229,15 @@ export class ListModel extends VDomModel {
   readonly name: string;
 
   /**
-   * Whether the extension manager support installation methods or not.
+   * Whether the extension manager supports installing extensions.
+   *
+   * When `false`, the manager is a read-only listing: extensions are shown
+   * without a security disclaimer, remote search, or install, uninstall,
+   * enable or disable actions. Provide a custom model through the
+   * {@link IExtensionManager} token (overriding {@link ListModel.fetchInstalled})
+   * to list extensions from a source other than the default server API.
    */
   readonly canInstall: boolean;
-
-  /**
-   * Whether the extension manager is display-only.
-   *
-   * When `true`, extensions are listed read-only: no security disclaimer, no
-   * remote search, and no install, uninstall, enable or disable actions.
-   */
-  readonly displayOnly: boolean;
 
   /**
    * Extensions installation path.
@@ -474,7 +468,7 @@ export class ListModel extends VDomModel {
    * @returns The extensions matching the current query.
    */
   protected async search(force = false): Promise<void> {
-    if (this.displayOnly) {
+    if (!this.canInstall) {
       // No registry to search; re-render so the query filters the list locally.
       this.stateChanged.emit();
       return;

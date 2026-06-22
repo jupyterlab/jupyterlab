@@ -34,7 +34,7 @@ function createEntry(name: string): IEntry {
  * in-memory source, mirroring how a downstream distribution (e.g. a
  * server-less deployment) provides its own model through the
  * `IExtensionManager` token. It also exposes the protected `search` method so
- * its display-only behavior can be asserted directly.
+ * the read-only behavior can be asserted directly.
  */
 class TestModel extends ListModel {
   /**
@@ -87,43 +87,49 @@ describe('@jupyterlab/extensionmanager', () => {
       PageConfig.setOption('extensionManager', '{}');
     });
 
-    describe('#displayOnly', () => {
+    describe('#canInstall', () => {
       it('should default to false when no metadata is provided', () => {
         const model = createModel();
-        expect(model.displayOnly).toBe(false);
+        expect(model.canInstall).toBe(false);
       });
 
-      it('should reflect the display_only metadata flag', () => {
-        const model = createModel({ display_only: true });
-        expect(model.displayOnly).toBe(true);
+      it('should reflect the can_install metadata flag', () => {
+        const model = createModel({ can_install: true });
+        expect(model.canInstall).toBe(true);
       });
+    });
 
-      it('should be disclaimed automatically when display-only', () => {
-        const model = createModel({ display_only: true });
+    describe('read-only listing (cannot install)', () => {
+      it('should be disclaimed automatically when it cannot install', () => {
+        const model = createModel({ can_install: false });
+        expect(model.canInstall).toBe(false);
+        // Nothing remote to disclaim, so the security warning is pre-accepted
+        // and the listing loads without user consent.
         expect(model.isDisclaimed).toBe(true);
       });
 
-      it('should not be disclaimed by default', () => {
-        const model = createModel();
+      it('should require disclaiming when it can install', () => {
+        const model = createModel({ can_install: true });
         expect(model.isDisclaimed).toBe(false);
       });
     });
 
     describe('#search()', () => {
-      it('should be a no-op re-render when display-only', async () => {
-        const model = createModel({ display_only: true });
+      it('should be a no-op re-render when it cannot install', async () => {
+        const model = createModel({ can_install: false });
         let changed = 0;
         model.stateChanged.connect(() => {
           changed++;
         });
-        await expect(model.search()).resolves.toBeUndefined();
         // Re-render once so the query filters the local list, but never reach
         // the server.
+        await expect(model.search()).resolves.toBeUndefined();
         expect(changed).toBe(1);
       });
 
-      it('should reject when not disclaimed and not display-only', async () => {
-        const model = createModel();
+      it('should reject when installable but not disclaimed', async () => {
+        const model = createModel({ can_install: true });
+        expect(model.isDisclaimed).toBe(false);
         await expect(model.search()).rejects.toBe(
           'Installation warning is not disclaimed.'
         );
@@ -132,7 +138,7 @@ describe('@jupyterlab/extensionmanager', () => {
 
     describe('#fetchInstalled()', () => {
       it('should back refreshInstalled and sort the result by name', async () => {
-        const model = createModel();
+        const model = createModel({ can_install: false });
         model.customInstalled = [
           createEntry('b-extension'),
           createEntry('a-extension')
@@ -145,10 +151,11 @@ describe('@jupyterlab/extensionmanager', () => {
         ]);
       });
 
-      it('should provide the installed list for a display-only model', async () => {
-        const model = createModel({ display_only: true });
+      it('should be the override point for an installable manager too', async () => {
+        const model = createModel({ can_install: true });
         model.customInstalled = [createEntry('an-extension')];
         await model.refreshInstalled();
+        expect(model.fetchInstalledCount).toBe(1);
         expect(model.installed.map(entry => entry.name)).toEqual([
           'an-extension'
         ]);
