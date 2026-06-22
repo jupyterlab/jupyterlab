@@ -32,7 +32,13 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
+    "test:watch": "jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -50,6 +56,8 @@
     "semver": "^7.5.2"
   },
   "devDependencies": {
+    "@jupyterlab/testing": "^4.6.0",
+    "@types/jest": "^29.2.0",
     "@types/react": "^18.0.26",
     "@types/react-paginate": "^6.2.1",
     "@types/semver": "^7.5.2",
