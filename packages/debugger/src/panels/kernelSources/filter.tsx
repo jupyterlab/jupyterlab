@@ -22,8 +22,8 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const onFilterChange = (event: CustomEvent<unknown>) => {
-    const target = event.target;
+  const onFilterChange = (event: Event) => {
+    const target = event.currentTarget;
     if (target && 'value' in target && typeof target.value === 'string') {
       props.model.filter = target.value;
     }
