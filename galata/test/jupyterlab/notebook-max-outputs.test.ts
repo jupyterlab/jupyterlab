@@ -34,7 +34,7 @@ for i in range(10):
   );
 });
 
-test('Limit cell outputs if input is requested', async ({ page }) => {
+test('Limit cell outputs even when input is requested', async ({ page }) => {
   await page.notebook.createNew();
 
   await page.locator(
