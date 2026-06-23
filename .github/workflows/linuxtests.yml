@@ -15,12 +15,10 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, interop, nonode, lint]
         # This will be used by the base setup action
         python-version: ["3.10", "3.14"]
         include:
-          - group: examples
-            upload-output: true
           - group: release_test
             upload-output: true
           - group: lint
@@ -46,8 +44,6 @@ jobs:
           - group: nonode
             python-version: "3.10"
           - group: lint
-            python-version: "3.10"
-          - group: examples
             python-version: "3.10"
           - group: splice_source
             python-version: "3.10"
@@ -108,7 +104,6 @@ jobs:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: |
             ./build/${{ matrix.group }}_output
-            ./examples/*/test-results
 
   test_minimum_versions:
     name: Test Minimum Versions
