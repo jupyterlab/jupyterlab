@@ -571,18 +571,18 @@ namespace ILinker {
       '"]{2,}[^\\s' +
       controlCodes +
       '"\'(){}\\[\\],:;.!?])',
-    'ug'
+    'gu'
   );
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/3e407526a1e2ff22cacb69c7e353e81a12f41029/extensions/notebook-renderers/src/linkify.ts#L9
-  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w\.-]*)+)/;
-  const winRelPathRegex = /(?:(?:\~|\.)(?:(?:\\|\/)[\w\.-]*)+)/;
+  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w.-]*)+)/;
+  const winRelPathRegex = /(?:(?:~|\.)(?:(?:\\|\/)[\w.-]*)+)/;
   const winPathRegex = new RegExp(
+    // eslint-disable-next-line regexp/no-useless-non-capturing-group
     `(${winAbsPathRegex.source}|${winRelPathRegex.source})`
   );
-  const posixPathRegex = /((?:\~|\.)?(?:\/[\w\.-]*)+)/;
-  const lineColumnRegex =
-    /(?:(?:\:|", line )(?<line>[\d]+))?(?:\:(?<column>[\d]+))?/;
+  const posixPathRegex = /((?:~|\.)?(?:\/[\w.-]*)+)/;
+  const lineColumnRegex = /(?:(?::|", line )(?<line>\d+))?(?::(?<column>\d+))?/;
   // TODO: this ought to come from kernel (browser may be on a different OS).
   const isWindows = navigator.userAgent.indexOf('Windows') >= 0;
   export const pathLinkRegex = new RegExp(
@@ -709,9 +709,9 @@ function splitShallowNode<T extends Node>(
   at: number
 ): { pre: T; post: T } {
   const pre = node.cloneNode() as T;
-  pre.textContent = node.textContent?.slice(0, at) as string;
+  pre.textContent = (node.textContent ?? '').slice(0, at);
   const post = node.cloneNode() as T;
-  post.textContent = node.textContent?.slice(at) as string;
+  post.textContent = (node.textContent ?? '').slice(at);
   return {
     pre,
     post
@@ -780,9 +780,9 @@ function* alignedNodes<T extends Node, U extends Node>(
         let { pre, post } = splitShallowNode(A.node, B.end - A.start);
         if (B.start < A.start) {
           // this node should not be yielded anywhere else, so ok to modify in-place
-          B.node.textContent = B.node.textContent?.slice(
+          B.node.textContent = (B.node.textContent ?? '').slice(
             A.start - B.start
-          ) as string;
+          );
         }
         yield [pre, B.node];
         // Modify iteration result in-place:
@@ -793,9 +793,9 @@ function* alignedNodes<T extends Node, U extends Node>(
         let { pre, post } = splitShallowNode(B.node, A.end - B.start);
         if (A.start < B.start) {
           // this node should not be yielded anywhere else, so ok to modify in-place
-          A.node.textContent = A.node.textContent?.slice(
+          A.node.textContent = (A.node.textContent ?? '').slice(
             B.start - A.start
-          ) as string;
+          );
         }
         yield [A.node, pre];
         // Modify iteration result in-place:
@@ -1633,7 +1633,8 @@ namespace Private {
    * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
    */
   export function ansiSpan(str: string): string {
-    const ansiRe = /\x1b\[(.*?)([@-~])/g; // eslint-disable-line no-control-regex
+    // Final byte range and control regex are intended here
+    const ansiRe = /\x1b\[(.*?)([@-~])/g; // eslint-disable-line no-control-regex, regexp/no-obscure-range
     let fg: number | Array<number> = [];
     let bg: number | Array<number> = [];
     let bold = false;

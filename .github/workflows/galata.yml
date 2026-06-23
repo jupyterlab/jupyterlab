@@ -21,6 +21,8 @@ on:
         default: 1
         type: number
 
+permissions: {}
+
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
 
@@ -29,6 +31,8 @@ jobs:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -57,23 +61,23 @@ jobs:
             suite: documentation
             shard: 1
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
           - browser: chromium
             project: documentation
             suite: documentation
             shard: 2
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           path: core
           persist-credentials: false
 
       - name: Checkout demo project
         if: ${{ matrix.project == 'documentation' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -87,9 +91,9 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
-          python_package_manager: "uv pip"
+          python_package_manager: 'uv pip'
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
 
       - name: Find out Playwright version
@@ -102,7 +106,7 @@ jobs:
         working-directory: core
 
       - name: Set up browser cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
@@ -145,7 +149,7 @@ jobs:
         run: |
           set -ex
           cd core/galata
-          jlpm run build
+          jlpm build
 
       - name: Wait for JupyterLab
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
@@ -175,14 +179,14 @@ jobs:
             TEST_ARGS+=(--repeat-each "${REPEAT_EACH}")
           fi
 
-          jlpm run test "${TEST_ARGS[@]}"
+          jlpm test "${TEST_ARGS[@]}"
           TEST_EXIT_CODE=$?
           mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
           BENCHMARK_EXIT_CODE=0
           if [[ -z "${TEST_PATTERN}" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
-            BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+            BENCHMARK_NUMBER_SAMPLES=1 jlpm test:benchmark
             BENCHMARK_EXIT_CODE=$?
             mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
           fi
@@ -194,15 +198,15 @@ jobs:
 
       - name: Upload test assets
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
           path: core/galata/test-results
-          if-no-files-found: ignore  # expected when no tests fail
+          if-no-files-found: ignore # expected when no tests fail
 
       - name: Upload test report blob
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
           path: core/galata/blob-report
@@ -214,16 +218,101 @@ jobs:
         run: |
           cat /tmp/jupyterlab_server.log
 
+  examples:
+    name: Example Tests
+    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          path: core
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: 'uv pip'
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_PACKAGE_VERSION=$(echo "$PW_VERSION" | sed -E 's/^"playwright@npm:([^"]+)":/\1/')
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+          echo "package-version=$PW_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+        working-directory: core
+
+      - name: Set up browser cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
+
+      - name: Install dependencies
+        env:
+          GROUP: examples
+        run: |
+          set -ex
+          bash ./scripts/ci_install.sh
+        working-directory: core
+
+      - name: Test examples
+        env:
+          GROUP: examples
+          PLAYWRIGHT_VERSION: ${{ steps.pw-version.outputs.package-version }}
+        run: |
+          cd core
+          set +e
+          bash ./scripts/ci_script.sh
+          TEST_EXIT_CODE=$?
+
+          mkdir -p galata/test-results
+          mkdir -p galata/blob-report
+
+          find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
+            TARGET_DIR="galata/test-results/${RESULTS_DIR}"
+            mkdir -p "$TARGET_DIR"
+            cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
+          done
+
+          find examples packages/services/examples -type d -name blob-report | while read -r BLOB_DIR; do
+            cp -R "${BLOB_DIR}/." galata/blob-report/
+          done
+
+          exit $TEST_EXIT_CODE
+
+      - name: Upload test assets
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-test-assets-chromium-examples-1
+          path: core/galata/test-results
+          if-no-files-found: ignore # expected when no tests fail
+
+      - name: Upload test report blob
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-blobs-chromium-examples-1
+          path: core/galata/blob-report
+          retention-days: 1
+          compression-level: 1
+
   merge-reports:
     name: Merge Test Reports and Results
     if: ${{ !cancelled() }}
-    needs: test
+    needs: [test, examples]
     runs-on: ubuntu-22.04
     permissions:
       contents: read
     steps:
       - name: Checkout lockfile
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           sparse-checkout: yarn.lock
           sparse-checkout-cone-mode: false
@@ -240,14 +329,14 @@ jobs:
       - name: Download aggregate blob artifact
         if: ${{ github.run_attempt > 1 }}
         continue-on-error: true
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: galata-blobs-merged
           path: artifacts/base
 
       - name: Download individual blob artifacts
         continue-on-error: true
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           path: artifacts/overlay
           pattern: galata-blobs-*-*-*
@@ -285,11 +374,12 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
           PW_VERSION: ${{ steps.pw-version.outputs.version }}
         run: |
-          npx "playwright@${PW_VERSION}" merge-reports --reporter html,json,github ./artifacts/final/
+          echo "module.exports = { testDir: '.' };" > merge.config.js
+          npx "playwright@${PW_VERSION}" merge-reports --config merge.config.js --reporter html,json,github ./artifacts/final/
 
       - name: Extract failing and flaky counts
         id: test-counts
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const fs = require('fs');
@@ -300,19 +390,19 @@ jobs:
             core.setOutput('flaky', String(flaky));
 
       - name: Upload merged reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: visual-regression-report
           path: playwright-report
 
       - name: Inline the report
-        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           path: playwright-report
 
       - name: Upload inlined report
         id: upload-report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           archive: false
           name: visual-regression-report-standalone
@@ -326,7 +416,7 @@ jobs:
 
       - name: Save PR comment data
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}
           FAILING: ${{ steps.test-counts.outputs.failing || 0 }}
@@ -343,7 +433,7 @@ jobs:
 
       - name: Upload PR comment data
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-pr-comment-data
           path: pr-comment-data.json
@@ -352,7 +442,7 @@ jobs:
       - name: Merge and upload test results
         if: ${{ !cancelled() }}
         continue-on-error: true
-        uses: actions/upload-artifact/merge@v6
+        uses: actions/upload-artifact/merge@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
           name: galata-test-assets-merged
@@ -361,7 +451,7 @@ jobs:
 
       - name: Merge blobs and delete individual shards
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact/merge@v6
+        uses: actions/upload-artifact/merge@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           # The name matches the pattern so that it is picked again on re-runs
           name: galata-blobs-merged

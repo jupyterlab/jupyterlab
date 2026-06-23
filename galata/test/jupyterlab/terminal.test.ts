@@ -40,8 +40,18 @@ async function runCommand(
   await page.keyboard.press('Enter');
 }
 
+async function waitForTerminal(page: Page) {
+  const terminal = page.locator(TERMINAL_SELECTOR);
+  await terminal.waitFor();
+  const terminalTabLabel = page.locator(
+    '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
+  );
+  await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+}
+
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.menu.clickMenuItem('File>New>Terminal');
     await page.locator(TERMINAL_SELECTOR).waitFor();
   });
@@ -59,7 +69,7 @@ test.describe('Terminal', () => {
   test.describe('Theme', () => {
     test('Light theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
         'inherit'
@@ -72,9 +82,10 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'light-term-light.png'
       );
@@ -82,7 +93,7 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
       await terminal.focus();
@@ -93,7 +104,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
@@ -107,7 +118,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
@@ -119,7 +130,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
@@ -131,7 +142,7 @@ test.describe('Terminal', () => {
   test.describe('Search', () => {
     test('should highlight matches', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
 
       // Display some content in terminal.
       await runCommand(page, terminal, 'seq 1006 2 1024');
@@ -158,7 +169,7 @@ test.describe('Terminal', () => {
       const terminal = page.locator(TERMINAL_SELECTOR);
       const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
 
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await terminalInput.waitFor();
 
       // Focus terminal input.
@@ -196,6 +207,10 @@ test.describe('Terminal', () => {
     await contents.createDirectory(tmpPath);
   });
 
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
+  });
+
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
@@ -204,7 +219,7 @@ test.describe('Terminal', () => {
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
     const terminal = page.locator(TERMINAL_SELECTOR);
-    await terminal.waitFor();
+    await waitForTerminal(page);
 
     // use the local helper to run basename
     await runCommand(page, terminal, 'basename $PWD', true);
@@ -218,8 +233,6 @@ test.describe('Terminal', () => {
   });
 
   test('Terminal web link', async ({ page, tmpPath, browserName }) => {
-    test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
       .waitFor();
@@ -227,7 +240,7 @@ test.describe('Terminal', () => {
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
     const terminal = page.locator(TERMINAL_SELECTOR);
-    await terminal.waitFor();
+    await waitForTerminal(page);
 
     await runCommand(page, terminal, 'echo https://jupyter.org/', true);
 
@@ -237,16 +250,14 @@ test.describe('Terminal', () => {
       timeout: 5000
     });
 
-    // Hover over the link layer to trigger link highlighting
-    await Promise.all([
-      terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-      terminal.locator('canvas.xterm-link-layer').hover({
-        position: {
-          x: 60,
-          y: 23
-        }
-      })
-    ]);
+    // Hover over the link to trigger link highlighting.
+    await terminal.hover({ position: { x: 6, y: 27 } });
+
+    // We need to retry once with 2s pause to avoid flakiness.
+    await page.waitForTimeout(2000);
+    await terminal.hover({ position: { x: 10, y: 27 } });
+
+    await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
 
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
   });

@@ -282,7 +282,7 @@ def ensure_app(app_dir):
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jlpm run build:core` then `jupyter lab build` ",
+        "Please run `jlpm build:core` then `jupyter lab build` ",
         "or use a different app directory",
     ]
     return msgs
@@ -1004,7 +1004,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise
         """
         should_rebuild = False
-        for extname, _ in self.info["extensions"].items():
+        for extname in self.info["extensions"]:
             uninstalled = self.uninstall_extension(extname)
             should_rebuild = should_rebuild or uninstalled
         return should_rebuild
@@ -1015,7 +1015,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         should_rebuild = False
-        for extname, _ in self.info["extensions"].items():
+        for extname in self.info["extensions"]:
             if extname in self.info["local_extensions"]:
                 continue
             updated = self._update_extension(extname)
@@ -1340,10 +1340,7 @@ class _AppHandler:
             locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
-        disabled_core = []
-        for key in info["core_extensions"]:
-            if key in info["disabled"]:
-                disabled_core.append(key)
+        disabled_core = [key for key in info["core_extensions"] if key in info["disabled"]]
 
         info["disabled_core"] = disabled_core
 
@@ -1388,7 +1385,7 @@ class _AppHandler:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in [".yarnrc.yml", "yarn.js"]:
+        for fname in [".yarnrc.yml"]:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, "staging", fname), target)
 

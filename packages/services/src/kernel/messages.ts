@@ -855,7 +855,7 @@ export interface IInfoReplyMsg extends IShellMessage<'kernel_info_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
  * @see {@link ICompleteReplyMsg}
- * @see {@link IKernelConnection.complete}
+ * @see {@link Kernel.IKernelConnection.requestComplete}
  */
 export interface ICompleteRequestMsg extends IShellMessage<'complete_request'> {
   content: {
@@ -868,8 +868,8 @@ export interface ICompleteRequestMsg extends IShellMessage<'complete_request'> {
  * A `'complete_reply'` message content.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
- * @see {@link ICompleteRequest}
- * @see {@link IKernelConnection.complete}
+ * @see {@link KernelMessage.ICompleteRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestComplete}
  */
 interface ICompleteReply extends IReplyOkContent {
   matches: string[];
@@ -882,8 +882,8 @@ interface ICompleteReply extends IReplyOkContent {
  * A `'complete_reply'` message on the `'shell'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
- * @see {@link ICompleteRequest}
- * @see {@link IKernelConnection.complete}
+ * @see {@link KernelMessage.ICompleteRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestComplete}
  */
 export interface ICompleteReplyMsg extends IShellMessage<'complete_reply'> {
   parent_header: IHeader<'complete_request'>;
@@ -895,7 +895,7 @@ export interface ICompleteReplyMsg extends IShellMessage<'complete_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
  * @see {@link IInspectReplyMsg}
- * @see {@link IKernelConnection.inspect}
+ * @see {@link Kernel.IKernelConnection.requestInspect}
  */
 export interface IInspectRequestMsg extends IShellMessage<'inspect_request'> {
   content: {
@@ -909,8 +909,8 @@ export interface IInspectRequestMsg extends IShellMessage<'inspect_request'> {
  * A `'inspect_reply'` message content.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
- * @see {@link IInspectRequest}
- * @see {@link IKernelConnection.inspect}
+ * @see {@link KernelMessage.IInspectRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestInspect}
  */
 
 export interface IInspectReply extends IReplyOkContent {
@@ -923,8 +923,8 @@ export interface IInspectReply extends IReplyOkContent {
  * A `'inspect_reply'` message on the `'shell'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
- * @see {@link IInspectRequest}
- * @see {@link IKernelConnection.inspect}
+ * @see {@link KernelMessage.IInspectRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestInspect}
  */
 
 export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
@@ -940,7 +940,7 @@ export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
  * @see {@link IInterruptReplyMsg}
- * @see {@link IKernelConnection.interrupt}
+ * @see {@link Kernel.IKernelConnection.interrupt}
  */
 
 export interface IInterruptRequestMsg extends IControlMessage<'interrupt_request'> {
@@ -952,7 +952,7 @@ export interface IInterruptRequestMsg extends IControlMessage<'interrupt_request
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
  * @see {@link IInterruptRequestMsg}
- * @see {@link IKernelConnection.interrupt}
+ * @see {@link Kernel.IKernelConnection.interrupt}
  */
 
 export interface IInterruptReply extends IReplyOkContent {}
@@ -962,7 +962,7 @@ export interface IInterruptReply extends IReplyOkContent {}
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
  * @see {@link IInterruptRequestMsg}
- * @see {@link IKernelConnection.interrupt}
+ * @see {@link Kernel.IKernelConnection.interrupt}
  */
 export interface IInterruptReplyMsg extends IControlMessage<'interrupt_reply'> {
   parent_header: IHeader<'interrupt_request'>;
@@ -974,7 +974,7 @@ export interface IInterruptReplyMsg extends IControlMessage<'interrupt_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
  * @see {@link IHistoryReplyMsg}
- * @see {@link IKernelConnection.history}
+ * @see {@link Kernel.IKernelConnection.requestHistory}
  */
 export interface IHistoryRequestMsg extends IShellMessage<'history_request'> {
   content: IHistoryRequestRange | IHistoryRequestSearch | IHistoryRequestTail;
@@ -985,7 +985,7 @@ export interface IHistoryRequestMsg extends IShellMessage<'history_request'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
  * @see {@link IHistoryReply}
- * @see {@link IKernelConnection.history}
+ * @see {@link Kernel.IKernelConnection.requestHistory}
  */
 export interface IHistoryRequestRange {
   output: boolean;
@@ -1001,7 +1001,7 @@ export interface IHistoryRequestRange {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
  * @see {@link IHistoryReply}
- * @see {@link IKernelConnection.history}
+ * @see {@link Kernel.IKernelConnection.requestHistory}
  */
 export interface IHistoryRequestSearch {
   output: boolean;
@@ -1017,7 +1017,7 @@ export interface IHistoryRequestSearch {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
  * @see {@link IHistoryReply}
- * @see {@link IKernelConnection.history}
+ * @see {@link Kernel.IKernelConnection.requestHistory}
  */
 export interface IHistoryRequestTail {
   output: boolean;
@@ -1030,8 +1030,8 @@ export interface IHistoryRequestTail {
  * A `'history_reply'` message content.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
- * @see {@link IHistoryRequest}
- * @see {@link IKernelConnection.history}
+ * @see {@link KernelMessage.IHistoryRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestHistory}
  */
 export interface IHistoryReply extends IReplyOkContent {
   history: [number, number, string][] | [number, number, [string, string]][];
@@ -1041,8 +1041,8 @@ export interface IHistoryReply extends IReplyOkContent {
  * A `'history_reply'` message on the `'shell'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
- * @see {@link IHistoryRequest}
- * @see {@link IKernelConnection.history}
+ * @see {@link KernelMessage.IHistoryRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestHistory}
  */
 export interface IHistoryReplyMsg extends IShellMessage<'history_reply'> {
   parent_header: IHeader<'history_request'>;
@@ -1054,7 +1054,7 @@ export interface IHistoryReplyMsg extends IShellMessage<'history_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-completeness).
  * @see {@link IIsCompleteReplyMsg}
- * @see {@link IKernelConnection.isComplete}
+ * @see {@link Kernel.IKernelConnection.requestIsComplete}
  */
 export interface IIsCompleteRequestMsg extends IShellMessage<'is_complete_request'> {
   content: {
@@ -1066,8 +1066,8 @@ export interface IIsCompleteRequestMsg extends IShellMessage<'is_complete_reques
  * An `'is_complete_reply'` message on the `'stream'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-completeness).
- * @see {@link IIsCompleteRequest}
- * @see {@link IKernelConnection.isComplete}
+ * @see {@link KernelMessage.IIsCompleteRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestIsComplete}
  */
 export interface IIsCompleteReplyMsg extends IShellMessage<'is_complete_reply'> {
   parent_header: IHeader<'is_complete_request'>;
@@ -1170,8 +1170,8 @@ export interface IExecuteReply extends IExecuteReplyBase {
  * An `'execute_reply'` message on the `'stream'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execution-results).
- * @see {@link IExecuteRequest}
- * @see {@link IKernelConnection.execute}
+ * @see {@link KernelMessage.IExecuteRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestExecute}
  */
 export interface IExecuteReplyMsg extends IShellMessage<'execute_reply'> {
   parent_header: IHeader<'execute_request'>;
@@ -1190,7 +1190,7 @@ export function isExecuteReplyMsg(msg: IMessage): msg is IExecuteReplyMsg {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#comm-info).
  * @see {@link ICommInfoReplyMsg}
- * @see {@link IKernelConnection.commInfo}
+ * @see {@link Kernel.IKernelConnection.requestCommInfo}
  */
 export interface ICommInfoRequestMsg extends IShellMessage<'comm_info_request'> {
   content: {
@@ -1205,8 +1205,8 @@ export interface ICommInfoRequestMsg extends IShellMessage<'comm_info_request'> 
  * A `'comm_info_reply'` message content.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#comm-info).
- * @see {@link ICommInfoRequest}
- * @see {@link IKernelConnection.commInfo}
+ * @see {@link KernelMessage.ICommInfoRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestCommInfo}
  */
 export interface ICommInfoReply extends IReplyOkContent {
   /**
@@ -1219,8 +1219,8 @@ export interface ICommInfoReply extends IReplyOkContent {
  * A `'comm_info_reply'` message on the `'shell'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#comm-info).
- * @see {@link ICommInfoRequestMsg}
- * @see {@link IKernelConnection.commInfo}
+ * @see {@link KernelMessage.ICommInfoRequestMsg}
+ * @see {@link Kernel.IKernelConnection.requestCommInfo}
  */
 export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
   parent_header: IHeader<'comm_info_request'>;
