@@ -47,6 +47,7 @@ for i in range(10):
 input('Your age:')
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
   await expect(page.locator('.jp-RenderedMarkdown')).toHaveCount(MAX_OUTPUTS);
@@ -73,6 +74,7 @@ for i in range(10):
     display(Markdown('_Markdown_ **text**'))
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
 
