@@ -262,7 +262,7 @@ ${diff}`
  * Post-bump.
  */
 export function postbump(commit = true): void {
-  run('jlpm run integrity');
+  run('jlpm integrity');
 
   // Commit changes.
   if (commit) {

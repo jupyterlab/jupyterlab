@@ -79,7 +79,7 @@ export function Table<T>(props: Table.IOptions<T>) {
   if (sortedColumn) {
     const sorter = sortedColumn.sort.bind(sortedColumn);
     rows = props.rows.sort(
-      (a, b) => sorter(a.data, b.data) * sortState.sortDirection
+      (a, b) => (sorter(a.data, b.data) ?? 0) * sortState.sortDirection
     );
   }
 

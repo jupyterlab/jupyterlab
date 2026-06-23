@@ -32,7 +32,7 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
           # Build dev-mode
-          jlpm run build
+          jlpm build
 
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
@@ -99,7 +99,7 @@ jobs:
           bash ./scripts/ci_install.sh
 
           # Build dev-mode
-          jlpm run build
+          jlpm build
 
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:

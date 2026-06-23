@@ -360,7 +360,7 @@ export class InlineCompleter extends Widget {
     });
   }
 
-  private _onEditorBlur(event: FocusEvent) {
+  private _onEditorBlur(event: FocusEvent): boolean {
     if (this.node.contains(event.relatedTarget as HTMLElement)) {
       // Cancel removing ghost text if our node is receiving focus
       return false;
@@ -369,6 +369,7 @@ export class InlineCompleter extends Widget {
     this._editor?.host.classList.remove(INLINE_COMPLETER_ACTIVE_CLASS);
     // Hide the widget if editor was blurred.
     this.hide();
+    return true;
   }
 
   private _onModelSuggestionsChanged(
@@ -534,7 +535,7 @@ export class InlineCompleter extends Widget {
     }
 
     const host =
-      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host.closest<HTMLElement>('.jp-MainAreaWidget > .lm-Widget') ??
       editor.host;
 
     let anchor: DOMRect;

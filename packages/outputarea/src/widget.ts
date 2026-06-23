@@ -369,16 +369,36 @@ export class OutputArea extends Widget {
             this._clear();
           } else {
             // range of items removed from model
-            // remove widgets corresponding to removed model items
+            // remove widgets corresponding to removed visible model items
             const startIndex = args.oldIndex;
-            for (
-              let i = 0;
-              i < args.oldValues.length && startIndex < this.widgets.length;
-              ++i
-            ) {
+            let outputWidgetCount = this._outputModelWidgetCount();
+            const count = Math.min(
+              args.oldValues.length,
+              Math.max(0, outputWidgetCount - startIndex)
+            );
+            for (let i = 0; i < count; ++i) {
               const widget = this.widgets[startIndex];
               widget.parent = null;
               widget.dispose();
+            }
+            outputWidgetCount -= count;
+
+            if (this.model.length <= this._maxNumberOutputs) {
+              this.widgets
+                .find(widget => this._isTrimmedOutputsWidget(widget))
+                ?.dispose();
+            }
+
+            const targetOutputCount = Math.min(
+              this.model.length,
+              this._maxNumberOutputs
+            );
+            while (outputWidgetCount < targetOutputCount) {
+              this._insertOutput(
+                outputWidgetCount,
+                this.model.get(outputWidgetCount)
+              );
+              outputWidgetCount++;
             }
 
             // apply item offset to target model item indices in _displayIdMap
@@ -556,10 +576,6 @@ export class OutputArea extends Widget {
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
-    // Increase number of outputs to display the result up to the input request.
-    if (this.model.length >= this.maxNumberOutputs) {
-      this.maxNumberOutputs = this.model.length;
-    }
     this._inputRequested.emit(input);
 
     // Get the input node to ensure focus after updating the model upon user reply.
@@ -704,6 +720,28 @@ export class OutputArea extends Widget {
 
     this.outputLengthChanged.emit(
       Math.min(this.model.length, this._maxNumberOutputs)
+    );
+  }
+
+  /**
+   * Count layout widgets that map directly to output model indices.
+   */
+  private _outputModelWidgetCount(): number {
+    const boundary = this.widgets.findIndex(
+      widget =>
+        widget.hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS) ||
+        this._isTrimmedOutputsWidget(widget)
+    );
+    return boundary === -1 ? this.widgets.length : boundary;
+  }
+
+  /**
+   * Whether a layout widget wraps the trimmed outputs marker.
+   */
+  private _isTrimmedOutputsWidget(widget: Widget): boolean {
+    return (
+      widget instanceof Panel &&
+      widget.widgets.some(child => child instanceof Private.TrimmedOutputs)
     );
   }
 
