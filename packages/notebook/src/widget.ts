@@ -2958,9 +2958,9 @@ export class Notebook extends StaticNotebook {
             (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
               : 'data-jupyter-id';
-          const element = this.node.querySelector(
+          const element = this.node.querySelector<HTMLElement>(
             `h${heading.level}[${attribute}="${CSS.escape(id)}"]`
-          ) as HTMLElement;
+          )!;
 
           return {
             cell,
