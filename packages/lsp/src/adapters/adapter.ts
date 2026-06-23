@@ -558,12 +558,7 @@ export abstract class WidgetLSPAdapter<
     try {
       await connectionPromise;
     } finally {
-      if (
-        this._pendingDocumentConnections.get(virtualDocument) ===
-        connectionPromise
-      ) {
-        this._pendingDocumentConnections.delete(virtualDocument);
-      }
+      this._pendingDocumentConnections.delete(virtualDocument);
     }
   }
 
