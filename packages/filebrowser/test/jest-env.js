@@ -10,7 +10,7 @@
 import JSDOMEnvironment from 'jest-environment-jsdom';
 
 export default class FixJSDOMEnvironment extends JSDOMEnvironment {
-  constructor(...args: ConstructorParameters<typeof JSDOMEnvironment>) {
+  constructor(...args) {
     super(...args);
 
     this.global.fetch = fetch;
