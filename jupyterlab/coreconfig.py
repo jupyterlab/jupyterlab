@@ -102,10 +102,7 @@ class CoreConfig:
             data["jupyterlab"]["mimeExtensions"],
         )
         for m in maps:
-            try:
-                del m[name]
-            except KeyError:
-                pass
+            m.pop(name, None)
 
         data["jupyterlab"]["singletonPackages"].remove(name)
 

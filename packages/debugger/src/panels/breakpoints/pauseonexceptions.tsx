@@ -109,7 +109,7 @@ export class PauseOnExceptionsMenu extends MenuSvg {
         command: this._command,
         args: {
           filter: filter.filter,
-          description: filter.description as string
+          description: filter.description!
         }
       });
     });

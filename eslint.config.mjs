@@ -8,6 +8,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
+import tsdocPlugin from 'eslint-plugin-tsdoc';
 import regexpPlugin from 'eslint-plugin-regexp';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
@@ -206,7 +207,8 @@ export default defineConfig([
       '@typescript-eslint': tseslint.plugin,
       jest: jestPlugin,
       react: reactPlugin,
-      jupyter: jupyterPlugin
+      jupyter: jupyterPlugin,
+      tsdoc: tsdocPlugin
     },
 
     languageOptions: {
@@ -239,6 +241,7 @@ export default defineConfig([
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-untranslated-string': 'error',
+      'tsdoc/syntax': 'warn',
       'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
@@ -262,6 +265,7 @@ export default defineConfig([
 
       '@typescript-eslint/no-use-before-define': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/non-nullable-type-assertion-style': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
@@ -464,7 +468,8 @@ export default defineConfig([
     ],
 
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off'
     }
   },
   {
