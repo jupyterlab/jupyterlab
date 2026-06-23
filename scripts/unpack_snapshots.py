@@ -77,16 +77,60 @@ def to_repo_relative(path_value: str, root_dir: str | None) -> Path:
     return path
 
 
-def to_artifact_source_path(source_relative: Path, artifact_dir: Path) -> Path:
+def to_artifact_source_path(source_relative: Path, artifact_dir: Path, report_dir: Path) -> Path:
     """Map a report source path to the downloaded artifact directory."""
     parts = source_relative.parts
     prefix = ("galata", "test-results")
+
+    for index, part in enumerate(parts):
+        if part == "test-results":
+            candidate = report_dir / Path(*parts[index + 1 :])
+            if candidate.exists():
+                return candidate
 
     for index in range(max(0, len(parts) - len(prefix) + 1)):
         if parts[index : index + len(prefix)] == prefix:
             return artifact_dir / Path(*parts[index + len(prefix) :])
 
     return artifact_dir / source_relative
+
+
+def get_report_repo_dir(json_file: Path, artifact_dir: Path) -> Path | None:
+    """Infer the repository directory containing a nested Playwright report."""
+    try:
+        report_parent = json_file.parent.relative_to(artifact_dir)
+    except ValueError:
+        return None
+
+    parts = report_parent.parts
+    if not parts or "test-results" not in parts:
+        return None
+
+    index = parts.index("test-results")
+    if index == 0:
+        return None
+
+    return Path(*parts[:index])
+
+
+def to_destination_path(
+    expected_path: str, root_dir: str | None, report_repo_dir: Path | None
+) -> Path:
+    """Map an expected snapshot attachment path to a repository destination."""
+    dest_relative = to_repo_relative(expected_path, root_dir)
+    if report_repo_dir is None:
+        return dest_relative
+
+    parts = dest_relative.parts
+    root_name = Path(root_dir.rstrip("/")).name if root_dir else ""
+    if root_name and parts and parts[0] == root_name:
+        parts = parts[1:]
+
+    repo_parts = report_repo_dir.parts
+    if parts[: len(repo_parts)] == repo_parts:
+        return Path(*parts)
+
+    return report_repo_dir / Path(*parts)
 
 
 def collect_snapshot_attachments(
@@ -120,6 +164,8 @@ def collect_snapshot_attachments(
 def process_result(
     result: dict,
     artifact_dir: Path,
+    report_dir: Path,
+    report_repo_dir: Path | None,
     root_dir: str | None,
     dry_run: bool = False,
 ) -> int:
@@ -138,14 +184,14 @@ def process_result(
             continue
 
         source_relative = to_repo_relative(actual["path"], root_dir)
-        source_path = to_artifact_source_path(source_relative, artifact_dir)
+        source_path = to_artifact_source_path(source_relative, artifact_dir, report_dir)
         if not source_path.exists():
             sys.stderr.write(
                 f"Warning: Could not locate actual snapshot in artifact: {actual['path']}\n"
             )
             continue
 
-        dest_relative = to_repo_relative(expected["path"], root_dir)
+        dest_relative = to_destination_path(expected["path"], root_dir, report_repo_dir)
         dest_path = Path.cwd() / dest_relative
 
         if dry_run:
@@ -161,7 +207,7 @@ def process_result(
     return copied
 
 
-def process_report(report: dict, artifact_dir: Path, dry_run: bool = False) -> int:
+def process_report(report: dict, artifact_dir: Path, json_file: Path, dry_run: bool = False) -> int:
     """
     Process a complete test report.
 
@@ -169,6 +215,8 @@ def process_report(report: dict, artifact_dir: Path, dry_run: bool = False) -> i
     """
     total = 0
     root_dir = report.get("config", {}).get("rootDir")
+    report_dir = json_file.parent
+    report_repo_dir = get_report_repo_dir(json_file, artifact_dir)
 
     def walk_suites(suites: list[dict]) -> int:
         count = 0
@@ -176,7 +224,14 @@ def process_report(report: dict, artifact_dir: Path, dry_run: bool = False) -> i
             for spec in suite.get("specs", []):
                 for test in spec.get("tests", []):
                     for result in test.get("results", []):
-                        count += process_result(result, artifact_dir, root_dir, dry_run)
+                        count += process_result(
+                            result,
+                            artifact_dir,
+                            report_dir,
+                            report_repo_dir,
+                            root_dir,
+                            dry_run,
+                        )
             count += walk_suites(suite.get("suites", []))
         return count
 
@@ -202,7 +257,9 @@ def main():
     # Find JSON reports in the test results directory.
     # Hidden files (e.g. .last-run.json) are metadata and not Playwright report files.
     json_files = [
-        path for path in args.test_assets_dir.glob("*.json") if not path.name.startswith(".")
+        path
+        for path in args.test_assets_dir.rglob("*.json")
+        if not any(part.startswith(".") for part in path.relative_to(args.test_assets_dir).parts)
     ]
 
     if not json_files:
@@ -220,7 +277,7 @@ def main():
             sys.stdout.write("  Skipping: not a Playwright JSON report\n")
             continue
 
-        count = process_report(report, args.test_assets_dir, args.dry_run)
+        count = process_report(report, args.test_assets_dir, json_file, args.dry_run)
         total_snapshots += count
         sys.stdout.write(f"  Processed {count} snapshots from this report\n")
 

@@ -129,8 +129,9 @@ function startApp(
     languages
   });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
-  const editorFactory = factoryService.newInlineEditor;
-  const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
+  const contentFactory = new ConsolePanel.ContentFactory({
+    editorFactory: factoryService.newInlineEditor
+  });
 
   const consolePanel = new ConsolePanel({
     rendermime,
