@@ -278,7 +278,7 @@ def ensure_app(app_dir) -> list[str] | None:
     If it does not exist, return a list of messages to prompt the user.
     """
     if osp.exists(pjoin(app_dir, "static", "index.html")):
-        return
+        return None
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
