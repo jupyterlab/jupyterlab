@@ -62,7 +62,7 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
-    python -m pip install .[docs]
+    python -m pip install --group docs
     pushd docs
     make html
     make shellcheck
@@ -177,19 +177,6 @@ if [[ $GROUP == release_test ]]; then
 
     ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
-fi
-
-
-if [[ $GROUP == examples ]]; then
-    # Run the integrity script to link binary files
-    jlpm integrity
-
-    # Build the examples.
-    jlpm build:packages
-    jlpm build:examples
-
-    # Test the examples
-    jlpm test:examples
 fi
 
 

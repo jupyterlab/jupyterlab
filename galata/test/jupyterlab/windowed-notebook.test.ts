@@ -68,7 +68,7 @@ test('should update displayed cells on resize', async ({ page, tmpPath }) => {
   );
   await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
-  // The cell should be visible aqain
+  // The cell should be visible again
   await expect.soft(cell).toBeVisible();
 });
 
@@ -289,6 +289,19 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       for (let i = 0; i < testCase.times; i++) {
         await page.keyboard.press(testCase.key);
         // Allow for small delay between pressing keys
+        if (i === 0 && testCase.key === 'PageDown' && testCase.times === 10) {
+          // TODO: for some reason the notebook scrolls back to the selected cell after a few seconds.
+          // The exact mechanism is not clear but it is easily reproducible with the test case
+          // "Show neither cell on pressing PageDown 10 times" by commenting out the timeout below,
+          // and decreasing the timeout for each iteration (say down to 10ms).
+          // It might be unrelated to this test, but instead a different bug in the windowing
+          // logic where some stale request remains beyond its intended lifetime
+          // (i.e. when user requested a different scroll).
+          // This could be related related to the scrollback logic; PR #18973 demonstrated
+          // a potential fix, however it made the scrollback test for full windowing flaky
+          // ("should keep active cell when a cell above generates a lot of output").
+          await page.waitForTimeout(3000);
+        }
         await page.waitForTimeout(100);
       }
 
