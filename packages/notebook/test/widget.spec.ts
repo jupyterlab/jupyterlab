@@ -1312,6 +1312,117 @@ describe('@jupyter/notebook', () => {
         widget.deselectAll();
         expect(selected(widget)).toEqual([]);
       });
+
+      it('should not auto-select children when activating a collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Activate the heading
+        widget.activeCellIndex = 0;
+
+        // Children should not be selected just from activation
+        expect(selected(widget)).toEqual([]);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should include children when explicitly selecting a collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Explicitly select the heading
+        widget.select(heading);
+
+        // Children should be selected when explicitly selecting the heading
+        expect(selected(widget)).toEqual([0, 1, 2]);
+      });
+
+      it('should clear all selections without side effects on deselectAll', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[2]);
+
+        // All selections should be cleared
+        widget.deselectAll();
+        expect(selected(widget)).toEqual([]);
+        expect(widget.activeCellIndex).toBe(0);
+      });
     });
 
     describe('#extendContiguousSelectionTo()', () => {
