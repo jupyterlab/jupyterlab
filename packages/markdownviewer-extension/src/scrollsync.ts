@@ -19,26 +19,10 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**
- * Time window (in milliseconds) during which scroll events on the pane that is
- * being driven are ignored, to avoid feedback loops between the two panes.
+ * Time window (in milliseconds) during which scroll events on the pane being
+ * driven are ignored, to avoid feedback loops between the two panes.
  */
 const SYNC_RELEASE_DELAY = 200;
-
-/**
- * A source line (0-based) mapped to a vertical offset (in pixels) within the
- * preview scroll container content.
- */
-interface IScrollMarker {
-  /**
-   * The 0-based source line.
-   */
-  line: number;
-
-  /**
-   * The vertical offset in the preview content, in pixels.
-   */
-  top: number;
-}
 
 /**
  * Manages synchronized scrolling between Markdown source editors and their
@@ -96,7 +80,7 @@ export class MarkdownScrollSyncManager implements IDisposable {
   }
 
   /**
-   * Attempt to link every open preview with a matching source editor.
+   * Link every open preview with a matching source editor, when possible.
    */
   private _pairAll(): void {
     this._markdownTracker.forEach(preview => {
@@ -122,9 +106,8 @@ export class MarkdownScrollSyncManager implements IDisposable {
       previewWidget: preview,
       rendermime: this._rendermime
     });
+    // Keying by the preview widget keeps the pair valid across file renames.
     this._pairs.set(preview, pair);
-    // Keying by the preview widget (rather than its path) keeps the pair valid
-    // across file renames.
     pair.disposed.connect(() => {
       this._pairs.delete(preview);
     });
@@ -179,6 +162,15 @@ export namespace MarkdownScrollSyncManager {
  */
 namespace Private {
   /**
+   * A source line (0-based) mapped to a vertical offset (in pixels) within the
+   * preview scroll container content.
+   */
+  export interface IScrollMarker {
+    line: number;
+    top: number;
+  }
+
+  /**
    * A source line (0-based) mapped to a heading element in the preview.
    */
   export interface IAnchor {
@@ -212,6 +204,8 @@ namespace Private {
       this._editor = this._editorWidget.content.editor;
       this._editorHost = this._editor.host;
       this._previewScroller = this._previewWidget.content.renderer.node;
+      this._expectedEditorTop = this._editorScrollTop();
+      this._expectedPreviewTop = this._previewScroller.scrollTop;
 
       // Scroll events do not bubble, so listen in the capture phase to catch
       // scrolling of the inner CodeMirror scroller.
@@ -257,7 +251,6 @@ namespace Private {
       this._previewWidget.disposed.disconnect(this._onWidgetDisposed, this);
       if (this._releaseTimer !== null) {
         window.clearTimeout(this._releaseTimer);
-        this._releaseTimer = null;
       }
       this._disposed.emit();
       Signal.clearData(this);
@@ -272,14 +265,50 @@ namespace Private {
       if (this._isDisposed || event.type !== 'scroll') {
         return;
       }
+      // A hidden pane has no usable geometry, so only sync when both are shown.
+      if (!this._editorWidget.isVisible || !this._previewWidget.isVisible) {
+        return;
+      }
       if (event.currentTarget === this._editorHost) {
-        if (this._claim('editor')) {
-          this._scrollPreviewToEditor();
-        }
+        this._onScroll('editor');
       } else if (event.currentTarget === this._previewScroller) {
-        if (this._claim('preview')) {
-          this._scrollEditorToPreview();
-        }
+        this._onScroll('preview');
+      }
+    }
+
+    /**
+     * React to a scroll of one pane and drive the other to match.
+     *
+     * Scrolls that merely restore a pane to its expected offset are ignored:
+     * this discards both the feedback from a sync we just performed and the
+     * offset restored by the browser when a hidden pane is shown again.
+     */
+    private _onScroll(source: 'editor' | 'preview'): void {
+      const top =
+        source === 'editor'
+          ? this._editorScrollTop()
+          : this._previewScroller.scrollTop;
+      const expected =
+        source === 'editor'
+          ? this._expectedEditorTop
+          : this._expectedPreviewTop;
+      if (Math.abs(top - expected) <= 1) {
+        return;
+      }
+      // Record the new offset before claiming, so the editor offset stays
+      // current even when the scroll was induced by our own `revealPosition`.
+      if (source === 'editor') {
+        this._expectedEditorTop = top;
+      } else {
+        this._expectedPreviewTop = top;
+      }
+      if (!this._claim(source)) {
+        return;
+      }
+      if (source === 'editor') {
+        this._scrollPreviewToEditor();
+      } else {
+        this._scrollEditorToPreview();
       }
     }
 
@@ -313,6 +342,16 @@ namespace Private {
     }
 
     /**
+     * The scroll offset of the inner CodeMirror scroller.
+     */
+    private _editorScrollTop(): number {
+      if (!this._editorScroller) {
+        this._editorScroller = this._editorHost.querySelector('.cm-scroller');
+      }
+      return this._editorScroller?.scrollTop ?? 0;
+    }
+
+    /**
      * Rebuild the source-line to preview-element anchor list from the headings.
      */
     private async _rebuildAnchors(): Promise<void> {
@@ -335,12 +374,10 @@ namespace Private {
         );
         return;
       }
-      // Ignore the result if the pair was disposed while parsing.
       if (this._isDisposed) {
         return;
       }
-      // The parsed headings and the rendered heading elements are both in
-      // document order, so they can be paired by index.
+      // Headings and rendered elements share document order, so pair them by index.
       const elements = Array.from(
         this._previewScroller.querySelectorAll<HTMLElement>(
           'h1, h2, h3, h4, h5, h6'
@@ -363,8 +400,8 @@ namespace Private {
       const container = this._previewScroller;
       const containerTop = container.getBoundingClientRect().top;
       const scrollTop = container.scrollTop;
-      // The largest reachable scroll offset; heading offsets beyond it (in the
-      // final viewport) are clamped so the markers stay monotonic.
+      // Heading offsets in the final viewport are clamped to the largest
+      // reachable scroll offset so the markers stay monotonic.
       const maxTop = Math.max(
         container.scrollHeight - container.clientHeight,
         0
@@ -439,7 +476,9 @@ namespace Private {
       if (markers.length < 2) {
         return;
       }
-      this._previewScroller.scrollTop = interpolate(markers, line, 'line');
+      const top = interpolate(markers, line, 'line');
+      this._expectedPreviewTop = top;
+      this._previewScroller.scrollTop = top;
     }
 
     /**
@@ -466,10 +505,13 @@ namespace Private {
     private _rendermime: IRenderMimeRegistry;
     private _editor: CodeEditor.IEditor;
     private _editorHost: HTMLElement;
+    private _editorScroller: HTMLElement | null = null;
     private _previewScroller: HTMLElement;
     private _anchors: IAnchor[] = [];
     private _owner: 'editor' | 'preview' | null = null;
     private _releaseTimer: number | null = null;
+    private _expectedEditorTop = 0;
+    private _expectedPreviewTop = 0;
     private _isDisposed = false;
     private _disposed = new Signal<this, void>(this);
   }
@@ -485,17 +527,16 @@ namespace Private {
     value: number,
     by: 'line' | 'top'
   ): number {
-    const from = by;
     const to = by === 'line' ? 'top' : 'line';
-    if (value <= markers[0][from]) {
+    if (value <= markers[0][by]) {
       return markers[0][to];
     }
     for (let i = 0; i < markers.length - 1; i++) {
       const a = markers[i];
       const b = markers[i + 1];
-      if (value < b[from]) {
-        const span = b[from] - a[from];
-        const fraction = span === 0 ? 0 : (value - a[from]) / span;
+      if (value < b[by]) {
+        const span = b[by] - a[by];
+        const fraction = span === 0 ? 0 : (value - a[by]) / span;
         return a[to] + fraction * (b[to] - a[to]);
       }
     }
