@@ -156,8 +156,9 @@ function createApp(manager: ServiceManager.IManager): void {
     languages
   });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
-  const editorFactory = factoryService.newInlineEditor;
-  const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
+  const contentFactory = new NotebookPanel.ContentFactory({
+    editorFactory: factoryService.newInlineEditor
+  });
 
   const sessionContextDialogs = new SessionContextDialogs();
   const toolbarFactory = (panel: NotebookPanel) =>
