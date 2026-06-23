@@ -43,24 +43,19 @@ test('should load the example', async ({ page }) => {
   if (process.env['TEST_SNAPSHOT'] === '1') {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-    await page.addStyleTag({
-      content: `
-        .cm-cursorLayer {
-          animation: none !important;
-          opacity: 1 !important;
-        }
-
-        .cm-cursor {
-          display: block !important;
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-      `
-    });
     expect
       .soft(
         await page.screenshot({
-          mask: [page.locator('.jp-DirListing-itemModified')]
+          mask: [page.locator('.jp-DirListing-itemModified')],
+          style: `
+            .cm-cursorLayer {
+              animation: none !important;
+            }
+
+            .jp-ConsolePanel .cm-cursor {
+              visibility: hidden !important;
+            }
+          `
         })
       )
       .toMatchSnapshot('example.png');
