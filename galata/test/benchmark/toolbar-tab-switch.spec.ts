@@ -115,17 +115,30 @@ test.describe('Benchmark - Toolbar tab switch', () => {
       // measuring, so it does not leak into the measurement window.
       await page.waitForTimeout(2500);
 
-      // The toolbar re-renders triggered by a tab switch reconcile the button
-      // subtrees but usually produce *no* DOM change (the rendered output is
-      // identical) - so the cost is pure JS CPU time. We therefore measure the
-      // cumulative script execution time (via the Chrome DevTools Protocol)
-      // rather than wall-clock, which would be dominated by the shell's own
-      // per-activation work and by scheduling/frame timing.
+      // A tab switch reconciles the button subtrees but usually produces *no*
+      // DOM change (the rendered output is identical). The cost is therefore
+      // not just JS - re-rendering the button also re-runs the web-component
+      // property setters, which can trigger style recalculation independently
+      // of any DOM mutation. We thus capture, via the Chrome DevTools Protocol,
+      // the main-thread breakdown (script, style recalc, layout) rather than
+      // wall-clock, which would be dominated by the shell's per-activation work.
+      const METRICS = [
+        'TaskDuration',
+        'ScriptDuration',
+        'RecalcStyleDuration',
+        'LayoutDuration',
+        'RecalcStyleCount',
+        'LayoutCount'
+      ];
       const client = await page.context().newCDPSession(page);
       await client.send('Performance.enable');
-      const scriptDuration = async (): Promise<number> => {
+      const snapshot = async (): Promise<Record<string, number>> => {
         const { metrics } = await client.send('Performance.getMetrics');
-        return metrics.find(m => m.name === 'ScriptDuration')!.value;
+        const result: Record<string, number> = {};
+        for (const name of METRICS) {
+          result[name] = metrics.find(m => m.name === name)?.value ?? 0;
+        }
+        return result;
       };
 
       // Run `rounds` iterations of: optionally switch the active tab, then flush
@@ -170,27 +183,38 @@ test.describe('Benchmark - Toolbar tab switch', () => {
           [rounds, activate] as [number, boolean]
         );
 
-      // Idle baseline (no tab switches).
-      const idleStart = await scriptDuration();
+      // Idle baseline (no tab switches) of the exact same shape, to cancel the
+      // constant background work (pollers etc.).
+      const idle0 = await snapshot();
       await runLoop(N_ROUNDS, false);
-      const idleScript = (await scriptDuration()) - idleStart;
+      const idle1 = await snapshot();
 
       // Tab switches.
-      const switchStart = await scriptDuration();
+      const switch0 = await snapshot();
       await runLoop(N_ROUNDS, true);
-      const switchScript = (await scriptDuration()) - switchStart;
+      const switch1 = await snapshot();
 
       await client.detach();
 
-      // Script time attributable to the tab switches (ScriptDuration is in
-      // seconds). Clamp at 0 to guard against baseline noise.
-      const switchScriptTime = Math.max(0, (switchScript - idleScript) * 1000);
+      // Per-metric delta attributable to the tab switches (idle-subtracted).
+      const delta: Record<string, number> = {};
+      for (const name of METRICS) {
+        const idleDelta = idle1[name] - idle0[name];
+        const switchDelta = switch1[name] - switch0[name];
+        // Durations are in seconds; convert to ms. Counts stay as-is.
+        const scale = name.endsWith('Count') ? 1 : 1000;
+        delta[name] = (switchDelta - idleDelta) * scale;
+      }
 
+      console.log(`TAB_SWITCH_METRICS=${JSON.stringify(delta)}`);
+
+      // Record total main-thread time (script + style + layout + everything
+      // else on the thread) attributable to the switches as the headline metric.
       testInfo.attachments.push(
         benchmark.addAttachment({
           ...attachmentCommon,
           test: 'tab-switch',
-          time: switchScriptTime
+          time: Math.max(0, delta.TaskDuration)
         })
       );
     });
