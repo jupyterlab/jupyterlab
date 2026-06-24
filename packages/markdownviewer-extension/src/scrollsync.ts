@@ -5,10 +5,7 @@ import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import type { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import type {
-  IMarkdownViewerTracker,
-  MarkdownDocument
-} from '@jupyterlab/markdownviewer';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import type {
   IMarkdownParser,
   IRenderMimeRegistry
@@ -28,9 +25,10 @@ const SYNC_RELEASE_DELAY = 200;
  * Manages synchronized scrolling between Markdown source editors and their
  * rendered previews.
  *
- * When enabled, every file editor that shares its path with an open Markdown
- * preview is linked so that scrolling one pane scrolls the other to the
- * matching location.
+ * Synchronization is tracked per preview: each preview for which it is enabled
+ * is linked to the file editor that shares its path, so that scrolling one pane
+ * scrolls the other to the matching location. Enabling or disabling a preview
+ * affects only that preview, not the global `syncScrolling` setting.
  */
 export class MarkdownScrollSyncManager implements IDisposable {
   /**
@@ -38,8 +36,10 @@ export class MarkdownScrollSyncManager implements IDisposable {
    */
   constructor(options: MarkdownScrollSyncManager.IOptions) {
     this._editorTracker = options.editorTracker;
-    this._markdownTracker = options.markdownTracker;
     this._rendermime = options.rendermime;
+    // A source editor may be opened after sync has been enabled for its
+    // preview, so watch for new editors to pair them retroactively.
+    this._editorTracker.widgetAdded.connect(this._onEditorAdded, this);
   }
 
   /**
@@ -50,22 +50,42 @@ export class MarkdownScrollSyncManager implements IDisposable {
   }
 
   /**
-   * Enable or disable scroll synchronization.
+   * A signal emitted when scroll synchronization is toggled for a preview.
+   *
+   * The emitted value is the affected preview.
    */
-  setEnabled(enabled: boolean): void {
-    if (this._isDisposed || enabled === this._enabled) {
+  get enabledChanged(): ISignal<this, MarkdownDocument> {
+    return this._enabledChanged;
+  }
+
+  /**
+   * Whether scroll synchronization is enabled for a given preview.
+   */
+  isEnabled(preview: MarkdownDocument): boolean {
+    return this._enabled.has(preview);
+  }
+
+  /**
+   * Enable or disable scroll synchronization for a single preview.
+   *
+   * This affects only the given preview; it does not change the global
+   * `syncScrolling` setting.
+   */
+  setEnabled(preview: MarkdownDocument, enabled: boolean): void {
+    if (this._isDisposed || enabled === this._enabled.has(preview)) {
       return;
     }
-    this._enabled = enabled;
     if (enabled) {
-      this._editorTracker.widgetAdded.connect(this._pairAll, this);
-      this._markdownTracker.widgetAdded.connect(this._pairAll, this);
-      this._pairAll();
+      this._enabled.add(preview);
+      // Forget the preview once it is closed.
+      const onDisposed = () => this._disable(preview);
+      this._disposeSlots.set(preview, onDisposed);
+      preview.disposed.connect(onDisposed);
+      this._pair(preview);
     } else {
-      this._editorTracker.widgetAdded.disconnect(this._pairAll, this);
-      this._markdownTracker.widgetAdded.disconnect(this._pairAll, this);
-      this._clearPairs();
+      this._disable(preview);
     }
+    this._enabledChanged.emit(preview);
   }
 
   /**
@@ -76,26 +96,44 @@ export class MarkdownScrollSyncManager implements IDisposable {
       return;
     }
     this._isDisposed = true;
-    this._editorTracker.widgetAdded.disconnect(this._pairAll, this);
-    this._markdownTracker.widgetAdded.disconnect(this._pairAll, this);
+    this._editorTracker.widgetAdded.disconnect(this._onEditorAdded, this);
+    for (const [preview, onDisposed] of this._disposeSlots) {
+      preview.disposed.disconnect(onDisposed);
+    }
+    this._disposeSlots.clear();
+    this._enabled.clear();
     this._clearPairs();
     Signal.clearData(this);
   }
 
   /**
-   * Link every open preview with a matching source editor, when possible.
+   * React to a new source editor by pairing it with any enabled preview that
+   * shares its path.
    */
-  private _pairAll(): void {
-    this._markdownTracker.forEach(preview => {
+  private _onEditorAdded(): void {
+    for (const preview of this._enabled) {
       this._pair(preview);
-    });
+    }
+  }
+
+  /**
+   * Disable synchronization for a preview and release its resources.
+   */
+  private _disable(preview: MarkdownDocument): void {
+    this._enabled.delete(preview);
+    const onDisposed = this._disposeSlots.get(preview);
+    if (onDisposed) {
+      this._disposeSlots.delete(preview);
+      preview.disposed.disconnect(onDisposed);
+    }
+    this._unpair(preview);
   }
 
   /**
    * Link a single preview with its matching source editor, if any.
    */
   private _pair(preview: MarkdownDocument): void {
-    if (this._pairs.has(preview)) {
+    if (this._pairs.has(preview) || !this._enabled.has(preview)) {
       return;
     }
     const path = preview.context.path;
@@ -117,6 +155,17 @@ export class MarkdownScrollSyncManager implements IDisposable {
   }
 
   /**
+   * Dispose of the active pair for a preview, if any.
+   */
+  private _unpair(preview: MarkdownDocument): void {
+    const pair = this._pairs.get(preview);
+    if (pair) {
+      this._pairs.delete(preview);
+      pair.dispose();
+    }
+  }
+
+  /**
    * Dispose of all the active pairs.
    */
   private _clearPairs(): void {
@@ -128,10 +177,11 @@ export class MarkdownScrollSyncManager implements IDisposable {
   }
 
   private _editorTracker: IEditorTracker;
-  private _markdownTracker: IMarkdownViewerTracker;
   private _rendermime: IRenderMimeRegistry;
   private _pairs = new Map<MarkdownDocument, Private.ScrollSyncPair>();
-  private _enabled = false;
+  private _enabled = new Set<MarkdownDocument>();
+  private _disposeSlots = new Map<MarkdownDocument, () => void>();
+  private _enabledChanged = new Signal<this, MarkdownDocument>(this);
   private _isDisposed = false;
 }
 
@@ -147,11 +197,6 @@ export namespace MarkdownScrollSyncManager {
      * The file editor tracker holding the Markdown source editors.
      */
     editorTracker: IEditorTracker;
-
-    /**
-     * The tracker holding the Markdown previews.
-     */
-    markdownTracker: IMarkdownViewerTracker;
 
     /**
      * The rendermime registry, used to access the Markdown parser.

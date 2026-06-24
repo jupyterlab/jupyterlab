@@ -1,0 +1,12 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*
+  Accent the scroll synchronization toolbar button while it is active so its
+  per-preview state stands out on top of the toolbar's active background.
+*/
+.jp-MarkdownViewer-syncButton[aria-pressed='true'] .jp-icon3[fill] {
+  fill: var(--jp-brand-color1);
+}
