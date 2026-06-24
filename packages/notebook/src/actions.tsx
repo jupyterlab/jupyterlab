@@ -1673,7 +1673,7 @@ export namespace NotebookActions {
             actions: [
               {
                 label: trans.__('Show new outputs'),
-                displayType: 'link',
+                displayType: 'accent',
                 callback: () => {
                   if (dismissTimeout) {
                     window.clearTimeout(dismissTimeout);
