@@ -1177,12 +1177,15 @@ export class WindowedList<
   /**
    * Wait for the item with the given index to be attached to the DOM.
    * This resolves with the matching element once it
-   * is inserted, or with `null` if it does not appear within
-   * {@link MAXIMUM_TIME_REMAINING}.
+   * is inserted, or with `null` if it does not appear
+   * within the timeout (10 seconds by default).
    *
    * @param index Item index to wait for
    */
-  private _waitForItem(index: number): Promise<HTMLElement | null> {
+  private _waitForItem(
+    index: number,
+    timeout = 10000
+  ): Promise<HTMLElement | null> {
     const selector = `[data-windowed-list-index="${index}"]`;
     const existing = this._innerElement.querySelector(selector);
     if (existing instanceof HTMLElement) {
@@ -1209,8 +1212,11 @@ export class WindowedList<
       timer = window.setTimeout(() => {
         observer.disconnect();
         const item = this._innerElement.querySelector(selector);
+        console.warn(
+          `Cell with index ${index} did not appear withing ${timeout}`
+        );
         resolve(item instanceof HTMLElement ? item : null);
-      }, 30000);
+      }, timeout);
     });
   }
 
