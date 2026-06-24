@@ -1530,6 +1530,19 @@ export namespace NotebookActions {
       switch (mode) {
         case 'below':
           index = notebook.activeCellIndex + 1;
+          // If the active cell is a collapsed markdown heading with children,
+          // insert after all the children, not just after the heading.
+          {
+            const activeCell = notebook.activeCell;
+            if (
+              activeCell instanceof MarkdownCell &&
+              activeCell.headingCollapsed &&
+              activeCell.numberChildNodes > 0
+            ) {
+              index =
+                notebook.activeCellIndex + activeCell.numberChildNodes + 1;
+            }
+          }
           break;
         case 'belowSelected':
           notebook.widgets.forEach((child, childIndex) => {
@@ -1537,7 +1550,24 @@ export namespace NotebookActions {
               index = childIndex + 1;
             }
           });
-
+          // If the last selected cell is a collapsed markdown heading with children,
+          // insert after all the children, not just after the heading.
+          {
+            const lastSelectedIndex = index - 1;
+            if (
+              lastSelectedIndex >= 0 &&
+              lastSelectedIndex < notebook.widgets.length
+            ) {
+              const widget = notebook.widgets[lastSelectedIndex];
+              if (
+                widget instanceof MarkdownCell &&
+                widget.headingCollapsed &&
+                widget.numberChildNodes > 0
+              ) {
+                index = lastSelectedIndex + widget.numberChildNodes + 1;
+              }
+            }
+          }
           break;
         case 'above':
           index = notebook.activeCellIndex;
@@ -2909,8 +2939,30 @@ namespace Private {
    * @returns A list of 0 or more selected cells
    */
   export function selectedCells(notebook: Notebook): nbformat.ICell[] {
-    return notebook.widgets
-      .filter(cell => notebook.isSelectedOrActive(cell))
+    const cellsToInclude = new Set<Cell>();
+
+    // Collect all selected/active cells and expand collapsed sections
+    for (let i = 0; i < notebook.widgets.length; i++) {
+      const cell = notebook.widgets[i];
+      if (notebook.isSelectedOrActive(cell)) {
+        cellsToInclude.add(cell);
+
+        // If this is a collapsed markdown cell, add all its children
+        if (
+          cell instanceof MarkdownCell &&
+          cell.headingCollapsed &&
+          cell.numberChildNodes > 0
+        ) {
+          for (let j = i + 1; j <= i + cell.numberChildNodes; j++) {
+            if (notebook.widgets[j]) {
+              cellsToInclude.add(notebook.widgets[j]);
+            }
+          }
+        }
+      }
+    }
+
+    return Array.from(cellsToInclude)
       .map(cell => cell.model.toJSON())
       .map(cellJSON => {
         if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
@@ -3117,18 +3169,39 @@ namespace Private {
     const model = notebook.model!;
     const sharedModel = model.sharedModel;
     const toDelete: number[] = [];
+    const cellsToDeleteSet = new Set<number>();
 
     notebook.mode = 'command';
 
-    // Find the cells to delete.
+    // Find the cells to delete, expanding collapsed sections.
     notebook.widgets.forEach((child, index) => {
       const deletable = child.model.getMetadata('deletable') !== false;
 
       if (notebook.isSelectedOrActive(child) && deletable) {
-        toDelete.push(index);
+        cellsToDeleteSet.add(index);
         notebook.model?.deletedCells.push(child.model.id);
+
+        // If this is a collapsed markdown cell, mark all its children for deletion
+        if (
+          child instanceof MarkdownCell &&
+          child.headingCollapsed &&
+          child.numberChildNodes > 0
+        ) {
+          for (let j = index + 1; j <= index + child.numberChildNodes; j++) {
+            if (notebook.widgets[j]) {
+              const childDeletable =
+                notebook.widgets[j].model.getMetadata('deletable') !== false;
+              if (childDeletable) {
+                cellsToDeleteSet.add(j);
+                notebook.model?.deletedCells.push(notebook.widgets[j].model.id);
+              }
+            }
+          }
+        }
       }
     });
+
+    toDelete.push(...Array.from(cellsToDeleteSet).sort((a, b) => a - b));
 
     // If cells are not deletable, we may not have anything to delete.
     if (toDelete.length > 0) {
