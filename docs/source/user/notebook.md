@@ -300,15 +300,10 @@ location on the server. For example, if your notebook is at
 `notebooks/data/results.csv`. This also works for links to other
 notebooks or text files, which open in a new tab in JupyterLab.
 
-**Absolute paths**
-
-Links beginning with `/` (e.g., `/etc/config.json`) are treated as
-absolute paths on the server's file system. Note that this behavior may
-differ from the classic Notebook interface.
-
 **Anchor links**
 
 You can link to a section within the same notebook using an anchor:
 
 ```markdown
 See the [introduction section](#introduction).
+```
