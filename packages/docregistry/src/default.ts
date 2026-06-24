@@ -54,19 +54,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this._dirty;
-    if (newValue === oldValue) {
+    if (newValue === this.dirty) {
       return;
     }
-    this._dirty = newValue;
-    this.triggerStateChange({
-      name: 'dirty',
-      oldValue,
-      newValue
-    });
+    this.sharedModel.dirty = newValue;
   }
 
   /**
@@ -164,7 +158,6 @@ export class DocumentModel
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
   private _onStateChanged(sender: ISharedFile, changes: DocumentChange): void {
@@ -173,12 +166,7 @@ export class DocumentModel
     }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name === 'dirty') {
-          // Setting `dirty` will trigger the state change.
-          // We always set `dirty` because the shared model state
-          // and the local attribute are synchronized one way shared model -> _dirty
-          this.dirty = value.newValue;
-        } else if (value.oldValue !== value.newValue) {
+        if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
@@ -194,7 +182,6 @@ export class DocumentModel
    */
   readonly sharedModel: ISharedFile;
   private _defaultLang = '';
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -581,6 +568,7 @@ export class DocumentWidget<
     this.context.model.stateChanged.connect(this._onModelStateChanged, this);
     void this.context.ready.then(() => {
       this._handleDirtyState();
+      this._handleReadOnlyState();
     });
 
     // listen for changes to the title object
@@ -643,32 +631,35 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
-    if (!this.context.model.dirty) {
-      if (this.context.contentsModel?.writable === false) {
-        const readOnlyIndicator = createReadonlyLabel(this);
-        let roi = this.toolbar.insertBefore(
-          'kernelName',
-          'read-only-indicator',
-          readOnlyIndicator
-        );
-        if (!roi) {
-          this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
-        }
-      }
-    }
   }
 
   /**
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (
-      this.context.model.dirty &&
-      !this.title.className.includes(DIRTY_CLASS)
-    ) {
-      this.title.className += ` ${DIRTY_CLASS}`;
+    if (this.context.model.dirty) {
+      if (!this.title.className.includes(DIRTY_CLASS)) {
+        this.title.className += ` ${DIRTY_CLASS}`;
+      }
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
+  }
+
+  /**
+   * Handle the read-only state of the context model.
+   */
+  private _handleReadOnlyState(): void {
+    if (this.context.contentsModel?.writable === false) {
+      const readOnlyIndicator = createReadonlyLabel(this);
+      let roi = this.toolbar.insertBefore(
+        'kernelName',
+        'read-only-indicator',
+        readOnlyIndicator
+      );
+      if (!roi) {
+        this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+      }
     }
   }
 

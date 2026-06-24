@@ -26,7 +26,7 @@ import { expandDottedPaths, sleep, untilReady } from './utils';
 import type { VirtualDocument } from './virtual/document';
 
 import type * as protocol from 'vscode-languageserver-protocol';
-import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate, type ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * Each Widget with a document (whether file or a notebook) has the same DocumentConnectionManager
@@ -377,44 +377,77 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
     firstTimeoutSeconds = 30,
     secondTimeoutMinutes = 5
   ): Promise<ILSPConnection | undefined> {
-    let connection = await this._connectSocket(options);
-    let { virtualDocument } = options;
-    if (!connection) {
-      return;
+    const { virtualDocument } = options;
+    const { uri } = virtualDocument;
+    const existingConnection = this.connections.get(uri);
+
+    if (existingConnection) {
+      return existingConnection;
     }
-    if (!connection.isReady) {
+
+    const pendingConnection = this._pendingConnections.get(uri);
+    if (pendingConnection) {
+      return pendingConnection;
+    }
+
+    const pendingConnectDelegate = new PromiseDelegate<
+      ILSPConnection | undefined
+    >();
+    const pendingConnectionPromise = pendingConnectDelegate.promise;
+    this._pendingConnections.set(uri, pendingConnectionPromise);
+
+    void (async () => {
       try {
-        // user feedback hinted that 40 seconds was too short and some users are willing to wait more;
-        // to make the best of both worlds we first check frequently (6.6 times a second) for the first
-        // 30 seconds, and show the warning early in case if something is wrong; we then continue retrying
-        // for another 5 minutes, but only once per second.
-        await untilReady(
-          () => connection!.isReady,
-          Math.round((firstTimeoutSeconds * 1000) / 150),
-          150
-        );
-      } catch {
-        console.log(
-          `Connection to ${virtualDocument.uri} timed out after ${firstTimeoutSeconds} seconds, will continue retrying for another ${secondTimeoutMinutes} minutes`
-        );
-        try {
-          await untilReady(
-            () => connection!.isReady,
-            60 * secondTimeoutMinutes,
-            1000
-          );
-        } catch {
-          console.log(
-            `Connection to ${virtualDocument.uri} timed out again after ${secondTimeoutMinutes} minutes, giving up`
-          );
+        let connection = await this._connectSocket(options);
+        if (!connection) {
+          pendingConnectDelegate.resolve(undefined);
           return;
         }
+        if (!connection.isReady) {
+          try {
+            // user feedback hinted that 40 seconds was too short and some users are willing to wait more;
+            // to make the best of both worlds we first check frequently (6.6 times a second) for the first
+            // 30 seconds, and show the warning early in case if something is wrong; we then continue retrying
+            // for another 5 minutes, but only once per second.
+            await untilReady(
+              () => connection!.isReady,
+              Math.round((firstTimeoutSeconds * 1000) / 150),
+              150
+            );
+          } catch {
+            console.log(
+              `Connection to ${virtualDocument.uri} timed out after ${firstTimeoutSeconds} seconds, will continue retrying for another ${secondTimeoutMinutes} minutes`
+            );
+            try {
+              await untilReady(
+                () => connection!.isReady,
+                60 * secondTimeoutMinutes,
+                1000
+              );
+            } catch {
+              console.log(
+                `Connection to ${virtualDocument.uri} timed out again after ${secondTimeoutMinutes} minutes, giving up`
+              );
+              pendingConnectDelegate.resolve(undefined);
+              return;
+            }
+          }
+        }
+
+        this._connected.emit({ connection, virtualDocument });
+        pendingConnectDelegate.resolve(connection);
+      } catch (error) {
+        pendingConnectDelegate.reject(error);
+      }
+    })();
+
+    try {
+      return await pendingConnectionPromise;
+    } finally {
+      if (this._pendingConnections.get(uri) === pendingConnectionPromise) {
+        this._pendingConnections.delete(uri);
       }
     }
-
-    this._connected.emit({ connection, virtualDocument });
-
-    return connection;
   }
 
   /**
@@ -541,6 +574,14 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
    * Set of ignored languages
    */
   private _ignoredLanguages: Set<string>;
+
+  /**
+   * Map of in-flight connect calls keyed by virtual document URI.
+   */
+  private _pendingConnections: Map<
+    VirtualDocument.uri,
+    Promise<ILSPConnection | undefined>
+  > = new Map();
 }
 
 export namespace DocumentConnectionManager {

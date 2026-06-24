@@ -1025,7 +1025,7 @@ describe('LabShell', () => {
       expect(bottomPanel?.getAttribute('role')).toEqual('contentinfo');
     });
 
-    it('left handler should have a role of compelementary and aria label of main sidebar', () => {
+    it('left handler should have a role of complementary and aria label of main sidebar', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left');

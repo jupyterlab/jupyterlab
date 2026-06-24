@@ -1268,7 +1268,8 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
               label: trans.__('Notebook (no kernel)'),
               factory: FACTORY,
               kernelPreference: {
-                shouldStart: false
+                shouldStart: false,
+                shouldReuse: false
               }
             }
           })
