@@ -1145,10 +1145,12 @@ export class WindowedList<
       // stays correct when several scroll requests overlap: each request that
       // starts waiting is balanced by exactly one decrement in `finally`, and
       // the timer only resolves once no wait is left.
-      const clampedIndex = Math.max(
-        0,
-        Math.min(index, this.viewModel.widgetCount - 1)
-      );
+      const count = this.viewModel.widgetCount;
+      if (count <= 0) {
+        this._markProgrammaticScrollingDone();
+        return delegate.promise;
+      }
+      const clampedIndex = Math.max(0, Math.min(index, count - 1));
       this._pendingItemWaits++;
       void this._waitForItem(clampedIndex)
         .then(item => {
