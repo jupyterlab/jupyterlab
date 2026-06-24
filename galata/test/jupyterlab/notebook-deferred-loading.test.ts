@@ -75,6 +75,10 @@ for (const mode of windowingModes) {
         `.jp-Cell[data-windowed-list-index="${lastCellIndex}"]`
       );
 
+      // Ensure we exercise the deferred-rendering path: the last cell should not
+      // be attached yet when the scroll is requested.
+      await expect(lastCell).toHaveCount(0, { timeout: 1000 });
+
       // Request a scroll to the last cell while it is (very likely) still a
       // placeholder being rendered progressively during idle time.
       await page.evaluate(async index => {
