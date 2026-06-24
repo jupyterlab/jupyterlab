@@ -85,6 +85,13 @@ export interface ILanguageServerProvider {
   /**
    * @alpha
    *
+   * Provider identifier.
+   */
+  readonly id: string;
+
+  /**
+   * @alpha
+   *
    * Signal emitted when provider sessions/specs are changed.
    */
   readonly sessionsChanged?: ISignal<ILanguageServerProvider, void>;
@@ -251,6 +258,15 @@ export interface ILanguageServerManager extends IDisposable {
    * Register a runtime language server provider.
    */
   registerProvider?(provider: ILanguageServerProvider): IDisposable;
+
+  /**
+   * @alpha
+   *
+   * Get a runtime transport factory for a language server.
+   */
+  getTransportFactory(
+    languageServerId: TLanguageServerId
+  ): ILanguageServerProvider.TTransportFactory | null;
 
   /**
    * @alpha

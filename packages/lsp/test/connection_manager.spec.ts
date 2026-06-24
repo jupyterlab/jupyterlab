@@ -145,6 +145,7 @@ describe('@jupyterlab/lsp', () => {
           (_options: ILanguageServerProvider.ITransportOptions) => socket
         );
         const provider: ILanguageServerProvider = {
+          id: 'test-provider',
           fetch: async () => ({
             sessions: runtimeSessions as any,
             specs: runtimeSpecs as any,

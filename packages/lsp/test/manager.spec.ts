@@ -81,6 +81,7 @@ describe('@jupyterlab/lsp', () => {
 
       it('should merge runtime provider sessions and specs', async () => {
         const provider: ILanguageServerProvider = {
+          id: 'test-provider',
           fetch: async () => ({
             sessions: runtimeSessions as any,
             specs: runtimeSpecs as any
@@ -96,6 +97,7 @@ describe('@jupyterlab/lsp', () => {
 
       it('should remove provider sessions and specs after disposal', async () => {
         const provider: ILanguageServerProvider = {
+          id: 'test-provider',
           fetch: async () => ({
             sessions: runtimeSessions as any,
             specs: runtimeSpecs as any
@@ -116,6 +118,7 @@ describe('@jupyterlab/lsp', () => {
       it('should refresh when provider emits sessionsChanged', async () => {
         let active = false;
         const provider = {
+          id: 'test-provider',
           fetch: async () => ({
             sessions: active ? (runtimeSessions as any) : {},
             specs: active ? (runtimeSpecs as any) : {}
@@ -167,6 +170,7 @@ describe('@jupyterlab/lsp', () => {
         });
 
         const provider: ILanguageServerProvider = {
+          id: 'test-provider',
           fetch: async () => ({
             sessions: runtimeSessions as any,
             specs: runtimeSpecs as any
@@ -180,6 +184,39 @@ describe('@jupyterlab/lsp', () => {
         expect(manager.specs.has('pyright' as any)).toEqual(true);
 
         spy.mockImplementation(defaultImplementation!);
+        warnSpy.mockRestore();
+      });
+
+      it('should not register the same provider id twice', async () => {
+        const firstProvider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: async () => ({
+            sessions: runtimeSessions as any,
+            specs: runtimeSpecs as any
+          })
+        };
+        const secondProvider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: jest.fn(async () => ({
+            sessions: {},
+            specs: {}
+          }))
+        };
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+        manager.registerProvider(firstProvider);
+        const duplicateDisposable = manager.registerProvider(secondProvider);
+        await manager.fetchSessions();
+        duplicateDisposable.dispose();
+
+        expect(manager.sessions.has('pyright' as any)).toEqual(true);
+        expect(secondProvider.fetch).not.toHaveBeenCalled();
+        expect(warnSpy).toHaveBeenLastCalledWith(
+          expect.stringContaining(
+            'Language server provider with id test-provider is already registered'
+          )
+        );
+
         warnSpy.mockRestore();
       });
 

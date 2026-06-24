@@ -17,7 +17,6 @@ import type {
   TSpecsMap
 } from './tokens';
 import { ILanguageServerManager } from './tokens';
-import { setLanguageServerTransports } from './runtime_transport';
 import type { ServerSpecProperties } from './schema';
 
 interface IProviderRegistration {
@@ -116,7 +115,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._sessions = new Map();
     this._serverSessions = new Map();
     this._serverSpecs = new Map();
-    setLanguageServerTransports(this, new Map());
+    this._transports.clear();
     this._sessionsChanged.emit(void 0);
   }
 
@@ -129,7 +128,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     }
     this._isDisposed = true;
 
-    for (const registration of this._providers) {
+    for (const registration of this._providers.values()) {
       if (registration.provider.sessionsChanged) {
         registration.provider.sessionsChanged.disconnect(
           registration.onSessionsChanged
@@ -139,7 +138,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._providers.clear();
     this._serverSessions.clear();
     this._serverSpecs.clear();
-    setLanguageServerTransports(this, new Map());
+    this._transports.clear();
 
     Signal.clearData(this);
   }
@@ -155,13 +154,20 @@ export class LanguageServerManager implements ILanguageServerManager {
    * Register a runtime language server provider.
    */
   registerProvider(provider: ILanguageServerProvider): IDisposable {
+    if (this._providers.has(provider.id)) {
+      console.warn(
+        `Language server provider with id ${provider.id} is already registered`
+      );
+      return new DisposableDelegate(() => undefined);
+    }
+
     const registration = {
       provider,
       onSessionsChanged: () => {
         void this.fetchSessions().catch(console.error);
       }
     };
-    this._providers.add(registration);
+    this._providers.set(provider.id, registration);
 
     if (provider.sessionsChanged) {
       provider.sessionsChanged.connect(registration.onSessionsChanged);
@@ -170,12 +176,24 @@ export class LanguageServerManager implements ILanguageServerManager {
     void this.fetchSessions().catch(console.error);
 
     return new DisposableDelegate(() => {
+      if (this._providers.get(provider.id) !== registration) {
+        return;
+      }
       if (provider.sessionsChanged) {
         provider.sessionsChanged.disconnect(registration.onSessionsChanged);
       }
-      this._providers.delete(registration);
+      this._providers.delete(provider.id);
       void this.fetchSessions().catch(console.error);
     });
+  }
+
+  /**
+   * Get a runtime transport factory for a language server.
+   */
+  getTransportFactory(
+    languageServerId: TLanguageServerId
+  ): ILanguageServerProvider.TTransportFactory | null {
+    return this._transports.get(languageServerId) ?? null;
   }
 
   /**
@@ -257,7 +275,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     this._mergeSnapshot(specs, this._serverSpecs);
     this._mergeSnapshot(sessions, this._serverSessions);
 
-    for (const registration of this._providers) {
+    for (const registration of this._providers.values()) {
       try {
         const data = await registration.provider.fetch();
         if (!data) {
@@ -279,7 +297,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     }
 
     this._statusCode = statusCode;
-    setLanguageServerTransports(this, transports);
+    this._transports = transports;
     this._syncSnapshot(this._specs, specs);
     this._syncSnapshot(this._sessions, sessions);
     this._sessionsChanged.emit(void 0);
@@ -500,7 +518,15 @@ export class LanguageServerManager implements ILanguageServerManager {
   /**
    * Runtime language server providers.
    */
-  private _providers = new Set<IProviderRegistration>();
+  private _providers = new Map<string, IProviderRegistration>();
+
+  /**
+   * Runtime language server transport factories.
+   */
+  private _transports = new Map<
+    TLanguageServerId,
+    ILanguageServerProvider.TTransportFactory
+  >();
 
   private _isDisposed = false;
 

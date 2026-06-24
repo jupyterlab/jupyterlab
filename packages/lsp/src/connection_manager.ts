@@ -22,7 +22,6 @@ import type {
   TLanguageServerId,
   TServerKeys
 } from './tokens';
-import { getLanguageServerTransport } from './runtime_transport';
 import { expandDottedPaths, sleep, untilReady } from './utils';
 import type { VirtualDocument } from './virtual/document';
 
@@ -729,10 +728,8 @@ namespace Private {
     if (!connection) {
       const serverManager = Private.getLanguageServerManager();
       const { settings } = serverManager;
-      const transportFactory = getLanguageServerTransport(
-        serverManager,
-        languageServerId
-      );
+      const transportFactory =
+        serverManager.getTransportFactory(languageServerId);
       const socket = transportFactory
         ? transportFactory({
             languageServerId,
