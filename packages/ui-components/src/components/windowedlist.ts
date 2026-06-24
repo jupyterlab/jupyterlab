@@ -1248,6 +1248,10 @@ export class WindowedList<
       // rendered
       timer = window.setTimeout(() => {
         observer.disconnect();
+        if (this.isDisposed || !this.isAttached) {
+          resolve(null);
+          return;
+        }
         const item = this._innerElement.querySelector(selector);
         console.warn(
           `Item with index ${index} did not appear within ${timeout} ms`
