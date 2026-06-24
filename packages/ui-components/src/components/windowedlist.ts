@@ -1141,21 +1141,20 @@ export class WindowedList<
       // While we wait, the scroll has not happened yet, so the
       // `_resetScrollToItem` safety timer must not resolve `delegate` (it
       // would mark the programmatic scroll done before it actually occurred).
-      this._isWaitingForItem = true;
+      // We track the number of outstanding waits rather than a boolean so this
+      // stays correct when several scroll requests overlap: each request that
+      // starts waiting is balanced by exactly one decrement in `finally`, and
+      // the timer only resolves once no wait is left.
+      this._pendingItemWaits++;
       void this._waitForItem(index)
         .then(item => {
-          // Bail only if a newer scroll request superseded this one while
-          // waiting. `_isScrolling` is a reliable indicator here because
-          // `_isWaitingForItem` prevents the `_resetScrollToItem` safety timer
-          // from clearing it before a slow-to-render item appears (otherwise
-          // the scroll could be dropped, e.g. for the last cell on slower
-          // browsers).
+          // Bail if a newer scroll request superseded this one while waiting;
+          // the surviving request owns the scroll. (`_pendingItemWaits` keeps
+          // the safety timer from resolving `delegate` until every wait -
+          // including this superseded one - has settled).
           if (this._isScrolling !== delegate) {
             return;
           }
-          // The wait settled for the current request; from now on `delegate`
-          // is resolved by the scroll below (or the not-found branch).
-          this._isWaitingForItem = false;
           if (!item) {
             // Note: this can happen if the item never gets rendered.
             console.debug(`Element with index ${index} not found`);
@@ -1180,14 +1179,17 @@ export class WindowedList<
           );
         })
         .catch(error => {
-          // If computing the offset or scrolling threw, the delegate would
-          // otherwise never settle (the safety timer is no longer guaranteed to
-          // be pending), leaving callers awaiting `scrollToItem` hung. Reset
-          // the waiting flag and resolve the delegate so the promise always
-          // settles, and surface the error for debugging.
-          this._isWaitingForItem = false;
+          // If computing the offset or scrolling threw, resolve the delegate
+          // so callers awaiting `scrollToItem` are not left hung (the safety
+          // timer is no longer guaranteed to be pending), and surface the
+          // error for debugging.
           console.warn(error);
           this._markProgrammaticScrollingDone();
+        })
+        .finally(() => {
+          // Balances the increment above. Runs exactly once regardless of
+          // whether the wait scrolled, bailed, or threw.
+          this._pendingItemWaits--;
         });
 
       return delegate.promise;
@@ -1698,11 +1700,11 @@ export class WindowedList<
 
     if (this._isScrolling) {
       this._programmaticScrollTimeout = window.setTimeout(() => {
-        // Do not resolve the programmatic scroll delegate while we are still
-        // waiting for a not-yet-rendered item (non-windowing path): the
+        // Do not resolve the programmatic scroll delegate while any scroll is
+        // still waiting for a not-yet-rendered item (non-windowing path): the
         // scroll has not happened yet and will resolve the delegate itself
         // once `_waitForItem` settles (see `scrollToItem`).
-        if (!this._isWaitingForItem) {
+        if (this._pendingItemWaits === 0) {
           this._markProgrammaticScrollingDone();
         }
       }, PROGRAMMATIC_SCROLL_TIMEOUT);
@@ -1865,7 +1867,7 @@ export class WindowedList<
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
-  private _isWaitingForItem = false;
+  private _pendingItemWaits = 0;
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
