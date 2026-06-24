@@ -34,7 +34,7 @@ const MAXIMUM_TIME_FOR_SCROLLBACK = 3000;
 /**
  * How long should we wait for programmatic scroll resolution?
  * When scrolling to a not-yet-rendered item in defer/content-visibility mode,
- * MAXIMUM_TIME_WAITING_FOR_CELL will take precedence over this value.
+ * MAXIMUM_TIME_WAITING_FOR_ITEM will take precedence over this value.
  *
  * The time is given in milliseconds.
  */
@@ -48,7 +48,7 @@ const PROGRAMMATIC_SCROLL_TIMEOUT = 3000;
  *
  * The time is given in milliseconds.
  */
-const MAXIMUM_TIME_WAITING_FOR_CELL = 10000;
+const MAXIMUM_TIME_WAITING_FOR_ITEM = 10000;
 
 /*
  * Feature detection
@@ -1221,7 +1221,7 @@ export class WindowedList<
    */
   private _waitForItem(
     index: number,
-    timeout = MAXIMUM_TIME_WAITING_FOR_CELL
+    timeout = MAXIMUM_TIME_WAITING_FOR_ITEM
   ): Promise<HTMLElement | null> {
     const selector = `[data-windowed-list-index="${index}"]`;
     const existing = this._innerElement.querySelector(selector);
