@@ -1145,8 +1145,12 @@ export class WindowedList<
       // stays correct when several scroll requests overlap: each request that
       // starts waiting is balanced by exactly one decrement in `finally`, and
       // the timer only resolves once no wait is left.
+      const clampedIndex = Math.max(
+        0,
+        Math.min(index, this.viewModel.widgetCount - 1)
+      );
       this._pendingItemWaits++;
-      void this._waitForItem(index)
+      void this._waitForItem(clampedIndex)
         .then(item => {
           // Bail if a newer scroll request superseded this one while waiting;
           // the surviving request owns the scroll. (`_pendingItemWaits` keeps
@@ -1157,13 +1161,13 @@ export class WindowedList<
           }
           if (!item) {
             // Note: this can happen if the item never gets rendered.
-            console.debug(`Element with index ${index} not found`);
+            console.debug(`Element with index ${clampedIndex} not found`);
             this._markProgrammaticScrollingDone();
             return;
           }
           this.scrollTo(
             this.viewModel.getOffsetForIndexAndAlignment(
-              Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
+              clampedIndex,
               align,
               margin,
               {
