@@ -29,7 +29,26 @@ import { PanelLayout, Widget } from '@lumino/widgets';
  *
  * The time is given in milliseconds.
  */
-const MAXIMUM_TIME_REMAINING = 3000;
+const MAXIMUM_TIME_FOR_SCROLLBACK = 3000;
+
+/**
+ * How long should we wait for programmatic scroll resolution.
+ * When scrolling to a not-yet-rendered cell in defer/content-visibility mode
+ * MAXIMUM_TIME_WAITING_FOR_CELL will take precedence over this value.
+ *
+ * The time is given in milliseconds.
+ */
+const PROGRAMMATIC_SCROLL_TIMEOUT = 3000;
+
+/**
+ * For how long after scroll request we should wait for the cell to show up
+ * in modes which implement deferred cell rendering?
+ * When scrolling to a not-yet-rendered cell in defer/content-visibility mode
+ * this takes precedence over the PROGRAMMATIC_SCROLL_TIMEOUT value.
+ *
+ * The time is given in milliseconds.
+ */
+const MAXIMUM_TIME_WAITING_FOR_CELL = 10000;
 
 /*
  * Feature detection
@@ -1092,12 +1111,6 @@ export class WindowedList<
     margin: number = 0.25,
     alignPreference?: WindowedList.BaseScrollToAlignment
   ): Promise<void> {
-    // Identify this scroll request so that an asynchronous continuation
-    // (see the `_waitForItem` branch below) can tell whether a newer
-    // request has superseded it, independently of `_isScrolling` which may
-    // be cleared by the `_resetScrollToItem` safety timer before a slow-to-
-    // render item appears.
-    const requestId = ++this._scrollRequestCounter;
     let delegate: PromiseDelegate<void>;
     if (
       !this._isScrolling ||
@@ -1125,16 +1138,23 @@ export class WindowedList<
     if (!this.viewModel.windowingActive) {
       // The requested item may not be attached to the DOM yet.
       // Wait for it to be inserted before computing its position.
+      // While we wait, the scroll has not happened yet, so the
+      // `_resetScrollToItem` safety timer must not resolve `delegate` (it
+      // would mark the programmatic scroll done before it actually occurred).
+      this._isWaitingForItem = true;
       void this._waitForItem(index).then(item => {
         // Bail only if a newer scroll request superseded this one while
-        // waiting. We compare against the request counter rather than
-        // `_isScrolling` because the latter may have been cleared by the
-        // `_resetScrollToItem` safety timer (after `MAXIMUM_TIME_REMAINING`)
-        // before the item finished rendering, which would otherwise drop the
-        // scroll entirely (e.g. for the last cell on slower-rendering browsers).
-        if (this._scrollRequestCounter !== requestId) {
+        // waiting. `_isScrolling` is a reliable indicator here because
+        // `_isWaitingForItem` prevents the `_resetScrollToItem` safety timer
+        // from clearing it before a slow-to-render item appears (otherwise
+        // the scroll could be dropped, e.g. for the last cell on slower
+        // browsers).
+        if (this._isScrolling !== delegate) {
           return;
         }
+        // The wait settled for the current request; from now on `delegate`
+        // is resolved by the scroll below (or the not-found branch).
+        this._isWaitingForItem = false;
         if (!item) {
           // Note: this can happen if the item never gets rendered.
           console.debug(`Element with index ${index} not found`);
@@ -1178,13 +1198,13 @@ export class WindowedList<
    * Wait for the item with the given index to be attached to the DOM.
    * This resolves with the matching element once it
    * is inserted, or with `null` if it does not appear
-   * within the timeout (10 seconds by default).
+   * within the timeout.
    *
    * @param index Item index to wait for
    */
   private _waitForItem(
     index: number,
-    timeout = 10000
+    timeout = MAXIMUM_TIME_WAITING_FOR_CELL
   ): Promise<HTMLElement | null> {
     const selector = `[data-windowed-list-index="${index}"]`;
     const existing = this._innerElement.querySelector(selector);
@@ -1655,16 +1675,31 @@ export class WindowedList<
       clearTimeout(this._resetScrollToItemTimeout);
     }
 
+    if (this._programmaticScrollTimeout) {
+      clearTimeout(this._programmaticScrollTimeout);
+    }
+
     if (this._scrollToItem) {
       this._resetScrollToItemTimeout = window.setTimeout(() => {
         this._scrollToItem = null;
-        this._markProgrammaticScrollingDone();
-      }, MAXIMUM_TIME_REMAINING);
+      }, MAXIMUM_TIME_FOR_SCROLLBACK);
+    }
+
+    if (this._isScrolling) {
+      this._programmaticScrollTimeout = window.setTimeout(() => {
+        // Do not resolve the programmatic scroll delegate while we are still
+        // waiting for a not-yet-rendered item (non-windowing path): the
+        // scroll has not happened yet and will resolve the delegate itself
+        // once `_waitForItem` settles (see `scrollToItem`).
+        if (!this._isWaitingForItem) {
+          this._markProgrammaticScrollingDone();
+        }
+      }, PROGRAMMATIC_SCROLL_TIMEOUT);
     }
   }
 
   /**
-   * Mark the current promise for programmatic scrolling as compelted.
+   * Mark the current promise for programmatic scrolling as completed.
    */
   private _markProgrammaticScrollingDone() {
     if (this._isScrolling) {
@@ -1819,10 +1854,11 @@ export class WindowedList<
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
-  private _scrollRequestCounter = 0;
+  private _isWaitingForItem = false;
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
+  private _programmaticScrollTimeout: number | null;
   private _requiresTotalSizeUpdate: boolean = false;
   private _areaResizeObserver: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
