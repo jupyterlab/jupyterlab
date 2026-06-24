@@ -1092,6 +1092,12 @@ export class WindowedList<
     margin: number = 0.25,
     alignPreference?: WindowedList.BaseScrollToAlignment
   ): Promise<void> {
+    // Identify this scroll request so that an asynchronous continuation
+    // (see the `_waitForItem` branch below) can tell whether a newer
+    // request has superseded it, independently of `_isScrolling` which may
+    // be cleared by the `_resetScrollToItem` safety timer before a slow-to-
+    // render item appears.
+    const requestId = ++this._scrollRequestCounter;
     let delegate: PromiseDelegate<void>;
     if (
       !this._isScrolling ||
@@ -1120,8 +1126,13 @@ export class WindowedList<
       // The requested item may not be attached to the DOM yet.
       // Wait for it to be inserted before computing its position.
       void this._waitForItem(index).then(item => {
-        // A newer scroll request may have superseded this one while waiting.
-        if (this._isScrolling !== delegate) {
+        // Bail only if a newer scroll request superseded this one while
+        // waiting. We compare against the request counter rather than
+        // `_isScrolling` because the latter may have been cleared by the
+        // `_resetScrollToItem` safety timer (after `MAXIMUM_TIME_REMAINING`)
+        // before the item finished rendering, which would otherwise drop the
+        // scroll entirely (e.g. for the last cell on slower-rendering browsers).
+        if (this._scrollRequestCounter !== requestId) {
           return;
         }
         if (!item) {
@@ -1802,6 +1813,7 @@ export class WindowedList<
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
+  private _scrollRequestCounter = 0;
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
