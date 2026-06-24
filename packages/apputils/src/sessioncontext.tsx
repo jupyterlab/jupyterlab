@@ -1851,7 +1851,7 @@ namespace Private {
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select') as HTMLSelectElement;
+      const selector = this.node.querySelector<HTMLSelectElement>('select')!;
       return JSON.parse(selector.value) as Kernel.IModel;
     }
   }

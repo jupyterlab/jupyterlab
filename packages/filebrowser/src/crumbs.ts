@@ -520,7 +520,7 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      node = node.parentElement as HTMLElement;
+      node = node.parentElement!;
     }
 
     // Click landed on the breadcrumb background (including separators
@@ -542,7 +542,7 @@ export class BreadCrumbs extends Widget {
         if (index !== -1) {
           break;
         }
-        target = target.parentElement as HTMLElement;
+        target = target.parentElement!;
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
@@ -590,7 +590,7 @@ export class BreadCrumbs extends Widget {
       if (index !== -1) {
         break;
       }
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
     if (index !== -1) {
       breadcrumbElements[index].classList.add(DROP_TARGET_CLASS);
