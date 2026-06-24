@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IEditorTracker } from '@jupyterlab/fileeditor';
-import type { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Signal } from '@lumino/signaling';
 
@@ -14,48 +14,44 @@ describe('@jupyterlab/markdownviewer-extension', () => {
      * A minimal stand-in for a Markdown preview document.
      */
     class FakePreview {
+      readonly disposed = new Signal<this, void>(this);
       constructor(readonly path: string) {}
       get context(): { path: string } {
         return { path: this.path };
+      }
+      dispose(): void {
+        this.disposed.emit();
       }
     }
 
     /**
      * A minimal file editor tracker whose `find` never matches, so no
-     * `ScrollSyncPair` (which needs a live DOM) is ever constructed.
+     * `ScrollSyncPair` (which needs a live DOM) is ever constructed. It records
+     * how often the manager looks for a matching editor.
      */
     class FakeEditorTracker {
       readonly widgetAdded = new Signal<this, void>(this);
+      finds = 0;
       find(): undefined {
+        this.finds++;
         return undefined;
       }
     }
 
-    /**
-     * A minimal Markdown viewer tracker that records how often the manager
-     * scans the open previews.
-     */
-    class FakeMarkdownTracker {
-      readonly widgetAdded = new Signal<this, void>(this);
-      previews: FakePreview[] = [];
-      scans = 0;
-      forEach(fn: (preview: FakePreview) => void): void {
-        this.scans++;
-        this.previews.forEach(fn);
-      }
-    }
-
     let editorTracker: FakeEditorTracker;
-    let markdownTracker: FakeMarkdownTracker;
     let manager: MarkdownScrollSyncManager;
+    let preview: FakePreview;
+
+    // The manager API is typed against `MarkdownDocument`; the fake provides the
+    // small surface the manager actually exercises.
+    const asPreview = (fake: FakePreview) =>
+      fake as unknown as MarkdownDocument;
 
     beforeEach(() => {
       editorTracker = new FakeEditorTracker();
-      markdownTracker = new FakeMarkdownTracker();
-      markdownTracker.previews = [new FakePreview('notes.md')];
+      preview = new FakePreview('notes.md');
       manager = new MarkdownScrollSyncManager({
         editorTracker: editorTracker as unknown as IEditorTracker,
-        markdownTracker: markdownTracker as unknown as IMarkdownViewerTracker,
         rendermime: {} as unknown as IRenderMimeRegistry
       });
     });
@@ -64,40 +60,75 @@ describe('@jupyterlab/markdownviewer-extension', () => {
       manager.dispose();
     });
 
-    it('does not scan previews while disabled', () => {
-      markdownTracker.widgetAdded.emit();
-      expect(markdownTracker.scans).toBe(0);
+    it('reports a preview as not synchronized by default', () => {
+      expect(manager.isEnabled(asPreview(preview))).toBe(false);
     });
 
-    it('scans existing previews when enabled and when widgets are added', () => {
-      manager.setEnabled(true);
-      expect(markdownTracker.scans).toBe(1);
+    it('enables and disables synchronization for a preview', () => {
+      const changed: MarkdownDocument[] = [];
+      manager.enabledChanged.connect((sender, affected) => {
+        changed.push(affected);
+      });
+
+      manager.setEnabled(asPreview(preview), true);
+      expect(manager.isEnabled(asPreview(preview))).toBe(true);
+
+      manager.setEnabled(asPreview(preview), false);
+      expect(manager.isEnabled(asPreview(preview))).toBe(false);
+
+      expect(changed).toEqual([asPreview(preview), asPreview(preview)]);
+    });
+
+    it('ignores a redundant setEnabled', () => {
+      let emissions = 0;
+      manager.enabledChanged.connect(() => {
+        emissions++;
+      });
+      manager.setEnabled(asPreview(preview), true);
+      manager.setEnabled(asPreview(preview), true);
+      expect(emissions).toBe(1);
+    });
+
+    it('looks for a matching editor when enabled', () => {
+      manager.setEnabled(asPreview(preview), true);
+      expect(editorTracker.finds).toBe(1);
+    });
+
+    it('pairs an enabled preview when an editor is added later', () => {
+      manager.setEnabled(asPreview(preview), true);
+      expect(editorTracker.finds).toBe(1);
 
       editorTracker.widgetAdded.emit();
-      markdownTracker.widgetAdded.emit();
-      expect(markdownTracker.scans).toBe(3);
+      expect(editorTracker.finds).toBe(2);
     });
 
-    it('ignores a redundant setEnabled(true)', () => {
-      manager.setEnabled(true);
-      manager.setEnabled(true);
-      expect(markdownTracker.scans).toBe(1);
+    it('does not look for editors for a disabled preview', () => {
+      manager.setEnabled(asPreview(preview), true);
+      manager.setEnabled(asPreview(preview), false);
+      const before = editorTracker.finds;
+
+      editorTracker.widgetAdded.emit();
+      expect(editorTracker.finds).toBe(before);
     });
 
-    it('stops scanning once disabled', () => {
-      manager.setEnabled(true);
-      manager.setEnabled(false);
-      markdownTracker.widgetAdded.emit();
-      expect(markdownTracker.scans).toBe(1);
+    it('forgets a preview once it is disposed', () => {
+      manager.setEnabled(asPreview(preview), true);
+      preview.dispose();
+      expect(manager.isEnabled(asPreview(preview))).toBe(false);
+
+      const before = editorTracker.finds;
+      editorTracker.widgetAdded.emit();
+      expect(editorTracker.finds).toBe(before);
     });
 
     it('reports disposal and becomes inert', () => {
       manager.dispose();
       expect(manager.isDisposed).toBe(true);
 
-      manager.setEnabled(true);
-      markdownTracker.widgetAdded.emit();
-      expect(markdownTracker.scans).toBe(0);
+      manager.setEnabled(asPreview(preview), true);
+      expect(manager.isEnabled(asPreview(preview))).toBe(false);
+      editorTracker.widgetAdded.emit();
+      expect(editorTracker.finds).toBe(0);
     });
   });
 });
