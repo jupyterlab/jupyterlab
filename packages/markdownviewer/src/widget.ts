@@ -342,7 +342,7 @@ export namespace MarkdownViewerFactory {
   /**
    * The options used to initialize a MarkdownViewerFactory.
    */
-  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions<MarkdownDocument> {
     /**
      * The primary file type associated with the document.
      */
@@ -364,11 +364,11 @@ namespace Private {
    */
   export function createRegistryOptions(
     options: MarkdownViewerFactory.IOptions
-  ): DocumentRegistry.IWidgetFactoryOptions {
+  ): DocumentRegistry.IWidgetFactoryOptions<MarkdownDocument> {
     return {
       ...options,
       readOnly: true
-    } as DocumentRegistry.IWidgetFactoryOptions;
+    } as DocumentRegistry.IWidgetFactoryOptions<MarkdownDocument>;
   }
 
   /**
