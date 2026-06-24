@@ -33,6 +33,9 @@ const SYNC_RELEASE_DELAY = 200;
  * matching location.
  */
 export class MarkdownScrollSyncManager implements IDisposable {
+  /**
+   * Construct a new Markdown scroll sync manager.
+   */
   constructor(options: MarkdownScrollSyncManager.IOptions) {
     this._editorTracker = options.editorTracker;
     this._markdownTracker = options.markdownTracker;
@@ -197,6 +200,9 @@ namespace Private {
    * proportional scrolling thanks to the synthetic start and end markers.
    */
   export class ScrollSyncPair implements IDisposable {
+    /**
+     * Construct a new scroll sync pair.
+     */
     constructor(options: IPairOptions) {
       this._editorWidget = options.editorWidget;
       this._previewWidget = options.previewWidget;
