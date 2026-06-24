@@ -1092,7 +1092,7 @@ export class WindowedList<
     margin: number = 0.25,
     alignPreference?: WindowedList.BaseScrollToAlignment
   ): Promise<void> {
-    let deletage: PromiseDelegate<void>;
+    let delegate: PromiseDelegate<void>;
     if (
       !this._isScrolling ||
       this._scrollToItem === null ||
@@ -1103,13 +1103,13 @@ export class WindowedList<
         this._isScrolling.reject('Scrolling to a new item is requested.');
       }
 
-      deletage = new PromiseDelegate<void>();
-      this._isScrolling = deletage;
+      delegate = new PromiseDelegate<void>();
+      this._isScrolling = delegate;
       // Catch the internal reject, as otherwise this will
       // result in an unhandled promise rejection in test.
-      deletage.promise.catch(console.debug);
+      delegate.promise.catch(console.debug);
     } else {
-      deletage = this._isScrolling;
+      delegate = this._isScrolling;
     }
 
     this._scrollToItem = [index, align, margin, alignPreference];
@@ -1121,7 +1121,7 @@ export class WindowedList<
       // Wait for it to be inserted before computing its position.
       void this._waitForItem(index).then(item => {
         // A newer scroll request may have superseded this one while waiting.
-        if (this._isScrolling !== deletage) {
+        if (this._isScrolling !== delegate) {
           return;
         }
         if (!item) {
@@ -1148,7 +1148,7 @@ export class WindowedList<
         );
       });
 
-      return deletage.promise;
+      return delegate.promise;
     }
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
@@ -1160,7 +1160,7 @@ export class WindowedList<
       )
     );
 
-    return deletage.promise;
+    return delegate.promise;
   }
 
   /**
