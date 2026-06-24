@@ -1142,42 +1142,53 @@ export class WindowedList<
       // `_resetScrollToItem` safety timer must not resolve `delegate` (it
       // would mark the programmatic scroll done before it actually occurred).
       this._isWaitingForItem = true;
-      void this._waitForItem(index).then(item => {
-        // Bail only if a newer scroll request superseded this one while
-        // waiting. `_isScrolling` is a reliable indicator here because
-        // `_isWaitingForItem` prevents the `_resetScrollToItem` safety timer
-        // from clearing it before a slow-to-render item appears (otherwise
-        // the scroll could be dropped, e.g. for the last cell on slower
-        // browsers).
-        if (this._isScrolling !== delegate) {
-          return;
-        }
-        // The wait settled for the current request; from now on `delegate`
-        // is resolved by the scroll below (or the not-found branch).
-        this._isWaitingForItem = false;
-        if (!item) {
-          // Note: this can happen if the item never gets rendered.
-          console.debug(`Element with index ${index} not found`);
-          this._markProgrammaticScrollingDone();
-          return;
-        }
-        this.scrollTo(
-          this.viewModel.getOffsetForIndexAndAlignment(
-            Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
-            align,
-            margin,
-            {
-              totalSize: this._outerElement.scrollHeight,
-              itemMetadata: {
-                offset: item.offsetTop,
-                size: item.clientHeight
+      void this._waitForItem(index)
+        .then(item => {
+          // Bail only if a newer scroll request superseded this one while
+          // waiting. `_isScrolling` is a reliable indicator here because
+          // `_isWaitingForItem` prevents the `_resetScrollToItem` safety timer
+          // from clearing it before a slow-to-render item appears (otherwise
+          // the scroll could be dropped, e.g. for the last cell on slower
+          // browsers).
+          if (this._isScrolling !== delegate) {
+            return;
+          }
+          // The wait settled for the current request; from now on `delegate`
+          // is resolved by the scroll below (or the not-found branch).
+          this._isWaitingForItem = false;
+          if (!item) {
+            // Note: this can happen if the item never gets rendered.
+            console.debug(`Element with index ${index} not found`);
+            this._markProgrammaticScrollingDone();
+            return;
+          }
+          this.scrollTo(
+            this.viewModel.getOffsetForIndexAndAlignment(
+              Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
+              align,
+              margin,
+              {
+                totalSize: this._outerElement.scrollHeight,
+                itemMetadata: {
+                  offset: item.offsetTop,
+                  size: item.clientHeight
+                },
+                currentOffset: this._outerElement.scrollTop
               },
-              currentOffset: this._outerElement.scrollTop
-            },
-            alignPreference
-          )
-        );
-      });
+              alignPreference
+            )
+          );
+        })
+        .catch(error => {
+          // If computing the offset or scrolling threw, the delegate would
+          // otherwise never settle (the safety timer is no longer guaranteed to
+          // be pending), leaving callers awaiting `scrollToItem` hung. Reset
+          // the waiting flag and resolve the delegate so the promise always
+          // settles, and surface the error for debugging.
+          this._isWaitingForItem = false;
+          console.warn(error);
+          this._markProgrammaticScrollingDone();
+        });
 
       return delegate.promise;
     }
