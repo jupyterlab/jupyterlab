@@ -32,8 +32,8 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 const MAXIMUM_TIME_FOR_SCROLLBACK = 3000;
 
 /**
- * How long should we wait for programmatic scroll resolution.
- * When scrolling to a not-yet-rendered cell in defer/content-visibility mode
+ * How long should we wait for programmatic scroll resolution?
+ * When scrolling to a not-yet-rendered item in defer/content-visibility mode,
  * MAXIMUM_TIME_WAITING_FOR_CELL will take precedence over this value.
  *
  * The time is given in milliseconds.
@@ -41,9 +41,9 @@ const MAXIMUM_TIME_FOR_SCROLLBACK = 3000;
 const PROGRAMMATIC_SCROLL_TIMEOUT = 3000;
 
 /**
- * For how long after scroll request we should wait for the cell to show up
- * in modes which implement deferred cell rendering?
- * When scrolling to a not-yet-rendered cell in defer/content-visibility mode
+ * For how long after a scroll request should we wait for the item to show up
+ * in modes which implement deferred rendering?
+ * When scrolling to a not-yet-rendered item in defer/content-visibility mode,
  * this takes precedence over the PROGRAMMATIC_SCROLL_TIMEOUT value.
  *
  * The time is given in milliseconds.
@@ -1233,7 +1233,7 @@ export class WindowedList<
         observer.disconnect();
         const item = this._innerElement.querySelector(selector);
         console.warn(
-          `Cell with index ${index} did not appear withing ${timeout}`
+          `Item with index ${index} did not appear within ${timeout} ms`
         );
         resolve(item instanceof HTMLElement ? item : null);
       }, timeout);
