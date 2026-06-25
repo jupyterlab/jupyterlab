@@ -1261,7 +1261,7 @@ describe('drive', () => {
     it('should list a directory and get the file contents', async () => {
       let content: Contents.IModel[];
       let path = '';
-      const listing = await contents.get('src');
+      const listing = await contents.get('src', { content: true });
       content = listing.content as Contents.IModel[];
       let called = false;
       for (let i = 0; i < content.length; i++) {
