@@ -11,6 +11,7 @@ import {
 } from '@jupyterlab/lsp';
 import { LabShell } from '@jupyterlab/application';
 import { ServerConnection } from '@jupyterlab/services';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { LSPConnection } from '../src/connection';
 
 jest.mock('@jupyterlab/notebook');
@@ -110,6 +111,57 @@ describe('@jupyterlab/lsp', () => {
         });
         connection.dispose();
         expect(connection.isDisposed).toBe(true);
+      });
+    });
+    describe('#connect()', () => {
+      it('should deduplicate concurrent connects for the same URI', async () => {
+        const connectPromise = new PromiseDelegate<LSPConnection | undefined>();
+        const connection = { isReady: true } as LSPConnection;
+        const connectSocketSpy = jest
+          .spyOn(manager as any, '_connectSocket')
+          .mockReturnValue(connectPromise.promise);
+
+        const connectedSlot = jest.fn();
+        manager.connected.connect(connectedSlot);
+
+        const options = {
+          capabilities: {},
+          virtualDocument: document,
+          language: document.language,
+          hasLspSupportedFile: document.hasLspSupportedFile
+        };
+
+        const firstConnect = manager.connect(options);
+        const secondConnect = manager.connect(options);
+
+        expect(connectSocketSpy).toHaveBeenCalledTimes(1);
+
+        connectPromise.resolve(connection);
+
+        await expect(firstConnect).resolves.toBe(connection);
+        await expect(secondConnect).resolves.toBe(connection);
+        expect(connectedSlot).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear pending connect state when a connect fails', async () => {
+        const connection = { isReady: true } as LSPConnection;
+        const connectSocketSpy = jest
+          .spyOn(manager as any, '_connectSocket')
+          .mockRejectedValueOnce(new Error('connect failed'))
+          .mockResolvedValueOnce(connection);
+
+        const options = {
+          capabilities: {},
+          virtualDocument: document,
+          language: document.language,
+          hasLspSupportedFile: document.hasLspSupportedFile
+        };
+
+        await expect(manager.connect(options)).rejects.toThrow(
+          'connect failed'
+        );
+        await expect(manager.connect(options)).resolves.toBe(connection);
+        expect(connectSocketSpy).toHaveBeenCalledTimes(2);
       });
     });
   });

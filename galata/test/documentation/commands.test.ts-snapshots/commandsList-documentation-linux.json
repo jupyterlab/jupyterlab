@@ -212,6 +212,10 @@
             "bottom"
           ],
           "description": "The direction to split the tab"
+        },
+        "id": {
+          "type": "string",
+          "description": "The widget ID to split. Defaults to the context menu target."
         }
       },
       "required": [
@@ -658,6 +662,33 @@
         "search": {
           "type": "string",
           "description": "The URL search string containing query parameters"
+        }
+      }
+    }
+  },
+  {
+    "id": "apputils:move-section-back",
+    "label": "Move back",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "apputils:move-section-to",
+    "label": "Move to ",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "targetId": {
+          "type": "string"
+        },
+        "targetLabel": {
+          "type": "string"
         }
       }
     }
@@ -4935,8 +4966,28 @@
     }
   },
   {
+    "id": "notebook:select-last-modified-cell",
+    "label": "Select Last Modified Cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:select-last-run-cell",
     "label": "Select current running or last run cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "notebook:select-next-modified-cell",
+    "label": "Select Next Modified Cell",
     "caption": "",
     "shortcuts": [],
     "args": {

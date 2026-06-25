@@ -683,6 +683,211 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('Collapsed heading operations', () => {
+      it('copy should include children of selected collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Explicitly select the heading
+        widget.select(heading);
+        NotebookActions.copy(widget);
+
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME);
+        expect(data.length).toBe(3); // heading + 2 children
+      });
+
+      it('cut should include children of selected collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        const initialCount = widget.widgets.length;
+
+        // Explicitly select the heading
+        widget.select(heading);
+        NotebookActions.cut(widget);
+
+        // Should have deleted heading + 2 children + added 1 new cell
+        expect(widget.widgets.length).toBe(initialCount - 2);
+      });
+
+      it('delete should include children of active collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code3',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        const initialCount = widget.widgets.length;
+
+        widget.activeCellIndex = 0;
+        NotebookActions.deleteCells(widget);
+
+        // Should have deleted heading + 2 children only
+        expect(widget.widgets.length).toBe(initialCount - 3);
+      });
+
+      it('activating collapsed heading should not select children', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Activate the heading
+        widget.activeCellIndex = 0;
+
+        // Children should NOT be selected from activation alone
+        expect(widget.isSelected(widget.widgets[1])).toBe(false);
+        expect(widget.isSelected(widget.widgets[2])).toBe(false);
+
+        // But active cell should be the heading
+        expect(widget.activeCell).toBe(heading);
+      });
+
+      it('toggling collapse should not change explicit selection', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code3',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+
+        // Select only code3
+        widget.select(widget.widgets[3]);
+        const initialSelectedCount = widget.selectedCells.length;
+
+        // Toggle collapse
+        heading.headingCollapsed = true;
+
+        // Selection should remain unchanged
+        expect(widget.selectedCells.length).toBe(initialSelectedCount);
+        expect(widget.isSelected(widget.widgets[3])).toBe(true);
+      });
+    });
+
     describe('#insertAbove()', () => {
       it('should insert a code cell above the active cell', () => {
         const count = widget.widgets.length;
@@ -2547,6 +2752,78 @@ describe('@jupyterlab/notebook', () => {
       it('should unrender the cells', () => {
         NotebookActions.setMarkdownHeader(widget, 1);
         expect((widget.activeCell as MarkdownCell).rendered).toBe(false);
+      });
+    });
+
+    describe('#selectLastModifiedCell() and #selectNextModifiedCell()', () => {
+      beforeEach(async () => {
+        const model = new NotebookModel();
+        widget.model = model;
+        for (let i = 0; i < 3; i++) {
+          model.sharedModel.insertCell(i, {
+            cell_type: 'code',
+            source: ''
+          });
+        }
+      });
+
+      function editCell(index: number, source: string) {
+        widget.activeCellIndex = index;
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource(source);
+      }
+
+      it('should push on edit and select last modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(1);
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should allow forward navigation to next modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // select 1
+        await NotebookActions.selectLastModifiedCell(widget); // then 0
+
+        await NotebookActions.selectNextModifiedCell(widget); // back to 1
+        expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should clear forward stack on new edit', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // selects 1
+        await NotebookActions.selectLastModifiedCell(widget); // selects 0
+
+        // Make an edit while at index 0 to clear the forward stack
+        editCell(0, 'edit 3');
+        await NotebookActions.selectNextModifiedCell(widget);
+        // Should stay at 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should skip active cell and disposed cells', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+
+        // Remove cell 1
+        widget.activeCellIndex = 1;
+        NotebookActions.deleteCells(widget);
+
+        widget.activeCellIndex = 1; // Now index 1 is the cell 2
+        await NotebookActions.selectLastModifiedCell(widget);
+        // Should skip deleted cell 1 and select cell 0
+        expect(widget.activeCellIndex).toBe(0);
       });
     });
 

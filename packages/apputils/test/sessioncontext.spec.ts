@@ -10,6 +10,7 @@ import {
   SessionContext,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
+import type { Session } from '@jupyterlab/services';
 import {
   KernelManager,
   KernelSpecManager,
@@ -299,6 +300,81 @@ describe('@jupyterlab/apputils', () => {
         expect(other.kernel?.id).toBeDefined();
         expect(other.kernel?.id).toBe(sessionContext.session?.kernel?.id);
         await other.shutdown();
+        other.dispose();
+      });
+
+      it('should keep no kernel when shouldReuse is false even if a path session exists', async () => {
+        const refreshRunning = jest
+          .spyOn(sessionManager, 'refreshRunning')
+          .mockResolvedValue(undefined);
+        const pathSessionModel: Session.IModel = {
+          id: UUID.uuid4(),
+          path,
+          name: '',
+          type: 'test',
+          kernel: {
+            id: UUID.uuid4(),
+            name: specsManager.specs!.default
+          }
+        };
+        const running = jest
+          .spyOn(sessionManager, 'running')
+          .mockReturnValue([pathSessionModel][Symbol.iterator]());
+        const connectTo = jest.spyOn(sessionManager, 'connectTo');
+        try {
+          const kernelPreference = {
+            ...sessionContext.kernelPreference,
+            shouldStart: false,
+            shouldReuse: false
+          };
+          sessionContext.kernelPreference = kernelPreference;
+          expect(sessionContext.kernelPreference.shouldReuse).toBe(false);
+
+          const result = await sessionContext.initialize();
+          expect(result).toBe(false);
+          expect(connectTo).not.toHaveBeenCalled();
+          expect(sessionContext.session?.kernel).toBeFalsy();
+        } finally {
+          refreshRunning.mockRestore();
+          running.mockRestore();
+          connectTo.mockRestore();
+        }
+      });
+
+      it('should connect to a path session when shouldStart is false', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel?.id).toBe(other.kernel?.id);
+        other.dispose();
+      });
+
+      it('should connect to a path session when shouldStart is false and a kernel id is provided', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false,
+          id: other.kernel!.id
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel?.id).toBe(other.kernel?.id);
         other.dispose();
       });
 

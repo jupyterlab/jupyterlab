@@ -65,7 +65,7 @@
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
-    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest && jlpm install",
+    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest && jlpm",
     "docs": "typedoc --options typedoc.js && python scripts/ensure_typedoc_links.py",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --cache --fix .",
@@ -110,7 +110,7 @@
     "@types/react": "^18.0.26",
     "lodash": "^4.17.23",
     "lodash-es": "^4.18.1",
-    "marked": "^17.0.4",
+    "marked": "^17.0.6",
     "prettier": "^3.8.1",
     "react": "^18.2.0",
     "type-fest": "^4.30.0",
@@ -123,6 +123,8 @@
     "eslint-plugin-jest": "^28.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-regexp": "^3.1.0",
+    "eslint-plugin-tsdoc": "^0.5.2",
     "prettier": "^3.8.1",
     "stylelint": "16.12.0",
     "stylelint-config-recommended": "^14.0.1",
@@ -137,5 +139,6 @@
     "lerna": "^7.1.4",
     "typedoc": "~0.27.4",
     "typedoc-plugin-mdn-links": "^4.0.4"
-  }
+  },
+  "packageManager": "yarn@3.5.0"
 }
