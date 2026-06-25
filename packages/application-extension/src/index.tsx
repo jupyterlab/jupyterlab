@@ -837,7 +837,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return find(labShell.widgets('main'), w => w.id === id) ?? null;
       };
 
-      commands.addCommand('application:split-tab', {
+      commands.addCommand(CommandIDs.splitTab, {
         label: args => {
           const direction = args?.['direction'] as
             | 'left'
@@ -869,6 +869,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 type: 'string',
                 enum: ['left', 'right', 'top', 'bottom'],
                 description: trans.__('The direction to split the tab')
+              },
+              id: {
+                type: 'string',
+                description: trans.__(
+                  'The widget ID to split. Defaults to the context menu target.'
+                )
               }
             },
             required: ['direction']
@@ -899,7 +905,16 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             | 'top'
             | 'bottom';
 
-          const widget = contextMenuTabWidget();
+          // Get the widget from its id if provided.
+          let widget = args?.['id']
+            ? find(labShell.widgets('main'), value => value.id === args?.['id'])
+            : null;
+
+          // Get the widget from the context menu hit test.
+          if (!widget) {
+            widget = contextMenuTabWidget();
+          }
+
           if (widget && direction) {
             labShell.moveTab(widget, direction);
           }
