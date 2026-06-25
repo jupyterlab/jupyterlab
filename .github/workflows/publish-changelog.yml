@@ -9,7 +9,8 @@ on:
         description: "The branch to target"
         required: false
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   publish_changelog:
