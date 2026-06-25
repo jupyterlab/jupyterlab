@@ -133,13 +133,14 @@ jobs:
         working-directory: core
 
       - name: Launch JupyterLab
-        if: ${{ matrix.project != 'csp' }}
         run: |
           set -ex
           cd core/galata
           if [[ "${{ matrix.project }}" == "documentation" ]]; then
             JUPYTERLAB_GALATA_ROOT_DIR="${DEMO_DIR}" PYTHONWARNINGS=ignore \
               jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1 &
+          elif [[ "${{ matrix.project }}" == "csp" ]]; then
+            jupyter lab --config jupyter_server_csp_test_config.py > /tmp/jupyterlab_server.log 2>&1 &
           else
             jlpm start 2>&1 > /tmp/jupyterlab_server.log &
           fi
@@ -158,7 +159,6 @@ jobs:
           jlpm build
 
       - name: Wait for JupyterLab
-        if: ${{ matrix.project != 'csp' }}
         run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
 
       - name: Test
@@ -186,11 +186,7 @@ jobs:
             TEST_ARGS+=(--repeat-each "${REPEAT_EACH}")
           fi
 
-          if [[ "${{ matrix.project }}" == "csp" ]]; then
-            jlpm test:csp "${TEST_ARGS[@]}"
-          else
-            jlpm test "${TEST_ARGS[@]}"
-          fi
+          jlpm test "${TEST_ARGS[@]}"
           TEST_EXIT_CODE=$?
           mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
 
@@ -225,7 +221,7 @@ jobs:
           compression-level: 1
 
       - name: Print JupyterLab logs
-        if: ${{ always() && matrix.project != 'csp' }}
+        if: ${{ always() }}
         run: |
           cat /tmp/jupyterlab_server.log
 
