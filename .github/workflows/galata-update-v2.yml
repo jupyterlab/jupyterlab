@@ -21,8 +21,12 @@ jobs:
       (github.event.issue.pull_request || github.event.pull_request) &&
       (
         contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update galata snapshots please') ||
+        contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update example snapshots please') ||
+        contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update examples snapshots please') ||
         contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update snapshots please') ||
         contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update galata snapshots') ||
+        contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update example snapshots') ||
+        contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update examples snapshots') ||
         contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update snapshots')
       )
     runs-on: ubuntu-slim
@@ -203,10 +207,18 @@ jobs:
       - name: Stage allowed files and check for changes
         id: check-changes
         run: |
-          git add -- ':(glob)galata/**/*.png' ':(glob)galata/**/*.json'
+          git ls-files -z --exclude-standard -dmo -- \
+            ':(glob)galata/**/*.png' \
+            ':(glob)galata/**/*.json' \
+            ':(glob)examples/**/*-snapshots/*.png' \
+            > /tmp/snapshot-files
 
-          if git diff --cached --name-only | grep -Ev '^galata/.*\.(png|json)$' >/dev/null; then
-            echo "::error::Only galata/*.png and galata/*.json files are allowed in this update"
+          if [[ -s /tmp/snapshot-files ]]; then
+            git add --pathspec-from-file=/tmp/snapshot-files --pathspec-file-nul
+          fi
+
+          if git diff --cached --name-only | grep -Ev '^(galata/.*\.(png|json)|examples/.*-snapshots/.*\.png)$' >/dev/null; then
+            echo "::error::Only galata/*.png, galata/*.json, and examples/*-snapshots/*.png files are allowed in this update"
             git diff --cached --name-only
             exit 1
           fi
