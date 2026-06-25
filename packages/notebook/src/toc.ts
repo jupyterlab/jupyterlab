@@ -25,6 +25,14 @@ import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import type { CommandRegistry } from '@lumino/commands';
 
 /**
+ * Pixels to scroll back after scrollIntoView so the heading has breathing room.
+ * This is set to the same amount of space we would use for cell margin,
+ * this way the cell scrolled to top and first heading scrolled to top anchor
+ * at the same spot.
+ */
+const HEADING_SCROLL_OFFSET_PX = 6;
+
+/**
  * Cell running status
  */
 export enum RunningStatus {
@@ -624,8 +632,14 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
           const el = headingToElement.get(heading);
           if (el) {
+            // We generally want to scroll to particular heading
+            // because any cell can have multiple headings...
             if (this.scrollToTop) {
               el.scrollIntoView({ block: 'start' });
+              // scrollIntoView places the heading flush at the viewport top.
+              // Subtract a small constant so the heading has visual breathing
+              // room and is not crammed against the edge.
+              widget.content.outerNode.scrollTop -= HEADING_SCROLL_OFFSET_PX;
             } else {
               const widgetBox = widget.content.node.getBoundingClientRect();
               const elementBox = el.getBoundingClientRect();
@@ -638,6 +652,9 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
               }
             }
           } else {
+            // ... but if we cannot locate a heading, ensuring that
+            // we at least scrolled to the right cell is a good fallback.
+            // This should not happen unless the heading was just modified.
             console.debug('scrolling to heading: using fallback strategy');
             await widget.content.scrollToItem(
               widget.content.activeCellIndex,
@@ -666,10 +683,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           });
         } else {
           widget.content
+            // First move the cell into the viewport
+            // (critical for the full windowed mode)
             .scrollToItem(idx, this.scrollToTop ? 'start' : undefined)
-            .then(() => {
-              return onCellInViewport(cell);
-            })
+            // Ensure heading elements are indexed, to position the viewport precisely
+            .then(() => findHeadingElement(cell))
+            // Position the heading as required
+            .then(() => onCellInViewport(cell))
             .catch(reason => {
               console.error(
                 `Fail to scroll to cell to display the required heading (${reason}).`
@@ -679,45 +699,47 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    const findHeadingElement = (cell: Cell): void => {
-      model.getCellHeadings(cell).forEach(async heading => {
-        const elementId = await getIdForHeading(
-          heading,
-          this.parser!,
-          this.sanitizer
-        );
-
-        const attribute =
-          (this.sanitizer.allowNamedProperties ?? false)
-            ? 'id'
-            : 'data-jupyter-id';
-        const selector = elementId
-          ? `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`
-          : `h${heading.level}`;
-
-        if (heading.outputIndex !== undefined) {
-          // Code cell
-          headingToElement.set(
+    const findHeadingElement = (cell: Cell): Promise<void> => {
+      return Promise.all(
+        model.getCellHeadings(cell).map(async heading => {
+          const elementId = await getIdForHeading(
             heading,
-            TableOfContentsUtils.addPrefix(
-              (heading.cellRef as CodeCell).outputArea.widgets[
-                heading.outputIndex
-              ].node,
-              selector,
-              heading.prefix ?? ''
-            )
+            this.parser!,
+            this.sanitizer
           );
-        } else {
-          headingToElement.set(
-            heading,
-            TableOfContentsUtils.addPrefix(
-              heading.cellRef.node,
-              selector,
-              heading.prefix ?? ''
-            )
-          );
-        }
-      });
+
+          const attribute =
+            (this.sanitizer.allowNamedProperties ?? false)
+              ? 'id'
+              : 'data-jupyter-id';
+          const selector = elementId
+            ? `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`
+            : `h${heading.level}`;
+
+          if (heading.outputIndex !== undefined) {
+            // Code cell
+            headingToElement.set(
+              heading,
+              TableOfContentsUtils.addPrefix(
+                (heading.cellRef as CodeCell).outputArea.widgets[
+                  heading.outputIndex
+                ].node,
+                selector,
+                heading.prefix ?? ''
+              )
+            );
+          } else {
+            headingToElement.set(
+              heading,
+              TableOfContentsUtils.addPrefix(
+                heading.cellRef.node,
+                selector,
+                heading.prefix ?? ''
+              )
+            );
+          }
+        })
+      ).then(() => undefined);
     };
 
     const onHeadingsChanged = (model: NotebookToCModel) => {
@@ -730,9 +752,9 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       // Create a new mapping
       headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
-      widget.content.widgets.forEach(cell => {
-        findHeadingElement(cell);
-      });
+      return Promise.all(
+        widget.content.widgets.map(cell => findHeadingElement(cell))
+      );
     };
 
     const onHeadingCollapsed = (
@@ -771,7 +793,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     const onCellInViewportChanged = (_: unknown, cell: Cell) => {
       if (cell.inViewport) {
-        findHeadingElement(cell);
+        findHeadingElement(cell)?.catch(console.warn);
       } else {
         // Needed to remove prefix in cell outputs
         TableOfContentsUtils.clearNumbering(cell.node);
@@ -779,7 +801,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     void widget.context.ready.then(() => {
-      onHeadingsChanged(model);
+      onHeadingsChanged(model)?.catch(console.warn);
 
       model.activeHeadingChanged.connect(onActiveHeadingChanged);
       model.headingsChanged.connect(onHeadingsChanged);

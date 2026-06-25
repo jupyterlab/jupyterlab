@@ -568,6 +568,7 @@ export class DocumentWidget<
     this.context.model.stateChanged.connect(this._onModelStateChanged, this);
     void this.context.ready.then(() => {
       this._handleDirtyState();
+      this._handleReadOnlyState();
     });
 
     // listen for changes to the title object
@@ -630,19 +631,6 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
-    if (!this.context.model.dirty) {
-      if (this.context.contentsModel?.writable === false) {
-        const readOnlyIndicator = createReadonlyLabel(this);
-        let roi = this.toolbar.insertBefore(
-          'kernelName',
-          'read-only-indicator',
-          readOnlyIndicator
-        );
-        if (!roi) {
-          this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
-        }
-      }
-    }
   }
 
   /**
@@ -655,6 +643,23 @@ export class DocumentWidget<
       }
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
+  }
+
+  /**
+   * Handle the read-only state of the context model.
+   */
+  private _handleReadOnlyState(): void {
+    if (this.context.contentsModel?.writable === false) {
+      const readOnlyIndicator = createReadonlyLabel(this);
+      let roi = this.toolbar.insertBefore(
+        'kernelName',
+        'read-only-indicator',
+        readOnlyIndicator
+      );
+      if (!roi) {
+        this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+      }
     }
   }
 

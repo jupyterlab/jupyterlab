@@ -18,22 +18,33 @@ repos:
       - id: check-executables-have-shebangs
       - id: requirements-txt-fixer
       - id: check-added-large-files
-      - id: check-case-conflict
       - id: check-toml
       - id: check-yaml
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
         exclude: .bumpversion.cfg
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: mixed-line-ending
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.37.2
     hooks:
       - id: check-github-workflows
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args:
+          - --ignore-words=.codespellignore
+          - --skip=docs/source/api/**,docs/source/getting_started/changelog.md
+        files: \.(md|rst|txt)$
+
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+    rev: v0.15.15
     hooks:
       - id: ruff
         args: ["--fix"]

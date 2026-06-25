@@ -21,6 +21,8 @@ on:
         default: 1
         type: number
 
+permissions: {}
+
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
 
@@ -29,6 +31,8 @@ jobs:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -57,13 +61,13 @@ jobs:
             suite: documentation
             shard: 1
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
           - browser: chromium
             project: documentation
             suite: documentation
             shard: 2
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -89,7 +93,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
-          python_package_manager: "uv pip"
+          python_package_manager: 'uv pip'
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
 
       - name: Find out Playwright version
@@ -198,7 +202,7 @@ jobs:
         with:
           name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
           path: core/galata/test-results
-          if-no-files-found: ignore  # expected when no tests fail
+          if-no-files-found: ignore # expected when no tests fail
 
       - name: Upload test report blob
         if: ${{ !cancelled() }}
@@ -214,10 +218,95 @@ jobs:
         run: |
           cat /tmp/jupyterlab_server.log
 
+  examples:
+    name: Example Tests
+    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          path: core
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: 'uv pip'
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_PACKAGE_VERSION=$(echo "$PW_VERSION" | sed -E 's/^"playwright@npm:([^"]+)":/\1/')
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+          echo "package-version=$PW_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+        working-directory: core
+
+      - name: Set up browser cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
+
+      - name: Install dependencies
+        env:
+          GROUP: examples
+        run: |
+          set -ex
+          bash ./scripts/ci_install.sh
+        working-directory: core
+
+      - name: Test examples
+        env:
+          GROUP: examples
+          PLAYWRIGHT_VERSION: ${{ steps.pw-version.outputs.package-version }}
+        run: |
+          cd core
+          set +e
+          bash ./scripts/ci_script.sh
+          TEST_EXIT_CODE=$?
+
+          mkdir -p galata/test-results
+          mkdir -p galata/blob-report
+
+          find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
+            TARGET_DIR="galata/test-results/${RESULTS_DIR}"
+            mkdir -p "$TARGET_DIR"
+            cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
+          done
+
+          find examples packages/services/examples -type d -name blob-report | while read -r BLOB_DIR; do
+            cp -R "${BLOB_DIR}/." galata/blob-report/
+          done
+
+          exit $TEST_EXIT_CODE
+
+      - name: Upload test assets
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-test-assets-chromium-examples-1
+          path: core/galata/test-results
+          if-no-files-found: ignore # expected when no tests fail
+
+      - name: Upload test report blob
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-blobs-chromium-examples-1
+          path: core/galata/blob-report
+          retention-days: 1
+          compression-level: 1
+
   merge-reports:
     name: Merge Test Reports and Results
     if: ${{ !cancelled() }}
-    needs: test
+    needs: [test, examples]
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -285,7 +374,8 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
           PW_VERSION: ${{ steps.pw-version.outputs.version }}
         run: |
-          npx "playwright@${PW_VERSION}" merge-reports --reporter html,json,github ./artifacts/final/
+          echo "module.exports = { testDir: '.' };" > merge.config.js
+          npx "playwright@${PW_VERSION}" merge-reports --config merge.config.js --reporter html,json,github ./artifacts/final/
 
       - name: Extract failing and flaky counts
         id: test-counts

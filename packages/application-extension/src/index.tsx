@@ -278,7 +278,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     function getZoomTarget(widget: Widget): HTMLElement {
       const node = widget.node;
 
-      let target = node.querySelector('.jp-zoom-target') as HTMLElement;
+      const target = node.querySelector<HTMLElement>('.jp-zoom-target');
       if (target) return target;
 
       node.classList.add('jp-zoom-target');
@@ -944,7 +944,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       if (!target) return null;
 
       // closest lumino widget node
-      const node = target.closest('.lm-Widget') as HTMLElement;
+      const node = target.closest<HTMLElement>('.lm-Widget');
       if (!node) return null;
 
       for (const widget of shell.widgets('main')) {
@@ -1593,15 +1593,15 @@ const busy: JupyterFrontEndPlugin<void> = {
   requires: [ILabStatus],
   activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
     status.busySignal.connect((_, isBusy) => {
-      const favicon = document.querySelector(
+      const favicon = document.querySelector<HTMLLinkElement>(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
-      ) as HTMLLinkElement;
+      );
       if (!favicon) {
         return;
       }
-      const newFavicon = document.querySelector(
+      const newFavicon = document.querySelector<HTMLLinkElement>(
         `link${isBusy ? '.busy.favicon' : '.idle.favicon'}`
-      ) as HTMLLinkElement;
+      );
       if (!newFavicon) {
         return;
       }
