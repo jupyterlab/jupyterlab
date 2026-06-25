@@ -439,24 +439,27 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this.model!.sharedModel.moveCells(from, boundedTo, n);
 
     for (let i = 0; i < n; i++) {
-      const newCell = this.widgets[to + i];
+      const newIndex = from > boundedTo ? boundedTo + i : boundedTo - n + 1 + i;
+      const newCell = this.widgets[newIndex];
       const view = viewModel[i];
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
       }
 
-      if (from > to) {
-        if (this.widgets[to + i].model.type === 'code') {
-          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+      if (from > boundedTo) {
+        if (this.widgets[boundedTo + i].model.type === 'code') {
+          (this.widgets[boundedTo + i].model as CodeCellModel).isDirty =
+            dirtyState[i];
         }
       } else {
-        if (this.widgets[to + i - n + 1].model.type === 'code') {
-          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+        if (this.widgets[boundedTo + i - n + 1].model.type === 'code') {
+          (this.widgets[boundedTo + i - n + 1].model as CodeCellModel).isDirty =
             dirtyState[i];
         }
       }
     }
+    this._refreshCollapsedHeadingVisibility();
   }
 
   /**
@@ -905,6 +908,35 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       .catch(error => {
         console.warn('Failed to resolve headings: ', error);
       });
+  }
+
+  /**
+   * Recompute hidden cells from the current collapsed heading structure.
+   */
+  private _refreshCollapsedHeadingVisibility(): void {
+    for (const cell of this.widgets) {
+      cell.setHidden(false);
+    }
+
+    for (const cell of this.widgets) {
+      if (!(cell instanceof MarkdownCell) || !cell.headingCollapsed) {
+        continue;
+      }
+      if (cell.headingsResolved) {
+        NotebookActions.setHeadingCollapse(cell, true, this);
+        continue;
+      }
+      cell
+        .getHeadings()
+        .then(() => {
+          if (!cell.isDisposed && cell.headingCollapsed) {
+            this._refreshCollapsedHeadingVisibility();
+          }
+        })
+        .catch(error => {
+          console.warn('Failed to resolve headings: ', error);
+        });
+    }
   }
 
   /**
@@ -1968,6 +2000,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._ensureFocus();
+
     if (newValue === oldValue) {
       return;
     }
@@ -2062,16 +2095,25 @@ export class Notebook extends StaticNotebook {
     if (newActiveCellIndex >= 0) {
       this.activeCellIndex = newActiveCellIndex;
     }
+
+    // Deselect all cells first to clear any stale selection state.
+    this.deselectAll();
     if (from > to) {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to + idx]);
+          const widget = this.widgets[to + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     } else {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to - n + 1 + idx]);
+          const widget = this.widgets[to - n + 1 + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     }
@@ -2089,6 +2131,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
     Private.selectedProperty.set(widget, true);
+    this._selectCollapsedSection(widget);
     this._selectionChanged.emit(void 0);
     this.update();
   }
@@ -2103,6 +2146,19 @@ export class Notebook extends StaticNotebook {
   deselect(widget: Cell): void {
     if (!Private.selectedProperty.get(widget)) {
       return;
+    }
+    // Deselect all children if widget is a collapsed heading
+    if (
+      widget instanceof MarkdownCell &&
+      widget.headingCollapsed &&
+      widget.numberChildNodes > 0
+    ) {
+      const idx = this.widgets.indexOf(widget);
+      for (let i = idx + 1; i <= idx + widget.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], false);
+        }
+      }
     }
     Private.selectedProperty.set(widget, false);
     this._selectionChanged.emit(void 0);
@@ -2139,11 +2195,8 @@ export class Notebook extends StaticNotebook {
     }
     if (changed) {
       this._selectionChanged.emit(void 0);
+      this.update();
     }
-    // Make sure we have a valid active cell.
-    // eslint-disable-next-line no-self-assign
-    this.activeCellIndex = this.activeCellIndex;
-    this.update();
   }
 
   /**
@@ -2237,6 +2290,25 @@ export class Notebook extends StaticNotebook {
     Private.selectedProperty.set(this.widgets[index], true);
 
     if (selectionChanged) {
+      this._selectionChanged.emit(void 0);
+    }
+  }
+
+  /**
+   * Select all child cells of a collapsed heading, if applicable.
+   */
+  private _selectCollapsedSection(cell: Cell | null): void {
+    if (
+      cell instanceof MarkdownCell &&
+      cell.headingCollapsed &&
+      cell.numberChildNodes > 0
+    ) {
+      const idx = this.widgets.indexOf(cell);
+      for (let i = idx; i <= idx + cell.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], true);
+        }
+      }
       this._selectionChanged.emit(void 0);
     }
   }
@@ -2935,9 +3007,9 @@ export class Notebook extends StaticNotebook {
             (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
               : 'data-jupyter-id';
-          const element = this.node.querySelector(
+          const element = this.node.querySelector<HTMLElement>(
             `h${heading.level}[${attribute}="${CSS.escape(id)}"]`
-          ) as HTMLElement;
+          )!;
 
           return {
             cell,
