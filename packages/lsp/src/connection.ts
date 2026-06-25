@@ -30,7 +30,6 @@ import { LspWsConnection } from './ws-connection/ws-connection';
 
 import type * as lsp from 'vscode-languageserver-protocol';
 
-import { CancellationTokenSource } from 'vscode-jsonrpc';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
 /**
@@ -176,6 +175,42 @@ enum MessageKind {
 interface IMessageLog {
   method: string;
   message: unknown;
+}
+
+interface ICancellationDisposable {
+  dispose(): void;
+}
+
+interface ISignalCancellationToken {
+  readonly isCancellationRequested: boolean;
+  onCancellationRequested(
+    listener: (event: unknown) => void,
+    thisArgs?: unknown,
+    disposables?: ICancellationDisposable[]
+  ): ICancellationDisposable;
+}
+
+function cancellationTokenFromSignal(
+  signal: AbortSignal
+): ISignalCancellationToken {
+  return {
+    get isCancellationRequested(): boolean {
+      return signal.aborted;
+    },
+    onCancellationRequested: (listener, thisArgs, disposables) => {
+      const onAbort = () => {
+        listener.call(thisArgs, undefined);
+      };
+      signal.addEventListener('abort', onAbort, { once: true });
+      const disposable = {
+        dispose: () => {
+          signal.removeEventListener('abort', onAbort);
+        }
+      };
+      disposables?.push(disposable);
+      return disposable;
+    }
+  };
 }
 
 export class LSPConnection extends LspWsConnection implements ILSPConnection {
@@ -344,7 +379,9 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
       );
     }
 
-    const cancellation = signal ? new CancellationTokenSource() : undefined;
+    const cancellation = signal
+      ? cancellationTokenFromSignal(signal)
+      : undefined;
     let rejectOnAbort: ((reason?: unknown) => void) | undefined;
     const aborted = signal
       ? new Promise<never>((_, reject) => {
@@ -352,7 +389,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
         })
       : undefined;
     const cancel = () => {
-      cancellation?.cancel();
       rejectOnAbort?.(
         signal?.reason ??
           new DOMException('The request was aborted.', 'AbortError')
@@ -363,7 +399,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     this.log(MessageKind.clientRequested, { method, message: params });
     try {
       const response = cancellation
-        ? this.connection.sendRequest<T>(method, params, cancellation.token)
+        ? this.connection.sendRequest<T>(method, params, cancellation)
         : this.connection.sendRequest<T>(method, params);
       const result = aborted
         ? await Promise.race([response, aborted])
@@ -372,7 +408,6 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
       return result;
     } finally {
       signal?.removeEventListener('abort', cancel);
-      cancellation?.dispose();
     }
   }
 

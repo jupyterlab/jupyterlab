@@ -95,12 +95,18 @@ describe('LSPConnection', () => {
         }
       );
       const cancellationToken = sendRequest.mock.calls[0][2];
+      const onCancellationRequested = jest.fn();
+      const disposable = cancellationToken.onCancellationRequested(
+        onCancellationRequested
+      );
       expect(cancellationToken.isCancellationRequested).toBe(false);
 
       controller.abort(reason);
 
       expect(cancellationToken.isCancellationRequested).toBe(true);
+      expect(onCancellationRequested).toHaveBeenCalledTimes(1);
       await expect(request).rejects.toBe(reason);
+      disposable.dispose();
       response.resolve(undefined);
     });
 
