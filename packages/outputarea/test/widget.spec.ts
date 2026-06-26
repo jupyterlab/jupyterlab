@@ -16,6 +16,7 @@ import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
+import { UUID } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -26,6 +27,51 @@ import { simulate } from 'simulate-event';
 const rendermime = defaultRenderMime();
 
 const CODE = 'print("hello")';
+
+function createResolvedFuture(): Kernel.IShellFuture<
+  KernelMessage.IExecuteRequestMsg,
+  KernelMessage.IExecuteReplyMsg
+> {
+  const done = Promise.resolve(
+    KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+      channel: 'shell',
+      msgType: 'execute_reply',
+      session: UUID.uuid4(),
+      content: {
+        status: 'ok',
+        execution_count: 1,
+        user_expressions: {},
+        payload: []
+      }
+    })
+  );
+  return {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+}
+
+function createUpdateDisplayDataMessage(
+  data: Record<string, string>,
+  displayId: string
+): KernelMessage.IUpdateDisplayDataMsg {
+  return KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>({
+    channel: 'iopub',
+    msgType: 'update_display_data',
+    session: UUID.uuid4(),
+    content: {
+      data,
+      metadata: {},
+      transient: { display_id: displayId }
+    }
+  });
+}
 
 class LogOutputArea extends OutputArea {
   methods: string[] = [];
@@ -409,6 +455,52 @@ describe('outputarea/widget', () => {
         const reply = await future.done;
         expect(reply!.content.execution_count).toBeTruthy();
         expect(model.length).toBe(1);
+      });
+    });
+
+    describe('#reattachFuture()', () => {
+      it('should rebuild display id targets from transient output data', () => {
+        const displayId = 'display-id';
+        const initialData = { 'text/plain': 'before' };
+        const updatedData = { 'text/plain': 'after' };
+        model.fromJSON([
+          {
+            output_type: 'display_data',
+            data: initialData,
+            metadata: {},
+            transient: { display_id: displayId }
+          }
+        ]);
+        const future = createResolvedFuture();
+
+        widget.reattachFuture(future);
+        void future.onIOPub(
+          createUpdateDisplayDataMessage(updatedData, displayId)
+        );
+
+        expect(model.get(0).data).toEqual(updatedData);
+        expect(model.toJSON()[0]).not.toHaveProperty('transient');
+      });
+
+      it('should use captured display id targets for restored JSON outputs', () => {
+        const displayId = 'display-id';
+        const initialData = { 'text/plain': 'before' };
+        const updatedData = { 'text/plain': 'after' };
+        model.fromJSON([
+          {
+            output_type: 'display_data',
+            data: initialData,
+            metadata: {}
+          }
+        ]);
+        const future = createResolvedFuture();
+
+        widget.reattachFuture(future, new Map([[displayId, [0]]]));
+        void future.onIOPub(
+          createUpdateDisplayDataMessage(updatedData, displayId)
+        );
+
+        expect(model.get(0).data).toEqual(updatedData);
       });
     });
 
