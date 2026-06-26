@@ -40,6 +40,7 @@ import {
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMime } from '@jupyterlab/rendermime';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -139,6 +140,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ILauncher,
     ILabStatus,
     ISessionContextDialogs,
+    IPageHandler,
     IFormRendererRegistry,
     ITranslator,
     ISessionContextDialogs,
@@ -280,6 +282,7 @@ async function activateConsole(
   launcher: ILauncher | null,
   status: ILabStatus | null,
   sessionDialogs_: ISessionContextDialogs | null,
+  pageHandler: IPageHandler | null,
   formRegistry: IFormRendererRegistry | null,
   translator_: ITranslator | null,
   sessionContextDialogs: ISessionContextDialogs | null,
@@ -469,6 +472,7 @@ async function activateConsole(
       rendermime,
       sessionDialogs,
       executor,
+      pageHandler: pageHandler ?? undefined,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)

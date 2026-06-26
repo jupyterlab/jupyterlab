@@ -895,6 +895,12 @@
       "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
       "type": "boolean",
       "default": false
+    },
+    "helpInBottomPanel": {
+      "title": "Show Help in Bottom Panel",
+      "description": "Whether to display help output (e.g. pager output from 'source: page' payloads) in a bottom panel inspector instead of inlining it.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,
