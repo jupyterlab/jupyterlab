@@ -414,3 +414,53 @@ test.describe('Reactive toolbar', () => {
     expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
   });
 });
+
+test.describe('Toolbar buttons for non-editable cells', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        preventCopyPasteForNonEditable: true
+      }
+    }
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+  });
+
+  test('Copy toolbar button is disabled for non-editable cell', async ({
+    page
+  }) => {
+    await page.evaluate(() => {
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      const notebook = nbPanel.content;
+      notebook.activeCell.model.setMetadata('editable', false);
+      notebook.activeCellChanged.emit(notebook.activeCell);
+    });
+
+    const copyButton = await page.notebook.getToolbarItemLocator('copy');
+    await expect(copyButton!.locator('jp-button')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
+  test('Cut toolbar button is disabled for non-editable cell', async ({
+    page
+  }) => {
+    await page.evaluate(() => {
+      const nbPanel = window.jupyterapp.shell.currentWidget as any;
+      const notebook = nbPanel.content;
+      notebook.activeCell.model.setMetadata('editable', false);
+      notebook.activeCellChanged.emit(notebook.activeCell);
+    });
+
+    const cutButton = await page.notebook.getToolbarItemLocator('cut');
+    await expect(cutButton!.locator('jp-button')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+});
