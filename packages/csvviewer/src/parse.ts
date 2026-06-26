@@ -111,7 +111,7 @@ export namespace IParser {
     /**
      * The maximum number of columns observed while parsing.
      */
-    maxNcols: number;
+    maxNcols?: number;
     /**
      * The index offsets into the data string for the rows or data items.
      *
@@ -518,7 +518,6 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
   const len = data.length;
   let nextRow: number;
   let col: number;
-  let rowString: string;
   let colIndex: number;
 
   // The end of the current row.
@@ -540,19 +539,16 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     // end of the data string.
     rowEnd = nextRow === -1 ? len : nextRow;
 
-    // Find the next field delimiter. We slice the current row out so that
-    // the indexOf will stop at the end of the row. It may possibly be faster
-    // to just use a loop to check each character.
+    // Find field delimiters in the current row.
     col = 1;
-    rowString = data.slice(currRow, rowEnd);
-    colIndex = rowString.indexOf(delimiter);
+    colIndex = data.indexOf(delimiter, currRow);
 
-    while (colIndex !== -1) {
+    while (colIndex !== -1 && colIndex < rowEnd) {
       if (columnOffsets === true && (ncols === undefined || col < ncols)) {
-        offsets.push(currRow + colIndex + 1);
+        offsets.push(colIndex + 1);
       }
       col++;
-      colIndex = rowString.indexOf(delimiter, colIndex + 1);
+      colIndex = data.indexOf(delimiter, colIndex + 1);
     }
 
     maxNcols = Math.max(maxNcols, col);

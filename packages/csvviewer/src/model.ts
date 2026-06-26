@@ -440,7 +440,7 @@ export class DSVModel extends DataModel implements IDisposable {
     this._rowCount = oldRowCount + nrows - duplicateRows;
 
     const oldColumnCount = this._columnCount ?? 0;
-    this._columnCount = Math.max(oldColumnCount, maxNcols);
+    this._columnCount = Math.max(oldColumnCount, maxNcols ?? 0);
     const columnCountChanged = this._columnCount !== oldColumnCount;
 
     // If we didn't reach the requested row, we must be done.
