@@ -210,6 +210,7 @@ export class Context<
       return;
     }
     this._isDisposed = true;
+    this._stopLeaseHeartbeat();
     this.sessionContext.dispose();
     this._model.dispose();
     // Ensure we dispose the `sharedModel` as it may have been generated in the context
@@ -255,11 +256,23 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
+    const contents = this._manager.contents;
+
     if (isNew) {
       await this._save();
+
+      try {
+        await contents.open?.(this._path, { mode: 'write' });
+        this._startLeaseHeartbeat();
+      } catch {
+        // Server does not support open/close; proceed without heartbeat.
+      }
     } else {
+      await contents.open?.(this._path, { mode: 'write' });
+      this._startLeaseHeartbeat();
       await this._revert();
     }
+
     this.model.sharedModel.clearUndoHistory();
   }
 
@@ -997,6 +1010,14 @@ or load the version on disk (revert)?`,
 
   protected translator: ITranslator;
 
+  /**
+   * Interval at which the lease heartbeat is sent (in milliseconds).
+   *
+   * The server-side TTL for the open lease should be at least 2x this value
+   * to account for network delays and client-side processing time.
+   */
+  private readonly _LEASE_HEARTBEAT_INTERVAL_MS = 30000;
+
   private _isReady = false;
   private _isDisposed = false;
   private _isPopulated = false;
@@ -1026,6 +1047,39 @@ or load the version on disk (revert)?`,
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
   private _conflictModalIsOpen = false;
+  private _leaseTimer: ReturnType<typeof setInterval> | null = null;
+
+  /**
+   * Start the lease heartbeat timer so the server knows this file is
+   * still being edited. If the server supports open/close, this
+   * periodically renews the lease. On crash, the heartbeat stops and
+   * the server eventually auto-expires the lease.
+   */
+  private _startLeaseHeartbeat(): void {
+    if (this._leaseTimer !== null) {
+      return;
+    }
+    const contents = this._manager.contents;
+    if (!contents.open) {
+      return;
+    }
+    this._leaseTimer = setInterval(() => {
+      contents.open!(this._path).catch(() => {
+        // Server may not support open/close; stop trying.
+        this._stopLeaseHeartbeat();
+      });
+    }, this._LEASE_HEARTBEAT_INTERVAL_MS);
+  }
+
+  /**
+   * Stop the lease heartbeat timer.
+   */
+  private _stopLeaseHeartbeat(): void {
+    if (this._leaseTimer !== null) {
+      clearInterval(this._leaseTimer);
+      this._leaseTimer = null;
+    }
+  }
 }
 
 /**
