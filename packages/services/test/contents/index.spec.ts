@@ -1267,9 +1267,31 @@ describe('drive', () => {
       for (let i = 0; i < content.length; i++) {
         if (content[i].type === 'file') {
           path = content[i].path;
+          const msg = await contents.get(path, { type: 'file', content: true });
+          // eslint-disable-next-line jest/no-conditional-expect
+          expect(msg.path).toBe(path);
+          expect(msg.content).not.toBeNull();
+          called = true;
+        }
+      }
+      expect(called).toBe(true);
+    });
+
+    it('should no get directory and file content by default', async () => {
+      let content: Contents.IModel[];
+      let path = '';
+      let listing = await contents.get('src');
+      expect(listing.content).toBeNull();
+      listing = await contents.get('src', { content: true });
+      content = listing.content as Contents.IModel[];
+      let called = false;
+      for (let i = 0; i < content.length; i++) {
+        if (content[i].type === 'file') {
+          path = content[i].path;
           const msg = await contents.get(path, { type: 'file' });
           // eslint-disable-next-line jest/no-conditional-expect
           expect(msg.path).toBe(path);
+          expect(msg.content).toBeNull();
           called = true;
         }
       }
