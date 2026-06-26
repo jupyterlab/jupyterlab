@@ -9,6 +9,9 @@ on:
         description: "The branch to target"
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   publish_changelog:
     runs-on: ubuntu-latest
