@@ -484,6 +484,92 @@ describe('cells/widget', () => {
       });
     });
 
+    describe('#dataset attributes (#8298)', () => {
+      it('should expose the cell id on the DOM node', () => {
+        const cellModel = new CodeCellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model: cellModel
+        }).initializeState();
+
+        expect(widget.node.dataset.jpCellId).toBe(cellModel.id);
+      });
+
+      it('should not set a tags attribute when the cell has no tags', () => {
+        const cellModel = new CodeCellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model: cellModel
+        }).initializeState();
+
+        expect(widget.node.dataset.jpTags).toBeUndefined();
+      });
+
+      it('should reflect tags onto the DOM when set through metadata', () => {
+        const cellModel = new CodeCellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model: cellModel
+        }).initializeState();
+
+        cellModel.setMetadata('tags', ['parameters', 'hide-input']);
+
+        expect(widget.node.dataset.jpTags).toBe('parameters hide-input');
+      });
+
+      it('should update the tags attribute when tags change', () => {
+        const cellModel = new CodeCellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model: cellModel
+        }).initializeState();
+
+        cellModel.setMetadata('tags', ['a']);
+        expect(widget.node.dataset.jpTags).toBe('a');
+
+        cellModel.setMetadata('tags', ['a', 'b', 'c']);
+        expect(widget.node.dataset.jpTags).toBe('a b c');
+      });
+
+      it('should remove the tags attribute when tags are cleared', () => {
+        const cellModel = new CodeCellModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model: cellModel
+        }).initializeState();
+
+        cellModel.setMetadata('tags', ['a']);
+        expect(widget.node.dataset.jpTags).toBe('a');
+
+        cellModel.setMetadata('tags', []);
+        expect(widget.node.dataset.jpTags).toBeUndefined();
+      });
+
+      it('should reflect tags present at construction time', () => {
+        const sharedModel = createStandaloneCell({
+          cell_type: 'code'
+        }) as YCodeCell;
+        sharedModel.setMetadata('tags', ['pre-existing']);
+        const cellModel = new CodeCellModel({ sharedModel });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model: cellModel
+        }).initializeState();
+
+        expect(widget.node.dataset.jpTags).toBe('pre-existing');
+      });
+    });
+
     describe('.ContentFactory', () => {
       describe('#constructor', () => {
         it('should create a ContentFactory', () => {

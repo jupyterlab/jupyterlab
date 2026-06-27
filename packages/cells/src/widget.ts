@@ -193,6 +193,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this.addClass(CELL_CLASS);
     const model = (this._model = options.model);
 
+    // Surface the cell id on the DOM node so that tests and automation can
+    // target a specific cell unambiguously (#8298).
+    this.node.dataset.jpCellId = model.id;
+
     this.contentFactory = options.contentFactory;
     this.layout = options.layout ?? new PanelLayout();
     // Set up translator for aria labels
@@ -207,6 +211,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this.placeholder = options.placeholder ?? true;
 
     model.metadataChanged.connect(this.onMetadataChanged, this);
+
+    // Reflect any tags already present on the model onto the DOM (#8298).
+    this._syncTags();
   }
 
   /**
@@ -716,8 +723,29 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           this.loadEditableState();
         }
         break;
+      case 'tags':
+        this._syncTags();
+        break;
       default:
         break;
+    }
+  }
+
+  /**
+   * Reflect the cell `tags` metadata onto the DOM as a `data-jp-tags`
+   * attribute, so that tests and CSS selectors can target tagged cells.
+   *
+   * #### Notes
+   * The attribute is removed entirely when the cell has no tags, rather than
+   * left empty, to match the convention used by other `data-jp-*` attributes
+   * and to keep `[data-jp-tags]` selectors meaningful.
+   */
+  private _syncTags(): void {
+    const tags = this._model.getMetadata('tags') as string[] | undefined;
+    if (tags && tags.length > 0) {
+      this.node.dataset.jpTags = tags.join(' ');
+    } else {
+      delete this.node.dataset.jpTags;
     }
   }
 
