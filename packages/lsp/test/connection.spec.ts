@@ -8,6 +8,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 
 import { LSPConnection } from '../src/connection';
+import { Method } from '../src/tokens';
 
 class TestLSPConnection extends LSPConnection {
   initialize(connection: MessageConnection): void {
@@ -30,16 +31,22 @@ function createConnection(sendRequest: jest.Mock): TestLSPConnection {
 
 describe('LSPConnection', () => {
   describe('#request()', () => {
-    it('should forward an arbitrary request and return its result', async () => {
+    it('should forward a client request and return its result', async () => {
       const expected = { contents: 'result' };
       const sendRequest = jest.fn().mockResolvedValue(expected);
       const connection = createConnection(sendRequest);
       const params = { textDocument: { uri: 'file:///test.py' } };
 
-      const result = await connection.request('custom/request', params);
+      const result = await connection.request(
+        Method.ClientRequest.HOVER,
+        params
+      );
 
       expect(result).toBe(expected);
-      expect(sendRequest).toHaveBeenCalledWith('custom/request', params);
+      expect(sendRequest).toHaveBeenCalledWith(
+        Method.ClientRequest.HOVER,
+        params
+      );
     });
 
     it('should propagate request errors', async () => {
@@ -48,9 +55,9 @@ describe('LSPConnection', () => {
         jest.fn().mockRejectedValue(expected)
       );
 
-      await expect(connection.request('custom/request', {})).rejects.toBe(
-        expected
-      );
+      await expect(
+        connection.request(Method.ClientRequest.HOVER, {})
+      ).rejects.toBe(expected);
     });
 
     it('should reject requests before the connection is ready', async () => {
@@ -61,7 +68,9 @@ describe('LSPConnection', () => {
         serverUri: ''
       });
 
-      await expect(connection.request('custom/request', {})).rejects.toThrow(
+      await expect(
+        connection.request(Method.ClientRequest.HOVER, {})
+      ).rejects.toThrow(
         'Cannot send an LSP request before the connection is ready.'
       );
     });
@@ -75,9 +84,9 @@ describe('LSPConnection', () => {
       });
       connection.dispose();
 
-      await expect(connection.request('custom/request', {})).rejects.toThrow(
-        'Cannot send an LSP request on a disposed connection.'
-      );
+      await expect(
+        connection.request(Method.ClientRequest.HOVER, {})
+      ).rejects.toThrow('Cannot send an LSP request on a disposed connection.');
     });
 
     it('should cancel a request with the provided signal', async () => {
@@ -88,7 +97,7 @@ describe('LSPConnection', () => {
       const reason = new Error('Timed out');
 
       const request = connection.request(
-        'custom/request',
+        Method.ClientRequest.HOVER,
         {},
         {
           signal: controller.signal
@@ -117,7 +126,13 @@ describe('LSPConnection', () => {
       controller.abort();
 
       await expect(
-        connection.request('custom/request', {}, { signal: controller.signal })
+        connection.request(
+          Method.ClientRequest.HOVER,
+          {},
+          {
+            signal: controller.signal
+          }
+        )
       ).rejects.toMatchObject({ name: 'AbortError' });
       expect(sendRequest).not.toHaveBeenCalled();
     });

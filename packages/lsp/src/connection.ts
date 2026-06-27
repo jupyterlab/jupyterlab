@@ -149,6 +149,12 @@ type AnyMethodType =
   | typeof Method.ClientNotification
   | typeof Method.ClientRequest
   | typeof Method.ServerRequest;
+type AnyMethod =
+  | Method.ServerNotification
+  | Method.ClientNotification
+  | Method.ClientRequest
+  | Method.ServerRequest;
+
 /**
  * Create a map between the request method and its handler
  */
@@ -172,9 +178,9 @@ enum MessageKind {
   responseForServer
 }
 
-interface IMessageLog {
-  method: string;
-  message: unknown;
+interface IMessageLog<T extends AnyMethod = AnyMethod> {
+  method: T;
+  message: any;
 }
 
 interface ICancellationDisposable {
@@ -358,7 +364,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    * Send a request to the language server.
    */
   async request<T = unknown>(
-    method: string,
+    method: Method.ClientRequest,
     params: lsp.LSPObject,
     options: ILSPConnection.IRequestOptions = {}
   ): Promise<T> {

@@ -761,6 +761,7 @@ export namespace Method {
     COMPLETION = 'textDocument/completion',
     COMPLETION_ITEM_RESOLVE = 'completionItem/resolve',
     DEFINITION = 'textDocument/definition',
+    DIAGNOSTIC = 'textDocument/diagnostic',
     DOCUMENT_COLOR = 'textDocument/documentColor',
     DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight',
     DOCUMENT_SYMBOL = 'textDocument/documentSymbol',
@@ -832,6 +833,7 @@ export interface IClientRequestParams {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
   [Method.ClientRequest.DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DIAGNOSTIC]: lsp.DocumentDiagnosticParams;
   [Method.ClientRequest.DOCUMENT_COLOR]: lsp.DocumentColorParams;
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbolParams;
@@ -858,6 +860,7 @@ export interface IClientResult {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: AnyCompletion;
   [Method.ClientRequest.DEFINITION]: AnyLocation;
+  [Method.ClientRequest.DIAGNOSTIC]: lsp.DocumentDiagnosticReport;
   [Method.ClientRequest.DOCUMENT_COLOR]: lsp.ColorInformation[];
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
@@ -1025,7 +1028,7 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
   /**
    * @alpha
    *
-   * Send a request to the language server.
+   * Send a client request to the language server.
    *
    * @param method - The LSP method to request.
    * @param params - The parameters for the request.
@@ -1033,7 +1036,7 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * @returns The response from the language server.
    */
   request<T = unknown>(
-    method: string,
+    method: Method.ClientRequest,
     params: lsp.LSPObject,
     options?: ILSPConnection.IRequestOptions
   ): Promise<T>;
