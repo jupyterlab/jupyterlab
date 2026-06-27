@@ -42,8 +42,7 @@ jobs:
           python -m pip install --group docs pyenchant
 
       - name: Run Sphinx spelling builder
-        env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          python scripts/check_spelling.py
+          python scripts/check_spelling.py \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}"

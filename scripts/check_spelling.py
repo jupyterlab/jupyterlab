@@ -58,22 +58,17 @@ def git_output(args: list[str]) -> str:
 
 def diff_args(args: argparse.Namespace) -> list[str]:
     """Return the git diff range arguments for the requested mode."""
-    env_base = os.environ.get("PR_BASE_SHA")
-    env_head = os.environ.get("PR_HEAD_SHA")
-
     if args.staged:
         if args.base or args.head:
             message = "--staged cannot be combined with --base or --head"
             raise SystemExit(message)
         return ["--cached"]
 
-    base = args.base or env_base
-    head = args.head or env_head
-    if not base or not head:
-        message = "Provide --staged, provide --base and --head, or set PR_BASE_SHA and PR_HEAD_SHA."
+    if not args.base or not args.head:
+        message = "Provide --staged or provide --base and --head."
         raise SystemExit(message)
 
-    return [f"{base}...{head}"]
+    return [f"{args.base}...{args.head}"]
 
 
 def is_text_document(path: str) -> bool:

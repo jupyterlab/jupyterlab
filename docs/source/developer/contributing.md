@@ -133,9 +133,11 @@ hook with `pre-commit install`, you can fix everything up using
 `pre-commit run --all-files`. You need to make the fixing commit
 yourself after that.
 
-To run the optional Sphinx spelling check on staged `.md`, `.txt`, or
-spelling-support changes, install the documentation dependencies and a native
-Enchant/Aspell backend with an English dictionary, then run:
+To run the optional Sphinx spelling check on staged `.md` or `.txt` files, or
+after staging files that affect the spelling check itself, such as the word
+list, docs configuration, or check script, install the documentation
+dependencies and a native Enchant/Aspell backend with an English dictionary,
+then run:
 
 ```
 pre-commit run sphinx-spelling --hook-stage manual
