@@ -125,7 +125,7 @@ function main(): void {
 
   const cellWidget = new CodeCell({
     contentFactory: new Cell.ContentFactory({
-      editorFactory: factoryService.newInlineEditor.bind(factoryService)
+      editorFactory: factoryService.newInlineEditor
     }),
     rendermime,
     model: new CodeCellModel()

@@ -544,17 +544,13 @@ class BenchmarkReporter implements Reporter {
     });
 
     // If the reference | project lists has two items, the intervals will be compared.
-    if (!groups.values().next().value) {
+    const firstTestGroup = groups.values().next().value;
+    if (!firstTestGroup) {
       return ['## Benchmark report\n\nNot enough data', reportExtension];
     }
 
-    const compare =
-      (
-        groups.values().next().value?.values().next().value as Map<
-          string,
-          Map<string, number[]>
-        >
-      ).size === 2;
+    const firstBrowserGroup = firstTestGroup.values().next().value!;
+    const compare = firstBrowserGroup.size === 2;
 
     // - Create report
     const reportContent = new Array<string>(
@@ -576,8 +572,6 @@ class BenchmarkReporter implements Reporter {
     let header = '| Test file |';
     let nFiles = 0;
     // groups is non-empty (checked above), so all nested maps have at least one entry
-    const firstTestGroup = groups.values().next().value!;
-    const firstBrowserGroup = firstTestGroup.values().next().value!;
     const firstFileGroup = firstBrowserGroup.values().next().value!;
     for (const [file] of firstFileGroup) {
       header += ` ${file} |`;
