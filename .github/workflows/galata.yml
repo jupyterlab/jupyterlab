@@ -101,7 +101,7 @@ jobs:
                 continue;
               }
               const filename = file.filename;
-              if (!/^galata\/test\/.*\.(test|spec)\.ts$/.test(filename)) {
+              if (!/^galata\/test\/[A-Za-z0-9._/-]*\.(test|spec)\.ts$/.test(filename)) {
                 continue;
               }
               const galataPath = filename.replace(/^galata\//, '');
