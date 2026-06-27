@@ -844,6 +844,7 @@ export interface IClientRequestParams {
   [Method.ClientRequest.RENAME]: lsp.RenameParams;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.LINKED_EDITING_RANGE]: lsp.LinkedEditingRangeParams;
   [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValueParams;
   [Method.ClientRequest.INLAY_HINT]: lsp.InlayHintParams;
   [Method.ClientRequest.WORKSPACE_SYMBOL]: lsp.WorkspaceSymbolParams;
@@ -871,6 +872,7 @@ export interface IClientResult {
   [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
+  [Method.ClientRequest.LINKED_EDITING_RANGE]: lsp.LinkedEditingRanges | null;
   [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValue[] | null;
   [Method.ClientRequest.INLAY_HINT]: lsp.InlayHint[] | null;
   [Method.ClientRequest.WORKSPACE_SYMBOL]:
@@ -1035,11 +1037,11 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * @param options - Options for the request.
    * @returns The response from the language server.
    */
-  request<T = unknown>(
-    method: Method.ClientRequest,
-    params: lsp.LSPObject,
+  request<M extends Method.ClientRequest>(
+    method: M,
+    params: IClientRequestParams[M],
     options?: ILSPConnection.IRequestOptions
-  ): Promise<T>;
+  ): Promise<IClientResult[M]>;
 
   /**
    * @alpha

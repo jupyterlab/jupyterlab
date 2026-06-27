@@ -363,11 +363,11 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   /**
    * Send a request to the language server.
    */
-  async request<T = unknown>(
-    method: Method.ClientRequest,
-    params: lsp.LSPObject,
+  async request<M extends Method.ClientRequest>(
+    method: M,
+    params: IClientRequestParams[M],
     options: ILSPConnection.IRequestOptions = {}
-  ): Promise<T> {
+  ): Promise<IClientResult[M]> {
     if (this.isDisposed) {
       throw new Error('Cannot send an LSP request on a disposed connection.');
     }
@@ -405,8 +405,12 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     this.log(MessageKind.clientRequested, { method, message: params });
     try {
       const response = cancellation
-        ? this.connection.sendRequest<T>(method, params, cancellation)
-        : this.connection.sendRequest<T>(method, params);
+        ? this.connection.sendRequest<IClientResult[M]>(
+            method,
+            params,
+            cancellation
+          )
+        : this.connection.sendRequest<IClientResult[M]>(method, params);
       const result = aborted
         ? await Promise.race([response, aborted])
         : await response;

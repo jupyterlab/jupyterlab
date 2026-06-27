@@ -29,13 +29,20 @@ function createConnection(sendRequest: jest.Mock): TestLSPConnection {
   return connection;
 }
 
+function createHoverParams() {
+  return {
+    textDocument: { uri: 'file:///test.py' },
+    position: { line: 0, character: 0 }
+  };
+}
+
 describe('LSPConnection', () => {
   describe('#request()', () => {
     it('should forward a client request and return its result', async () => {
       const expected = { contents: 'result' };
       const sendRequest = jest.fn().mockResolvedValue(expected);
       const connection = createConnection(sendRequest);
-      const params = { textDocument: { uri: 'file:///test.py' } };
+      const params = createHoverParams();
 
       const result = await connection.request(
         Method.ClientRequest.HOVER,
@@ -56,7 +63,7 @@ describe('LSPConnection', () => {
       );
 
       await expect(
-        connection.request(Method.ClientRequest.HOVER, {})
+        connection.request(Method.ClientRequest.HOVER, createHoverParams())
       ).rejects.toBe(expected);
     });
 
@@ -69,7 +76,7 @@ describe('LSPConnection', () => {
       });
 
       await expect(
-        connection.request(Method.ClientRequest.HOVER, {})
+        connection.request(Method.ClientRequest.HOVER, createHoverParams())
       ).rejects.toThrow(
         'Cannot send an LSP request before the connection is ready.'
       );
@@ -85,7 +92,7 @@ describe('LSPConnection', () => {
       connection.dispose();
 
       await expect(
-        connection.request(Method.ClientRequest.HOVER, {})
+        connection.request(Method.ClientRequest.HOVER, createHoverParams())
       ).rejects.toThrow('Cannot send an LSP request on a disposed connection.');
     });
 
@@ -98,7 +105,7 @@ describe('LSPConnection', () => {
 
       const request = connection.request(
         Method.ClientRequest.HOVER,
-        {},
+        createHoverParams(),
         {
           signal: controller.signal
         }
@@ -126,13 +133,9 @@ describe('LSPConnection', () => {
       controller.abort();
 
       await expect(
-        connection.request(
-          Method.ClientRequest.HOVER,
-          {},
-          {
-            signal: controller.signal
-          }
-        )
+        connection.request(Method.ClientRequest.HOVER, createHoverParams(), {
+          signal: controller.signal
+        })
       ).rejects.toMatchObject({ name: 'AbortError' });
       expect(sendRequest).not.toHaveBeenCalled();
     });
