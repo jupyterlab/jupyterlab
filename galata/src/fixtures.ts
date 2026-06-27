@@ -369,18 +369,6 @@ export const test: TestType<
       if (!(await helpers.isInSimpleMode())) {
         await helpers.activity.activateTab('Launcher');
       }
-      await page.locator('.jp-LauncherCard').first().waitFor();
-      await helpers.waitForCondition(() =>
-        page.locator('.jp-Launcher-kernelIcon').evaluateAll(images =>
-          images.every(image => {
-            return (
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-            );
-          })
-        )
-      );
     };
     await use(waitIsReady);
   },
