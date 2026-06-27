@@ -52,9 +52,12 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
     "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
+
+mermaid_version = "latest"
 
 SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
 
@@ -81,6 +84,7 @@ if SPELLING_BUILD_ENABLED:
 
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
+myst_fence_as_directive = ["mermaid"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

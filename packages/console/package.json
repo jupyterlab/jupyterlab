@@ -50,6 +50,7 @@
     "@jupyterlab/coreutils": "^6.6.0",
     "@jupyterlab/nbformat": "^4.6.0",
     "@jupyterlab/observables": "^5.6.0",
+    "@jupyterlab/outputarea": "^4.6.0",
     "@jupyterlab/rendermime": "^4.6.0",
     "@jupyterlab/services": "^7.6.0",
     "@jupyterlab/translation": "^4.6.0",
