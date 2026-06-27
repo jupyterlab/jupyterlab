@@ -387,7 +387,8 @@ export interface INotebookExportGuidance {
  * A token describing a service for showing notebook export guidance.
  */
 export const INotebookExportGuidance = new Token<INotebookExportGuidance>(
-  '@jupyterlab/notebook-extension:INotebookExportGuidance'
+  '@jupyterlab/notebook-extension:INotebookExportGuidance',
+  'A service for showing notebook export guidance.'
 );
 
 /**

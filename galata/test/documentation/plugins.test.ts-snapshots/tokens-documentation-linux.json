@@ -65,6 +65,7 @@
   "@jupyterlab/mermaid:IMermaidManager": "a manager for rendering mermaid text-based diagrams",
   "@jupyterlab/mermaid:IMermaidMarkdown": "a manager for rendering mermaid text-based diagrams in markdown fenced code blocks",
   "@jupyterlab/metadataform:IMetadataFormProvider": "A service to register new metadata editor widgets.",
+  "@jupyterlab/notebook-extension:INotebookExportGuidance": "A service for showing notebook export guidance.",
   "@jupyterlab/notebook:IContentFactory": "A factory object that creates new notebooks.\n    Use this if you want to create and host notebooks in your own UI elements.",
   "@jupyterlab/notebook:INotebookCellExecutor": "The notebook cell executor",
   "@jupyterlab/notebook:INotebookTools": "A service for the \"Notebook Tools\" panel in the\n  right sidebar. Use this to add your own functionality to the panel.",
