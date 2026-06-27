@@ -22,11 +22,15 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const onFilterChange = (event: Event) => {
-    const target = event.currentTarget;
-    if (target && 'value' in target && typeof target.value === 'string') {
-      props.model.filter = target.value;
+  const onFilterChange = (event: CustomEvent<unknown>) => {
+    const target = event.target;
+    if (!hasStringValue(target)) {
+      console.error(
+        'Search input event target does not provide a string value.'
+      );
+      return;
     }
+    props.model.filter = target.value;
   };
   return (
     <Search
@@ -37,6 +41,14 @@ const FilterBox = (props: IFilterBoxProps) => {
     />
   );
 };
+
+function hasStringValue(
+  target: EventTarget | null
+): target is EventTarget & { value: string } {
+  return (
+    target !== null && 'value' in target && typeof target.value === 'string'
+  );
+}
 
 /**
  * A widget which hosts a input textbox to filter on file names.
