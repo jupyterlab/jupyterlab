@@ -45,6 +45,7 @@
     "@jupyterlab/filebrowser": "^4.6.0",
     "@jupyterlab/launcher": "^4.6.0",
     "@jupyterlab/mainmenu": "^4.6.0",
+    "@jupyterlab/outputarea": "^4.6.0",
     "@jupyterlab/rendermime": "^4.6.0",
     "@jupyterlab/settingregistry": "^4.6.0",
     "@jupyterlab/translation": "^4.6.0",
