@@ -24,6 +24,7 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import type { IOutputAreaModel } from './model';
+import type { IPageHandler } from './tokens';
 
 /**
  * The class name added to an output area widget.
@@ -110,6 +111,7 @@ export class OutputArea extends Widget {
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
+    this._pageHandler = options.pageHandler ?? null;
 
     const model = (this.model = options.model);
     for (
@@ -868,10 +870,16 @@ export class OutputArea extends Widget {
     if (!pages.length) {
       return;
     }
-    const page = JSON.parse(JSON.stringify(pages[0]));
+
+    const page = pages[0] as ReadonlyJSONObject;
+    if (this._pageHandler?.handlePage(page)) {
+      return;
+    }
+
+    const pageData = JSON.parse(JSON.stringify(page));
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data: (pageData as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -922,6 +930,7 @@ export class OutputArea extends Widget {
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
   private _showInputPlaceholder: boolean = true;
+  private _pageHandler: IPageHandler | null = null;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -1001,6 +1010,11 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**

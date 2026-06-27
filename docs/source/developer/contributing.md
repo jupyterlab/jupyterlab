@@ -125,6 +125,12 @@ pre-commit run
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
+To run the GitHub Actions security analysis locally before pushing, use
+`pre-commit run zizmor --files .github/workflows/<workflow>.yml` or
+`pre-commit run zizmor --all-files`.
+
+The local hook is pinned and kept aligned with the CI `zizmor` version.
+For day-to-day development, prefer targeted runs with `--files`.
 You may also install [ruff integration](https://docs.astral.sh/ruff/integrations)
 into your text editor to format code automatically.
 

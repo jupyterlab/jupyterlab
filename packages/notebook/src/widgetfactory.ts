@@ -5,6 +5,7 @@
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory } from '@jupyterlab/docregistry';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { INotebookModel } from './model';
@@ -33,6 +34,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._pageHandler = options.pageHandler;
   }
 
   /*
@@ -95,6 +97,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       notebookConfig: source
         ? source.content.notebookConfig
         : this._notebookConfig,
+      pageHandler: this._pageHandler,
       translator,
       kernelHistory
     };
@@ -105,6 +108,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
 
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -141,6 +145,11 @@ export namespace NotebookWidgetFactory {
      * The notebook configuration.
      */
     notebookConfig?: StaticNotebook.INotebookConfig;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
 
     /**
      * The application language translator.
