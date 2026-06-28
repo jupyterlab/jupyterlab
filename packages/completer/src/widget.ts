@@ -247,12 +247,12 @@ export class Completer extends Widget {
    * Emit the selected signal for the current active item and reset.
    */
   selectActive(): void {
-    const active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    const active = this.node.querySelector<HTMLElement>(`.${ACTIVE_CLASS}`);
     if (!active) {
       this.reset();
       return;
     }
-    this._selected.emit(active.getAttribute('data-value') as string);
+    this._selected.emit(active.getAttribute('data-value')!);
     this.reset();
   }
 
@@ -548,10 +548,10 @@ export class Completer extends Widget {
    * to the first item, subsequent `ArrowUp` cycles will cycle to the last index.
    */
   private _cycle(direction: Private.scrollType): void {
-    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    const items = this.node.querySelectorAll<HTMLElement>(`.${ITEM_CLASS}`);
     const index = this._activeIndex;
     const last = items.length - 1;
-    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    let active = this.node.querySelector<HTMLElement>(`.${ACTIVE_CLASS}`)!;
     active.classList.remove(ACTIVE_CLASS);
 
     switch (direction) {
@@ -573,9 +573,9 @@ export class Completer extends Widget {
       }
     }
 
-    active = items[this._activeIndex] as HTMLElement;
+    active = items[this._activeIndex]!;
     active.classList.add(ACTIVE_CLASS);
-    let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
+    const completionList = this.node.querySelector(`.${LIST_CLASS}`)!;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
     const visibleCompletionItems = this.model?.completionItems();
@@ -677,7 +677,7 @@ export class Completer extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this._selected.emit(target.getAttribute('data-value') as string);
+        this._selected.emit(target.getAttribute('data-value')!);
         this.reset();
         return;
       }
@@ -690,7 +690,7 @@ export class Completer extends Widget {
         return;
       }
 
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
     this.reset();
   }
@@ -762,7 +762,7 @@ export class Completer extends Widget {
     }
 
     const start = model.cursor.start;
-    const position = editor.getPositionAt(start) as CodeEditor.IPosition;
+    const position = editor.getPositionAt(start)!;
     const anchor = editor.getCoordinateForPosition(position);
 
     if (!anchor) {
@@ -779,7 +779,7 @@ export class Completer extends Widget {
     // and editor is preferred. The difference is negligible in File Editor, but
     // substantial for Notebooks.
     const host =
-      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host.closest<HTMLElement>('.jp-MainAreaWidget > .lm-Widget') ??
       editor.host;
 
     const items = model.completionItems();
