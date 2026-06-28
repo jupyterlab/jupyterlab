@@ -49,7 +49,6 @@ import {
   KernelSpecManager,
   SessionManager
 } from '@jupyterlab/services';
-import { TranslationManager } from '@jupyterlab/translation';
 
 import type { IYText } from '@jupyter/ydoc';
 
@@ -57,13 +56,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { BoxPanel, Widget } from '@lumino/widgets';
 
-async function main(): Promise<void> {
-  const translator = new TranslationManager(
-    PageConfig.getOption('translationsApiUrl')
-  );
-  await translator.fetch('default');
-  const trans = translator.load('jupyterlab');
-
+function main(): void {
   const kernelManager = new KernelManager();
   const specsManager = new KernelSpecManager();
   const sessionManager = new SessionManager({ kernelManager });
@@ -71,8 +64,7 @@ async function main(): Promise<void> {
     kernelManager,
     sessionManager,
     specsManager,
-    name: 'Example',
-    translator
+    name: 'Example'
   });
   const editorExtensions = () => {
     const themes = new EditorThemeRegistry();
@@ -129,18 +121,14 @@ async function main(): Promise<void> {
   );
 
   // Create the cell widget with a default rendermime instance.
-  const rendermime = new RenderMimeRegistry({
-    initialFactories,
-    translator
-  });
+  const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const cellWidget = new CodeCell({
     contentFactory: new Cell.ContentFactory({
       editorFactory: factoryService.newInlineEditor.bind(factoryService)
     }),
     rendermime,
-    model: new CodeCellModel(),
-    translator
+    model: new CodeCellModel()
   }).initializeState();
 
   // Handle the mimeType for the current kernel asynchronously.
@@ -199,10 +187,10 @@ async function main(): Promise<void> {
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
-      tooltip: trans.__('Interrupt the kernel')
+      tooltip: 'Interrupt the kernel'
     })
   );
-  const dialogs = new SessionContextDialogs({ translator });
+  const dialogs = new SessionContextDialogs();
   toolbar.addItem(
     'restart',
     new ToolbarButton({
@@ -210,17 +198,14 @@ async function main(): Promise<void> {
       onClick: () => {
         void dialogs.restart(sessionContext);
       },
-      tooltip: trans.__('Restart the kernel')
+      tooltip: 'Restart the kernel'
     })
   );
   toolbar.addItem(
     'name',
-    AppToolbar.createKernelNameItem(sessionContext, dialogs, translator)
+    AppToolbar.createKernelNameItem(sessionContext, dialogs)
   );
-  toolbar.addItem(
-    'status',
-    AppToolbar.createKernelStatusItem(sessionContext, translator)
-  );
+  toolbar.addItem('status', AppToolbar.createKernelStatusItem(sessionContext));
 
   // Lay out the widgets.
   const panel = new BoxPanel();

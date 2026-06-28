@@ -13,14 +13,8 @@ import { DockPanel, Widget } from '@lumino/widgets';
 import { TerminalManager } from '@jupyterlab/services';
 
 import { Terminal } from '@jupyterlab/terminal';
-import { TranslationManager } from '@jupyterlab/translation';
 
 async function main(): Promise<void> {
-  const translator = new TranslationManager(
-    PageConfig.getOption('translationsApiUrl')
-  );
-  await translator.fetch('default');
-
   const dock = new DockPanel();
   dock.id = 'main';
 
@@ -39,12 +33,12 @@ async function main(): Promise<void> {
 
   const manager = new TerminalManager();
   const s1 = await manager.startNew();
-  const term1 = new Terminal(s1, { theme: 'light' }, translator);
+  const term1 = new Terminal(s1, { theme: 'light' });
   term1.title.closable = true;
   dock.addWidget(term1);
 
   const s2 = await manager.startNew();
-  const term2 = new Terminal(s2, { theme: 'dark' }, translator);
+  const term2 = new Terminal(s2, { theme: 'dark' });
   term2.title.closable = true;
   dock.addWidget(term2, { mode: 'tab-before' });
 

@@ -15,7 +15,7 @@ import {
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import { NotebookActions, NotebookSearchProvider } from '@jupyterlab/notebook';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
   copyIcon,
@@ -75,22 +75,19 @@ export const setupCommands = (
   nbWidget: NotebookPanel,
   handler: CompletionHandler,
   sessionContextDialogs: ISessionContextDialogs,
-  translator: ITranslator,
   settings?: ISettingRegistry.ISettings
 ): void => {
-  const trans = translator.load('jupyterlab');
-
   // Add commands.
   commands.addCommand(COMMAND_IDS.invoke, {
-    label: trans.__('Completer: Invoke'),
+    label: 'Completer: Invoke',
     execute: () => handler.invoke()
   });
   commands.addCommand(COMMAND_IDS.select, {
-    label: trans.__('Completer: Select'),
+    label: 'Completer: Select',
     execute: () => handler.completer.selectActive()
   });
   commands.addCommand(COMMAND_IDS.invokeNotebook, {
-    label: trans.__('Invoke Notebook'),
+    label: 'Invoke Notebook',
     execute: () => {
       if (nbWidget.content.activeCell?.model.type === 'code') {
         return commands.execute(COMMAND_IDS.invoke);
@@ -98,7 +95,7 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.selectNotebook, {
-    label: trans.__('Select Notebook'),
+    label: 'Select Notebook',
     execute: () => {
       if (nbWidget.content.activeCell?.model.type === 'code') {
         return commands.execute(COMMAND_IDS.select);
@@ -106,18 +103,18 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.save, {
-    label: args => (args.toolbar ? '' : trans.__('Save')),
-    caption: trans.__('Save'),
+    label: args => (args.toolbar ? '' : 'Save'),
+    caption: 'Save',
     icon: args => (args.toolbar ? saveIcon : undefined),
     execute: () => nbWidget.context.save()
   });
 
   let searchInstance: SearchDocumentView | undefined;
   commands.addCommand(COMMAND_IDS.startSearch, {
-    label: trans.__('Find…'),
+    label: 'Find…',
     execute: () => {
       if (!searchInstance) {
-        const provider = new NotebookSearchProvider(nbWidget, translator);
+        const provider = new NotebookSearchProvider(nbWidget, nullTranslator);
         const searchModel = new SearchDocumentModel(provider, 500);
         searchInstance = new SearchDocumentView(searchModel);
         /**
@@ -162,7 +159,7 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.findNext, {
-    label: trans.__('Find Next'),
+    label: 'Find Next',
     isEnabled: () => !!searchInstance,
     execute: async () => {
       if (!searchInstance) {
@@ -172,7 +169,7 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.findPrevious, {
-    label: trans.__('Find Previous'),
+    label: 'Find Previous',
     isEnabled: () => !!searchInstance,
     execute: async () => {
       if (!searchInstance) {
@@ -182,27 +179,27 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.interrupt, {
-    label: args => (args.toolbar ? '' : trans.__('Interrupt')),
-    caption: trans.__('Interrupt the kernel'),
+    label: args => (args.toolbar ? '' : 'Interrupt'),
+    caption: 'Interrupt the kernel',
     icon: args => (args.toolbar ? stopIcon : undefined),
     execute: async () =>
       nbWidget.context.sessionContext.session?.kernel?.interrupt()
   });
   commands.addCommand(COMMAND_IDS.restart, {
-    label: args => (args.toolbar ? '' : trans.__('Restart Kernel')),
-    caption: trans.__('Restart the kernel'),
+    label: args => (args.toolbar ? '' : 'Restart Kernel'),
+    caption: 'Restart the kernel',
     icon: args => (args.toolbar ? refreshIcon : undefined),
     execute: () =>
       sessionContextDialogs.restart(nbWidget.context.sessionContext)
   });
   commands.addCommand(COMMAND_IDS.switchKernel, {
-    label: trans.__('Switch Kernel'),
+    label: 'Switch Kernel',
     execute: () =>
       sessionContextDialogs.selectKernel(nbWidget.context.sessionContext)
   });
   commands.addCommand(COMMAND_IDS.runAndAdvance, {
-    label: args => (args.toolbar ? '' : trans.__('Run and Advance')),
-    caption: trans.__('Run the selected cells and advance.'),
+    label: args => (args.toolbar ? '' : 'Run and Advance'),
+    caption: 'Run the selected cells and advance.',
     icon: args => (args.toolbar ? runIcon : undefined),
     execute: () => {
       return NotebookActions.runAndAdvance(
@@ -213,7 +210,7 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.run, {
-    label: trans.__('Run'),
+    label: 'Run',
     execute: () => {
       return NotebookActions.run(
         nbWidget.content,
@@ -223,75 +220,75 @@ export const setupCommands = (
     }
   });
   commands.addCommand(COMMAND_IDS.editMode, {
-    label: trans.__('Edit Mode'),
+    label: 'Edit Mode',
     execute: () => {
       nbWidget.content.mode = 'edit';
     }
   });
   commands.addCommand(COMMAND_IDS.commandMode, {
-    label: trans.__('Command Mode'),
+    label: 'Command Mode',
     execute: () => {
       nbWidget.content.mode = 'command';
     }
   });
   commands.addCommand(COMMAND_IDS.selectBelow, {
-    label: trans.__('Select Below'),
+    label: 'Select Below',
     execute: () => NotebookActions.selectBelow(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.selectAbove, {
-    label: trans.__('Select Above'),
+    label: 'Select Above',
     execute: () => NotebookActions.selectAbove(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.extendAbove, {
-    label: trans.__('Extend Above'),
+    label: 'Extend Above',
     execute: () => NotebookActions.extendSelectionAbove(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.extendTop, {
-    label: trans.__('Extend to Top'),
+    label: 'Extend to Top',
     execute: () => NotebookActions.extendSelectionAbove(nbWidget.content, true)
   });
   commands.addCommand(COMMAND_IDS.extendBelow, {
-    label: trans.__('Extend Below'),
+    label: 'Extend Below',
     execute: () => NotebookActions.extendSelectionBelow(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.extendBottom, {
-    label: trans.__('Extend to Bottom'),
+    label: 'Extend to Bottom',
     execute: () => NotebookActions.extendSelectionBelow(nbWidget.content, true)
   });
   commands.addCommand(COMMAND_IDS.merge, {
-    label: trans.__('Merge Cells'),
+    label: 'Merge Cells',
     execute: () => NotebookActions.mergeCells(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.split, {
-    label: trans.__('Split Cell'),
+    label: 'Split Cell',
     execute: () => NotebookActions.splitCell(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.undo, {
-    label: trans.__('Undo'),
+    label: 'Undo',
     execute: () => NotebookActions.undo(nbWidget.content)
   });
   commands.addCommand(COMMAND_IDS.redo, {
-    label: trans.__('Redo'),
+    label: 'Redo',
     execute: () => NotebookActions.redo(nbWidget.content)
   });
 
   commands.addCommand(COMMAND_IDS.insert, {
-    label: args => (args.toolbar ? '' : trans.__('Insert a cell below')),
-    caption: trans.__('Insert a cell below'),
+    label: args => (args.toolbar ? '' : 'Insert a cell below'),
+    caption: 'Insert a cell below',
     icon: args => (args.toolbar ? addIcon : undefined),
     execute: () => NotebookActions.insertBelow(nbWidget.content)
   });
 
   commands.addCommand(COMMAND_IDS.deleteCell, {
-    label: args => (args.toolbar ? '' : trans.__('Delete the selected cells')),
-    caption: trans.__('Delete the selected cells'),
+    label: args => (args.toolbar ? '' : 'Delete the selected cells'),
+    caption: 'Delete the selected cells',
     icon: args => (args.toolbar ? deleteIcon : undefined),
     execute: () => NotebookActions.deleteCells(nbWidget.content)
   });
 
   commands.addCommand(COMMAND_IDS.cut, {
-    label: args => (args.toolbar ? '' : trans.__('Cut the selected cells')),
-    caption: trans.__('Cut the selected cells'),
+    label: args => (args.toolbar ? '' : 'Cut the selected cells'),
+    caption: 'Cut the selected cells',
     icon: args => (args.toolbar ? cutIcon : undefined),
     execute: async () => {
       if (settings?.get('useSystemClipboardForCells').composite as boolean) {
@@ -303,8 +300,8 @@ export const setupCommands = (
   });
 
   commands.addCommand(COMMAND_IDS.copy, {
-    label: args => (args.toolbar ? '' : trans.__('Copy the selected cells')),
-    caption: trans.__('Copy the selected cells'),
+    label: args => (args.toolbar ? '' : 'Copy the selected cells'),
+    caption: 'Copy the selected cells',
     icon: args => (args.toolbar ? copyIcon : undefined),
     execute: async () => {
       if (settings?.get('useSystemClipboardForCells').composite as boolean) {
@@ -316,9 +313,8 @@ export const setupCommands = (
   });
 
   commands.addCommand(COMMAND_IDS.paste, {
-    label: args =>
-      args.toolbar ? '' : trans.__('Paste cells from the clipboard'),
-    caption: trans.__('Paste cells from the clipboard'),
+    label: args => (args.toolbar ? '' : 'Paste cells from the clipboard'),
+    caption: 'Paste cells from the clipboard',
     icon: args => (args.toolbar ? pasteIcon : undefined),
     execute: async () => {
       if (settings?.get('useSystemClipboardForCells').composite as boolean) {
@@ -331,10 +327,8 @@ export const setupCommands = (
 
   commands.addCommand(COMMAND_IDS.restartAndRun, {
     label: args =>
-      args.toolbar
-        ? ''
-        : trans.__('Restart the kernel, then re-run the whole notebook'),
-    caption: trans.__('Restart the kernel, then re-run the whole notebook'),
+      args.toolbar ? '' : 'Restart the kernel, then re-run the whole notebook',
+    caption: 'Restart the kernl, then re-run the whole notebook',
     icon: args => (args.toolbar ? fastForwardIcon : undefined),
     execute: () => {
       void sessionContextDialogs
@@ -352,7 +346,7 @@ export const setupCommands = (
     }
   });
 
-  let category = trans.__('Notebook Operations');
+  let category = 'Notebook Operations';
   [
     COMMAND_IDS.interrupt,
     COMMAND_IDS.restart,
@@ -364,7 +358,7 @@ export const setupCommands = (
     COMMAND_IDS.findPrevious
   ].forEach(command => palette.addItem({ command, category }));
 
-  category = trans.__('Notebook Cell Operations');
+  category = 'Notebook Cell Operations';
   [
     COMMAND_IDS.runAndAdvance,
     COMMAND_IDS.run,

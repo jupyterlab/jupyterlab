@@ -50,30 +50,20 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 import { ServiceManager } from '@jupyterlab/services';
-import type { ITranslator } from '@jupyterlab/translation';
-import { TranslationManager } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { COMMAND_IDS, setupCommands } from './commands';
 
-async function main(): Promise<void> {
-  const translator = new TranslationManager(
-    PageConfig.getOption('translationsApiUrl')
-  );
-  await translator.fetch('default');
-
+function main(): void {
   const manager = new ServiceManager();
   void manager.ready.then(() => {
-    createApp(manager, translator);
+    createApp(manager);
   });
 }
 
-function createApp(
-  manager: ServiceManager.IManager,
-  translator: ITranslator
-): void {
+function createApp(manager: ServiceManager.IManager): void {
   // Initialize the command registry with the bindings.
   const commands = new CommandRegistry();
   const useCapture = true;
@@ -92,8 +82,7 @@ function createApp(
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
     latexTypesetter: new MathJaxTypesetter(),
-    markdownParser: createMarkdownParser(languages),
-    translator
+    markdownParser: createMarkdownParser(languages)
   });
 
   const opener = {
@@ -112,12 +101,11 @@ function createApp(
     }
   };
 
-  const docRegistry = new DocumentRegistry({ translator });
+  const docRegistry = new DocumentRegistry();
   const docManager = new DocumentManager({
     registry: docRegistry,
     manager,
-    opener,
-    translator
+    opener
   });
   const mFactory = new NotebookModelFactory({});
   const editorExtensions = () => {
@@ -182,7 +170,7 @@ function createApp(
   const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
-  const sessionContextDialogs = new SessionContextDialogs({ translator });
+  const sessionContextDialogs = new SessionContextDialogs();
   const toolbarFactory = (panel: NotebookPanel) =>
     [
       COMMAND_IDS.save,
@@ -205,25 +193,18 @@ function createApp(
         })
       }))
       .concat([
-        {
-          name: 'cellType',
-          widget: ToolbarItems.createCellTypeItem(panel, translator)
-        },
+        { name: 'cellType', widget: ToolbarItems.createCellTypeItem(panel) },
         { name: 'spacer', widget: Toolbar.createSpacerItem() },
         {
           name: 'kernelName',
           widget: AppToolbar.createKernelNameItem(
             panel.sessionContext,
-            sessionContextDialogs,
-            translator
+            sessionContextDialogs
           )
         },
         {
           name: 'executionProgress',
-          widget: ExecutionIndicator.createExecutionIndicatorItem(
-            panel,
-            translator
-          )
+          widget: ExecutionIndicator.createExecutionIndicatorItem(panel)
         }
       ]);
 
@@ -237,7 +218,6 @@ function createApp(
     rendermime,
     contentFactory,
     mimeTypeService,
-    translator,
     toolbarFactory,
     notebookConfig: {
       ...StaticNotebook.defaultNotebookConfig,
@@ -309,14 +289,7 @@ function createApp(
   window.addEventListener('resize', () => {
     panel.update();
   });
-  setupCommands(
-    commands,
-    palette,
-    nbWidget,
-    handler,
-    sessionContextDialogs,
-    translator
-  );
+  setupCommands(commands, palette, nbWidget, handler, sessionContextDialogs);
 
   console.debug('Example started!');
 }
