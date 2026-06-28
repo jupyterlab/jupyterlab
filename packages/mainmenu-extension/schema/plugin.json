@@ -278,6 +278,7 @@
     {
       "command": "editmenu:redo",
       "keys": ["Accel Shift Z"],
+      "macKeys": [""],
       "selector": "[data-jp-undoer]"
     },
     {
