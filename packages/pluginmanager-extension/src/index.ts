@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module pluginmanager-extension
@@ -199,6 +198,6 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [pluginmanager];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [pluginmanager];
 
 export default plugins;
