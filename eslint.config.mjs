@@ -507,6 +507,66 @@ export default defineConfig([
             "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure'] > ObjectExpression > Property[key.name='mode'][value.value='serial']",
           message:
             "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
+        },
+        // no-wait-for-timeout
+        {
+          selector: "CallExpression[callee.property.name='waitForTimeout']",
+          message:
+            'Do not use page.waitForTimeout(). Prefer Utils.waitForCondition or a web-first assertion (e.g. expect(locator).toBeVisible()) that waits on a real condition instead of an arbitrary delay.'
+        },
+        // no-element-handle
+        {
+          selector: "CallExpression[callee.property.name='$']",
+          message:
+            'Do not use page.$(). Use Locators (page.locator(...)), which auto-retry on DOM updates, instead of ElementHandles.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='$$']",
+          message:
+            'Do not use page.$$(). Use Locators (page.locator(...)), which auto-retry on DOM updates, instead of ElementHandles.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='elementHandle']",
+          message:
+            'Do not use elementHandle(). Use Locators, which auto-retry on DOM updates, instead of ElementHandles.'
+        },
+        {
+          selector: "CallExpression[callee.property.name='elementHandles']",
+          message:
+            'Do not use elementHandles(). Use Locators, which auto-retry on DOM updates, instead of ElementHandles.'
+        },
+        // no-networkidle
+        {
+          selector:
+            "CallExpression[callee.property.name='waitForLoadState'] > Literal[value='networkidle']",
+          message:
+            "Do not wait for the 'networkidle' state; it is discouraged by Playwright. Wait on a specific condition (a visible element or a web-first assertion) instead."
+        },
+        {
+          selector:
+            "Property[key.name='waitUntil'] > Literal[value='networkidle']",
+          message:
+            "Do not use waitUntil: 'networkidle'; it is discouraged by Playwright. Wait on a specific condition (a visible element or a web-first assertion) instead."
+        },
+        // prefer-to-have-count / prefer-to-have-length
+        {
+          selector:
+            "CallExpression[callee.object.callee.name='expect'][callee.object.arguments.0.type='AwaitExpression'][callee.object.arguments.0.argument.callee.property.name='count']",
+          message:
+            'Do not assert on expect(await locator.count()). Use expect(locator).toHaveCount(n), which auto-retries until the count matches.'
+        },
+        {
+          selector:
+            "CallExpression[callee.object.callee.name='expect'][callee.object.arguments.0.type='AwaitExpression'][callee.object.arguments.0.argument.property.name='length']",
+          message:
+            'Do not assert on expect(await locator.length). Use expect(locator).toHaveLength(n), which auto-retries until the length matches.'
+        },
+        // prefer-web-first-assertions
+        {
+          selector:
+            "CallExpression[callee.object.callee.name='expect'][callee.object.arguments.0.type='AwaitExpression'][callee.object.arguments.0.argument.callee.property.name=/^(isVisible|isHidden|isEnabled|isDisabled|isChecked|isEditable|textContent|innerText)$/]",
+          message:
+            'Do not assert on expect(await locator.isVisible()/textContent()/...). Use the web-first equivalent (toBeVisible, toBeHidden, toBeEnabled, toBeDisabled, toBeChecked, toBeEditable, toHaveText, etc.), which auto-waits.'
         }
       ]
     }
