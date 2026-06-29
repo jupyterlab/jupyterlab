@@ -1805,6 +1805,54 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterSecondMove.model.executionState).toBe('idle');
         expect(cellAfterSecondMove.model.executionCount).not.toBe(null);
       }, 20000);
+
+      it('should not touch the undo stack when the move is a no-op', async () => {
+        // Create a previous, unrelated undo item (a real move of a cell that
+        // is not running).
+        widget.activeCellIndex = 0;
+        NotebookActions.moveDown(widget);
+
+        const undoManager = (widget.model!.sharedModel as YNotebook)
+          .undoManager;
+        undoManager.stopCapturing();
+
+        // Run the bottom cell so it has an in-flight execution future, which
+        // would otherwise be captured and written onto the undo stack.
+        const lastIndex = widget.widgets.length - 1;
+        const cell = widget.widgets[lastIndex] as CodeCell;
+        widget.activeCellIndex = lastIndex;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(2)');
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        const topItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+        const stackLengthBefore = undoManager.undoStack.length;
+        const metaSizeBefore = topItem.meta.size;
+
+        // Moving the bottom cell "down" is a no-op: `Notebook.moveCell` returns
+        // early because the bounded target equals the source index. The wrapper
+        // must mirror that and avoid attaching execution metadata to the
+        // unrelated previous undo item.
+        widget.activeCellIndex = lastIndex;
+        NotebookActions.moveDown(widget);
+
+        expect(undoManager.undoStack.length).toBe(stackLengthBefore);
+        expect(undoManager.undoStack[undoManager.undoStack.length - 1]).toBe(
+          topItem
+        );
+        expect(topItem.meta.size).toBe(metaSizeBefore);
+
+        // The running cell keeps its future and finishes normally.
+        const inIdleState = waitForExecutionState(cell, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(cell.model.executionState).toBe('idle');
+        expect(cell.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#copy()', () => {
