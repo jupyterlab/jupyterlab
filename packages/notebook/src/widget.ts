@@ -3423,8 +3423,8 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
-      // Move the cells one by one
-      this.moveCell(fromIndex, toIndex, toMove.length);
+      // Move the selected block of cells, preserving in-flight executions.
+      NotebookActions.moveCells(this, fromIndex, toIndex, toMove.length);
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
