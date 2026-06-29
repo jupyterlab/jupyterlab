@@ -1277,7 +1277,7 @@ describe('drive', () => {
       expect(called).toBe(true);
     });
 
-    it('should no get directory and file content by default', async () => {
+    it('should not get directory and file content by default', async () => {
       let content: Contents.IModel[];
       let path = '';
       let listing = await contents.get('src');
