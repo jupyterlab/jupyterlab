@@ -633,6 +633,19 @@ export namespace NotebookActions {
     if (!notebook.model) {
       return;
     }
+
+    // Mirror `Notebook.moveCell`'s bounding/no-op logic so that we do not
+    // capture futures or touch the undo stack when the move won't happen.
+    // Otherwise we could attach execution metadata to an unrelated previous
+    // undo item, corrupting subsequent undo behavior.
+    const boundedTo = Math.min(
+      notebook.model.cells.length - 1,
+      Math.max(0, to)
+    );
+    if (boundedTo === from) {
+      return;
+    }
+
     // moveCells serializes cells to JSON and recreates widgets (delete+insert),
     // which would dispose any in-flight futures. Capture them first.
     const storedExecutions: Private.IStoredCellExecution[] = [];
