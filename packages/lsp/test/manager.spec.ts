@@ -220,13 +220,15 @@ describe('@jupyterlab/lsp', () => {
         warnSpy.mockRestore();
       });
 
-      it('should not restore stale server sessions after disable', async () => {
+      it('should not expose stale server sessions or specs after disable', async () => {
         await manager.fetchSessions();
         expect(manager.sessions.has('pyls' as any)).toEqual(true);
 
         const defaultImplementation = spy.getMockImplementation();
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
         manager.disable();
+        expect(manager.sessions.has('pyls' as any)).toEqual(false);
+        expect(manager.specs.has('pyls' as any)).toEqual(false);
         spy.mockImplementation((status, method, setting) => {
           return Promise.resolve({
             ok: true,

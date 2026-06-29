@@ -113,6 +113,7 @@ export class LanguageServerManager implements ILanguageServerManager {
   disable(): void {
     this._enabled = false;
     this._sessions = new Map();
+    this._specs = new Map();
     this._serverSessions = new Map();
     this._serverSpecs = new Map();
     this._transports.clear();

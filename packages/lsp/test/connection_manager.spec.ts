@@ -3,14 +3,14 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { LabShell } from '@jupyterlab/application';
 import {
   DocumentConnectionManager,
   LanguageServerManager,
   VirtualDocument,
   WidgetLSPAdapterTracker
-} from '../src';
-import type { ILanguageServerProvider } from '../src';
-import { LabShell } from '@jupyterlab/application';
+} from '@jupyterlab/lsp';
+import type { ILanguageServerProvider } from '@jupyterlab/lsp';
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { LSPConnection } from '../src/connection';
@@ -152,18 +152,6 @@ describe('@jupyterlab/lsp', () => {
             transport: { pyright: transportFactory }
           })
         };
-        const connectSpy = jest
-          .spyOn(LSPConnection.prototype, 'connect')
-          .mockImplementation(function (
-            this: LSPConnection,
-            socket: WebSocket
-          ): void {
-            (this as any).socket = socket;
-            (this as any).connection = { dispose: jest.fn() };
-            (this as any)._isConnected = true;
-            (this as any)._isInitialized = true;
-          });
-
         const defaultImplementation = spy.getMockImplementation();
         spy.mockImplementation(() => {
           return Promise.reject(new Error('offline'));
@@ -175,16 +163,12 @@ describe('@jupyterlab/lsp', () => {
           } as any);
           languageServerManager.registerProvider(provider);
           await languageServerManager.fetchSessions();
-          const connection = await manager.connect(
-            {
-              capabilities: {},
-              hasLspSupportedFile: false,
-              language: 'python',
-              virtualDocument: document
-            },
-            0,
-            0
-          );
+          const connection = await (manager as any)._connectSocket({
+            capabilities: {},
+            hasLspSupportedFile: false,
+            language: 'python',
+            virtualDocument: document
+          });
 
           expect(transportFactory).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -195,11 +179,10 @@ describe('@jupyterlab/lsp', () => {
           expect(transportFactory.mock.calls[0][0].socketUrl).toContain(
             'lsp/ws/pyright'
           );
-          expect(connectSpy).toHaveBeenCalledWith(socket);
+          expect((connection as any).socket).toBe(socket);
           expect(connection).toBeDefined();
         } finally {
           manager.disconnect('pyright' as any);
-          connectSpy.mockRestore();
           spy.mockImplementation(defaultImplementation!);
         }
       });
