@@ -341,6 +341,7 @@ test.describe('Notebook Search', () => {
     await page.fill('[placeholder="Find"]', 'with');
     await page.click('button[title="Show Search Filters"]');
     await page.click('text=Search in 1 Selected Cell');
+    await page.locator('text=1/4').waitFor();
 
     // Bring focus to first cell without switching away from command mode
     let cell = await page.notebook.getCellLocator(0);
@@ -354,11 +355,10 @@ test.describe('Notebook Search', () => {
     // Expect the filter text to be updated
     await page.locator('text=Search in 4 Selected Cells').waitFor();
 
-    // Wait for the counter to be updated for the four selected cells.
-    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
-      /^\d+\/19$/,
-      { timeout: 10000 }
-    );
+    // Wait for the counter to reset to the first match in the selection.
+    await page
+      .locator('.jp-DocumentSearch-index-counter:has-text("1/19")')
+      .waitFor({ timeout: 10000 });
 
     // Reset selection, switch to a middle cell, preserving command mode.
     cell = await page.notebook.getCellLocator(2);
