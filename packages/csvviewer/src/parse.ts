@@ -541,14 +541,16 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
 
     // Find field delimiters in the current row.
     col = 1;
-    colIndex = data.indexOf(delimiter, currRow);
 
-    while (colIndex !== -1 && colIndex < rowEnd) {
+    for (colIndex = currRow; colIndex < rowEnd; colIndex++) {
+      if (data[colIndex] !== delimiter) {
+        continue;
+      }
+
       if (columnOffsets === true && (ncols === undefined || col < ncols)) {
         offsets.push(colIndex + 1);
       }
       col++;
-      colIndex = data.indexOf(delimiter, colIndex + 1);
     }
 
     maxNcols = Math.max(maxNcols, col);
