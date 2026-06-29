@@ -45,6 +45,7 @@
   "@jupyterlab/docmanager:IDocumentWidgetOpener": "A service to open a widget.",
   "@jupyterlab/docmanager:IRecentsManager": "A service providing information about recently opened and closed documents",
   "@jupyterlab/documentsearch:ISearchProviderRegistry": "A service for a registry of search\n  providers for the application. Plugins can register their UI elements with this registry\n  to provide find/replace support.",
+  "@jupyterlab/extensionmanager:IExtensionManager": "A service providing the model backing the extension manager. Provide it to list extensions from a custom source.",
   "@jupyterlab/filebrowser:IDefaultFileBrowser": "A service for the default file browser.",
   "@jupyterlab/filebrowser:IDefaultFileBrowserRenderer": "A service for overriding the default file browser directory listing renderer.",
   "@jupyterlab/filebrowser:IFileBrowserCommands": "A token to ensure file browser commands are loaded.",

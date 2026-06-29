@@ -158,15 +158,19 @@ interface IExtensionManagerMetadata {
   /**
    * Extension manager name.
    */
-  name: string;
+  name?: string;
   /**
    * Whether the extension manager can un-/install extensions.
    */
-  can_install: boolean;
+  can_install?: boolean;
   /**
    * Extensions installation path.
    */
-  install_path: string | null;
+  install_path?: string | null;
+  /**
+   * Whether the extension manager can enable/disable extensions (default true).
+   */
+  can_manage?: boolean;
 }
 
 /**
@@ -207,14 +211,22 @@ export class ListModel extends VDomModel {
       PageConfig.getOption('extensionManager') || '{}'
     ) as IExtensionManagerMetadata;
 
-    this.name = metadata.name;
-    this.canInstall = metadata.can_install;
-    this.installPath = metadata.install_path;
     this.translator = translator || nullTranslator;
+    this.name =
+      metadata.name ?? this.translator.load('jupyterlab').__('Extension');
+    this.canInstall = metadata.can_install ?? false;
+    this.canManage = metadata.can_manage ?? true;
+    this.installPath = metadata.install_path ?? null;
     this._installed = [];
     this._lastSearchResult = [];
     this.serviceManager = serviceManager;
     this._debouncedSearch = new Debouncer(this.search.bind(this), 1000);
+
+    if (!this.canInstall) {
+      // A read-only manager neither searches a registry nor installs, so there
+      // is nothing to disclaim.
+      this._isDisclaimed = true;
+    }
   }
 
   /**
@@ -223,9 +235,27 @@ export class ListModel extends VDomModel {
   readonly name: string;
 
   /**
-   * Whether the extension manager support installation methods or not.
+   * Whether the extension manager supports installing extensions.
+   *
+   * When `false`, the manager cannot install, uninstall or search a remote
+   * registry, and the security disclaimer does not apply: extensions are
+   * listed read-only. They can still be enabled or disabled when
+   * {@link canManage} is `true`. Provide a custom model through the
+   * {@link IExtensionManager} token (overriding {@link ListModel.fetchInstalled})
+   * to list extensions from a source other than the default server API.
    */
   readonly canInstall: boolean;
+
+  /**
+   * Whether the extension manager supports enabling and disabling extensions.
+   *
+   * Defaults to `true`: toggling already-installed extensions is independent
+   * of {@link canInstall}, so a read-only manager (such as the server
+   * read-only provider) still exposes enable and disable actions. Set it to
+   * `false` for a pure listing with no actions at all — for example a static
+   * gallery, or a server-less deployment that cannot toggle extensions yet.
+   */
+  readonly canManage: boolean;
 
   /**
    * Extensions installation path.
@@ -422,9 +452,7 @@ export class ListModel extends VDomModel {
     this._isLoadingInstalledExtensions = true;
     this.stateChanged.emit();
     try {
-      const [extensions] = await Private.requestAPI<IEntry[]>({
-        refresh: force ? 1 : 0
-      });
+      const extensions = await this.fetchInstalled(force);
       this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
       this.installedError = reason.toString();
@@ -435,6 +463,22 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Fetch the list of installed extensions.
+   *
+   * @param force Force refreshing the list of installed packages
+   *
+   * #### Notes
+   * This is the data source backing {@link refreshInstalled}; override it to
+   * list extensions from a source other than the default server API.
+   */
+  protected async fetchInstalled(force: boolean): Promise<IEntry[]> {
+    const [extensions] = await Private.requestAPI<IEntry[]>({
+      refresh: force ? 1 : 0
+    });
+    return extensions;
+  }
+
+  /**
    * Search with current query.
    *
    * Sets searchError and totalEntries as appropriate.
@@ -442,6 +486,11 @@ export class ListModel extends VDomModel {
    * @returns The extensions matching the current query.
    */
   protected async search(force = false): Promise<void> {
+    if (!this.canInstall) {
+      // No registry to search; re-render so the query filters the list locally.
+      this.stateChanged.emit();
+      return;
+    }
     if (!this.isDisclaimed) {
       return Promise.reject('Installation warning is not disclaimed.');
     }

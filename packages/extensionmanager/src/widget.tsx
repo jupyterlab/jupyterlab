@@ -495,7 +495,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.isDisclaimed}
+            canFetch={this.model.canManage && this.model.isDisclaimed}
             entries={this.model.installed.filter(pkg =>
               new RegExp(this.model.query.toLowerCase()).test(pkg.name)
             )}
@@ -505,7 +505,9 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
+              this.model.canManage && this.model.isDisclaimed
+                ? this.onAction.bind(this)
+                : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -602,7 +604,7 @@ class SearchResult extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.isDisclaimed}
+            canFetch={this.model.canManage && this.model.isDisclaimed}
             entries={this.model.searchResult}
             initialPage={this.model.page}
             numPages={this.model.lastPage}
@@ -610,7 +612,9 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
+              this.model.canManage && this.model.isDisclaimed
+                ? this.onAction.bind(this)
+                : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -649,10 +653,11 @@ export class ExtensionsPanel extends SidePanel {
 
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
-    const warning = new Warning(model, this.trans);
-    warning.title.label = this.trans.__('Warning');
-
-    this.addWidget(warning);
+    if (model.canInstall) {
+      const warning = new Warning(model, this.trans);
+      warning.title.label = this.trans.__('Warning');
+      this.addWidget(warning);
+    }
 
     const installed = new PanelWithToolbar();
     installed.addClass('jp-extensionmanager-installedlist');
@@ -688,14 +693,16 @@ export class ExtensionsPanel extends SidePanel {
     }
 
     this._wasDisclaimed = this.model.isDisclaimed;
-    if (this.model.isDisclaimed) {
-      (this.content as AccordionPanel).collapse(0);
-      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
-    } else {
-      // If warning is not disclaimed expand only the warning panel
-      (this.content as AccordionPanel).expand(0);
-      (this.content as AccordionPanel).collapse(1);
-      (this.content as AccordionPanel).collapse(2);
+    if (this.model.canInstall) {
+      if (this.model.isDisclaimed) {
+        (this.content as AccordionPanel).collapse(0);
+        (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
+      } else {
+        // If warning is not disclaimed expand only the warning panel
+        (this.content as AccordionPanel).expand(0);
+        (this.content as AccordionPanel).collapse(1);
+        (this.content as AccordionPanel).collapse(2);
+      }
     }
 
     this.model.stateChanged.connect(this._onStateChanged, this);
@@ -799,7 +806,11 @@ export class ExtensionsPanel extends SidePanel {
   }
 
   private _onStateChanged(): void {
-    if (!this._wasDisclaimed && this.model.isDisclaimed) {
+    if (
+      this.model.canInstall &&
+      !this._wasDisclaimed &&
+      this.model.isDisclaimed
+    ) {
       (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
       (this.content as AccordionPanel).expand(2);
