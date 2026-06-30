@@ -4,7 +4,7 @@
  */
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ArrayExt, StringExt } from '@lumino/algorithm';
-import type { CommandRegistry } from '@lumino/commands';
+import { CommandRegistry } from '@lumino/commands';
 import type { PartialJSONArray } from '@lumino/coreutils';
 import type {
   IKeybinding,
@@ -73,7 +73,8 @@ export class ShortcutRegistry
         const keybindingKey = this._computeKeybindingId(shortcut);
 
         const keybinding: IKeybinding = {
-          keys: shortcut.keys,
+          // Resolve platform-specific keys (`winKeys`/`linuxKeys`/`macKeys` with fallback to `keys`)
+          keys: CommandRegistry.normalizeKeys(shortcut),
           isDefault: !setByUser.has(keybindingKey)
         };
 
@@ -142,7 +143,7 @@ export class ShortcutRegistry
       shortcut.command,
       shortcut.selector,
       JSON.stringify(shortcut.args ?? {}),
-      shortcut.keys.join(' ')
+      CommandRegistry.normalizeKeys(shortcut).join(' ')
     ].join('_');
   }
 }
