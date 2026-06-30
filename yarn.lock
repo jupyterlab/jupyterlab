@@ -3401,6 +3401,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@jupyterlab/example-localization@workspace:examples/localization":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/example-localization@workspace:examples/localization"
+  dependencies:
+    "@jupyterlab/application": ^4.6.0
+    "@jupyterlab/coreutils": ^6.6.0
+    "@jupyterlab/theme-light-extension": ^4.6.0
+    "@jupyterlab/translation": ^4.6.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
+    css-loader: ^6.7.1
+    mini-svg-data-uri: ^1.4.4
+    rimraf: ~5.0.5
+    style-loader: ~3.3.1
+    typescript: ~5.9.3
+  languageName: unknown
+  linkType: soft
+
 "@jupyterlab/example-notebook@workspace:examples/notebook":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
