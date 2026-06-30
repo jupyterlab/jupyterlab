@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module terminal-extension
@@ -29,8 +28,11 @@ import type { Terminal } from '@jupyterlab/services';
 import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
-import type { ITerminal } from '@jupyterlab/terminal';
-import { ITerminalTracker, Terminal as XTerm } from '@jupyterlab/terminal';
+import {
+  ITerminal,
+  ITerminalTracker,
+  Terminal as XTerm
+} from '@jupyterlab/terminal';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
@@ -73,6 +75,10 @@ namespace CommandIDs {
  * The duration in milliseconds to display the escape hint.
  */
 const ESCAPE_HINT_DISPLAY_MS = 1500;
+
+const TERMINAL_OPTION_KEYS = new Set<string>(
+  Object.keys(ITerminal.defaultOptions)
+);
 
 /**
  * The default terminal extension.
@@ -231,8 +237,13 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as any)[key] = settings.composite[key];
+    Object.keys(options).forEach(key => {
+      Reflect.deleteProperty(options, key);
+    });
+    Object.entries(settings.composite).forEach(([key, value]) => {
+      if (Private.isTerminalOption(key)) {
+        Object.assign(options, { [key]: value });
+      }
     });
   }
 
@@ -813,6 +824,15 @@ function addCommands(
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Whether a setting key is a terminal widget option.
+   */
+  export function isTerminalOption(
+    key: string
+  ): key is keyof ITerminal.IOptions {
+    return TERMINAL_OPTION_KEYS.has(key);
+  }
+
   /**
    *  Utility function for consistent error reporting
    */

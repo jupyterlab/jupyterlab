@@ -277,6 +277,12 @@
     },
     {
       "command": "editmenu:redo",
+      "keys": ["Accel Shift Z"],
+      "macKeys": [""],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "editmenu:redo",
       "winKeys": ["Ctrl Y"],
       "linuxKeys": ["Ctrl Y"],
       "keys": ["Accel Shift Z"],

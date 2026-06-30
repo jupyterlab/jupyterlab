@@ -94,6 +94,13 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
+   * The known language server specifications.
+   */
+  readonly specs: TSpecsMap;
+
+  /**
+   * @alpha
+   *
    * Get server connection settings.
    */
   readonly settings: ServerConnection.ISettings;
@@ -754,6 +761,7 @@ export namespace Method {
     COMPLETION = 'textDocument/completion',
     COMPLETION_ITEM_RESOLVE = 'completionItem/resolve',
     DEFINITION = 'textDocument/definition',
+    DIAGNOSTIC = 'textDocument/diagnostic',
     DOCUMENT_COLOR = 'textDocument/documentColor',
     DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight',
     DOCUMENT_SYMBOL = 'textDocument/documentSymbol',
@@ -825,6 +833,7 @@ export interface IClientRequestParams {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
   [Method.ClientRequest.DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DIAGNOSTIC]: lsp.DocumentDiagnosticParams;
   [Method.ClientRequest.DOCUMENT_COLOR]: lsp.DocumentColorParams;
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbolParams;
@@ -835,6 +844,7 @@ export interface IClientRequestParams {
   [Method.ClientRequest.RENAME]: lsp.RenameParams;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.LINKED_EDITING_RANGE]: lsp.LinkedEditingRangeParams;
   [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValueParams;
   [Method.ClientRequest.INLAY_HINT]: lsp.InlayHintParams;
   [Method.ClientRequest.WORKSPACE_SYMBOL]: lsp.WorkspaceSymbolParams;
@@ -851,6 +861,7 @@ export interface IClientResult {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: AnyCompletion;
   [Method.ClientRequest.DEFINITION]: AnyLocation;
+  [Method.ClientRequest.DIAGNOSTIC]: lsp.DocumentDiagnosticReport;
   [Method.ClientRequest.DOCUMENT_COLOR]: lsp.ColorInformation[];
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
@@ -861,6 +872,7 @@ export interface IClientResult {
   [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
+  [Method.ClientRequest.LINKED_EDITING_RANGE]: lsp.LinkedEditingRanges | null;
   [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValue[] | null;
   [Method.ClientRequest.INLAY_HINT]: lsp.InlayHint[] | null;
   [Method.ClientRequest.WORKSPACE_SYMBOL]:
@@ -1018,6 +1030,22 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
   /**
    * @alpha
    *
+   * Send a client request to the language server.
+   *
+   * @param method - The LSP method to request.
+   * @param params - The parameters for the request.
+   * @param options - Options for the request.
+   * @returns The response from the language server.
+   */
+  request<M extends Method.ClientRequest>(
+    method: M,
+    params: IClientRequestParams[M],
+    options?: ILSPConnection.IRequestOptions
+  ): Promise<IClientResult[M]>;
+
+  /**
+   * @alpha
+   *
    * Lists server capabilities.
    */
   serverCapabilities: lsp.ServerCapabilities;
@@ -1043,4 +1071,16 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * Send all changes to the server.
    */
   sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
+}
+
+export namespace ILSPConnection {
+  /**
+   * Options for an LSP request.
+   */
+  export interface IRequestOptions {
+    /**
+     * A signal used to cancel the request.
+     */
+    signal?: AbortSignal;
+  }
 }

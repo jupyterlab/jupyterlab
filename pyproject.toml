@@ -136,6 +136,7 @@ docs = [
     "shellcheck-py",
     "sphinx>=1.8,<8.2.0",
     "sphinx-copybutton",
+    "sphinxcontrib-mermaid",
     "sphinxcontrib-spelling",
 ]
 

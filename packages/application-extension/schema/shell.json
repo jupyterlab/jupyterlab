@@ -24,6 +24,7 @@
       "default": "display"
     },
     "startMode": {
+      "type": "string",
       "oneOf": [
         { "const": "", "title": "Default" },
         { "const": "single", "title": "Single" },
@@ -98,6 +99,7 @@
           "type": "object",
           "properties": {
             "area": {
+              "type": "string",
               "oneOf": [
                 { "const": "main", "title": "Main" },
                 { "const": "left", "title": "Left" },
