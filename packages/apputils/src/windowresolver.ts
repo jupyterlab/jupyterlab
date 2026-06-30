@@ -197,8 +197,12 @@ namespace Private {
     let localStorage: Storage;
     try {
       localStorage = window.localStorage;
-    } catch {
+    } catch (reason) {
       // Sandboxed documents may not have access to local storage.
+      console.warn(
+        'WindowResolver could not access localStorage; accepting the candidate name.',
+        reason
+      );
       accept(potential);
       return delegate.promise;
     }
@@ -223,7 +227,11 @@ namespace Private {
     currentBeaconRequest = `${Math.random()}-${new Date().getTime()}`;
     try {
       localStorage.setItem(BEACON, currentBeaconRequest);
-    } catch {
+    } catch (reason) {
+      console.warn(
+        'WindowResolver could not write to localStorage; accepting the candidate name.',
+        reason
+      );
       accept(potential);
     }
 
