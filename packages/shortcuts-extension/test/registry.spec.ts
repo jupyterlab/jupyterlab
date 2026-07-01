@@ -99,6 +99,29 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(targets[0].keybindings).toHaveLength(2);
       });
 
+      it('should resolve platform-specific keys', () => {
+        // The `keys` value is the cross-platform fallback; `winKeys`/`linuxKeys`/
+        // `macKeys` take precedence on their respective platform (as done by
+        // Lumino's `addKeyBinding`). The registry should expose the resolved
+        // keys so the UI reflects the binding that is actually active.
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel Shift Z'],
+          winKeys: ['Ctrl Y'],
+          linuxKeys: ['Ctrl Y'],
+          selector: 'body'
+        } as CommandRegistry.IKeyBindingOptions);
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const target = [...shortcutRegistry.values()][0];
+        expect(target.keybindings[0].keys).toEqual(
+          CommandRegistry.normalizeKeys({
+            keys: ['Accel Shift Z'],
+            winKeys: ['Ctrl Y'],
+            linuxKeys: ['Ctrl Y']
+          } as CommandRegistry.IKeyBindingOptions)
+        );
+      });
+
       it('should mark keybindings created by user as non-default', () => {
         const shortcut = {
           command: 'test:command',
