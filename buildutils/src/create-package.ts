@@ -38,6 +38,10 @@ void import('inquirer')
     }
     data.name = name;
     data.description = description;
+    // Set the repository directory for monorepo npm metadata (#6443).
+    if (data.repository) {
+      data.repository.directory = `packages/${answers.name}`;
+    }
     utils.writePackageData(jsonPath, data);
 
     // Add the launch file to git.
