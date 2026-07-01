@@ -106,6 +106,8 @@ export namespace CommandIDs {
 
   export const matchBrackets = 'viewmenu:match-brackets';
 
+  export const showToolbar = 'viewmenu:show-toolbar';
+
   export const openRun = 'runmenu:open';
 
   export const run = 'runmenu:run';
@@ -812,6 +814,25 @@ function createViewMenu(
     semanticCommands: menu.editorViewers.toggleWordWrap,
     default: {
       label: trans.__('Wrap Words')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+
+  addSemanticCommand({
+    id: CommandIDs.showToolbar,
+    commands,
+    shell,
+    semanticCommands: menu.editorViewers.toggleToolbar,
+    default: {
+      label: trans.__('Show Toolbar')
     },
     overrides: {
       describedBy: {
