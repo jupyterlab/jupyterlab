@@ -6,7 +6,7 @@
 
 # Extension Migration Guide
 
-## JupyterLab 4.5 to 4.6 (not released yet)
+## JupyterLab 4.5 to 4.6
 
 ### Migrating to `jupyter-builder`
 
