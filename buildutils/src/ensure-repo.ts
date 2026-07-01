@@ -66,7 +66,8 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-sql',
     '@codemirror/lang-wast',
     '@codemirror/lang-xml',
-    '@codemirror/legacy-modes'
+    '@codemirror/legacy-modes',
+    '@plutojl/lang-julia'
   ],
   '@jupyterlab/codemirror-extension': [
     '@codemirror/lang-markdown',
