@@ -18,11 +18,16 @@ import type {
 import type { ImageViewer } from '@jupyterlab/imageviewer';
 import { IImageTracker, ImageViewerFactory } from '@jupyterlab/imageviewer';
 import { ITranslator } from '@jupyterlab/translation';
+import { CommandToolbarButton } from '@jupyterlab/ui-components';
 
 /**
  * The command IDs used by the image widget plugin.
  */
 namespace CommandIDs {
+  export const fitToScreen = 'imageviewer:fit-to-screen';
+
+  export const resetZoom = 'imageviewer:reset-zoom';
+
   export const resetImage = 'imageviewer:reset-image';
 
   export const zoomIn = 'imageviewer:zoom-in';
@@ -115,6 +120,35 @@ function activate(
       widget.title.iconClass = types[0].iconClass ?? '';
       widget.title.iconLabel = types[0].iconLabel ?? '';
     }
+
+    widget.toolbar.addItem(
+      'zoom-out',
+      new CommandToolbarButton({
+        commands: app.commands,
+        id: CommandIDs.zoomOut
+      })
+    );
+    widget.toolbar.addItem(
+      'zoom-in',
+      new CommandToolbarButton({
+        commands: app.commands,
+        id: CommandIDs.zoomIn
+      })
+    );
+    widget.toolbar.addItem(
+      'reset-zoom',
+      new CommandToolbarButton({
+        commands: app.commands,
+        id: CommandIDs.resetZoom
+      })
+    );
+    widget.toolbar.addItem(
+      'fit-to-screen',
+      new CommandToolbarButton({
+        commands: app.commands,
+        id: CommandIDs.fitToScreen
+      })
+    );
   }
 
   const factory = new ImageViewerFactory({
@@ -165,6 +199,8 @@ function activate(
     [
       CommandIDs.zoomIn,
       CommandIDs.zoomOut,
+      CommandIDs.resetZoom,
+      CommandIDs.fitToScreen,
       CommandIDs.resetImage,
       CommandIDs.rotateClockwise,
       CommandIDs.rotateCounterclockwise,
@@ -227,6 +263,30 @@ function addCommands(
   commands.addCommand(CommandIDs.resetImage, {
     execute: resetImage,
     label: trans.__('Reset Image'),
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.resetZoom, {
+    execute: resetZoom,
+    label: trans.__('Reset Zoom (100%)'),
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.fitToScreen, {
+    execute: fitToScreen,
+    label: trans.__('Fit to Screen'),
     isEnabled,
     describedBy: {
       args: {
@@ -307,7 +367,7 @@ function addCommands(
     const widget = tracker.currentWidget?.content;
 
     if (widget) {
-      widget.scale = widget.scale > 1 ? widget.scale + 0.5 : widget.scale * 2;
+      widget.zoomIn();
     }
   }
 
@@ -315,7 +375,7 @@ function addCommands(
     const widget = tracker.currentWidget?.content;
 
     if (widget) {
-      widget.scale = widget.scale > 1 ? widget.scale - 0.5 : widget.scale / 2;
+      widget.zoomOut();
     }
   }
 
@@ -323,9 +383,26 @@ function addCommands(
     const widget = tracker.currentWidget?.content;
 
     if (widget) {
-      widget.scale = 1;
+      widget.resetZoom();
       widget.colorinversion = 0;
       widget.resetRotationFlip();
+      widget.fitToScreen();
+    }
+  }
+
+  function resetZoom(): void {
+    const widget = tracker.currentWidget?.content;
+
+    if (widget) {
+      widget.resetZoom();
+    }
+  }
+
+  function fitToScreen(): void {
+    const widget = tracker.currentWidget?.content;
+
+    if (widget) {
+      widget.fitToScreen();
     }
   }
 
