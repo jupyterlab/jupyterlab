@@ -3253,9 +3253,7 @@
     "id": "filemenu:close-and-cleanup",
     "label": "Close and Shut Down",
     "caption": "",
-    "shortcuts": [
-      "Ctrl Shift Q"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
