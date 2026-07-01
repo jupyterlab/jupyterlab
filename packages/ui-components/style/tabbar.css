@@ -17,13 +17,46 @@
 }
 
 .lm-DockPanel-tabBar .lm-TabBar-tab {
-  width: var(--jp-private-horizontal-tab-width);
+  width: auto;
 }
 
 .lm-DockPanel-tabBar .lm-TabBar-content {
-  flex: unset;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .lm-DockPanel-tabBar[data-orientation='horizontal'] {
   flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.lm-DockPanel-tabBar[data-orientation='horizontal'] > .lm-TabBar-content {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  z-index: 3;
+}
+
+.lm-TabBar-content::-webkit-scrollbar {
+  height: 2px;
+  background: var(--jp-layout-color1);
+}
+
+.lm-TabBar-content::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.lm-TabBar-content::-webkit-scrollbar-track {
+  background: var(--jp-layout-color1);
+}
+
+.lm-TabBar-content::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+.lm-TabBar-content:hover::-webkit-scrollbar-thumb {
+  background: rgba(160, 160, 160, 0.6);
 }
