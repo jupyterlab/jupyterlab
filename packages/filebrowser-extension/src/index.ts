@@ -284,6 +284,9 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             const value = settings.get(key).composite as boolean;
             browser[key] = value;
           }
+          browser.timestampFormat = settings.get('timestampFormat')
+            .composite as 'absolute' | 'relative';
+
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
           browser.minimumBreadcrumbsLeftItems = breadcrumbs.minimumLeftItems;
