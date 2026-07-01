@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
-import { SessionContextDialogs } from '@jupyterlab/apputils';
+import { SessionContextDialogs, showErrorMessage } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type {
@@ -629,6 +629,15 @@ export class DocumentManager implements IDocumentManager {
    */
   private _onContextDisposed(context: Private.IContext): void {
     ArrayExt.removeFirstOf(this._contexts, context);
+
+    // If no more contexts remain for this path, notify the server
+    // that the file is no longer being edited across any client.
+    const remaining = this._contextsForPath(context.path);
+    if (remaining.length === 0) {
+      this.services.contents.close?.(context.path).catch(() => {
+        // Server may not support open/close endpoints.
+      });
+    }
   }
 
   /**
@@ -719,6 +728,10 @@ export class DocumentManager implements IDocumentManager {
     ready.catch(err => {
       console.error(
         `Failed to initialize the context with '${factory.name}' for ${path}`,
+        err
+      );
+      void showErrorMessage(
+        this.translator.load('jupyterlab').__('File Open Error'),
         err
       );
       widget.close();
