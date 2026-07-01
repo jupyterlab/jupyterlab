@@ -2301,7 +2301,8 @@ function activateNotebookHandler(
         | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
         .composite as boolean,
-      showMinimap: settings.get('showMinimap').composite as boolean
+      showMinimap: settings.get('showMinimap').composite as boolean,
+      autoScroll: settings.get('autoScroll').composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -3163,13 +3164,10 @@ function addCommands(
       }
       const { context, content } = current;
 
-      const cells = content.widgets;
       const restarted = await sessionDialogs.restart(current.sessionContext);
-
       if (restarted) {
-        return NotebookActions.runCells(
+        return NotebookActions.runAll(
           content,
-          cells,
           context.sessionContext,
           sessionDialogs,
           translator
