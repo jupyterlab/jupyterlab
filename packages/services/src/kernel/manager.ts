@@ -282,7 +282,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     let models: Kernel.IModel[];
     try {
       models = await this._kernelAPIClient.listRunning();
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.

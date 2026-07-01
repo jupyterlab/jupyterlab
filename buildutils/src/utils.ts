@@ -16,6 +16,10 @@ import assert from 'assert';
 
 type Dict<T> = { [key: string]: T };
 
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && 'code' in error;
+}
+
 const backSlash = /\\/g;
 
 /**
@@ -48,7 +52,7 @@ export function getLernaPaths(basePath = '.'): string[] {
       packages = baseConfig.packages;
     }
   } catch (e) {
-    if (e.code === 'MODULE_NOT_FOUND') {
+    if (isNodeError(e) && e.code === 'MODULE_NOT_FOUND') {
       throw new Error(
         `No yarn workspace / lerna package list found in ${basePath}`
       );

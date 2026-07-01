@@ -392,7 +392,7 @@ export class PluginListModel extends VDomModel {
         })
       );
     } catch (reason) {
-      this.statusError = reason.toString();
+      this.statusError = String(reason);
     } finally {
       this._isLoading = false;
       this.stateChanged.emit();
@@ -443,7 +443,9 @@ export class PluginListModel extends VDomModel {
         settings
       );
     } catch (error) {
-      throw new ServerConnection.NetworkError(error);
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();
