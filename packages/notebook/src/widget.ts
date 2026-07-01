@@ -1476,7 +1476,7 @@ export namespace StaticNotebook {
     recordTiming: false,
     inputHistoryScope: 'global',
     maxNumberOutputs: 50,
-    showEditorForReadOnlyMarkdown: true,
+    showEditorForReadOnlyMarkdown: false,
     disableDocumentWideUndoRedo: true,
     autoRenderMarkdownCells: false,
     renderingLayout: 'default',
