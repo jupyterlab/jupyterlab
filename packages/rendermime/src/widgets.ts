@@ -9,7 +9,7 @@ import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import PromiseDelegate from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as renderers from './renderers';
@@ -460,25 +460,6 @@ export class RenderedText extends RenderedCommon {
     this._wrapper.style.width = '100%';
     this.node.appendChild(this._wrapper);
     this._ready.resolve(void 0);
-    /*
-    this._iframe = document.createElement('iframe');
-    this._iframe.width = '100%';
-    this._iframe.style.border = '0';
-    this.node.appendChild(this._iframe);
-    this._iframe.onload = () => {
-      const body = this._iframe.contentWindow!.document.createElement('body');
-      const style = this._iframe.contentWindow!.document.createElement('style');
-      style.innerHTML = 'pre { margin: 0; white-space: pre-wrap; word-break: break-all;word-wrap: break-word;}'
-      const resizeObserver = new ResizeObserver((entries) => {
-        //
-        this._iframe.style.height = entries[0].contentRect.height + 'px';
-      });
-      resizeObserver.observe(body);
-      body.style.margin = '0px';
-      this._iframe.contentWindow!.document.body = body;
-      this._iframe.contentWindow!.document.head.appendChild(style);
-      this._ready.resolve(void 0);
-    };*/
   }
 
   /**
@@ -491,14 +472,13 @@ export class RenderedText extends RenderedCommon {
   async render(model: IRenderMime.IMimeModel): Promise<void> {
     await this._ready.promise;
     return renderers.renderText({
-      host: this._wrapper, //this._iframe.contentDocument?.body!,
+      host: this._wrapper,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
       translator: this.translator
     });
   }
 
-  protected _iframe: HTMLIFrameElement;
   protected _wrapper: HTMLElement;
   protected _ready = new PromiseDelegate<void>();
 }
@@ -507,7 +487,7 @@ export class RenderedError extends RenderedText {
   async render(model: IRenderMime.IMimeModel): Promise<void> {
     await this._ready.promise;
     return renderers.renderError({
-      host: this._wrapper, //this._iframe.contentDocument?.body!,
+      host: this._wrapper,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
       linkHandler: this.linkHandler,
