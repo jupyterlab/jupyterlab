@@ -57,7 +57,7 @@ def main():
                     runner = osp.join(here, "example_check.py")
                     subprocess.check_call([sys.executable, runner, path], cwd=cwd)  # noqa S603
                     count += 1
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError:  # noqa: PERF203
             failed.append(path)
 
     if failed:

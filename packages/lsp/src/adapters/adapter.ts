@@ -525,21 +525,40 @@ export abstract class WidgetLSPAdapter<
     virtualDocument: VirtualDocument,
     sendOpen = false
   ): Promise<void> {
-    virtualDocument.foreignDocumentOpened.connect(
-      this.onForeignDocumentOpened,
-      this
-    );
-    const connectionContext = await this._connect(virtualDocument).catch(
-      console.error
-    );
+    if (this._isDisposed || virtualDocument.isDisposed) {
+      return;
+    }
 
-    if (connectionContext && connectionContext.connection) {
-      virtualDocument.changed.connect(this.documentChanged, this);
-      if (sendOpen) {
-        connectionContext.connection.sendOpenWhenReady(
-          virtualDocument.documentInfo
-        );
+    const pendingConnection =
+      this._pendingDocumentConnections.get(virtualDocument);
+    if (pendingConnection) {
+      return pendingConnection;
+    }
+
+    const connectionPromise = (async () => {
+      virtualDocument.foreignDocumentOpened.connect(
+        this.onForeignDocumentOpened,
+        this
+      );
+      const connectionContext = await this._connect(virtualDocument).catch(
+        console.error
+      );
+
+      if (connectionContext && connectionContext.connection) {
+        virtualDocument.changed.connect(this.documentChanged, this);
+        if (sendOpen) {
+          connectionContext.connection.sendOpenWhenReady(
+            virtualDocument.documentInfo
+          );
+        }
       }
+    })();
+    this._pendingDocumentConnections.set(virtualDocument, connectionPromise);
+
+    try {
+      await connectionPromise;
+    } finally {
+      this._pendingDocumentConnections.delete(virtualDocument);
     }
   }
 
@@ -549,7 +568,7 @@ export abstract class WidgetLSPAdapter<
   protected initVirtual(): void {
     this._virtualDocument?.dispose();
     this._virtualDocument = this.createVirtualDocument();
-    this._onLspSessionOrFeatureChanged();
+    this._toggleVirtualDocumentUpdates();
   }
 
   /**
@@ -616,6 +635,11 @@ export abstract class WidgetLSPAdapter<
   private _updateFinished: Promise<void>;
   private _virtualDocument: VirtualDocument | null = null;
   private _editorToAdapter: WeakMap<Document.IEditor, EditorAdapter>;
+  private _pendingDocumentConnections = new WeakMap<
+    VirtualDocument,
+    Promise<void>
+  >();
+  private _queuedConnectionRetries = new WeakSet<VirtualDocument>();
 
   private _onEditorAdded(
     sender: WidgetLSPAdapter<T>,
@@ -697,6 +721,10 @@ export abstract class WidgetLSPAdapter<
 
     let connection = await this.connectionManager.connect(options);
 
+    if (this._isDisposed || virtualDocument.isDisposed) {
+      return undefined;
+    }
+
     if (connection) {
       await this.onConnected({ virtualDocument, connection });
 
@@ -755,6 +783,10 @@ export abstract class WidgetLSPAdapter<
    * the LSP server status changed or when a LSP feature is registered.
    */
   private _onLspSessionOrFeatureChanged(): void {
+    this._toggleVirtualDocumentUpdates(true);
+  }
+
+  private _toggleVirtualDocumentUpdates(retryConnection = false): void {
     if (!this._virtualDocument) {
       return;
     }
@@ -763,8 +795,49 @@ export abstract class WidgetLSPAdapter<
 
     if (this._shouldUpdateVirtualDocument()) {
       model.contentChanged.connect(this._onContentChanged, this);
+      if (retryConnection) {
+        this._connectVirtualDocumentIfNeeded(this._virtualDocument);
+      }
     } else {
       model.contentChanged.disconnect(this._onContentChanged, this);
     }
+  }
+
+  private _connectVirtualDocumentIfNeeded(
+    virtualDocument: VirtualDocument
+  ): void {
+    if (
+      this._isDisposed ||
+      virtualDocument.isDisposed ||
+      this.connectionManager.connections.has(virtualDocument.uri)
+    ) {
+      return;
+    }
+
+    const pendingConnection =
+      this._pendingDocumentConnections.get(virtualDocument);
+    if (pendingConnection) {
+      if (this._queuedConnectionRetries.has(virtualDocument)) {
+        return;
+      }
+      this._queuedConnectionRetries.add(virtualDocument);
+      void pendingConnection
+        .finally(() => {
+          if (!this._queuedConnectionRetries.delete(virtualDocument)) {
+            return;
+          }
+          if (
+            this._virtualDocument === virtualDocument &&
+            this._shouldUpdateVirtualDocument() &&
+            !this.connectionManager.connections.has(virtualDocument.uri)
+          ) {
+            this._connectVirtualDocumentIfNeeded(virtualDocument);
+          }
+        })
+        .catch(console.warn);
+      return;
+    }
+
+    this.connectDocument(virtualDocument, false).catch(console.warn);
   }
 }

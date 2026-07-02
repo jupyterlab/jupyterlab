@@ -40,6 +40,8 @@ export type InstallHelp = string;
 /**
  * languages supported by this Language Server
  *
+ * @minItems 1
+ *
  * This interface was referenced by `JupyterLspServerStatusResponse`'s JSON-Schema
  * via the `definition` "language-list".
  */
@@ -54,7 +56,7 @@ export type LanguageList = [string, ...string[]];
  * via the `patternProperty` ".*".
  */
 export type LanguageServerSpec = ServerSpecProperties & {
-  [k: string]: any;
+  [k: string]: unknown;
 };
 /**
  * the arguments to start the language server normally
@@ -73,7 +75,9 @@ export type DisplayName = string;
  */
 export type Extensions = LanguageServerExtension[];
 /**
- * list of MIME types supported by the language server
+ * languages supported by this Language Server
+ *
+ * @minItems 1
  */
 export type MIMETypes = [string, ...string[]];
 /**
@@ -103,7 +107,7 @@ export type ShellArgs = string[];
  * describes the current state of (potentially) running language servers
  */
 export interface JupyterLspServerStatusResponse {
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
  * a JSON schema to configure the Language Server or extension behavior from the client
@@ -112,7 +116,7 @@ export interface JupyterLspServerStatusResponse {
  * via the `definition` "client-config-schema".
  */
 export interface ClientConfigurationSchema {
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
  * a list of installation approaches keyed by package manager, e.g. pip, npm, yarn, apt
@@ -133,7 +137,7 @@ export interface LanguageServerExtension {
   config_schema?: ClientConfigurationSchema;
   display_name?: string;
   install?: Installation;
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
  * all properties that might be required to start and/or describe a Language Server
@@ -159,13 +163,13 @@ export interface ServerSpecProperties {
   urls?: URLs;
   version?: SpecSchemaVersion;
   workspace_configuration?: WorkspaceConfiguration;
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
- * a JSON schema to configure the Language Server behavior from the client
+ * a JSON schema to configure the Language Server or extension behavior from the client
  */
 export interface ClientConfigurationSchema1 {
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
  * additional environment variables to set when starting the language server
@@ -191,7 +195,7 @@ export interface URLs {
  * default values to include in the client `workspace/configuration` reply (also known as `serverSettings`). User may override these defaults. The keys should be fully qualified (dotted) names of settings (nested specification is not supported).
  */
 export interface WorkspaceConfiguration {
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
  * This interface was referenced by `JupyterLspServerStatusResponse`'s JSON-Schema
@@ -201,7 +205,7 @@ export interface ServersResponse {
   sessions: Sessions;
   specs?: LanguageServerSpecsMap;
   version: SpecSchemaVersion;
-  [k: string]: any;
+  [k: string]: unknown;
 }
 /**
  * named server sessions that are, could be, or were running
