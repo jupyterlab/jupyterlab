@@ -22,7 +22,7 @@ const licenseFormats = [
   { name: 'JSON', extension: 'json', validation: isValidJSON }
 ];
 
-test('Switch back and forth to reference page', async ({ page }) => {
+test('Switch back and forth to an iframe', async ({ page }) => {
   // The goal is to test switching back and forth with a tab containing an iframe
   const notebookFilename = 'test-switch-doc-notebook';
   const cellContent = '# First cell';
@@ -33,14 +33,20 @@ test('Switch back and forth to reference page', async ({ page }) => {
   // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
   await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-  await page.menu.clickMenuItem('Help>Jupyter Reference');
+  // Open a local page (the unauthenticated Jupyter Server `/api` version
+  // endpoint) in an in-app iframe tab, avoiding a dependency on an external
+  // website which would make this test flaky.
+  await page.evaluate(async () => {
+    const { baseUrl } = window.jupyterapp.serviceManager.serverSettings;
+    await window.jupyterapp.commands.execute('help:open', {
+      url: `${baseUrl}api`,
+      text: 'Server API version'
+    });
+  });
 
   await expect(
-    page
-      .frameLocator('iframe[src="https://jupyter.org/documentation"]')
-      .locator('h1')
-      .first()
-  ).toHaveText('Project Jupyter Documentation#');
+    page.frameLocator('iframe[src$="/api"]').locator('body')
+  ).toContainText('version');
 
   await page.activity.activateTab(notebookFilename);
 

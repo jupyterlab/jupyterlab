@@ -228,7 +228,7 @@ export class Tooltip extends Widget {
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
     const host =
-      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host.closest<HTMLElement>('.jp-MainAreaWidget > .lm-Widget') ??
       editor.host;
 
     // Calculate the geometry of the tooltip.

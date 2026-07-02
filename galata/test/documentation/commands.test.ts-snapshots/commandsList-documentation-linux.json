@@ -212,6 +212,10 @@
             "bottom"
           ],
           "description": "The direction to split the tab"
+        },
+        "id": {
+          "type": "string",
+          "description": "The widget ID to split. Defaults to the context menu target."
         }
       },
       "required": [
@@ -2387,7 +2391,7 @@
     "label": "Redo",
     "caption": "",
     "shortcuts": [
-      "Ctrl Y"
+      "Ctrl Shift Z"
     ],
     "args": {
       "type": "object",
