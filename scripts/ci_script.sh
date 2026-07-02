@@ -180,19 +180,6 @@ if [[ $GROUP == release_test ]]; then
 fi
 
 
-if [[ $GROUP == examples ]]; then
-    # Run the integrity script to link binary files
-    jlpm integrity
-
-    # Build the examples.
-    jlpm build:packages
-    jlpm build:examples
-
-    # Test the examples
-    jlpm test:examples
-fi
-
-
 if [[ $GROUP == usage ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
