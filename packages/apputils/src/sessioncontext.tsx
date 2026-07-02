@@ -282,6 +282,11 @@ export namespace ISessionContext {
     readonly shouldStart?: boolean;
 
     /**
+     * Reuse an existing session on the current path (default `true`).
+     */
+    readonly shouldReuse?: boolean;
+
+    /**
      * A kernel can be started (default `true`).
      */
     readonly canStart?: boolean;
@@ -803,7 +808,8 @@ export class SessionContext implements ISessionContext {
    * @returns A promise that resolves with whether to ask the user to select a kernel.
    *
    * #### Notes
-   * If a server session exists on the current path, we will connect to it.
+   * If a server session exists on the current path, we will connect to it
+   * unless `kernelPreference.shouldReuse === false`.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -835,16 +841,21 @@ export class SessionContext implements ISessionContext {
     const manager = this.sessionManager;
     await manager.ready;
     await manager.refreshRunning();
-    const model = find(manager.running(), item => {
-      return item.path === this._path;
-    });
-    if (model) {
-      try {
-        const session = manager.connectTo({ model });
-        this._handleNewSession(session);
-      } catch (err) {
-        void this._handleSessionError(err);
-        return Promise.reject(err);
+    const preference = this.kernelPreference;
+    const shouldConnectToPathSession = preference.shouldReuse !== false;
+
+    if (shouldConnectToPathSession) {
+      const model = find(manager.running(), item => {
+        return item.path === this._path;
+      });
+      if (model) {
+        try {
+          const session = manager.connectTo({ model });
+          this._handleNewSession(session);
+        } catch (err) {
+          void this._handleSessionError(err);
+          return Promise.reject(err);
+        }
       }
     }
 
@@ -1840,7 +1851,7 @@ namespace Private {
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select') as HTMLSelectElement;
+      const selector = this.node.querySelector<HTMLSelectElement>('select')!;
       return JSON.parse(selector.value) as Kernel.IModel;
     }
   }

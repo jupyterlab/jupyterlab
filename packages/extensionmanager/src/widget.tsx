@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   Button,
@@ -40,10 +38,20 @@ function getExtensionGitHubUser(entry: IEntry) {
   return null;
 }
 
+function isProtocolAllowed(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const protocol = parsed.protocol.toLowerCase();
+    return ['http:', 'https:'].includes(protocol);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * VDOM for visualizing an extension entry.
  */
-function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
+function ListEntry(props: ListEntry.IProperties): React.ReactElement {
   const { canFetch, entry, supportInstallation, trans } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
@@ -75,7 +83,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            {entry.homepage_url ? (
+            {entry.homepage_url && isProtocolAllowed(entry.homepage_url) ? (
               <a
                 href={entry.homepage_url}
                 target="_blank"
@@ -238,7 +246,7 @@ namespace ListEntry {
 /**
  * List view widget for extensions
  */
-function ListView(props: ListView.IProperties): React.ReactElement<any> {
+function ListView(props: ListView.IProperties): React.ReactElement {
   const { canFetch, performAction, supportInstallation, trans } = props;
 
   return (
@@ -497,7 +505,7 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -602,7 +610,7 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed

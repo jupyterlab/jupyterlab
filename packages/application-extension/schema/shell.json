@@ -24,6 +24,7 @@
       "default": "contentVisibility"
     },
     "startMode": {
+      "type": "string",
       "oneOf": [
         { "const": "", "title": "Default" },
         { "const": "single", "title": "Single" },
@@ -75,6 +76,12 @@
       ],
       "default": "side"
     },
+    "optimizeResize": {
+      "type": "boolean",
+      "title": "Optimize panel resize",
+      "description": "Freeze panel dimensions during handle drag to improve resize performance when panels contain heavy DOM content.",
+      "default": true
+    },
     "zoomOnWheel": {
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",
@@ -92,6 +99,7 @@
           "type": "object",
           "properties": {
             "area": {
+              "type": "string",
               "oneOf": [
                 { "const": "main", "title": "Main" },
                 { "const": "left", "title": "Left" },

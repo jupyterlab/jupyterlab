@@ -251,6 +251,21 @@
         "rank": 3
       },
       {
+        "command": "notebook:copy-selected-text",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 3
+      },
+      {
+        "command": "notebook:cut-selected-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
+        "command": "notebook:paste-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
         "rank": 4
@@ -304,11 +319,6 @@
         "command": "notebook:clear-cell-output",
         "selector": ".jp-Notebook .jp-CodeCell",
         "rank": 12
-      },
-      {
-        "command": "notebook:clear-all-cell-outputs",
-        "selector": ".jp-Notebook",
-        "rank": 13
       },
       {
         "type": "separator",
@@ -673,7 +683,7 @@
         "showJumpToRecentExecutionButton": {
           "type": "boolean",
           "title": "Show jump to most recently executed/executing cell button",
-          "description": "If enabled, displays a button that scrolls to the currently executing cell or, if none, the most recently executed cell. scrolls to the currently executing cell or, if none, the most recently executed cell. The button shows when hovering over the kernel execution indicator. Enabling this option automatically enables recording of execution timing metadata.",
+          "description": "If enabled, displays a button that scrolls to the currently executing cell or, if none, the most recently executed cell. The button shows when hovering over the kernel execution indicator. Enabling this option automatically enables recording of execution timing metadata.",
           "default": false
         }
       }
@@ -820,6 +830,7 @@
     "renderingLayout": {
       "title": "Rendering Layout",
       "description": "Global setting to define the rendering layout in notebooks. 'default' or 'side-by-side' are supported.",
+      "type": "string",
       "oneOf": [
         { "const": "default", "title": "Default" },
         { "const": "side-by-side", "title": "Side by side" }
@@ -848,6 +859,7 @@
     "windowingMode": {
       "title": "Windowing mode",
       "description": "- 'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells\n- 'full': Best performance with side effects - Attach to the DOM only cells in viewport\n- 'none': Worst performance without side effects - Attach all cells to the viewport\n- 'contentVisibility': Browser-optimized rendering - Use content-visibility to skip offscreen cells",
+      "type": "string",
       "oneOf": [
         { "const": "defer", "title": "Defer" },
         { "const": "full", "title": "Full" },
@@ -883,6 +895,12 @@
     "pasteCodeCellsWithoutOutput": {
       "title": "Paste code cells without output",
       "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
+      "type": "boolean",
+      "default": false
+    },
+    "helpInBottomPanel": {
+      "title": "Show Help in Bottom Panel",
+      "description": "Whether to display help output (e.g. pager output from 'source: page' payloads) in a bottom panel inspector instead of inlining it.",
       "type": "boolean",
       "default": false
     }

@@ -11,13 +11,16 @@ import subprocess
 import textwrap
 from pathlib import Path
 from shutil import which
+from typing import TYPE_CHECKING
 
 from docutils import nodes
-from sphinx.application import Sphinx
 from sphinx.builders import Builder
 from sphinx.errors import SphinxError
 from sphinx.locale import __
 from sphinx.util import logging
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 LOGGER = logging.getLogger(__name__)
 
@@ -147,7 +150,7 @@ class ShellcheckBuilder(Builder):
                 stripped = line.lstrip()
                 if stripped.startswith(self._prompt):
                     command = stripped[len(self._prompt) :]
-                    script_lines.append(command[1:] if command.startswith(" ") else command)
+                    script_lines.append(command.removeprefix(" "))
                 else:
                     script_lines.append("# output")
             return "\n".join(script_lines) + "\n"

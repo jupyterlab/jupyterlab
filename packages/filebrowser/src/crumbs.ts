@@ -1,15 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { renameFile } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   ellipsesIcon,
-  homeIcon as preferredIcon,
+  folderFavoriteIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import { PathNavigator } from './pathnavigator';
@@ -520,7 +519,7 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      node = node.parentElement as HTMLElement;
+      node = node.parentElement!;
     }
 
     // Click landed on the breadcrumb background (including separators
@@ -542,7 +541,7 @@ export class BreadCrumbs extends Widget {
         if (index !== -1) {
           break;
         }
-        target = target.parentElement as HTMLElement;
+        target = target.parentElement!;
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
@@ -590,7 +589,7 @@ export class BreadCrumbs extends Widget {
       if (index !== -1) {
         break;
       }
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
     if (index !== -1) {
       breadcrumbElements[index].classList.add(DROP_TARGET_CLASS);
@@ -639,7 +638,7 @@ export class BreadCrumbs extends Widget {
     const manager = model.manager;
 
     // Move all of the items.
-    const promises: Promise<any>[] = [];
+    const promises: Promise<Contents.IModel | null>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
       const name = PathExt.basename(oldPath);

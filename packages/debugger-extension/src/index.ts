@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module debugger-extension
@@ -126,6 +125,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
+    handler.executionDone.connect(debug.displayModules.bind(debug));
+
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
     ): Promise<void> => {
@@ -231,6 +232,8 @@ const files: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
+    handler.executionDone.connect(debug.displayModules.bind(debug));
+
     const activeSessions: {
       [id: string]: Session.ISessionConnection;
     } = {};
@@ -334,6 +337,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       service,
       translator: translator
     });
+
+    handler.executionDone.connect(service.displayModules.bind(service));
 
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
@@ -1681,7 +1686,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   service,
   displayRegistry,
   consoles,

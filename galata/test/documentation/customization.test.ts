@@ -24,9 +24,24 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
+    // Pre-load the terminal font before xterm.js initializes.
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
+
     await page.menu.clickMenuItem('File>New>Terminal');
 
     await page.locator('.jp-Terminal').waitFor();
+
+    // Wait for the terminal tab title to settle. It starts as '...' while the
+    // terminal process is initializing, then updates to the actual title.
+    const terminalTabLabel = page.locator(
+      '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
+    );
+    await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+
+    // Normalise the tab title to "Terminal 1" so the snapshot is consistent
+    // across environments because locally it would show the user's shell prompt path,
+    // and sometimes on CI it can show "Terminal 2" when multiple tests run in parallel.
+    await terminalTabLabel.evaluate(el => (el.textContent = 'Terminal 1'));
 
     expect(await page.screenshot()).toMatchSnapshot(
       'default-terminal-position-single.png'
@@ -52,11 +67,20 @@ test.describe('Default', () => {
 
     // Wait for kernel to settle on idle
     await page
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
-    await page
       .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
       .waitFor();
+
+    const debuggerActive = page.locator(
+      '.jp-DebuggerBugButton[aria-disabled="false"]'
+    );
+    // The debugger icon flickering is a persistent source of flakiness,
+    // we see it appear, disappear and appear again; while we want to
+    // fix this properly, it is not trivial as seen in attempts to address
+    // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
+    // so for now to ease the snapshot updates we just wait for it to settle.
+    await debuggerActive.waitFor();
+    await page.waitForTimeout(1250);
+    await debuggerActive.waitFor();
 
     expect(
       await page
@@ -200,6 +224,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.menu.clickMenuItem('File>New>Terminal');
 
     await page.locator('.jp-Terminal').waitFor();
@@ -229,9 +254,18 @@ test.describe('Customized', () => {
     await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
-    await page
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
+    const debuggerActive = page.locator(
+      '.jp-DebuggerBugButton[aria-disabled="false"]'
+    );
+
+    // The debugger icon flickering is a persistent source of flakiness,
+    // we see it appear, disappear and appear again; while we want to
+    // fix this properly, it is not trivial as seen in attempts to address
+    // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
+    // so for now to ease the snapshot updates we just wait for it to settle.
+    await debuggerActive.waitFor();
+    await page.waitForTimeout(1250);
+    await debuggerActive.waitFor();
 
     expect(
       await page

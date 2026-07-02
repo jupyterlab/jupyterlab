@@ -15,6 +15,7 @@ import type {
 import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
+  Clipboard,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -89,9 +90,14 @@ import {
   ToolbarItems
 } from '@jupyterlab/notebook';
 import type { IObservableList } from '@jupyterlab/observables';
+import { IPageHandler } from '@jupyterlab/outputarea';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
+import {
+  IMarkdownParser,
+  IRenderMimeRegistry,
+  MimeModel
+} from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -112,6 +118,7 @@ import {
   duplicateIcon,
   fastForwardIcon,
   IFormRendererRegistry,
+  infoIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -124,6 +131,7 @@ import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type {
   JSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
@@ -318,6 +326,10 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
+  export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
+
+  export const selectNextModifiedCell = 'notebook:select-next-modified-cell';
+
   export const replaceSelection = 'notebook:replace-selection';
 
   export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
@@ -341,6 +353,12 @@ namespace CommandIDs {
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
+
+  export const copySelectedtext = 'notebook:copy-selected-text';
+
+  export const pasteText = 'notebook:paste-text';
+
+  export const cutSelectedtext = 'notebook:cut-selected-text';
 }
 
 /**
@@ -853,10 +871,28 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       IRenderMimeRegistry,
       IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
+    optional: [
+      ISettingRegistry,
+      ISessionContextDialogs,
+      ITranslator,
+      IPageHandler
+    ],
     activate: activateWidgetFactory,
     autoStart: true
   };
+
+/**
+ * The pager output handler provider.
+ */
+const pageHandlerPlugin: JupyterFrontEndPlugin<IPageHandler> = {
+  id: '@jupyterlab/notebook-extension:page-handler',
+  description: 'Provides a handler for pager output payloads.',
+  autoStart: true,
+  provides: IPageHandler,
+  requires: [IRenderMimeRegistry],
+  optional: [ISettingRegistry, ITranslator],
+  activate: activatePageHandler
+};
 
 /**
  * The cloned output provider.
@@ -1005,7 +1041,12 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     mdParser: IMarkdownParser | null,
     settingRegistry: ISettingRegistry | null
   ): void => {
-    const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
+    const nbTocFactory = new NotebookToCFactory(
+      tracker,
+      mdParser,
+      sanitizer,
+      app.commands
+    );
     tocRegistry.add(nbTocFactory);
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
@@ -1252,7 +1293,8 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
               label: trans.__('Notebook (no kernel)'),
               factory: FACTORY,
               kernelPreference: {
-                shouldStart: false
+                shouldStart: false,
+                shouldReuse: false
               }
             }
           })
@@ -1271,6 +1313,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   cellExecutor,
   factory,
   trackerPlugin,
+  pageHandlerPlugin,
   executionIndicator,
   exportPlugin,
   tools,
@@ -1347,6 +1390,86 @@ function activateNotebookTools(
 }
 
 /**
+ * Activate the pager output handler provider.
+ */
+function activatePageHandler(
+  app: JupyterFrontEnd,
+  rendermime: IRenderMimeRegistry,
+  settingRegistry: ISettingRegistry | null,
+  translator_: ITranslator | null
+): IPageHandler {
+  const translator = translator_ ?? nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  let helpInBottomPanel = false;
+  let helpWidget: MainAreaWidget<Panel> | null = null;
+
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+
+  const updateConfig = (settings: ISettingRegistry.ISettings): void => {
+    helpInBottomPanel = settings.get('helpInBottomPanel').composite as boolean;
+  };
+
+  void fetchSettings
+    .then(settings => {
+      updateConfig(settings);
+      settings.changed.connect(() => {
+        updateConfig(settings);
+      });
+    })
+    .catch((reason: Error) => {
+      console.warn(reason.message);
+    });
+
+  return {
+    handlePage: payload => {
+      if (!helpInBottomPanel) {
+        return false;
+      }
+
+      const data = payload['data'];
+      if (!data || typeof data !== 'object') {
+        return false;
+      }
+
+      const mimeData = data as nbformat.IMimeBundle;
+      const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
+      const mimeType = rendermime.preferredMimeType(mimeData, 'any');
+      if (!mimeType) {
+        return false;
+      }
+
+      if (!helpWidget || helpWidget.isDisposed) {
+        const content = new Panel();
+        content.addClass('jp-HelpPanel');
+        helpWidget = new MainAreaWidget({ content });
+        helpWidget.id = 'jp-help-panel';
+        helpWidget.title.label = trans.__('Help');
+        helpWidget.title.icon = infoIcon;
+        helpWidget.title.closable = true;
+      }
+
+      const content = helpWidget.content;
+      content.widgets.forEach(widget => widget.dispose());
+
+      const renderer = rendermime.createRenderer(mimeType);
+      void renderer.renderModel(
+        new MimeModel({ data: mimeData, metadata, trusted: true })
+      );
+      content.addWidget(renderer);
+
+      if (!helpWidget.isAttached) {
+        app.shell.add(helpWidget, 'down');
+      }
+      app.shell.activateById(helpWidget.id);
+      return true;
+    }
+  };
+}
+
+/**
  * Activate the notebook widget factory.
  */
 function activateWidgetFactory(
@@ -1357,7 +1480,8 @@ function activateWidgetFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
   settingRegistry: ISettingRegistry | null,
   sessionContextDialogs_: ISessionContextDialogs | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  pageHandler: IPageHandler | null
 ): NotebookWidgetFactory.IFactory {
   const translator = translator_ ?? nullTranslator;
   const sessionContextDialogs =
@@ -1438,6 +1562,7 @@ function activateWidgetFactory(
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
+    pageHandler: pageHandler ?? undefined,
     mimeTypeService: editorServices.mimeTypeService,
     toolbarFactory,
     translator
@@ -1904,6 +2029,7 @@ function activateNotebookHandler(
   fetchSettings
     .then(settings => {
       updateConfig(settings);
+
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
@@ -2607,6 +2733,9 @@ function addCommands(
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.copySelectedtext);
+    commands.notifyCommandChanged(CommandIDs.pasteText);
+    commands.notifyCommandChanged(CommandIDs.cutSelectedtext);
     commands.notifyCommandChanged(CommandIDs.copy);
     commands.notifyCommandChanged(CommandIDs.cut);
     commands.notifyCommandChanged(CommandIDs.pasteBelow);
@@ -2623,6 +2752,16 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
+    commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+    commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+  });
+  tracker.widgetAdded.connect((_, panel) => {
+    panel.content.stateChanged.connect((_, args) => {
+      if (args.name === 'lastModifiedCellStack') {
+        commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+        commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+      }
+    });
   });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
@@ -3497,6 +3636,156 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.copySelectedtext, {
+    label: trans.__('Copy Selected Text'),
+    caption: trans.__('Copy selected text from the active cell or output area'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
+
+      // copying from the editor (input area)
+      const editor = current.content.activeCell?.editor;
+      if (editor) {
+        const selection = editor.getSelection();
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        const text = editor.model.sharedModel.getSource().slice(start, end);
+        if (text) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+      }
+
+      // fallback to DOM selection (output)
+      const domSelection = window.getSelection();
+      const selectedText = domSelection?.toString();
+      if (selectedText && selectedText.trim().length > 0) {
+        await navigator.clipboard.writeText(selectedText);
+      }
+    },
+
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (editor) {
+        const selection = editor.getSelection();
+        const hasEditorSelection =
+          selection.start.line !== selection.end.line ||
+          selection.start.column !== selection.end.column;
+        if (hasEditorSelection) {
+          return true;
+        }
+      }
+
+      // Check for text selection in output area
+      const domSelection = window.getSelection();
+      return !!domSelection && domSelection.toString().trim().length > 0;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.cutSelectedtext, {
+    label: trans.__('Cut Selected Text'),
+    caption: trans.__('Cut selected text from the active cell or output area'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (editor) {
+        const selection = editor.getSelection();
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        const text = editor.model.sharedModel.getSource().slice(start, end);
+        if (text) {
+          await navigator.clipboard.writeText(text);
+          editor.replaceSelection?.('');
+          return;
+        }
+      }
+    },
+
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (!editor) {
+        return false;
+      }
+
+      const selection = editor.getSelection();
+      const hasEditorSelection =
+        selection.start.line !== selection.end.line ||
+        selection.start.column !== selection.end.column;
+      return hasEditorSelection;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.pasteText, {
+    label: trans.__('Paste Text'),
+    caption: trans.__(
+      'Paste text from the clipboard into the active cell editor'
+    ),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
+
+      const editor = current.content.activeCell?.editor;
+      if (!editor) {
+        return;
+      }
+
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          editor.replaceSelection?.(text);
+        }
+      } catch (err) {
+        // browser limitation fallback (e.g Firefox)
+        Clipboard.showPasteUnavailableDialog(trans);
+      }
+    },
+
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      return !!current.content.activeCell?.editor;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.split, {
     label: trans.__('Split Cell'),
     execute: args => {
@@ -3531,7 +3820,16 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isVisible: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      // Enable only if more than one cell is selected
+      const notebook = current.content;
+      return notebook && notebook.selectedCells.length > 1;
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -4570,6 +4868,44 @@ function addCommands(
       }
     }
   });
+  commands.addCommand(CommandIDs.selectLastModifiedCell, {
+    label: trans.__('Select Last Modified Cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        await NotebookActions.selectLastModifiedCell(current.content);
+      }
+    },
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return !!current && current.content.hasNavigableModifiedCellBack();
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.selectNextModifiedCell, {
+    label: trans.__('Select Next Modified Cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        await NotebookActions.selectNextModifiedCell(current.content);
+      }
+    },
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return !!current && current.content.hasNavigableModifiedCellForward();
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Notebook Cell'),
     execute: args => {
@@ -4826,6 +5162,9 @@ function populatePalette(
     CommandIDs.pasteAbove,
     CommandIDs.pasteAndReplace,
     CommandIDs.deleteCell,
+    CommandIDs.copySelectedtext,
+    CommandIDs.pasteText,
+    CommandIDs.cutSelectedtext,
     CommandIDs.split,
     CommandIDs.merge,
     CommandIDs.mergeAbove,
@@ -4864,7 +5203,9 @@ function populatePalette(
     CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
-    CommandIDs.disableOutputScrolling
+    CommandIDs.disableOutputScrolling,
+    CommandIDs.selectLastModifiedCell,
+    CommandIDs.selectNextModifiedCell
   ].forEach(command => {
     palette.addItem({ command, category });
   });

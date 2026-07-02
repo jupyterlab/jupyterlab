@@ -1,13 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type {
+  ILanguageServerProvider,
   TLanguageServerConfigurations,
   TLanguageServerId,
   TSessionMap,
@@ -15,7 +18,11 @@ import type {
 } from './tokens';
 import { ILanguageServerManager } from './tokens';
 import type { ServerSpecProperties } from './schema';
-import { PromiseDelegate } from '@lumino/coreutils';
+
+interface IProviderRegistration {
+  provider: ILanguageServerProvider;
+  onSessionsChanged: () => void;
+}
 
 export class LanguageServerManager implements ILanguageServerManager {
   constructor(options: ILanguageServerManager.IOptions) {
@@ -106,6 +113,10 @@ export class LanguageServerManager implements ILanguageServerManager {
   disable(): void {
     this._enabled = false;
     this._sessions = new Map();
+    this._specs = new Map();
+    this._serverSessions = new Map();
+    this._serverSpecs = new Map();
+    this._transports.clear();
     this._sessionsChanged.emit(void 0);
   }
 
@@ -118,6 +129,18 @@ export class LanguageServerManager implements ILanguageServerManager {
     }
     this._isDisposed = true;
 
+    for (const registration of this._providers.values()) {
+      if (registration.provider.sessionsChanged) {
+        registration.provider.sessionsChanged.disconnect(
+          registration.onSessionsChanged
+        );
+      }
+    }
+    this._providers.clear();
+    this._serverSessions.clear();
+    this._serverSpecs.clear();
+    this._transports.clear();
+
     Signal.clearData(this);
   }
 
@@ -126,6 +149,52 @@ export class LanguageServerManager implements ILanguageServerManager {
    */
   setConfiguration(configuration: TLanguageServerConfigurations): void {
     this._configuration = configuration;
+  }
+
+  /**
+   * Register a runtime language server provider.
+   */
+  registerProvider(provider: ILanguageServerProvider): IDisposable {
+    if (this._providers.has(provider.id)) {
+      console.warn(
+        `Language server provider with id ${provider.id} is already registered`
+      );
+      return new DisposableDelegate(() => undefined);
+    }
+
+    const registration = {
+      provider,
+      onSessionsChanged: () => {
+        void this.fetchSessions().catch(console.error);
+      }
+    };
+    this._providers.set(provider.id, registration);
+
+    if (provider.sessionsChanged) {
+      provider.sessionsChanged.connect(registration.onSessionsChanged);
+    }
+
+    void this.fetchSessions().catch(console.error);
+
+    return new DisposableDelegate(() => {
+      if (this._providers.get(provider.id) !== registration) {
+        return;
+      }
+      if (provider.sessionsChanged) {
+        provider.sessionsChanged.disconnect(registration.onSessionsChanged);
+      }
+      this._providers.delete(provider.id);
+      void this.fetchSessions().catch(console.error);
+    });
+  }
+
+  /**
+   * Get a runtime transport factory for a language server.
+   */
+  getTransportFactory(
+    languageServerId: TLanguageServerId
+  ): ILanguageServerProvider.TTransportFactory | null {
+    return this._transports.get(languageServerId) ?? null;
   }
 
   /**
@@ -176,58 +245,62 @@ export class LanguageServerManager implements ILanguageServerManager {
     if (!this._enabled) {
       return;
     }
-    let response = await ServerConnection.makeRequest(
-      this.statusUrl,
-      { method: 'GET' },
-      this._settings
-    );
+    let statusCode = this._statusCode;
+    const sessions: TSessionMap = new Map();
+    const specs: TSpecsMap = new Map();
+    const transports = new Map<
+      TLanguageServerId,
+      ILanguageServerProvider.TTransportFactory
+    >();
 
-    this._statusCode = response.status;
-    if (!response.ok) {
-      if (this._retries > 0) {
-        this._retries -= 1;
-        setTimeout(this.fetchSessions.bind(this), this._retriesInterval);
-      } else {
-        this._ready.resolve(undefined);
-        console.log('Missing jupyter_lsp server extension, skipping.');
-      }
+    const serverData = await this._fetchServerData();
+    if (serverData?.statusCode !== undefined) {
+      statusCode = serverData.statusCode;
+      this._statusCode = statusCode;
+    }
+    if (serverData?.retryScheduled && this._providers.size === 0) {
       return;
     }
+    if (serverData?.sessions !== undefined) {
+      this._syncSnapshot(this._serverSessions, serverData.sessions);
+    }
+    if (serverData?.specs !== undefined) {
+      this._syncSnapshot(this._serverSpecs, serverData.specs);
+    }
+    if (serverData) {
+      if (serverData.version !== undefined) {
+        this.version = serverData.version;
+      }
+    }
 
-    let sessions: { [key: string]: any };
+    this._mergeSnapshot(specs, this._serverSpecs);
+    this._mergeSnapshot(sessions, this._serverSessions);
 
-    try {
-      const data = await response.json();
-      sessions = data.sessions;
+    for (const registration of this._providers.values()) {
       try {
-        this.version = data.version;
-        this._specs = new Map(Object.entries(data.specs)) as TSpecsMap;
+        const data = await registration.provider.fetch();
+        if (!data) {
+          continue;
+        }
+        if (data.statusCode !== undefined) {
+          statusCode = data.statusCode;
+        }
+        this._mergeSnapshot(specs, data.specs);
+        this._mergeSnapshot(sessions, data.sessions);
+        if (data.transport) {
+          for (const [key, factory] of Object.entries(data.transport)) {
+            transports.set(key as TLanguageServerId, factory);
+          }
+        }
       } catch (err) {
         console.warn(err);
       }
-    } catch (err) {
-      console.warn(err);
-      this._ready.resolve(undefined);
-      return;
     }
 
-    for (let key of Object.keys(sessions)) {
-      let id: TLanguageServerId = key as TLanguageServerId;
-      if (this._sessions.has(id)) {
-        Object.assign(this._sessions.get(id) || {}, sessions[key]);
-      } else {
-        this._sessions.set(id, sessions[key]);
-      }
-    }
-
-    const oldKeys = this._sessions.keys();
-
-    for (const oldKey in oldKeys) {
-      if (!sessions[oldKey]) {
-        let oldId = oldKey as TLanguageServerId;
-        this._sessions.delete(oldId);
-      }
-    }
+    this._statusCode = statusCode;
+    this._transports = transports;
+    this._syncSnapshot(this._specs, specs);
+    this._syncSnapshot(this._sessions, sessions);
     this._sessionsChanged.emit(void 0);
     this._ready.resolve(undefined);
   }
@@ -281,6 +354,95 @@ export class LanguageServerManager implements ILanguageServerManager {
   }
 
   /**
+   * Fetch language server data from the HTTP endpoint.
+   */
+  private async _fetchServerData(): Promise<
+    | (ILanguageServerProvider.IFetchResult & {
+        version?: number;
+        retryScheduled?: boolean;
+      })
+    | null
+  > {
+    let response: Response;
+
+    try {
+      response = await ServerConnection.makeRequest(
+        this.statusUrl,
+        { method: 'GET' },
+        this._settings
+      );
+    } catch (err) {
+      console.warn(err);
+      return null;
+    }
+
+    if (!response.ok) {
+      if (this._retries > 0) {
+        this._retries -= 1;
+        setTimeout(this.fetchSessions.bind(this), this._retriesInterval);
+        return { statusCode: response.status, retryScheduled: true };
+      } else {
+        console.log('Missing jupyter_lsp server extension, skipping.');
+      }
+      return { statusCode: response.status };
+    }
+
+    try {
+      const data = await response.json();
+      return {
+        statusCode: response.status,
+        version: data.version,
+        sessions: data.sessions,
+        specs: data.specs
+      };
+    } catch (err) {
+      console.warn(err);
+      return { statusCode: response.status };
+    }
+  }
+
+  /**
+   * Merge provider snapshot into target map.
+   */
+  private _mergeSnapshot<T>(
+    target: Map<TLanguageServerId, T>,
+    source?: Map<TLanguageServerId, T> | { [key: string]: T }
+  ): void {
+    if (!source) {
+      return;
+    }
+    const entries =
+      source instanceof Map ? source.entries() : Object.entries(source);
+
+    for (const [key, value] of entries) {
+      target.set(key as TLanguageServerId, value);
+    }
+  }
+
+  /**
+   * Synchronize a mutable map in place.
+   */
+  private _syncSnapshot<T>(
+    target: Map<TLanguageServerId, T>,
+    source: Map<TLanguageServerId, T> | { [key: string]: T }
+  ): void {
+    const entries =
+      source instanceof Map ? source.entries() : Object.entries(source);
+    const nextKeys = new Set<TLanguageServerId>();
+
+    for (const [key, value] of entries) {
+      const id = key as TLanguageServerId;
+      nextKeys.add(id);
+      target.set(id, value);
+    }
+    for (const key of Array.from(target.keys())) {
+      if (!nextKeys.has(key)) {
+        target.delete(key);
+      }
+    }
+  }
+
+  /**
    * Get the base URL for language server requests.
    */
   private get _baseUrl(): string {
@@ -296,6 +458,16 @@ export class LanguageServerManager implements ILanguageServerManager {
    * Map of language server specs.
    */
   private _specs: TSpecsMap = new Map();
+
+  /**
+   * Last known language server sessions from HTTP status endpoint.
+   */
+  private _serverSessions: TSessionMap = new Map();
+
+  /**
+   * Last known language server specs from HTTP status endpoint.
+   */
+  private _serverSpecs: TSpecsMap = new Map();
 
   /**
    * Server connection setting.
@@ -343,6 +515,19 @@ export class LanguageServerManager implements ILanguageServerManager {
   private _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal(
     this
   );
+
+  /**
+   * Runtime language server providers.
+   */
+  private _providers = new Map<string, IProviderRegistration>();
+
+  /**
+   * Runtime language server transport factories.
+   */
+  private _transports = new Map<
+    TLanguageServerId,
+    ILanguageServerProvider.TTransportFactory
+  >();
 
   private _isDisposed = false;
 

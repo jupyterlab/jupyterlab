@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module filebrowser-extension
@@ -20,6 +19,7 @@ import {
   Clipboard,
   createToolbarFactory,
   ICommandPalette,
+  IMovableSectionRegistry,
   InputDialog,
   IToolbarWidgetRegistry,
   Notification,
@@ -72,7 +72,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import type { ContextMenu } from '@lumino/widgets';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -377,7 +378,9 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     JupyterFrontEnd.ITreeResolver,
     ILabShell,
     ITranslator,
-    IDefaultFileBrowserRenderer
+    IDefaultFileBrowserRenderer,
+    IMovableSectionRegistry,
+    IStateDB
   ],
   activate: async (
     app: JupyterFrontEnd,
@@ -386,7 +389,9 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null,
     translator: ITranslator | null,
-    renderer: IDefaultFileBrowserRenderer | null
+    renderer: IDefaultFileBrowserRenderer | null,
+    registry: IMovableSectionRegistry | null,
+    stateDB: IStateDB | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -426,6 +431,53 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     app.commands.keyBindingChanged.connect(() => {
       updateBrowserTitle();
     });
+
+    if (registry) {
+      registry.registerTarget(
+        '@jupyterlab/filebrowser-extension:default-file-browser',
+        trans.__('File Browser'),
+        defaultBrowser
+      );
+    }
+
+    // Persist and restore the relative sizes of the file-browser accordion
+    // sections (file listing + any moved-in sections). The accordion is
+    // created lazily when the first section is moved in, so we wire up
+    // size persistence the first time it appears.
+    if (stateDB) {
+      const SIZES_KEY = 'filebrowser:section-sizes';
+      let wiredAccordion: AccordionPanel | null = null;
+
+      const wireAccordion = () => {
+        const accordion = defaultBrowser.accordionPanel;
+        if (!accordion || wiredAccordion === accordion) {
+          return;
+        }
+        wiredAccordion = accordion;
+        const saveSizes = async () => {
+          await stateDB.save(
+            SIZES_KEY,
+            accordion.relativeSizes() as unknown as ReadonlyPartialJSONValue
+          );
+        };
+        accordion.handleMoved.connect(saveSizes);
+        void stateDB.fetch(SIZES_KEY).then(value => {
+          if (Array.isArray(value)) {
+            accordion.setRelativeSizes(value as number[]);
+          }
+        });
+      };
+
+      defaultBrowser.sectionChanged.connect(() => {
+        wireAccordion();
+        if (wiredAccordion) {
+          void stateDB.save(
+            SIZES_KEY,
+            wiredAccordion.relativeSizes() as unknown as ReadonlyPartialJSONValue
+          );
+        }
+      });
+    }
 
     void Private.restoreBrowser(
       defaultBrowser,
@@ -1960,7 +2012,7 @@ function addCommands(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   factory,
   defaultFileBrowser,
   browser,
