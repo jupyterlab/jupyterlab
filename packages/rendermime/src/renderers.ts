@@ -864,6 +864,19 @@ function renderTextual(
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
+  // Escape hatch: when incremental auto-linking is disabled, render
+  // synchronously in a single pass (legacy behavior). Links then appear
+  // together with the text at first paint, at the cost of blocking on large
+  // outputs. Disabling incremental auto-linking thus also disables incremental
+  // rendering. Useful as a fallback and to benchmark the incremental pipeline.
+  if (sanitizer.getIncrementalAutolink?.() === false) {
+    // Abort any incremental rendering that may be in-flight for this host
+    // (e.g. if the setting was toggled mid-stream) before rendering synchronously.
+    Private.abortRendering(host);
+    renderTextualSync(options, autoLinkOptions);
+    return;
+  }
+
   // We want to only manipulate DOM once per animation frame whether
   // the autolink is enabled or not, because a stream can also choke
   // rendering pipeline even if autolink is disabled. This acts as
@@ -878,12 +891,15 @@ function renderTextual(
   let fullPreTextContent: string | null = null;
   let pre: HTMLPreElement;
 
-  let isVisible = false;
-  isVisible = true;
+  // We use the observer to pause rendering while the output is off-screen; this
+  // is helpful when opening a notebook with a large number of large textual
+  // outputs. The initial values are optimistic (visible) so that the first
+  // paint is not held back waiting for the asynchronous observer callback; the
+  // observer then pauses further work (e.g. auto-linking) should the output
+  // turn out to be off-screen.
+  let isVisible = true;
+  let wasEverVisible = true;
 
-  // We will use the observer to pause rendering if the element
-  // is not visible; this is helpful when opening a notebook
-  // with a large number of large textual outputs.
   let observer: IntersectionObserver | null = null;
   if (typeof IntersectionObserver !== 'undefined') {
     observer = new IntersectionObserver(
@@ -898,15 +914,17 @@ function renderTextual(
       { threshold: 0 }
     );
     observer.observe(host);
+    // Disconnect any observer left behind by a superseded render for this host.
+    Private.registerObserver(host, observer);
   }
-  let wasEverVisible = false;
-  wasEverVisible = true;
 
   const stopRendering = () => {
     // Remove the host from rendering queue
     Private.removeFromQueue(host);
     // Disconnect the intersection observer.
-    observer?.disconnect();
+    if (observer) {
+      Private.unregisterObserver(host, observer);
+    }
     return RenderingResult.stop;
   };
 
@@ -948,6 +966,10 @@ function renderTextual(
 
     const start = performance.now();
     Private.beginRendering(host);
+    // Record that this host has been painted so that subsequent frames (updates
+    // and auto-linking passes) are not treated as a first paint. From here on we
+    // are committed to writing to the DOM in this frame.
+    Private.markPainted(host);
 
     if (fullPreTextContent === null) {
       const hasAnsiPrefix = source.includes(ansiPrefix);
@@ -1065,7 +1087,81 @@ function renderTextual(
     }
   };
 
-  Private.scheduleRendering(host, renderFrame);
+  // Schedule the first paint resiliently so that the plain text is shown even
+  // if `requestAnimationFrame` is starved (background tab or heavy resource
+  // pressure). Subsequent frames (updates and auto-linking passes) rely on
+  // animation frames alone, so auto-linking naturally backs off under those
+  // conditions rather than competing for scarce resources.
+  Private.scheduleRendering(host, renderFrame, {
+    resilient: !Private.hasPainted(host)
+  });
+}
+
+/**
+ * Render the textual representation synchronously in a single pass.
+ *
+ * This is the legacy (non-incremental) rendering path, used when incremental
+ * rendering is disabled via the sanitizer settings. It produces the same final
+ * DOM as `renderTextual`, but without spreading the work across animation
+ * frames - so it blocks the main thread for the duration of the render and does
+ * not preserve selection while streaming.
+ */
+function renderTextualSync(
+  options: renderText.IRenderOptions,
+  autoLinkOptions: IAutoLinkOptions
+): void {
+  const { host, sanitizer, source } = options;
+
+  const hasAnsiPrefix = source.includes(ansiPrefix);
+
+  // Create the HTML content:
+  // If no ANSI codes are present use a fast path for escaping.
+  const content = hasAnsiPrefix
+    ? sanitizer.sanitize(Private.ansiSpan(source), {
+        allowedTags: ['span']
+      })
+    : nativeSanitize(source);
+
+  const pre = document.createElement('pre');
+  pre.innerHTML = content;
+
+  const preTextContent = pre.textContent;
+  const shouldAutoLink = sanitizer.getAutolink?.() ?? true;
+
+  if (!preTextContent || !shouldAutoLink) {
+    // Nothing to auto-link (or auto-linking is disabled): use the sanitized
+    // `<pre>` as-is.
+    host.replaceChildren(pre);
+    return;
+  }
+
+  // Auto-link the whole content in a single pass, reusing the streaming cache -
+  // this is what keeps repeated renders of a growing stream from being O(n^2).
+  const cacheStore = Private.getCacheStore(autoLinkOptions);
+  const linkedNodes = incrementalAutoLink(
+    cacheStore,
+    options,
+    autoLinkOptions,
+    preTextContent
+  );
+
+  if (linkedNodes.length === 1 && linkedNodes[0] instanceof Text) {
+    // No links were found; use the sanitized `<pre>` as-is.
+    host.replaceChildren(pre);
+    return;
+  }
+
+  // Persist clones in the cache so that a component mutating the rendered nodes
+  // (e.g. search highlighting) cannot corrupt the cache.
+  cacheStore.set(host, {
+    preTextContent,
+    linkedNodes: linkedNodes.map(
+      node => node.cloneNode(true) as HTMLAnchorElement | Text
+    )
+  });
+
+  const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
+  host.replaceChildren(mergeNodes(preNodes, linkedNodes));
 }
 
 function incrementalAutoLink(
@@ -1407,6 +1503,37 @@ namespace Private {
 
   const renderQueue = new Array<HTMLElement>();
   const frameRequests = new WeakMap<HTMLElement, number>();
+  const fallbackTimers = new WeakMap<HTMLElement, number>();
+
+  /**
+   * Hosts which have already had their content painted at least once.
+   *
+   * Used to distinguish a "first paint" - which should be shown as promptly and
+   * as resiliently as possible - from a subsequent update or auto-linking pass -
+   * which can be throttled to the frame rate.
+   */
+  const paintedHosts = new WeakSet<HTMLElement>();
+
+  export function hasPainted(host: HTMLElement): boolean {
+    return paintedHosts.has(host);
+  }
+
+  export function markPainted(host: HTMLElement): void {
+    paintedHosts.add(host);
+  }
+
+  /**
+   * Delay (in milliseconds) after which the first paint is performed via a
+   * timer if `requestAnimationFrame` has not fired yet.
+   *
+   * Animation frames do not fire in background tabs and can be starved by the
+   * browser under heavy resource pressure (e.g. when the OS starts swapping);
+   * the timer ensures the cheap first paint of the plain text is not held back
+   * in those cases. It is long enough that a normally produced frame wins the
+   * race (and cancels the timer), so the fallback only kicks in when frames are
+   * genuinely not being produced.
+   */
+  const firstPaintFallbackDelay = 100;
 
   export function cancelRenderingRequest(host: HTMLElement) {
     // do not remove from queue - the expectation is that rendering will resume
@@ -1414,18 +1541,42 @@ namespace Private {
     if (previousRequest) {
       window.cancelAnimationFrame(previousRequest);
     }
+    const previousTimer = fallbackTimers.get(host);
+    if (previousTimer) {
+      window.clearTimeout(previousTimer);
+      fallbackTimers.delete(host);
+    }
   }
 
   export function scheduleRendering(
     host: HTMLElement,
-    render: (timetamp: number) => void
+    render: (timestamp: number) => void,
+    options: { resilient?: boolean } = {}
   ) {
     // push at the end of the queue
     if (!renderQueue.includes(host)) {
       renderQueue.push(host);
     }
-    const thisRequest = window.requestAnimationFrame(render);
+    // Whichever of the animation frame or the fallback timer fires first
+    // performs the work and cancels its counterpart. The `ran` guard makes this
+    // robust even if both happen to become due in the same tick.
+    let ran = false;
+    const run = (timestamp: number) => {
+      if (ran) {
+        return;
+      }
+      ran = true;
+      cancelRenderingRequest(host);
+      render(timestamp);
+    };
+    const thisRequest = window.requestAnimationFrame(run);
     frameRequests.set(host, thisRequest);
+    if (options.resilient) {
+      const timer = window.setTimeout(() => {
+        run(performance.now());
+      }, firstPaintFallbackDelay);
+      fallbackTimers.set(host, timer);
+    }
   }
 
   export function beginRendering(host: HTMLElement) {
@@ -1441,6 +1592,45 @@ namespace Private {
 
   export function hasNewRenderingRequest(host: HTMLElement) {
     return frameRequests.get(host);
+  }
+
+  /**
+   * Intersection observers tracked per host.
+   *
+   * Storing them here allows disconnecting an observer left behind by a
+   * superseded render (e.g. when a new stream chunk cancels a pending frame
+   * before it had a chance to disconnect its own observer) instead of leaking
+   * one observer per stream chunk.
+   */
+  const hostObservers = new WeakMap<HTMLElement, IntersectionObserver>();
+
+  export function registerObserver(
+    host: HTMLElement,
+    observer: IntersectionObserver
+  ): void {
+    hostObservers.get(host)?.disconnect();
+    hostObservers.set(host, observer);
+  }
+
+  export function unregisterObserver(
+    host: HTMLElement,
+    observer: IntersectionObserver
+  ): void {
+    observer.disconnect();
+    if (hostObservers.get(host) === observer) {
+      hostObservers.delete(host);
+    }
+  }
+
+  /**
+   * Abort any in-flight incremental rendering for a host: cancel its pending
+   * frame/timer, remove it from the render queue, and disconnect its observer.
+   */
+  export function abortRendering(host: HTMLElement): void {
+    cancelRenderingRequest(host);
+    removeFromQueue(host);
+    hostObservers.get(host)?.disconnect();
+    hostObservers.delete(host);
   }
 
   /**
@@ -1535,10 +1725,10 @@ namespace Private {
         const nodeEnd =
           node instanceof Text
             ? node.nodeValue!.length
-            : (node instanceof HTMLAnchorElement
-                ? node.childNodes[0].nodeValue?.length ??
-                  node.textContent?.length
-                : node.textContent?.length) ?? 0;
+            : ((node instanceof HTMLAnchorElement
+                ? (node.childNodes[0].nodeValue?.length ??
+                  node.textContent?.length)
+                : node.textContent?.length) ?? 0);
         if (textOffset > offset && textOffset < offset + nodeEnd) {
           if (node instanceof Text) {
             return { node, positionOffset: textOffset - offset };

@@ -34,6 +34,16 @@ function encodeChars(txt: string): string {
   return txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/**
+ * Read the rendered inner HTML of a text/error renderer.
+ *
+ * `RenderedText`/`RenderedError` wrap their content in a containment `<div>`,
+ * so the rendered `<pre>` lives one level below the widget node.
+ */
+function renderedHTML(w: IRenderMime.IRenderer): string {
+  return (w.node.firstElementChild as HTMLElement).innerHTML;
+}
+
 const sanitizer = new Sanitizer();
 const defaultOptions: any = {
   sanitizer,
@@ -42,6 +52,17 @@ const defaultOptions: any = {
 };
 
 describe('rendermime/factories', () => {
+  // The factory tests assert on the fully-rendered DOM, so text/error outputs
+  // are rendered synchronously in a single pass (disabling incremental
+  // auto-linking also disables incremental rendering) rather than incrementally
+  // across animation frames. The incremental pipeline (and its resilience) is
+  // covered by renderers.spec.ts.
+  beforeAll(() => {
+    sanitizer.setIncrementalAutolink(false);
+  });
+  afterAll(() => {
+    sanitizer.setIncrementalAutolink(true);
+  });
   describe('textRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should have text related mimeTypes', () => {
@@ -63,7 +84,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, 'x = 2 ** a');
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
+        expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it('should be re-renderable', async () => {
@@ -73,7 +94,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
+        expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it.each([
@@ -101,7 +122,7 @@ describe('rendermime/factories', () => {
           const model = createModel(mimeType, source);
           const w = f.createRenderer({ mimeType, ...defaultOptions });
           await w.renderModel(model);
-          expect(w.node.innerHTML).toBe(expected);
+          expect(renderedHTML(w)).toBe(expected);
         }
       );
 
@@ -113,7 +134,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+        expect(renderedHTML(w)).toBe(
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
@@ -165,7 +186,7 @@ describe('rendermime/factories', () => {
               ? 'https://' + urlEncoded
               : urlEncoded;
             await w.renderModel(model);
-            expect(w.node.innerHTML).toBe(
+            expect(renderedHTML(w)).toBe(
               `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
             );
           })
@@ -182,7 +203,7 @@ describe('rendermime/factories', () => {
         sanitizer.setAutolink(true);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(expected);
+        expect(renderedHTML(w)).toBe(expected);
       });
 
       it('should skip autolink', async () => {
@@ -194,7 +215,7 @@ describe('rendermime/factories', () => {
         sanitizer.setAutolink(false);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(expected);
+        expect(renderedHTML(w)).toBe(expected);
         sanitizer.setAutolink(true);
       });
 
@@ -207,7 +228,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(expected);
+        expect(renderedHTML(w)).toBe(expected);
       });
     });
   });
@@ -901,7 +922,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, 'x = 2 ** a');
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
+        expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it('should be re-renderable', async () => {
@@ -911,7 +932,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
+        expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it('should escape inline html', async () => {
@@ -922,7 +943,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+        expect(renderedHTML(w)).toBe(
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
@@ -1027,9 +1048,9 @@ describe('rendermime/factories', () => {
           });
           // Perform an initial render to populate the cache.
           await w.renderModel(model);
-          const before = w.node.innerHTML;
+          const before = renderedHTML(w);
           const cachedLink = w.node.querySelector('a');
-          expect(cachedLink).toBe(w.node.childNodes[0].childNodes[0]);
+          expect(cachedLink).toBe(w.node.querySelector('pre')!.childNodes[0]);
 
           // Update the source.
           source += addition;
@@ -1041,7 +1062,7 @@ describe('rendermime/factories', () => {
 
           // Perform a second render which should use the cache.
           await w.renderModel(model);
-          const after = w.node.innerHTML;
+          const after = renderedHTML(w);
           const linkAfter = w.node.querySelector('a');
 
           // The contents of the node should be updated with the new line.
@@ -1068,7 +1089,7 @@ describe('rendermime/factories', () => {
         });
         // Perform an initial render to populate the cache.
         await w.renderModel(model);
-        const before = w.node.innerHTML;
+        const before = renderedHTML(w);
         const cachedLink = w.node.querySelector('a');
 
         // Update the source.
@@ -1081,7 +1102,7 @@ describe('rendermime/factories', () => {
 
         // Perform a second render.
         await w.renderModel(model);
-        const after = w.node.innerHTML;
+        const after = renderedHTML(w);
         const linkAfter = w.node.querySelector('a');
 
         // The contents of the node should be updated with the new line.
@@ -1107,7 +1128,7 @@ describe('rendermime/factories', () => {
         });
         // Perform an initial render to populate the cache.
         await w.renderModel(model);
-        const cachedTextNode = w.node.childNodes[0].childNodes[0];
+        const cachedTextNode = w.node.querySelector('pre')!.childNodes[0];
         const linksBefore = w.node.querySelectorAll('a');
         expect(linksBefore).toHaveLength(1);
 
@@ -1121,7 +1142,7 @@ describe('rendermime/factories', () => {
 
         // Perform a second render.
         await w.renderModel(model);
-        const textNodeAfter = w.node.childNodes[0].childNodes[0];
+        const textNodeAfter = w.node.querySelector('pre')!.childNodes[0];
         const linksAfter = w.node.querySelectorAll('a');
 
         // It should not use the second text node (`bbb www.`) from cache and instead
@@ -1159,7 +1180,7 @@ describe('rendermime/factories', () => {
               ? 'https://' + urlEncoded
               : urlEncoded;
             await w.renderModel(model);
-            expect(w.node.innerHTML).toBe(
+            expect(renderedHTML(w)).toBe(
               `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}">${urlEncoded}</a>${afterEncoded} inside.</pre>`
             );
           })
@@ -1174,7 +1195,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+        expect(renderedHTML(w)).toBe(
           '<pre>prefix <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a> suffix\nprefix <a href="~/jupyterlab/b_file.py#line=0">~/jupyterlab/b_file.py:1</a> suffix</pre>'
         );
       });
@@ -1187,7 +1208,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+        expect(renderedHTML(w)).toBe(
           '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
         );
       });
@@ -1199,7 +1220,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+        expect(renderedHTML(w)).toBe(
           '<pre>File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
         );
       });
@@ -1213,7 +1234,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(expected);
+        expect(renderedHTML(w)).toBe(expected);
       });
 
       it('should autolink mixed content with URLs and files', async () => {
@@ -1223,7 +1244,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(
+        expect(renderedHTML(w)).toBe(
           '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
         );
       });
