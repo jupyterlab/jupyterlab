@@ -6,7 +6,7 @@
 
 import type { Extension } from '@codemirror/state';
 
-import { EditorView } from '@codemirror/view';
+import { placeholder as editorPlaceholder, EditorView } from '@codemirror/view';
 
 import { ElementExt } from '@lumino/domutils';
 
@@ -168,6 +168,11 @@ const RAW_CELL_CLASS = 'jp-RawCell';
  * The class name added to a rendered input area.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
+
+/**
+ * The class name added to rendered markdown cells showing the empty placeholder.
+ */
+const EMPTY_MARKDOWN_PLACEHOLDER_CLASS = 'jp-mod-emptyMarkdownPlaceholder';
 
 const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
 
@@ -2167,6 +2172,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       options.showEditorForReadOnlyMarkdown ??
       MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
 
+    this._cachedHeadingText = this.model.sharedModel.getSource();
+    this._emptyPlaceholder =
+      options.emptyPlaceholder ??
+      trans.__('Double-click (or press Enter) to edit');
+    this._editModePlaceholder = trans.__(
+      'You can use Markdown and LaTeX: $ α^2 $'
+    );
+
     // Defer setting placeholder as the renderer must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
 
@@ -2191,10 +2204,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
-
-    this._cachedHeadingText = this.model.sharedModel.getSource();
-    this._emptyPlaceholder =
-      options.emptyPlaceholder ?? trans.__('Type Markdown and LaTeX: $ α^2 $');
   }
 
   /**
@@ -2508,6 +2517,20 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  /**
+   * Get the editor options at initialization.
+   *
+   * @returns Editor options
+   */
+  protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
+    const base = super.getEditorOptions() ?? {};
+    base.extensions = [
+      ...(base.extensions ?? []),
+      editorPlaceholder(this._editModePlaceholder)
+    ];
+    return base;
+  }
+
   /*
    * Handle `update-request` messages.
    */
@@ -2538,6 +2561,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private async _handleRendered(): Promise<void> {
     if (!this._rendered) {
+      this.removeClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS);
       this.showEditor();
     } else {
       // TODO: It would be nice for the cell to provide a way for
@@ -2559,8 +2583,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
 
     const model = this.model;
-    const text =
-      (model && model.sharedModel.getSource()) || this._emptyPlaceholder;
+    const source = model?.sharedModel.getSource() ?? '';
+    const isEmpty = source.length === 0;
+    const text = isEmpty ? this._emptyPlaceholder : source;
+    this.toggleClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS, isEmpty);
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -2602,6 +2628,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
+  private _editModePlaceholder: string;
 }
 
 /**
