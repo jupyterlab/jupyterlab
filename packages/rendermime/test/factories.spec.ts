@@ -44,6 +44,57 @@ function renderedHTML(w: IRenderMime.IRenderer): string {
   return (w.node.firstElementChild as HTMLElement).innerHTML;
 }
 
+// Renderers attached during a test. The incremental pipeline only renders while
+// the host is connected to the DOM, so parameterized tests must attach the
+// widget; these are disposed after each test by `disposeRenderers`.
+const attachedRenderers: IRenderMime.IRenderer[] = [];
+
+/**
+ * Create a renderer and attach it to the document (required by the incremental
+ * pipeline, which bails while the host is disconnected).
+ */
+function attachedRenderer(
+  factory: IRenderMime.IRendererFactory,
+  options: any
+): IRenderMime.IRenderer {
+  const w = factory.createRenderer(options);
+  Widget.attach(w as Widget, document.body);
+  attachedRenderers.push(w);
+  return w;
+}
+
+/**
+ * Render a model and drive the incremental pipeline to completion, flushing the
+ * async work it triggers (e.g. file-path resolution). A no-op beyond the render
+ * itself for the synchronous pipeline. Fake timers must be enabled by the
+ * caller.
+ *
+ * `renderError` awaits render completion (so its `renderModel` promise only
+ * settles once the animation-frame loop has finished), so the timers must be
+ * driven *while* that promise is pending - hence drive-then-await rather than
+ * await-then-drive.
+ */
+async function renderAndFlush(
+  w: IRenderMime.IRenderer,
+  model: IRenderMime.IMimeModel
+): Promise<void> {
+  const rendered = w.renderModel(model);
+  // `runAllTimersAsync` runs the (re-scheduling) animation-frame loop to
+  // completion and flushes microtasks between timers; it exists at runtime
+  // (jest 29.5) but is missing from the installed `@types/jest`.
+  await (
+    jest as unknown as { runAllTimersAsync(): Promise<void> }
+  ).runAllTimersAsync();
+  await rendered;
+}
+
+/** Dispose all renderers attached during a test. */
+function disposeRenderers(): void {
+  while (attachedRenderers.length) {
+    (attachedRenderers.pop() as Widget).dispose();
+  }
+}
+
 const sanitizer = new Sanitizer();
 const defaultOptions: any = {
   sanitizer,
@@ -77,23 +128,42 @@ describe('rendermime/factories', () => {
       });
     });
 
-    describe('#createRenderer()', () => {
+    // The output-correctness tests run against both rendering pipelines: the
+    // incremental (asynchronous) one and the synchronous escape hatch. Both must
+    // produce the same final DOM.
+    describe.each([
+      ['incremental', true],
+      ['synchronous', false]
+    ] as const)('#createRenderer() (%s pipeline)', (_label, incremental) => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+        sanitizer.setIncrementalAutolink(incremental);
+      });
+      afterEach(() => {
+        disposeRenderers();
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+        // Restore the default assumed by the non-parameterized suites.
+        sanitizer.setIncrementalAutolink(false);
+      });
+
       it('should output the correct HTML', async () => {
-        const f = textRendererFactory;
-        const mimeType = 'text/plain';
-        const model = createModel(mimeType, 'x = 2 ** a');
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'text/plain',
+          ...defaultOptions
+        });
+        await renderAndFlush(w, createModel('text/plain', 'x = 2 ** a'));
         expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it('should be re-renderable', async () => {
-        const f = textRendererFactory;
-        const mimeType = 'text/plain';
-        const model = createModel(mimeType, 'x = 2 ** a');
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
-        await w.renderModel(model);
+        const model = createModel('text/plain', 'x = 2 ** a');
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'text/plain',
+          ...defaultOptions
+        });
+        await renderAndFlush(w, model);
+        await renderAndFlush(w, model);
         expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
       });
 
@@ -117,30 +187,35 @@ describe('rendermime/factories', () => {
       ])(
         'should output the correct HTML with ansi colors',
         async (source, expected) => {
-          const f = textRendererFactory;
-          const mimeType = 'application/vnd.jupyter.console-text';
-          const model = createModel(mimeType, source);
-          const w = f.createRenderer({ mimeType, ...defaultOptions });
-          await w.renderModel(model);
+          const w = attachedRenderer(textRendererFactory, {
+            mimeType: 'application/vnd.jupyter.console-text',
+            ...defaultOptions
+          });
+          await renderAndFlush(
+            w,
+            createModel('application/vnd.jupyter.console-text', source)
+          );
           expect(renderedHTML(w)).toBe(expected);
         }
       );
 
       it('should escape inline html', async () => {
-        const f = textRendererFactory;
         const source =
           'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
-        const mimeType = 'application/vnd.jupyter.console-text';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'application/vnd.jupyter.console-text',
+          ...defaultOptions
+        });
+        await renderAndFlush(
+          w,
+          createModel('application/vnd.jupyter.console-text', source)
+        );
         expect(renderedHTML(w)).toBe(
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
 
       it('should autolink single URL', async () => {
-        const f = textRendererFactory;
         const urls = [
           ['https://example.com', '', ''],
           ['https://example.com#', '', ''],
@@ -170,65 +245,80 @@ describe('rendermime/factories', () => {
           ['http://127.0.0.1/test?query=string', '', ''],
           ['http://127.0.0.1/test?query=string&param=42', '', '']
         ];
-        await Promise.all(
-          urls.map(async u => {
-            const [url, before, after] = u;
-            const source = `Text with the URL ${before}${url}${after} inside.`;
-            const mimeType = 'text/plain';
-            const model = createModel(mimeType, source);
-            const w = f.createRenderer({ mimeType, ...defaultOptions });
-            const [urlEncoded, beforeEncoded, afterEncoded] = [
-              url,
-              before,
-              after
-            ].map(encodeChars);
-            const prefixedUrl = urlEncoded.startsWith('www.')
-              ? 'https://' + urlEncoded
-              : urlEncoded;
-            await w.renderModel(model);
-            expect(renderedHTML(w)).toBe(
-              `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
-            );
-          })
-        );
+        // Sequential so that the fake-timer flush is deterministic per render.
+        for (const [url, before, after] of urls) {
+          const source = `Text with the URL ${before}${url}${after} inside.`;
+          const w = attachedRenderer(textRendererFactory, {
+            mimeType: 'text/plain',
+            ...defaultOptions
+          });
+          const [urlEncoded, beforeEncoded, afterEncoded] = [
+            url,
+            before,
+            after
+          ].map(encodeChars);
+          const prefixedUrl = urlEncoded.startsWith('www.')
+            ? 'https://' + urlEncoded
+            : urlEncoded;
+          await renderAndFlush(w, createModel('text/plain', source));
+          expect(renderedHTML(w)).toBe(
+            `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
+          );
+        }
       });
 
       it('should not skip autolink', async () => {
-        const source = 'www.example.com';
-        const expected =
-          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>';
-        const f = textRendererFactory;
-        const mimeType = 'text/plain';
-        const model = createModel(mimeType, source);
         sanitizer.setAutolink(true);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(expected);
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'text/plain',
+          ...defaultOptions
+        });
+        await renderAndFlush(w, createModel('text/plain', 'www.example.com'));
+        expect(renderedHTML(w)).toBe(
+          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>'
+        );
       });
 
       it('should skip autolink', async () => {
-        const source = 'www.example.com';
-        const expected = '<pre>www.example.com</pre>';
-        const f = textRendererFactory;
-        const mimeType = 'text/plain';
-        const model = createModel(mimeType, source);
         sanitizer.setAutolink(false);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(expected);
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'text/plain',
+          ...defaultOptions
+        });
+        await renderAndFlush(w, createModel('text/plain', 'www.example.com'));
+        expect(renderedHTML(w)).toBe('<pre>www.example.com</pre>');
         sanitizer.setAutolink(true);
       });
 
       it('should autolink multiple URLs', async () => {
-        const source = 'www.example.com\nwww.python.org';
-        const expected =
-          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a>\n<a href="https://www.python.org" rel="noopener" target="_blank">www.python.org</a></pre>';
-        const f = textRendererFactory;
-        const mimeType = 'text/plain';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(expected);
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'text/plain',
+          ...defaultOptions
+        });
+        await renderAndFlush(
+          w,
+          createModel('text/plain', 'www.example.com\nwww.python.org')
+        );
+        expect(renderedHTML(w)).toBe(
+          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a>\n<a href="https://www.python.org" rel="noopener" target="_blank">www.python.org</a></pre>'
+        );
+      });
+
+      it('wraps the rendered content in a single containment div', async () => {
+        // Unlike older versions - which placed the `<pre>` directly under the
+        // widget node - the rendered output is nested one level deeper, inside a
+        // containment `<div>`. This holds for both rendering pipelines.
+        const w = attachedRenderer(textRendererFactory, {
+          mimeType: 'text/plain',
+          ...defaultOptions
+        });
+        await renderAndFlush(w, createModel('text/plain', 'x = 1'));
+        expect(w.node.children).toHaveLength(1);
+        const wrapper = w.node.firstElementChild as HTMLElement;
+        expect(wrapper.tagName).toBe('DIV');
+        expect(wrapper.style.contain).toBe('style layout');
+        expect(wrapper.children).toHaveLength(1);
+        expect(wrapper.firstElementChild!.tagName).toBe('PRE');
       });
     });
   });
@@ -916,261 +1006,221 @@ describe('rendermime/factories', () => {
         jest.restoreAllMocks();
       });
 
-      it('should output the correct HTML', async () => {
-        const f = errorRendererFactory;
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, 'x = 2 ** a');
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
-      });
+      // Output-correctness and cache tests run against both pipelines. None of
+      // these rely on the (async) path resolver, so they behave identically in
+      // the incremental and synchronous pipelines.
+      describe.each([
+        ['incremental', true],
+        ['synchronous', false]
+      ] as const)('%s pipeline', (_label, incremental) => {
+        beforeEach(() => {
+          jest.useFakeTimers();
+          sanitizer.setIncrementalAutolink(incremental);
+        });
+        afterEach(() => {
+          disposeRenderers();
+          jest.runOnlyPendingTimers();
+          jest.useRealTimers();
+          sanitizer.setIncrementalAutolink(false);
+        });
 
-      it('should be re-renderable', async () => {
-        const f = errorRendererFactory;
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, 'x = 2 ** a');
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
-      });
-
-      it('should escape inline html', async () => {
-        const f = errorRendererFactory;
-        const source =
-          'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(
-          '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
-        );
-      });
-
-      it.each([
-        // Note: timeouts are set to 3.5 times more the local performance to allow for slower runs on CI
-        //
-        // Local benchmarks:
-        // - without linkify cache: 12.5s
-        // - with cache: 1.1s
-        [
-          'when new content arrives line by line',
-          '\n' + 'X'.repeat(5000),
-          1100 * 3.5
-        ],
-        // Local benchmarks:
-        // - without cache: 3.8s
-        // - with cache: 0.8s
-        [
-          'when new content is added to the same line',
-          'test.com ' + 'X'.repeat(2500) + ' www.',
-          800 * 3.5
-        ]
-      ])('should be fast %s', async (_, newContent, timeout) => {
-        let source = '';
         const mimeType = 'application/vnd.jupyter.stderr';
 
-        const model = createModel(mimeType, source);
-        const w = errorRendererFactory.createRenderer({ mimeType, ...options });
-
-        const start = performance.now();
-        for (let i = 0; i < 25; i++) {
-          source += newContent;
-          model.setData({
-            data: {
-              [mimeType]: source
-            }
+        it('should output the correct HTML', async () => {
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
           });
-          await w.renderModel(model);
-        }
-        const end = performance.now();
+          await renderAndFlush(w, createModel(mimeType, 'x = 2 ** a'));
+          expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
+        });
 
-        expect(end - start).toBeLessThan(timeout);
-      });
+        it('should be re-renderable', async () => {
+          const model = createModel(mimeType, 'x = 2 ** a');
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, model);
+          await renderAndFlush(w, model);
+          expect(renderedHTML(w)).toBe('<pre>x = 2 ** a</pre>');
+        });
 
-      it('should use a fast path when no ANSI codes are present', async () => {
-        const mimeType = 'application/vnd.jupyter.stderr';
+        it('should autolink URLs', async () => {
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...defaultOptions
+          });
+          await renderAndFlush(w, createModel(mimeType, 'www.example.com'));
+          expect(renderedHTML(w)).toBe(
+            '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>'
+          );
+        });
 
-        const ansiEscape = '\x1b[01;41;32mtext\x1b[00m';
-        const notAnsiEscape = '\x1a[01;41;32mtext\x1a[00m';
+        it.each([
+          ['arrives in a new line', 'www.example.com', '\n a new line of text'],
+          [
+            'arrives after a new line',
+            'www.example.com\n',
+            'a new line of text'
+          ],
+          [
+            'arrives after a text node',
+            'www.example.com next line',
+            ' of text'
+          ],
+          [
+            'arrives after a text node',
+            'www.example.com\nnext line',
+            ' of text'
+          ]
+        ])(
+          'should use cached links if new content %s',
+          async (_, oldSource, addition) => {
+            let source = oldSource;
+            const model = createModel(mimeType, source);
+            const w = attachedRenderer(errorRendererFactory, {
+              mimeType,
+              ...defaultOptions
+            });
+            // Perform an initial render to populate the cache.
+            await renderAndFlush(w, model);
+            const before = renderedHTML(w);
+            const cachedLink = w.node.querySelector('a');
+            expect(cachedLink).toBe(w.node.querySelector('pre')!.childNodes[0]);
 
-        // We cannot just compare times here because:
-        // a) tests are run in jsdom thus "native" sanitizer is not much faster
-        // b) `Private.ansiSpan` has much higher cost when ANSI escapes are present
+            // Update the source.
+            source += addition;
+            model.setData({ data: { [mimeType]: source } });
 
-        const testSource = '<script>window.x = 1</script>';
-        const spy = jest.spyOn(sanitizer, 'sanitize');
+            // Perform a second render which should use the cache.
+            await renderAndFlush(w, model);
+            const after = renderedHTML(w);
+            const linkAfter = w.node.querySelector('a');
 
-        // Initialize slow path scenario
-        let model = createModel(mimeType, testSource + ansiEscape);
-        let w = errorRendererFactory.createRenderer({ mimeType, ...options });
-        expect(spy).toHaveBeenCalledTimes(0);
+            // The contents of the node should be updated with the new line.
+            expect(before).not.toEqual(after);
+            expect(after).toContain('line of text');
 
-        // Test slow path
-        await w.renderModel(model);
-        // Sanitizer.sanitize should have been called
-        expect(spy).toHaveBeenCalledTimes(1);
+            expect(cachedLink).not.toBe(null);
+            expect(linkAfter).not.toBe(null);
+            expect(linkAfter).toEqual(cachedLink);
 
-        const escapedSlow = w.node.querySelector('pre')!.innerHTML;
-
-        // Initialize fast path scenario.
-        model = createModel(mimeType, testSource + notAnsiEscape);
-        w = errorRendererFactory.createRenderer({ mimeType, ...options });
-
-        // Test fast path
-        await w.renderModel(model);
-        // Sanitizer.sanitize should not have been called
-        expect(spy).toHaveBeenCalledTimes(1);
-
-        const escapedFast = w.node.querySelector('pre')!.innerHTML;
-
-        // Disregarding the suffix the escaped code should be the same.
-        expect(escapedFast.slice(0, testSource.length)).toEqual(
-          escapedSlow.slice(0, testSource.length)
+            // Node reuse differs between the pipelines: the synchronous pipeline
+            // reuses cached nodes by cloning them (so the reused DOM node carries
+            // the `wasCloned` marker), whereas the incremental pipeline reuses
+            // the existing DOM nodes in place.
+            if (!incremental) {
+              /* eslint-disable jest/no-conditional-expect */
+              expect(cachedLink).not.toHaveProperty('wasCloned');
+              expect(linkAfter).toHaveProperty('wasCloned', true);
+              /* eslint-enable jest/no-conditional-expect */
+            }
+          }
         );
-      });
 
-      it.each([
-        ['arrives in a new line', 'www.example.com', '\n a new line of text'],
-        ['arrives after a new line', 'www.example.com\n', 'a new line of text'],
-        ['arrives after a text node', 'www.example.com next line', ' of text'],
-        ['arrives after a text node', 'www.example.com\nnext line', ' of text']
-      ])(
-        'should use cached links if new content %s',
-        async (_, oldSource, addition) => {
-          const mimeType = 'application/vnd.jupyter.stderr';
-          let source = oldSource;
+        it('should not use cached links if the new content appends to the link', async () => {
+          let source = 'www.example.co';
           const model = createModel(mimeType, source);
-          const w = errorRendererFactory.createRenderer({
+          const w = attachedRenderer(errorRendererFactory, {
             mimeType,
             ...defaultOptions
           });
           // Perform an initial render to populate the cache.
-          await w.renderModel(model);
+          await renderAndFlush(w, model);
           const before = renderedHTML(w);
           const cachedLink = w.node.querySelector('a');
-          expect(cachedLink).toBe(w.node.querySelector('pre')!.childNodes[0]);
 
           // Update the source.
-          source += addition;
-          model.setData({
-            data: {
-              [mimeType]: source
-            }
-          });
+          source += 'm';
+          model.setData({ data: { [mimeType]: source } });
 
-          // Perform a second render which should use the cache.
-          await w.renderModel(model);
+          // Perform a second render.
+          await renderAndFlush(w, model);
           const after = renderedHTML(w);
           const linkAfter = w.node.querySelector('a');
 
           // The contents of the node should be updated with the new line.
           expect(before).not.toEqual(after);
-          expect(after).toContain('line of text');
 
           expect(cachedLink).not.toBe(null);
+          expect(cachedLink!.textContent).toEqual('www.example.co');
           expect(cachedLink).not.toHaveProperty('wasCloned');
 
           // If cached links were reused those would be cloned
           expect(linkAfter).not.toBe(null);
-          expect(linkAfter).toEqual(cachedLink);
-          expect(linkAfter).toHaveProperty('wasCloned', true);
-        }
-      );
-
-      it('should not use cached links if the new content appends to the link', async () => {
-        const mimeType = 'application/vnd.jupyter.stderr';
-        let source = 'www.example.co';
-        const model = createModel(mimeType, source);
-        const w = errorRendererFactory.createRenderer({
-          mimeType,
-          ...defaultOptions
+          expect(linkAfter!.textContent).toEqual('www.example.com');
+          expect(linkAfter).not.toHaveProperty('wasCloned');
         });
-        // Perform an initial render to populate the cache.
-        await w.renderModel(model);
-        const before = renderedHTML(w);
-        const cachedLink = w.node.querySelector('a');
 
-        // Update the source.
-        source += 'm';
-        model.setData({
-          data: {
-            [mimeType]: source
+        it('should use partial cache if a link is created by addition of a new fragment', async () => {
+          let source = 'aaa www.one.com bbb www.';
+          const model = createModel(mimeType, source);
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...defaultOptions
+          });
+          // Perform an initial render to populate the cache.
+          await renderAndFlush(w, model);
+          const cachedTextNode = w.node.querySelector('pre')!.childNodes[0];
+          const linksBefore = w.node.querySelectorAll('a');
+          expect(linksBefore).toHaveLength(1);
+
+          // Update the source.
+          source += 'two.com';
+          model.setData({ data: { [mimeType]: source } });
+
+          // Perform a second render.
+          await renderAndFlush(w, model);
+          const textNodeAfter = w.node.querySelector('pre')!.childNodes[0];
+          const linksAfter = w.node.querySelectorAll('a');
+
+          // It should not use the second text node (`bbb www.`) from cache and
+          // instead it should fragment properly linkify the second link
+          expect(linksAfter).toHaveLength(2);
+
+          expect(cachedTextNode).toBeInstanceOf(Text);
+          expect(textNodeAfter).toEqual(cachedTextNode);
+
+          // See note above: cached-node reuse is clone-based only in the
+          // synchronous pipeline.
+          if (!incremental) {
+            /* eslint-disable jest/no-conditional-expect */
+            expect(cachedTextNode).not.toHaveProperty('wasCloned');
+            expect(textNodeAfter).toHaveProperty('wasCloned', true);
+            /* eslint-enable jest/no-conditional-expect */
           }
         });
 
-        // Perform a second render.
-        await w.renderModel(model);
-        const after = renderedHTML(w);
-        const linkAfter = w.node.querySelector('a');
-
-        // The contents of the node should be updated with the new line.
-        expect(before).not.toEqual(after);
-
-        expect(cachedLink).not.toBe(null);
-        expect(cachedLink!.textContent).toEqual('www.example.co');
-        expect(cachedLink).not.toHaveProperty('wasCloned');
-
-        // If cached links were reused those would be cloned
-        expect(linkAfter).not.toBe(null);
-        expect(linkAfter!.textContent).toEqual('www.example.com');
-        expect(linkAfter).not.toHaveProperty('wasCloned');
-      });
-
-      it('should use partial cache if a link is created by addition of a new fragment', async () => {
-        const mimeType = 'application/vnd.jupyter.stderr';
-        let source = 'aaa www.one.com bbb www.';
-        const model = createModel(mimeType, source);
-        const w = errorRendererFactory.createRenderer({
-          mimeType,
-          ...defaultOptions
-        });
-        // Perform an initial render to populate the cache.
-        await w.renderModel(model);
-        const cachedTextNode = w.node.querySelector('pre')!.childNodes[0];
-        const linksBefore = w.node.querySelectorAll('a');
-        expect(linksBefore).toHaveLength(1);
-
-        // Update the source.
-        source += 'two.com';
-        model.setData({
-          data: {
-            [mimeType]: source
-          }
+        it('should escape inline html', async () => {
+          // `</script>` contains a path-like `/script` that gets auto-linked and
+          // is then pruned by the async path resolver - exercising that the path
+          // step runs after the (incremental) render has produced the anchors.
+          const source =
+            'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, createModel(mimeType, source));
+          expect(renderedHTML(w)).toBe(
+            '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
+          );
         });
 
-        // Perform a second render.
-        await w.renderModel(model);
-        const textNodeAfter = w.node.querySelector('pre')!.childNodes[0];
-        const linksAfter = w.node.querySelectorAll('a');
-
-        // It should not use the second text node (`bbb www.`) from cache and instead
-        // it should fragment properly linkify the second link
-        expect(linksAfter).toHaveLength(2);
-
-        expect(cachedTextNode).toBeInstanceOf(Text);
-        expect(cachedTextNode).not.toHaveProperty('wasCloned');
-
-        // If cached nodes were reused those would be cloned
-        expect(textNodeAfter).toEqual(cachedTextNode);
-        expect(textNodeAfter).toHaveProperty('wasCloned', true);
-      });
-
-      it('should autolink a single known file path', async () => {
-        const f = errorRendererFactory;
-        const urls = [
-          ['/usr/local/lib/message.py', '', ''],
-          ['/usr/local/lib/message.py', '"', '"'],
-          ['/tmp/ipykernel_361344/2220647380.py', '', '']
-        ];
-        await Promise.all(
-          urls.map(async u => {
-            const [url, before, after] = u;
+        it('should autolink a single known file path', async () => {
+          const urls = [
+            ['/usr/local/lib/message.py', '', ''],
+            ['/usr/local/lib/message.py', '"', '"'],
+            ['/tmp/ipykernel_361344/2220647380.py', '', '']
+          ];
+          // Sequential so that the fake-timer flush is deterministic per render.
+          for (const [url, before, after] of urls) {
             const source = `Text with the URL ${before}${url}${after} inside.`;
-            const mimeType = 'application/vnd.jupyter.stderr';
-            const model = createModel(mimeType, source);
-            const w = f.createRenderer({ mimeType, ...options });
+            const w = attachedRenderer(errorRendererFactory, {
+              mimeType,
+              ...options
+            });
             const [urlEncoded, beforeEncoded, afterEncoded] = [
               url,
               before,
@@ -1179,74 +1229,166 @@ describe('rendermime/factories', () => {
             const prefixedUrl = urlEncoded.startsWith('www.')
               ? 'https://' + urlEncoded
               : urlEncoded;
-            await w.renderModel(model);
+            await renderAndFlush(w, createModel(mimeType, source));
             expect(renderedHTML(w)).toBe(
               `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}">${urlEncoded}</a>${afterEncoded} inside.</pre>`
             );
-          })
-        );
+          }
+        });
+
+        it('should autolink multiple links', async () => {
+          const source =
+            'prefix ~/jupyterlab/a_file.py:1 suffix\nprefix ~/jupyterlab/b_file.py:1 suffix';
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, createModel(mimeType, source));
+          expect(renderedHTML(w)).toBe(
+            '<pre>prefix <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a> suffix\nprefix <a href="~/jupyterlab/b_file.py#line=0">~/jupyterlab/b_file.py:1</a> suffix</pre>'
+          );
+        });
+
+        it('should autolink to a specific line (IPython style)', async () => {
+          const source = 'File ~/jupyterlab/a_file.py:1';
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, createModel(mimeType, source));
+          expect(renderedHTML(w)).toBe(
+            '<pre>File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
+          );
+        });
+
+        it('should autolink mixed content with URLs and files', async () => {
+          const source = 'URL www.example.com File ~/jupyterlab/a_file.py:1';
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, createModel(mimeType, source));
+          expect(renderedHTML(w)).toBe(
+            '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
+          );
+        });
       });
 
-      it('should autolink multiple links', async () => {
-        const f = errorRendererFactory;
-        const source =
-          'prefix ~/jupyterlab/a_file.py:1 suffix\nprefix ~/jupyterlab/b_file.py:1 suffix';
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(
-          '<pre>prefix <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a> suffix\nprefix <a href="~/jupyterlab/b_file.py#line=0">~/jupyterlab/b_file.py:1</a> suffix</pre>'
-        );
-      });
+      // Synchronous-pipeline-only tests:
+      // - the performance tests measure wall-clock render time, which is only
+      //   meaningful when rendering happens synchronously in a single pass;
+      // - the Python-style traceback link has its line locator *after a space*
+      //   (`", line 1`); the incremental linker splits fragments on whitespace
+      //   and commits the path anchor before it sees the locator, so it captures
+      //   only the path (no `#line=…`). Other locator styles (e.g. IPython's
+      //   `:1`) attach without a space and work in both pipelines.
+      describe('synchronous pipeline only', () => {
+        beforeEach(() => {
+          sanitizer.setIncrementalAutolink(false);
+        });
+        afterEach(() => {
+          sanitizer.setIncrementalAutolink(false);
+        });
 
-      it('should autolink to a specific line (Python style)', async () => {
-        const f = errorRendererFactory;
-        const source =
-          'File "/home/user/jupyterlab/a_file.py", line 1, in <module>';
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(
-          '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
-        );
-      });
+        it('should autolink to a specific line (Python style)', async () => {
+          const mimeType = 'application/vnd.jupyter.stderr';
+          const source =
+            'File "/home/user/jupyterlab/a_file.py", line 1, in <module>';
+          const w = errorRendererFactory.createRenderer({
+            mimeType,
+            ...options
+          });
+          await w.renderModel(createModel(mimeType, source));
+          expect(renderedHTML(w)).toBe(
+            '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
+          );
+        });
 
-      it('should autolink to a specific line (IPython style)', async () => {
-        const f = errorRendererFactory;
-        const source = 'File ~/jupyterlab/a_file.py:1';
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(
-          '<pre>File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
-        );
-      });
+        it.each([
+          // Note: timeouts are set to 3.5 times more the local performance to allow for slower runs on CI
+          //
+          // Local benchmarks:
+          // - without linkify cache: 12.5s
+          // - with cache: 1.1s
+          [
+            'when new content arrives line by line',
+            '\n' + 'X'.repeat(5000),
+            1100 * 3.5
+          ],
+          // Local benchmarks:
+          // - without cache: 3.8s
+          // - with cache: 0.8s
+          [
+            'when new content is added to the same line',
+            'test.com ' + 'X'.repeat(2500) + ' www.',
+            800 * 3.5
+          ]
+        ])('should be fast %s', async (_, newContent, timeout) => {
+          let source = '';
+          const mimeType = 'application/vnd.jupyter.stderr';
 
-      it('should autolink URLs', async () => {
-        const source = 'www.example.com';
-        const expected =
-          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>';
-        const f = errorRendererFactory;
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(expected);
-      });
+          const model = createModel(mimeType, source);
+          const w = errorRendererFactory.createRenderer({
+            mimeType,
+            ...options
+          });
 
-      it('should autolink mixed content with URLs and files', async () => {
-        const f = errorRendererFactory;
-        const source = 'URL www.example.com File ~/jupyterlab/a_file.py:1';
-        const mimeType = 'application/vnd.jupyter.stderr';
-        const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...options });
-        await w.renderModel(model);
-        expect(renderedHTML(w)).toBe(
-          '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
-        );
+          const start = performance.now();
+          for (let i = 0; i < 25; i++) {
+            source += newContent;
+            model.setData({
+              data: {
+                [mimeType]: source
+              }
+            });
+            await w.renderModel(model);
+          }
+          const end = performance.now();
+
+          expect(end - start).toBeLessThan(timeout);
+        });
+
+        it('should use a fast path when no ANSI codes are present', async () => {
+          const mimeType = 'application/vnd.jupyter.stderr';
+
+          const ansiEscape = '\x1b[01;41;32mtext\x1b[00m';
+          const notAnsiEscape = '\x1a[01;41;32mtext\x1a[00m';
+
+          // We cannot just compare times here because:
+          // a) tests are run in jsdom thus "native" sanitizer is not much faster
+          // b) `Private.ansiSpan` has much higher cost when ANSI escapes are present
+
+          const testSource = '<script>window.x = 1</script>';
+          const spy = jest.spyOn(sanitizer, 'sanitize');
+
+          // Initialize slow path scenario
+          let model = createModel(mimeType, testSource + ansiEscape);
+          let w = errorRendererFactory.createRenderer({ mimeType, ...options });
+          expect(spy).toHaveBeenCalledTimes(0);
+
+          // Test slow path
+          await w.renderModel(model);
+          // Sanitizer.sanitize should have been called
+          expect(spy).toHaveBeenCalledTimes(1);
+
+          const escapedSlow = w.node.querySelector('pre')!.innerHTML;
+
+          // Initialize fast path scenario.
+          model = createModel(mimeType, testSource + notAnsiEscape);
+          w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+          // Test fast path
+          await w.renderModel(model);
+          // Sanitizer.sanitize should not have been called
+          expect(spy).toHaveBeenCalledTimes(1);
+
+          const escapedFast = w.node.querySelector('pre')!.innerHTML;
+
+          // Disregarding the suffix the escaped code should be the same.
+          expect(escapedFast.slice(0, testSource.length)).toEqual(
+            escapedSlow.slice(0, testSource.length)
+          );
+        });
       });
 
       it('should execute command when kernel-scoped path link is clicked in untrusted content', async () => {

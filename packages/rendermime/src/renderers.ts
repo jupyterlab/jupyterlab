@@ -821,7 +821,9 @@ function* alignedNodes<T extends Node, U extends Node>(
 export async function renderText(
   options: renderText.IRenderOptions
 ): Promise<void> {
-  renderTextual(options, {
+  // Text has no post-render step, so we do not await completion here (rendering
+  // continues incrementally across animation frames).
+  void renderTextual(options, {
     checkWeb: true,
     checkPaths: false
   });
@@ -860,9 +862,13 @@ enum RenderingResult {
 function renderTextual(
   options: renderText.IRenderOptions,
   autoLinkOptions: IAutoLinkOptions
-): void {
+): Promise<void> {
   // Unpack the options.
   const { host, sanitizer, source } = options;
+
+  // Settle the completion promise of any previous render for this host - it is
+  // being superseded by this call.
+  Private.settleRender(host);
 
   // Escape hatch: when incremental auto-linking is disabled, render
   // synchronously in a single pass (legacy behavior). Links then appear
@@ -874,8 +880,18 @@ function renderTextual(
     // (e.g. if the setting was toggled mid-stream) before rendering synchronously.
     Private.abortRendering(host);
     renderTextualSync(options, autoLinkOptions);
-    return;
+    return Promise.resolve();
   }
+
+  // Completion promise: resolves once this render has finished (reached
+  // `stopRendering`) or has been superseded by a later render. `renderError`
+  // awaits it before resolving file-path links, which requires the anchors to
+  // already be present in the DOM.
+  let resolveRendered!: () => void;
+  const rendered = new Promise<void>(resolve => {
+    resolveRendered = resolve;
+  });
+  Private.registerRenderResolver(host, resolveRendered);
 
   // We want to only manipulate DOM once per animation frame whether
   // the autolink is enabled or not, because a stream can also choke
@@ -925,6 +941,8 @@ function renderTextual(
     if (observer) {
       Private.unregisterObserver(host, observer);
     }
+    // Resolve the completion promise now that rendering has finished.
+    Private.settleRender(host);
     return RenderingResult.stop;
   };
 
@@ -1095,6 +1113,8 @@ function renderTextual(
   Private.scheduleRendering(host, renderFrame, {
     resilient: !Private.hasPainted(host)
   });
+
+  return rendered;
 }
 
 /**
@@ -1320,7 +1340,10 @@ export async function renderError(
   // Unpack the options.
   const { host, linkHandler, resolver } = options;
 
-  renderTextual(options, {
+  // Wait for rendering to complete before patching paths: the path anchors must
+  // be in the DOM for `handlePaths` to resolve them. In the incremental pipeline
+  // rendering happens across animation frames, so this must be awaited.
+  await renderTextual(options, {
     checkWeb: true,
     checkPaths: true
   });
@@ -1520,6 +1543,31 @@ namespace Private {
 
   export function markPainted(host: HTMLElement): void {
     paintedHosts.add(host);
+  }
+
+  /**
+   * Resolvers for the per-host render completion promise returned by
+   * `renderTextual`. A host has at most one in-flight render; its resolver is
+   * called (and cleared) when the render finishes or is superseded.
+   */
+  const renderResolvers = new WeakMap<HTMLElement, () => void>();
+
+  export function registerRenderResolver(
+    host: HTMLElement,
+    resolve: () => void
+  ): void {
+    renderResolvers.set(host, resolve);
+  }
+
+  /**
+   * Resolve and clear the pending render completion promise for a host, if any.
+   */
+  export function settleRender(host: HTMLElement): void {
+    const resolve = renderResolvers.get(host);
+    if (resolve) {
+      renderResolvers.delete(host);
+      resolve();
+    }
   }
 
   /**
