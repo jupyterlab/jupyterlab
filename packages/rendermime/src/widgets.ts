@@ -9,7 +9,6 @@ import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as renderers from './renderers';
@@ -455,11 +454,7 @@ export class RenderedText extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedText');
-    this._wrapper = document.createElement('div');
-    this._wrapper.style.contain = 'style layout';
-    this._wrapper.style.width = '100%';
-    this.node.appendChild(this._wrapper);
-    this._ready.resolve(void 0);
+    this.node.style.contain = 'style layout';
   }
 
   /**
@@ -470,24 +465,19 @@ export class RenderedText extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   async render(model: IRenderMime.IMimeModel): Promise<void> {
-    await this._ready.promise;
     return renderers.renderText({
-      host: this._wrapper,
+      host: this.node,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
       translator: this.translator
     });
   }
-
-  protected _wrapper: HTMLElement;
-  protected _ready = new PromiseDelegate<void>();
 }
 
 export class RenderedError extends RenderedText {
   async render(model: IRenderMime.IMimeModel): Promise<void> {
-    await this._ready.promise;
     return renderers.renderError({
-      host: this._wrapper,
+      host: this.node,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
       linkHandler: this.linkHandler,

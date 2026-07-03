@@ -41,7 +41,7 @@ function encodeChars(txt: string): string {
  * so the rendered `<pre>` lives one level below the widget node.
  */
 function renderedHTML(w: IRenderMime.IRenderer): string {
-  return (w.node.firstElementChild as HTMLElement).innerHTML;
+  return (w.node as HTMLElement).innerHTML;
 }
 
 // Renderers attached during a test. The incremental pipeline only renders while
@@ -305,20 +305,16 @@ describe('rendermime/factories', () => {
       });
 
       it('wraps the rendered content in a single containment div', async () => {
-        // Unlike older versions - which placed the `<pre>` directly under the
-        // widget node - the rendered output is nested one level deeper, inside a
-        // containment `<div>`. This holds for both rendering pipelines.
+        // The `contain: style layout` CSS containment is applied directly to
+        // the widget node; the rendered <pre> element is its only child.
         const w = attachedRenderer(textRendererFactory, {
           mimeType: 'text/plain',
           ...defaultOptions
         });
         await renderAndFlush(w, createModel('text/plain', 'x = 1'));
         expect(w.node.children).toHaveLength(1);
-        const wrapper = w.node.firstElementChild as HTMLElement;
-        expect(wrapper.tagName).toBe('DIV');
-        expect(wrapper.style.contain).toBe('style layout');
-        expect(wrapper.children).toHaveLength(1);
-        expect(wrapper.firstElementChild!.tagName).toBe('PRE');
+        expect((w.node as HTMLElement).style.contain).toBe('style layout');
+        expect(w.node.firstElementChild!.tagName).toBe('PRE');
       });
     });
   });
