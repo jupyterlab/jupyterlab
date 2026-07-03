@@ -782,6 +782,211 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('Collapsed heading operations', () => {
+      it('copy should include children of selected collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Explicitly select the heading
+        widget.select(heading);
+        NotebookActions.copy(widget);
+
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME);
+        expect(data.length).toBe(3); // heading + 2 children
+      });
+
+      it('cut should include children of selected collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        const initialCount = widget.widgets.length;
+
+        // Explicitly select the heading
+        widget.select(heading);
+        NotebookActions.cut(widget);
+
+        // Should have deleted heading + 2 children + added 1 new cell
+        expect(widget.widgets.length).toBe(initialCount - 2);
+      });
+
+      it('delete should include children of active collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code3',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        const initialCount = widget.widgets.length;
+
+        widget.activeCellIndex = 0;
+        NotebookActions.deleteCells(widget);
+
+        // Should have deleted heading + 2 children only
+        expect(widget.widgets.length).toBe(initialCount - 3);
+      });
+
+      it('activating collapsed heading should not select children', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Activate the heading
+        widget.activeCellIndex = 0;
+
+        // Children should NOT be selected from activation alone
+        expect(widget.isSelected(widget.widgets[1])).toBe(false);
+        expect(widget.isSelected(widget.widgets[2])).toBe(false);
+
+        // But active cell should be the heading
+        expect(widget.activeCell).toBe(heading);
+      });
+
+      it('toggling collapse should not change explicit selection', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code3',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+
+        // Select only code3
+        widget.select(widget.widgets[3]);
+        const initialSelectedCount = widget.selectedCells.length;
+
+        // Toggle collapse
+        heading.headingCollapsed = true;
+
+        // Selection should remain unchanged
+        expect(widget.selectedCells.length).toBe(initialSelectedCount);
+        expect(widget.isSelected(widget.widgets[3])).toBe(true);
+      });
+    });
+
     describe('#insertAbove()', () => {
       it('should insert a code cell above the active cell', () => {
         const count = widget.widgets.length;
