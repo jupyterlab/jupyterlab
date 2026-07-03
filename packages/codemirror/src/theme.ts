@@ -148,7 +148,7 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   {
     tag: t.definition(t.typeName),
     color: 'var(--jp-mirror-editor-def-color)',
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   {
     tag: [t.special(t.variableName), t.self, t.macroName],
