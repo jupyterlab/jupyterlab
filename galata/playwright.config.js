@@ -43,6 +43,16 @@ module.exports = {
       }
     },
     {
+      name: 'csp',
+      testMatch: 'test/csp/**',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
+    },
+    {
       name: 'jupyterlab',
       testMatch: [
         'test/jupyterlab/**/*.test.ts',
