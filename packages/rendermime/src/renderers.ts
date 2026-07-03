@@ -909,12 +909,18 @@ function renderTextual(
 
   // We use the observer to pause rendering while the output is off-screen; this
   // is helpful when opening a notebook with a large number of large textual
-  // outputs. The initial values are optimistic (visible) so that the first
-  // paint is not held back waiting for the asynchronous observer callback; the
+  // outputs. The initial value is optimistic (visible) so that the first paint
+  // is not held back waiting for the asynchronous observer callback; the
   // observer then pauses further work (e.g. auto-linking) should the output
   // turn out to be off-screen.
   let isVisible = true;
-  let wasEverVisible = true;
+
+  // Number of frames for which rendering has been delayed because the host is
+  // not yet attached to the DOM (see the `!host.isConnected` handling below).
+  // Bounded so that a host that is disposed before ever attaching does not keep
+  // an animation-frame/watchdog loop alive indefinitely.
+  let disconnectedAttempts = 0;
+  const maxDisconnectedAttempts = 1000;
 
   let observer: IntersectionObserver | null = null;
   if (typeof IntersectionObserver !== 'undefined') {
@@ -922,9 +928,6 @@ function renderTextual(
       entries => {
         for (const entry of entries) {
           isVisible = entry.isIntersecting;
-          if (isVisible) {
-            wasEverVisible = true;
-          }
         }
       },
       { threshold: 0 }
@@ -962,17 +965,26 @@ function renderTextual(
     forced: boolean = false
   ): RenderingResult => {
     if (!host.isConnected) {
-      // Abort rendering if host is no longer in DOM; note, that even in
-      // full windowing notebook mode the output nodes are never removed,
-      // but instead the cell gets hidden (usually with `display: none`
-      // or in case of the active cell - opacity tricks).
-      if (!wasEverVisible) {
-        // If the host was never visible, it means it was not yet
-        // attached when loading notebook for the first time.
-        return delayRendering();
-      } else {
-        return stopRendering();
+      // The host is not in the DOM. Note that even in full windowing notebook
+      // mode the output nodes are never removed; instead the cell gets hidden
+      // (usually with `display: none`, or for the active cell via opacity), so
+      // it stays connected. A disconnected host therefore means one of:
+      // - it has not been attached yet (the notebook is still being laid out,
+      //   which under load can outlast the first scheduled frame or the fallback
+      //   watchdog) - in which case we must wait rather than give up, otherwise
+      //   the first paint is lost while the synchronously-rendered siblings
+      //   (HTML/Markdown) still appear;
+      // - it has already painted and was then detached (e.g. the cell was
+      //   removed) - in which case we stop.
+      if (!Private.hasPainted(host)) {
+        if (disconnectedAttempts < maxDisconnectedAttempts) {
+          disconnectedAttempts += 1;
+          return delayRendering();
+        }
+        // Give up eventually so a host disposed before ever attaching does not
+        // keep the render loop alive forever.
       }
+      return stopRendering();
     }
 
     // Delay rendering of this output if the output is not visible due to
@@ -1142,9 +1154,14 @@ function renderTextual(
   // in due course (see `armFallbackWatchdog`). Subsequent frames (auto-linking
   // passes, stream updates) rely on animation frames alone, so auto-linking
   // naturally backs off under resource pressure rather than competing for it.
+  //
+  // The callback returns `true` when the host still needs watching (the forced
+  // frame could not paint yet because the host is not attached), so the watchdog
+  // keeps trying until the host attaches and paints.
   if (!Private.hasPainted(host)) {
-    Private.armFallbackWatchdog(host, () =>
-      renderFrame(performance.now(), true)
+    Private.armFallbackWatchdog(
+      host,
+      () => renderFrame(performance.now(), true) === RenderingResult.delay
     );
   }
 
@@ -1587,34 +1604,40 @@ namespace Private {
    * checks whether animation frames are still being produced at all: if they
    * are, it just re-arms and lets the queue deliver this host; only when frames
    * have genuinely stopped does it force a paint.
+   *
+   * `forcePaint` returns `true` if the host still needs watching afterwards -
+   * i.e. the forced frame could not paint yet because the host is not attached -
+   * in which case the watchdog re-arms and keeps trying until it attaches.
    */
   export function armFallbackWatchdog(
     host: HTMLElement,
-    forcePaint: () => void
+    forcePaint: () => boolean
   ): void {
     clearFallbackWatchdog(host);
+    const rearm = () =>
+      fallbackWatchdogs.set(
+        host,
+        window.setTimeout(tick, firstPaintFallbackDelay)
+      );
     const tick = () => {
       const framesStarved =
         performance.now() - lastAnimationFrameTime >= firstPaintFallbackDelay;
-      if (framesStarved) {
-        fallbackWatchdogs.delete(host);
-        // Cancel the pending (starved) animation frame so it does not fire later
-        // and re-render on top of the forced paint.
-        cancelRenderingRequest(host);
-        forcePaint();
-      } else {
+      if (!framesStarved) {
         // Frames are still being produced; keep watching in case they stop
         // before this host gets its turn in the render queue.
-        fallbackWatchdogs.set(
-          host,
-          window.setTimeout(tick, firstPaintFallbackDelay)
-        );
+        rearm();
+        return;
+      }
+      fallbackWatchdogs.delete(host);
+      // Cancel the pending (starved) animation frame so it does not fire later
+      // and re-render on top of the forced paint.
+      cancelRenderingRequest(host);
+      if (forcePaint()) {
+        // The host was not ready to paint (not attached yet); keep watching.
+        rearm();
       }
     };
-    fallbackWatchdogs.set(
-      host,
-      window.setTimeout(tick, firstPaintFallbackDelay)
-    );
+    rearm();
   }
 
   export function clearFallbackWatchdog(host: HTMLElement): void {
