@@ -957,7 +957,10 @@ function renderTextual(
     return RenderingResult.delay;
   };
 
-  const renderFrame = (timestamp: number): RenderingResult => {
+  const renderFrame = (
+    timestamp: number,
+    forced: boolean = false
+  ): RenderingResult => {
     if (!host.isConnected) {
       // Abort rendering if host is no longer in DOM; note, that even in
       // full windowing notebook mode the output nodes are never removed,
@@ -977,8 +980,28 @@ function renderTextual(
     // should be rendered first.
     // Note: cannot use `checkVisibility` as it triggers style recalculation
     // before we appended the new nodes from the stream, which leads to layout
-    // trashing. Instead we use intersection observer
-    if (!isVisible || !Private.canRenderInFrame(timestamp, host)) {
+    // trashing. Instead we use intersection observer.
+    // The visibility gate is only applied once the host has been painted at
+    // least once: before the first paint the host has no content and, because
+    // `RenderedText` sets `contain: style layout`, collapses to zero height,
+    // which the intersection observer reports as not intersecting even when the
+    // output is within the viewport. Gating the first paint on the observer
+    // would therefore deadlock (never paint -> stays zero height -> never
+    // reported visible). This matches the documented intent that the first
+    // paint is not held back; only subsequent work (auto-linking, stream
+    // updates) is paused while the output is off-screen.
+    //
+    // A `forced` frame (delivered by the fallback watchdog because animation
+    // frames are starved) bypasses both gates entirely: the render queue
+    // distributes work across animation frames to avoid janky frames, but that
+    // is moot when frames are not being produced, and letting the queue rotate
+    // this host past its turn would defeat the very purpose of the fallback
+    // (see `armFallbackWatchdog`).
+    if (
+      !forced &&
+      ((!isVisible && Private.hasPainted(host)) ||
+        !Private.canRenderInFrame(timestamp, host))
+    ) {
       return delayRendering();
     }
 
@@ -988,6 +1011,9 @@ function renderTextual(
     // and auto-linking passes) are not treated as a first paint. From here on we
     // are committed to writing to the DOM in this frame.
     Private.markPainted(host);
+    // The plain text is about to be shown; the starvation watchdog is no longer
+    // needed for this host.
+    Private.clearFallbackWatchdog(host);
 
     if (fullPreTextContent === null) {
       const hasAnsiPrefix = source.includes(ansiPrefix);
@@ -1105,14 +1131,22 @@ function renderTextual(
     }
   };
 
-  // Schedule the first paint resiliently so that the plain text is shown even
-  // if `requestAnimationFrame` is starved (background tab or heavy resource
-  // pressure). Subsequent frames (updates and auto-linking passes) rely on
-  // animation frames alone, so auto-linking naturally backs off under those
-  // conditions rather than competing for scarce resources.
-  Private.scheduleRendering(host, renderFrame, {
-    resilient: !Private.hasPainted(host)
-  });
+  // Schedule the first paint through the normal animation-frame render queue.
+  Private.scheduleRendering(host, renderFrame);
+
+  // Until the host has painted, keep a watchdog that force-paints it if
+  // `requestAnimationFrame` turns out to be starved (background tab or heavy
+  // resource pressure), so the plain text is shown even when frames stop being
+  // produced. The watchdog only fires under genuine starvation - while frames
+  // are still being produced it simply lets the render queue deliver this host
+  // in due course (see `armFallbackWatchdog`). Subsequent frames (auto-linking
+  // passes, stream updates) rely on animation frames alone, so auto-linking
+  // naturally backs off under resource pressure rather than competing for it.
+  if (!Private.hasPainted(host)) {
+    Private.armFallbackWatchdog(host, () =>
+      renderFrame(performance.now(), true)
+    );
+  }
 
   return rendered;
 }
@@ -1526,7 +1560,70 @@ namespace Private {
 
   const renderQueue = new Array<HTMLElement>();
   const frameRequests = new WeakMap<HTMLElement, number>();
-  const fallbackTimers = new WeakMap<HTMLElement, number>();
+
+  /**
+   * Timestamp (in the `performance.now()` / animation-frame time domain) at
+   * which an animation frame most recently ran. Used by the fallback watchdog to
+   * tell genuine `requestAnimationFrame` starvation (background tab, heavy
+   * resource pressure) apart from a host simply waiting its turn in the
+   * per-frame render queue.
+   */
+  let lastAnimationFrameTime = 0;
+
+  /**
+   * Self-rearming fallback watchdogs, one per host awaiting its first paint.
+   */
+  const fallbackWatchdogs = new WeakMap<HTMLElement, number>();
+
+  /**
+   * Arm a watchdog that force-paints an as-yet-unpainted host if animation
+   * frames are starved.
+   *
+   * The watchdog is *not* a plain timeout racing the animation frame: with the
+   * per-frame render queue a host may legitimately wait many frames for its
+   * turn (e.g. when opening a notebook with many outputs), which is far longer
+   * than the fallback delay. Firing unconditionally would therefore force a
+   * disruptive burst of out-of-turn paints. Instead, on each tick the watchdog
+   * checks whether animation frames are still being produced at all: if they
+   * are, it just re-arms and lets the queue deliver this host; only when frames
+   * have genuinely stopped does it force a paint.
+   */
+  export function armFallbackWatchdog(
+    host: HTMLElement,
+    forcePaint: () => void
+  ): void {
+    clearFallbackWatchdog(host);
+    const tick = () => {
+      const framesStarved =
+        performance.now() - lastAnimationFrameTime >= firstPaintFallbackDelay;
+      if (framesStarved) {
+        fallbackWatchdogs.delete(host);
+        // Cancel the pending (starved) animation frame so it does not fire later
+        // and re-render on top of the forced paint.
+        cancelRenderingRequest(host);
+        forcePaint();
+      } else {
+        // Frames are still being produced; keep watching in case they stop
+        // before this host gets its turn in the render queue.
+        fallbackWatchdogs.set(
+          host,
+          window.setTimeout(tick, firstPaintFallbackDelay)
+        );
+      }
+    };
+    fallbackWatchdogs.set(
+      host,
+      window.setTimeout(tick, firstPaintFallbackDelay)
+    );
+  }
+
+  export function clearFallbackWatchdog(host: HTMLElement): void {
+    const timer = fallbackWatchdogs.get(host);
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+      fallbackWatchdogs.delete(host);
+    }
+  }
 
   /**
    * Hosts which have already had their content painted at least once.
@@ -1571,15 +1668,16 @@ namespace Private {
   }
 
   /**
-   * Delay (in milliseconds) after which the first paint is performed via a
-   * timer if `requestAnimationFrame` has not fired yet.
+   * Delay (in milliseconds) used by the fallback watchdog: if no animation frame
+   * has run for at least this long while a host is still awaiting its first
+   * paint, the watchdog force-paints it.
    *
    * Animation frames do not fire in background tabs and can be starved by the
    * browser under heavy resource pressure (e.g. when the OS starts swapping);
-   * the timer ensures the cheap first paint of the plain text is not held back
-   * in those cases. It is long enough that a normally produced frame wins the
-   * race (and cancels the timer), so the fallback only kicks in when frames are
-   * genuinely not being produced.
+   * the watchdog ensures the cheap first paint of the plain text is not held
+   * back in those cases. It is long enough that normally produced frames keep it
+   * from firing, so the fallback only kicks in when frames are genuinely not
+   * being produced.
    */
   const firstPaintFallbackDelay = 100;
 
@@ -1589,42 +1687,24 @@ namespace Private {
     if (previousRequest) {
       window.cancelAnimationFrame(previousRequest);
     }
-    const previousTimer = fallbackTimers.get(host);
-    if (previousTimer) {
-      window.clearTimeout(previousTimer);
-      fallbackTimers.delete(host);
-    }
   }
 
   export function scheduleRendering(
     host: HTMLElement,
-    render: (timestamp: number) => void,
-    options: { resilient?: boolean } = {}
+    render: (timestamp: number, forced?: boolean) => void
   ) {
     // push at the end of the queue
     if (!renderQueue.includes(host)) {
       renderQueue.push(host);
     }
-    // Whichever of the animation frame or the fallback timer fires first
-    // performs the work and cancels its counterpart. The `ran` guard makes this
-    // robust even if both happen to become due in the same tick.
-    let ran = false;
-    const run = (timestamp: number) => {
-      if (ran) {
-        return;
-      }
-      ran = true;
+    const thisRequest = window.requestAnimationFrame(timestamp => {
+      // Record that an animation frame ran so the fallback watchdog can
+      // distinguish real starvation from queue waiting.
+      lastAnimationFrameTime = timestamp;
       cancelRenderingRequest(host);
-      render(timestamp);
-    };
-    const thisRequest = window.requestAnimationFrame(run);
+      render(timestamp, false);
+    });
     frameRequests.set(host, thisRequest);
-    if (options.resilient) {
-      const timer = window.setTimeout(() => {
-        run(performance.now());
-      }, firstPaintFallbackDelay);
-      fallbackTimers.set(host, timer);
-    }
   }
 
   export function beginRendering(host: HTMLElement) {
@@ -1672,10 +1752,12 @@ namespace Private {
 
   /**
    * Abort any in-flight incremental rendering for a host: cancel its pending
-   * frame/timer, remove it from the render queue, and disconnect its observer.
+   * frame and fallback watchdog, remove it from the render queue, and disconnect
+   * its observer.
    */
   export function abortRendering(host: HTMLElement): void {
     cancelRenderingRequest(host);
+    clearFallbackWatchdog(host);
     removeFromQueue(host);
     hostObservers.get(host)?.disconnect();
     hostObservers.delete(host);
