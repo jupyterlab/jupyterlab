@@ -4099,7 +4099,7 @@ namespace Private {
     edit: HTMLInputElement,
     original: string
   ): Promise<string> {
-    const parent = text.parentElement as HTMLElement;
+    const parent = text.parentElement!;
     parent.replaceChild(edit, text);
     edit.focus();
     const index = edit.value.lastIndexOf('.');

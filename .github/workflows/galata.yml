@@ -21,6 +21,8 @@ on:
         default: 1
         type: number
 
+permissions: {}
+
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
 
@@ -29,6 +31,9 @@ jobs:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
     strategy:
       fail-fast: false
       matrix:
@@ -57,19 +62,70 @@ jobs:
             suite: documentation
             shard: 1
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
           - browser: chromium
             project: documentation
             suite: documentation
             shard: 2
             shards: 2
-            optional_dependencies: "docs-screenshots"
+            optional_dependencies: 'docs-screenshots'
+          - browser: chromium
+            project: csp
+            suite: csp
+            shard: 1
+            shards: 1
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           path: core
           persist-credentials: false
+
+      - name: Collect modified Galata test files
+        if: ${{ github.event_name == 'pull_request' }}
+        id: modified-tests
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100
+            });
+
+            const byProject = {
+              documentation: [],
+              galata: [],
+              jupyterlab: []
+            };
+
+            for (const file of files) {
+              // Removed test files cannot be replayed.
+              if (file.status === 'removed') {
+                continue;
+              }
+              const filename = file.filename;
+              if (!/^galata\/test\/[A-Za-z0-9._/-]*\.(test|spec)\.ts$/.test(filename)) {
+                continue;
+              }
+              const galataPath = filename.replace(/^galata\//, '');
+              if (filename.startsWith('galata/test/documentation/')) {
+                byProject.documentation.push(galataPath);
+              } else if (filename.startsWith('galata/test/galata/')) {
+                byProject.galata.push(galataPath);
+              } else if (filename.startsWith('galata/test/jupyterlab/')) {
+                byProject.jupyterlab.push(galataPath);
+              }
+            }
+
+            core.info(
+              `Modified test files: documentation=${byProject.documentation.length}, galata=${byProject.galata.length}, jupyterlab=${byProject.jupyterlab.length}`
+            );
+
+            core.setOutput('documentation', JSON.stringify(byProject.documentation));
+            core.setOutput('galata', JSON.stringify(byProject.galata));
+            core.setOutput('jupyterlab', JSON.stringify(byProject.jupyterlab));
 
       - name: Checkout demo project
         if: ${{ matrix.project == 'documentation' }}
@@ -89,7 +145,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
-          python_package_manager: "uv pip"
+          python_package_manager: 'uv pip'
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
 
       - name: Find out Playwright version
@@ -130,6 +186,8 @@ jobs:
           if [[ "${{ matrix.project }}" == "documentation" ]]; then
             JUPYTERLAB_GALATA_ROOT_DIR="${DEMO_DIR}" PYTHONWARNINGS=ignore \
               jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1 &
+          elif [[ "${{ matrix.project }}" == "csp" ]]; then
+            jupyter lab --config jupyter_server_csp_test_config.py > /tmp/jupyterlab_server.log 2>&1 &
           else
             jlpm start 2>&1 > /tmp/jupyterlab_server.log &
           fi
@@ -154,6 +212,9 @@ jobs:
         env:
           TEST_PATTERN: ${{ github.event.inputs.test_pattern || '' }}
           REPEAT_EACH: ${{ github.event.inputs.repeat_each || 1 }}
+          MODIFIED_DOC_TESTS: ${{ steps.modified-tests.outputs.documentation || '[]' }}
+          MODIFIED_GALATA_TESTS: ${{ steps.modified-tests.outputs.galata || '[]' }}
+          MODIFIED_JUPYTERLAB_TESTS: ${{ steps.modified-tests.outputs.jupyterlab || '[]' }}
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
@@ -177,18 +238,64 @@ jobs:
 
           jlpm test "${TEST_ARGS[@]}"
           TEST_EXIT_CODE=$?
-          mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+          if [[ -f test-results/report.json ]]; then
+            mv test-results/report.json test-results/${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+          fi
 
           BENCHMARK_EXIT_CODE=0
           if [[ -z "${TEST_PATTERN}" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.project }}" == "galata" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
             # Run benchmark tests once to ensure they have no regressions
             BENCHMARK_NUMBER_SAMPLES=1 jlpm test:benchmark
             BENCHMARK_EXIT_CODE=$?
-            mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+            if [[ -f test-results/report.json ]]; then
+              mv test-results/report.json test-results/benchmark-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+            fi
+          fi
+
+          MODIFIED_TESTS_EXIT_CODE=0
+          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ matrix.browser }}" == "chromium" ]] && [[ "${{ matrix.shard }}" == "1" ]]; then
+            MODIFIED_TESTS_JSON='[]'
+            case "${{ matrix.project }}" in
+              documentation)
+                MODIFIED_TESTS_JSON="${MODIFIED_DOC_TESTS}"
+                ;;
+              galata)
+                MODIFIED_TESTS_JSON="${MODIFIED_GALATA_TESTS}"
+                ;;
+              jupyterlab)
+                MODIFIED_TESTS_JSON="${MODIFIED_JUPYTERLAB_TESTS}"
+                ;;
+            esac
+
+            MODIFIED_TEST_FILES=()
+            while IFS= read -r file; do
+              if [[ -n "${file}" ]]; then
+                MODIFIED_TEST_FILES+=("${file}")
+              fi
+            done < <(
+              MODIFIED_TESTS_JSON="${MODIFIED_TESTS_JSON}" \
+                node -e 'const files = JSON.parse(process.env.MODIFIED_TESTS_JSON || "[]"); for (const file of files) { console.log(file); }'
+            )
+
+            if (( ${#MODIFIED_TEST_FILES[@]} > 0 )); then
+              echo "Running modified tests with video recording enabled:"
+              printf '  - %s\n' "${MODIFIED_TEST_FILES[@]}"
+              MODIFIED_TEST_ARGS=(--project=${{ matrix.project }})
+              MODIFIED_TEST_ARGS+=("${MODIFIED_TEST_FILES[@]}")
+              PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report-modified \
+              PLAYWRIGHT_JSON_OUTPUT_FILE=test-results-replay/report.json \
+                jlpm run test -c playwright-video.config.js "${MODIFIED_TEST_ARGS[@]}"
+              MODIFIED_TESTS_EXIT_CODE=$?
+              if [[ -f test-results-replay/report.json ]]; then
+                mv test-results-replay/report.json test-results-replay/modified-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}.json
+              fi
+            else
+              echo "No modified test files to replay for project ${{ matrix.project }}."
+            fi
           fi
 
           # mark as failing
-          if [[ $TEST_EXIT_CODE -ne 0 ]] || [[ $BENCHMARK_EXIT_CODE -ne 0 ]]; then
+          if [[ $TEST_EXIT_CODE -ne 0 ]] || [[ $BENCHMARK_EXIT_CODE -ne 0 ]] || [[ $MODIFIED_TESTS_EXIT_CODE -ne 0 ]]; then
             exit 1
           fi
 
@@ -197,7 +304,9 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-test-assets-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
-          path: core/galata/test-results
+          path: |
+            core/galata/test-results
+            core/galata/test-results-replay
           if-no-files-found: ignore  # expected when no tests fail
 
       - name: Upload test report blob
@@ -205,19 +314,106 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: galata-blobs-${{ matrix.browser }}-${{ matrix.project }}-${{ matrix.shard }}
-          path: core/galata/blob-report
+          path: |
+            core/galata/blob-report
+            core/galata/blob-report-modified
           retention-days: 1
           compression-level: 1
 
       - name: Print JupyterLab logs
-        if: always()
+        if: ${{ always() }}
         run: |
           cat /tmp/jupyterlab_server.log
+
+  examples:
+    name: Example Tests
+    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          path: core
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: 'uv pip'
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_PACKAGE_VERSION=$(echo "$PW_VERSION" | sed -E 's/^"playwright@npm:([^"]+)":/\1/')
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+          echo "package-version=$PW_PACKAGE_VERSION" >> $GITHUB_OUTPUT
+        working-directory: core
+
+      - name: Set up browser cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
+
+      - name: Install dependencies
+        env:
+          GROUP: examples
+        run: |
+          set -ex
+          bash ./scripts/ci_install.sh
+        working-directory: core
+
+      - name: Test examples
+        env:
+          GROUP: examples
+          PLAYWRIGHT_VERSION: ${{ steps.pw-version.outputs.package-version }}
+        run: |
+          cd core
+          set +e
+          bash ./scripts/ci_script.sh
+          TEST_EXIT_CODE=$?
+
+          mkdir -p galata/test-results
+          mkdir -p galata/blob-report
+
+          find examples packages/services/examples -type d -name test-results | while read -r RESULTS_DIR; do
+            TARGET_DIR="galata/test-results/${RESULTS_DIR}"
+            mkdir -p "$TARGET_DIR"
+            cp -R "${RESULTS_DIR}/." "$TARGET_DIR/"
+          done
+
+          find examples packages/services/examples -type d -name blob-report | while read -r BLOB_DIR; do
+            cp -R "${BLOB_DIR}/." galata/blob-report/
+          done
+
+          exit $TEST_EXIT_CODE
+
+      - name: Upload test assets
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-test-assets-chromium-examples-1
+          path: core/galata/test-results
+          if-no-files-found: ignore # expected when no tests fail
+
+      - name: Upload test report blob
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-blobs-chromium-examples-1
+          path: core/galata/blob-report
+          retention-days: 1
+          compression-level: 1
 
   merge-reports:
     name: Merge Test Reports and Results
     if: ${{ !cancelled() }}
-    needs: test
+    needs: [test, examples]
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -285,7 +481,8 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: merged-report.json
           PW_VERSION: ${{ steps.pw-version.outputs.version }}
         run: |
-          npx "playwright@${PW_VERSION}" merge-reports --reporter html,json,github ./artifacts/final/
+          echo "module.exports = { testDir: '.' };" > merge.config.js
+          npx "playwright@${PW_VERSION}" merge-reports --config merge.config.js --reporter html,json,github ./artifacts/final/
 
       - name: Extract failing and flaky counts
         id: test-counts
