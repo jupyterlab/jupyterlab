@@ -227,9 +227,15 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
+    const cellCountBeforeInsert = await page.notebook.getCellCount();
     await page.keyboard.press('Shift+B');
-    await page.waitForTimeout(200);
+    // Wait for the new heading cell to be inserted and ready for input.
+    await page.waitForCondition(
+      async () =>
+        (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
+    );
     await page.keyboard.type('Heading 3');
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- allow the heading/TOC numbering state to settle before running the newly typed heading (see #15422); no DOM signal is available for this internal recomputation
     await page.waitForTimeout(500);
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
@@ -245,8 +251,13 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
+    const cellCountBeforeInsert = await page.notebook.getCellCount();
     await page.keyboard.press('Shift+B');
-    await page.waitForTimeout(200);
+    // Wait for the new heading cell to be inserted and ready for input.
+    await page.waitForCondition(
+      async () =>
+        (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
+    );
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(0);
@@ -261,8 +272,13 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowLeft');
+    const cellCountBeforeInsert = await page.notebook.getCellCount();
     await page.keyboard.press('Shift+B');
-    await page.waitForTimeout(200);
+    // Wait for the new heading cell to be inserted and ready for input.
+    await page.waitForCondition(
+      async () =>
+        (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
+    );
     await page.keyboard.type('Heading 1.2');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
@@ -274,8 +290,13 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   /** Checks also if the cursor is at the right position when adding heading */
   test('Add Header Above 01', async ({ page }) => {
     await page.notebook.selectCells(6);
+    const cellCountBeforeInsert = await page.notebook.getCellCount();
     await page.keyboard.press('Shift+A');
-    await page.waitForTimeout(200);
+    // Wait for the new heading cell to be inserted above the current one.
+    await page.waitForCondition(
+      async () =>
+        (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
+    );
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_01.png');
@@ -284,8 +305,13 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   /** Checks also if the cursor is at the right position when adding heading */
   test('Add Header Above 02', async ({ page }) => {
     await page.notebook.selectCells(4);
+    const cellCountBeforeInsert = await page.notebook.getCellCount();
     await page.keyboard.press('Shift+A');
-    await page.waitForTimeout(200);
+    // Wait for the new heading cell to be inserted above the current one.
+    await page.waitForCondition(
+      async () =>
+        (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
+    );
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_02.png');
@@ -294,8 +320,13 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   /** Checks also if the cursor is at the right position when adding heading */
   test('Add Header Above 03', async ({ page }) => {
     await page.notebook.selectCells(3);
+    const cellCountBeforeInsert = await page.notebook.getCellCount();
     await page.keyboard.press('Shift+A');
-    await page.waitForTimeout(200);
+    // Wait for the new heading cell to be inserted above the current one.
+    await page.waitForCondition(
+      async () =>
+        (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
+    );
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_03.png');
@@ -305,10 +336,12 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.selectCells(1);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft'); // collapse section
-    await page.waitForTimeout(200);
+    // The collapsed section hides the following cells; wait for that to apply.
+    await expect((await page.notebook.getCellLocator(1))!).toBeHidden();
 
     // Insert a cell below(inside) the collapsed header
     await page.keyboard.press('b');
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- allow the section to re-expand and the new cell to settle into place before the screenshot; no simple DOM signal distinguishes "fully expanded" from "insertion in progress"
     await page.waitForTimeout(200);
 
     // Section should be expanded with new cell visible
@@ -321,13 +354,15 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.selectCells(1);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
-    await page.waitForTimeout(200);
+    // The collapsed section hides the following cells; wait for that to apply.
+    await expect((await page.notebook.getCellLocator(1))!).toBeHidden();
 
     // Select a code cell below the collapsed section and move it up into it
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
 
     await page.keyboard.press('Control+Shift+ArrowUp');
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- allow the section to re-expand and the moved cell to settle into place before the screenshot; no simple DOM signal distinguishes "fully expanded" from "move in progress"
     await page.waitForTimeout(200);
 
     expect(

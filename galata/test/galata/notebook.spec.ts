@@ -235,6 +235,7 @@ test.describe('Access cells in windowed notebook', () => {
 
     await page.filebrowser.open(target);
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- settle wait for the windowed list layout to stabilize before scrolling in getCellLocator; no observable DOM condition exists for this
     await page.waitForTimeout(50);
 
     await page.notebook.getCellLocator(12);

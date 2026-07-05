@@ -260,7 +260,7 @@ test.describe('Kernel', () => {
     // Switch back to running notebook
     await page.notebook.activate('Untitled.ipynb');
     // The status bar should show Busy since the long running script is still executing
-    await page.waitForTimeout(500);
+    await statusBar.getByText('Busy').waitFor();
 
     const statusText = await statusBar.textContent();
     expect(statusText).toContain('Busy');

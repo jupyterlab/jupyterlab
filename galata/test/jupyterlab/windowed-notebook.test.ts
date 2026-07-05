@@ -76,16 +76,20 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const notebook = await page.notebook.getNotebookInPanelLocator();
   let initialHeight = 0;
-  let previousHeight = 0;
-  let counter = 0;
 
-  // Wait to ensure the rendering logic is stable.
-  do {
-    previousHeight = initialHeight;
-    await page.waitForTimeout(600);
-
-    initialHeight = await getInnerHeight(notebook!);
-  } while (previousHeight !== initialHeight && counter++ < 10);
+  // Wait to ensure the rendering logic is stable: poll the inner height
+  // every 600ms until two consecutive reads agree (bounded by the 6s
+  // timeout, matching the previous 10-iteration cap).
+  await expect
+    .poll(
+      async () => {
+        const previousHeight = initialHeight;
+        initialHeight = await getInnerHeight(notebook!);
+        return initialHeight === previousHeight;
+      },
+      { intervals: [600], timeout: 6000 }
+    )
+    .toBe(true);
 
   expect.soft(initialHeight).toBeGreaterThan(0);
 
@@ -118,7 +122,7 @@ test('should hide first inactive code cell when scrolling down', async ({
   ]);
 
   // Check the content contains only the output
-  expect(await firstCell.textContent()).toEqual('[16]:local link\n');
+  await expect(firstCell).toHaveText('[16]:local link\n');
 });
 
 test('should reattached inactive code cell when scrolling back into the viewport', async ({
@@ -300,14 +304,17 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
           // This could be related related to the scrollback logic; PR #18973 demonstrated
           // a potential fix, however it made the scrollback test for full windowing flaky
           // ("should keep active cell when a cell above generates a lot of output").
+          // eslint-disable-next-line playwright/no-wait-for-timeout -- documented flakiness workaround, see comment above
           await page.waitForTimeout(3000);
         }
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- pacing between repeated key presses required to avoid the flakiness described above
         await page.waitForTimeout(100);
       }
 
       if (testCase.showCell === 'neither') {
         // For negative test case we need to add an explicit timeout to test
         // against the possibility of the scroll happening with a small delay.
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- negative test: must wait to prove the scroll does NOT happen, no positive condition to assert
         await page.waitForTimeout(400);
         await expect(firstCell).toBeHidden();
         await expect(secondCell).toBeHidden();
@@ -368,6 +375,10 @@ test('should reattach a markdown code cell when scrolling back into the viewport
     page.mouse.wheel(0, 1200)
   ]);
 
+  // Wait for the windowing engine to finish detaching the now-hidden cell
+  // before reversing the scroll direction; there is no observable signal
+  // for that internal detach completing.
+  // eslint-disable-next-line playwright/no-wait-for-timeout -- no observable signal for windowing engine detach completion
   await page.waitForTimeout(400);
 
   await page.mouse.wheel(0, -1200);
@@ -397,9 +408,7 @@ test('should remove all cells including hidden outputs artifacts', async ({
   await page.keyboard.press('d');
 
   // Check that the notebook only contains one cell
-  expect(await h!.locator('.jp-WindowedPanel-inner')!.textContent()).toEqual(
-    '[ ]:'
-  );
+  await expect(h!.locator('.jp-WindowedPanel-inner')!).toHaveText('[ ]:');
 
   // Check there are no hidden cells
   let found = true;

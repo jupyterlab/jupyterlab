@@ -58,9 +58,6 @@ test.describe('Debugger', () => {
 
     await setBreakpoint(page);
 
-    // Wait for breakpoint to finish appearing
-    await page.waitForTimeout(150);
-
     const breakpointIcon = page
       .locator('.jp-NotebookPanel-notebook')
       .first()
@@ -69,6 +66,7 @@ test.describe('Debugger', () => {
       .nth(2)
       .locator('span.cm-breakpoint-icon');
 
+    // Wait for breakpoint to finish appearing
     await breakpointIcon.waitFor();
     expect(
       await page.screenshot({

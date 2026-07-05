@@ -28,7 +28,6 @@ test.describe('HTML Viewer', () => {
   test('should notify links are blocked for untrusted file', async ({
     page
   }) => {
-    await page.waitForTimeout(100);
     const frame = await waitForFrame(page, {
       url: url => url.protocol == 'blob:'
     });
@@ -78,12 +77,15 @@ async function waitForFrame(
 ): Promise<Frame> {
   const loops = 200;
   const pause = 10;
-  for (let i = 0; i < loops; i++) {
-    const frame = page.frame(frameSelector);
-    if (frame) {
-      return frame;
-    }
-    await page.waitForTimeout(pause);
+  await expect
+    .poll(() => !!page.frame(frameSelector), {
+      intervals: [pause],
+      timeout: pause * loops
+    })
+    .toBe(true);
+  const frame = page.frame(frameSelector);
+  if (!frame) {
+    throw Error(`Frame was not found after ${pause * loops}ms`);
   }
-  throw Error(`Frame was not found after ${pause * loops}ms`);
+  return frame;
 }

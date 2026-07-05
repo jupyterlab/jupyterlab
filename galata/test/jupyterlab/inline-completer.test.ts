@@ -33,7 +33,10 @@ test.describe('Inline Completer', () => {
     await page.notebook.runCell(1, true);
     await page.notebook.enterCellEditingMode(2);
     // we need to wait until the completer gets bound to the cell after entering it
-    await page.waitForTimeout(50);
+    const boundEditor = page.locator(
+      '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+    );
+    await expect(boundEditor).toHaveClass(/jp-mod-completer-enabled/);
   });
 
   test.describe('Widget "onHover", shortcuts on', () => {
@@ -61,7 +64,7 @@ test.describe('Inline Completer', () => {
       await completer.waitFor();
 
       // Wait for full opacity
-      await page.waitForTimeout(100);
+      await expect(completer).toHaveCSS('opacity', '1');
 
       const imageName = 'inline-completer-shortcuts-on.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
@@ -97,7 +100,6 @@ test.describe('Inline Completer', () => {
 
       // Should hide on blur
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
     });
 
@@ -109,6 +111,7 @@ test.describe('Inline Completer', () => {
       // Focusing or clicking should not hide
       await completer.focus();
       await completer.click();
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- negative test: confirm the completer stays visible over time rather than hiding asynchronously after focus/click
       await page.waitForTimeout(100);
       await expect(completer).toBeVisible();
     });
@@ -249,7 +252,6 @@ test.describe('Inline Completer', () => {
 
       // Ghost text should hide
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(ghostText).toBeHidden();
     });
 
@@ -310,11 +312,13 @@ test.describe('Inline Completer', () => {
       // By default the hiding animation starts after 700ms and lasts for 300ms
 
       // When animation starts the editor height should reduce
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- deliberately sampling the editor height mid-animation (700ms delay + in-progress shrink); no DOM signal marks this instant
       await page.waitForTimeout(750);
       const spacerAnimatingHeight = await measureEditorHeight();
       expect(spacerAnimatingHeight).toBeLessThan(ghostTextShownHeight);
 
       // After animation is done the height should be back to the initial height
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- deliberately sampling the editor height once the animation's fixed 300ms duration elapses; no DOM signal marks animation end
       await page.waitForTimeout(300);
       const finalHeight = await measureEditorHeight();
       expect(noGhostTextHeight).toEqual(finalHeight);
@@ -344,8 +348,8 @@ test.describe('Inline Completer', () => {
       // The ghost text should contain the rest of the suggestion.
       await expect(ghostText).toHaveText('gestion_1 = 1');
 
-      // Wait a brief moment for highlighting to apply.
-      await page.waitForTimeout(100);
+      // Wait for the syntax-highlighting spans to be rendered into the ghost text.
+      await expect(ghostText.locator('span').first()).toBeAttached();
 
       // Take a screenshot of the entire cell.
       const imageName = 'ghost-text-with-syntax-highlighting.png';

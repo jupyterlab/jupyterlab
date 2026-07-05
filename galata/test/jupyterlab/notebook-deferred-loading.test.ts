@@ -42,14 +42,21 @@ for (const mode of windowingModes) {
       // Sample the number of rendered cells until at least 200 are rendered.
       const counts: number[] = [];
       const locator = page.locator('.jp-Cell');
-      let current: number;
 
-      do {
-        // Small delay to allow next batch of cells to render
-        await page.waitForTimeout(100);
-        current = await locator.count();
-        counts.push(current);
-      } while (current < 200);
+      await expect
+        .poll(
+          async () => {
+            const current = await locator.count();
+            counts.push(current);
+            return current;
+          },
+          {
+            // Small interval to allow next batch of cells to render
+            intervals: [100],
+            timeout: 30000
+          }
+        )
+        .toBeGreaterThanOrEqual(200);
 
       // There should be at least one increase in the sequence of counts
       let increased = false;

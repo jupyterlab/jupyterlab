@@ -27,6 +27,7 @@ async function enterEditingModeForScreenshot(
     cellBox.height != cellNewBox.height
   ) {
     // Wait a bit if the bounding box have changed
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- render-settle before screenshot: no observable signal for CodeMirror bounding box stabilization
     await page.waitForTimeout(100);
   }
   // Scroll the cell into the middle of the viewport to ensure we do not include
@@ -34,6 +35,7 @@ async function enterEditingModeForScreenshot(
   await cell!.evaluate(element => {
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
   });
+  // eslint-disable-next-line playwright/no-wait-for-timeout -- render-settle before screenshot: no observable signal that scrollIntoView finished
   await page.waitForTimeout(50);
 }
 

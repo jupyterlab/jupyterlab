@@ -284,7 +284,7 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Escape');
     await page.getByText(`Mode: Command`, { exact: true }).waitFor();
     expect(await page.notebook.isCellInEditingMode(0)).toBeFalsy();
-    expect(await page.isVisible('.jp-DocumentSearch-overlay')).toBeTruthy();
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
 
     // Second escape should close the search box (even if it is not focused)
     await page.keyboard.press('Escape');
@@ -789,6 +789,7 @@ test.describe('Auto search in any selection', async () => {
     await page.keyboard.press('Shift+End');
 
     // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18462
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- documented bug workaround, see issue above
     await page.waitForTimeout(200);
 
     // Open search box (filters should already be shown)

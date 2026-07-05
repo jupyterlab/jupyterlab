@@ -61,6 +61,12 @@ for (const c of showSourcesCases) {
     test.afterEach(async ({ page }) => {
       await page.click('jp-button[title^=Continue]');
       await page.debugger.switchOff();
+      // `switchOff` resolves once the toolbar button's `aria-pressed`
+      // attribute flips, which happens synchronously on click, but the
+      // actual session teardown (kernel comm, debugpy detach) is not
+      // awaited and has no other DOM-observable signal, so a fixed pause
+      // is needed to avoid racing `notebook.close()`.
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debugger session backend teardown to finish; no observable DOM signal exists
       await page.waitForTimeout(500);
       await page.notebook.close();
     });
@@ -80,7 +86,7 @@ for (const c of showSourcesCases) {
       expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
 
       const callStackPanel = await page.debugger.getCallStackPanelLocator();
-      expect(await callStackPanel.innerText()).toBe('');
+      await expect(callStackPanel).toHaveText('');
 
       void page.notebook.run();
 
@@ -235,7 +241,7 @@ for (const c of showSourcesCases) {
       expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
       const callStackPanel = await page.debugger.getCallStackPanelLocator();
-      expect(await callStackPanel.innerText()).toBe('');
+      await expect(callStackPanel).toHaveText('');
 
       // Run script (blocked by breakpoint)
       await page.menu.clickMenuItem('Run>Run All Code');
@@ -285,6 +291,9 @@ test.describe('Debugger Tests', () => {
       await page.click('jp-button[title^=Continue]');
     }
     await page.debugger.switchOff();
+    // See comment above (other `afterEach`) - `switchOff` does not await the
+    // backend session teardown and there is no observable DOM signal for it.
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debugger session backend teardown to finish; no observable DOM signal exists
     await page.waitForTimeout(500);
     await page.notebook.close();
   });

@@ -25,6 +25,7 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
     .waitFor({ state: 'visible' });
   // Wait a short while as the file initializes before renaming, see
   // https://github.com/jupyterlab/jupyterlab/issues/18455
+  // eslint-disable-next-line playwright/no-wait-for-timeout -- server-side file initialization race, see jupyterlab/jupyterlab#18455
   await page.waitForTimeout(100);
   await page.contents.renameFile(
     `${tmpPath}/dir1/dir2/untitled.txt`,
