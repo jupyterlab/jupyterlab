@@ -121,6 +121,7 @@
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-jest": "^28.0.0",
+    "eslint-plugin-playwright": "^2.2.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-regexp": "^3.1.0",
