@@ -1338,32 +1338,36 @@ function getApplicableLinkCache(
     cachedResult.linkedNodes[cachedResult.linkedNodes.length - 1];
   let processedText = cachedResult.preTextContent;
 
-  // Only use cached nodes if:
-  // - the last cached node is a text node
-  // - the new content starts with a new line
-  // - the old content ends with a new line
+  // Decide how much of the cache the appended text lets us keep.
   if (
     cachedResult.preTextContent.endsWith('\n') ||
     addedText.startsWith('\n')
   ) {
-    // Second or third condition is met, we can use the cached nodes
-    // (this is a no-op, we just continue execution).
-  } else if (lastCachedNode instanceof Text) {
-    // The first condition is met, we can use the cached nodes,
-    // but first we remove the Text node to re-analyse its text.
-    // This is required when we cached `aaa www.one.com bbb www.`
-    // and the incoming addition is `two.com`. We can still
-    // use text node `aaa ` and anchor node `www.one.com`, but
-    // we need to pass `bbb www.` + `two.com` through linkify again.
-    cachedNodes = cachedNodes.slice(0, -1);
-    addedText = lastCachedNode.textContent + addedText;
-    processedText = processedText.slice(0, -lastCachedNode.textContent!.length);
-  } else if (lastCachedNode instanceof HTMLAnchorElement) {
-    // TODO: why did I not include this condition before?
+    // A newline on either side of the join means the appended text cannot
+    // extend the last cached node into (or out of) a link - a URL never spans
+    // a line break - so every cached node stays valid and we linkify only the
+    // addition (this is a no-op, we just continue execution).
+  } else if (
+    lastCachedNode instanceof Text ||
+    lastCachedNode instanceof HTMLAnchorElement
+  ) {
+    // Otherwise the appended text may merge with the last cached node, so we
+    // drop that node and re-analyse its text together with the addition. Every
+    // earlier node is shielded by it and stays valid. This covers both a
+    // trailing Text node (cached `aaa www.one.com bbb www.` + `two.com`: keep
+    // text `aaa ` and anchor `www.one.com`, re-linkify `bbb www.` + `two.com`)
+    // and a trailing anchor (cached `www.one.com` + `/path` extends the link).
+    //
+    // The anchor case is not just an optimisation: the incremental renderer
+    // requires a usable cache on every frame (see the `iteration > 0` guard in
+    // `renderTextual`), so returning null when a frame boundary lands right
+    // after a URL would crash rather than merely skip the cache.
     cachedNodes = cachedNodes.slice(0, -1);
     addedText = lastCachedNode.textContent + addedText;
     processedText = processedText.slice(0, -lastCachedNode.textContent!.length);
   } else {
+    // `linkedNodes` only ever holds Text or anchor nodes, so we reach here only
+    // when it is empty (`lastCachedNode` is undefined): nothing to reuse.
     return null;
   }
 
