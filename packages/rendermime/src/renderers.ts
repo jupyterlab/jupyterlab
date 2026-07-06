@@ -1563,23 +1563,25 @@ namespace Private {
     host: HTMLElement
   ): boolean {
     if (lastFrameTimestamp !== timestamp) {
-      // progress queue
-      const last = renderQueue.shift();
-      if (last) {
-        renderQueue.push(last);
-      } else {
+      // Progress the round-robin queue: move the current front host to the back.
+      const front: HTMLElement | undefined = renderQueue.values().next().value;
+      if (front === undefined) {
         throw Error('Render queue cannot be empty here!');
       }
+      renderQueue.delete(front);
+      renderQueue.add(front);
       lastFrameTimestamp = timestamp;
     }
-    // check queue
-    if (renderQueue[0] === host) {
-      return true;
-    }
-    return false;
+    // Only the host now at the front of the queue may render in this frame. A
+    // `Set` iterates in insertion order, so its first value is the front.
+    const next: HTMLElement | undefined = renderQueue.values().next().value;
+    return next === host;
   }
 
-  const renderQueue = new Array<HTMLElement>();
+  // A `Set` (not an array) so membership, appending, round-robin rotation and
+  // removal are all O(1): with an output-heavy notebook every in-flight host
+  // re-enqueues each frame, which would be O(n^2) per frame with an array.
+  const renderQueue = new Set<HTMLElement>();
   const frameRequests = new WeakMap<HTMLElement, number>();
 
   /**
@@ -1720,10 +1722,9 @@ namespace Private {
     host: HTMLElement,
     render: (timestamp: number, forced?: boolean) => void
   ) {
-    // push at the end of the queue
-    if (!renderQueue.includes(host)) {
-      renderQueue.push(host);
-    }
+    // Append to the queue; a no-op if the host is already queued, which
+    // preserves its current position (a `Set` keeps insertion order).
+    renderQueue.add(host);
     const thisRequest = window.requestAnimationFrame(timestamp => {
       // Record that an animation frame ran so the fallback watchdog can
       // distinguish real starvation from queue waiting.
@@ -1739,10 +1740,7 @@ namespace Private {
   }
 
   export function removeFromQueue(host: HTMLElement) {
-    const index = renderQueue.indexOf(host);
-    if (index !== -1) {
-      renderQueue.splice(index, 1);
-    }
+    renderQueue.delete(host);
   }
 
   export function hasNewRenderingRequest(host: HTMLElement) {
