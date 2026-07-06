@@ -1075,6 +1075,11 @@ function renderTextual(
     const budget = 10;
     let linkedNodes: (HTMLAnchorElement | Text)[];
     let elapsed: number;
+    // Defensive only: the loop below runs synchronously, so nothing can
+    // schedule a new frame while it is executing - a new stream chunk
+    // supersedes this render between frames instead (`renderTextual` cancels
+    // the pending frame request). Kept as a cheap safeguard in case a future
+    // change lets other code run mid-loop (e.g. yielding to the event loop).
     let newRequest: number | undefined;
 
     do {
@@ -2015,7 +2020,11 @@ namespace Private {
       const newChild = newNodes[i];
       if (
         newChild &&
-        oldChild.nodeType === newChild.nodeType &&
+        // Compare `nodeName` rather than `nodeType`: when a URL inside an
+        // ANSI-colored span gets linkified in a later frame, the old `<span>`
+        // and the new `<a>` wrapping that span are both elements with
+        // identical `textContent`, yet the anchor must replace the span.
+        oldChild.nodeName === newChild.nodeName &&
         oldChild.textContent === newChild.textContent
       ) {
         lastSharedNode = i;

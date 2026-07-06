@@ -244,6 +244,43 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors[0].textContent).toBe('www.example.com/path/page');
     });
 
+    it('linkifies a URL inside ANSI-colored text when the anchor arrives in a later frame', async () => {
+      // Regression test for the DOM diffing in `replaceChangedNodes`: after
+      // the first frame paints the colored span with the URL not yet
+      // linkified, a later frame produces an anchor wrapping that span. The
+      // old `<span>` and the new `<a>` are both elements with identical
+      // `textContent`, so a diff comparing only `nodeType` and `textContent`
+      // would treat them as unchanged and silently drop the link (while the
+      // cache records it as rendered, so it would never be retried).
+      const sanitizer = new Sanitizer();
+
+      // Exhaust the first frame's time budget after a single word fragment
+      // ('see'), so the colored URL paints unlinked; subsequent frames get an
+      // effectively unlimited budget and complete the auto-linking.
+      let calls = 0;
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => {
+        calls += 1;
+        // Call 1 is the first frame's start, call 2 its first budget check.
+        clock += calls <= 2 ? 1000 : 0.01;
+        return clock;
+      });
+
+      await renderText({
+        host,
+        sanitizer,
+        source: 'see \x1b[0;31mwww.example.com\x1b[0m more'
+      });
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe('see www.example.com more');
+      const anchors = host.querySelectorAll('a');
+      expect(anchors).toHaveLength(1);
+      expect(anchors[0].textContent).toBe('www.example.com');
+      // The ANSI coloring is preserved inside the link.
+      expect(anchors[0].querySelector('span')).not.toBeNull();
+    });
+
     // Selection preservation across streamed re-renders. `replaceChangedNodes`
     // records the selection as character offsets before mutating the DOM and
     // restores it afterwards. jsdom's `Selection.containsNode` always returns
