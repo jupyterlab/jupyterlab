@@ -134,7 +134,7 @@ export abstract class RenderedCommon
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
 
   /**
-   * Whether to Whether to keep the existing rendering by default.
+   * Whether to keep the existing rendering by default.
    */
   readonly keepExisting?: boolean = false;
 
