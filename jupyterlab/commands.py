@@ -23,6 +23,7 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
+from typing import Any
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
@@ -133,7 +134,7 @@ class ProgressProcess(Process):
         return self.terminate()
 
 
-def pjoin(*args):
+def pjoin(*args: str | os.PathLike[str]) -> str:
     """Join paths to create a real path."""
     return osp.abspath(osp.join(*args))
 
@@ -198,7 +199,7 @@ def get_app_dir() -> str:
     return str(Path(app_dir).resolve())
 
 
-def dedupe_yarn(path, logger=None):
+def dedupe_yarn(path: str, logger: logging.Logger | None = None) -> None:
     """`yarn-deduplicate` with the `fewer` strategy to minimize total
     packages installed in a given staging directory
 
@@ -228,7 +229,7 @@ def dedupe_yarn(path, logger=None):
         yarn_proc.wait()
 
 
-def ensure_node_modules(cwd, logger=None) -> bool:
+def ensure_node_modules(cwd: str, logger: logging.Logger | None = None) -> bool:
     """Ensure that node_modules is up to date.
 
     Returns true if the node_modules was updated.
@@ -248,7 +249,7 @@ def ensure_node_modules(cwd, logger=None) -> bool:
     return ret != 0
 
 
-def ensure_dev(logger=None) -> None:
+def ensure_dev(logger: logging.Logger | None = None) -> None:
     """Ensure that the dev assets are available."""
     logger = _ensure_logger(logger)
     target = pjoin(DEV_DIR, "static")
@@ -259,7 +260,7 @@ def ensure_dev(logger=None) -> None:
         yarn_proc.wait()
 
 
-def ensure_core(logger=None) -> None:
+def ensure_core(logger: logging.Logger | None = None) -> None:
     """Ensure that the core assets are available."""
     staging = pjoin(HERE, "staging")
     logger = _ensure_logger(logger)
@@ -272,7 +273,7 @@ def ensure_core(logger=None) -> None:
         yarn_proc.wait()
 
 
-def ensure_app(app_dir) -> list[str] | None:
+def ensure_app(app_dir: str) -> list[str] | None:
     """Ensure that an application directory is available.
 
     If it does not exist, return a list of messages to prompt the user.
@@ -288,7 +289,7 @@ def ensure_app(app_dir) -> list[str] | None:
     return msgs
 
 
-def watch_packages(logger=None):
+def watch_packages(logger: logging.Logger | None = None) -> list[WatchHelper]:
     """Run watch mode for the source packages.
 
     Parameters
@@ -314,7 +315,7 @@ def watch_packages(logger=None):
     return [ts_proc]
 
 
-def watch_dev(logger=None):
+def watch_dev(logger: logging.Logger | None = None) -> list[WatchHelper]:
     """Run watch mode in a given directory.
 
     Parameters
@@ -407,7 +408,10 @@ class AppOptions(HasTraits):
         return config.get("registry", YARN_DEFAULT_REGISTRY)
 
 
-def _ensure_options(options):
+AppOptionsLike = AppOptions | dict[str, Any] | None
+
+
+def _ensure_options(options: AppOptionsLike) -> AppOptions:
     """Helper to use deprecated kwargs for AppOption"""
     if options is None:
         return AppOptions()
@@ -417,7 +421,7 @@ def _ensure_options(options):
         return AppOptions(**options)
 
 
-def watch(app_options=None):
+def watch(app_options: AppOptionsLike = None) -> list[WatchHelper]:
     """Watch the application.
 
     Parameters
@@ -438,7 +442,9 @@ def watch(app_options=None):
     return package_procs + handler.watch()
 
 
-def install_extension(extension, app_options=None, pin=None):
+def install_extension(
+    extension: str, app_options: AppOptionsLike = None, pin: str | None = None
+) -> bool:
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
@@ -451,7 +457,9 @@ def install_extension(extension, app_options=None, pin=None):
     return handler.install_extension(extension, pin=pin)
 
 
-def uninstall_extension(name=None, app_options=None, all_=False):
+def uninstall_extension(
+    name: str | None = None, app_options: AppOptionsLike = None, all_: bool = False
+) -> bool:
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -464,7 +472,12 @@ def uninstall_extension(name=None, app_options=None, all_=False):
     return handler.uninstall_extension(name)
 
 
-def update_extension(name=None, all_=False, app_dir=None, app_options=None):
+def update_extension(
+    name: str | None = None,
+    all_: bool = False,
+    app_dir: str | None = None,
+    app_options: AppOptionsLike = None,
+) -> bool:
     """Update an extension by name, or all extensions.
     Either `name` must be given as a string, or `all_` must be `True`.
     If `all_` is `True`, the value of `name` is ignored.
@@ -478,7 +491,7 @@ def update_extension(name=None, all_=False, app_dir=None, app_options=None):
     return handler.update_extension(name)
 
 
-def clean(app_options=None):
+def clean(app_options: AppOptionsLike = None) -> None:
     """Clean the JupyterLab application directory."""
     app_options = _ensure_options(app_options)
     logger = app_options.logger
@@ -513,15 +526,15 @@ def clean(app_options=None):
 
 
 def build(
-    name=None,
-    version=None,
-    static_url=None,
-    kill_event=None,
-    clean_staging=False,
-    app_options=None,
-    production=True,
-    minimize=True,
-):
+    name: str | None = None,
+    version: str | None = None,
+    static_url: str | None = None,
+    kill_event: Event | None = None,
+    clean_staging: bool = False,
+    app_options: AppOptionsLike = None,
+    production: bool = True,
+    minimize: bool = True,
+) -> None:
     """Build the JupyterLab application."""
     app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
@@ -536,14 +549,16 @@ def build(
     )
 
 
-def get_app_info(app_options=None):
+def get_app_info(app_options: AppOptionsLike = None) -> dict[str, Any]:
     """Get a dictionary of information about the app."""
     handler = _AppHandler(app_options)
     handler._ensure_disabled_info()
     return handler.info
 
 
-def enable_extension(extension, app_options=None, level="sys_prefix"):
+def enable_extension(
+    extension: str, app_options: AppOptionsLike = None, level: str = "sys_prefix"
+) -> bool:
     """Enable a JupyterLab extension/plugin.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -552,7 +567,9 @@ def enable_extension(extension, app_options=None, level="sys_prefix"):
     return handler.toggle_extension(extension, False, level=level)
 
 
-def disable_extension(extension, app_options=None, level="sys_prefix"):
+def disable_extension(
+    extension: str, app_options: AppOptionsLike = None, level: str = "sys_prefix"
+) -> bool:
     """Disable a JupyterLab extension/plugin.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -561,25 +578,31 @@ def disable_extension(extension, app_options=None, level="sys_prefix"):
     return handler.toggle_extension(extension, True, level=level)
 
 
-def check_extension(extension, installed=False, app_options=None):
+def check_extension(
+    extension: str, installed: bool = False, app_options: AppOptionsLike = None
+) -> bool:
     """Check if a JupyterLab extension is enabled or disabled."""
     handler = _AppHandler(app_options)
     return handler.check_extension(extension, installed)
 
 
-def lock_extension(extension, app_options=None, level="sys_prefix"):
+def lock_extension(
+    extension: str, app_options: AppOptionsLike = None, level: str = "sys_prefix"
+) -> bool:
     """Lock a JupyterLab extension/plugin."""
     handler = _AppHandler(app_options)
     return handler.toggle_extension_lock(extension, True, level=level)
 
 
-def unlock_extension(extension, app_options=None, level="sys_prefix"):
+def unlock_extension(
+    extension: str, app_options: AppOptionsLike = None, level: str = "sys_prefix"
+) -> bool:
     """Unlock a JupyterLab extension/plugin."""
     handler = _AppHandler(app_options)
     return handler.toggle_extension_lock(extension, False, level=level)
 
 
-def build_check(app_options=None):
+def build_check(app_options: AppOptionsLike = None) -> list[str]:
     """Determine whether JupyterLab should be built.
 
     Returns a list of messages.
@@ -590,13 +613,13 @@ def build_check(app_options=None):
     return handler.build_check()
 
 
-def list_extensions(app_options=None):
+def list_extensions(app_options: AppOptionsLike = None) -> None:
     """List the extensions."""
     handler = _AppHandler(app_options)
     return handler.list_extensions()
 
 
-def link_package(path, app_options=None):
+def link_package(path: str | os.PathLike[str], app_options: AppOptionsLike = None) -> bool:
     """Link a package against the JupyterLab build.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -605,7 +628,7 @@ def link_package(path, app_options=None):
     return handler.link_package(path)
 
 
-def unlink_package(package, app_options=None):
+def unlink_package(package: str | os.PathLike[str], app_options: AppOptionsLike = None) -> bool:
     """Unlink a package from JupyterLab by path or name.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -614,19 +637,21 @@ def unlink_package(package, app_options=None):
     return handler.unlink_package(package)
 
 
-def get_app_version(app_options=None):
+def get_app_version(app_options: AppOptionsLike = None) -> str:
     """Get the application version."""
     handler = _AppHandler(app_options)
     return handler.info["version"]
 
 
-def get_latest_compatible_package_versions(names, app_options=None):
+def get_latest_compatible_package_versions(
+    names: list[str], app_options: AppOptionsLike = None
+) -> dict[str, str]:
     """Get the latest compatible version of a list of packages."""
     handler = _AppHandler(app_options)
     return handler.latest_compatible_package_versions(names)
 
 
-def read_package(target):
+def read_package(target: str | os.PathLike[str]) -> dict[str, Any]:
     """Read the package data in a given target tarball."""
     with tarfile.open(target, "r") as tar:
         with tar.extractfile("package/package.json") as f:
@@ -641,7 +666,7 @@ def read_package(target):
 
 
 class _AppHandler:
-    def __init__(self, options):
+    def __init__(self, options: AppOptionsLike) -> None:
         """Create a new _AppHandler object"""
         options = _ensure_options(options)
         self._options = options
@@ -672,7 +697,12 @@ class _AppHandler:
                     "Both `sys_prefix` and `user` level settings are read-only, cannot auto-migrate `disabledExtensions` to `lockedExtensions`"
                 )
 
-    def install_extension(self, extension, existing=None, pin=None):
+    def install_extension(
+        self,
+        extension: str | os.PathLike[str],
+        existing: Any = None,
+        pin: str | None = None,
+    ) -> bool:
         """Install an extension package into JupyterLab.
 
         The extension is first validated.
@@ -720,13 +750,13 @@ class _AppHandler:
 
     def build(
         self,
-        name=None,
-        version=None,
-        static_url=None,
-        clean_staging=False,
-        production=True,
-        minimize=True,
-    ):
+        name: str | None = None,
+        version: str | None = None,
+        static_url: str | None = None,
+        clean_staging: bool = False,
+        production: bool | None = True,
+        minimize: bool = True,
+    ) -> None:
         """Build the application."""
         if production is None:
             production = not (self.info["linked_packages"] or self.info["local_extensions"])
@@ -769,7 +799,7 @@ class _AppHandler:
             self.logger.debug(msg)
             raise RuntimeError(msg)
 
-    def watch(self):
+    def watch(self) -> list[WatchHelper]:
         """Start the application watcher and then run the watch in
         the background.
         """
@@ -789,7 +819,7 @@ class _AppHandler:
         )
         return [proc]
 
-    def list_extensions(self):  # noqa
+    def list_extensions(self) -> None:  # noqa
         """Print an output of the extensions."""
         self._ensure_disabled_info()
         logger = self.logger
@@ -860,7 +890,7 @@ class _AppHandler:
             logger.info("\nBuild recommended, please run `jupyter lab build`:")
             [logger.info(f"    {item}") for item in messages]
 
-    def build_check(self, fast=None):  # noqa
+    def build_check(self, fast: bool | None = None) -> list[str]:  # noqa
         """Determine whether JupyterLab should be built.
 
         Returns a list of messages.
