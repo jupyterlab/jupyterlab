@@ -863,7 +863,7 @@ function addCommands(
           kernelPreference: {
             type: 'object',
             description:
-              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/stable/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values'
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/4.5.x/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values'
           },
           options: {
             type: 'object',

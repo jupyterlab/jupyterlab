@@ -8,7 +8,7 @@
 
 JupyterLab 4.5 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-4-to-4-5) which lists deprecations and changes to the public API.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_migration.html#jupyterlab-4-4-to-4-5) which lists deprecations and changes to the public API.
 
 ### Performance and windowing
 
@@ -127,7 +127,7 @@ Keyboard navigation and tab order in the status bar has also been improved.
 
 JupyterLab 4.4 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-3-to-4-4) which lists deprecations and changes to the public API.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_migration.html#jupyterlab-4-3-to-4-4) which lists deprecations and changes to the public API.
 
 ### Code console improvements
 
@@ -218,7 +218,7 @@ in "Running Terminals and Kernels" (code name `showStatusBarItem`).
 
 JupyterLab 4.3 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
-Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-2-to-4-3) which lists deprecations and changes to the public API.
+Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_migration.html#jupyterlab-4-2-to-4-3) which lists deprecations and changes to the public API.
 
 ### Minimap
 
@@ -291,7 +291,7 @@ The following dialog windows can now be dismissed or silenced:
 
 ### Workspaces UI
 
-It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/stable/user/workspaces.html) from within JupyterLab.
+It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/4.5.x/user/workspaces.html) from within JupyterLab.
 
 <img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manage the workspace over which it was opened - clone, rename, reset, delete, export, and import." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/4.5.x/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
 
@@ -315,7 +315,7 @@ Users are now able to:
 
 ### Full notebook windowing mode by default
 
-Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. One limitation of `full` mode is that the search function in your browser may produce false negatives; using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/stable/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1, go to Settings → Settings Editor → Notebook, scroll to "Windowing mode", and choose `defer`.
+Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. One limitation of `full` mode is that the search function in your browser may produce false negatives; using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/4.5.x/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1, go to Settings → Settings Editor → Notebook, scroll to "Windowing mode", and choose `defer`.
 
 ### Improved Shortcuts Editor
 
@@ -343,7 +343,7 @@ Following feedback from users, implementation of certain shortcuts was moved fro
 
 ## v4.1
 
-JupyterLab 4.1 includes a number of new features (described below), bug fixes, and enhancements for extension developers. This release is compatible with extensions supporting JupyterLab 4.0. Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-4-0-to-4-1) which lists deprecations and changes to the public API.
+JupyterLab 4.1 includes a number of new features (described below), bug fixes, and enhancements for extension developers. This release is compatible with extensions supporting JupyterLab 4.0. Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_migration.html#jupyterlab-4-0-to-4-1) which lists deprecations and changes to the public API.
 
 ### Custom CSS
 
@@ -352,7 +352,7 @@ Themes are the recommended way for customizing the JupyterLab look and feel,
 while custom CSS is intended for minor personal adjustments.
 
 To opt in, start JupyterLab with the `--custom-css` flag.
-The location of the `custom.css` file is documented in the section on [customizing the user interface](https://jupyterlab.readthedocs.io/en/stable/user/interface_customization.html#custom-css).
+The location of the `custom.css` file is documented in the section on [customizing the user interface](https://jupyterlab.readthedocs.io/en/4.5.x/user/interface_customization.html#custom-css).
 
 ```{note}
 `custom.css` is also available in Jupyter Notebook;
@@ -450,11 +450,11 @@ Individual plugins can now be disabled or enabled from a new Plugin Manager user
 Each extension is composed of one or more plugins, and plugins form the basis of JupyterLab itself,
 thus the plugin manager enables more extensive customization of the JupyterLab experience.
 
-<img alt="An example search result in the plugin extension listing" src="https://jupyterlab.readthedocs.io/en/stable/_images/plugin-manager-search-notebook.png" class="jp-screenshot">
+<img alt="An example search result in the plugin extension listing" src="https://jupyterlab.readthedocs.io/en/4.5.x/_images/plugin-manager-search-notebook.png" class="jp-screenshot">
 
-This feature is intended for advanced users and is documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#managing-plugins-with-plugin-manager).
+This feature is intended for advanced users and is documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/4.5.x/user/extensions.html#managing-plugins-with-plugin-manager).
 
-Administrators may want to [lock specific plugins](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#locking-and-unlocking-plugins) if they are required for any reason; this will prevent users from disabling the plugins via Plugin Manager and remote API calls. The Plugin Manager itself can be [disabled using the CLI](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#enabling-and-disabling-extensions).
+Administrators may want to [lock specific plugins](https://jupyterlab.readthedocs.io/en/4.5.x/user/extensions.html#locking-and-unlocking-plugins) if they are required for any reason; this will prevent users from disabling the plugins via Plugin Manager and remote API calls. The Plugin Manager itself can be [disabled using the CLI](https://jupyterlab.readthedocs.io/en/4.5.x/user/extensions.html#enabling-and-disabling-extensions).
 
 ### Virtual scrollbar for notebook in windowed mode
 
@@ -523,7 +523,7 @@ Developers can now provide editor extensions, like themes and programming langua
 #### New extension manager
 
 Starting with JupyterLab 3, extensions can be installed via Python packages
-(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#prebuilt-extensions)).
+(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_dev.html#prebuilt-extensions)).
 
 In JupyterLab 4, building on this feature, the Extension Manager now includes extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
 This removes the build step from installation of extension when using Extension Manager.
@@ -597,11 +597,58 @@ Here are the main tool updates that will benefit extension authors and developer
 
 We recommend using Node.js v18 or newer, because older versions will reach end of life in 2023 or earlier (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
 
-To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
+To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
 - the [JupyterLab Extensions by Examples](https://github.com/jupyterlab/extension-examples/pull/232)
 - the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
 
 <!-- <START NEW CHANGELOG ENTRY> -->
+
+## 4.5.9
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.8...26936727d7f197bab4f314ca50690cd162d50312))
+
+### Bugs fixed
+
+- Fix `jupyter labextension build` crash on `webpack ≥ 5.107` [#19021](https://github.com/jupyterlab/jupyterlab/pull/19021) ([@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+- Backport PR #18992: Fix hidden cells after moving collapsed headings [#19016](https://github.com/jupyterlab/jupyterlab/pull/19016) ([@MUFFANUJ](https://github.com/MUFFANUJ), [@krassowski](https://github.com/krassowski))
+- Forbid relative URLs in extensionmanager [#19013](https://github.com/jupyterlab/jupyterlab/pull/19013) ([@Yann-P](https://github.com/Yann-P))
+- Fix XSS in extension manager's `homepage_url` [#19003](https://github.com/jupyterlab/jupyterlab/pull/19003) ([@Yann-P](https://github.com/Yann-P))
+- Fix toolbar popup row clipping in Safari [#18998](https://github.com/jupyterlab/jupyterlab/pull/18998) ([@arun-357](https://github.com/arun-357))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-04&to=2026-06-17&type=c))
+
+@arun-357 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarun-357+updated%3A2026-06-04..2026-06-17&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-06-04..2026-06-17&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-04..2026-06-17&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-04..2026-06-17&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-06-04..2026-06-17&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
+## 4.5.8
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.7...8d30d481fbab784096e04d85dfa3b0c36e77be2c))
+
+### Bugs fixed
+
+- Prevent dialog from hanging when `getValue()` throws [#18938](https://github.com/jupyterlab/jupyterlab/pull/18938) ([@AliMahmoudDev](https://github.com/AliMahmoudDev))
+- Add `packaging` min version pin [#18910](https://github.com/jupyterlab/jupyterlab/pull/18910) ([@krassowski](https://github.com/krassowski))
+- Use CSS `anchor` for prompt overlay [#18840](https://github.com/jupyterlab/jupyterlab/pull/18840) ([@CrafterKolyan](https://github.com/CrafterKolyan))
+
+### Maintenance and upkeep improvements
+
+- Fix completer test failures on CI [#18946](https://github.com/jupyterlab/jupyterlab/pull/18946) ([@krassowski](https://github.com/krassowski))
+- Bump license webpack plugin [#18929](https://github.com/jupyterlab/jupyterlab/pull/18929) ([@Darshan808](https://github.com/Darshan808), [@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-04-29&to=2026-06-04&type=c))
+
+@AliMahmoudDev ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAliMahmoudDev+updated%3A2026-04-29..2026-06-04&type=Issues)) | @CrafterKolyan ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACrafterKolyan+updated%3A2026-04-29..2026-06-04&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-04-29..2026-06-04&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-04-29..2026-06-04&type=Issues))
 
 ## 4.5.7
 
@@ -643,8 +690,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-03-11&to=2026-04-29&type=c))
 
 @Carreau ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACarreau+updated%3A2026-03-11..2026-04-29&type=Issues)) | @filipeoliveira05 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afilipeoliveira05+updated%3A2026-03-11..2026-04-29&type=Issues)) | @flaviomartins ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aflaviomartins+updated%3A2026-03-11..2026-04-29&type=Issues)) | @itsmejay80 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmejay80+updated%3A2026-03-11..2026-04-29&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-03-11..2026-04-29&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-03-11..2026-04-29&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2026-03-11..2026-04-29&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-03-11..2026-04-29&type=Issues)) | @utsav-develops ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Autsav-develops+updated%3A2026-03-11..2026-04-29&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.6
 
@@ -4189,9 +4234,9 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 
 JupyterLab 4 is released! :tada:
 
-Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/stable/getting_started/changelog.html#v4-0
+Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/4.5.x/getting_started/changelog.html#v4-0
 
-For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-3-x-to-4-x
+For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/4.5.x/extension/extension_migration.html#jupyterlab-3-x-to-4-x
 
 ______________________________________________________________________
 
@@ -6094,7 +6139,7 @@ No merged PRs
 
 ### Enhancements made
 
-- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/stable/user/files.html#displaying-hidden-files)
+- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/4.5.x/user/files.html#displaying-hidden-files)
 - Restore Copy shareable link use of `shareUrl` [#11188](https://github.com/jupyterlab/jupyterlab/pull/11188) ([@fcollonval](https://github.com/fcollonval))
 - Add Galata in JupyterLab [#11179](https://github.com/jupyterlab/jupyterlab/pull/11179) ([@fcollonval](https://github.com/fcollonval))
 - Responsive Toolbar [#11178](https://github.com/jupyterlab/jupyterlab/pull/11178) ([@3coins](https://github.com/3coins))
@@ -6540,9 +6585,9 @@ No merged PRs
 - From JupyterLab 3.1, file documents and notebooks have collaborative
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
-  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html).
+  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/4.5.x/user/rtc.html).
 - The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
-- Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/toc.html).
+- Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/4.5.x/user/toc.html).
 - The debugger received many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
 - A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
@@ -7163,21 +7208,21 @@ extensions does not require rebuilding JupyterLab and does not require
 having NodeJS installed. The previous way of distributing extensions as
 npm packages requiring rebuilding JupyterLab is still available as well.
 See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#extensions)
+[documentation](https://jupyterlab.readthedocs.io/en/4.5.x/user/extensions.html#extensions)
 for more details.
 
 #### The JupyterLab interface supports multiple languages
 
 JupyterLab now provides the ability to set the display language of the
 user interface. See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/language.html)
+[documentation](https://jupyterlab.readthedocs.io/en/4.5.x/user/language.html)
 for more details.
 
 #### A new visual debugger
 
 JupyterLab now ships with a debugger front-end by default, available for
 kernels that support the new debugging protocol. See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/debugger.html)
+[documentation](https://jupyterlab.readthedocs.io/en/4.5.x/user/debugger.html)
 for more details.
 
 #### Improvements to Simple Interface mode and Mobile

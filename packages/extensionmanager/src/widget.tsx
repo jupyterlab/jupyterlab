@@ -38,6 +38,16 @@ function getExtensionGitHubUser(entry: IEntry) {
   return null;
 }
 
+function isProtocolAllowed(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const protocol = parsed.protocol.toLowerCase();
+    return ['http:', 'https:'].includes(protocol);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * VDOM for visualizing an extension entry.
  */
@@ -73,7 +83,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            {entry.homepage_url ? (
+            {entry.homepage_url && isProtocolAllowed(entry.homepage_url) ? (
               <a
                 href={entry.homepage_url}
                 target="_blank"
@@ -100,7 +110,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               )}
               onClick={() =>
                 window.open(
-                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                  'https://jupyterlab.readthedocs.io/en/4.5.x/user/extensions.html'
                 )
               }
             />
@@ -415,7 +425,7 @@ to work, this panel needs to fetch data from web services. Do you agree to
 activate this feature?`)}
           <br />
           <a
-            href="https://jupyterlab.readthedocs.io/en/stable/privacy_policies.html"
+            href="https://jupyterlab.readthedocs.io/en/4.5.x/privacy_policies.html"
             target="_blank"
             rel="noreferrer"
           >

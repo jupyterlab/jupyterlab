@@ -10,6 +10,8 @@
 
 .jp-OutputArea {
   overflow-y: auto;
+  /* stylelint-disable-next-line csstree/validator, property-no-unknown */
+  anchor-scope: --jp-output-area;
 }
 
 .jp-OutputArea-child {
@@ -17,6 +19,8 @@
   flex-direction: row;
   width: 100%;
   overflow: hidden;
+  /* stylelint-disable-next-line csstree/validator, property-no-unknown */
+  anchor-name: --jp-output-area;
 }
 
 .jp-OutputPrompt {
@@ -64,9 +68,11 @@
 
 .jp-OutputArea-promptOverlay {
   position: absolute;
-  top: 0;
+  /* stylelint-disable csstree/validator, function-no-unknown */
+  top: anchor(--jp-output-area top);
+  bottom: anchor(--jp-output-area bottom);
+  /* stylelint-enable csstree/validator, function-no-unknown */
   width: var(--jp-cell-prompt-width);
-  height: 100%;
   opacity: 0.5;
   display: flex;
   align-items: center;

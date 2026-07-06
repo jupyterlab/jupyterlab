@@ -45,7 +45,7 @@ dependencies = [
     "jupyter-lsp>=2.0.0",
     "jupyterlab_server>=2.28.0,<3",
     "notebook_shim>=0.2",
-    "packaging",
+    "packaging>=23.2",
     "setuptools>=41.1.0",
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",

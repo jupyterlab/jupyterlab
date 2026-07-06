@@ -9,6 +9,7 @@ import * as webpack from 'webpack';
 import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 import { LicenseIdentifiedModule } from 'license-webpack-plugin/dist/LicenseIdentifiedModule';
 import { PluginOptions } from 'license-webpack-plugin/dist/PluginOptions';
+import { WebpackInnerModuleIterator } from 'license-webpack-plugin/dist/WebpackInnerModuleIterator';
 
 // From
 // https://github.com/webpack/webpack/blob/95120bdf98a01649740b104bebc426b0123651ce/lib/WatchIgnorePlugin.js
@@ -220,6 +221,26 @@ export namespace WPPlugin {
   export const DEFAULT_LICENSE_REPORT_FILENAME = 'third-party-licenses.json';
 
   /**
+   * Teach `license-webpack-plugin` to read webpack >= 5.107 shared-module
+   * identifiers, which use `|` instead of `=`.
+   */
+  const _getActualFilename =
+    WebpackInnerModuleIterator.prototype.getActualFilename;
+  WebpackInnerModuleIterator.prototype.getActualFilename = function (
+    filename: string | null | undefined
+  ): string | null {
+    if (
+      typeof filename === 'string' &&
+      filename.indexOf('provide module') === 0 &&
+      filename.indexOf('=') === -1 &&
+      filename.indexOf('|') > -1
+    ) {
+      return filename.slice(filename.indexOf('|') + 1).trim();
+    }
+    return _getActualFilename.call(this, filename);
+  };
+
+  /**
    * a plugin that creates a predictable, machine-readable report of licenses for
    * all modules included in this build
    */
@@ -242,7 +263,7 @@ export namespace WPPlugin {
       for (const mod of modules) {
         report.packages.push({
           name: mod.name || '',
-          versionInfo: mod.packageJson.version || '',
+          versionInfo: mod.packageJson?.version || '',
           licenseId: mod.licenseId || '',
           extractedText: mod.licenseText || ''
         });

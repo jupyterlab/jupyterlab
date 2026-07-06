@@ -37,7 +37,7 @@ type CoreData = Map<string, any>;
 const URL_CONFIG = {
   source: 'main',
   target: '4.5.x',
-  rtdVersion: 'stable'
+  rtdVersion: '4.5.x'
 };
 
 // Data to ignore.
@@ -83,6 +83,7 @@ const UNUSED: Dict<string[]> = {
     'style-loader',
     'terser-webpack-plugin',
     'webpack-cli',
+    'webpack-sources',
     'worker-loader',
     'source-map-loader'
   ],
