@@ -40,7 +40,7 @@
     "@jupyterlab/pluginmanager": "^4.7.0-alpha.0",
     "@jupyterlab/translation": "^4.7.0-alpha.0",
     "@jupyterlab/ui-components": "^4.7.0-alpha.0",
-    "@lumino/coreutils": "^2.2.2"
+    "@lumino/coreutils": "^2.2.3"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
