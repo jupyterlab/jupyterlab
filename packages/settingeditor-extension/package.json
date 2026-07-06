@@ -49,7 +49,7 @@
     "@jupyterlab/statedb": "^4.7.0-alpha.0",
     "@jupyterlab/translation": "^4.7.0-alpha.0",
     "@jupyterlab/ui-components": "^4.7.0-alpha.0",
-    "@lumino/disposable": "^2.1.5",
+    "@lumino/disposable": "^2.1.6",
     "react": "^18.2.0"
   },
   "devDependencies": {
