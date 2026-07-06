@@ -223,6 +223,14 @@ export interface IMarkdownParser extends IRenderMime.IMarkdownParser {
    * @returns - A promise of heading metadata.
    */
   getHeadingTokens?: (source: string) => Promise<IMarkdownHeadingToken[]>;
+
+  /**
+   * Parse markdown and extract top-level block metadata.
+   *
+   * @param source - The markdown string to parse.
+   * @returns - A promise of block metadata.
+   */
+  getBlockTokens?: (source: string) => Promise<IMarkdownBlockToken[]>;
 }
 
 /**
@@ -238,6 +246,26 @@ export interface IMarkdownHeadingToken {
    * Raw markdown text of the heading
    */
   raw: string;
+}
+
+/**
+ * Markdown top-level block metadata.
+ */
+export interface IMarkdownBlockToken {
+  /**
+   * Line number in source markdown (0-based)
+   */
+  line: number;
+
+  /**
+   * Raw markdown text of the block
+   */
+  raw: string;
+
+  /**
+   * Markdown parser token type (e.g. `heading`, `paragraph`, `code`)
+   */
+  type: string;
 }
 
 /**
