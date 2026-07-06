@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
@@ -235,7 +236,13 @@ export class ShortcutUI
         shortcut.selector === target.selector &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
         keybinding &&
-        JSONExt.deepEqual(keybinding.keys, shortcut.keys)
+        // `keybinding.keys` are the resolved (normalized) platform keys exposed
+        // by the registry, so compare against the resolved keys of the raw user
+        // shortcut rather than its (possibly platform-specific) `keys` fallback.
+        JSONExt.deepEqual(
+          keybinding.keys,
+          CommandRegistry.normalizeKeys(shortcut)
+        )
       ) {
         const matchesDefault =
           keybinding.isDefault && JSONExt.deepEqual(keybinding.keys, keys);

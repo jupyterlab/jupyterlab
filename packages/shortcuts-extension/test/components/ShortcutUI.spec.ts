@@ -221,6 +221,42 @@ describe('@jupyterlab/shortcut-extension', () => {
           selector: 'body'
         });
       });
+
+      it('should replace a user keybinding whose active keys differ from fallback keys', async () => {
+        // The stored `keys` are the cross-platform fallback; the resolved
+        // platform keys (what the registry exposes and the UI edits) differ.
+        // All platform variants share a value so the resolved keys are the
+        // same regardless of the test platform.
+        data.user.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel Shift J'],
+          winKeys: ['Ctrl Alt Y'],
+          linuxKeys: ['Ctrl Alt Y'],
+          macKeys: ['Ctrl Alt Y'],
+          selector: 'body'
+        } as CommandRegistry.IKeyBindingOptions);
+        const keybinding = {
+          keys: CommandRegistry.normalizeKeys({
+            keys: ['Accel Shift J'],
+            winKeys: ['Ctrl Alt Y'],
+            linuxKeys: ['Ctrl Alt Y'],
+            macKeys: ['Ctrl Alt Y']
+          } as CommandRegistry.IKeyBindingOptions),
+          isDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        await shortcutUI.replaceKeybinding(target, keybinding, ['Ctrl X']);
+        // The existing user shortcut should be updated in place, not duplicated.
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0].keys).toEqual(['Ctrl X']);
+      });
     });
 
     describe('#deleteKeybinding()', () => {
@@ -288,6 +324,39 @@ describe('@jupyterlab/shortcut-extension', () => {
         await shortcutUI.deleteKeybinding(target, keybinding);
         expect(data.user.shortcuts).toHaveLength(1);
         expect(data.user.shortcuts[0].keys[0]).toBe('Ctrl B');
+      });
+
+      it('should remove a user keybinding whose active keys differ from fallback keys', async () => {
+        // The stored `keys` are the cross-platform fallback; the resolved
+        // platform keys (what the registry exposes and the UI edits) differ.
+        data.user.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel Shift J'],
+          winKeys: ['Ctrl Alt Y'],
+          linuxKeys: ['Ctrl Alt Y'],
+          macKeys: ['Ctrl Alt Y'],
+          selector: 'body'
+        } as CommandRegistry.IKeyBindingOptions);
+        const keybinding = {
+          keys: CommandRegistry.normalizeKeys({
+            keys: ['Accel Shift J'],
+            winKeys: ['Ctrl Alt Y'],
+            linuxKeys: ['Ctrl Alt Y'],
+            macKeys: ['Ctrl Alt Y']
+          } as CommandRegistry.IKeyBindingOptions),
+          isDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        await shortcutUI.deleteKeybinding(target, keybinding);
+        // The user shortcut should be removed, not left behind.
+        expect(data.user.shortcuts).toHaveLength(0);
       });
     });
 
