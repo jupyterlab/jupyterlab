@@ -1845,17 +1845,21 @@ namespace Private {
       }
       if (node.childNodes.length > 0) {
         const result = computeSelectionCharacterOffset(node, selection);
-        if (result.anchor) {
+        // Compare against `null` rather than testing truthiness: an offset of
+        // `0` is a valid position (the selection end is at the very start of a
+        // nested node, e.g. the first character of a linkified URL) and must
+        // not be discarded.
+        if (result.anchor !== null) {
           anchor = offset + result.anchor;
         }
-        if (result.focus) {
+        if (result.focus !== null) {
           focus = offset + result.focus;
         }
         offset += result.processedCharacters;
       } else {
         offset += node.textContent!.length;
       }
-      if (anchor && focus) {
+      if (anchor !== null && focus !== null) {
         break;
       }
     }
@@ -1886,7 +1890,13 @@ namespace Private {
                 ? (node.childNodes[0].nodeValue?.length ??
                   node.textContent?.length)
                 : node.textContent?.length) ?? 0);
-        if (textOffset > offset && textOffset < offset + nodeEnd) {
+        // Use `>=` on the lower bound so an offset that falls exactly on a node
+        // boundary is resolved to the start of that node. With a strict `>` the
+        // offset `0` (start of content) and every inter-node boundary would be
+        // missed, leaving the selection unrestored - the ranges are half-open
+        // [offset, offset + nodeEnd), so each character position still maps to
+        // exactly one node.
+        if (textOffset >= offset && textOffset < offset + nodeEnd) {
           if (node instanceof Text) {
             return { node, positionOffset: textOffset - offset };
           } else {

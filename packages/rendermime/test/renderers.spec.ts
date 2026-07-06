@@ -243,5 +243,65 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors).toHaveLength(1);
       expect(anchors[0].textContent).toBe('www.example.com/path/page');
     });
+
+    // Selection preservation across streamed re-renders. `replaceChangedNodes`
+    // records the selection as character offsets before mutating the DOM and
+    // restores it afterwards. jsdom's `Selection.containsNode` always returns
+    // `false`, which would short-circuit that path, so it is stubbed to `true`
+    // (matching a real browser where the selection is inside the output host).
+    it('preserves a selection starting at the first character of a linkified URL', async () => {
+      // Regression test: the selection-offset code must treat a character
+      // offset of 0 as a real position. Selecting from the very start of a
+      // linkified URL exercises both the save path (a nested offset of 0,
+      // previously discarded by a truthiness check) and the restore path
+      // (locating offset 0, previously missed by a strict `>` comparison).
+      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      const sanitizer = new Sanitizer();
+
+      await renderText({ host, sanitizer, source: 'www.example.com and more' });
+      jest.runAllTimers();
+
+      const urlText = host.querySelector('a')!.firstChild as Text;
+      const selection = window.getSelection()!;
+      selection.setBaseAndExtent(urlText, 0, urlText, 5);
+      expect(selection.toString()).toBe('www.e');
+
+      // A further stream chunk rebuilds the DOM; the selection must survive.
+      await renderText({
+        host,
+        sanitizer,
+        source: 'www.example.com and more text'
+      });
+      jest.runAllTimers();
+
+      const restored = window.getSelection()!;
+      expect(restored.isCollapsed).toBe(false);
+      expect(restored.toString()).toBe('www.e');
+    });
+
+    it('preserves a mid-content selection across a streamed append', async () => {
+      // Baseline: an offset strictly inside a node (away from any boundary) is
+      // preserved. Complements the offset-0 case above.
+      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      const sanitizer = new Sanitizer();
+
+      await renderText({ host, sanitizer, source: 'www.example.com and more' });
+      jest.runAllTimers();
+
+      // Select "example", strictly inside the linkified URL text node.
+      const urlText = host.querySelector('a')!.firstChild as Text;
+      const selection = window.getSelection()!;
+      selection.setBaseAndExtent(urlText, 4, urlText, 11);
+      expect(selection.toString()).toBe('example');
+
+      await renderText({
+        host,
+        sanitizer,
+        source: 'www.example.com and more text'
+      });
+      jest.runAllTimers();
+
+      expect(window.getSelection()!.toString()).toBe('example');
+    });
   });
 });
