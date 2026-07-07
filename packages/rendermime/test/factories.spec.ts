@@ -1268,6 +1268,40 @@ describe('rendermime/factories', () => {
           );
         });
 
+        it('should autolink to a specific line (Python style)', async () => {
+          const source =
+            'File "/home/user/jupyterlab/a_file.py", line 1, in <module>';
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, createModel(mimeType, source));
+          expect(renderedHTML(w)).toBe(
+            '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
+          );
+        });
+
+        it('should keep the line locator when a step boundary falls inside it', async () => {
+          // A Python-style path link spans spaces (`", line 1` is part of the
+          // link), so an incremental step must not break at whitespace inside
+          // it - only a line break is a safe break point for path links.
+          // Position the space of `", line 1` exactly at the stride so it is
+          // the first whitespace at/after the point where a step may break.
+          const STRIDE = 8192; // Keep in sync with AUTO_LINK_STRIDE.
+          const tracebackLine =
+            'File "/home/user/jupyterlab/a_file.py", line 1, in <module>';
+          const locatorSpace = tracebackLine.indexOf(' line');
+          const pad = 'x'.repeat(STRIDE - locatorSpace - 1) + '\n';
+          const w = attachedRenderer(errorRendererFactory, {
+            mimeType,
+            ...options
+          });
+          await renderAndFlush(w, createModel(mimeType, pad + tracebackLine));
+          expect(renderedHTML(w)).toContain(
+            '<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>'
+          );
+        });
+
         it('should autolink mixed content with URLs and files', async () => {
           const source = 'URL www.example.com File ~/jupyterlab/a_file.py:1';
           const w = attachedRenderer(errorRendererFactory, {
@@ -1281,34 +1315,15 @@ describe('rendermime/factories', () => {
         });
       });
 
-      // Synchronous-pipeline-only tests:
-      // - the performance tests measure wall-clock render time, which is only
-      //   meaningful when rendering happens synchronously in a single pass;
-      // - the Python-style traceback link has its line locator *after a space*
-      //   (`", line 1`); the incremental linker splits fragments on whitespace
-      //   and commits the path anchor before it sees the locator, so it captures
-      //   only the path (no `#line=…`). Other locator styles (e.g. IPython's
-      //   `:1`) attach without a space and work in both pipelines.
+      // Synchronous-pipeline-only tests: the performance tests measure
+      // wall-clock render time, which is only meaningful when rendering
+      // happens synchronously in a single pass.
       describe('synchronous pipeline only', () => {
         beforeEach(() => {
           sanitizer.setIncrementalAutolink(false);
         });
         afterEach(() => {
           sanitizer.setIncrementalAutolink(false);
-        });
-
-        it('should autolink to a specific line (Python style)', async () => {
-          const mimeType = 'application/vnd.jupyter.stderr';
-          const source =
-            'File "/home/user/jupyterlab/a_file.py", line 1, in <module>';
-          const w = errorRendererFactory.createRenderer({
-            mimeType,
-            ...options
-          });
-          await w.renderModel(createModel(mimeType, source));
-          expect(renderedHTML(w)).toBe(
-            '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
-          );
         });
 
         it.each([

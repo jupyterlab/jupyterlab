@@ -846,8 +846,8 @@ const ansiPrefix = '\x1b';
 
 /**
  * Minimum number of characters an incremental auto-linking step advances by;
- * each step extends to the first safe break point (see `autoLinkBreak`) at or
- * after this offset. Advancing by a sizable stride rather than a single word
+ * each step extends to the first safe break point (see `autoLinkBreak` and
+ * `autoLinkPathBreak`) at or after this offset. Advancing by a sizable stride rather than a single word
  * amortizes the per-step overhead - cache lookup, prefix verification and
  * node-array copying - over much more text; the per-frame time budget still
  * decides how many steps run in one frame.
@@ -862,6 +862,14 @@ const AUTO_LINK_STRIDE = 8192;
  * (the lookbehind may inspect characters before `lastIndex`).
  */
 const autoLinkBreak = /(?<=\S)\s/g;
+
+/**
+ * The break point used when path auto-linking is enabled: only a line break
+ * is safe then, because a path link can span spaces within a line - the
+ * Python traceback locator in `File "/path/to/a.py", line 1` is part of the
+ * link - but no link spans a line break.
+ */
+const autoLinkPathBreak = /\n/g;
 
 /**
  * Enum used exclusively for static analysis to ensure that each
@@ -1625,12 +1633,19 @@ function renderTextual(
     // change lets other code run mid-loop (e.g. yielding to the event loop).
     let newRequest: number | undefined;
 
+    // The step break point: a place no link can span, so that splitting there
+    // cannot cut a link in two. With web links only, any whitespace qualifies;
+    // with path links a line break is required, because a path link can span
+    // spaces within a line (the `", line 1` locator of a Python traceback).
+    const stepBreak = autoLinkOptions.checkPaths
+      ? autoLinkPathBreak
+      : autoLinkBreak;
+
     do {
-      // Find a safe break point: the first whitespace (following a non-space
-      // character) at or after the stride, so that each step advances by at
-      // least `AUTO_LINK_STRIDE` characters instead of a single word.
-      autoLinkBreak.lastIndex = AUTO_LINK_STRIDE;
-      const breakMatch = autoLinkBreak.exec(toBeAutoLinked);
+      // Find a safe break point at or after the stride, so that each step
+      // advances by at least `AUTO_LINK_STRIDE` characters.
+      stepBreak.lastIndex = AUTO_LINK_STRIDE;
+      const breakMatch = stepBreak.exec(toBeAutoLinked);
       const breakIndex = breakMatch ? breakMatch.index : -1;
 
       const before =
@@ -1640,9 +1655,9 @@ function renderTextual(
       const after = breakIndex === -1 ? '' : toBeAutoLinked.slice(breakIndex);
 
       // Linkify only this step's text and append to the running node list.
-      // Steps always split at whitespace, which a URL can never span, so the
-      // nodes from earlier steps stay valid as-is; adjacent Text nodes are
-      // merged to avoid unbounded fragmentation. (The seed boundary - where a
+      // Steps always split at a break point no link can span (see
+      // `stepBreak`), so the nodes from earlier steps stay valid as-is;
+      // adjacent Text nodes are merged to avoid unbounded fragmentation. (The seed boundary - where a
       // new stream chunk may extend a URL from the previous chunk - is the one
       // place a node can be invalidated, and is handled by
       // `getApplicableLinkCache` when seeding above.)
@@ -1961,6 +1976,22 @@ export async function renderError(
 }
 
 /**
+ * Whether two nodes produced by the auto-linker represent the same anchor.
+ *
+ * Web anchors are identified by `href`; path anchors carry no `href` (the
+ * path is resolved asynchronously after rendering) and are identified by
+ * their pending path/locator data instead - without this, any two path
+ * anchors would compare as equal through their empty `href`.
+ */
+function isSameAnchor(a: HTMLAnchorElement, b: HTMLAnchorElement): boolean {
+  return (
+    a.href === b.href &&
+    a.dataset.path === b.dataset.path &&
+    a.dataset.locator === b.dataset.locator
+  );
+}
+
+/**
  * Merge `<span>` nodes from a `<pre>` element with `<a>` nodes from linker.
  */
 function mergeNodes(
@@ -1980,8 +2011,10 @@ function mergeNodes(
       if (
         isAnchor &&
         inAnchorElement &&
-        (node as HTMLAnchorElement).href ===
-          (lastCombined as HTMLAnchorElement).href
+        isSameAnchor(
+          node as HTMLAnchorElement,
+          lastCombined as HTMLAnchorElement
+        )
       ) {
         // Continuation of the anchor started by the previous pair: a boundary
         // between source-side nodes (an ANSI span edge, or a tail-segment
@@ -2010,8 +2043,10 @@ function mergeNodes(
     // into the anchor content as a child
     if (
       inAnchorElement &&
-      (linkNode as HTMLAnchorElement).href ===
-        (lastCombined as HTMLAnchorElement).href
+      isSameAnchor(
+        linkNode as HTMLAnchorElement,
+        lastCombined as HTMLAnchorElement
+      )
     ) {
       lastCombined.appendChild(preNode);
     } else {
