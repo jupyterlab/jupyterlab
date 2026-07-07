@@ -855,6 +855,38 @@ enum RenderingResult {
 }
 
 /**
+ * How a render frame was invoked; decides which scheduling gates apply
+ * and what time budget the frame runs with.
+ */
+enum FrameInvocation {
+  /**
+   * A regular animation frame: subject to the visibility gate and to the
+   * round-robin render queue (both reserved for on-screen hosts).
+   */
+  animation,
+  /**
+   * Forced by the first-paint fallback watchdog under animation-frame
+   * starvation: bypasses all gates (see `armFallbackWatchdog`).
+   */
+  forced,
+  /**
+   * A background slice delivered during browser idle time to a host which has
+   * painted but is off-screen: bypasses the gates and runs with the budget
+   * derived from the idle deadline (see `scheduleIdleRendering`).
+   */
+  idle
+}
+
+/**
+ * Renders one frame of an incremental render and reports the decision taken.
+ */
+type FrameRenderer = (
+  timestamp: number,
+  invocation?: FrameInvocation,
+  budget?: number
+) => RenderingResult;
+
+/**
  * Render the textual representation into a host node.
  *
  * Implements the shared logic for `renderText` and `renderError`.
@@ -907,11 +939,13 @@ function renderTextual(
   let fullPreTextContent: string | null = null;
   let pre: HTMLPreElement;
 
-  // We use the observer to pause rendering while the output is off-screen; this
-  // is helpful when opening a notebook with a large number of large textual
+  // We use the observer to deprioritize rendering while the output is
+  // off-screen: work continues in the background (idle) tier at a reduced rate
+  // rather than competing with visible outputs for animation frames. This is
+  // helpful when opening a notebook with a large number of large textual
   // outputs. The initial value is optimistic (visible) so that the first paint
   // is not held back waiting for the asynchronous observer callback; the
-  // observer then pauses further work (e.g. auto-linking) should the output
+  // observer then demotes further work (e.g. auto-linking) should the output
   // turn out to be off-screen.
   let isVisible = true;
 
@@ -928,6 +962,14 @@ function renderTextual(
       entries => {
         for (const entry of entries) {
           isVisible = entry.isIntersecting;
+        }
+        if (isVisible) {
+          // The host may have been parked in the background tier while it was
+          // off-screen; promote it eagerly so rendering resumes at full rate
+          // now that it is visible, rather than waiting for the browser to go
+          // idle (idle callbacks can be delayed indefinitely on a busy page,
+          // e.g. while the user is scrolling through a heavy notebook).
+          Private.promoteFromIdle(host, renderFrame);
         }
       },
       { threshold: 0 }
@@ -957,20 +999,34 @@ function renderTextual(
     return RenderingResult.stop;
   };
 
+  // Schedule the next frame on the tier matching the current visibility:
+  // off-screen hosts which have already painted are parked in the background
+  // (idle) tier where they keep making progress during browser idle time;
+  // everything else (visible hosts, and hosts awaiting their first paint or
+  // attachment) goes through the animation-frame render queue.
+  const scheduleNextFrame = () => {
+    if (!isVisible && Private.hasPainted(host)) {
+      Private.scheduleIdleRendering(host, renderFrame);
+    } else {
+      Private.scheduleRendering(host, renderFrame);
+    }
+  };
+
   const continueRendering = () => {
     iteration += 1;
-    Private.scheduleRendering(host, renderFrame);
+    scheduleNextFrame();
     return RenderingResult.continue;
   };
 
   const delayRendering = () => {
-    Private.scheduleRendering(host, renderFrame);
+    scheduleNextFrame();
     return RenderingResult.delay;
   };
 
-  const renderFrame = (
+  const renderFrame: FrameRenderer = (
     timestamp: number,
-    forced: boolean = false
+    invocation: FrameInvocation = FrameInvocation.animation,
+    budget: number = 10
   ): RenderingResult => {
     if (!host.isConnected) {
       // The host is not in the DOM. Note that even in full windowing notebook
@@ -995,9 +1051,13 @@ function renderTextual(
       return stopRendering();
     }
 
-    // Delay rendering of this output if the output is not visible due to
-    // scrolling away in full windowed notebook mode, or if another output
-    // should be rendered first.
+    // Gates applied to regular animation frames only:
+    // - if the output is not visible (scrolled away in full windowed notebook
+    //   mode), park it in the background tier: `delayRendering` re-schedules
+    //   through `scheduleNextFrame`, which sends off-screen hosts to the idle
+    //   tier where they keep making progress during browser idle time instead
+    //   of competing with visible outputs for animation frames;
+    // - otherwise wait for this host's round-robin turn in the render queue.
     // Note: cannot use `checkVisibility` as it triggers style recalculation
     // before we appended the new nodes from the stream, which leads to layout
     // trashing. Instead we use intersection observer.
@@ -1009,16 +1069,17 @@ function renderTextual(
     // would therefore deadlock (never paint -> stays zero height -> never
     // reported visible). This matches the documented intent that the first
     // paint is not held back; only subsequent work (auto-linking, stream
-    // updates) is paused while the output is off-screen.
+    // updates) is deprioritized while the output is off-screen.
     //
     // A `forced` frame (delivered by the fallback watchdog because animation
     // frames are starved) bypasses both gates entirely: the render queue
     // distributes work across animation frames to avoid janky frames, but that
     // is moot when frames are not being produced, and letting the queue rotate
     // this host past its turn would defeat the very purpose of the fallback
-    // (see `armFallbackWatchdog`).
+    // (see `armFallbackWatchdog`). An `idle` slice likewise bypasses them: it
+    // exists precisely to run work for off-screen hosts, outside the queue.
     if (
-      !forced &&
+      invocation === FrameInvocation.animation &&
       ((!isVisible && Private.hasPainted(host)) ||
         !Private.canRenderInFrame(timestamp, host))
     ) {
@@ -1080,7 +1141,6 @@ function renderTextual(
       : fullPreTextContent;
     let moreWorkToBeDone: boolean;
 
-    const budget = 10;
     let linkedNodes: (HTMLAnchorElement | Text)[];
     let elapsed: number;
     // Defensive only: the loop below runs synchronously, so nothing can
@@ -1165,8 +1225,9 @@ function renderTextual(
   // produced. The watchdog only fires under genuine starvation - while frames
   // are still being produced it simply lets the render queue deliver this host
   // in due course (see `armFallbackWatchdog`). Subsequent frames (auto-linking
-  // passes, stream updates) rely on animation frames alone, so auto-linking
-  // naturally backs off under resource pressure rather than competing for it.
+  // passes, stream updates) rely on animation frames and idle slices alone, so
+  // auto-linking naturally backs off under resource pressure rather than
+  // competing for it.
   //
   // The callback returns `true` when the host still needs watching (the forced
   // frame could not paint yet because the host is not attached), so the watchdog
@@ -1174,7 +1235,9 @@ function renderTextual(
   if (!Private.hasPainted(host)) {
     Private.armFallbackWatchdog(
       host,
-      () => renderFrame(performance.now(), true) === RenderingResult.delay
+      () =>
+        renderFrame(performance.now(), FrameInvocation.forced) ===
+        RenderingResult.delay
     );
   }
 
@@ -1731,10 +1794,11 @@ namespace Private {
     }
   }
 
-  export function scheduleRendering(
-    host: HTMLElement,
-    render: (timestamp: number, forced?: boolean) => void
-  ) {
+  export function scheduleRendering(host: HTMLElement, render: FrameRenderer) {
+    // The host may have been parked in the background tier (e.g. it is being
+    // promoted after scrolling back into view, or a new stream chunk arrived
+    // for it): pull it out, it now (re-)enters the animation-frame tier.
+    idleQueue.delete(host);
     // Append to the queue; a no-op if the host is already queued, which
     // preserves its current position (a `Set` keeps insertion order).
     renderQueue.add(host);
@@ -1743,7 +1807,7 @@ namespace Private {
       // distinguish real starvation from queue waiting.
       lastAnimationFrameTime = timestamp;
       cancelRenderingRequest(host);
-      render(timestamp, false);
+      render(timestamp, FrameInvocation.animation);
     });
     frameRequests.set(host, thisRequest);
   }
@@ -1754,10 +1818,125 @@ namespace Private {
 
   export function removeFromQueue(host: HTMLElement) {
     renderQueue.delete(host);
+    idleQueue.delete(host);
   }
 
   export function hasNewRenderingRequest(host: HTMLElement) {
     return frameRequests.get(host);
+  }
+
+  /**
+   * Background (idle) rendering tier: hosts which have painted but are
+   * currently off-screen. They keep making progress during browser idle
+   * periods instead of competing with visible outputs for animation frames -
+   * so scrolling later lands on already-rendered content - while the
+   * round-robin `renderQueue` stays reserved for on-screen hosts. Like the
+   * render queue, this is a `Set` used as a round-robin queue.
+   */
+  const idleQueue = new Set<HTMLElement>();
+
+  /**
+   * The frame renderer of each host currently parked in the idle tier.
+   */
+  const idleRenderers = new WeakMap<HTMLElement, FrameRenderer>();
+
+  /**
+   * Handle of the pending idle callback (or its timer fallback) driving the
+   * idle tier, if any. A single callback serves the whole tier.
+   */
+  let idlePumpHandle: number | null = null;
+
+  /**
+   * Period and per-slice budget (both in milliseconds) of the `setTimeout`
+   * fallback used in browsers without `requestIdleCallback` (Safari): the
+   * background tier advances for up to 10ms every 100ms, a ~10% duty cycle
+   * that keeps off-screen rendering cheap without stalling it entirely.
+   */
+  const idleFallbackPeriod = 100;
+  const idleFallbackBudget = 10;
+
+  /**
+   * `requestIdleCallback` with a `setTimeout` fallback emulating a fixed-size
+   * idle deadline.
+   */
+  const requestIdle: (callback: (deadline: IdleDeadline) => void) => number =
+    typeof requestIdleCallback === 'function'
+      ? callback => requestIdleCallback(callback)
+      : callback =>
+          window.setTimeout(() => {
+            const start = performance.now();
+            callback({
+              didTimeout: false,
+              timeRemaining: () =>
+                Math.max(0, idleFallbackBudget - (performance.now() - start))
+            });
+          }, idleFallbackPeriod);
+
+  /**
+   * Park a host in the background (idle) tier, leaving the animation-frame
+   * tier if it was in it. Its rendering continues in browser idle time until
+   * it completes, or until the host is promoted back (see `promoteFromIdle`)
+   * or removed (`removeFromQueue`).
+   */
+  export function scheduleIdleRendering(
+    host: HTMLElement,
+    render: FrameRenderer
+  ): void {
+    renderQueue.delete(host);
+    idleQueue.add(host);
+    idleRenderers.set(host, render);
+    ensureIdlePump();
+  }
+
+  /**
+   * Promote a host parked in the idle tier back to the animation-frame tier;
+   * a no-op if the host is not in the idle tier.
+   */
+  export function promoteFromIdle(
+    host: HTMLElement,
+    render: FrameRenderer
+  ): void {
+    if (!idleQueue.has(host)) {
+      return;
+    }
+    scheduleRendering(host, render);
+  }
+
+  /**
+   * Request an idle callback to drive the idle tier, unless one is already
+   * pending or there is nothing to drive.
+   *
+   * Note that without spare main-thread time the browser may delay the idle
+   * callback indefinitely; that is intended - background rendering should
+   * yield entirely to whatever is keeping the page busy. Hosts which become
+   * visible in the meantime are promoted eagerly by their intersection
+   * observers rather than waiting for an idle slice.
+   */
+  function ensureIdlePump(): void {
+    if (idlePumpHandle !== null || idleQueue.size === 0) {
+      return;
+    }
+    idlePumpHandle = requestIdle(deadline => {
+      idlePumpHandle = null;
+      // Round-robin over the background tier for as long as the browser
+      // reports spare time. A host which still has work re-enqueues itself at
+      // the back (via `scheduleIdleRendering`), preserving fairness while
+      // allowing several slices within one long idle period; a host which
+      // finishes (or moves tiers) leaves the queue, so the loop terminates.
+      while (idleQueue.size > 0 && deadline.timeRemaining() > 1) {
+        const host: HTMLElement = idleQueue.values().next().value!;
+        idleQueue.delete(host);
+        const render = idleRenderers.get(host);
+        if (render) {
+          render(
+            performance.now(),
+            FrameInvocation.idle,
+            deadline.timeRemaining()
+          );
+        }
+      }
+      ensureIdlePump();
+    });
   }
 
   /**
@@ -1790,8 +1969,8 @@ namespace Private {
 
   /**
    * Abort any in-flight incremental rendering for a host: cancel its pending
-   * frame and fallback watchdog, remove it from the render queue, and disconnect
-   * its observer.
+   * frame and fallback watchdog, remove it from the rendering queues (both the
+   * animation-frame and the idle tier), and disconnect its observer.
    */
   export function abortRendering(host: HTMLElement): void {
     cancelRenderingRequest(host);

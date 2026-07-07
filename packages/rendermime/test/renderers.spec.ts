@@ -217,6 +217,117 @@ describe('@jupyterlab/rendermime', () => {
       expect(disconnect).toHaveBeenCalledTimes(2);
     });
 
+    it('keeps auto-linking an off-screen output in the background during idle time', async () => {
+      // Once an output has painted and scrolls off-screen, it is parked in the
+      // background tier: it must stop consuming animation frames (previously
+      // it kept re-scheduling frames at the display refresh rate without doing
+      // any work), yet still make progress during browser idle time
+      // (requestIdleCallback, or its timer fallback) until fully rendered - so
+      // that scrolling back lands on already-linkified content and the
+      // pipeline reaches quiescence.
+      let observerCallback: IntersectionObserverCallback | undefined;
+      jest
+        .spyOn(window, 'IntersectionObserver')
+        .mockImplementation((cb: IntersectionObserverCallback) => {
+          observerCallback = cb;
+          return {
+            observe: () => undefined,
+            unobserve: () => undefined,
+            disconnect: () => undefined,
+            takeRecords: () => []
+          } as unknown as IntersectionObserver;
+        });
+      const raf = jest.spyOn(window, 'requestAnimationFrame');
+
+      // Exhaust the first frame's budget after a single word fragment ('see')
+      // so that linkification of the URL is still pending when the output
+      // goes off-screen; later slices get an effectively unlimited budget.
+      let calls = 0;
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => {
+        calls += 1;
+        clock += calls <= 2 ? 1000 : 0.01;
+        return clock;
+      });
+
+      const sanitizer = new Sanitizer();
+      await renderText({ host, sanitizer, source: 'see www.example.com more' });
+
+      // First frame: the full text paints, but the URL is not linkified yet.
+      jest.advanceTimersByTime(16);
+      expect(host.textContent).toBe('see www.example.com more');
+      expect(host.querySelectorAll('a')).toHaveLength(0);
+
+      // The output scrolls off-screen; the next animation frame parks it in
+      // the background tier.
+      observerCallback!(
+        [{ isIntersecting: false } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+      jest.advanceTimersByTime(16);
+      const rafCallsWhenParked = raf.mock.calls.length;
+
+      // Background (idle) slices finish the auto-linking without a single
+      // further animation frame being requested.
+      jest.advanceTimersByTime(300);
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+      expect(raf.mock.calls.length).toBe(rafCallsWhenParked);
+
+      // The pipeline is quiescent: no frame requests, no idle slices pending.
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('promotes an off-screen output back to animation frames when it becomes visible', async () => {
+      // A host parked in the background tier must resume at full rate as soon
+      // as it scrolls back into view, without waiting for the browser to go
+      // idle (idle callbacks can be delayed indefinitely on a busy page).
+      let observerCallback: IntersectionObserverCallback | undefined;
+      jest
+        .spyOn(window, 'IntersectionObserver')
+        .mockImplementation((cb: IntersectionObserverCallback) => {
+          observerCallback = cb;
+          return {
+            observe: () => undefined,
+            unobserve: () => undefined,
+            disconnect: () => undefined,
+            takeRecords: () => []
+          } as unknown as IntersectionObserver;
+        });
+
+      // Same budget shape as above: one word in the first frame, unlimited
+      // afterwards.
+      let calls = 0;
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => {
+        calls += 1;
+        clock += calls <= 2 ? 1000 : 0.01;
+        return clock;
+      });
+
+      const sanitizer = new Sanitizer();
+      await renderText({ host, sanitizer, source: 'see www.example.com more' });
+
+      // Paint the first frame, then park the host in the background tier.
+      jest.advanceTimersByTime(16);
+      observerCallback!(
+        [{ isIntersecting: false } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+      jest.advanceTimersByTime(16);
+      expect(host.querySelectorAll('a')).toHaveLength(0);
+
+      // The output scrolls back into view: rendering completes on animation
+      // frames, well before the first background (idle) slice - which in the
+      // requestIdleCallback fallback would only run after 100ms - could fire.
+      observerCallback!(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+      jest.advanceTimersByTime(48);
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+      expect(host.querySelector('a')!.textContent).toBe('www.example.com');
+    });
+
     it('renders synchronously when incremental auto-linking is disabled', async () => {
       const sanitizer = new Sanitizer();
       // Escape hatch: fall back to the legacy synchronous pipeline.
