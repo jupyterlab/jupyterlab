@@ -153,6 +153,48 @@ describe('@jupyterlab/rendermime', () => {
       detached.remove();
     });
 
+    it('clears the first-paint watchdog when a never-attached host gives up', async () => {
+      // A host that is discarded before ever being attached (e.g. a completer
+      // documentation node replaced while typing) stops rendering after a
+      // bounded number of frames. The first-paint watchdog must be cleared on
+      // that path too. The leak only shows while animation frames keep being
+      // produced (a healthy foreground tab): the watchdog then never
+      // force-paints (it only acts under frame starvation) and instead keeps
+      // re-arming its timer - and strongly referencing the host - forever. A
+      // second, still-rendering host keeps the frames alive here; without it
+      // the very next tick would see the frames as starved, force-paint into
+      // the give-up path and dissolve on its own, masking the leak.
+      const sanitizer = new Sanitizer();
+      const neverAttached = document.createElement('div');
+      const laterStarted = document.createElement('div');
+
+      void renderText({
+        host: neverAttached,
+        sanitizer,
+        source: 'see www.example.com here'
+      });
+
+      // Let the first render burn through half of its allotted frames, then
+      // start the second one so that it is still producing frames (each host
+      // gets ~1000 frames at ~16ms per fake-timer frame) when the first gives
+      // up.
+      jest.advanceTimersByTime(8000);
+      void renderText({
+        host: laterStarted,
+        sanitizer,
+        source: 'other www.example.org output'
+      });
+
+      // Advance to a point where the first render has given up while the
+      // second is still running.
+      jest.advanceTimersByTime(13000);
+      expect(neverAttached.textContent).toBe('');
+
+      // Only the second render's timers may remain: its frame request and its
+      // watchdog. A third pending timer is the first render's leaked watchdog.
+      expect(jest.getTimerCount()).toBe(2);
+    });
+
     it('does not leak intersection observers while streaming', async () => {
       const disconnect = jest.spyOn(
         window.IntersectionObserver.prototype,

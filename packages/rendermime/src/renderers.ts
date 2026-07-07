@@ -944,6 +944,14 @@ function renderTextual(
     if (observer) {
       Private.unregisterObserver(host, observer);
     }
+    // Clear the first-paint watchdog: rendering is over for this host, so
+    // there is nothing left to force-paint. On paths that painted this is a
+    // no-op (the watchdog is cleared on first paint); it matters for renders
+    // which stop without ever painting (a host discarded before being
+    // attached), where a stale watchdog would otherwise keep re-arming its
+    // timer - and strongly referencing the host - for as long as animation
+    // frames keep being produced.
+    Private.clearFallbackWatchdog(host);
     // Resolve the completion promise now that rendering has finished.
     Private.settleRender(host);
     return RenderingResult.stop;
