@@ -4,6 +4,12 @@
 import { Sanitizer } from '@jupyterlab/apputils';
 import { renderText } from '@jupyterlab/rendermime';
 
+// Keep in sync with `AUTO_LINK_STRIDE` in `src/renderers.ts`: each incremental
+// auto-linking step advances to the first whitespace at or after this offset.
+// Tests that need a render to span several steps/frames pad their sources
+// beyond the stride.
+const STRIDE = 8192;
+
 describe('@jupyterlab/rendermime', () => {
   describe('renderText()', () => {
     let host: HTMLElement;
@@ -195,11 +201,23 @@ describe('@jupyterlab/rendermime', () => {
       expect(jest.getTimerCount()).toBe(2);
     });
 
-    it('does not leak intersection observers while streaming', async () => {
+    it('reuses a single persistent intersection observer while streaming', async () => {
       const disconnect = jest.spyOn(
         window.IntersectionObserver.prototype,
         'disconnect'
       );
+      // Count constructions; the pass-through implementation is needed because
+      // the environment's IntersectionObserver is a class (jest's default
+      // pass-through would invoke it without `new`).
+      const RealIntersectionObserver = window.IntersectionObserver;
+      const ctor = jest
+        .spyOn(window, 'IntersectionObserver')
+        .mockImplementation(
+          (
+            callback: IntersectionObserverCallback,
+            options?: IntersectionObserverInit
+          ) => new RealIntersectionObserver(callback, options)
+        );
       const sanitizer = new Sanitizer();
 
       // Simulate three stream chunks arriving before any frame is rendered
@@ -212,9 +230,10 @@ describe('@jupyterlab/rendermime', () => {
         source: 'aaa www.example.com bbb www.example.org'
       });
 
-      // The observers of the two superseded renders must have been disconnected;
-      // previously one observer was leaked per stream chunk.
-      expect(disconnect).toHaveBeenCalledTimes(2);
+      // A single observer is created on the first chunk and reused afterwards;
+      // previously each chunk created (and had to disconnect) its own.
+      expect(ctor).toHaveBeenCalledTimes(1);
+      expect(disconnect).not.toHaveBeenCalled();
     });
 
     it('keeps auto-linking an off-screen output in the background during idle time', async () => {
@@ -239,9 +258,10 @@ describe('@jupyterlab/rendermime', () => {
         });
       const raf = jest.spyOn(window, 'requestAnimationFrame');
 
-      // Exhaust the first frame's budget after a single word fragment ('see')
-      // so that linkification of the URL is still pending when the output
-      // goes off-screen; later slices get an effectively unlimited budget.
+      // Exhaust the first frame's budget after a single auto-linking step (the
+      // stride-sized padding before the URL) so that linkification of the URL
+      // is still pending when the output goes off-screen; later slices get an
+      // effectively unlimited budget.
       let calls = 0;
       let clock = 0;
       jest.spyOn(performance, 'now').mockImplementation(() => {
@@ -251,11 +271,12 @@ describe('@jupyterlab/rendermime', () => {
       });
 
       const sanitizer = new Sanitizer();
-      await renderText({ host, sanitizer, source: 'see www.example.com more' });
+      const source = `${'x'.repeat(STRIDE + 8)} www.example.com more`;
+      await renderText({ host, sanitizer, source });
 
       // First frame: the full text paints, but the URL is not linkified yet.
       jest.advanceTimersByTime(16);
-      expect(host.textContent).toBe('see www.example.com more');
+      expect(host.textContent).toBe(source);
       expect(host.querySelectorAll('a')).toHaveLength(0);
 
       // The output scrolls off-screen; the next animation frame parks it in
@@ -294,8 +315,8 @@ describe('@jupyterlab/rendermime', () => {
           } as unknown as IntersectionObserver;
         });
 
-      // Same budget shape as above: one word in the first frame, unlimited
-      // afterwards.
+      // Same budget shape as above: one auto-linking step in the first frame,
+      // unlimited afterwards.
       let calls = 0;
       let clock = 0;
       jest.spyOn(performance, 'now').mockImplementation(() => {
@@ -305,7 +326,8 @@ describe('@jupyterlab/rendermime', () => {
       });
 
       const sanitizer = new Sanitizer();
-      await renderText({ host, sanitizer, source: 'see www.example.com more' });
+      const source = `${'x'.repeat(STRIDE + 8)} www.example.com more`;
+      await renderText({ host, sanitizer, source });
 
       // Paint the first frame, then park the host in the background tier.
       jest.advanceTimersByTime(16);
@@ -356,20 +378,21 @@ describe('@jupyterlab/rendermime', () => {
       // rather than bailing out, otherwise the next frame throws.
       const sanitizer = new Sanitizer();
 
-      // Force the 10ms per-frame budget to be exceeded after each fragment so
-      // the render spans several frames, with the first boundary landing right
-      // after the URL `www.example.com`.
+      // Force the 10ms per-frame budget to be exceeded after each auto-linking
+      // step so the render spans several frames.
       let clock = 0;
       jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
 
-      await renderText({
-        host,
-        sanitizer,
-        source: 'www.example.com and more text'
-      });
+      // Place the URL so that the first step's break point (the first
+      // whitespace at or after the stride) is the space right after the URL:
+      // the space before the URL falls at `STRIDE - 7 < STRIDE`, the URL spans
+      // the stride offset, and the next whitespace follows the URL.
+      const padding = 'y'.repeat(STRIDE - 7);
+      const source = `${padding} www.example.com and more text`;
+      await renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
-      expect(host.textContent).toBe('www.example.com and more text');
+      expect(host.textContent).toBe(source);
       const anchors = host.querySelectorAll('a');
       expect(anchors).toHaveLength(1);
       expect(anchors[0].textContent).toBe('www.example.com');
@@ -407,9 +430,10 @@ describe('@jupyterlab/rendermime', () => {
       // cache records it as rendered, so it would never be retried).
       const sanitizer = new Sanitizer();
 
-      // Exhaust the first frame's time budget after a single word fragment
-      // ('see'), so the colored URL paints unlinked; subsequent frames get an
-      // effectively unlimited budget and complete the auto-linking.
+      // Exhaust the first frame's time budget after a single auto-linking step
+      // (the stride-sized padding before the URL), so the colored URL paints
+      // unlinked; subsequent frames get an effectively unlimited budget and
+      // complete the auto-linking.
       let calls = 0;
       let clock = 0;
       jest.spyOn(performance, 'now').mockImplementation(() => {
@@ -419,14 +443,15 @@ describe('@jupyterlab/rendermime', () => {
         return clock;
       });
 
+      const padding = 'x'.repeat(STRIDE + 8);
       await renderText({
         host,
         sanitizer,
-        source: 'see \x1b[0;31mwww.example.com\x1b[0m more'
+        source: `${padding} \x1b[0;31mwww.example.com\x1b[0m more`
       });
       jest.runAllTimers();
 
-      expect(host.textContent).toBe('see www.example.com more');
+      expect(host.textContent).toBe(`${padding} www.example.com more`);
       const anchors = host.querySelectorAll('a');
       expect(anchors).toHaveLength(1);
       expect(anchors[0].textContent).toBe('www.example.com');

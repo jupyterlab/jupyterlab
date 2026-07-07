@@ -845,6 +845,25 @@ function nativeSanitize(source: string): string {
 const ansiPrefix = '\x1b';
 
 /**
+ * Minimum number of characters an incremental auto-linking step advances by;
+ * each step extends to the first safe break point (see `autoLinkBreak`) at or
+ * after this offset. Advancing by a sizable stride rather than a single word
+ * amortizes the per-step overhead - cache lookup, prefix verification and
+ * node-array copying - over much more text; the per-frame time budget still
+ * decides how many steps run in one frame.
+ */
+const AUTO_LINK_STRIDE = 8192;
+
+/**
+ * Matches a whitespace character preceded by a non-space character - a safe
+ * point to split text for incremental auto-linking, as a URL never spans
+ * whitespace. The `g` flag makes `lastIndex` the search start position,
+ * letting the search begin at `AUTO_LINK_STRIDE` without slicing the string
+ * (the lookbehind may inspect characters before `lastIndex`).
+ */
+const autoLinkBreak = /(?<=\S)\s/g;
+
+/**
  * Enum used exclusively for static analysis to ensure that each
  * branch in `renderFrame` leads to explicit rendering decision.
  */
@@ -939,16 +958,6 @@ function renderTextual(
   let fullPreTextContent: string | null = null;
   let pre: HTMLPreElement;
 
-  // We use the observer to deprioritize rendering while the output is
-  // off-screen: work continues in the background (idle) tier at a reduced rate
-  // rather than competing with visible outputs for animation frames. This is
-  // helpful when opening a notebook with a large number of large textual
-  // outputs. The initial value is optimistic (visible) so that the first paint
-  // is not held back waiting for the asynchronous observer callback; the
-  // observer then demotes further work (e.g. auto-linking) should the output
-  // turn out to be off-screen.
-  let isVisible = true;
-
   // Number of frames for which rendering has been delayed because the host is
   // not yet attached to the DOM (see the `!host.isConnected` handling below).
   // Bounded so that a host that is disposed before ever attaching does not keep
@@ -956,36 +965,21 @@ function renderTextual(
   let disconnectedAttempts = 0;
   const maxDisconnectedAttempts = 1000;
 
-  let observer: IntersectionObserver | null = null;
-  if (typeof IntersectionObserver !== 'undefined') {
-    observer = new IntersectionObserver(
-      entries => {
-        for (const entry of entries) {
-          isVisible = entry.isIntersecting;
-        }
-        if (isVisible) {
-          // The host may have been parked in the background tier while it was
-          // off-screen; promote it eagerly so rendering resumes at full rate
-          // now that it is visible, rather than waiting for the browser to go
-          // idle (idle callbacks can be delayed indefinitely on a busy page,
-          // e.g. while the user is scrolling through a heavy notebook).
-          Private.promoteFromIdle(host, renderFrame);
-        }
-      },
-      { threshold: 0 }
-    );
-    observer.observe(host);
-    // Disconnect any observer left behind by a superseded render for this host.
-    Private.registerObserver(host, observer);
-  }
+  // Observe visibility (lazily - one persistent observer per host, not one per
+  // render, which with streamed outputs would mean one per chunk): rendering is
+  // deprioritized while the output is off-screen - work continues in the
+  // background (idle) tier at a reduced rate rather than competing with
+  // visible outputs for animation frames - and the observer promotes the host
+  // back as soon as it returns into view. Until the asynchronous observer
+  // callback first delivers, visibility is optimistically assumed (see
+  // `isHostVisible`) so the first paint is not held back.
+  Private.observeVisibility(host);
 
   const stopRendering = () => {
-    // Remove the host from rendering queue
+    // Remove the host from rendering queue. The visibility observer is left in
+    // place - it is persistent per host (see `observeVisibility`), so that
+    // subsequent renders (e.g. further stream chunks) reuse it.
     Private.removeFromQueue(host);
-    // Disconnect the intersection observer.
-    if (observer) {
-      Private.unregisterObserver(host, observer);
-    }
     // Clear the first-paint watchdog: rendering is over for this host, so
     // there is nothing left to force-paint. On paths that painted this is a
     // no-op (the watchdog is cleared on first paint); it matters for renders
@@ -1005,7 +999,7 @@ function renderTextual(
   // everything else (visible hosts, and hosts awaiting their first paint or
   // attachment) goes through the animation-frame render queue.
   const scheduleNextFrame = () => {
-    if (!isVisible && Private.hasPainted(host)) {
+    if (!Private.isHostVisible(host) && Private.hasPainted(host)) {
       Private.scheduleIdleRendering(host, renderFrame);
     } else {
       Private.scheduleRendering(host, renderFrame);
@@ -1080,7 +1074,7 @@ function renderTextual(
     // exists precisely to run work for off-screen hosts, outside the queue.
     if (
       invocation === FrameInvocation.animation &&
-      ((!isVisible && Private.hasPainted(host)) ||
+      ((!Private.isHostVisible(host) && Private.hasPainted(host)) ||
         !Private.canRenderInFrame(timestamp, host))
     ) {
       return delayRendering();
@@ -1151,8 +1145,12 @@ function renderTextual(
     let newRequest: number | undefined;
 
     do {
-      // find first space (or equivalent) which follows a non-space character.
-      const breakIndex = toBeAutoLinked.search(/(?<=\S)\s/);
+      // Find a safe break point: the first whitespace (following a non-space
+      // character) at or after the stride, so that each step advances by at
+      // least `AUTO_LINK_STRIDE` characters instead of a single word.
+      autoLinkBreak.lastIndex = AUTO_LINK_STRIDE;
+      const breakMatch = autoLinkBreak.exec(toBeAutoLinked);
+      const breakIndex = breakMatch ? breakMatch.index : -1;
 
       const before =
         breakIndex === -1
@@ -1892,14 +1890,14 @@ namespace Private {
    * Promote a host parked in the idle tier back to the animation-frame tier;
    * a no-op if the host is not in the idle tier.
    */
-  export function promoteFromIdle(
-    host: HTMLElement,
-    render: FrameRenderer
-  ): void {
+  function promoteFromIdle(host: HTMLElement): void {
     if (!idleQueue.has(host)) {
       return;
     }
-    scheduleRendering(host, render);
+    const render = idleRenderers.get(host);
+    if (render) {
+      scheduleRendering(host, render);
+    }
   }
 
   /**
@@ -1940,31 +1938,61 @@ namespace Private {
   }
 
   /**
-   * Intersection observers tracked per host.
+   * Per-host visibility as last reported by the persistent intersection
+   * observer (see `observeVisibility`). Hosts without an entry are assumed
+   * visible: this keeps the first paint optimistic (an unpainted host has no
+   * content and, with `contain: style layout`, zero height - so the observer
+   * would report it as not intersecting even inside the viewport) and errs
+   * towards rendering at full rate.
+   */
+  const hostVisibility = new WeakMap<HTMLElement, boolean>();
+
+  export function isHostVisible(host: HTMLElement): boolean {
+    return hostVisibility.get(host) ?? true;
+  }
+
+  /**
+   * Persistent intersection observers, one per host.
    *
-   * Storing them here allows disconnecting an observer left behind by a
-   * superseded render (e.g. when a new stream chunk cancels a pending frame
-   * before it had a chance to disconnect its own observer) instead of leaking
-   * one observer per stream chunk.
+   * An observer is created lazily on the first render for a host and then
+   * kept for the host's lifetime, so that subsequent renders (with streamed
+   * outputs: every chunk) reuse it instead of paying for an
+   * observe/disconnect cycle each. No explicit disconnection is needed:
+   * observation targets are held weakly (they do not prevent the host from
+   * being garbage collected), and this `WeakMap` keeps the observer itself
+   * alive only as long as its host.
    */
   const hostObservers = new WeakMap<HTMLElement, IntersectionObserver>();
 
-  export function registerObserver(
-    host: HTMLElement,
-    observer: IntersectionObserver
-  ): void {
-    hostObservers.get(host)?.disconnect();
-    hostObservers.set(host, observer);
-  }
-
-  export function unregisterObserver(
-    host: HTMLElement,
-    observer: IntersectionObserver
-  ): void {
-    observer.disconnect();
-    if (hostObservers.get(host) === observer) {
-      hostObservers.delete(host);
+  /**
+   * Start observing the visibility of a host, unless it is already observed.
+   *
+   * Besides recording visibility (see `isHostVisible`), the observer promotes
+   * the host out of the background (idle) tier as soon as it comes back into
+   * view, so rendering resumes at full rate without waiting for an idle slice
+   * (idle callbacks can be delayed indefinitely on a busy page, e.g. while
+   * the user is scrolling through a heavy notebook).
+   */
+  export function observeVisibility(host: HTMLElement): void {
+    if (
+      typeof IntersectionObserver === 'undefined' ||
+      hostObservers.has(host)
+    ) {
+      return;
     }
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          hostVisibility.set(host, entry.isIntersecting);
+        }
+        if (isHostVisible(host)) {
+          promoteFromIdle(host);
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(host);
+    hostObservers.set(host, observer);
   }
 
   /**
@@ -1978,6 +2006,7 @@ namespace Private {
     removeFromQueue(host);
     hostObservers.get(host)?.disconnect();
     hostObservers.delete(host);
+    hostVisibility.delete(host);
   }
 
   /**
