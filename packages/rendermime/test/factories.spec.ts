@@ -1141,12 +1141,23 @@ describe('rendermime/factories', () => {
 
           expect(cachedLink).not.toBe(null);
           expect(cachedLink!.textContent).toEqual('www.example.co');
-          expect(cachedLink).not.toHaveProperty('wasCloned');
 
-          // If cached links were reused those would be cloned
           expect(linkAfter).not.toBe(null);
           expect(linkAfter!.textContent).toEqual('www.example.com');
-          expect(linkAfter).not.toHaveProperty('wasCloned');
+
+          // In the synchronous pipeline the clone marker distinguishes a
+          // reused cached link (cloned) from a freshly re-analyzed one: the
+          // appended character extends the URL, so the stale cached anchor
+          // must not be reused. The incremental pipeline keeps its working
+          // nodes out of the DOM and always renders clones of them, so the
+          // marker carries no signal there; the `textContent` assertions
+          // above cover the intent for both pipelines.
+          if (!incremental) {
+            /* eslint-disable jest/no-conditional-expect */
+            expect(cachedLink).not.toHaveProperty('wasCloned');
+            expect(linkAfter).not.toHaveProperty('wasCloned');
+            /* eslint-enable jest/no-conditional-expect */
+          }
         });
 
         it('should use partial cache if a link is created by addition of a new fragment', async () => {

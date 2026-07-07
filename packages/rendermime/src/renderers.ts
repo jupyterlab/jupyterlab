@@ -958,18 +958,26 @@ function renderTextual(
   let fullPreTextContent: string | null = null;
   let pre: HTMLPreElement;
 
-  // Auto-linking progress, carried across frames: the already-linkified prefix
-  // and the remaining text. Persisting these in the closure (rather than
-  // re-deriving them from the auto-link cache each frame, which drops and
-  // re-analyses the trailing cached node) guarantees strictly monotonic
-  // progress: without it, a frame whose budget is exhausted by a single step
-  // over a large trailing node (e.g. a huge whitespace-free token) would redo
-  // exactly the same work on the next frame, forever. The cache is still
-  // consulted once, on the first working frame, to reuse the results of a
-  // previous render for this host (i.e. the preceding stream chunk).
+  // Auto-linking progress, carried across frames: the already-linkified prefix,
+  // the remaining text, and the linkified nodes produced so far. Persisting
+  // these in the closure (rather than re-deriving them from the auto-link
+  // cache on every step and frame) guarantees strictly monotonic progress -
+  // without it, a frame whose budget is exhausted by a single step over a
+  // large trailing node (e.g. a huge whitespace-free token) would redo exactly
+  // the same work on the next frame, forever - and avoids paying a
+  // full-prefix cache validation per step. The cache is still consulted once,
+  // on the first working frame, to reuse the results of a previous render for
+  // this host (i.e. the preceding stream chunk).
+  //
+  // Aliasing contract for `linkedNodes`: these nodes are NEVER placed in the
+  // DOM - `mergeNodes` receives clones of them - so they stay pristine while
+  // components like search highlighting mutate the rendered DOM. The cache
+  // entry written at the end of each frame may therefore alias them without
+  // cloning: both are only ever read by this renderer.
   let autoLinkSeeded = false;
   let alreadyAutoLinked = '';
   let toBeAutoLinked = '';
+  let linkedNodes: (HTMLAnchorElement | Text)[] = [];
 
   // Number of frames for which rendering has been delayed because the host is
   // not yet attached to the DOM (see the `!host.isConnected` handling below).
@@ -1148,11 +1156,12 @@ function renderTextual(
       toBeAutoLinked = applicableCache
         ? applicableCache.addedText
         : fullPreTextContent;
+      // The previous render's nodes are dead (it can no longer run), so they
+      // can be adopted as this render's working nodes without cloning.
+      linkedNodes = applicableCache ? applicableCache.cachedNodes : [];
       autoLinkSeeded = true;
     }
     let moreWorkToBeDone: boolean;
-
-    let linkedNodes: (HTMLAnchorElement | Text)[];
     let elapsed: number;
     // Defensive only: the loop below runs synchronously, so nothing can
     // schedule a new frame while it is executing - a new stream chunk
@@ -1174,19 +1183,42 @@ function renderTextual(
           ? toBeAutoLinked
           : toBeAutoLinked.slice(0, breakIndex);
       const after = breakIndex === -1 ? '' : toBeAutoLinked.slice(breakIndex);
-      const fragment = alreadyAutoLinked + before;
-      linkedNodes = incrementalAutoLink(
-        cacheStore,
-        options,
-        autoLinkOptions,
-        fragment
-      );
-      alreadyAutoLinked = fragment;
+
+      // Linkify only this step's text and append to the running node list.
+      // Steps always split at whitespace, which a URL can never span, so the
+      // nodes from earlier steps stay valid as-is; adjacent Text nodes are
+      // merged to avoid unbounded fragmentation. (The seed boundary - where a
+      // new stream chunk may extend a URL from the previous chunk - is the one
+      // place a node can be invalidated, and is handled by
+      // `getApplicableLinkCache` when seeding above.)
+      const newAdditions = autolink(before, autoLinkOptions);
+      const lastNode = linkedNodes[linkedNodes.length - 1];
+      const firstNew = newAdditions[0];
+      if (lastNode instanceof Text && firstNew instanceof Text) {
+        lastNode.data += firstNew.data;
+        linkedNodes.push(...newAdditions.slice(1));
+      } else {
+        linkedNodes.push(...newAdditions);
+      }
+
+      alreadyAutoLinked += before;
       toBeAutoLinked = after;
       moreWorkToBeDone = toBeAutoLinked != '';
       elapsed = performance.now() - start;
       newRequest = Private.hasNewRenderingRequest(host);
     } while (elapsed < budget && moreWorkToBeDone && !newRequest);
+
+    // Persist this frame's progress for the next render of this host (i.e.
+    // the next stream chunk). No cloning: per the aliasing contract on
+    // `linkedNodes`, the working nodes never enter the DOM, so nothing outside
+    // this renderer (e.g. search highlighting, which mutates the rendered DOM)
+    // can touch them. The entry is consistent whenever it can be read - it is
+    // rewritten at the end of every frame, and reads only happen between
+    // frames.
+    cacheStore.set(host, {
+      preTextContent: alreadyAutoLinked,
+      linkedNodes
+    });
 
     // Note: we set `keepExisting` to `true` in `IRenderMime.IRenderer`s which
     // use this method to ensure that the previous node is not removed from DOM
@@ -1198,22 +1230,17 @@ function renderTextual(
         Private.replaceChangedNodes(host, pre);
       }
     } else {
-      // Persist nodes in cache by cloning them
-      cacheStore.set(host, {
-        preTextContent: alreadyAutoLinked,
-        // Clone the nodes before storing them in the cache in case if another component
-        // attempts to modify (e.g. dispose of) them - which is the case for search highlights!
-        linkedNodes: linkedNodes.map(
-          node => node.cloneNode(true) as HTMLAnchorElement | Text
-        )
-      });
-
       const preNodes = Array.from(pre.cloneNode(true).childNodes) as (
         | Text
         | HTMLSpanElement
       )[];
+      // Hand `mergeNodes` clones: it mutates its inputs (anchors are emptied
+      // and refilled with `<pre>` nodes) and its output enters the DOM, which
+      // other components mutate - the working nodes must stay pristine.
       const node = mergeNodes(preNodes, [
-        ...linkedNodes,
+        ...linkedNodes.map(
+          node => node.cloneNode(true) as HTMLAnchorElement | Text
+        ),
         document.createTextNode(toBeAutoLinked)
       ]);
 
