@@ -499,9 +499,17 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that
-are built in the dev-installed Python package. Note that when running in
-dev mode, extensions will not be activated by default - refer
-{ref}`documentation on extension development <prebuilt-dev-workflow>` to know more.
+are built in the dev-installed Python package. By default, extensions
+from labextension paths are not activated in dev mode. If you are testing
+changes to an extension package in `packages/`, you may need to start
+JupyterLab with:
+
+```bash
+jupyter lab --dev-mode --extensions-in-dev-mode
+```
+
+See {ref}`documentation on extension development <prebuilt-dev-workflow>`
+for more details.
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
