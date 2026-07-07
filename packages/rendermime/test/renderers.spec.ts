@@ -482,13 +482,14 @@ describe('@jupyterlab/rendermime', () => {
       const raf = jest.spyOn(window, 'requestAnimationFrame');
 
       // The first working frame of each output busts its budget after one
-      // step (two `performance.now` calls per frame, two frames), leaving the
-      // URLs unlinked; afterwards the budget is effectively unlimited.
+      // step (three `performance.now` calls per animation frame: start, the
+      // budget check, and the frame-end stamp; two frames), leaving the URLs
+      // unlinked; afterwards the budget is effectively unlimited.
       let calls = 0;
       let clock = 0;
       jest.spyOn(performance, 'now').mockImplementation(() => {
         calls += 1;
-        clock += calls <= 4 ? 1000 : 0.01;
+        clock += calls <= 6 ? 1000 : 0.01;
         return clock;
       });
 
@@ -528,6 +529,166 @@ describe('@jupyterlab/rendermime', () => {
 
       hostA.remove();
       hostB.remove();
+    });
+
+    it('never touches already-committed content on subsequent frames', async () => {
+      // The append-only commit path must leave committed (linkified) content
+      // alone: the anchor from an early frame stays the same DOM object, and
+      // foreign mutations of committed content - like the `<mark>` elements
+      // injected by search highlighting - survive later frames instead of
+      // being wiped by a rebuild.
+      const sanitizer = new Sanitizer();
+
+      // Every budget check fails: one auto-linking step per frame. The first
+      // step's break point lands right after the first URL.
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const source = `${'y'.repeat(STRIDE - 7)} www.example.com ${'z'.repeat(
+        STRIDE
+      )} www.example.org end`;
+      await renderText({ host, sanitizer, source });
+
+      // First frame: the first URL is committed.
+      jest.advanceTimersByTime(16);
+      const anchor = host.querySelector('a');
+      expect(anchor).not.toBeNull();
+      expect(anchor!.textContent).toBe('www.example.com');
+
+      // Simulate search highlighting inside the committed region: split the
+      // leading committed text node and wrap a piece in a `<mark>`.
+      const pre = host.querySelector('pre')!;
+      const committedText = pre.firstChild as Text;
+      const piece = committedText.splitText(2);
+      const mark = document.createElement('mark');
+      pre.replaceChild(mark, piece);
+      mark.appendChild(piece);
+
+      // Let the render complete.
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      const anchors = host.querySelectorAll('a');
+      expect(anchors).toHaveLength(2);
+      // Identity: the committed anchor was never replaced.
+      expect(anchors[0]).toBe(anchor);
+      // The highlight survived the remaining frames.
+      expect(mark.isConnected).toBe(true);
+    });
+
+    it('recovers when another component mutates the not-yet-rendered tail', async () => {
+      // Nodes tracked by the renderer can be split or merged under it (search
+      // highlighting while a large output is still rendering). When its
+      // bookkeeping no longer matches the DOM, the renderer must rebuild and
+      // still produce the correct final output rather than crash or corrupt.
+      const sanitizer = new Sanitizer();
+
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const source = `${'y'.repeat(STRIDE - 7)} www.example.com ${'z'.repeat(
+        STRIDE
+      )} www.example.org end`;
+      await renderText({ host, sanitizer, source });
+      jest.advanceTimersByTime(16);
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+
+      // Simulate search highlighting inside the tail: split the last tail
+      // segment and wrap a piece of it in a `<mark>`.
+      const pre = host.querySelector('pre')!;
+      const tailText = pre.lastChild as Text;
+      const piece = tailText.splitText(4);
+      const mark = document.createElement('mark');
+      pre.replaceChild(mark, piece);
+      mark.appendChild(piece);
+
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      expect(host.querySelectorAll('a')).toHaveLength(2);
+    });
+
+    it('shows ANSI colors in not-yet-linkified tail content', async () => {
+      // The tail (text painted but not yet linkified) is derived from the
+      // source-formatted nodes, so ANSI coloring must be visible from the
+      // first paint rather than popping in when auto-linking reaches it.
+      const sanitizer = new Sanitizer();
+
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const padding = 'x'.repeat(STRIDE + 8);
+      const source = `${padding} \x1b[0;31mcolored www.example.com\x1b[0m`;
+      await renderText({ host, sanitizer, source });
+
+      // First frame: only the padding is committed; the colored region is
+      // still tail - yet its span (with the ANSI class) must be present.
+      jest.advanceTimersByTime(16);
+      expect(host.querySelectorAll('a')).toHaveLength(0);
+      const tailSpan = host.querySelector('pre span');
+      expect(tailSpan).not.toBeNull();
+      expect(tailSpan!.textContent).toContain('colored');
+
+      jest.runAllTimers();
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+      // The coloring is preserved within the link.
+      expect(host.querySelector('a span')).not.toBeNull();
+    });
+
+    it('appends streamed chunks to the existing DOM across renders', async () => {
+      // Consecutive renders (stream chunks) adopt the live DOM of the
+      // previous one: content before the re-analyzed trailing region is not
+      // rebuilt, so its nodes keep their identity across chunks.
+      const sanitizer = new Sanitizer();
+
+      await renderText({ host, sanitizer, source: 'line1 www.a.com\n' });
+      jest.runAllTimers();
+      const firstAnchor = host.querySelector('a');
+      expect(firstAnchor!.textContent).toBe('www.a.com');
+
+      // Newline chunk boundary: nothing needs re-analysis.
+      await renderText({
+        host,
+        sanitizer,
+        source: 'line1 www.a.com\nline2 www.'
+      });
+      jest.runAllTimers();
+
+      // Mid-link chunk boundary: `www.` + `b.com` must form one link, which
+      // requires trimming the trailing committed region back - but not the
+      // first line.
+      await renderText({
+        host,
+        sanitizer,
+        source: 'line1 www.a.com\nline2 www.b.com end'
+      });
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe('line1 www.a.com\nline2 www.b.com end');
+      const anchors = host.querySelectorAll('a');
+      expect(anchors).toHaveLength(2);
+      expect(anchors[1].textContent).toBe('www.b.com');
+      // The first line was never rebuilt.
+      expect(anchors[0]).toBe(firstAnchor);
+    });
+
+    it('leaves the DOM untouched when re-rendering identical content', async () => {
+      const sanitizer = new Sanitizer();
+      // A trailing newline shields the last node from re-analysis, so a
+      // re-render with identical content is a complete no-op.
+      const source = 'see www.example.com\n';
+
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+      const preBefore = host.querySelector('pre');
+      const anchorBefore = host.querySelector('a');
+
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      expect(host.querySelector('pre')).toBe(preBefore);
+      expect(host.querySelector('a')).toBe(anchorBefore);
     });
 
     it('keeps a single anchor when a streamed URL grows by appended path characters', async () => {

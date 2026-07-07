@@ -906,6 +906,139 @@ type FrameRenderer = (
 ) => RenderingResult;
 
 /**
+ * Upper bound (in milliseconds) for the adaptive per-frame auto-linking
+ * budget.
+ *
+ * The default 10ms budget assumes frames are otherwise cheap. For very large
+ * outputs the browser-side cost of a frame - style recalculation, layout and
+ * paint of the content shifted by the newly inserted nodes - can reach
+ * hundreds of milliseconds, and the total rendering cost is then governed by
+ * the *number* of frames rather than the work done in each. When that happens
+ * the budget is scaled up towards the observed frame overhead (capped here),
+ * so that expensive layout passes are paid fewer times; outputs with cheap
+ * frames keep the responsive default.
+ */
+const MAX_FRAME_BUDGET = 200;
+
+/**
+ * Maximum number of characters per tail segment in the live render DOM.
+ *
+ * The not-yet-linkified remainder ("tail") of an output is kept as a series of
+ * separate nodes so that consuming text from its front - which happens on
+ * every frame - only touches nodes of bounded size, instead of rewriting one
+ * huge text node whose layout cost would be proportional to everything that
+ * remains.
+ */
+const TAIL_SEGMENT_MAX = 16384;
+
+/**
+ * A segment of the not-yet-linkified tail in the live render DOM.
+ */
+interface ITailSegment {
+  /**
+   * The live node: Text, or an ANSI-colored `<span>` piece, so the tail shows
+   * source formatting before it has been linkified.
+   */
+  node: Text | HTMLSpanElement;
+  /**
+   * The number of characters the node is expected to hold. Compared against
+   * the actual length before the segment is touched: a mismatch means another
+   * component (e.g. search highlighting) mutated it, which triggers a rebuild
+   * of the live DOM.
+   */
+  length: number;
+}
+
+/**
+ * Live DOM state of an incrementally rendered output, kept per host across
+ * frames and across renders (i.e. stream chunks).
+ *
+ * The `<pre>` holds two regions: `[0, committedLength)` is merged, linkified
+ * content which is never touched again - so e.g. search highlights applied to
+ * it survive subsequent frames - and the tail segments cover
+ * `[committedLength, fullText.length)` with source-formatted plain text. Each
+ * frame consumes segments from the front of the tail and replaces them with
+ * merged (linkified) nodes appended to the committed region; per-frame DOM
+ * work is thereby proportional to the text processed in that frame, not to
+ * the total size of the output.
+ */
+interface ILiveRenderState {
+  /**
+   * The live `<pre>` element, child of the host.
+   */
+  pre: HTMLPreElement;
+  /**
+   * The full source text (as rendered, i.e. with ANSI codes stripped) that
+   * the live DOM represents.
+   */
+  fullText: string;
+  /**
+   * Number of characters (from the start) covered by committed - merged and
+   * linkified - content.
+   */
+  committedLength: number;
+  /**
+   * Tail segments; entries before `tailIndex` are already consumed.
+   */
+  tail: ITailSegment[];
+  /**
+   * Index of the first tail segment not yet consumed.
+   */
+  tailIndex: number;
+}
+
+/**
+ * Create a detached copy of the `[from, to)` character range of a shallow
+ * node (Text, or an ANSI `<span>`, whose attributes are preserved).
+ */
+function sliceNodePiece(
+  node: Text | HTMLSpanElement,
+  from: number,
+  to: number
+): Text | HTMLSpanElement {
+  const text = (node.textContent ?? '').slice(from, to);
+  if (node instanceof Text) {
+    return document.createTextNode(text);
+  }
+  const piece = node.cloneNode(false) as HTMLSpanElement;
+  piece.textContent = text;
+  return piece;
+}
+
+/**
+ * Build detached tail segments covering the `[from, to)` character range of
+ * the pristine source `<pre>`, splitting anything larger than
+ * `TAIL_SEGMENT_MAX`.
+ */
+function buildTailSegments(
+  sourcePre: HTMLPreElement,
+  from: number,
+  to: number
+): ITailSegment[] {
+  const segments: ITailSegment[] = [];
+  let offset = 0;
+  for (const child of sourcePre.childNodes) {
+    if (offset >= to) {
+      break;
+    }
+    // Only Text and `<span>` nodes are present after sanitization.
+    const node = child as Text | HTMLSpanElement;
+    const length = node.textContent?.length ?? 0;
+    const start = Math.max(from, offset);
+    const end = Math.min(to, offset + length);
+    for (let at = start; at < end; at += TAIL_SEGMENT_MAX) {
+      const pieceEnd = Math.min(end, at + TAIL_SEGMENT_MAX);
+      segments.push({
+        node: sliceNodePiece(node, at - offset, pieceEnd - offset),
+        length: pieceEnd - at
+      });
+    }
+    offset += length;
+  }
+  return segments;
+}
+
+/**
  * Render the textual representation into a host node.
  *
  * Implements the shared logic for `renderText` and `renderError`.
@@ -951,7 +1084,10 @@ function renderTextual(
   // screen.
   Private.cancelRenderingRequest(host);
 
-  // Stop rendering after 10 minutes (assuming 60 Hz)
+  // Stop rendering after 36000 frames: 10 minutes for a visible output
+  // (animation frames, assuming 60 Hz); up to an hour for an out-of-view one
+  // (background-tier slices arrive at most every 100ms in the idle fallback,
+  // see `idleFallbackPeriod`).
   const maxIterations = 60 * 60 * 10;
   let iteration = 0;
 
@@ -978,6 +1114,25 @@ function renderTextual(
   let alreadyAutoLinked = '';
   let toBeAutoLinked = '';
   let linkedNodes: (HTMLAnchorElement | Text)[] = [];
+
+  // The live DOM state this render commits into (see `ILiveRenderState`),
+  // established (adopted from the previous render, or built fresh) on the
+  // first working frame.
+  let liveState: ILiveRenderState | null = null;
+
+  // Commit cursor into `linkedNodes`: everything before
+  // (`workingIndex`, `workingOffset`) has been committed to the live DOM.
+  // The offset may sit at the current end of a node: a committed Text node
+  // can still grow afterwards (adjacent-Text join in the step loop), in which
+  // case the next commit resumes inside it.
+  let workingIndex = 0;
+  let workingOffset = 0;
+
+  // When the previous animation frame of this render finished its work (in
+  // the `performance.now()` time domain). The gap between it and the next
+  // frame's timestamp estimates the browser-side (style/layout/paint) cost
+  // per frame, which drives the adaptive budget (see `MAX_FRAME_BUDGET`).
+  let lastFrameEnd = 0;
 
   // Number of frames for which rendering has been delayed because the host is
   // not yet attached to the DOM (see the `!host.isConnected` handling below).
@@ -1036,6 +1191,288 @@ function renderTextual(
   const delayRendering = () => {
     scheduleNextFrame();
     return RenderingResult.delay;
+  };
+
+  // ---------------------------------------------------------------------
+  // Live DOM commit (append-only).
+  //
+  // Frames advance the auto-linking progress (`alreadyAutoLinked` /
+  // `linkedNodes`); the functions below transfer that progress into the live
+  // DOM by consuming source-formatted tail segments and replacing them with
+  // merged (linkified) nodes. Committed content is never touched again, so
+  // per-frame DOM work is proportional to the frame's progress - and foreign
+  // mutations of the committed region (e.g. search highlights) survive.
+  // ---------------------------------------------------------------------
+
+  /**
+   * Discard any adopted/previous DOM and rebuild the live `<pre>` from the
+   * pristine source: full text as tail segments, nothing committed. The
+   * fallback when no previous state exists or its bookkeeping no longer
+   * matches the DOM (foreign mutation).
+   */
+  const freshLiveState = () => {
+    const segments = buildTailSegments(pre, 0, fullPreTextContent!.length);
+    const live = document.createElement('pre');
+    for (const segment of segments) {
+      live.appendChild(segment.node);
+    }
+    Private.withSelectionPreserved(host, [host], () => {
+      host.replaceChildren(live);
+    });
+    liveState = {
+      pre: live,
+      fullText: fullPreTextContent!,
+      committedLength: 0,
+      tail: segments,
+      tailIndex: 0
+    };
+    // Everything needs (re-)committing.
+    workingIndex = 0;
+    workingOffset = 0;
+    Private.setLiveRenderState(host, liveState);
+  };
+
+  /**
+   * Adopt the live DOM left by the previous render of this host (the
+   * preceding stream chunk): trim the committed region back to the seeded
+   * progress (the seed re-analyses the trailing cached node, e.g. a URL the
+   * new chunk may extend), re-derive tail segments for the trimmed range, and
+   * append segments for the newly added text.
+   *
+   * @returns Whether adoption succeeded; on `false` the caller builds fresh.
+   */
+  const tryAdoptLiveState = (): boolean => {
+    const existing = Private.getLiveRenderState(host);
+    if (!existing || existing.pre.parentNode !== host) {
+      return false;
+    }
+    const fullText = fullPreTextContent!;
+    // The previous content must be a prefix of the new content; this also
+    // vouches for the (unvalidated-by-the-cache) tail region.
+    if (!fullText.startsWith(existing.fullText)) {
+      return false;
+    }
+    const seededLength = alreadyAutoLinked.length;
+    if (seededLength > existing.committedLength) {
+      return false;
+    }
+
+    // Plan the trim-back: walk backward from the end of the committed region
+    // collecting whole nodes until exactly `committedLength - seededLength`
+    // characters are covered. Merged nodes never cross working-node
+    // boundaries, and the trim boundary is a working-node boundary, so the
+    // walk must land exactly; landing mid-node means the DOM was mutated in
+    // an unexpected way and we rebuild instead.
+    const firstTail = existing.tail[existing.tailIndex]?.node ?? null;
+    if (firstTail && firstTail.parentNode !== existing.pre) {
+      return false;
+    }
+    let toRemove = existing.committedLength - seededLength;
+    const removals: ChildNode[] = [];
+    let cursor = firstTail ? firstTail.previousSibling : existing.pre.lastChild;
+    while (toRemove > 0) {
+      if (!cursor) {
+        return false;
+      }
+      const length = cursor.textContent?.length ?? 0;
+      if (length > toRemove) {
+        return false;
+      }
+      removals.push(cursor);
+      toRemove -= length;
+      cursor = cursor.previousSibling;
+    }
+
+    // Re-derive source-formatted segments for the trimmed range and build
+    // segments for the appended text, both from the pristine new parse.
+    const trimmedSegments = buildTailSegments(
+      pre,
+      seededLength,
+      existing.committedLength
+    );
+    const appendedSegments = buildTailSegments(
+      pre,
+      existing.fullText.length,
+      fullText.length
+    );
+    Private.withSelectionPreserved(existing.pre, removals, () => {
+      for (const node of removals) {
+        existing.pre.removeChild(node);
+      }
+      for (const segment of trimmedSegments) {
+        existing.pre.insertBefore(segment.node, firstTail);
+      }
+      for (const segment of appendedSegments) {
+        existing.pre.appendChild(segment.node);
+      }
+    });
+    existing.tail = [
+      ...trimmedSegments,
+      ...existing.tail.slice(existing.tailIndex),
+      ...appendedSegments
+    ];
+    existing.tailIndex = 0;
+    existing.committedLength = seededLength;
+    existing.fullText = fullText;
+    liveState = existing;
+    // The seeded working nodes cover exactly the committed region: position
+    // the commit cursor at their end (inside the last node, so that it can
+    // still grow via joins).
+    if (linkedNodes.length > 0) {
+      workingIndex = linkedNodes.length - 1;
+      workingOffset = linkedNodes[workingIndex].textContent!.length;
+    } else {
+      workingIndex = 0;
+      workingOffset = 0;
+    }
+    return true;
+  };
+
+  const ensureLiveState = () => {
+    if (!liveState && !tryAdoptLiveState()) {
+      freshLiveState();
+    }
+  };
+
+  /**
+   * Collect clones of the working nodes covering the next `chars` characters,
+   * advancing the commit cursor. The DOM must only ever receive clones - see
+   * the aliasing contract on `linkedNodes`.
+   */
+  const takeWorkingSlice = (chars: number): (HTMLAnchorElement | Text)[] => {
+    const slice: (HTMLAnchorElement | Text)[] = [];
+    while (chars > 0) {
+      let node = linkedNodes[workingIndex];
+      // Skip nodes consumed to their current end.
+      while (workingOffset >= node.textContent!.length) {
+        workingIndex += 1;
+        workingOffset = 0;
+        node = linkedNodes[workingIndex];
+      }
+      const available = node.textContent!.length - workingOffset;
+      const used = Math.min(chars, available);
+      if (workingOffset === 0 && used === node.textContent!.length) {
+        slice.push(node.cloneNode(true) as HTMLAnchorElement | Text);
+      } else {
+        // Partial pieces are always Text: anchors are never split by commit
+        // boundaries (commits end on working-node boundaries) and only Text
+        // nodes grow via joins.
+        slice.push(
+          document.createTextNode(
+            node.textContent!.slice(workingOffset, workingOffset + used)
+          )
+        );
+      }
+      workingOffset += used;
+      chars -= used;
+    }
+    return slice;
+  };
+
+  /**
+   * Commit the auto-linking progress made since the last commit into the live
+   * DOM: validate and consume the tail segments covering the newly linkified
+   * range, merge them with the corresponding working nodes, and insert the
+   * merged nodes in their place.
+   *
+   * @returns `false` when the tracked nodes no longer match the DOM (foreign
+   * mutation, e.g. search highlighting splitting or normalizing them); the
+   * caller then rebuilds via `freshLiveState` and retries.
+   */
+  const tryCommit = (): boolean => {
+    const state = liveState;
+    if (!state || state.pre.parentNode !== host) {
+      return false;
+    }
+    const upTo = alreadyAutoLinked.length;
+    const take = upTo - state.committedLength;
+    if (take <= 0) {
+      return true;
+    }
+
+    // Plan: validate and gather the tail segments covering the committed
+    // range, without mutating anything yet.
+    const whole: ITailSegment[] = [];
+    let boundary: ITailSegment | null = null;
+    let boundaryTake = 0;
+    let index = state.tailIndex;
+    let remaining = take;
+    while (remaining > 0) {
+      const segment = state.tail[index];
+      if (
+        !segment ||
+        segment.node.parentNode !== state.pre ||
+        (segment.node.textContent?.length ?? 0) !== segment.length
+      ) {
+        return false;
+      }
+      if (remaining >= segment.length) {
+        whole.push(segment);
+        remaining -= segment.length;
+        index += 1;
+      } else {
+        boundary = segment;
+        boundaryTake = remaining;
+        remaining = 0;
+      }
+    }
+
+    const linkedSlice = takeWorkingSlice(take);
+    const touched: Node[] = whole.map(segment => segment.node);
+    if (boundary) {
+      touched.push(boundary.node);
+    }
+    const insertBeforeNode = boundary
+      ? boundary.node
+      : (state.tail[index]?.node ?? null);
+
+    Private.withSelectionPreserved(state.pre, touched, () => {
+      // Detach the consumed segments; they become the source-formatting side
+      // of the merge (mutating them is fine - they are being replaced).
+      const preNodes: (Text | HTMLSpanElement)[] = [];
+      for (const segment of whole) {
+        state.pre.removeChild(segment.node);
+        preNodes.push(segment.node);
+      }
+      if (boundary) {
+        preNodes.push(sliceNodePiece(boundary.node, 0, boundaryTake));
+        // Shrink the live boundary segment in place.
+        boundary.node.textContent = (boundary.node.textContent ?? '').slice(
+          boundaryTake
+        );
+        boundary.length -= boundaryTake;
+      }
+      const merged = mergeNodes(preNodes, linkedSlice);
+      for (const child of Array.from(merged.childNodes)) {
+        state.pre.insertBefore(child, insertBeforeNode);
+      }
+    });
+
+    state.tailIndex = index;
+    state.committedLength = upTo;
+    return true;
+  };
+
+  /**
+   * Transfer this frame's progress into the live DOM, rebuilding it from
+   * scratch when the bookkeeping no longer matches (foreign DOM mutation).
+   */
+  const commitProgress = () => {
+    ensureLiveState();
+    let committed = false;
+    try {
+      committed = tryCommit();
+    } catch (error) {
+      // Never leave the output wedged: rebuild below.
+      console.error(
+        'Incremental rendering commit failed; rebuilding the output.',
+        error
+      );
+    }
+    if (!committed) {
+      freshLiveState();
+      tryCommit();
+    }
   };
 
   const renderFrame: FrameRenderer = (
@@ -1102,6 +1539,20 @@ function renderTextual(
     }
 
     const start = performance.now();
+    // Scale the budget towards the observed per-frame overhead: for very
+    // large outputs the browser-side frame cost (style/layout/paint of the
+    // content shifted by the insertions) dwarfs the default budget, and the
+    // total cost is then governed by the number of frames. Batching more
+    // progress into each frame when frames are expensive anyway means paying
+    // for fewer layout passes; cheap frames keep the responsive default.
+    // Note: the gap can include time waiting for this host's turn (queue
+    // rotation, delays), inflating the estimate - `MAX_FRAME_BUDGET` bounds
+    // the damage.
+    let frameBudget = budget;
+    if (invocation === FrameInvocation.animation && lastFrameEnd > 0) {
+      const overhead = timestamp - lastFrameEnd;
+      frameBudget = Math.min(MAX_FRAME_BUDGET, Math.max(budget, overhead));
+    }
     Private.beginRendering(host);
     // Record that this host has been painted so that subsequent frames (updates
     // and auto-linking passes) are not treated as a first paint. From here on we
@@ -1160,6 +1611,10 @@ function renderTextual(
       // can be adopted as this render's working nodes without cloning.
       linkedNodes = applicableCache ? applicableCache.cachedNodes : [];
       autoLinkSeeded = true;
+      // Establish the live DOM now, while `alreadyAutoLinked` still equals
+      // the seeded progress: adoption trims the committed region back to
+      // exactly this point, before the steps below advance it.
+      ensureLiveState();
     }
     let moreWorkToBeDone: boolean;
     let elapsed: number;
@@ -1206,7 +1661,7 @@ function renderTextual(
       moreWorkToBeDone = toBeAutoLinked != '';
       elapsed = performance.now() - start;
       newRequest = Private.hasNewRenderingRequest(host);
-    } while (elapsed < budget && moreWorkToBeDone && !newRequest);
+    } while (elapsed < frameBudget && moreWorkToBeDone && !newRequest);
 
     // Persist this frame's progress for the next render of this host (i.e.
     // the next stream chunk). No cloning: per the aliasing contract on
@@ -1223,28 +1678,10 @@ function renderTextual(
     // Note: we set `keepExisting` to `true` in `IRenderMime.IRenderer`s which
     // use this method to ensure that the previous node is not removed from DOM
     // when new chunks of data comes from the stream.
-    if (linkedNodes.length === 1 && linkedNodes[0] instanceof Text) {
-      if (host.childNodes.length === 1 && host.childNodes[0] === pre) {
-        // no-op
-      } else {
-        Private.replaceChangedNodes(host, pre);
-      }
-    } else {
-      const preNodes = Array.from(pre.cloneNode(true).childNodes) as (
-        | Text
-        | HTMLSpanElement
-      )[];
-      // Hand `mergeNodes` clones: it mutates its inputs (anchors are emptied
-      // and refilled with `<pre>` nodes) and its output enters the DOM, which
-      // other components mutate - the working nodes must stay pristine.
-      const node = mergeNodes(preNodes, [
-        ...linkedNodes.map(
-          node => node.cloneNode(true) as HTMLAnchorElement | Text
-        ),
-        document.createTextNode(toBeAutoLinked)
-      ]);
+    commitProgress();
 
-      Private.replaceChangedNodes(host, node);
+    if (invocation === FrameInvocation.animation) {
+      lastFrameEnd = performance.now();
     }
 
     // Continue unless:
@@ -1537,8 +1974,27 @@ function mergeNodes(
 
   for (let nodes of alignedNodes(preNodes, linkedNodes)) {
     if (!nodes[0]) {
-      combinedNodes.push(nodes[1]);
-      inAnchorElement = nodes[1].nodeType !== Node.TEXT_NODE;
+      const node = nodes[1];
+      const isAnchor = node.nodeType !== Node.TEXT_NODE;
+      const lastCombined = combinedNodes[combinedNodes.length - 1];
+      if (
+        isAnchor &&
+        inAnchorElement &&
+        (node as HTMLAnchorElement).href ===
+          (lastCombined as HTMLAnchorElement).href
+      ) {
+        // Continuation of the anchor started by the previous pair: a boundary
+        // between source-side nodes (an ANSI span edge, or a tail-segment
+        // edge) fell inside the link, so `alignedNodes` yielded the anchor in
+        // pieces. Fold this piece's content into the open anchor instead of
+        // producing a second, adjacent anchor for the same URL.
+        while (node.firstChild) {
+          lastCombined.appendChild(node.firstChild);
+        }
+      } else {
+        combinedNodes.push(node);
+      }
+      inAnchorElement = isAnchor;
       continue;
     } else if (!nodes[1]) {
       combinedNodes.push(nodes[0]);
@@ -2201,102 +2657,46 @@ namespace Private {
   }
 
   /**
-   * Replace nodes in `target` using nodes from `source`, minimising DOM operations
-   * and preserving selection (mapped using character offsets) if any.
-   *
-   * In the worst-case scenario (when no optimizations can be applied),
-   * this is equivalent to `target.replaceChildren(source)`. However,
-   * if nodes of the same type and with identical content are found
-   * at the start of the `target` and `source` child list, these are
-   * reused, improving the performance for stream operations.
+   * Run a DOM mutation, preserving the user selection (mapped through
+   * character offsets relative to `root`) when it intersects any of the
+   * `touched` nodes. The mutation must not change the total text content of
+   * `root`, as the offsets are restored against the post-mutation DOM.
    */
-  export function replaceChangedNodes(
-    target: HTMLElement,
-    source: HTMLPreElement
-  ) {
-    const result = checkChangedNodes(target, source);
+  export function withSelectionPreserved(
+    root: HTMLElement,
+    touched: Node[],
+    mutate: () => void
+  ): void {
     const selection = window.getSelection();
-    const hasSelection = selection && selection.containsNode(target, true);
-    const selectionOffsets = hasSelection
-      ? computeSelectionCharacterOffset(target, selection)
+    const affected =
+      selection && touched.some(node => selection.containsNode(node, true));
+    const offsets = affected
+      ? computeSelectionCharacterOffset(root, selection!)
       : null;
-    const pre = result ? result.parent : source;
-    if (result) {
-      for (const element of result.toDelete) {
-        result.parent.removeChild(element);
-      }
-      result.parent.append(...result.toAppend);
-    } else {
-      target.replaceChildren(source);
-    }
-    // Restore selection - if there is a meaningful one.
-    if (selection && selectionOffsets) {
-      selectByOffsets(pre, selection, selectionOffsets);
+    mutate();
+    if (selection && offsets) {
+      selectByOffsets(root, selection, offsets);
     }
   }
 
   /**
-   * Find nodes in `node` which do not have the same content or type and thus need to be appended.
+   * Live render state (see `ILiveRenderState`) per host. Kept across renders
+   * so that subsequent stream chunks append to the existing DOM instead of
+   * rebuilding it.
    */
-  function checkChangedNodes(host: HTMLElement, node: HTMLPreElement) {
-    const oldPre = host.childNodes[0];
-    if (!oldPre) {
-      return;
-    }
-    if (!(oldPre instanceof HTMLPreElement)) {
-      return;
-    }
-    // Normalization at this point should be cheap as the new node is not in the DOM yet.
-    node.normalize();
-    const newNodes = node.childNodes;
-    const oldNodes = oldPre.childNodes;
+  const liveRenderStates = new WeakMap<HTMLElement, ILiveRenderState>();
 
-    if (
-      // This could be generalized to appending a mix of text and non-text
-      // to a block of text too, but for now handles the most common case
-      // of just streaming text.
-      newNodes.length === 1 &&
-      newNodes[0] instanceof Text &&
-      [...oldNodes].every(n => n instanceof Text) &&
-      node.textContent!.startsWith(oldPre.textContent!)
-    ) {
-      const textNodeToAppend = document.createTextNode(
-        node.textContent!.slice(oldPre.textContent!.length)
-      );
-      return {
-        parent: oldPre,
-        toDelete: [],
-        toAppend: [textNodeToAppend]
-      };
-    }
+  export function getLiveRenderState(
+    host: HTMLElement
+  ): ILiveRenderState | undefined {
+    return liveRenderStates.get(host);
+  }
 
-    let lastSharedNode: number = -1;
-    for (let i = 0; i < oldNodes.length; i++) {
-      const oldChild = oldNodes[i];
-      const newChild = newNodes[i];
-      if (
-        newChild &&
-        // Compare `nodeName` rather than `nodeType`: when a URL inside an
-        // ANSI-colored span gets linkified in a later frame, the old `<span>`
-        // and the new `<a>` wrapping that span are both elements with
-        // identical `textContent`, yet the anchor must replace the span.
-        oldChild.nodeName === newChild.nodeName &&
-        oldChild.textContent === newChild.textContent
-      ) {
-        lastSharedNode = i;
-      } else {
-        break;
-      }
-    }
-
-    if (lastSharedNode === -1) {
-      return;
-    }
-    return {
-      parent: oldPre,
-      toDelete: [...oldNodes].slice(lastSharedNode),
-      toAppend: [...newNodes].slice(lastSharedNode)
-    };
+  export function setLiveRenderState(
+    host: HTMLElement,
+    state: ILiveRenderState
+  ): void {
+    liveRenderStates.set(host, state);
   }
 
   /**
