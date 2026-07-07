@@ -398,6 +398,138 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors[0].textContent).toBe('www.example.com');
     });
 
+    it('renders a whitespace-free output larger than the stride in one step', async () => {
+      // With no whitespace there is no safe break point, so a single step must
+      // swallow the whole text (splitting mid-token could split a URL).
+      const sanitizer = new Sanitizer();
+      const source = 'z'.repeat(STRIDE * 3);
+
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      expect(host.querySelectorAll('a')).toHaveLength(0);
+    });
+
+    it('makes progress when a huge unbroken token exhausts every frame budget', async () => {
+      // Regression test for a cross-frame livelock: when the frame budget is
+      // exhausted by a single step whose text ends in one huge node, deriving
+      // the next frame's state from the auto-link cache (which drops and
+      // re-analyses the trailing node) would redo the exact same step forever.
+      // The render must instead carry its progress across frames, so the URL
+      // after the token still gets linkified.
+      const sanitizer = new Sanitizer();
+
+      // Every budget check fails, so each frame performs exactly one step; the
+      // first step consumes the token, the next must handle the URL.
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const source = `${'z'.repeat(STRIDE * 2)} www.example.com`;
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      const anchors = host.querySelectorAll('a');
+      expect(anchors).toHaveLength(1);
+      expect(anchors[0].textContent).toBe('www.example.com');
+    });
+
+    it('round-robins frames between multiple visible outputs until both complete', async () => {
+      // Two multi-frame renders share the per-frame render queue; the rotation
+      // must let both make progress and finish (neither may starve the other).
+      const sanitizer = new Sanitizer();
+      const hostA = document.createElement('div');
+      const hostB = document.createElement('div');
+      document.body.appendChild(hostA);
+      document.body.appendChild(hostB);
+
+      // Every budget check fails: one auto-linking step per frame.
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const sourceA = `${'a'.repeat(STRIDE + 8)} www.example.com tail`;
+      const sourceB = `${'b'.repeat(STRIDE + 8)} www.example.org tail`;
+      void renderText({ host: hostA, sanitizer, source: sourceA });
+      void renderText({ host: hostB, sanitizer, source: sourceB });
+      jest.runAllTimers();
+
+      expect(hostA.textContent).toBe(sourceA);
+      expect(hostB.textContent).toBe(sourceB);
+      expect(hostA.querySelectorAll('a')).toHaveLength(1);
+      expect(hostB.querySelectorAll('a')).toHaveLength(1);
+
+      hostA.remove();
+      hostB.remove();
+    });
+
+    it('serves multiple parked outputs within a single idle slice', async () => {
+      // Two outputs park in the background tier; one idle callback must drive
+      // both to completion (round-robin over the idle queue while the deadline
+      // allows), without requesting further animation frames.
+      const callbacks: IntersectionObserverCallback[] = [];
+      jest
+        .spyOn(window, 'IntersectionObserver')
+        .mockImplementation((cb: IntersectionObserverCallback) => {
+          callbacks.push(cb);
+          return {
+            observe: () => undefined,
+            unobserve: () => undefined,
+            disconnect: () => undefined,
+            takeRecords: () => []
+          } as unknown as IntersectionObserver;
+        });
+      const raf = jest.spyOn(window, 'requestAnimationFrame');
+
+      // The first working frame of each output busts its budget after one
+      // step (two `performance.now` calls per frame, two frames), leaving the
+      // URLs unlinked; afterwards the budget is effectively unlimited.
+      let calls = 0;
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => {
+        calls += 1;
+        clock += calls <= 4 ? 1000 : 0.01;
+        return clock;
+      });
+
+      const sanitizer = new Sanitizer();
+      const hostA = document.createElement('div');
+      const hostB = document.createElement('div');
+      document.body.appendChild(hostA);
+      document.body.appendChild(hostB);
+      const sourceA = `${'a'.repeat(STRIDE + 8)} www.example.com more`;
+      const sourceB = `${'b'.repeat(STRIDE + 8)} www.example.org more`;
+      void renderText({ host: hostA, sanitizer, source: sourceA });
+      void renderText({ host: hostB, sanitizer, source: sourceB });
+
+      // Two frames: each output paints its text (one budget-busted step each).
+      jest.advanceTimersByTime(32);
+      expect(hostA.textContent).toBe(sourceA);
+      expect(hostB.textContent).toBe(sourceB);
+      expect(hostA.querySelectorAll('a')).toHaveLength(0);
+      expect(hostB.querySelectorAll('a')).toHaveLength(0);
+
+      // Both outputs scroll off-screen and park in the background tier.
+      for (const cb of callbacks) {
+        cb(
+          [{ isIntersecting: false } as IntersectionObserverEntry],
+          {} as IntersectionObserver
+        );
+      }
+      jest.advanceTimersByTime(16);
+      const rafCallsWhenParked = raf.mock.calls.length;
+
+      // A single idle slice (the 100ms timer fallback) completes both.
+      jest.advanceTimersByTime(300);
+      expect(hostA.querySelectorAll('a')).toHaveLength(1);
+      expect(hostB.querySelectorAll('a')).toHaveLength(1);
+      expect(raf.mock.calls.length).toBe(rafCallsWhenParked);
+      expect(jest.getTimerCount()).toBe(0);
+
+      hostA.remove();
+      hostB.remove();
+    });
+
     it('keeps a single anchor when a streamed URL grows by appended path characters', async () => {
       // The first chunk ends exactly on the URL (the last cached node is an
       // anchor); the second chunk appends path characters directly onto it,

@@ -958,6 +958,19 @@ function renderTextual(
   let fullPreTextContent: string | null = null;
   let pre: HTMLPreElement;
 
+  // Auto-linking progress, carried across frames: the already-linkified prefix
+  // and the remaining text. Persisting these in the closure (rather than
+  // re-deriving them from the auto-link cache each frame, which drops and
+  // re-analyses the trailing cached node) guarantees strictly monotonic
+  // progress: without it, a frame whose budget is exhausted by a single step
+  // over a large trailing node (e.g. a huge whitespace-free token) would redo
+  // exactly the same work on the next frame, forever. The cache is still
+  // consulted once, on the first working frame, to reuse the results of a
+  // previous render for this host (i.e. the preceding stream chunk).
+  let autoLinkSeeded = false;
+  let alreadyAutoLinked = '';
+  let toBeAutoLinked = '';
+
   // Number of frames for which rendering has been delayed because the host is
   // not yet attached to the DOM (see the `!host.isConnected` handling below).
   // Bounded so that a host that is disposed before ever attaching does not keep
@@ -1122,17 +1135,21 @@ function renderTextual(
       return stopRendering();
     }
     const cacheStore = Private.getCacheStore(autoLinkOptions);
-    const cache = cacheStore.get(host);
-    const applicableCache = getApplicableLinkCache(cache, fullPreTextContent);
-    const hasCache = cache && applicableCache;
-    if (iteration > 0 && !hasCache) {
-      throw Error('Each iteration should set cache!');
+    if (!autoLinkSeeded) {
+      // First working frame: seed the progress from the auto-link cache left
+      // by a previous render for this host (the preceding stream chunk), if
+      // it is applicable to the current text. Subsequent frames continue from
+      // the closure state instead of consulting the cache again.
+      const applicableCache = getApplicableLinkCache(
+        cacheStore.get(host),
+        fullPreTextContent
+      );
+      alreadyAutoLinked = applicableCache ? applicableCache.processedText : '';
+      toBeAutoLinked = applicableCache
+        ? applicableCache.addedText
+        : fullPreTextContent;
+      autoLinkSeeded = true;
     }
-
-    let alreadyAutoLinked = hasCache ? applicableCache.processedText : '';
-    let toBeAutoLinked = hasCache
-      ? applicableCache.addedText
-      : fullPreTextContent;
     let moreWorkToBeDone: boolean;
 
     let linkedNodes: (HTMLAnchorElement | Text)[];
@@ -1430,12 +1447,8 @@ function getApplicableLinkCache(
     // earlier node is shielded by it and stays valid. This covers both a
     // trailing Text node (cached `aaa www.one.com bbb www.` + `two.com`: keep
     // text `aaa ` and anchor `www.one.com`, re-linkify `bbb www.` + `two.com`)
-    // and a trailing anchor (cached `www.one.com` + `/path` extends the link).
-    //
-    // The anchor case is not just an optimisation: the incremental renderer
-    // requires a usable cache on every frame (see the `iteration > 0` guard in
-    // `renderTextual`), so returning null when a frame boundary lands right
-    // after a URL would crash rather than merely skip the cache.
+    // and a trailing anchor (cached `www.one.com` + `/path` extends the link,
+    // which matters when a stream chunk boundary falls right after a URL).
     cachedNodes = cachedNodes.slice(0, -1);
     addedText = lastCachedNode.textContent + addedText;
     processedText = processedText.slice(0, -lastCachedNode.textContent!.length);
