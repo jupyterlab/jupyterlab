@@ -18,7 +18,10 @@ module.exports = {
       name: 'documentation',
       // Try one retry as some tests are flaky
       retries: process.env.CI ? 2 : 0,
-      testMatch: 'test/documentation/**/*.test.ts',
+      testMatch: [
+        'test/documentation/**/*.test.ts',
+        'test/documentation/**/*.spec.ts'
+      ],
       testIgnore: '**/.ipynb_checkpoints/**',
       timeout: 90000,
       use: {
@@ -40,8 +43,21 @@ module.exports = {
       }
     },
     {
+      name: 'csp',
+      testMatch: 'test/csp/**',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
+    },
+    {
       name: 'jupyterlab',
-      testMatch: 'test/jupyterlab/**/*.test.ts',
+      testMatch: [
+        'test/jupyterlab/**/*.test.ts',
+        'test/jupyterlab/**/*.spec.ts'
+      ],
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {
@@ -54,7 +70,10 @@ module.exports = {
     },
     {
       name: 'jupyterlab-firefox',
-      testMatch: 'test/jupyterlab/**/*.test.ts',
+      testMatch: [
+        'test/jupyterlab/**/*.test.ts',
+        'test/jupyterlab/**/*.spec.ts'
+      ],
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {

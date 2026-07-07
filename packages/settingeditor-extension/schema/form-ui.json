@@ -5,6 +5,7 @@
     "settingEditorType": {
       "title": "Type of editor for the setting.",
       "description": "Set the type of editor to use while editing your settings.",
+      "type": "string",
       "oneOf": [
         { "const": "json", "title": "JSON" },
         { "const": "ui", "title": "UI" }
