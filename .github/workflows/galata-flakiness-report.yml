@@ -124,7 +124,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const marker = '<!-- galata-flake-report -->';
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const issue_number = Number(process.env.ISSUE_NUMBER);
             const status = process.env.ANALYZE_RESULT === 'success' ? 'completed' : 'failed';
@@ -155,31 +154,14 @@ jobs:
               const report = summaryIndex >= 0
                 ? fullReport.slice(summaryIndex + 1).trim()
                 : fullReport.replace(/^# Galata Flakiness Report\s*/, '').trim();
-              body = `${marker}\n## Galata flakiness report\n\n${details}\n\n${report}`;
+              body = `## Galata flakiness report\n\n${details}\n\n${report}`;
             } else {
-              body = `${marker}\n## Galata flakiness report\n\n${details}\n\nThe flakiness analyzer failed before producing a report.`;
+              body = `## Galata flakiness report\n\n${details}\n\nThe flakiness analyzer failed before producing a report.`;
             }
 
-            const comments = await github.paginate(github.rest.issues.listComments, {
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number,
-              per_page: 100
+              body
             });
-            const existing = comments.find(comment => comment.body?.includes(marker));
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number,
-                body
-              });
-            }
