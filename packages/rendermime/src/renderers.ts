@@ -2846,8 +2846,11 @@ namespace Private {
   /**
    * Run a DOM mutation, preserving the user selection (mapped through
    * character offsets relative to `root`) when it intersects any of the
-   * `touched` nodes. The mutation must not change the total text content of
-   * `root`, as the offsets are restored against the post-mutation DOM.
+   * `touched` nodes. Because the offsets are restored against the
+   * post-mutation DOM, the mutation must keep them stable: the text content
+   * of `root` up to and including the mutated region must be unchanged.
+   * Appending new text strictly after it (as the stream-adoption path does)
+   * is fine - such text lies beyond every restorable offset.
    */
   export function withSelectionPreserved(
     root: HTMLElement,
