@@ -952,7 +952,8 @@ interface ITailSegment {
    * The number of characters the node is expected to hold. Compared against
    * the actual length before the segment is touched: a mismatch means another
    * component (e.g. search highlighting) mutated it, which triggers a rebuild
-   * of the live DOM.
+   * of the tail region of the live DOM (see `rebuildTail` in `renderTextual`;
+   * the committed region is preserved, along with any highlights on it).
    */
   length: number;
 }
@@ -1462,25 +1463,124 @@ function renderTextual(
   };
 
   /**
-   * Transfer this frame's progress into the live DOM, rebuilding it from
-   * scratch when the bookkeeping no longer matches (foreign DOM mutation).
+   * Rebuild only the tail (not-yet-committed) region of the live DOM from
+   * the pristine source, leaving the committed region - and any foreign
+   * decorations applied to it, such as search highlights - untouched.
+   *
+   * This is the recovery for commit-time validation failures: those are
+   * caused by another component mutating *tail* nodes (splitting, wrapping
+   * or normalizing them), and the committed region - which the renderer
+   * never touches after committing - needs no rebuilding. The walk verifies
+   * that the committed region still holds exactly the first
+   * `committedLength` characters of the source, so the recovery cannot
+   * produce an inconsistent output.
+   *
+   * @returns Whether the tail was rebuilt; `false` when the committed region
+   * no longer checks out (its text was altered, or a foreign element spans
+   * the committed/tail boundary), in which case the caller falls back to a
+   * full rebuild.
+   */
+  const rebuildTail = (): boolean => {
+    const state = liveState;
+    if (!state || state.pre.parentNode !== host) {
+      return false;
+    }
+    // Find the DOM position where the committed region ends, verifying its
+    // content along the way. Foreign mutations may have split or merged
+    // (`normalize()`) text nodes, so the boundary is located by character
+    // count rather than through tracked nodes.
+    const committed = state.committedLength;
+    let offset = 0;
+    let node: ChildNode | null = state.pre.firstChild;
+    let firstTail: ChildNode | null = node;
+    while (offset < committed) {
+      if (!node) {
+        return false;
+      }
+      const text = node.textContent ?? '';
+      if (offset + text.length <= committed) {
+        if (!state.fullText.startsWith(text, offset)) {
+          return false;
+        }
+        offset += text.length;
+        node = node.nextSibling;
+        firstTail = node;
+      } else {
+        // The boundary falls inside this node. A Text node can be split
+        // exactly at it (without affecting rendering or highlights); an
+        // element spanning the boundary (e.g. a highlight of a match
+        // crossing it) makes the boundary ambiguous.
+        if (!(node instanceof Text)) {
+          return false;
+        }
+        const take = committed - offset;
+        if (
+          state.fullText.slice(offset, committed) !== node.data.slice(0, take)
+        ) {
+          return false;
+        }
+        firstTail = node.splitText(take);
+        offset = committed;
+      }
+    }
+    // Replace everything past the boundary with pristine tail segments.
+    const segments = buildTailSegments(pre, committed, state.fullText.length);
+    const removals: ChildNode[] = [];
+    for (let n: ChildNode | null = firstTail; n !== null; n = n.nextSibling) {
+      removals.push(n);
+    }
+    Private.withSelectionPreserved(state.pre, removals, () => {
+      for (const n of removals) {
+        state.pre.removeChild(n);
+      }
+      for (const segment of segments) {
+        state.pre.appendChild(segment.node);
+      }
+    });
+    state.tail = segments;
+    state.tailIndex = 0;
+    return true;
+  };
+
+  /**
+   * Run `tryCommit`, translating a thrown error (the DOM diverged from the
+   * bookkeeping in a way the commit validation did not anticipate) into a
+   * `false` return so that the caller can recover.
+   */
+  const attemptCommit = (): boolean => {
+    try {
+      return tryCommit();
+    } catch (error) {
+      // Never leave the output wedged: the caller rebuilds.
+      console.error('Incremental rendering commit failed; recovering.', error);
+      return false;
+    }
+  };
+
+  /**
+   * Transfer this frame's progress into the live DOM. When the bookkeeping
+   * no longer matches the DOM (another component mutated it - e.g. search
+   * highlighting splitting, wrapping or normalizing text nodes), recover by
+   * rebuilding only the tail, which preserves the committed region and any
+   * highlights applied to it; fall back to a full rebuild when even the
+   * committed region no longer checks out.
    */
   const commitProgress = () => {
     ensureLiveState();
-    let committed = false;
+    if (attemptCommit()) {
+      return;
+    }
+    let tailRebuilt = false;
     try {
-      committed = tryCommit();
+      tailRebuilt = rebuildTail();
     } catch (error) {
-      // Never leave the output wedged: rebuild below.
-      console.error(
-        'Incremental rendering commit failed; rebuilding the output.',
-        error
-      );
+      console.error('Incremental tail rebuild failed.', error);
     }
-    if (!committed) {
-      freshLiveState();
-      tryCommit();
+    if (tailRebuilt && attemptCommit()) {
+      return;
     }
+    freshLiveState();
+    attemptCommit();
   };
 
   const renderFrame: FrameRenderer = (

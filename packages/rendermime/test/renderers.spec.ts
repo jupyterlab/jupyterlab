@@ -681,6 +681,78 @@ describe('@jupyterlab/rendermime', () => {
       expect(host.querySelectorAll('a')).toHaveLength(2);
     });
 
+    it('preserves committed search highlights when the tail is mutated mid-render', async () => {
+      // Recovery from a foreign tail mutation must not touch the committed
+      // region: only the tail is rebuilt, so highlights applied to already
+      // rendered content (e.g. by search) survive. Rebuilding everything
+      // would wipe them on every frame while search and rendering overlap.
+      const sanitizer = new Sanitizer();
+
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const source = `${'y'.repeat(STRIDE)} ${'z'.repeat(
+        STRIDE
+      )} www.example.org end`;
+      await renderText({ host, sanitizer, source });
+      jest.advanceTimersByTime(16);
+
+      const pre = host.querySelector('pre')!;
+      // Highlight inside the committed region, the way search does: split the
+      // committed text node and wrap a piece of it in a `<mark>`.
+      const committedText = pre.firstChild as Text;
+      const committedPiece = committedText.splitText(4);
+      committedPiece.splitText(6);
+      const committedMark = document.createElement('mark');
+      pre.replaceChild(committedMark, committedPiece);
+      committedMark.appendChild(committedPiece);
+      // And the same inside the tail, invalidating the bookkeeping of the
+      // segment the next commit consumes.
+      const tailText = pre.lastChild as Text;
+      const tailPiece = tailText.splitText(4);
+      const tailMark = document.createElement('mark');
+      pre.replaceChild(tailMark, tailPiece);
+      tailMark.appendChild(tailPiece);
+
+      jest.runAllTimers();
+
+      // Rendering recovered and completed...
+      expect(host.textContent).toBe(source);
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+      // ...without touching the committed highlight.
+      expect(committedMark.isConnected).toBe(true);
+      expect(committedMark.textContent).toBe('yyyyyy');
+    });
+
+    it('falls back to a full rebuild when the committed region no longer matches', async () => {
+      // The tail-only recovery verifies the committed region still holds
+      // exactly the committed prefix of the source; when a foreign mutation
+      // altered it, restoring a pristine tail next to corrupted committed
+      // content would produce an inconsistent output - the renderer must
+      // rebuild from scratch and still converge on the correct content.
+      const sanitizer = new Sanitizer();
+
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const source = `${'y'.repeat(STRIDE)} ${'z'.repeat(
+        STRIDE
+      )} www.example.org end`;
+      await renderText({ host, sanitizer, source });
+      jest.advanceTimersByTime(16);
+
+      const pre = host.querySelector('pre')!;
+      // Damage the committed region (drop a committed character)...
+      (pre.firstChild as Text).deleteData(0, 1);
+      // ...and the tail bookkeeping, forcing recovery on the next commit.
+      (pre.lastChild as Text).splitText(4);
+
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+    });
+
     it('shows ANSI colors in not-yet-linkified tail content', async () => {
       // The tail (text painted but not yet linkified) is derived from the
       // source-formatted nodes, so ANSI coloring must be visible from the
