@@ -1173,6 +1173,16 @@ function renderTextual(
     // timer - and strongly referencing the host - for as long as animation
     // frames keep being produced.
     Private.clearFallbackWatchdog(host);
+    // Drop the consumed tail segment records - they pin detached boundary
+    // pieces and are read by nothing anymore. On completed renders the tail
+    // was consumed wholly, so this frees the entire array; on interrupted
+    // ones it is the same compaction the next render's adoption would apply.
+    // The live state itself is kept: the next render for this host (the next
+    // stream chunk) adopts it.
+    if (liveState) {
+      liveState.tail = liveState.tail.slice(liveState.tailIndex);
+      liveState.tailIndex = 0;
+    }
     // Resolve the completion promise now that rendering has finished.
     Private.settleRender(host);
     return RenderingResult.stop;
