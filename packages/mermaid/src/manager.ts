@@ -211,8 +211,9 @@ export class MermaidManager implements IMermaidManager {
     );
 
     // add dimension information
-    if (info.width !== undefined) {
-      img.width = info.width;
+    const { width } = info;
+    if (width !== undefined && width !== null && width !== 0) {
+      img.width = width;
     }
 
     // add accessible alt title
