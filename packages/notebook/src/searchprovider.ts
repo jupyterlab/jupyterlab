@@ -794,7 +794,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         return;
       }
       const currentMatch = searchEngine.getCurrentMatch();
-      if (!currentMatch && this.matchesCount) {
+      if (!currentMatch && this.matchesCount > 0) {
         // Select a match as current by highlighting next (with looping) from
         // the selection start, to prevent "current" match from jumping around.
         await this.highlightNext(true, {

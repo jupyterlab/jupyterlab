@@ -714,7 +714,7 @@ function addCommands(
     label: trans.__('Increase Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize < 72) {
+      if (fontSize !== undefined && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
@@ -734,7 +734,7 @@ function addCommands(
     label: trans.__('Decrease Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize > 9) {
+      if (fontSize !== undefined && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {

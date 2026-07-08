@@ -203,7 +203,7 @@ namespace Private {
     msg: KernelMessage.IMessage
   ): string | ArrayBuffer {
     let value: string | ArrayBuffer;
-    if (msg.buffers?.length) {
+    if ((msg.buffers?.length ?? 0) > 0) {
       value = serializeBinary(msg);
     } else {
       value = JSON.stringify(msg);

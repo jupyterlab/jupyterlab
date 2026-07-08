@@ -486,7 +486,7 @@ export class OutputArea extends Widget {
     change: number | void
   ): void {
     const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
-    if (change) {
+    if (change !== undefined) {
       if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
@@ -532,7 +532,7 @@ export class OutputArea extends Widget {
     // to prevent this jitter.
     const rect = this.node.getBoundingClientRect();
     this.node.style.minHeight = `${rect.height}px`;
-    if (this._minHeightTimeout) {
+    if (this._minHeightTimeout !== null) {
       window.clearTimeout(this._minHeightTimeout);
     }
     this._minHeightTimeout = window.setTimeout(() => {

@@ -29,7 +29,7 @@ export class MermaidManager implements IMermaidManager {
   protected _themes: IThemeManager | null;
 
   constructor(options: MermaidManager.IOptions = {}) {
-    this._diagrams = new LruCache({ maxSize: options.maxCacheSize || null });
+    this._diagrams = new LruCache({ maxSize: options.maxCacheSize ?? null });
 
     // handle reacting to themes
     if (options.themes) {
@@ -211,7 +211,7 @@ export class MermaidManager implements IMermaidManager {
     );
 
     // add dimension information
-    if (info.width) {
+    if (info.width !== undefined) {
       img.width = info.width;
     }
 
