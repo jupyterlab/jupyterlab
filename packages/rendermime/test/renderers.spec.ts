@@ -463,6 +463,79 @@ describe('@jupyterlab/rendermime', () => {
       hostB.remove();
     });
 
+    it('keeps the default frame budget when sharing frames with another output', async () => {
+      // Two outputs render concurrently, so neither renders in two consecutive
+      // frames: the gap a host observes between its own working frames is
+      // dominated by the other host's turns, not by the browser-side cost of
+      // its own insertions, and must not inflate the adaptive frame budget -
+      // otherwise concurrently rendering outputs escalate each other's budgets
+      // up to `MAX_FRAME_BUDGET` and every frame turns janky.
+      //
+      // Simulate a browser where `performance.now` and animation-frame
+      // timestamps share one clock (as in reality): each `performance.now`
+      // call advances the clock by 11ms - so at the default 10ms budget every
+      // working frame fits exactly one auto-linking step - and each frame is
+      // delivered at the next 16ms vsync after the current clock.
+      let clock = 5;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 11));
+      const pending = new Map<number, FrameRequestCallback>();
+      let rafId = 0;
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((callback: FrameRequestCallback) => {
+          rafId += 1;
+          pending.set(rafId, callback);
+          return rafId;
+        });
+      jest
+        .spyOn(window, 'cancelAnimationFrame')
+        .mockImplementation((handle: number) => {
+          pending.delete(handle);
+        });
+      const runFrame = () => {
+        clock = Math.ceil(clock / 16) * 16;
+        const timestamp = clock;
+        const callbacks = [...pending.values()];
+        pending.clear();
+        for (const callback of callbacks) {
+          callback(timestamp);
+        }
+      };
+
+      const sanitizer = new Sanitizer();
+      const hostA = document.createElement('div');
+      const hostB = document.createElement('div');
+      document.body.appendChild(hostA);
+      document.body.appendChild(hostB);
+      // Six steps each: five stride-sized chunks and the trailing URL.
+      const sourceA = `${('a'.repeat(STRIDE) + ' ').repeat(5)}www.example.com`;
+      const sourceB = `${('b'.repeat(STRIDE) + ' ').repeat(5)}www.example.org`;
+      void renderText({ host: hostA, sanitizer, source: sourceA });
+      void renderText({ host: hostB, sanitizer, source: sourceB });
+
+      // Eight frames: four working frames per host - four steps out of the
+      // six each needs. A host inflating its budget from a gap spanning the
+      // other host's turns would run several steps per frame and its trailing
+      // URL would be linkified already.
+      for (let frame = 0; frame < 8; frame++) {
+        runFrame();
+      }
+      expect(hostA.textContent).toBe(sourceA);
+      expect(hostB.textContent).toBe(sourceB);
+      expect(hostA.querySelectorAll('a')).toHaveLength(0);
+      expect(hostB.querySelectorAll('a')).toHaveLength(0);
+
+      // Both still finish in due course.
+      for (let frame = 0; frame < 20 && pending.size > 0; frame++) {
+        runFrame();
+      }
+      expect(hostA.querySelectorAll('a')).toHaveLength(1);
+      expect(hostB.querySelectorAll('a')).toHaveLength(1);
+
+      hostA.remove();
+      hostB.remove();
+    });
+
     it('serves multiple parked outputs within a single idle slice', async () => {
       // Two outputs park in the background tier; one idle callback must drive
       // both to completion (round-robin over the idle queue while the deadline

@@ -1553,11 +1553,19 @@ function renderTextual(
     // total cost is then governed by the number of frames. Batching more
     // progress into each frame when frames are expensive anyway means paying
     // for fewer layout passes; cheap frames keep the responsive default.
-    // Note: the gap can include time waiting for this host's turn (queue
-    // rotation, delays), inflating the estimate - `MAX_FRAME_BUDGET` bounds
-    // the damage.
+    // The gap since `lastFrameEnd` measures that overhead only when this host
+    // rendered in the immediately preceding frame (`lastFrameEnd` at or after
+    // that frame's start); otherwise it is dominated by other hosts' turns in
+    // the round-robin queue - or by time this host spent parked off-screen -
+    // and is ignored, so concurrently rendering outputs cannot escalate each
+    // other's budgets (see `previousFrameTime`). `MAX_FRAME_BUDGET` bounds
+    // the cost of a single expensive layout.
     let frameBudget = budget;
-    if (invocation === FrameInvocation.animation && lastFrameEnd > 0) {
+    if (
+      invocation === FrameInvocation.animation &&
+      lastFrameEnd > 0 &&
+      lastFrameEnd >= Private.previousFrameTime()
+    ) {
       const overhead = timestamp - lastFrameEnd;
       frameBudget = Math.min(MAX_FRAME_BUDGET, Math.max(budget, overhead));
     }
@@ -2199,6 +2207,26 @@ namespace Private {
   let lastAnimationFrameTime = 0;
 
   /**
+   * The animation-frame timestamp observed immediately before the most recent
+   * one (callbacks of multiple hosts within one frame share a timestamp).
+   *
+   * Used by the adaptive frame budget: the gap between a host's last
+   * frame-end and the current timestamp measures the browser-side rendering
+   * overhead of that host's own work only if the host rendered in the
+   * immediately preceding frame - that is, its frame-end falls at or after
+   * this timestamp. Otherwise the gap is dominated by other hosts' turns in
+   * the round-robin queue (or by time the host spent parked off-screen) and
+   * must not inflate the budget: concurrently rendering outputs would
+   * escalate each other's budgets up to `MAX_FRAME_BUDGET`, trading frame
+   * rate for no throughput gain.
+   */
+  let previousAnimationFrameTime = 0;
+
+  export function previousFrameTime(): number {
+    return previousAnimationFrameTime;
+  }
+
+  /**
    * Self-rearming fallback watchdogs, one per host awaiting its first paint.
    */
   const fallbackWatchdogs = new WeakMap<HTMLElement, number>();
@@ -2333,8 +2361,13 @@ namespace Private {
     renderQueue.add(host);
     const thisRequest = window.requestAnimationFrame(timestamp => {
       // Record that an animation frame ran so the fallback watchdog can
-      // distinguish real starvation from queue waiting.
-      lastAnimationFrameTime = timestamp;
+      // distinguish real starvation from queue waiting, and keep the previous
+      // distinct timestamp for the adaptive-budget check (see
+      // `previousFrameTime`).
+      if (timestamp !== lastAnimationFrameTime) {
+        previousAnimationFrameTime = lastAnimationFrameTime;
+        lastAnimationFrameTime = timestamp;
+      }
       cancelRenderingRequest(host);
       render(timestamp, FrameInvocation.animation);
     });

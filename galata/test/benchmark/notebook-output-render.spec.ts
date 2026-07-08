@@ -23,7 +23,11 @@ import type * as nbformat from '@jupyterlab/nbformat';
  * sooner than the synchronous pipeline, which blocks until the entire output
  * (text and links) has been rendered.
  *
- * Two scenarios are covered:
+ * It also records `longest-frame`: the longest gap between two animation
+ * frames while rendering. This is a jank proxy - a long gap means the main
+ * thread was blocked and the page was unresponsive for that long.
+ *
+ * Three scenarios are covered:
  *
  * - `stream`: the output is produced by executing a cell, so `renderModel` is
  *   called repeatedly as chunks arrive. Each chunk ends with `www.` and the
@@ -31,11 +35,18 @@ import type * as nbformat from '@jupyterlab/nbformat';
  * - `baked`: the same output is stored in the notebook, so opening it renders
  *   the whole output in a single `renderModel` call, isolating the rendering
  *   cost from kernel/streaming variability.
+ * - `baked-many`: the `baked` output replicated into several cells rendering
+ *   concurrently (windowing is disabled so all of them attach at once). This
+ *   exercises the round-robin sharing of animation frames between outputs -
+ *   in particular that concurrently rendering outputs do not inflate each
+ *   other's per-frame time budgets (which would show up as a large
+ *   `longest-frame`).
  */
 
 const tmpPath = 'test-performance-output-render';
 const streamNotebook = 'streamed_links.ipynb';
 const bakedNotebook = 'baked_links.ipynb';
+const bakedManyNotebook = 'baked_links_many.ipynb';
 
 const SANITIZER_PLUGIN = '@jupyterlab/apputils-extension:sanitizer';
 
@@ -68,7 +79,15 @@ const EXPECTED_TEXT_LENGTH = FULL_TEXT.length;
 // link, so `N_CHUNKS - 1` links mark "all links".
 const EXPECTED_LINKS = N_CHUNKS - 1;
 
-const scenarios = ['stream', 'baked'] as const;
+// The `baked-many` scenario renders the full `baked` output in each of this
+// many concurrently rendering cells. Each output must be large enough to keep
+// rendering across many frames - that is what exercises the frame sharing;
+// outputs small enough to finish in a frame or two would not overlap.
+const N_OUTPUTS = 8;
+const MANY_EXPECTED_TEXT_LENGTH = FULL_TEXT.length * N_OUTPUTS;
+const MANY_EXPECTED_LINKS = EXPECTED_LINKS * N_OUTPUTS;
+
+const scenarios = ['stream', 'baked', 'baked-many'] as const;
 type Scenario = (typeof scenarios)[number];
 
 // Incremental (new, asynchronous) vs synchronous (legacy) rendering pipelines.
@@ -88,11 +107,16 @@ for (const scenario of scenarios) {
 
 /**
  * Fire a command and record, relative to the moment just before the command is
- * issued, when the rendered output:
+ * issued, when the rendered output(s) - aggregated over every text output in
+ * the notebook:
  *
- * - first shows any text (`first-text`),
- * - shows all of its text (`all-text`, auto-linking may still be in progress),
- * - has all of its URLs auto-linked (`all-links`).
+ * - first show any text (`first-text`),
+ * - show all of their text (`all-text`, auto-linking may still be in progress),
+ * - have all of their URLs auto-linked (`all-links`).
+ *
+ * Additionally records the longest gap between two animation frames observed
+ * until `all-links` (`longestFrame`) - a jank proxy: a long gap means the main
+ * thread was blocked and the page was unresponsive for that long.
  */
 async function measureRenderTimings(
   page: Page,
@@ -100,20 +124,31 @@ async function measureRenderTimings(
   expectedLinks: number,
   command: string,
   args?: Record<string, unknown>
-): Promise<{ firstText: number; allText: number; allLinks: number }> {
+): Promise<{
+  firstText: number;
+  allText: number;
+  allLinks: number;
+  longestFrame: number;
+}> {
   await page.evaluate(
     ({ expectedLength, expectedLinks, command, args }) => {
       const w = window as any;
       w.__bench = {
         firstText: null as number | null,
         allText: null as number | null,
-        allLinks: null as number | null
+        allLinks: null as number | null,
+        longestFrame: 0
       };
       const selector = '[role="main"] .jp-NotebookPanel .jp-RenderedText';
       const start = performance.now();
       const poll = () => {
-        const el = document.querySelector(selector);
-        const len = el ? (el.textContent ?? '').length : 0;
+        const els = document.querySelectorAll(selector);
+        let len = 0;
+        let links = 0;
+        for (const el of els) {
+          len += (el.textContent ?? '').length;
+          links += el.querySelectorAll('a').length;
+        }
         const now = performance.now() - start;
         if (len > 0 && w.__bench.firstText === null) {
           w.__bench.firstText = now;
@@ -121,16 +156,27 @@ async function measureRenderTimings(
         if (len >= expectedLength && w.__bench.allText === null) {
           w.__bench.allText = now;
         }
-        if (
-          w.__bench.allLinks === null &&
-          el &&
-          el.querySelectorAll('a').length >= expectedLinks
-        ) {
+        if (w.__bench.allLinks === null && links >= expectedLinks) {
           w.__bench.allLinks = now;
           clearInterval(w.__benchTimer);
         }
       };
       w.__benchTimer = setInterval(poll, 4);
+      // Track the longest inter-frame gap for as long as links are pending.
+      let lastFrame: number | null = null;
+      const trackFrame = (timestamp: number) => {
+        if (lastFrame !== null) {
+          w.__bench.longestFrame = Math.max(
+            w.__bench.longestFrame,
+            timestamp - lastFrame
+          );
+        }
+        lastFrame = timestamp;
+        if (w.__bench.allLinks === null) {
+          requestAnimationFrame(trackFrame);
+        }
+      };
+      requestAnimationFrame(trackFrame);
       // Start the clock and issue the measured action atomically.
       void w.jupyterapp.commands.execute(command, args);
       poll();
@@ -150,7 +196,8 @@ async function measureRenderTimings(
     return {
       firstText: w.__bench.firstText,
       allText: w.__bench.allText,
-      allLinks: w.__bench.allLinks
+      allLinks: w.__bench.allLinks,
+      longestFrame: w.__bench.longestFrame
     };
   });
 }
@@ -187,6 +234,23 @@ test.describe('Benchmark - Output rendering', () => {
       'text',
       `${tmpPath}/${bakedNotebook}`
     );
+
+    // Notebook with the full output baked into each of several cells, to
+    // exercise concurrent rendering of multiple outputs.
+    const manyOutput: nbformat.IOutput[] = [
+      { output_type: 'stream', name: 'stdout', text: FULL_TEXT }
+    ];
+    const manyContent = galata.Notebook.generateNotebook(
+      N_OUTPUTS,
+      'code',
+      [`# Pre-computed output (${N_CHUNKS} chunks per cell)`],
+      manyOutput
+    );
+    await content.uploadContent(
+      JSON.stringify(manyContent),
+      'text',
+      `${tmpPath}/${bakedManyNotebook}`
+    );
   });
 
   test.afterAll(async ({ request }) => {
@@ -202,10 +266,19 @@ test.describe('Benchmark - Output rendering', () => {
     }, testInfo) => {
       test.setTimeout(300_000);
 
-      // Toggle the incremental (asynchronous) auto-linking pipeline for this run.
+      // Toggle the incremental (asynchronous) auto-linking pipeline for this
+      // run. The many-outputs scenario disables notebook windowing so that
+      // all of its outputs attach - and render - concurrently.
       await galata.Mock.mockSettings(page, [], {
         ...galata.DEFAULT_SETTINGS,
-        [SANITIZER_PLUGIN]: { incrementalAutolink: incremental }
+        [SANITIZER_PLUGIN]: { incrementalAutolink: incremental },
+        ...(scenario === 'baked-many'
+          ? {
+              '@jupyterlab/notebook-extension:tracker': {
+                windowingMode: 'none'
+              }
+            }
+          : {})
       });
 
       const attachmentCommon = {
@@ -222,7 +295,12 @@ test.describe('Benchmark - Output rendering', () => {
           !!(window as any).jupyterapp?.commands?.hasCommand('docmanager:open')
       );
 
-      let timings: { firstText: number; allText: number; allLinks: number };
+      let timings: {
+        firstText: number;
+        allText: number;
+        allLinks: number;
+        longestFrame: number;
+      };
       if (scenario === 'stream') {
         // Open the notebook and wait for the kernel to be ready to execute.
         await page.evaluate(
@@ -248,6 +326,14 @@ test.describe('Benchmark - Output rendering', () => {
           EXPECTED_LINKS,
           'notebook:run-all-cells'
         );
+      } else if (scenario === 'baked-many') {
+        timings = await measureRenderTimings(
+          page,
+          MANY_EXPECTED_TEXT_LENGTH,
+          MANY_EXPECTED_LINKS,
+          'docmanager:open',
+          { path: `${tmpPath}/${bakedManyNotebook}`, factory: 'Notebook' }
+        );
       } else {
         timings = await measureRenderTimings(
           page,
@@ -261,7 +347,8 @@ test.describe('Benchmark - Output rendering', () => {
       for (const [metric, time] of [
         [`${modeName}-first-text`, timings.firstText],
         [`${modeName}-all-text`, timings.allText],
-        [`${modeName}-all-links`, timings.allLinks]
+        [`${modeName}-all-links`, timings.allLinks],
+        [`${modeName}-longest-frame`, timings.longestFrame]
       ] as const) {
         testInfo.attachments.push(
           benchmark.addAttachment({
