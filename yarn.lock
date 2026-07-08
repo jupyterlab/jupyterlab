@@ -4864,12 +4864,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/settingregistry@workspace:packages/settingregistry"
   dependencies:
+    "@jupyterlab/coreutils": ^6.7.0-alpha.0
     "@jupyterlab/nbformat": ^4.7.0-alpha.0
     "@jupyterlab/statedb": ^4.7.0-alpha.0
     "@jupyterlab/testing": ^4.7.0-alpha.0
     "@lumino/commands": ^2.3.4
     "@lumino/coreutils": ^2.2.3
     "@lumino/disposable": ^2.1.6
+    "@lumino/polling": ^2.1.6
     "@lumino/signaling": ^2.1.6
     "@rjsf/utils": ^5.13.4
     "@types/jest": ^29.2.0

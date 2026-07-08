@@ -4,13 +4,10 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import type {
-  ISettingConnector,
-  ISettingRegistry
-} from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { DataConnector } from '@jupyterlab/statedb';
 import { Throttler } from '@lumino/polling';
+import type { ISettingConnector, ISettingRegistry } from './tokens';
 
 /**
  * A data connector for fetching settings.

@@ -11,9 +11,9 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import {
   ISettingConnector,
   ISettingRegistry,
+  SettingConnector,
   SettingRegistry
 } from '@jupyterlab/settingregistry';
-import { SettingConnector } from './settingconnector';
 
 /**
  * Provides the settings connector as a separate plugin to allow for alternative
