@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
@@ -17,6 +15,8 @@ import { SettingsMenu } from './settings';
 import { TabsMenu } from './tabs';
 import type { IMainMenu } from './tokens';
 import { ViewMenu } from './view';
+
+type TRankedMenu = Menu & { rank?: number };
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
@@ -162,7 +162,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
       'rank' in options
         ? options.rank
         : 'rank' in menu
-          ? (menu as any).rank
+          ? (menu as TRankedMenu).rank
           : IRankedMenu.DEFAULT_RANK;
     const rankItem = { menu, rank };
     const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);

@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ABCWidgetFactory } from '@jupyterlab/docregistry';
@@ -12,6 +10,10 @@ import type { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
+
+type TNotebookContext = DocumentRegistry.IContext<INotebookModel> & {
+  translator?: ITranslator;
+};
 
 /**
  * A widget factory for notebook panels.
@@ -82,7 +84,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
-    const translator = (context as any).translator;
+    const translator = (context as TNotebookContext).translator;
     const kernelHistory = new NotebookHistory({
       sessionContext: context.sessionContext,
       translator: translator
