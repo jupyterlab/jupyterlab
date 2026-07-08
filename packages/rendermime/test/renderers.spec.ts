@@ -817,6 +817,39 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors[0]).toBe(firstAnchor);
     });
 
+    it('rebuilds from scratch when a stream chunk invalidates the whole cache', async () => {
+      // A chunk boundary inside the only (link-free) text node drops the
+      // entire auto-link cache - there is no shielded prefix - so nothing of
+      // the previous render can be adopted. Everything must be re-analyzed
+      // either way, so the renderer must take the cheap path: one fresh
+      // rebuild (a new `<pre>` via `replaceChildren`) rather than trimming
+      // the whole committed region out of the old one node by node. This is
+      // the shape of partial-line progress streams (e.g. `\r`-based bars).
+      const sanitizer = new Sanitizer();
+
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const chunk1 = `${'x'.repeat(STRIDE + 8)} progress 10%`;
+      await renderText({ host, sanitizer, source: chunk1 });
+      jest.runAllTimers();
+      expect(host.textContent).toBe(chunk1);
+      const preBefore = host.querySelector('pre');
+
+      // No newline on either side of the boundary: the cache is dropped.
+      // (Note: an actual `\r` would work the same for caching purposes, but
+      // HTML parsing normalizes it to `\n`, which would obscure the
+      // `textContent` assertion below.)
+      const source = `${chunk1} then progress 20% www.example.com`;
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+
+      expect(host.textContent).toBe(source);
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+      // The fresh-rebuild fast path replaced the `<pre>` wholesale.
+      expect(host.querySelector('pre')).not.toBe(preBefore);
+    });
+
     it('leaves the DOM untouched when re-rendering identical content', async () => {
       const sanitizer = new Sanitizer();
       // A trailing newline shields the last node from re-analysis, so a

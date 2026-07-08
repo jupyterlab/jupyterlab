@@ -1265,6 +1265,15 @@ function renderTextual(
     if (seededLength > existing.committedLength) {
       return false;
     }
+    if (seededLength === 0 && existing.committedLength > 0) {
+      // Nothing usable was seeded (e.g. the chunk boundary fell inside the
+      // only, link-free text node, dropping the whole cache - the shape of
+      // partial-line progress streams): adoption would trim away the entire
+      // committed region node by node only to re-derive it as pristine
+      // segments. A fresh rebuild produces the identical result with a
+      // single `replaceChildren`, so let the caller do that instead.
+      return false;
+    }
 
     // Plan the trim-back: walk backward from the end of the committed region
     // collecting whole nodes until exactly `committedLength - seededLength`
