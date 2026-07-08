@@ -38,10 +38,13 @@ import {
   copyIcon,
   pasteIcon,
   refreshIcon,
+  TabBarSvg,
   terminalIcon
 } from '@jupyterlab/ui-components';
 import { VDomRenderer } from '@jupyterlab/ui-components';
 import { VDomModel } from '@jupyterlab/ui-components';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
@@ -401,7 +404,7 @@ function activate(
 
   // Add a sessions manager if the running extension is available
   if (runningSessionManagers) {
-    addRunningSessionManager(runningSessionManagers, app, translator);
+    addRunningSessionManager(runningSessionManagers, app, tracker, translator);
   }
 
   if (searchRegistry) {
@@ -417,10 +420,12 @@ function activate(
 function addRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd,
+  tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   translator: ITranslator
 ) {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
+  const signaler = new RunningTerminalSignaler(manager, tracker);
 
   class RunningTerminal implements IRunningSessions.IRunningItem {
     constructor(model: Terminal.IModel) {
@@ -433,7 +438,10 @@ function addRunningSessionManager(
       return terminalIcon;
     }
     label() {
-      return `terminals/${this._model.name}`;
+      return Private.runningTerminalLabel(this._model.name, tracker);
+    }
+    labelTitle() {
+      return Private.runningTerminalLabel(this._model.name, tracker);
     }
     shutdown() {
       return manager.shutdown(this._model.name);
@@ -449,13 +457,55 @@ function addRunningSessionManager(
       Array.from(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),
     refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
+    runningChanged: signaler.runningChanged,
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
       'Are you sure you want to permanently shut down all running terminals?'
     )
   });
+}
+
+class RunningTerminalSignaler {
+  constructor(
+    manager: Terminal.IManager,
+    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>
+  ) {
+    manager.runningChanged.connect(this._emitRunningChanged, this);
+    tracker.widgetAdded.connect((_, widget) => {
+      this._watchWidget(widget);
+      this._emitRunningChanged();
+    });
+    tracker.forEach(widget => this._watchWidget(widget));
+  }
+
+  get runningChanged(): ISignal<this, void> {
+    return this._runningChanged;
+  }
+
+  private _watchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+    if (this._widgets.has(widget)) {
+      return;
+    }
+
+    this._widgets.add(widget);
+    widget.title.changed.connect(this._emitRunningChanged, this);
+    widget.disposed.connect(this._unwatchWidget, this);
+  }
+
+  private _unwatchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+    widget.title.changed.disconnect(this._emitRunningChanged, this);
+    widget.disposed.disconnect(this._unwatchWidget, this);
+    this._widgets.delete(widget);
+    this._emitRunningChanged();
+  }
+
+  private _emitRunningChanged(): void {
+    this._runningChanged.emit(void 0);
+  }
+
+  private _widgets = new Set<MainAreaWidget<ITerminal.ITerminal>>();
+  private _runningChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -838,6 +888,17 @@ namespace Private {
    */
   export function showErrorMessage(error: Error): void {
     console.error(`Failed to configure ${plugin.id}: ${error.message}`);
+  }
+
+  /**
+   * Get the running terminal label matching the Open Tabs section.
+   */
+  export function runningTerminalLabel(
+    name: string,
+    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>
+  ): string {
+    const widget = tracker.find(widget => widget.content.session.name === name);
+    return widget ? TabBarSvg.titleLabel(widget.title) : `terminals/${name}`;
   }
 }
 

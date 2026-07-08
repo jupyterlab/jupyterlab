@@ -14,9 +14,9 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 /**
  * Run a shell command in the visible terminal panel.
  *
- * @param page Playwright page (provided by galata fixture)
- * @param terminalLocator Locator that matches the terminal container
- * @param command Shell command to run
+ * @param page - Playwright page (provided by galata fixture)
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param command - Shell command to run
  */
 async function runCommand(
   page: Page,
@@ -63,6 +63,36 @@ test.describe('Terminal', () => {
       // We allow any because concurrent execution of tests means
       // that server can assign an identifier different than `1`.
       await expect(page.locator('text=/terminals\\/\\d+/')).toBeVisible();
+    });
+
+    test('should reuse terminal tab title in the running sidebar', async ({
+      page
+    }) => {
+      const terminalTitle = 'Galata terminal title';
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+
+      await runCommand(
+        page,
+        terminal,
+        `printf "\\033]2;${terminalTitle}\\007"`
+      );
+
+      await expect(
+        page.locator(
+          '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel',
+          { hasText: terminalTitle }
+        )
+      ).toBeVisible();
+
+      await page.sidebar.openTab('jp-running-sessions');
+      const runningLabels = page.locator(
+        '#jp-running-sessions .jp-RunningSessions-itemLabel'
+      );
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
     });
   });
 
