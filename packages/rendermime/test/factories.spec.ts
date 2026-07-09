@@ -37,8 +37,8 @@ function encodeChars(txt: string): string {
 /**
  * Read the rendered inner HTML of a text/error renderer.
  *
- * `RenderedText`/`RenderedError` wrap their content in a containment `<div>`,
- * so the rendered `<pre>` lives one level below the widget node.
+ * `RenderedText`/`RenderedError` apply `contain: style layout` on the widget
+ * node directly, so the rendered `<pre>` is its only child.
  */
 function renderedHTML(w: IRenderMime.IRenderer): string {
   return (w.node as HTMLElement).innerHTML;
