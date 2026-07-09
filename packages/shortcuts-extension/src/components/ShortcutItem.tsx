@@ -178,7 +178,9 @@ export class ShortcutItem extends React.Component<
 
   getResetShortCutLink(): JSX.Element {
     const isDelete = this.props.shortcut.userDefined;
-    const label = isDelete ? this._trans.__('Delete') : this._trans.__('Reset');
+    const label = isDelete
+      ? this._trans.__('Delete shortcut')
+      : this._trans.__('Reset to default');
     return (
       <button
         type="button"
@@ -204,7 +206,7 @@ export class ShortcutItem extends React.Component<
       this.props.shortcut.userDefined || !!this.props.newShortcutUtils;
     const showOptionsButtonTitle = editable
       ? this._trans.__('Custom options')
-      : this._trans.__('Show options');
+      : this._trans.__('Shortcut details');
 
     return (
       <div className="jp-Shortcuts-Cell">
@@ -412,7 +414,7 @@ export class ShortcutItem extends React.Component<
   }
 
   getAddLink(): JSX.Element {
-    const label = this._trans.__('Add');
+    const label = this._trans.__('Add keybinding');
     return (
       <button
         type="button"
