@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
@@ -17,7 +16,6 @@ import type {
   ITerminalOptions,
   Terminal as Xterm
 } from '@xterm/xterm';
-import type { CanvasAddon } from '@xterm/addon-canvas';
 import type { FitAddon } from '@xterm/addon-fit';
 import type { SearchAddon } from '@xterm/addon-search';
 import type { WebLinksAddon } from '@xterm/addon-web-links';
@@ -377,6 +375,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Open the terminal if necessary.
     if (!this._termOpened) {
       this._term.open(this.node);
+      // Load the renderer addon after open so a failed activation leaves
+      // the DOM renderer in place.
+      Private.addRenderer(this._term);
       this._term.element?.classList.add(TERMINAL_BODY_CLASS);
       this._term.textarea?.setAttribute(
         'aria-describedby',
@@ -619,6 +620,38 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     if (viewportFocused && event.key === 'Tab' && xtermTextarea) {
       xtermTextarea.tabIndex = -1;
     }
+
+    // The viewport is not a native scroll container, so translate the
+    // scrolling keys into xterm.js scroll API calls.
+    if (viewportFocused) {
+      let handled = true;
+      switch (event.key) {
+        case 'ArrowUp':
+          this._term.scrollLines(-1);
+          break;
+        case 'ArrowDown':
+          this._term.scrollLines(1);
+          break;
+        case 'PageUp':
+          this._term.scrollPages(-1);
+          break;
+        case 'PageDown':
+          this._term.scrollPages(1);
+          break;
+        case 'Home':
+          this._term.scrollToTop();
+          break;
+        case 'End':
+          this._term.scrollToBottom();
+          break;
+        default:
+          handled = false;
+      }
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
   }
 
   private _scheduleEscapeReset(): void {
@@ -763,46 +796,89 @@ namespace Private {
  * Utility functions for creating a Terminal widget
  */
 namespace Private {
-  let supportWebGL: boolean = false;
   let Xterm_: typeof Xterm;
   let FitAddon_: typeof FitAddon;
   let WeblinksAddon_: typeof WebLinksAddon;
   let SearchAddon_: typeof SearchAddon;
-  let Renderer_: typeof CanvasAddon | typeof WebglAddon;
+  let WebglAddon_: typeof WebglAddon | undefined;
+  let initPromise: Promise<void> | undefined;
 
   /**
-   * Detect if the browser supports WebGL or not.
+   * Detect if the browser supports WebGL2 or not, which the xterm.js
+   * WebGL addon requires.
    *
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/By_example/Detect_WebGL
    */
-  function hasWebGLContext(): boolean {
+  function hasWebGL2Context(): boolean {
     // Create canvas element. The canvas is not added to the
     // document itself, so it is never displayed in the
     // browser window.
     const canvas = document.createElement('canvas');
 
-    // Get WebGLRenderingContext from canvas element.
-    const gl =
-      canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    // Get WebGL2RenderingContext from canvas element.
+    const gl = canvas.getContext('webgl2');
 
     // Report the result.
     try {
-      return gl instanceof WebGLRenderingContext;
+      return gl instanceof WebGL2RenderingContext;
     } catch (error) {
       return false;
     }
   }
 
-  function addRenderer(term: Xterm): void {
-    let renderer = new Renderer_();
-    term.loadAddon(renderer);
-    if (supportWebGL) {
-      (renderer as WebglAddon).onContextLoss(event => {
+  /**
+   * Load the xterm.js modules, at most once.
+   */
+  async function initialize(): Promise<void> {
+    const [xterm_, fitAddon_, weblinksAddon_, searchAddon_] = await Promise.all(
+      [
+        import('@xterm/xterm'),
+        import('@xterm/addon-fit'),
+        import('@xterm/addon-web-links'),
+        import('@xterm/addon-search')
+      ]
+    );
+    Xterm_ = xterm_.Terminal;
+    FitAddon_ = fitAddon_.FitAddon;
+    WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
+    SearchAddon_ = searchAddon_.SearchAddon;
+    if (hasWebGL2Context()) {
+      try {
+        const webglAddon_ = await import('@xterm/addon-webgl');
+        WebglAddon_ = webglAddon_.WebglAddon;
+      } catch (error) {
+        console.warn(
+          'Failed to load the WebGL renderer, falling back to the DOM renderer.',
+          error
+        );
+      }
+    }
+  }
+
+  /**
+   * Attach the WebGL renderer to an opened terminal.
+   *
+   * The built-in DOM renderer is used when the WebGL addon is unavailable
+   * or fails to activate.
+   */
+  export function addRenderer(term: Xterm): void {
+    if (!WebglAddon_) {
+      return;
+    }
+    try {
+      const renderer = new WebglAddon_();
+      term.loadAddon(renderer);
+      renderer.onContextLoss(() => {
         console.debug('WebGL context lost - reinitialize Xtermjs renderer.');
         renderer.dispose();
         // If the Webgl context is lost, reinitialize the addon
         addRenderer(term);
       });
+    } catch (error) {
+      console.warn(
+        'Failed to activate the WebGL renderer, falling back to the DOM renderer.',
+        error
+      );
     }
   }
 
@@ -812,28 +888,17 @@ namespace Private {
   export async function createTerminal(
     options: ITerminalOptions & ITerminalInitOnlyOptions
   ): Promise<[Xterm, FitAddon, SearchAddon]> {
-    if (!Xterm_) {
-      supportWebGL = hasWebGLContext();
-      const [xterm_, fitAddon_, renderer_, weblinksAddon_, searchAddon_] =
-        await Promise.all([
-          import('@xterm/xterm'),
-          import('@xterm/addon-fit'),
-          supportWebGL
-            ? import('@xterm/addon-webgl')
-            : import('@xterm/addon-canvas'),
-          import('@xterm/addon-web-links'),
-          import('@xterm/addon-search')
-        ]);
-      Xterm_ = xterm_.Terminal;
-      FitAddon_ = fitAddon_.FitAddon;
-      Renderer_ =
-        (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
-      WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
-      SearchAddon_ = searchAddon_.SearchAddon;
+    if (!initPromise) {
+      initPromise = initialize();
+      // Allow a later terminal to retry if the modules failed to load, for
+      // example because of a transient network failure.
+      initPromise.catch(() => {
+        initPromise = undefined;
+      });
     }
+    await initPromise;
 
     const term = new Xterm_(options);
-    addRenderer(term);
     const fitAddon = new FitAddon_();
     term.loadAddon(fitAddon);
     const searchAddon = new SearchAddon_();

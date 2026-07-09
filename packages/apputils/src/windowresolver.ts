@@ -160,6 +160,15 @@ namespace Private {
   }
 
   /**
+   * Accept a candidate.
+   */
+  function accept(accepted: string): void {
+    resolved = true;
+    currentBeaconRequest = null;
+    delegate.resolve((name = accepted));
+  }
+
+  /**
    * Reject the candidate.
    */
   function reject(): void {
@@ -184,7 +193,19 @@ namespace Private {
       return delegate.promise;
     }
 
-    const { localStorage, setTimeout } = window;
+    const { setTimeout } = window;
+    let localStorage: Storage;
+    try {
+      localStorage = window.localStorage;
+    } catch (reason) {
+      // Sandboxed documents may not have access to local storage.
+      console.warn(
+        'WindowResolver could not access localStorage; accepting the candidate name.',
+        reason
+      );
+      accept(potential);
+      return delegate.promise;
+    }
 
     // Wait until other windows have reported before claiming the candidate.
     setTimeout(() => {
@@ -198,15 +219,21 @@ namespace Private {
         return reject();
       }
 
-      resolved = true;
-      currentBeaconRequest = null;
-      delegate.resolve((name = candidate));
+      accept(candidate);
       ping(name);
     }, TIMEOUT);
 
     // Fire the beacon to collect other windows' names.
     currentBeaconRequest = `${Math.random()}-${new Date().getTime()}`;
-    localStorage.setItem(BEACON, currentBeaconRequest);
+    try {
+      localStorage.setItem(BEACON, currentBeaconRequest);
+    } catch (reason) {
+      console.warn(
+        'WindowResolver could not write to localStorage; accepting the candidate name.',
+        reason
+      );
+      accept(potential);
+    }
 
     return delegate.promise;
   }

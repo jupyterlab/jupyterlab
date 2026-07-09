@@ -6,7 +6,26 @@
 
 # Extension Migration Guide
 
-## JupyterLab 4.5 to 4.6 (not released yet)
+## JupyterLab 4.6 to 4.7 (not released yet)
+
+### API updates
+
+- Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
+  `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
+  addons. Notable changes for extensions that interact with the terminal:
+  - `@xterm/addon-canvas` was removed upstream; when WebGL is not available the terminal now
+    falls back to the built-in DOM renderer, so the terminal may not contain a `<canvas>`
+    element anymore.
+  - The search addon no longer applies the `xterm-find-active-result-decoration` CSS class;
+    the active match is distinguished by its colors instead.
+  - The scrollbar is now rendered by a custom scrollable element instead of a native
+    `overflow-y: scroll` viewport; extensions styling or querying `.xterm-viewport` may need
+    updating.
+  - Extensions depending on `@xterm/*` packages themselves, for example to type against the
+    `Terminal.searchAddon` getter of `@jupyterlab/terminal`, should update them to the
+    versions used by `@jupyterlab/terminal` (`@xterm/xterm` 6.x and the matching addons).
+
+## JupyterLab 4.5 to 4.6
 
 ### Migrating to `jupyter-builder`
 
