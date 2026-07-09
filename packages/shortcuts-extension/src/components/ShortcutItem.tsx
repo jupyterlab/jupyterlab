@@ -341,24 +341,28 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element[] {
-    return binding.keys.map((keyboardKey: string, index: number) => (
-      <div className="jp-Shortcuts-ShortcutKeysContainer" key={index} tabIndex={0}>
-        <div className="jp-Shortcuts-ShortcutKeys">
-          {this.toSymbols(keyboardKey)
-            .split(' ')
-            .map((keyPart, keyPartIndex, keyParts) => (
-              <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
-                <span className="jp-ContextualShortcut-Key">{keyPart}</span>
-                {keyPartIndex + 1 < keyParts.length ? ' + ' : null}
-              </React.Fragment>
-            ))}
-        </div>
-        {index + 1 < binding.keys.length ? (
-          <div className="jp-Shortcuts-Comma">,</div>
-        ) : null}
-      </div>
-    ));
+  getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element {
+    return (
+      <>
+        {binding.keys.map((keyboardKey: string, index: number) => (
+          <React.Fragment key={index}>
+            <div className="jp-Shortcuts-ShortcutKeys">
+              {this.toSymbols(keyboardKey)
+                .split(' ')
+                .map((keyPart, keyPartIndex, keyParts) => (
+                  <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
+                    <span className="jp-ContextualShortcut-Key">{keyPart}</span>
+                    {keyPartIndex + 1 < keyParts.length ? ' + ' : null}
+                  </React.Fragment>
+                ))}
+            </div>
+            {index + 1 < binding.keys.length ? (
+              <div className="jp-Shortcuts-Comma">,</div>
+            ) : null}
+          </React.Fragment>
+        ))}
+      </>
+    );
   }
 
   isLocationBeingEdited(location: number): boolean {
@@ -370,33 +374,40 @@ export class ShortcutItem extends React.Component<
     binding: IKeybinding,
     nonEmptyBindings: IKeybinding[]
   ): JSX.Element {
+    const showOr =
+      !(
+        index === this._nonEmptyBindings.length - 1 &&
+        Object.values(this.state.displayReplaceInput).some(Boolean)
+      ) && index < this._nonEmptyBindings.length - 1;
+
     return (
-      <div
-        className="jp-Shortcuts-ShortcutContainer"
-        key={this.props.shortcut.id + '_' + index}
-        data-keybinding={index}
-        data-shortcut={this.props.shortcut.id}
-        onClick={() => this.toggleInputReplaceMethod(index)}
-        onKeyDown={event => {
-          const target = event.target as HTMLElement;
-          if (!target.classList.contains('jp-Shortcuts-ShortcutKeysContainer')) {
-            return;
-          }
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            this.toggleInputReplaceMethod(index);
-          }
-        }}
-      >
-        {this.isLocationBeingEdited(index)
-          ? this.getShortCutAsInput(binding, index)
-          : this.getShortCutForDisplayOnly(binding)}
-        {!(
-          index === this._nonEmptyBindings.length - 1 &&
-          Object.values(this.state.displayReplaceInput).some(Boolean)
-        ) &&
-          this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
-      </div>
+      <React.Fragment key={this.props.shortcut.id + '_' + index}>
+        <div
+          className="jp-Shortcuts-ShortcutContainer"
+          data-keybinding={index}
+          data-shortcut={this.props.shortcut.id}
+          tabIndex={this.isLocationBeingEdited(index) ? -1 : 0}
+          onClick={() => {
+            if (!this.isLocationBeingEdited(index)) {
+              this.toggleInputReplaceMethod(index);
+            }
+          }}
+          onKeyDown={event => {
+            if (this.isLocationBeingEdited(index)) {
+              return;
+            }
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              this.toggleInputReplaceMethod(index);
+            }
+          }}
+        >
+          {this.isLocationBeingEdited(index)
+            ? this.getShortCutAsInput(binding, index)
+            : this.getShortCutForDisplayOnly(binding)}
+        </div>
+        {showOr ? this.getOrDisplayIfNeeded(true) : null}
+      </React.Fragment>
     );
   }
 
