@@ -99,8 +99,11 @@ export abstract class RenderedCommon
   ): Promise<void> {
     // TODO compare model against old model for early bail?
 
-    // Empty any existing content in the node from previous renders
-    if (!keepExisting && !this.keepExisting) {
+    // Empty any existing content in the node from previous renders. An
+    // explicit `keepExisting` argument wins; when it is omitted the class
+    // default (`this.keepExisting`, e.g. `true` for streamed text) applies.
+    const keep = keepExisting ?? this.keepExisting;
+    if (!keep) {
       while (this.node.firstChild) {
         this.node.removeChild(this.node.firstChild);
       }
