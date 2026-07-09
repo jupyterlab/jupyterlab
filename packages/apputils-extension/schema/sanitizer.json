@@ -22,8 +22,8 @@
     },
     "incrementalAutolink": {
       "type": "boolean",
-      "title": "Incremental auto-linking",
-      "description": "Whether to auto-link URLs incrementally (asynchronously, across animation frames) as large textual outputs (e.g. streamed cell outputs) are rendered. When enabled (the default), the text is shown first and links appear shortly after, keeping the UI responsive. Disable to auto-link synchronously so links appear together with the text at first paint; note this also disables incremental rendering, so large outputs are rendered in a single blocking pass (legacy behavior).",
+      "title": "Incremental autolinking",
+      "description": "Whether to autolink URLs incrementally (asynchronously, across animation frames) as large textual outputs (e.g. streamed cell outputs) are rendered. When enabled (the default), the text is shown first and links appear shortly after, keeping the UI responsive. Disable to autolink synchronously so links appear together with the text at first paint; note this also disables incremental rendering, so large outputs are rendered in a single blocking pass (legacy behavior).",
       "default": true
     },
     "allowNamedProperties": {
