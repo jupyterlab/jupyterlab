@@ -5,11 +5,13 @@
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { Dialog, Printing, showDialog } from '@jupyterlab/apputils';
 import { isMarkdownCellModel } from '@jupyterlab/cells';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
+import type { IMapChange } from '@jupyter/ydoc';
 import { Token } from '@lumino/coreutils';
 import type { INotebookModel } from './model';
 import type { StaticNotebook } from './widget';
@@ -54,6 +56,19 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this._onSessionStatusChanged,
       this
     );
+    this.context.sessionContext.kernelPreferenceChanged.connect(
+      this._onKernelPreferenceChanged,
+      this
+    );
+    // Apply the `kernel_lock` metadata to the kernel preference once it is available.
+    void this.context.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._updateKernelLockPreference();
+      this.model?.metadataChanged.connect(this._onModelMetadataChanged, this);
+    });
+
     // this.content.fullyRendered.connect(this._onFullyRendered, this);
     this.context.saveState.connect(this._onSave, this);
     void this.revealed.then(() => {
@@ -257,6 +272,51 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       display_name: spec?.display_name,
       language: spec?.language
     });
+  }
+
+  /**
+   * Propagate the `kernel_lock` metadata into the kernel preference.
+   */
+  private _updateKernelLockPreference(): void {
+    const model = this.model;
+    if (!model) {
+      return;
+    }
+    const locked = model.kernelLocked;
+    const preference = this.context.sessionContext.kernelPreference;
+    if (preference.locked !== locked) {
+      this.context.sessionContext.kernelPreference = {
+        ...preference,
+        locked
+      };
+    }
+  }
+
+  /**
+   * Handle a change to the notebook metadata by propagating the `kernel_lock`
+   * field into the kernel preference.
+   */
+  private _onModelMetadataChanged(
+    sender: INotebookModel,
+    change: IMapChange
+  ): void {
+    if (change.key === 'kernel_lock') {
+      this._updateKernelLockPreference();
+    }
+  }
+
+  /**
+   * Handle a change to the kernel preference by persisting the lock state into
+   * the notebook metadata.
+   */
+  private _onKernelPreferenceChanged(
+    sender: ISessionContext,
+    args: IChangedArgs<ISessionContext.IKernelPreference>
+  ): void {
+    const locked = args.newValue.locked === true;
+    if (this.model && locked !== this.model.kernelLocked) {
+      this.model.setKernelLocked(locked);
+    }
   }
 
   /**
