@@ -44,9 +44,9 @@
     "@jupyterlab/notebook": "^4.7.0-alpha.0",
     "@jupyterlab/settingregistry": "^4.7.0-alpha.0",
     "@jupyterlab/terminal": "^4.7.0-alpha.0",
-    "@lumino/algorithm": "^2.0.4",
-    "@lumino/coreutils": "^2.2.2",
-    "@lumino/signaling": "^2.1.5"
+    "@lumino/algorithm": "^2.0.5",
+    "@lumino/coreutils": "^2.2.3",
+    "@lumino/signaling": "^2.1.6"
   },
   "devDependencies": {
     "@jupyter/builder": "^1.0.0-beta.1",

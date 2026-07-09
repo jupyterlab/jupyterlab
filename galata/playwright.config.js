@@ -5,7 +5,11 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
 var chromiumArgs = [
   // Ensures that subpixel font rendering in Chrome is the same on CI as locally
-  '--disable-lcd-text'
+  '--disable-lcd-text',
+  // The terminal renders with WebGL when available and with the DOM renderer
+  // otherwise, each rasterizing text slightly differently. WebGL availability
+  // varies between CI runners, so disable it to keep screenshots deterministic.
+  '--disable-webgl'
 ];
 
 module.exports = {
@@ -35,6 +39,16 @@ module.exports = {
     {
       name: 'galata',
       testMatch: 'test/galata/**',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
+    },
+    {
+      name: 'csp',
+      testMatch: 'test/csp/**',
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         launchOptions: {

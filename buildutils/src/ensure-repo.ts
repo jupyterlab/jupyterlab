@@ -349,6 +349,21 @@ function ensureBranch(): string[] {
       }
     }
 
+    if (filePath === 'packages/notebook-extension/src/index.ts') {
+      // Runtime help links should point users to stable documentation.
+      const runtimeHelpLinks = [
+        'https://jupyterlab.readthedocs.io/en/stable/user/export.html'
+      ];
+      runtimeHelpLinks.forEach(stableLink => {
+        const versionedLink = stableLink.replace('/stable/', `/${rtdVersion}/`);
+        if (stableLink !== versionedLink) {
+          while (newData.indexOf(versionedLink) !== -1) {
+            newData = newData.replace(versionedLink, stableLink);
+          }
+        }
+      });
+    }
+
     if (newData !== oldData) {
       messages.push(`Overwriting ${filePath}`);
       fs.writeFileSync(filePath, newData, 'utf-8');

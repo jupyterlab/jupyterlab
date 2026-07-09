@@ -164,6 +164,7 @@ jobs:
       - name: Download sdist
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
+          name: "sdist"
           path: "sdist"
       - name: Install From SDist
         run: |

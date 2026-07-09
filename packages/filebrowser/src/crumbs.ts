@@ -8,6 +8,7 @@ import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   ellipsesIcon,
+  homeIcon,
   folderFavoriteIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
@@ -1136,8 +1137,13 @@ namespace Private {
     ellipsis.tabIndex = -1;
 
     const preferredPath = PageConfig.getOption('preferredPath');
-    const path = preferredPath ? '/' + preferredPath : preferredPath;
-    const preferred = preferredIcon.element({
+    const path =
+      preferredPath && preferredPath !== '/'
+        ? '/' + preferredPath
+        : preferredPath;
+    const preferredPathIsHome =
+      PageConfig.getOption('preferredPathIsHome').toLowerCase() === 'true';
+    const preferred = (preferredPathIsHome ? homeIcon : preferredIcon).element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
       title: path || 'Jupyter Preferred Path',

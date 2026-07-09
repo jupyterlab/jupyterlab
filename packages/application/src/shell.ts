@@ -885,7 +885,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * The alpha version of this method only supports activating the "main" area.
    *
    * @alpha
-   * @param area Name of area to activate
+   * @param area - Name of area to activate
    */
   activateArea(area: ILabShell.Area = 'main'): void {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
@@ -1007,9 +1007,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Add a widget to the JupyterLab shell
    *
-   * @param widget Widget
-   * @param area Area
-   * @param options Options
+   * @param widget - Widget
+   * @param area - Area
+   * @param options - Options
    */
   add(
     widget: Widget,
@@ -1088,9 +1088,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * The new layout is stored in the shell user layout. Callers are
    * responsible for persisting it when needed.
    *
-   * @param widget Widget to move
-   * @param area New area
-   * @param mode Mode to change
+   * @param widget - Widget to move
+   * @param area - New area
+   * @param mode - Mode to change
    * @returns The new user layout
    */
   move(
@@ -1215,7 +1215,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Whether an side tab bar is visible or not.
    *
-   * @param side Sidebar of interest
+   * @param side - Sidebar of interest
    * @returns Side tab bar visibility
    */
   isSideTabBarVisible(side: 'left' | 'right'): boolean {
@@ -1493,7 +1493,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Toggle side tab bar visibility
    *
-   * @param side Sidebar of interest
+   * @param side - Sidebar of interest
    */
   toggleSideTabBarVisibility(side: 'right' | 'left'): void {
     if (side === 'right') {
@@ -1514,7 +1514,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Update the shell configuration.
    *
-   * @param config Shell configuration
+   * @param config - Shell configuration
    */
   updateConfig(config: Partial<ILabShell.IConfig>): void {
     if (config.hiddenMode) {
@@ -1558,8 +1558,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Move the activity bar of a side area to a new position.
    *
-   * @param side The side area to update.
-   * @param position The new position of the activity bar.
+   * @param side - The side area to update.
+   * @param position - The new position of the activity bar.
    */
   private _setActivityBarPosition(
     side: 'left' | 'right',
@@ -2427,7 +2427,10 @@ namespace Private {
      * Dehydrate the side bar data.
      */
     dehydrate(): ILabShell.ISideArea {
-      const collapsed = this._sideBar.currentTitle === null;
+      const collapsed =
+        this._position === 'side'
+          ? this._sideBar.currentTitle === null
+          : this._isCollapsedByUser;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
       const widgetStates: {
