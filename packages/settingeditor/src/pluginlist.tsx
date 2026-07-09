@@ -685,7 +685,14 @@ export class PluginList extends ReactWidget {
         plugin: ISettingRegistry.IPlugin,
         seen?: Set<string>
       ): ISearchMatch[] | null => {
-        if (filter(plugin.schema.title ?? '')) {
+        const schemaTags = plugin.schema.tags;
+        if (
+          filter(plugin.schema.title ?? '') ||
+          (Array.isArray(schemaTags) &&
+            (schemaTags as string[]).some(tag => filter(tag)))
+        ) {
+          // Returning null means that the whole plugin settings match, not only a
+          // subset of it. It is the case when the schema title or the tags match.
           return null;
         }
         return this._getMatches(
