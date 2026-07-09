@@ -9,6 +9,8 @@ import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
+const TERMINAL_TAB_LABEL_SELECTOR =
+  '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel';
 const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
 /**
@@ -43,10 +45,8 @@ async function runCommand(
 async function waitForTerminal(page: Page) {
   const terminal = page.locator(TERMINAL_SELECTOR);
   await terminal.waitFor();
-  const terminalTabLabel = page.locator(
-    '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
-  );
-  await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+  const terminalTabLabel = page.locator(TERMINAL_TAB_LABEL_SELECTOR);
+  await terminalTabLabel.filter({ hasText: /^Terminal \d+$/ }).waitFor();
 }
 
 test.describe('Terminal', () => {
@@ -58,11 +58,19 @@ test.describe('Terminal', () => {
 
   test.describe('Open', () => {
     test('should appear in the sidebar', async ({ page }) => {
+      await waitForTerminal(page);
+      const terminalTitle = await page
+        .locator(TERMINAL_TAB_LABEL_SELECTOR)
+        .first()
+        .innerText();
+
       await page.sidebar.openTab('jp-running-sessions');
-      // The number at the end is the identifier of the terminal.
-      // We allow any because concurrent execution of tests means
-      // that server can assign an identifier different than `1`.
-      await expect(page.locator('text=/terminals\\/\\d+/')).toBeVisible();
+
+      await expect(
+        page
+          .locator('#jp-running-sessions .jp-RunningSessions-itemLabel')
+          .filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
     });
 
     test('should reuse terminal tab title in the running sidebar', async ({
@@ -79,10 +87,7 @@ test.describe('Terminal', () => {
       );
 
       await expect(
-        page.locator(
-          '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel',
-          { hasText: terminalTitle }
-        )
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
       ).toBeVisible();
 
       await page.sidebar.openTab('jp-running-sessions');
