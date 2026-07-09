@@ -113,21 +113,24 @@ const STDOUT_WEB_LINKS = N_CHUNKS - 1;
 
 // Size the stderr output to roughly match the stdout output, so the two
 // channels are compared at a comparable total size (rendering cost scales with
-// size). Link density differs and is reported alongside.
-const STDERR_BLOCKS = Math.max(
-  2,
-  Math.round(STDOUT_TEXT.length / stderrText(1).length)
+// size). Link density differs and is reported alongside. Overridable
+// (BENCHMARK_STDERR_BLOCKS) to scan the output-size axis in round steps.
+const STDERR_BLOCKS = parseInt(
+  process.env['BENCHMARK_STDERR_BLOCKS'] ??
+    String(Math.max(2, Math.round(STDOUT_TEXT.length / stderrText(1).length))),
+  10
 );
 const STDERR_TEXT = stderrText(STDERR_BLOCKS);
 const STDERR_TEXT_LENGTH = STDERR_TEXT.length;
 // One web URL per traceback block.
 const STDERR_WEB_LINKS = STDERR_BLOCKS;
 
-// The `baked-many` scenario renders the full `baked` output in each of this
+// The `baked-many` scenarios render the full `baked` output in each of this
 // many concurrently rendering cells. Each output must be large enough to keep
 // rendering across many frames - that is what exercises the frame sharing;
 // outputs small enough to finish in a frame or two would not overlap.
-const N_OUTPUTS = 8;
+// Overridable (BENCHMARK_OUTPUT_CELLS) to scan the number-of-outputs axis.
+const N_OUTPUTS = parseInt(process.env['BENCHMARK_OUTPUT_CELLS'] ?? '8', 10);
 
 type Channel = 'stdout' | 'stderr';
 type Delivery = 'stream' | 'open';
@@ -189,6 +192,15 @@ const SCENARIOS: IScenario[] = [
     notebook: 'baked_stderr.ipynb',
     expectedLength: STDERR_TEXT_LENGTH,
     expectedLinks: STDERR_WEB_LINKS
+  },
+  {
+    name: 'baked-many-stderr',
+    channel: 'stderr',
+    delivery: 'open',
+    notebook: 'baked_stderr_many.ipynb',
+    expectedLength: STDERR_TEXT_LENGTH * N_OUTPUTS,
+    expectedLinks: STDERR_WEB_LINKS * N_OUTPUTS,
+    disableWindowing: true
   }
 ];
 
@@ -261,6 +273,7 @@ async function measureRenderTimings(
   allText: number;
   allLinks: number;
   longestFrame: number;
+  medianFrame: number;
 }> {
   await page.evaluate(
     ({ expectedLength, expectedLinks, linkSelector, command, args }) => {
@@ -269,7 +282,8 @@ async function measureRenderTimings(
         firstText: null as number | null,
         allText: null as number | null,
         allLinks: null as number | null,
-        longestFrame: 0
+        longestFrame: 0,
+        frameDeltas: [] as number[]
       };
       const selector = '[role="main"] .jp-NotebookPanel .jp-RenderedText';
       const start = performance.now();
@@ -298,10 +312,9 @@ async function measureRenderTimings(
       let lastFrame: number | null = null;
       const trackFrame = (timestamp: number) => {
         if (lastFrame !== null) {
-          w.__bench.longestFrame = Math.max(
-            w.__bench.longestFrame,
-            timestamp - lastFrame
-          );
+          const delta = timestamp - lastFrame;
+          w.__bench.frameDeltas.push(delta);
+          w.__bench.longestFrame = Math.max(w.__bench.longestFrame, delta);
         }
         lastFrame = timestamp;
         if (w.__bench.allLinks === null) {
@@ -331,11 +344,18 @@ async function measureRenderTimings(
   return page.evaluate(() => {
     const w = window as any;
     clearInterval(w.__benchTimer);
+    const deltas: number[] = [...w.__bench.frameDeltas].sort(
+      (a: number, b: number) => a - b
+    );
+    const medianFrame = deltas.length
+      ? deltas[Math.floor((deltas.length - 1) / 2)]
+      : 0;
     return {
       firstText: w.__bench.firstText,
       allText: w.__bench.allText,
       allLinks: w.__bench.allLinks,
-      longestFrame: w.__bench.longestFrame
+      longestFrame: w.__bench.longestFrame,
+      medianFrame
     };
   });
 }
@@ -423,6 +443,7 @@ test.describe('Benchmark - Output rendering', () => {
         allText: number;
         allLinks: number;
         longestFrame: number;
+        medianFrame: number;
       };
       if (scenario.delivery === 'stream') {
         // Open the notebook and wait for the kernel to be ready to execute.
@@ -463,7 +484,8 @@ test.describe('Benchmark - Output rendering', () => {
         [`${modeName}-first-text`, timings.firstText],
         [`${modeName}-all-text`, timings.allText],
         [`${modeName}-all-links`, timings.allLinks],
-        [`${modeName}-longest-frame`, timings.longestFrame]
+        [`${modeName}-longest-frame`, timings.longestFrame],
+        [`${modeName}-median-frame`, timings.medianFrame]
       ] as const) {
         testInfo.attachments.push(
           benchmark.addAttachment({
