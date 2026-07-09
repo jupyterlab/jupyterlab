@@ -605,7 +605,10 @@ export class PluginList extends ReactWidget {
           !filter ||
           filter(plugin.schema.title ?? '') ||
           (Array.isArray(schemaTags) &&
-            (schemaTags as string[]).some(tag => filter(tag)))
+            query !== undefined &&
+            (schemaTags as string[]).some(
+              tag => tag.toLowerCase() === query.toLowerCase()
+            ))
         ) {
           // Returning null means that the whole plugin settings match, not only a
           // subset of it. It is the case when the schema title or the tags match.
