@@ -79,6 +79,34 @@ describe('@jupyterlab/apputils', () => {
           const node = item.node.querySelector('.jp-Toolbar-kernelName')!;
           expect(node.textContent).toBe(sessionContext.kernelDisplayName);
         });
+
+        it('should be disabled when the kernel choice is locked', async () => {
+          const item = Toolbar.createKernelNameItem(
+            sessionContext,
+            new SessionContextDialogs()
+          );
+          await sessionContext.initialize();
+          Widget.attach(item, document.body);
+          await framePromise();
+          const button = item.node.querySelector('.jp-Toolbar-kernelName')!;
+          expect(button.getAttribute('aria-disabled')).toBe('false');
+
+          // Locking the kernel disables the switch-kernel button.
+          sessionContext.kernelPreference = {
+            ...sessionContext.kernelPreference,
+            locked: true
+          };
+          await framePromise();
+          expect(button.getAttribute('aria-disabled')).toBe('true');
+
+          // Unlocking re-enables it.
+          sessionContext.kernelPreference = {
+            ...sessionContext.kernelPreference,
+            locked: false
+          };
+          await framePromise();
+          expect(button.getAttribute('aria-disabled')).toBe('false');
+        });
       });
 
       describe('.createKernelStatusItem()', () => {
