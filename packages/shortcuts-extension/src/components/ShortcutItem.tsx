@@ -3,13 +3,15 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Button } from '@jupyter/react-components';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import {
+  addIcon,
   checkIcon,
+  deleteIcon,
   editIcon,
   HTMLSelect,
-  infoIcon
+  infoIcon,
+  restoreIcon
 } from '@jupyterlab/ui-components';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
@@ -175,15 +177,22 @@ export class ShortcutItem extends React.Component<
   }
 
   getResetShortCutLink(): JSX.Element {
+    const isDelete = this.props.shortcut.userDefined;
+    const label = isDelete ? this._trans.__('Delete') : this._trans.__('Reset');
     return (
-      <a
-        className="jp-Shortcuts-Reset"
+      <button
+        type="button"
+        className="jp-Button jp-mod-styled jp-Shortcuts-Reset jp-Shortcuts-Icon"
         onClick={() => this.props.resetKeybindings(this.props.shortcut)}
+        title={label}
+        aria-label={label}
       >
-        {this.props.shortcut.userDefined
-          ? this._trans.__('Delete')
-          : this._trans.__('Reset')}
-      </a>
+        {isDelete ? (
+          <deleteIcon.react tag={null} />
+        ) : (
+          <restoreIcon.react tag={null} />
+        )}
+      </button>
     );
   }
 
@@ -206,8 +215,9 @@ export class ShortcutItem extends React.Component<
         )}
         {!allDefault ? this.getResetShortCutLink() : ''}
         {this.props.external.editorFactory && (
-          <Button
-            className="jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions"
+          <button
+            type="button"
+            className="jp-Button jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions jp-Shortcuts-Icon"
             onClick={async () => {
               if (!this.props.external.editorFactory) {
                 console.error('Cannot build the custom options form');
@@ -230,23 +240,22 @@ export class ShortcutItem extends React.Component<
             }}
             title={showOptionsButtonTitle}
             aria-label={showOptionsButtonTitle}
-            appearance={'neutral'}
           >
             {editable ? (
               <editIcon.react tag={null} />
             ) : (
               <infoIcon.react tag={null} />
             )}
-          </Button>
+          </button>
         )}
         {!!this.props.newShortcutUtils && (
           <>
-            <Button
-              className="jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew"
+            <button
+              type="button"
+              className="jp-Button jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew jp-Shortcuts-Icon"
               onClick={this.props.newShortcutUtils?.saveShortcut}
               title={this._trans.__('Save shortcut')}
               aria-label={this._trans.__('Save shortcut')}
-              appearance="neutral"
               disabled={
                 !this.props.shortcut.command ||
                 !this.props.shortcut.keybindings.length ||
@@ -256,7 +265,7 @@ export class ShortcutItem extends React.Component<
               }
             >
               <checkIcon.react tag={null} />
-            </Button>
+            </button>
           </>
         )}
       </div>
@@ -323,6 +332,7 @@ export class ShortcutItem extends React.Component<
           conflicts.set(binding, data);
           this.setState({ conflicts });
         }}
+        clearConflict={() => this._clearConflictForBinding(binding)}
         toSymbols={this.toSymbols}
         displayInput={this.getDisplayReplaceInput(location)}
         placeholder={this.toSymbols(binding.keys.join(', '))}
@@ -391,15 +401,18 @@ export class ShortcutItem extends React.Component<
   }
 
   getAddLink(): JSX.Element {
+    const label = this._trans.__('Add');
     return (
       <button
         type="button"
-        className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
+        className="jp-Button jp-mod-styled jp-Shortcuts-Plus jp-Shortcuts-Icon"
         onClick={() => {
           this.toggleInputNew();
         }}
+        title={label}
+        aria-label={label}
       >
-        {this._trans.__('Add')}
+        <addIcon.react tag={null} />
       </button>
     );
   }
@@ -418,6 +431,7 @@ export class ShortcutItem extends React.Component<
           conflicts.set(null, data);
           this.setState({ conflicts });
         }}
+        clearConflict={() => this._clearConflictForBinding(null)}
         toSymbols={this.toSymbols}
         displayInput={this.state.displayNewInput}
         placeholder={''}
@@ -467,32 +481,11 @@ export class ShortcutItem extends React.Component<
               <div className="jp-Shortcuts-Conflict" key={key}>
                 <div className="jp-Shortcuts-ErrorMessage">
                   {this._trans.__(
-                    'Shortcut already in use by %1. Overwrite it?',
+                    'Shortcut already in use by %1.',
                     conflict.conflictsWith
                       .map(target => target.label ?? target.command)
                       .join(', ')
                   )}
-                </div>
-                <div className="jp-Shortcuts-ErrorButton">
-                  <button
-                    className="jp-Button jp-mod-reject jp-mod-styled"
-                    onClick={() => {
-                      this._clearConflict(conflict);
-                      conflict.cancel();
-                    }}
-                  >
-                    {this._trans.__('Cancel')}
-                  </button>
-                  <button
-                    className="jp-Button jp-mod-warn jp-mod-styled"
-                    onClick={() => {
-                      // Clear the conflict first to prevent user from accidentally clicking this button twice
-                      this._clearConflict(conflict);
-                      conflict.overwrite();
-                    }}
-                  >
-                    {this._trans.__('Overwrite')}
-                  </button>
                 </div>
               </div>
             );
@@ -502,29 +495,10 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  /**
-   * Mark conflict as resolved.
-   */
-  private _clearConflict(conflictToClear: IConflicts) {
-    const conflicts = new Map();
-    const idToSkip = this._conflictId(conflictToClear);
-    for (const [binding, conflict] of this.state.conflicts.entries()) {
-      if (this._conflictId(conflict) !== idToSkip) {
-        conflicts.set(binding, conflict);
-      }
-    }
+  private _clearConflictForBinding(binding: IKeybinding | null): void {
+    const conflicts = new Map(this.state.conflicts);
+    conflicts.delete(binding);
     this.setState({ conflicts });
-  }
-
-  /**
-   * Create a unique conflict identifier.
-   */
-  private _conflictId(conflict: IConflicts): string {
-    return (
-      conflict.keys.join(' ') +
-      '_' +
-      conflict.conflictsWith.map(target => target.id).join('')
-    );
   }
 
   private _getFilteredCommands(): IShortcutTarget[] {

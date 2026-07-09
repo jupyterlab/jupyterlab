@@ -8,7 +8,7 @@ import * as React from 'react';
 import type { ITranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
 import { EN_US } from '@lumino/keyboard';
-import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
+import { checkIcon } from '@jupyterlab/ui-components';
 import type {
   IKeybinding,
   IShortcutRegistry,
@@ -31,6 +31,7 @@ export interface IShortcutInputProps {
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
   displayConflicts: (conflicts: IConflicts) => void;
+  clearConflict: () => void;
   toggleInput: () => void;
   shortcut: IShortcutTarget;
   /* If keybinding is not given, the input is used for adding a keybinding, otherwise for replacing a keybinding */
@@ -49,6 +50,7 @@ export interface IShortcutInputState {
   keys: string[];
   currentChain: string;
   selected: boolean;
+  activeConflicts: IShortcutTarget[];
 }
 
 export class ShortcutInput extends React.Component<
@@ -66,7 +68,8 @@ export class ShortcutInput extends React.Component<
       isFunctional: this._isReplacingExistingKeybinding,
       keys: [],
       currentChain: '',
-      selected: true
+      selected: true,
+      activeConflicts: []
     };
   }
 
@@ -77,18 +80,12 @@ export class ShortcutInput extends React.Component<
 
   private _emitConflicts(conflicts: IShortcutTarget[]) {
     const keys = [...this.state.keys, this.state.currentChain];
+    this.setState({ activeConflicts: conflicts });
     this.props.displayConflicts({
       conflictsWith: conflicts,
       keys: this.state.keys,
       overwrite: async () => {
-        this.setState({
-          // Since user decided to overwrite, no need to show it as conflicted anymore
-          isAvailable: true
-        });
-        // Try to overwrite
-        await this._handleOverwrite(conflicts, keys);
-        // Only hide the input after the overwrite took place
-        this.props.toggleInput();
+        await this._overwriteConflicts(conflicts, keys);
       },
       cancel: () => {
         // Hide the input
@@ -97,7 +94,26 @@ export class ShortcutInput extends React.Component<
     });
   }
 
+  private _overwriteConflicts = async (
+    conflicts: IShortcutTarget[],
+    keys: string[]
+  ): Promise<void> => {
+    this.props.clearConflict();
+    this.setState({
+      // Since user decided to overwrite, no need to show it as conflicted anymore
+      isAvailable: true,
+      activeConflicts: []
+    });
+    await this._handleOverwrite(conflicts, keys);
+    this.props.toggleInput();
+  };
+
   handleSubmit = async () => {
+    if (!this.state.isAvailable && this.state.activeConflicts.length > 0) {
+      const keys = [...this.state.keys, this.state.currentChain];
+      await this._overwriteConflicts(this.state.activeConflicts, keys);
+      return;
+    }
     if (!this._isReplacingExistingKeybinding) {
       await this._updateShortcut();
       this.props.toggleInput();
@@ -303,6 +319,12 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this._submitRef.current?.focus();
+      return;
+    }
     event.preventDefault();
     this.setState({ selected: false });
     const parsed = this.parseChaining(
@@ -339,6 +361,8 @@ export class ShortcutInput extends React.Component<
 
   render() {
     const trans = this.props.translator.load('jupyterlab');
+    const hasConflict =
+      !this.state.isAvailable && this.state.activeConflicts.length > 0;
     let inputClassName = 'jp-Shortcuts-Input';
     if (!this.state.isAvailable) {
       inputClassName += ' jp-mod-unavailable-Input';
@@ -376,20 +400,35 @@ export class ShortcutInput extends React.Component<
               : this.state.value}
           </p>
         </div>
-        <button
-          className={
-            !this.state.isFunctional
-              ? 'jp-Shortcuts-Submit jp-mod-defunc-Submit'
-              : !this.state.isAvailable
-                ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
-                : 'jp-Shortcuts-Submit'
-          }
-          disabled={!this.state.isAvailable || !this.state.isFunctional}
-          onClick={this.handleSubmit}
-          tabIndex={0}
-        >
-          {this.state.isAvailable ? <checkIcon.react /> : <errorIcon.react />}
-        </button>
+        {hasConflict ? (
+          <button
+            ref={this._submitRef}
+            type="button"
+            className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-warn jp-mod-conflict-Submit${
+              !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+            }`}
+            disabled={!this.state.isFunctional}
+            onClick={this.handleSubmit}
+            title={trans.__('Overwrite')}
+            aria-label={trans.__('Overwrite')}
+          >
+            {trans.__('Overwrite')}
+          </button>
+        ) : (
+          <button
+            ref={this._submitRef}
+            type="button"
+            className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
+              !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+            }`}
+            disabled={!this.state.isFunctional}
+            onClick={this.handleSubmit}
+            title={trans.__('Save shortcut')}
+            aria-label={trans.__('Save shortcut')}
+          >
+            <checkIcon.react tag={null} />
+          </button>
+        )}
       </div>
     );
   }
@@ -408,4 +447,5 @@ export class ShortcutInput extends React.Component<
   };
 
   private _ref: React.RefObject<HTMLDivElement>;
+  private _submitRef = React.createRef<HTMLButtonElement>();
 }
