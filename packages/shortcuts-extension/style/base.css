@@ -209,11 +209,6 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
   background: var(--jp-accept-color-normal);
 }
 
-.jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutContainer {
-  border-color: var(--jp-border-color1);
-  background: var(--jp-layout-color2);
-}
-
 .jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
 .jp-Shortcuts-Row:hover button.jp-Shortcuts-Plus,
 .jp-Shortcuts-Row:hover .jp-Shortcuts-Or {
@@ -244,11 +239,15 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
 }
 
 .jp-Shortcuts-ShortcutContainer:focus-visible {
-  background: var(--jp-layout-color3);
+  background: var(--jp-layout-color2);
   outline-width: var(--jp-focus-outline-width);
   outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
   outline-offset: 1px;
+}
+
+.jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutContainer {
+  background: var(--jp-layout-color2);
 }
 
 .jp-Shortcuts-ConflictContainer {
