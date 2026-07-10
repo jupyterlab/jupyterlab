@@ -51,6 +51,64 @@ test('Open the settings editor with a specific search query', async ({
   await expect(fistListEntry).toHaveText('CodeMirror');
 });
 
+async function injectTag(
+  page: IJupyterLabPageFixture,
+  pluginId: string,
+  tag: string
+): Promise<void> {
+  await page.evaluate(
+    async ({ id, t }) => {
+      const app = (window as any).jupyterapp;
+      const registry = app.pluginRegistry._plugins.get(
+        '@jupyterlab/apputils-extension:settings'
+      ).service;
+      const settings = await registry.load(id);
+      settings.plugin.schema.tags = [t];
+    },
+    { id: pluginId, t: tag }
+  );
+}
+
+test('Tag search finds a plugin by exact tag match', async ({ page }) => {
+  const pluginId = '@jupyterlab/settingeditor-extension:form-ui';
+  await injectTag(page, pluginId, 'zz-galata-tag-test-zz');
+
+  // Search by exact tag — 'zz' cannot fuzzy-match any real plugin title
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'zz-galata-tag-test-zz'
+    });
+  });
+
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
+  await expect(
+    page.locator('.jp-PluginList-entry-label-text').first()
+  ).toHaveText('Settings Editor Form UI');
+  // Tag match means the full settings form is visible (not filtered to a subset)
+  await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
+});
+
+test('Partial tag does not match via tag search', async ({ page }) => {
+  const pluginId = '@jupyterlab/settingeditor-extension:form-ui';
+  await injectTag(page, pluginId, 'zz-galata-partial-zz');
+
+  // 'zz-galata-partial' is not an exact match of 'zz-galata-partial-zz'
+  // and cannot fuzzy-match any real plugin title
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'zz-galata-partial'
+    });
+  });
+
+  await page.locator('.jp-PluginList').waitFor();
+
+  // The form-ui plugin must not appear: no tag match and no title/property match
+  const titles = await page
+    .locator('.jp-PluginList-entry-label-text')
+    .allTextContents();
+  expect(titles).not.toContain('Settings Editor Form UI');
+});
+
 test.describe('change font-size', () => {
   // We wrap the font size comparisons in `expect().toPass()`
   // because clicking on the menu only triggers the asynchronous
