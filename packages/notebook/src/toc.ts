@@ -244,8 +244,15 @@ export class NotebookToCModel extends TableOfContentsModel<
    */
   protected async getHeadings(): Promise<INotebookHeading[] | null> {
     const cells = this.widget.content.widgets;
+    const currentCells = new Set(cells);
     const headings: INotebookHeading[] = [];
     const documentLevels = new Array<number>();
+
+    this._cellToHeadingIndex = new WeakMap<Cell, number>();
+    this._runningCells = this._runningCells.filter(cell =>
+      currentCells.has(cell)
+    );
+    this._errorCells = this._errorCells.filter(cell => currentCells.has(cell));
 
     // Generate headings by iterating through all notebook cells...
     for (let i = 0; i < cells.length; i++) {
@@ -329,7 +336,8 @@ export class NotebookToCModel extends TableOfContentsModel<
   ): boolean {
     return (
       super.isHeadingEqual(heading1, heading2) &&
-      heading1.cellRef === heading2.cellRef
+      heading1.cellRef === heading2.cellRef &&
+      heading1.isRunning === heading2.isRunning
     );
   }
 
@@ -463,11 +471,15 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   protected updateRunningStatus(headings: INotebookHeading[]): void {
+    headings.forEach(heading => {
+      heading.isRunning = RunningStatus.Idle;
+    });
+
     // Update isRunning
     this._runningCells.forEach((cell, index) => {
       const headingIndex = this._cellToHeadingIndex.get(cell);
       if (headingIndex !== undefined) {
-        const heading = this.headings[headingIndex];
+        const heading = headings[headingIndex];
         // Running is prioritized over Scheduled, so if a heading is
         // running don't change status
         if (heading.isRunning !== RunningStatus.Running) {
@@ -480,7 +492,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     this._errorCells.forEach((cell, index) => {
       const headingIndex = this._cellToHeadingIndex.get(cell);
       if (headingIndex !== undefined) {
-        const heading = this.headings[headingIndex];
+        const heading = headings[headingIndex];
         // Running and Scheduled are prioritized over Error, so only if
         // a heading is idle will it be set to Error
         if (heading.isRunning === RunningStatus.Idle) {
