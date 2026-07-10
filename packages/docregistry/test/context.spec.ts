@@ -14,7 +14,7 @@ import {
   waitForDialog
 } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { UUID } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 describe('docregistry/context', () => {
@@ -294,6 +294,54 @@ describe('docregistry/context', () => {
         });
         await context.initialize(false);
         await expect(context.ready).resolves.not.toThrow();
+      });
+
+      it('should resolve if the file is renamed while it is loading', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const get = manager.contents.get as jest.MockedFunction<
+          typeof manager.contents.get
+        >;
+        const getImplementation = get.getMockImplementation();
+        if (!getImplementation) {
+          throw new Error('Missing contents get mock implementation');
+        }
+
+        const started = new PromiseDelegate<void>();
+        const delayedGet = new PromiseDelegate<Contents.IModel>();
+        let isFirstGet = true;
+        get.mockImplementation((path, options) => {
+          if (path === oldPath && isFirstGet) {
+            isFirstGet = false;
+            started.resolve();
+            return delayedGet.promise;
+          }
+          return getImplementation(path, options);
+        });
+
+        try {
+          const initialized = context.initialize(false);
+          await started.promise;
+          await manager.contents.rename(oldPath, newPath);
+          delayedGet.reject(new Error('Stale path'));
+
+          await expect(initialized).resolves.not.toThrow();
+          await expect(context.ready).resolves.not.toThrow();
+          expect(context.path).toBe(newPath);
+          expect(context.contentsModel!.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+          expect(
+            document.body.getElementsByClassName('jp-Dialog')
+          ).toHaveLength(0);
+        } finally {
+          get.mockImplementation(getImplementation);
+        }
       });
     });
 
