@@ -404,7 +404,7 @@ export class ShortcutInput extends React.Component<
           <button
             ref={this._submitRef}
             type="button"
-            className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-warn jp-mod-conflict-Submit${
+            className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
               !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
             }`}
             disabled={!this.state.isFunctional}
