@@ -684,19 +684,19 @@ export class PluginList extends ReactWidget {
       const getMatches = (
         plugin: ISettingRegistry.IPlugin,
         seen?: Set<string>
-      ): ISearchMatch[] | null => {
+      ): ISearchMatch[] | 'all' | 'tag' => {
         const schemaTags = plugin.schema.tags;
         if (
-          filter(plugin.schema.title ?? '') ||
-          (Array.isArray(schemaTags) &&
-            query !== undefined &&
-            (schemaTags as string[]).some(
-              tag => tag.toLowerCase() === query.toLowerCase()
-            ))
+          Array.isArray(schemaTags) &&
+          query !== undefined &&
+          (schemaTags as string[]).some(
+            tag => tag.toLowerCase() === query.toLowerCase()
+          )
         ) {
-          // Returning null means that the whole plugin settings match, not only a
-          // subset of it. It is the case when the schema title or the tags match.
-          return null;
+          return 'tag';
+        }
+        if (!filter || filter(plugin.schema.title ?? '')) {
+          return 'all';
         }
         return this._getMatches(
           filter,
@@ -706,9 +706,13 @@ export class PluginList extends ReactWidget {
           seen
         );
       };
-      this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
+      this._filter = (
+        plugin: ISettingRegistry.IPlugin
+      ): SettingsEditor.FilteredValues => {
         const filtered = getMatches(plugin);
-        return filtered && [...new Set(filtered.map(match => match.label))];
+        return Array.isArray(filtered)
+          ? [...new Set(filtered.map(match => match.label))]
+          : filtered;
       };
       // The settings form needs every parent of a match, while the list
       // shows each match once and leaves out a parent whose matches it
@@ -752,8 +756,9 @@ export class PluginList extends ReactWidget {
     const icon = this.getHint(ICON_KEY, this._registry, plugin);
     const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
-    const filteredProperties = this._listFilter
-      ? this._listFilter(plugin)?.map(match => (
+    const listResult = this._listFilter ? this._listFilter(plugin) : undefined;
+    const filteredProperties = Array.isArray(listResult)
+      ? listResult.map(match => (
           <li
             key={JSON.stringify([...match.path, match.isKey])}
             style={{ paddingLeft: `${12 * (match.path.length - 1)}px` }}
@@ -834,7 +839,7 @@ export class PluginList extends ReactWidget {
         return false;
       }
       const filtered = this._filter(plugin);
-      return filtered === null || filtered.length > 0;
+      return !Array.isArray(filtered) || filtered.length > 0;
     });
 
     const modifiedPlugins = allPlugins.filter(plugin => {
@@ -905,7 +910,7 @@ export class PluginList extends ReactWidget {
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
   private _listFilter:
-    | ((plugin: ISettingRegistry.IPlugin) => ISearchMatch[] | null)
+    | ((plugin: ISettingRegistry.IPlugin) => ISearchMatch[] | 'all' | 'tag')
     | null = null;
   private _model: PluginList.Model;
   private _query: string | undefined;
