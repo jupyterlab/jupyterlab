@@ -41,8 +41,8 @@
   margin-left: auto;
   padding-left: 10px;
   width: 120px;
-  height: 25px;
-  line-height: 25px;
+  height: 26px;
+  line-height: 26px;
   display: block;
 }
 
@@ -62,8 +62,8 @@
   margin: 0;
   margin-top: 4px;
   padding: 0 5px;
-  height: 17px;
-  line-height: 17px;
+  height: 18px;
+  line-height: 18px;
   width: fit-content;
 }
 
@@ -76,19 +76,22 @@
   color: var(--jp-content-font-color3);
 }
 
-.jp-Shortcuts-Submit {
-  background-color: var(--jp-brand-color2);
-  border-radius: 0;
-  border: none;
-  color: var(--jp-layout-color0);
-  font-family: var(--jp-ui-font-family);
-  cursor: pointer;
+.jp-Shortcuts-Submit:focus {
+  outline: none;
 }
 
-.jp-Shortcuts-Submit.jp-Shortcuts-Icon {
-  display: block;
-  height: 27px;
-  width: 26px;
+.jp-Shortcuts-Submit .jp-icon3[fill] {
+  fill: var(--jp-layout-color1);
+}
+
+button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
+button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
+  background-color: green;
+  color: var(--jp-inverse-layout-color1);
+}
+
+button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color1);
 }
 
 .jp-Shortcuts-Overwrite {
@@ -104,27 +107,6 @@
   border-radius: 0;
   cursor: pointer;
   font-family: var(--jp-ui-font-family);
-}
-
-.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit {
-  background-color: var(--jp-layout-color3);
-  color: var(--jp-inverse-layout-color1);
-}
-
-.jp-Shortcuts-Submit:focus {
-  outline: none;
-}
-
-.jp-Shortcuts-Submit .jp-icon3[fill] {
-  fill: var(--jp-layout-color1);
-}
-
-.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
-  background-color: var(--jp-layout-color3);
-}
-
-.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
-  fill: var(--jp-inverse-layout-color1);
 }
 
 /* Shortcut Item Style */
@@ -163,9 +145,7 @@
   outline-offset: 1px;
 }
 
-.jp-Shortcuts-ShortcutUI .jp-Shortcuts-Cell button.jp-Shortcuts-Plus:focus-visible,
-.jp-Shortcuts-ShortcutUI .jp-Shortcuts-Cell button.jp-Shortcuts-Reset:focus-visible,
-.jp-Shortcuts-ShortcutUI .jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible {
+.jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible {
   outline-offset: 1px;
 }
 
@@ -250,15 +230,6 @@
   position: relative;
 }
 
-.jp-Shortcuts-ErrorButton {
-  margin-left: 12px;
-  white-space: nowrap;
-}
-
-.jp-Shortcuts-ErrorButton > button {
-  margin-right: 12px;
-}
-
 .jp-Shortcuts-ShortcutContainer {
   display: inline-flex;
   flex-wrap: nowrap;
@@ -269,7 +240,6 @@
 }
 
 .jp-Shortcuts-ShortcutContainer:hover {
-  border-color: var(--jp-border-color3);
   background: var(--jp-layout-color3);
 }
 
@@ -278,6 +248,7 @@
   outline-width: var(--jp-focus-outline-width);
   outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
+  outline-offset: 1px;
 }
 
 .jp-Shortcuts-ConflictContainer {
@@ -325,7 +296,7 @@
 }
 
 .jp-Shortcuts-Plus {
-  opacity: 0.2;
+  opacity: 0;
   color: var(--jp-ui-inverse-font-color1);
 }
 
@@ -339,7 +310,6 @@
 
 .jp-Shortcuts-Reset {
   color: var(--jp-brand-color2);
-  padding-left: 10px;
 }
 
 .jp-Shortcuts-Reset:hover {
@@ -394,9 +364,6 @@
 }
 
 /* TopNav Style */
-.jp-Shortcuts-Top {
-  display: block;
-}
 
 .jp-Shortcuts-TopNav {
   display: flex;
@@ -409,14 +376,6 @@
 
 .jp-Shortcuts-TopNav > .jp-FilterBox {
   width: 70%;
-}
-
-.jp-Shortcuts-Symbols {
-  padding: 0 12px;
-}
-
-.jp-Shortcuts-Symbols td:nth-child(2) {
-  padding-right: 10px;
 }
 
 .jp-Shortcuts-AdvancedOptions {
@@ -471,19 +430,6 @@
   z-index: 1;
   display: table;
   padding: 10px 0;
-}
-
-.jp-Shortcuts-commandIcon {
-  margin-right: 13px;
-}
-
-.jp-Shortcuts-altIcon {
-  margin-right: 14px;
-}
-
-.jp-Shortcuts-controlIcon {
-  margin-left: 8px;
-  margin-right: 16px;
 }
 
 .jp-Shortcuts-CustomOptionsDialogBody {
