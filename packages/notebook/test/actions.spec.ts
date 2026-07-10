@@ -70,6 +70,32 @@ function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
   });
 }
 
+/**
+ * Poll until the first stream output of a cell reaches at least `minLength`
+ * characters, returning the stream text from the output model.
+ *
+ * #### Notes
+ * After a move or undo the cell is reconstructed and its initial output models
+ * are created during `OutputAreaModel` construction, before `list.changed` is
+ * connected. As a result, in-place stream growth updates the output model data
+ * but does not emit `OutputAreaModel.changed`, so waiting on that signal is
+ * unreliable. Polling the output model is deterministic for these cases.
+ */
+async function waitForStreamOutput(
+  cell: CodeCell,
+  minLength: number
+): Promise<string> {
+  for (let i = 0; i < 100; i++) {
+    const text =
+      (cell.outputArea.model.get(0)?.data[STDOUT_TYPE] as string) ?? '';
+    if (text.length >= minLength) {
+      return text;
+    }
+    await sleep(100);
+  }
+  throw new Error('Timed out waiting for stream output');
+}
+
 beforeAll(async () => {
   await server.start();
 }, 30000);
@@ -1891,6 +1917,147 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.model!.cells.get(0).sharedModel.getSource()).toBe(source);
       });
+
+      it('should preserve execution state and output for a running cell', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for at least one output to arrive before moving.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        // Wait for one more print to go to buffer - reproduces an issue where
+        // content streamed while the cell was being moved would be lost.
+        await sleep(1500);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.id).toBe(cellId);
+
+        // Cell should still be running with partial output.
+        const output = cellAfterMove.outputArea.model.get(0);
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterMove.model.executionState).toBe('running');
+        expect(cellAfterMove.model.executionCount).toBe(null);
+
+        // Wait for execution to complete.
+        const inIdleState = waitForExecutionState(cellAfterMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterMove.model.executionState).toBe('idle');
+        expect(cellAfterMove.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should not lose outputs received after first move when moving a second time', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for first output before first move.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterFirstMove = widget.widgets[1] as CodeCell;
+
+        // Wait for another output to arrive while at the moved position.
+        // (Poll rather than wait on `model.changed`, which does not fire for
+        // in-place stream growth of a reconstructed cell's initial outputs.)
+        const outputAfterFirstMove = await waitForStreamOutput(
+          cellAfterFirstMove,
+          '0\n1\n'.length
+        );
+        // Verify at least one extra print arrived after the first move.
+        expect(outputAfterFirstMove.length).toBeGreaterThan('0\n'.length);
+
+        // Move a second time.
+        NotebookActions.moveDown(widget);
+        const cellAfterSecondMove = widget.widgets[2] as CodeCell;
+        expect(cellAfterSecondMove.model.id).toBe(cellId);
+
+        // Outputs received after the first move must survive the second move.
+        const output = cellAfterSecondMove.outputArea.model.get(0);
+        expect(output.data[STDOUT_TYPE]).toBe(outputAfterFirstMove);
+
+        // Wait for execution to complete.
+        const inIdleState = waitForExecutionState(cellAfterSecondMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterSecondMove.model.executionState).toBe('idle');
+        expect(cellAfterSecondMove.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should not touch the undo stack when the move is a no-op', async () => {
+        // Create a previous, unrelated undo item (a real move of a cell that
+        // is not running).
+        widget.activeCellIndex = 0;
+        NotebookActions.moveDown(widget);
+
+        const undoManager = (widget.model!.sharedModel as YNotebook)
+          .undoManager;
+        undoManager.stopCapturing();
+
+        // Run the bottom cell so it has an in-flight execution future, which
+        // would otherwise be captured and written onto the undo stack.
+        const lastIndex = widget.widgets.length - 1;
+        const cell = widget.widgets[lastIndex] as CodeCell;
+        widget.activeCellIndex = lastIndex;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(2)');
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        const topItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+        const stackLengthBefore = undoManager.undoStack.length;
+        const metaSizeBefore = topItem.meta.size;
+
+        // Moving the bottom cell "down" is a no-op: `Notebook.moveCell` returns
+        // early because the bounded target equals the source index. The wrapper
+        // must mirror that and avoid attaching execution metadata to the
+        // unrelated previous undo item.
+        widget.activeCellIndex = lastIndex;
+        NotebookActions.moveDown(widget);
+
+        expect(undoManager.undoStack.length).toBe(stackLengthBefore);
+        expect(undoManager.undoStack[undoManager.undoStack.length - 1]).toBe(
+          topItem
+        );
+        expect(topItem.meta.size).toBe(metaSizeBefore);
+
+        // The running cell keeps its future and finishes normally.
+        const inIdleState = waitForExecutionState(cell, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(cell.model.executionState).toBe('idle');
+        expect(cell.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#copy()', () => {
@@ -2495,6 +2662,63 @@ describe('@jupyterlab/notebook', () => {
         await executionCompleted;
         // Verify outputs kept arriving even after undo reconnected the future.
         expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should preserve execution state and output after undoing a move of a running cell', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        // A one-second cadence keeps the cell streaming well past the move and
+        // the undo, so the output received after the move (the output at risk
+        // of being rolled back) is deterministically present.
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for at least one output to arrive before moving.
+        await waitForStreamOutput(cell, '0\n'.length);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.id).toBe(cellId);
+
+        // Wait until more output arrives at the moved position (the output at
+        // risk of being rolled back by the undo).
+        await waitForStreamOutput(cellAfterMove, '0\n1\n'.length);
+        // Capture synchronously, immediately before the undo, so it matches
+        // the snapshot the undo takes.
+        const outputAfterMove = cellAfterMove.outputArea.model.get(0).data[
+          STDOUT_TYPE
+        ] as string;
+
+        // Undo the move.
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo.model.id).toBe(cellId);
+
+        // All outputs accumulated up to the undo must survive it.
+        expect(cellAfterUndo.outputArea.model.length).toBeGreaterThan(0);
+        const output = cellAfterUndo.outputArea.model.get(0);
+        expect(output.data[STDOUT_TYPE]).toBe(outputAfterMove);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for execution to complete; the final output must be intact.
+        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          finalOutput
+        );
         expect(cellAfterUndo.model.executionState).toBe('idle');
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
       }, 20000);

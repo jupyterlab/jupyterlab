@@ -17,8 +17,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-ThemedContainer button {
+/* Use :where() so this rule has specificity (0,0,1), lower than Font
+ * Awesome's `.fa` and friends who have (0,1,0), so that `<button class="fa">`
+ * keep their glyph font while plain buttons still get the UI font. */
+:where(.jp-ThemedContainer) button {
   font-family: var(--jp-ui-font-family);
+}
+
+.jp-ThemedContainer button {
   border-radius: var(--jp-border-radius);
 }
 
