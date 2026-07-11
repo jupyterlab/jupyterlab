@@ -1,16 +1,16 @@
 {
   "name": "@jupyterlab/example-localization",
-  "version": "4.6.0",
+  "version": "4.7.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && rspack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0",
-    "@jupyterlab/coreutils": "^6.6.0",
-    "@jupyterlab/theme-light-extension": "^4.6.0",
-    "@jupyterlab/translation": "^4.6.0"
+    "@jupyterlab/application": "^4.7.0-alpha.0",
+    "@jupyterlab/coreutils": "^6.7.0-alpha.0",
+    "@jupyterlab/theme-light-extension": "^4.7.0-alpha.0",
+    "@jupyterlab/translation": "^4.7.0-alpha.0"
   },
   "devDependencies": {
     "@rspack/cli": "^2.0.2",

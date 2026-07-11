@@ -3405,10 +3405,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-localization@workspace:examples/localization"
   dependencies:
-    "@jupyterlab/application": ^4.6.0
-    "@jupyterlab/coreutils": ^6.6.0
-    "@jupyterlab/theme-light-extension": ^4.6.0
-    "@jupyterlab/translation": ^4.6.0
+    "@jupyterlab/application": ^4.7.0-alpha.0
+    "@jupyterlab/coreutils": ^6.7.0-alpha.0
+    "@jupyterlab/theme-light-extension": ^4.7.0-alpha.0
+    "@jupyterlab/translation": ^4.7.0-alpha.0
     "@rspack/cli": ^2.0.2
     "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
