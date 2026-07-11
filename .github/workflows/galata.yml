@@ -69,6 +69,11 @@ jobs:
             shard: 2
             shards: 2
             optional_dependencies: 'docs-screenshots'
+          - browser: chromium
+            project: csp
+            suite: csp
+            shard: 1
+            shards: 1
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -181,6 +186,8 @@ jobs:
           if [[ "${{ matrix.project }}" == "documentation" ]]; then
             JUPYTERLAB_GALATA_ROOT_DIR="${DEMO_DIR}" PYTHONWARNINGS=ignore \
               jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1 &
+          elif [[ "${{ matrix.project }}" == "csp" ]]; then
+            jupyter lab --config jupyter_server_csp_test_config.py > /tmp/jupyterlab_server.log 2>&1 &
           else
             jlpm start 2>&1 > /tmp/jupyterlab_server.log &
           fi
@@ -314,7 +321,7 @@ jobs:
           compression-level: 1
 
       - name: Print JupyterLab logs
-        if: always()
+        if: ${{ always() }}
         run: |
           cat /tmp/jupyterlab_server.log
 
