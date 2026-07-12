@@ -1518,7 +1518,14 @@ function addCommands(
         if (item.type === 'directory') {
           return;
         }
-        return commands.execute('docmanager:open', { path });
+        const widgetFactory = Private.resolveOpenWithFactory(
+          registry,
+          (args.factory as string) || undefined
+        );
+        return commands.execute('docmanager:open', {
+          path,
+          factory: widgetFactory
+        });
       } catch (reason) {
         if (reason.response && reason.response.status === 404) {
           reason.message = trans.__('Could not find path: %1', path);
@@ -1537,6 +1544,12 @@ function addCommands(
           dontShowBrowser: {
             type: 'boolean',
             description: trans.__('Whether to avoid showing the file browser')
+          },
+          factory: {
+            type: 'string',
+            description: trans.__(
+              'The widget factory, file type, or file extension used to open a file'
+            )
           }
         }
       }
@@ -2129,6 +2142,38 @@ namespace Private {
   }
 
   /**
+   * Resolve an `open-with` value to a widget factory name.
+   */
+  export function resolveOpenWithFactory(
+    docRegistry: DocumentRegistry,
+    openWith: string | undefined
+  ): string | undefined {
+    if (!openWith) {
+      return undefined;
+    }
+
+    const factory = docRegistry.getWidgetFactory(openWith);
+    if (factory) {
+      return factory.name;
+    }
+
+    const extension = openWith.startsWith('.') ? openWith : `.${openWith}`;
+    const fileType =
+      docRegistry.getFileType(openWith) ??
+      Array.from(docRegistry.fileTypes()).find(fileType =>
+        fileType.extensions.some(
+          value => value.toLowerCase() === extension.toLowerCase()
+        )
+      );
+    const [defaultExtension] = fileType?.extensions ?? [];
+    if (!defaultExtension) {
+      return openWith;
+    }
+
+    return docRegistry.defaultWidgetFactory(`untitled${defaultExtension}`).name;
+  }
+
+  /**
    * Restores file browser state and overrides state if tree resolver resolves.
    */
   export async function restoreBrowser(
@@ -2160,7 +2205,8 @@ namespace Private {
         if (paths.file) {
           await commands.execute(CommandIDs.openPath, {
             path: paths.file,
-            dontShowBrowser: true
+            dontShowBrowser: true,
+            factory: paths.factory
           });
         }
         if (paths.browser) {

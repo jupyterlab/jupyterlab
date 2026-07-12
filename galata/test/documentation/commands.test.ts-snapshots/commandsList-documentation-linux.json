@@ -2690,6 +2690,10 @@
         "dontShowBrowser": {
           "type": "boolean",
           "description": "Whether to avoid showing the file browser"
+        },
+        "factory": {
+          "type": "string",
+          "description": "The widget factory, file type, or file extension used to open a file"
         }
       }
     }
