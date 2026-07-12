@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -61,32 +61,60 @@ test.describe('File Edit Operations', () => {
 });
 
 test.describe('Console Interactions', () => {
-  test('Should send line to console on Shift + Enter', async ({ page }) => {
+  test('Should send line to console on Shift + Enter before kernel starts', async ({
+    page
+  }) => {
     await page.locator('[role="main"] .cm-content').fill('123\n12');
-    await page.getByText('12312').click({
-      button: 'right'
+
+    let delaySessionStart = true;
+    let markSessionStartRequested: () => void = () => undefined;
+    let releaseSessionStart: () => void = () => undefined;
+    // Hold session creation so Shift+Enter is pressed while the console is pending.
+    const sessionStartRequested = new Promise<void>(resolve => {
+      markSessionStartRequested = resolve;
+    });
+    const sessionStartReleased = new Promise<void>(resolve => {
+      releaseSessionStart = () => {
+        resolve();
+      };
+    });
+    await page.route(galata.Routes.sessions, async route => {
+      if (route.request().method() === 'POST' && delaySessionStart) {
+        delaySessionStart = false;
+        markSessionStartRequested();
+        await sessionStartReleased;
+      }
+      return route.fallback();
     });
 
-    await page.getByText('Create Console for Editor').click();
+    await page.evaluate(async () => {
+      const app = window.jupyterapp;
+      const widget = app.shell.currentWidget as {
+        id: string;
+        context: {
+          contentsModel?: { name?: string };
+          path: string;
+        };
+      };
+      await app.commands.execute('console:create', {
+        activate: false,
+        name: widget.context.contentsModel?.name,
+        path: widget.context.path,
+        kernelPreference: {
+          autoStartDefault: true,
+          language: 'python'
+        },
+        ref: widget.id,
+        insertMode: 'split-bottom'
+      });
+    });
 
-    const loadingBanner = page
-      .locator('.jp-CodeConsole-banner')
-      .getByText('...');
-    // Wait for loading state in the banner to show up
-    await loadingBanner.waitFor({ state: 'attached' });
-
-    // Select kernel
-    await page.getByRole('button', { name: 'Select Kernel' }).click();
-
-    // Wait for loading banner to disappear once fully loaded
-    await loadingBanner.waitFor({ state: 'detached' });
+    await sessionStartRequested;
 
     await page.getByText('123', { exact: true }).click();
 
-    // Wait for kernel to start up before execution
-    await page.locator('.jp-ConsolePanel [title="Kernel Idle"]').waitFor();
-
     await page.keyboard.press('Shift+Enter');
+    releaseSessionStart();
 
     await expect(
       page.getByLabel('Code Cell Content with Output').locator('span')
