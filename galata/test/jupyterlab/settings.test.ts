@@ -241,7 +241,7 @@ test('Check codemirror settings can all be set at the same time.', async ({
     let locator = page.getByLabel(selectText);
     await locator.click();
     // Workaround for bug https://github.com/jupyterlab/jupyterlab/issues/18458
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- documented bug workaround, see issue above
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(50);
     locators.push(locator);
   }
@@ -334,10 +334,8 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
 
   const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
   await shortcutKey.click();
-  // The shortcut input has a 0.3s CSS slide-in animation (see
-  // `.jp-Shortcuts-Input` in shortcuts-extension/style/base.css); wait for it
-  // to finish before taking the screenshot below.
-  // eslint-disable-next-line playwright/no-wait-for-timeout -- settle wait for CSS slide-in animation before screenshot
+  // settle wait for CSS slide-in animation before screenshot
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(300);
   await firstRow.hover();
   expect(await firstRow.screenshot()).toMatchSnapshot(
@@ -485,10 +483,8 @@ test('Settings Export: Clicking the export button triggers a download and matche
       '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_adaptive-theme'
     )
     .click();
-  // Wait for the settings to be loaded (persisted through the debounced
-  // settings save); there is no reliably observable DOM signal for the
-  // save completing here.
-  // eslint-disable-next-line playwright/no-wait-for-timeout -- no observable signal for debounced settings save completion
+  // Wait for the settings to be loaded
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(500);
 
   const downloadPromise = page.waitForEvent('download', { timeout: 5000 });

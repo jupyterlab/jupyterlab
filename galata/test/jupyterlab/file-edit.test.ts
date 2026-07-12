@@ -34,7 +34,7 @@ test.describe('File Edit Operations', () => {
     const currentDir = await page.filebrowser.getCurrentDirectory();
     // Wait a short while as the file initializes before renaming, see
     // https://github.com/jupyterlab/jupyterlab/issues/18455
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- server-side file initialization race, see jupyterlab/jupyterlab#18455
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
     await page.contents.renameFile(
       `${currentDir}/${DEFAULT_NAME}`,

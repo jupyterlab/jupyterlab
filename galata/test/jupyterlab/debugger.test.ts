@@ -61,12 +61,7 @@ for (const c of showSourcesCases) {
     test.afterEach(async ({ page }) => {
       await page.click('jp-button[title^=Continue]');
       await page.debugger.switchOff();
-      // `switchOff` resolves once the toolbar button's `aria-pressed`
-      // attribute flips, which happens synchronously on click, but the
-      // actual session teardown (kernel comm, debugpy detach) is not
-      // awaited and has no other DOM-observable signal, so a fixed pause
-      // is needed to avoid racing `notebook.close()`.
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debugger session backend teardown to finish; no observable DOM signal exists
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(500);
       await page.notebook.close();
     });
@@ -291,9 +286,7 @@ test.describe('Debugger Tests', () => {
       await page.click('jp-button[title^=Continue]');
     }
     await page.debugger.switchOff();
-    // See comment above (other `afterEach`) - `switchOff` does not await the
-    // backend session teardown and there is no observable DOM signal for it.
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debugger session backend teardown to finish; no observable DOM signal exists
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500);
     await page.notebook.close();
   });

@@ -789,7 +789,7 @@ test.describe('Auto search in any selection', async () => {
     await page.keyboard.press('Shift+End');
 
     // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18462
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- documented bug workaround, see issue above
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     // Open search box (filters should already be shown)

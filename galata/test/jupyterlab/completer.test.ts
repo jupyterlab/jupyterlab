@@ -215,9 +215,8 @@ test.describe('Completer', () => {
       await page.keyboard.type('import getopt\ngetopt.');
       await page.keyboard.press('Tab');
       // We need to wait until the completer gets bound to the cell after
-      // entering it. There is no observable DOM signal for the binding
-      // completing in the console prompt, so a short settle wait is used.
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- no observable completer-binding signal for the console prompt
+      // entering it.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(50);
     });
 

@@ -184,9 +184,8 @@ test.describe('Terminal', () => {
       await page.keyboard.press('Escape');
       await expect(terminal.locator('.xterm-viewport')).toBeFocused();
 
-      // Let the cursor/focus-ring rendering settle before taking the
-      // screenshot; there is no DOM signal for the visual transition itself.
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- allow focus/cursor styling to settle before screenshot
+      // allow focus/cursor styling to settle before screenshot
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(100);
       expect(await terminal.screenshot()).toMatchSnapshot('focus.png');
     });
@@ -257,7 +256,7 @@ test.describe('Terminal', () => {
     await terminal.hover({ position: { x: 6, y: 27 } });
 
     // We need to retry once with 2s pause to avoid flakiness.
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- xterm.js link matcher needs time to attach hover listeners; no observable signal to wait on
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(2000);
     await terminal.hover({ position: { x: 10, y: 27 } });
 

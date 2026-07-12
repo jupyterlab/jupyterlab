@@ -91,12 +91,7 @@ test.describe('Debugger Console', () => {
       // Try to switch off debugger if it's still active
       if (await page.debugger.isOn()) {
         await page.debugger.switchOff();
-        // `switchOff` resolves once the toolbar button's `aria-pressed`
-        // attribute flips, which happens synchronously on click, but the
-        // actual session teardown (kernel comm, debugpy detach) is not
-        // awaited and has no other DOM-observable signal, so a fixed pause
-        // is needed to avoid racing `notebook.close()` below.
-        // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debugger session backend teardown to finish; no observable DOM signal exists
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(500);
       }
     } catch (error) {

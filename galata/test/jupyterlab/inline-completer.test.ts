@@ -111,7 +111,7 @@ test.describe('Inline Completer', () => {
       // Focusing or clicking should not hide
       await completer.focus();
       await completer.click();
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- negative test: confirm the completer stays visible over time rather than hiding asynchronously after focus/click
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(100);
       await expect(completer).toBeVisible();
     });
@@ -312,13 +312,13 @@ test.describe('Inline Completer', () => {
       // By default the hiding animation starts after 700ms and lasts for 300ms
 
       // When animation starts the editor height should reduce
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- deliberately sampling the editor height mid-animation (700ms delay + in-progress shrink); no DOM signal marks this instant
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(750);
       const spacerAnimatingHeight = await measureEditorHeight();
       expect(spacerAnimatingHeight).toBeLessThan(ghostTextShownHeight);
 
       // After animation is done the height should be back to the initial height
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- deliberately sampling the editor height once the animation's fixed 300ms duration elapses; no DOM signal marks animation end
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
       const finalHeight = await measureEditorHeight();
       expect(noGhostTextHeight).toEqual(finalHeight);

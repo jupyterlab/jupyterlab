@@ -441,8 +441,7 @@ test.describe('Notebook scroll over long outputs (no windowing)', () => {
     // Scroll piece by piece checking that there is no jump
     while (previousOffset > 75) {
       await page.mouse.wheel(0, -100);
-      // Explicit wait because mouse wheel does not wait for scrolling: poll
-      // until the scroll triggered by the wheel event has been applied.
+      // poll until the scroll triggered by the wheel event has been applied.
       await expect
         .poll(() => outer.evaluate(node => node.scrollTop))
         .not.toBe(previousOffset);

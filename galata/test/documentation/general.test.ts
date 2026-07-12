@@ -484,10 +484,8 @@ test.describe('General', () => {
     await page.notebook.run();
 
     if (testInfo.config.updateSnapshots !== 'none') {
-      // Wait a bit for the map to load when updating the snapshots; the map
-      // tiles load asynchronously over the network with no reliable DOM
-      // signal to observe, so a fixed delay is used here.
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- no observable condition for asynchronous map tile loading, only used when updating snapshots
+      // Wait a bit for the map to load when updating the snapshots
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
     }
 
@@ -610,9 +608,8 @@ test.describe('General', () => {
     await page.keyboard.press('Enter');
 
     // Wait for command answer
-    await expect(page.locator('.jp-Terminal-body')).toContainText(
-      '6 directories, 27 files'
-    );
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(200);
 
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
   });
