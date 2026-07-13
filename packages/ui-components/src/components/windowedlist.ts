@@ -1847,6 +1847,7 @@ export class WindowedList<
     this._viewport.dataset.isScrolling = 'false';
     if (this._requiresTotalSizeUpdate) {
       this._updateTotalSize();
+      this._scrollBackToItemOnResize();
     }
     this._requiresTotalSizeUpdate = false;
   }
