@@ -82,13 +82,13 @@ export class ShortcutUI
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
-    this._isDisposed = false;
+    this._isMounted = false;
     this.props.external.actionRequested.connect(this._onActionRequested, this);
     void this._loadShortcutList();
   }
 
   componentWillUnmount(): void {
-    this._isDisposed = true;
+    this._isMounted = true;
     this.props.external.actionRequested.disconnect(
       this._onActionRequested,
       this
@@ -111,7 +111,7 @@ export class ShortcutUI
   /** Load shortcut settings from SettingRegistry. */
   private async _loadShortcutList(): Promise<void> {
     const settings = await this.props.external.getSettings();
-    if (this._isDisposed) {
+    if (this._isMounted) {
       return;
     }
 
@@ -126,7 +126,7 @@ export class ShortcutUI
     settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> | null = this
       ._settings
   ): void {
-    if (!settings || this._isDisposed) {
+    if (!settings || this._isMounted) {
       return;
     }
     const shortcutRegistry = new ShortcutRegistry({
@@ -471,7 +471,7 @@ export class ShortcutUI
     );
   }
 
-  private _isDisposed = false;
+  private _isMounted = false;
   private _newShortcutItem: NewShortcutItem;
   private _settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> | null =
     null;
