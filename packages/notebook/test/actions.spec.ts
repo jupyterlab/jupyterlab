@@ -2796,7 +2796,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#clearOutputs()', () => {
-      it('should clear the outputs on the selected cells', async () => {
+      it('should clear the outputs on the selected cells', () => {
         // Select the next code cell that has outputs.
         let index = 0;
         for (let i = 1; i < widget.widgets.length; i++) {
@@ -2807,7 +2807,7 @@ describe('@jupyterlab/notebook', () => {
             break;
           }
         }
-        await NotebookActions.clearOutputs(widget);
+        NotebookActions.clearOutputs(widget);
         let cell = widget.widgets[0] as CodeCell;
         expect(cell.model.outputs.length).toBe(0);
         expect(cell.model.trusted).toBe(true);
@@ -2816,21 +2816,21 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.model.trusted).toBe(true);
       });
 
-      it('should preserve the widget mode', async () => {
-        await NotebookActions.clearOutputs(widget);
+      it('should preserve the widget mode', () => {
+        NotebookActions.clearOutputs(widget);
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        await NotebookActions.clearOutputs(widget);
+        NotebookActions.clearOutputs(widget);
         expect(widget.mode).toBe('edit');
       });
 
-      it('should be a no-op if there is no model', async () => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        await NotebookActions.clearOutputs(widget);
+        NotebookActions.clearOutputs(widget);
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should clear all the uncoalesced outputs', async () => {
+      it('should clear all the uncoalesced outputs', () => {
         const model = new NotebookModel();
         model.fromJSON(uncoalescedOp);
         widget.model = model;
@@ -2842,7 +2842,7 @@ describe('@jupyterlab/notebook', () => {
         expect(outputsBefore.length).toBeGreaterThan(1);
 
         widget.select(cell);
-        await NotebookActions.clearOutputs(widget);
+        NotebookActions.clearOutputs(widget);
 
         const outputsAfter = cell.model.toJSON().outputs;
         expect(cell.model.outputs.length).toBe(0);

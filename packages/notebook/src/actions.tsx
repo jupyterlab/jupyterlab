@@ -1819,7 +1819,7 @@ export namespace NotebookActions {
    * #### Notes
    * The widget `mode` will be preserved.
    */
-  export async function clearOutputs(notebook: Notebook): Promise<void> {
+  export function clearOutputs(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1837,8 +1837,7 @@ export namespace NotebookActions {
         Private.outputCleared.emit({ notebook, cell: child });
       }
     }
-    await Private.waitForLayout();
-    await Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2884,19 +2883,6 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-  }
-
-  /**
-   * Wait for visual cell updates triggered by model changes to reach layout.
-   */
-  export function waitForLayout(): Promise<void> {
-    return new Promise(resolve => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
-      });
-    });
   }
 
   /**

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
 
 import {
@@ -12,6 +13,18 @@ import {
 
 const fileName = 'scroll.ipynb';
 const longOutputsNb = 'long_outputs.ipynb';
+
+async function waitForNotebookLayout(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+  });
+}
 
 test.use({
   mockSettings: {
@@ -248,6 +261,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
+    await waitForNotebookLayout(page);
 
     // The cell should scroll if less than one line of code is visible,
     // this is the height of the top cell margin + editor line height,
@@ -303,6 +317,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
+    await waitForNotebookLayout(page);
 
     // Select third cell to make sure it is visible
     await page.notebook.selectCells(2);
@@ -311,6 +326,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
+    await waitForNotebookLayout(page);
 
     // Make the third cell fully visible
     await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 1);
