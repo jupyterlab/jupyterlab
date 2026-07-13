@@ -375,8 +375,6 @@ test('should reattach a markdown code cell when scrolling back into the viewport
   ]);
 
   // Wait for the windowing engine to finish detaching the now-hidden cell
-  // before reversing the scroll direction; there is no observable signal
-  // for that internal detach completing.
   // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(400);
 
