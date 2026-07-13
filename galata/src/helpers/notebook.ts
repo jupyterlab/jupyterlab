@@ -1503,6 +1503,8 @@ export class NotebookHelper {
     await this.page.evaluate(cellIdx => {
       window.galata.resetExecutionCount(cellIdx);
     }, cellIndex);
+
+    await this._waitUntilKernelReadyToScheduleExecution();
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );

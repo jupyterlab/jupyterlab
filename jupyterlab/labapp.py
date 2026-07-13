@@ -11,6 +11,7 @@ import sys
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
+from jupyter_server.utils import to_os_path
 from jupyter_server.utils import url_path_join as ujoin
 from jupyterlab_server import (
     LabServerApp,
@@ -724,6 +725,15 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super()._prepare_templates()
         self.jinja2_env.globals.update(custom_css=self.custom_css)
 
+    def _preferred_path_is_home(self):
+        """Whether the preferred path resolves to the user's home directory."""
+        try:
+            contents_manager = self.serverapp.contents_manager
+            preferred_dir = to_os_path(contents_manager.preferred_dir, contents_manager.root_dir)
+            return os.path.samefile(preferred_dir, os.path.expanduser("~"))
+        except (AttributeError, OSError):
+            return False
+
     def initialize_handlers(self):  # noqa
         handlers = []
 
@@ -738,6 +748,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
+        page_config["preferredPathIsHome"] = self._preferred_path_is_home()
         if hasattr(self.serverapp.contents_manager, "delete_to_trash"):
             page_config["delete_to_trash"] = self.serverapp.contents_manager.delete_to_trash
 
