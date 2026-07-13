@@ -25,11 +25,11 @@ async function runCommand(
   verify = false
 ): Promise<void> {
   await terminalLocator.waitFor({ state: 'visible' });
-  await terminalLocator.locator('.jp-Terminal-body').focus();
+  await terminalLocator.locator('.xterm-screen').click();
 
-  await terminalLocator
-    .locator(TERMINAL_INPUT_SELECTOR)
-    .waitFor({ state: 'visible' });
+  const terminalInput = terminalLocator.locator(TERMINAL_INPUT_SELECTOR);
+  await terminalInput.waitFor({ state: 'attached' });
+  await expect(terminalInput).toBeFocused();
 
   await page.keyboard.type(command);
   if (verify) {
@@ -396,8 +396,7 @@ test.describe('Open in Terminal from File Browser', () => {
     await page.filebrowser.openDirectory(tmpPath);
     await page.filebrowser.refresh();
 
-    // Select both directories. Selection behavior itself is tested in the
-    // file browser suite; this test verifies the terminal command.
+    // Select both directories using name-based lookup and Shift-click
     const folderALocator = page.locator(
       `.jp-DirListing-item:has-text("${folderA}")`
     );
@@ -405,17 +404,13 @@ test.describe('Open in Terminal from File Browser', () => {
       `.jp-DirListing-item:has-text("${folderB}")`
     );
 
+    // Click first item
     await folderALocator.waitFor({ state: 'visible' });
-    await folderBLocator.waitFor({ state: 'visible' });
+    await folderALocator.click();
 
-    await page.evaluate(async () => {
-      await window.jupyterapp.commands.execute('filebrowser:select-all');
-    });
-    await expect(
-      page.locator('.jp-DirListing-item.jp-mod-selected')
-    ).toHaveCount(2);
-    await expect(folderALocator).toHaveClass(/jp-mod-selected/);
-    await expect(folderBLocator).toHaveClass(/jp-mod-selected/);
+    // Shift-click second item to select range (A, B)
+    await folderBLocator.waitFor({ state: 'visible' });
+    await folderBLocator.click({ modifiers: ['Shift'] });
 
     // Right-click to open context menu on selection
     await folderBLocator.click({ button: 'right' });
@@ -430,21 +425,30 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
-    const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
     const foundFolders = new Set<string>();
     for (let i = 0; i < 2; i++) {
-      await tabs.nth(i).click();
-      await activeTerminal.waitFor({ state: 'visible' });
-      await expect(activeTerminal).toHaveCount(1);
+      const tab = tabs.nth(i);
+      await tab.click();
+      await expect(tab).toHaveAttribute('aria-selected', 'true');
 
-      await runCommand(page, activeTerminal, 'pwd', true);
+      const tabId = await tab.getAttribute('id');
+      if (!tabId) {
+        throw new Error('Terminal tab is missing an id');
+      }
 
-      await expect(activeTerminal).toContainText(
+      const terminalPanel = page.locator(
+        `.lm-DockPanel-widget[aria-labelledby="${tabId}"]`
+      );
+      await terminalPanel.waitFor({ state: 'visible' });
+
+      await runCommand(page, terminalPanel, 'pwd');
+
+      await expect(terminalPanel).toContainText(
         new RegExp(`${folderA}|${folderB}`),
         { timeout: 10000 }
       );
 
-      const text = await activeTerminal.textContent();
+      const text = await terminalPanel.textContent();
       if (text?.includes(folderA)) {
         foundFolders.add(folderA);
       }
