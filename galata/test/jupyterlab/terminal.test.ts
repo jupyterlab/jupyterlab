@@ -396,7 +396,8 @@ test.describe('Open in Terminal from File Browser', () => {
     await page.filebrowser.openDirectory(tmpPath);
     await page.filebrowser.refresh();
 
-    // Select both directories using name-based lookup and Shift-click
+    // Select both directories. Selection behavior itself is tested in the
+    // file browser suite; this test verifies the terminal command.
     const folderALocator = page.locator(
       `.jp-DirListing-item:has-text("${folderA}")`
     );
@@ -404,13 +405,17 @@ test.describe('Open in Terminal from File Browser', () => {
       `.jp-DirListing-item:has-text("${folderB}")`
     );
 
-    // Click first item
     await folderALocator.waitFor({ state: 'visible' });
-    await folderALocator.click();
-
-    // Shift-click second item to select range (A, B)
     await folderBLocator.waitFor({ state: 'visible' });
-    await folderBLocator.click({ modifiers: ['Shift'] });
+
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('filebrowser:select-all');
+    });
+    await expect(
+      page.locator('.jp-DirListing-item.jp-mod-selected')
+    ).toHaveCount(2);
+    await expect(folderALocator).toHaveClass(/jp-mod-selected/);
+    await expect(folderBLocator).toHaveClass(/jp-mod-selected/);
 
     // Right-click to open context menu on selection
     await folderBLocator.click({ button: 'right' });
@@ -425,18 +430,14 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
+    const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
     const foundFolders = new Set<string>();
     for (let i = 0; i < 2; i++) {
       await tabs.nth(i).click();
       await activeTerminal.waitFor({ state: 'visible' });
-
-      // Find the currently visible terminal body
       await expect(activeTerminal).toHaveCount(1);
 
-      await activeTerminal.click();
-      await page.keyboard.type('pwd');
-      await page.keyboard.press('Enter');
+      await runCommand(page, activeTerminal, 'pwd', true);
 
       await expect(activeTerminal).toContainText(
         new RegExp(`${folderA}|${folderB}`),
