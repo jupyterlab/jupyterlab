@@ -24,14 +24,8 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
 
-      - name: Constrain releaser dependencies
-        run: |
-          echo "fastcore<2" > /tmp/jupyter-releaser-constraints.txt
-
       - name: Check Release
         uses: jupyter-server/jupyter_releaser/.github/actions/check-release@634ac751f8a58d3d4a19b63f58aad138e6355cc8 # v2
-        env:
-          PIP_CONSTRAINT: /tmp/jupyter-releaser-constraints.txt
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
