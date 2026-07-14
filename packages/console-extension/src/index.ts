@@ -1277,8 +1277,12 @@ async function activateConsole(
       if (args['activate'] !== false) {
         shell.activateById(widget.id);
       }
-      await widget.console.sessionContext.ready;
+      const sessionContext = widget.console.sessionContext;
+      await sessionContext.ready;
       if (widget.isDisposed || widget.console.isDisposed) {
+        return;
+      }
+      if (!sessionContext.session?.kernel) {
         return;
       }
       return widget.console.inject(
