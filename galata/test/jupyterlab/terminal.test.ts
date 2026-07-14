@@ -425,10 +425,14 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
+    const firstTabIndex =
+      (await tabs.nth(0).getAttribute('aria-selected')) === 'true' ? 0 : 1;
     const foundFolders = new Set<string>();
-    for (let i = 0; i < 2; i++) {
+    for (const i of [firstTabIndex, 1 - firstTabIndex]) {
       const tab = tabs.nth(i);
-      await tab.click();
+      if ((await tab.getAttribute('aria-selected')) !== 'true') {
+        await tab.click();
+      }
       await expect(tab).toHaveAttribute('aria-selected', 'true');
 
       const tabId = await tab.getAttribute('id');
