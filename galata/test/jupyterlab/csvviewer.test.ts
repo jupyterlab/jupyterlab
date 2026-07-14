@@ -21,6 +21,17 @@ const testData = `id,name,ip_address,userid
 10,Stephanie Turner,206.103.246.83,sturner9
 `;
 
+// CSV data with leading comment lines prefixed with '#'
+const testDataWithComments = `# This file was exported on 2024-01-01
+# Source: internal database
+id,name,ip_address,userid
+1,Juan King,51.223.215.102,jking0
+2,Janet Robertson,94.135.163.124,jrobertson1
+3,Charles Howard,49.71.100.63,choward2
+4,Beverly Johnson,95.201.11.104,bjohnson3
+5,Robin Fowler,244.18.23.69,rfowler4
+`;
+
 test.describe('CSV Viewer', () => {
   const csvFileName = 'test-data.csv';
 
@@ -50,6 +61,105 @@ test.describe('CSV Viewer', () => {
     await page.theme.setDarkTheme();
 
     expect(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
+  });
+
+  test.afterEach(async ({ page }) => {
+    try {
+      await page.contents.deleteFile(csvFileName);
+    } catch (e) {
+      console.error(`Error deleting file ${csvFileName}: ${e}`);
+    }
+
+    try {
+      fs.unlinkSync(tempFilePath);
+      fs.rmdirSync(path.dirname(tempFilePath));
+    } catch (e) {
+      console.error(`Error cleaning up temp file: ${e}`);
+    }
+  });
+});
+
+test.describe('CSV Viewer - comment character', () => {
+  const csvFileName = 'test-data-comments.csv';
+
+  let tempFilePath: string;
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'csv-comment-test-'));
+    tempFilePath = path.join(tempDir, csvFileName);
+
+    fs.writeFileSync(tempFilePath, testDataWithComments);
+    await page.contents.uploadFile(tempFilePath, `${tmpPath}/${csvFileName}`);
+  });
+
+  test('should show the Comment toolbar control', async ({ page }) => {
+    await page.filebrowser.open(csvFileName);
+
+    // The select is wrapped by Styling.wrapSelect inside the jp-CSVComment-dropdown div
+    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+    await expect(commentDropdown).toBeVisible();
+
+    // Default value should be empty string (none)
+    await expect(commentDropdown).toHaveValue('');
+  });
+
+  test('should render differently with and without comment char set', async ({
+    page
+  }) => {
+    await page.filebrowser.open(csvFileName);
+
+    const csvLocator = page.locator('.jp-CSVViewer');
+    await expect(csvLocator).toBeVisible();
+
+    // The DataGrid is canvas-based — no DOM cell elements exist.
+    // Wait for initial render (RENDER_TIMEOUT in widget is 1000 ms)
+    await page.waitForTimeout(1500);
+
+    // Take a screenshot with no comment char (# lines treated as data rows).
+    const screenshotWithoutComment = await csvLocator.screenshot();
+
+    // Now set '#' as the comment character
+    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+    await commentDropdown.selectOption('#');
+    await expect(commentDropdown).toHaveValue('#');
+
+    // Wait for the grid to re-render (RENDER_TIMEOUT in widget is 1000 ms)
+    await page.waitForTimeout(1500);
+
+    // Take screenshot after setting comment char (# lines are now skipped)
+    const screenshotWithComment = await csvLocator.screenshot();
+
+    // The two renders must differ — the comment lines affect the data layout
+    expect(Buffer.compare(screenshotWithComment, screenshotWithoutComment)).not.toBe(0);
+  });
+
+  test('should revert to raw rendering when comment char is cleared', async ({
+    page
+  }) => {
+    await page.filebrowser.open(csvFileName);
+
+    const csvLocator = page.locator('.jp-CSVViewer');
+    await expect(csvLocator).toBeVisible();
+
+    // Wait for initial render (RENDER_TIMEOUT in widget is 1000 ms)
+    await page.waitForTimeout(1500);
+
+    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+
+    // Enable comment char — grid should re-render without comment rows
+    await commentDropdown.selectOption('#');
+    await page.waitForTimeout(1500);
+
+    const withCommentScreenshot = await csvLocator.screenshot();
+
+    // Revert to none — grid should re-render including comment rows as data
+    await commentDropdown.selectOption('');
+    await page.waitForTimeout(1500);
+
+    const withoutCommentScreenshot = await csvLocator.screenshot();
+
+    // The two states must produce different renders
+    expect(Buffer.compare(withCommentScreenshot, withoutCommentScreenshot)).not.toBe(0);
   });
 
   test.afterEach(async ({ page }) => {
