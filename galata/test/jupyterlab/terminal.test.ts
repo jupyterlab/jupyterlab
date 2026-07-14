@@ -441,6 +441,11 @@ test.describe('Open in Terminal from File Browser', () => {
       );
       await terminalPanel.waitFor({ state: 'visible' });
 
+      const terminalBody = terminalPanel.locator('.jp-Terminal-body');
+      await expect(terminalBody).toContainText(/[$#%>]/, {
+        timeout: 15000
+      });
+
       await runCommand(page, terminalPanel, 'pwd');
 
       await expect(terminalPanel).toContainText(
