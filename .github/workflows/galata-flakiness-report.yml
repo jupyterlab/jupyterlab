@@ -6,20 +6,16 @@ on:
       runs:
         description: Number of scheduled UI test runs to analyze
         required: false
-        default: 20
+        default: 28
         type: number
-      issue_number:
-        description: Issue number to update in this repository
-        required: false
-        default: ''
-        type: string
-      post_comment:
-        description: Post or update the tracking issue comment
-        required: false
-        default: false
-        type: boolean
+  schedule:
+    - cron: '0 6 * * 1'
 
 permissions: {}
+
+env:
+  TRACKING_REPOSITORY: jupyterlab/jupyterlab
+  TRACKING_ISSUE_NUMBER: 19153
 
 jobs:
   analyze:
@@ -31,17 +27,13 @@ jobs:
       contents: read
     outputs:
       runs: ${{ steps.params.outputs.runs }}
-      issue_number: ${{ steps.params.outputs.issue_number }}
-      post_comment: ${{ steps.params.outputs.post_comment }}
       window_start: ${{ steps.report.outputs.window_start }}
       window_end: ${{ steps.report.outputs.window_end }}
     steps:
       - name: Set report parameters
         id: params
         env:
-          INPUT_RUNS: ${{ github.event.inputs.runs || '20' }}
-          INPUT_ISSUE_NUMBER: ${{ github.event.inputs.issue_number || vars.GALATA_FLAKE_REPORT_ISSUE || '' }}
-          INPUT_POST_COMMENT: ${{ github.event.inputs.post_comment || 'false' }}
+          INPUT_RUNS: ${{ github.event.inputs.runs || '28' }}
         run: |
           set -euo pipefail
 
@@ -49,19 +41,9 @@ jobs:
             echo "Invalid runs value: $INPUT_RUNS"
             exit 1
           fi
-          if [[ -n "$INPUT_ISSUE_NUMBER" ]] && ! [[ "$INPUT_ISSUE_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
-            echo "Invalid issue_number value: $INPUT_ISSUE_NUMBER"
-            exit 1
-          fi
-          if [[ "$INPUT_POST_COMMENT" != "true" && "$INPUT_POST_COMMENT" != "false" ]]; then
-            echo "Invalid post_comment value: $INPUT_POST_COMMENT"
-            exit 1
-          fi
 
           {
             echo "runs=$INPUT_RUNS"
-            echo "issue_number=$INPUT_ISSUE_NUMBER"
-            echo "post_comment=$INPUT_POST_COMMENT"
           } >> "$GITHUB_OUTPUT"
 
       - name: Checkout
@@ -98,8 +80,7 @@ jobs:
     if: >-
       ${{
         always() &&
-        needs.analyze.outputs.issue_number != '' &&
-        needs.analyze.outputs.post_comment == 'true'
+        github.repository == 'jupyterlab/jupyterlab'
       }}
     runs-on: ubuntu-24.04
     permissions:
@@ -115,9 +96,10 @@ jobs:
       - name: Post report comment
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          ISSUE_NUMBER: ${{ needs.analyze.outputs.issue_number }}
           ANALYZE_RESULT: ${{ needs.analyze.result }}
           RUNS_REQUESTED: ${{ needs.analyze.outputs.runs }}
+          TRACKING_ISSUE_NUMBER: ${{ env.TRACKING_ISSUE_NUMBER }}
+          TRACKING_REPOSITORY: ${{ env.TRACKING_REPOSITORY }}
           WINDOW_START: ${{ needs.analyze.outputs.window_start }}
           WINDOW_END: ${{ needs.analyze.outputs.window_end }}
         with:
@@ -125,10 +107,15 @@ jobs:
           script: |
             const fs = require('fs');
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const issue_number = Number(process.env.ISSUE_NUMBER);
+            const [owner, repo] = process.env.TRACKING_REPOSITORY.split('/');
+            const issueNumber = Number(process.env.TRACKING_ISSUE_NUMBER);
             const status = process.env.ANALYZE_RESULT === 'success' ? 'completed' : 'failed';
             const sourceRepo = 'jupyterlab/jupyterlab';
             const branch = 'main';
+
+            if (!owner || !repo || !Number.isInteger(issueNumber) || issueNumber < 1) {
+              throw new Error('Invalid tracking issue configuration.');
+            }
 
             const cell = value => String(value || 'n/a').replace(/\n/g, ' ').replace(/\|/g, '\\|');
             const windowStart = process.env.WINDOW_START || '';
@@ -160,8 +147,8 @@ jobs:
             }
 
             await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number,
+              owner,
+              repo,
+              issue_number: issueNumber,
               body
             });
