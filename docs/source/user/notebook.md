@@ -125,6 +125,14 @@ collapser button on left of each cell:
 </div>
 ```
 
+When a cell is collapsed, JupyterLab will display the first line of the cell (such as a `# comment` or the beginning of a function definition) while hiding the rest of the content. This is especially useful for organizing large notebooks while maintaining clear context for what each collapsed cell contains.
+
+```{image} ./images/jupyter-collapsible.gif
+:align: center
+:alt: A notebook cell starting with a comment being collapsed to show only the first line.
+:class: jp-screenshot
+```
+
 (enable-scrolling)=
 
 Enable scrolling for long outputs by right-clicking on a cell and
