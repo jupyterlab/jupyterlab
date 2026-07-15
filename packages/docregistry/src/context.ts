@@ -80,6 +80,7 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      driveName: manager.contents.driveName(this._path),
       kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,

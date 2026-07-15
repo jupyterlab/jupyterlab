@@ -378,6 +378,7 @@ export class SessionContext implements ISessionContext {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._path = options.path ?? UUID.uuid4();
+    this._driveName = options.driveName ?? '';
     this._type = options.type ?? '';
     this._name = options.name ?? '';
     this._setBusy = options.setBusy;
@@ -964,7 +965,9 @@ export class SessionContext implements ISessionContext {
     // the kernel finishes starting.
     // We later switch to the real path below.
     // Use the correct directory so the kernel will be started in that directory.
-    const dirName = PathExt.dirname(this._path);
+    const dirName =
+      PathExt.dirname(this._path) ||
+      (this._driveName ? `${this._driveName}:` : '');
     const requestId = (this._pendingSessionRequest = PathExt.join(
       dirName,
       UUID.uuid4()
@@ -1229,6 +1232,7 @@ export class SessionContext implements ISessionContext {
   }
 
   private _path = '';
+  private _driveName = '';
   private _name = '';
   private _type = '';
   private _prevKernelName: string = '';
@@ -1306,6 +1310,11 @@ export namespace SessionContext {
      * The initial path of the file.
      */
     path?: string;
+
+    /**
+     * The drive name for the path.
+     */
+    driveName?: string;
 
     /**
      * The name of the session.
