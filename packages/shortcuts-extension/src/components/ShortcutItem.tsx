@@ -184,7 +184,7 @@ export class ShortcutItem extends React.Component<
     return (
       <button
         type="button"
-        className="jp-Button jp-mod-styled jp-Shortcuts-Reset jp-Shortcuts-Icon"
+        className="jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Reset jp-Shortcuts-Icon"
         onClick={() => this.props.resetKeybindings(this.props.shortcut)}
         title={label}
         aria-label={label}
@@ -418,7 +418,7 @@ export class ShortcutItem extends React.Component<
     return (
       <button
         type="button"
-        className="jp-Button jp-mod-styled jp-Shortcuts-Plus jp-Shortcuts-Icon"
+        className="jp-Button jp-mod-styled jp-mod-accept jp-Shortcuts-Plus jp-Shortcuts-Icon"
         onClick={() => {
           this.toggleInputNew();
         }}

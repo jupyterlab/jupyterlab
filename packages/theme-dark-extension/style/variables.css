@@ -454,12 +454,20 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-accept-color-normal: var(--md-blue-700, #1976d2);
   --jp-accept-color-hover: var(--md-blue-800, #1565c0);
   --jp-accept-color-active: var(--md-blue-900, #0d47a1);
+  --jp-accept-color-foreground: white;
+  --jp-accept-outline-color: #38a0f5;
+
   --jp-warn-color-normal: var(--md-red-700, #d32f2f);
   --jp-warn-color-hover: var(--md-red-800, #c62828);
   --jp-warn-color-active: var(--md-red-900, #b71c1c);
+  --jp-warn-color-foreground: white;
+  --jp-warn-outline-color: var(--md-red-800, #c62828);
+
   --jp-reject-color-normal: var(--md-grey-600, #757575);
   --jp-reject-color-hover: var(--md-grey-700, #616161);
   --jp-reject-color-active: var(--md-grey-800, #424242);
+  --jp-reject-color-foreground: white;
+  --jp-reject-outline-color: var(--md-grey-700, #616161);
 
   /* File or activity icons and switch semantic variables */
   --jp-jupyter-icon-color: #f37626;

@@ -76,22 +76,11 @@
   color: var(--jp-content-font-color3);
 }
 
-.jp-Shortcuts-Submit:focus {
-  outline: none;
-}
-
-.jp-Shortcuts-Submit .jp-icon3[fill] {
-  fill: var(--jp-layout-color1);
-}
-
 button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
 button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
-  background-color: green;
-  color: var(--jp-inverse-layout-color1);
-}
-
-button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
-  fill: var(--jp-inverse-layout-color1);
+  cursor: not-allowed;
+  background-color: var(--jp-layout-color3);
+  color: var(--jp-content-font-color3);
 }
 
 .jp-Shortcuts-Overwrite {
@@ -138,14 +127,8 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
   padding: 0 5px;
 }
 
+.jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible,
 .jp-Shortcuts-Cell button.jp-Shortcuts-Icon:focus-visible {
-  outline-width: var(--jp-focus-outline-width);
-  outline-color: var(--jp-focus-outline-color);
-  outline-style: solid;
-  outline-offset: 1px;
-}
-
-.jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible {
   outline-offset: 1px;
 }
 
@@ -161,6 +144,10 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
 .jp-Shortcuts-Cell button.jp-Shortcuts-Icon svg {
   height: 16px;
   width: 16px;
+}
+
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill] {
+  fill: currentColor;
 }
 
 .jp-Shortcuts-ShortcutCell {
@@ -296,23 +283,6 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit .jp-icon3[fill] {
 
 .jp-Shortcuts-Plus {
   opacity: 0;
-  color: var(--jp-ui-inverse-font-color1);
-}
-
-.jp-Shortcuts-Plus:hover {
-  background: var(--jp-shortcuts-button-hover-background);
-}
-
-.jp-Shortcuts-Plus:active {
-  background-color: var(--jp-brand-color2);
-}
-
-.jp-Shortcuts-Reset {
-  color: var(--jp-brand-color2);
-}
-
-.jp-Shortcuts-Reset:hover {
-  color: var(--jp-brand-color1);
 }
 
 .jp-Shortcuts-SourceCell {

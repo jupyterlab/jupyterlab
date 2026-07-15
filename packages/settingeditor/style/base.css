@@ -271,12 +271,12 @@
 .jp-SettingsHeader-buttonbar > .jp-RestoreButton {
   background-color: var(--jp-warn-color-normal);
   border: 0;
-  color: var(--jp-ui-inverse-font-color0);
+  color: var(--jp-warn-color-foreground, var(--jp-ui-inverse-font-color0));
 }
 
 .jp-SettingsHeader-buttonbar > .jp-RestoreButton:focus-visible {
   outline-width: var(--jp-focus-outline-width);
-  outline-color: var(--jp-warn-color-normal);
+  outline-color: var(--jp-warn-outline-color, var(--warn-color-normal));
   outline-style: solid;
   outline-offset: 2px;
 }
