@@ -17,6 +17,7 @@ import {
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
+  InputDialog,
   ISanitizer,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
@@ -106,6 +107,8 @@ namespace CommandIDs {
   export const interactionMode = 'console:interaction-mode';
 
   export const redo = 'console:redo';
+
+  export const rename = 'console:rename';
 
   export const replaceSelection = 'console:replace-selection';
 
@@ -477,6 +480,10 @@ async function activateConsole(
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
+    panel.title.dataset = {
+      type: 'console-title',
+      ...panel.title.dataset
+    };
 
     if (toolbarFactory) {
       setToolbar(panel, toolbarFactory);
@@ -834,6 +841,16 @@ async function activateConsole(
       shell.activateById(widget.id);
     }
     return widget;
+  }
+
+  // Get the console panel associated with the most recent context menu event.
+  function contextMenuConsole(): ConsolePanel | null {
+    const test = (node: HTMLElement) => !!node.dataset.id;
+    const node = app.contextMenuHitTest(test);
+    if (!node) {
+      return null;
+    }
+    return tracker.find(panel => panel.id === node.dataset.id) ?? null;
   }
 
   /**
@@ -1224,6 +1241,39 @@ async function activateConsole(
       });
     },
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.rename, {
+    label: trans.__('Rename Console…'),
+    execute: async args => {
+      const current = contextMenuConsole() ?? getCurrent(args);
+      const session = current?.console.sessionContext.session;
+      if (!session) {
+        return;
+      }
+      const result = await InputDialog.getText({
+        title: trans.__('Rename Console'),
+        okLabel: trans.__('Rename'),
+        text: session.name,
+        required: true
+      });
+      if (session.isDisposed || !result.button.accept || !result.value) {
+        return;
+      }
+      return session.setName(result.value);
+    },
+    isEnabled: () => contextMenuConsole() !== null || isEnabled(),
     describedBy: {
       args: {
         type: 'object',
