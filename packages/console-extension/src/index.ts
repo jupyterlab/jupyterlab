@@ -26,6 +26,7 @@ import {
   SessionContextDialogs,
   setToolbar,
   showDialog,
+  showErrorMessage,
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -1271,7 +1272,11 @@ async function activateConsole(
       if (session.isDisposed || !result.button.accept || !result.value) {
         return;
       }
-      return session.setName(result.value);
+      try {
+        await session.setName(result.value);
+      } catch (error) {
+        void showErrorMessage(trans.__('Rename Error'), error);
+      }
     },
     isEnabled: () => contextMenuConsole() !== null || isEnabled(),
     describedBy: {
