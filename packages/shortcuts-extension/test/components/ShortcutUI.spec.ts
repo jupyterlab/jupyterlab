@@ -14,6 +14,7 @@ import { Signal } from '@lumino/signaling';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
+import { framePromise } from '@jupyterlab/testing';
 import { nullTranslator } from '@jupyterlab/translation';
 import { createRoot } from 'react-dom/client';
 import React from 'react';
@@ -44,6 +45,10 @@ class DummySettings extends Settings {
 describe('@jupyterlab/shortcut-extension', () => {
   describe('ShortcutUI', () => {
     let shortcutUI: ShortcutUI;
+    let getSettings: jest.Mock<Promise<DummySettings>, []>;
+    let root: ReturnType<typeof createRoot> | null;
+    let rootElement: HTMLElement;
+    let settings: DummySettings;
     const data = {
       composite: { shortcuts: [] as CommandRegistry.IKeyBindingOptions[] },
       user: { shortcuts: [] as CommandRegistry.IKeyBindingOptions[] }
@@ -65,10 +70,11 @@ describe('@jupyterlab/shortcut-extension', () => {
         save: jest.fn(),
         remove: jest.fn()
       };
-      const settings = new DummySettings({
+      settings = new DummySettings({
         registry: new SettingRegistry({ connector }),
         plugin: plugin as any
       });
+      getSettings = jest.fn(async () => settings);
       const ready = new PromiseDelegate<void>();
       const element = React.createElement(ShortcutUI, {
         height: 1000,
@@ -80,19 +86,23 @@ describe('@jupyterlab/shortcut-extension', () => {
           }
         },
         external: {
-          getSettings: async () => {
-            return settings;
-          },
+          getSettings,
           translator: nullTranslator,
           commandRegistry,
           actionRequested: new Signal<unknown, any>({})
         }
       });
-      const rootElement = document.createElement('div');
+      rootElement = document.createElement('div');
       document.body.appendChild(rootElement);
-      const root = createRoot(rootElement);
+      root = createRoot(rootElement);
       root.render(element);
       await ready.promise;
+      await framePromise();
+    });
+
+    afterEach(() => {
+      root?.unmount();
+      rootElement.remove();
     });
 
     const registerKeybinding = (
@@ -128,6 +138,29 @@ describe('@jupyterlab/shortcut-extension', () => {
           keys: ['Ctrl A', 'C'],
           selector: 'body'
         });
+      });
+    });
+
+    describe('#changed', () => {
+      it('should refresh shortcut list when settings change externally', async () => {
+        expect(shortcutUI.state.filteredShortcutList).toHaveLength(0);
+
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Ctrl Y'],
+          selector: 'body'
+        });
+
+        (
+          settings.registry.pluginChanged as Signal<SettingRegistry, string>
+        ).emit(SHORTCUT_PLUGIN_ID);
+        await framePromise();
+
+        expect(getSettings).toHaveBeenCalledTimes(1);
+        expect(shortcutUI.state.filteredShortcutList).toHaveLength(1);
+        expect(shortcutUI.state.filteredShortcutList[0].command).toBe(
+          'test:command'
+        );
       });
     });
 
