@@ -2883,6 +2883,10 @@ export class Notebook extends StaticNotebook {
    * Ensure that the notebook has proper focus.
    */
   private _ensureFocus(force = false): void {
+    const activeElement = document.activeElement;
+    if (!force && activeElement && !this.node.contains(activeElement)) {
+      return;
+    }
     // No-op is the footer has the focus.
     const footer = (this.layout as NotebookWindowedLayout).footer;
     if (footer && document.activeElement === footer.node) {
@@ -3423,8 +3427,8 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
-      // Move the cells one by one
-      this.moveCell(fromIndex, toIndex, toMove.length);
+      // Move the selected block of cells, preserving in-flight executions.
+      NotebookActions.moveCells(this, fromIndex, toIndex, toMove.length);
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
