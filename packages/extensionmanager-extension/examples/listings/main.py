@@ -23,7 +23,7 @@ class ListingsApp(LabApp):
     base_url = "/"
     default_url = Unicode("/lab", help="The default URL to redirect to from `/`")
 
-    def init_webapp(self):
+    def init_webapp(self) -> None:
         """initialize tornado webapp and httpserver."""
         super().init_webapp()
         default_handlers = [

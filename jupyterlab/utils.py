@@ -3,6 +3,11 @@
 
 import functools
 import warnings
+from collections.abc import Callable
+from typing import ParamSpec, TypeVar
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 class jupyterlab_deprecation(Warning):  # noqa
@@ -26,12 +31,17 @@ class deprecated:  # noqa
         The package version in which the deprecated function will be removed.
     """
 
-    def __init__(self, alt_func=None, behavior="warn", removed_version=None):
+    def __init__(
+        self,
+        alt_func: str | None = None,
+        behavior: str = "warn",
+        removed_version: str | None = None,
+    ) -> None:
         self.alt_func = alt_func
         self.behavior = behavior
         self.removed_version = removed_version
 
-    def __call__(self, func):
+    def __call__(self, func: Callable[P, R]) -> Callable[P, R]:
         alt_msg = ""
         if self.alt_func is not None:
             alt_msg = f" Use ``{self.alt_func}`` instead."
@@ -43,7 +53,7 @@ class deprecated:  # noqa
         msg = f"Function ``{function_description}`` is deprecated"
 
         @functools.wraps(func)
-        def wrapped(*args, **kwargs):
+        def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
             if self.behavior == "warn":
                 func_code = func.__code__
                 warnings.simplefilter("always", jupyterlab_deprecation)

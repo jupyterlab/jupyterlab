@@ -16,7 +16,7 @@ with open(os.path.join(HERE, "package.json")) as fid:
     version = json.load(fid)["version"]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type[LabServerApp]]]:
     return [{"module": __name__, "app": ExampleApp}]
 
 
@@ -37,7 +37,7 @@ class ExampleApp(LabServerApp):
     # of looking in each of the Jupyter data paths.
     labextensions_path = [os.path.join(HERE, "labextensions")]
 
-    def initialize_settings(self):
+    def initialize_settings(self) -> None:
         super().initialize_settings()
         settings = self.serverapp.web_app.settings
         settings["terminals_available"] = False

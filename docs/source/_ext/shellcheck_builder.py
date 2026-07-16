@@ -21,8 +21,10 @@ from sphinx.util import logging
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
 
 LOGGER = logging.getLogger(__name__)
+
 
 _LANGUAGE_TO_SHELL = {
     "bash": "bash",
@@ -42,7 +44,7 @@ class ShellcheckBuilder(Builder):
     format = "shellcheck"
     epilog = __("Look for any errors in the above output or in %(outdir)s/output.txt")
 
-    def __init__(self, app: Sphinx, env) -> None:
+    def __init__(self, app: Sphinx, env: BuildEnvironment) -> None:
         super().__init__(app, env)
         self._executable = app.config.shellcheck_executable
         self._prompt = app.config.shellcheck_prompt
@@ -59,13 +61,13 @@ class ShellcheckBuilder(Builder):
     def get_target_uri(self, docname: str, typ: str | None = None) -> str:
         return ""
 
-    def get_outdated_docs(self):
+    def get_outdated_docs(self) -> set[str]:
         return self.env.found_docs
 
-    def prepare_writing(self, docnames) -> None:
+    def prepare_writing(self, docnames: set[str]) -> None:
         return
 
-    def write_doc(self, docname: str, doctree) -> None:
+    def write_doc(self, docname: str, doctree: nodes.document) -> None:
         source_path = self.env.doc2path(docname, None)
 
         for node in doctree.findall(nodes.literal_block):

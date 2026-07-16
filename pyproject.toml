@@ -263,7 +263,7 @@ exclude = ["*.ipynb"]
 target-version = "py310"
 line-length = 100
 lint.select = [
-  "A", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
+  "A", "ANN", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
   "ICN", "LOG", "N", "PERF", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RSE",
   "RUF", "S", "SIM", "SLOT", "T", "TC", "TID", "UP", "W", "YTT",
 ]
@@ -295,7 +295,8 @@ lint.ignore = [
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/browser_check.py" = ["RUF012"]
 # C901 method is too complex
-"jupyterlab/commands.py" = ["C901"]
+# ANN is being added incrementally; command helpers are covered separately.
+"jupyterlab/commands.py" = ["C901", "ANN"]
 # B028 No explicit `stacklevel` keyword argument found
 "jupyterlab/debuglog.py" = ["B028"]
 "jupyterlab/extensions/manager.py" = ["C901"]
@@ -309,7 +310,8 @@ lint.ignore = [
 # N802 Function name `foo` should be lowercase
 # EM101 Exception must not use a string literal
 # PLR2004 Magic value used in comparison
-"jupyterlab/tests/*" = ["C901", "S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004"]
+"jupyterlab/tests/*" = ["C901", "S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004", "ANN"]
+"jupyterlab/tests/**" = ["ANN"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/tests/echo_kernel.py" = ["RUF012"]
 # T201 `print` found

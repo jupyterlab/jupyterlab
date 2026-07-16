@@ -1,4 +1,4 @@
-def option_1():
+def option_1() -> None:
     """Documentation of 1st option.
 
     This docstring is intentionally long to fill the documentation panel box.
@@ -11,5 +11,5 @@ def option_1():
     """
 
 
-def option_2():
+def option_2() -> None:
     """Documentation of 2nd option."""

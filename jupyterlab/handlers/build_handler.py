@@ -3,6 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import json
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
@@ -12,6 +13,7 @@ from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
 from jupyterlab.commands import AppOptions, _ensure_options, build, build_check, clean
+from jupyterlab.coreconfig import CoreConfig
 
 
 class Builder:
@@ -22,7 +24,7 @@ class Builder:
     _kill_event = None
     _future = None
 
-    def __init__(self, core_mode, app_options=None):
+    def __init__(self, core_mode: bool, app_options: AppOptions | dict | None = None) -> None:
         app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.core_mode = core_mode
@@ -31,7 +33,7 @@ class Builder:
         self.labextensions_path = app_options.labextensions_path
 
     @gen.coroutine
-    def get_status(self):
+    def get_status(self) -> dict[str, str]:
         if self.core_mode:
             raise gen.Return({"status": "stable", "message": ""})
         if self.building:
@@ -55,7 +57,7 @@ class Builder:
         raise gen.Return({"status": status, "message": "\n".join(messages)})
 
     @gen.coroutine
-    def build(self):
+    def build(self) -> None:
         if self._canceling:
             msg = "Cancel in progress"
             raise ValueError(msg)
@@ -82,7 +84,7 @@ class Builder:
             raise e
 
     @gen.coroutine
-    def cancel(self):
+    def cancel(self) -> None:
         if not self.building:
             msg = "No current build"
             raise ValueError(msg)
@@ -92,7 +94,13 @@ class Builder:
         self.canceled = True
 
     @run_on_executor
-    def _run_build_check(self, app_dir, logger, core_config, labextensions_path):
+    def _run_build_check(
+        self,
+        app_dir: str,
+        logger: logging.Logger,
+        core_config: CoreConfig,
+        labextensions_path: list[str],
+    ) -> list[str]:
         return build_check(
             app_options=AppOptions(
                 app_dir=app_dir,
@@ -103,7 +111,14 @@ class Builder:
         )
 
     @run_on_executor
-    def _run_build(self, app_dir, logger, kill_event, core_config, labextensions_path):
+    def _run_build(
+        self,
+        app_dir: str,
+        logger: logging.Logger,
+        kill_event: Event,
+        core_config: CoreConfig,
+        labextensions_path: list[str],
+    ) -> None:
         app_options = AppOptions(
             app_dir=app_dir,
             logger=logger,
@@ -122,19 +137,19 @@ class Builder:
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
-    def initialize(self, builder=None, name=None):
+    def initialize(self, builder: Builder | None = None, name: str | None = None) -> None:
         super().initialize(name=name)
         self.builder = builder
 
     @web.authenticated
     @gen.coroutine
-    def get(self):
+    def get(self) -> None:
         data = yield self.builder.get_status()
         self.finish(json.dumps(data))
 
     @web.authenticated
     @gen.coroutine
-    def delete(self):
+    def delete(self) -> None:
         self.log.warning("Canceling build")
         try:
             yield self.builder.cancel()
@@ -144,7 +159,7 @@ class BuildHandler(ExtensionHandlerMixin, APIHandler):
 
     @web.authenticated
     @gen.coroutine
-    def post(self):
+    def post(self) -> None:
         self.log.debug("Starting build")
         try:
             yield self.builder.build()

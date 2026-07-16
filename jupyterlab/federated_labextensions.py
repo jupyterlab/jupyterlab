@@ -1,6 +1,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from typing import Any
+
 from jupyter_builder.federated_extensions import (
     build_labextension as _build_labextension,
 )
@@ -18,22 +20,22 @@ from jupyterlab.utils import deprecated
 
 
 @deprecated("jupyter_builder.federated_extensions.build_labextension")
-def build_labextension(*args, **kwargs):
+def build_labextension(*args: Any, **kwargs: Any) -> None:  # noqa: ANN401
     return _build_labextension(*args, **kwargs)
 
 
 @deprecated("jupyter_builder.federated_extensions.watch_labextension")
-def watch_labextension(*args, **kwargs):
+def watch_labextension(*args: Any, **kwargs: Any) -> None:  # noqa: ANN401
     return _watch_labextension(*args, **kwargs)
 
 
 @deprecated("jupyter_builder.federated_extensions.develop_labextension")
-def develop_labextension(*args, **kwargs):
+def develop_labextension(*args: Any, **kwargs: Any) -> str:  # noqa: ANN401
     return _develop_labextension(*args, **kwargs)
 
 
 @deprecated("jupyter_builder.federated_extensions.develop_labextension_py")
-def develop_labextension_py(*args, **kwargs):
+def develop_labextension_py(*args: Any, **kwargs: Any) -> list[str]:  # noqa: ANN401
     return _develop_labextension_py(*args, **kwargs)
 
 

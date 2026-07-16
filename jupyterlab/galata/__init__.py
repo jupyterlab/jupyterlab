@@ -6,8 +6,10 @@ import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile, mkdtemp
 
+from traitlets.config import Config
 
-def configure_jupyter_server(c):
+
+def configure_jupyter_server(c: Config) -> None:
     """Helper to configure the Jupyter Server for integration testing
     with Galata.
 

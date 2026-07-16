@@ -23,7 +23,7 @@ JUPYTERLAB_LAST_RELEASE_URL = "https://pypi.org/pypi/jupyterlab/json"
 JUPYTERLAB_RELEASE_URL = "https://github.com/jupyterlab/jupyterlab/releases/tag/v"
 
 
-def format_datetime(dt_str: str):
+def format_datetime(dt_str: str) -> float:
     return datetime.fromisoformat(dt_str).timestamp() * 1000
 
 
@@ -159,7 +159,7 @@ class CheckForUpdateHandler(APIHandler):
         self.update_checker.logger = self.log
 
     @web.authenticated
-    async def get(self):
+    async def get(self) -> None:
         """Check for updates.
         Response:
             {
@@ -202,7 +202,7 @@ class NewsHandler(APIHandler):
         self.news_url = news_url
 
     @web.authenticated
-    async def get(self):
+    async def get(self) -> None:
         """Get the news.
 
         Response:
@@ -229,7 +229,7 @@ class NewsHandler(APIHandler):
                 )
                 tree = ET.fromstring(response.body)  # noqa S314
 
-                def build_entry(node):
+                def build_entry(node: ET.Element) -> Notification:
                     def get_xml_text(attr: str, default: str | None = None) -> str:
                         node_item = node.find(f"atom:{attr}", xml_namespaces)
                         if node_item is not None:
