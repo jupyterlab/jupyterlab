@@ -25,11 +25,11 @@ async function runCommand(
   verify = false
 ): Promise<void> {
   await terminalLocator.waitFor({ state: 'visible' });
-  await terminalLocator.locator('.jp-Terminal-body').focus();
+  await terminalLocator.locator('.xterm-screen').click();
 
-  await terminalLocator
-    .locator(TERMINAL_INPUT_SELECTOR)
-    .waitFor({ state: 'visible' });
+  const terminalInput = terminalLocator.locator(TERMINAL_INPUT_SELECTOR);
+  await terminalInput.waitFor({ state: 'attached' });
+  await expect(terminalInput).toBeFocused();
 
   await page.keyboard.type(command);
   if (verify) {
@@ -155,8 +155,9 @@ test.describe('Terminal', () => {
         });
       }, searchText);
 
-      // Wait for search to be performed and terminal canvas rerendered.
-      await page.waitForSelector('.xterm-find-active-result-decoration');
+      // Wait for the search match decorations to be rendered. The active
+      // match is distinguished by its colors, not by a dedicated CSS class.
+      await page.waitForSelector('.xterm-find-result-decoration');
 
       expect(await terminal.screenshot()).toMatchSnapshot('search.png');
     });
@@ -186,6 +187,59 @@ test.describe('Terminal', () => {
 
       await page.waitForTimeout(100);
       expect(await terminal.screenshot()).toMatchSnapshot('focus.png');
+    });
+
+    test('should scroll with the keyboard when the viewport is focused', async ({
+      page
+    }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
+
+      await waitForTerminal(page);
+      await terminalInput.waitFor();
+
+      // Display enough content to make the terminal scrollable.
+      await runCommand(page, terminal, 'seq 1 200');
+
+      // The position of the scrollbar slider reflects the scroll position
+      // independently of the renderer; once the output arrives the terminal
+      // is scrolled to the bottom, so the slider moves away from the top.
+      const slider = terminal.locator(
+        '.xterm-scrollable-element > .scrollbar.vertical > .slider'
+      );
+      const sliderTop = () =>
+        slider.evaluate(element => parseFloat(element.style.top || '0'));
+      let previousTop = -1;
+      await expect
+        .poll(
+          async () => {
+            const currentTop = await sliderTop();
+            const settled = currentTop > 0 && currentTop === previousTop;
+            previousTop = currentTop;
+            return settled;
+          },
+          { intervals: [500], timeout: 15000 }
+        )
+        .toBe(true);
+      const bottomPosition = await sliderTop();
+
+      // Move focus to the terminal viewport with a double Escape.
+      await page.locator('div.xterm-screen').click();
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      await expect(terminal.locator('.xterm-viewport')).toBeFocused();
+
+      // The scrolling keys scroll the terminal while the viewport is
+      // focused.
+      await page.keyboard.press('PageUp');
+      await expect.poll(sliderTop).toBeLessThan(bottomPosition);
+      const pageUpPosition = await sliderTop();
+
+      await page.keyboard.press('Home');
+      await expect.poll(sliderTop).toBeLessThan(pageUpPosition);
+
+      await page.keyboard.press('End');
+      await expect.poll(sliderTop).toBeGreaterThan(pageUpPosition);
     });
   });
 });
@@ -371,25 +425,39 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
+    const firstTabIndex =
+      (await tabs.nth(0).getAttribute('aria-selected')) === 'true' ? 0 : 1;
     const foundFolders = new Set<string>();
-    for (let i = 0; i < 2; i++) {
-      await tabs.nth(i).click();
-      await activeTerminal.waitFor({ state: 'visible' });
+    for (const i of [firstTabIndex, 1 - firstTabIndex]) {
+      const tab = tabs.nth(i);
+      if ((await tab.getAttribute('aria-selected')) !== 'true') {
+        await tab.click();
+      }
+      await expect(tab).toHaveAttribute('aria-selected', 'true');
 
-      // Find the currently visible terminal body
-      await expect(activeTerminal).toHaveCount(1);
+      const tabId = await tab.getAttribute('id');
+      if (!tabId) {
+        throw new Error('Terminal tab is missing an id');
+      }
 
-      await activeTerminal.click();
-      await page.keyboard.type('pwd');
-      await page.keyboard.press('Enter');
+      const terminalPanel = page.locator(
+        `.lm-DockPanel-widget[aria-labelledby="${tabId}"]`
+      );
+      await terminalPanel.waitFor({ state: 'visible' });
 
-      await expect(activeTerminal).toContainText(
+      const terminalBody = terminalPanel.locator('.jp-Terminal-body');
+      await expect(terminalBody).toContainText(/[$#%>]/, {
+        timeout: 15000
+      });
+
+      await runCommand(page, terminalPanel, 'pwd');
+
+      await expect(terminalPanel).toContainText(
         new RegExp(`${folderA}|${folderB}`),
         { timeout: 10000 }
       );
 
-      const text = await activeTerminal.textContent();
+      const text = await terminalPanel.textContent();
       if (text?.includes(folderA)) {
         foundFolders.add(folderA);
       }

@@ -48,10 +48,10 @@
     "@jupyterlab/rendermime-interfaces": "^3.15.0-alpha.0",
     "@jupyterlab/services": "^7.7.0-alpha.0",
     "@jupyterlab/translation": "^4.7.0-alpha.0",
-    "@lumino/coreutils": "^2.2.2",
-    "@lumino/messaging": "^2.0.4",
-    "@lumino/signaling": "^2.1.5",
-    "@lumino/widgets": "^2.8.0",
+    "@lumino/coreutils": "^2.2.3",
+    "@lumino/messaging": "^2.0.5",
+    "@lumino/signaling": "^2.1.6",
+    "@lumino/widgets": "^2.9.0",
     "lodash.escape": "^4.0.1"
   },
   "devDependencies": {

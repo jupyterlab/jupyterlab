@@ -46,8 +46,8 @@
     "@jupyterlab/observables": "^5.7.0-alpha.0",
     "@jupyterlab/settingregistry": "^4.7.0-alpha.0",
     "@jupyterlab/translation": "^4.7.0-alpha.0",
-    "@lumino/datagrid": "^2.5.7",
-    "@lumino/widgets": "^2.8.0"
+    "@lumino/datagrid": "^2.5.8",
+    "@lumino/widgets": "^2.9.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
