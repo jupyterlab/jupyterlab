@@ -70,6 +70,7 @@
     "@lumino/coreutils": "^2.2.3",
     "@lumino/disposable": "^2.1.6",
     "@lumino/signaling": "^2.1.6",
+    "@plutojl/lang-julia": "^1.2.0",
     "yjs": "^13.5.40"
   },
   "devDependencies": {
