@@ -136,8 +136,10 @@ def changed_text_document_lines(git_diff_args: list[str]) -> dict[str, set[int]]
             current_line += 1
         elif raw_line.startswith("-") and not raw_line.startswith("---"):
             continue
-        else:
+        elif raw_line.startswith(" "):
             current_line += 1
+        else:
+            continue
 
     return dict(changed)
 
