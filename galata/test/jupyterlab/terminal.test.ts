@@ -25,11 +25,11 @@ async function runCommand(
   verify = false
 ): Promise<void> {
   await terminalLocator.waitFor({ state: 'visible' });
-  await terminalLocator.locator('.jp-Terminal-body').focus();
+  await terminalLocator.locator('.xterm-screen').click();
 
-  await terminalLocator
-    .locator(TERMINAL_INPUT_SELECTOR)
-    .waitFor({ state: 'visible' });
+  const terminalInput = terminalLocator.locator(TERMINAL_INPUT_SELECTOR);
+  await terminalInput.waitFor({ state: 'attached' });
+  await expect(terminalInput).toBeFocused();
 
   await page.keyboard.type(command);
   if (verify) {
@@ -425,25 +425,39 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
+    const firstTabIndex =
+      (await tabs.nth(0).getAttribute('aria-selected')) === 'true' ? 0 : 1;
     const foundFolders = new Set<string>();
-    for (let i = 0; i < 2; i++) {
-      await tabs.nth(i).click();
-      await activeTerminal.waitFor({ state: 'visible' });
+    for (const i of [firstTabIndex, 1 - firstTabIndex]) {
+      const tab = tabs.nth(i);
+      if ((await tab.getAttribute('aria-selected')) !== 'true') {
+        await tab.click();
+      }
+      await expect(tab).toHaveAttribute('aria-selected', 'true');
 
-      // Find the currently visible terminal body
-      await expect(activeTerminal).toHaveCount(1);
+      const tabId = await tab.getAttribute('id');
+      if (!tabId) {
+        throw new Error('Terminal tab is missing an id');
+      }
 
-      await activeTerminal.click();
-      await page.keyboard.type('pwd');
-      await page.keyboard.press('Enter');
+      const terminalPanel = page.locator(
+        `.lm-DockPanel-widget[aria-labelledby="${tabId}"]`
+      );
+      await terminalPanel.waitFor({ state: 'visible' });
 
-      await expect(activeTerminal).toContainText(
+      const terminalBody = terminalPanel.locator('.jp-Terminal-body');
+      await expect(terminalBody).toContainText(/[$#%>]/, {
+        timeout: 15000
+      });
+
+      await runCommand(page, terminalPanel, 'pwd');
+
+      await expect(terminalPanel).toContainText(
         new RegExp(`${folderA}|${folderB}`),
         { timeout: 10000 }
       );
 
-      const text = await activeTerminal.textContent();
+      const text = await terminalPanel.textContent();
       if (text?.includes(folderA)) {
         foundFolders.add(folderA);
       }
