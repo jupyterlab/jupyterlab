@@ -263,6 +263,8 @@ existing entries in the Keyboard Shortcuts settings. When editing the JSON
 directly, choose a key combination that is not already bound in the same
 context.
 
+### Defining shortcuts running multiple commands (macros)
+
 To define a custom keyboard shortcut which runs more than one command, add a keyboard shortcut
 for `apputils:run-all-enabled` command in Keyboard Shortcuts advanced settings. The commands you
 wish to run are passed in the `args` argument as a list of strings:
