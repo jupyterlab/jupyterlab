@@ -127,13 +127,13 @@ class Builder:
             labextensions_path=labextensions_path,
         )
         try:
-            return build(app_options=app_options)
+            build(app_options=app_options)
         except Exception:
             if self._kill_event.is_set():
                 return
             self.log.warning("Build failed, running a clean and rebuild")
             clean(app_options=app_options)
-            return build(app_options=app_options)
+            build(app_options=app_options)
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):

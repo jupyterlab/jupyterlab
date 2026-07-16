@@ -53,11 +53,13 @@ def _is_lab_package(name: str) -> bool:
 
 
 @overload
-def _only_nonlab(collection: dict[str, str]) -> dict[str, str]: ...
+def _only_nonlab(collection: dict[str, str]) -> dict[str, str]:
+    pass
 
 
 @overload
-def _only_nonlab(collection: list[str] | tuple[str, ...]) -> list[str]: ...
+def _only_nonlab(collection: list[str] | tuple[str, ...]) -> list[str]:
+    pass
 
 
 def _only_nonlab(

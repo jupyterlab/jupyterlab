@@ -18,11 +18,13 @@ from jupyterlab.labapp import LabApp
 
 
 class LabAppFactory(Protocol):
-    def __call__(self, **kwargs: Any) -> LabApp: ...  # noqa: ANN401
+    def __call__(self, **kwargs: Any) -> LabApp:  # noqa: ANN401
+        pass
 
 
 class FetchClient(Protocol):
-    def fetch(self, request: str, **kwargs: Any) -> Awaitable[HTTPResponse]: ...  # noqa: ANN401
+    def fetch(self, request: str, **kwargs: Any) -> Awaitable[HTTPResponse]:  # noqa: ANN401
+        pass
 
 
 class FetchFixture(Protocol):
@@ -32,7 +34,8 @@ class FetchFixture(Protocol):
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
         **kwargs: Any,  # noqa: ANN401
-    ) -> Awaitable[HTTPResponse]: ...
+    ) -> Awaitable[HTTPResponse]:
+        pass
 
 
 def mkdir(tmp_path: Path, *parts: str) -> Path:
