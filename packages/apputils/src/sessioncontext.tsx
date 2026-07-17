@@ -964,9 +964,7 @@ export class SessionContext implements ISessionContext {
         throw err;
       } finally {
         this._isChangingKernel = false;
-        this._statusChanged.emit(
-          this._session?.kernel?.status || 'unknown'
-        );
+        this._statusChanged.emit(this._session?.kernel?.status || 'unknown');
       }
     }
 
