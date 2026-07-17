@@ -2784,27 +2784,30 @@ export class DirListing extends Widget {
     }
 
     // STEP 5: Perform rename
-    const results = await Promise.allSettled(
-      items.map(item => {
-        const ext = PathExt.extname(item.name);
-        const newName = newBaseName + ext;
-        const oldPath = item.path;
-        const newPath = PathExt.join(PathExt.dirname(oldPath), newName);
+    const failedReasons: string[] = [];
 
-        if (oldPath === newPath) {
-          return Promise.resolve();
+    await Promise.all(
+      items.map(async item => {
+        try {
+          const ext = PathExt.extname(item.name);
+          const newName = newBaseName + ext;
+          const oldPath = item.path;
+          const newPath = PathExt.join(PathExt.dirname(oldPath), newName);
+
+          if (oldPath === newPath) {
+            return;
+          }
+
+          await renameFile(manager, oldPath, newPath);
+        } catch (error) {
+          if (error !== 'File not renamed') {
+            failedReasons.push(
+              error instanceof Error ? error.message : String(error)
+            );
+          }
         }
-
-        return renameFile(manager, oldPath, newPath);
       })
     );
-
-    const failedReasons = results
-      .filter(
-        (r): r is PromiseRejectedResult =>
-          r.status === 'rejected' && r.reason !== 'File not renamed'
-      )
-      .map(r => r.reason?.message || String(r.reason));
 
     if (failedReasons.length > 0) {
       throw new Error(
