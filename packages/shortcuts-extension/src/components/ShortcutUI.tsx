@@ -82,15 +82,18 @@ export class ShortcutUI
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
+    this._isMounted = false;
     this.props.external.actionRequested.connect(this._onActionRequested, this);
-    void this._refreshShortcutList();
+    void this._loadShortcutList();
   }
 
   componentWillUnmount(): void {
+    this._isMounted = true;
     this.props.external.actionRequested.disconnect(
       this._onActionRequested,
       this
     );
+    this._disconnectSettings();
   }
 
   private async _onActionRequested(
@@ -105,10 +108,27 @@ export class ShortcutUI
     }
   }
 
-  /** Fetch shortcut list from SettingRegistry  */
-  private async _refreshShortcutList(): Promise<void> {
-    const settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> =
-      await this.props.external.getSettings();
+  /** Load shortcut settings from SettingRegistry. */
+  private async _loadShortcutList(): Promise<void> {
+    const settings = await this.props.external.getSettings();
+    if (this._isMounted) {
+      return;
+    }
+
+    this._disconnectSettings();
+    this._settings = settings;
+    this._settings.changed.connect(this._refreshShortcutList, this);
+    this._refreshShortcutList(settings);
+  }
+
+  /** Refresh shortcut list from loaded settings. */
+  private _refreshShortcutList(
+    settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> | null = this
+      ._settings
+  ): void {
+    if (!settings || this._isMounted) {
+      return;
+    }
     const shortcutRegistry = new ShortcutRegistry({
       commandRegistry: this.props.external.commandRegistry,
       settings
@@ -123,6 +143,13 @@ export class ShortcutUI
         this.sortShortcuts();
       }
     );
+  }
+
+  private _disconnectSettings(): void {
+    if (this._settings) {
+      this._settings.changed.disconnect(this._refreshShortcutList, this);
+      this._settings = null;
+    }
   }
 
   /** Set the current search query */
@@ -167,7 +194,6 @@ export class ShortcutUI
   resetShortcuts = async (): Promise<void> => {
     const settings = await this.props.external.getSettings();
     await settings.set('shortcuts', []);
-    await this._refreshShortcutList();
   };
 
   /**
@@ -286,7 +312,6 @@ export class ShortcutUI
       }
     }
     await settings.set('shortcuts', newUserShortcuts as any);
-    await this._refreshShortcutList();
   }
 
   /**
@@ -314,7 +339,6 @@ export class ShortcutUI
     });
 
     await settings.set('shortcuts', userShortcuts as any);
-    await this._refreshShortcutList();
     return true;
   };
 
@@ -447,5 +471,8 @@ export class ShortcutUI
     );
   }
 
+  private _isMounted = false;
   private _newShortcutItem: NewShortcutItem;
+  private _settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> | null =
+    null;
 }
