@@ -10,8 +10,8 @@ import type { INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
 import type { ISharedText } from '@jupyter/ydoc';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import type { CodeCellModel, ICellModel } from '@jupyterlab/cells';
-import { InputPrompt } from '@jupyterlab/cells';
+import type { ICellModel } from '@jupyterlab/cells';
+import { InputPrompt, isCodeCellModel } from '@jupyterlab/cells';
 import { Debouncer } from '@lumino/polling';
 
 /**
@@ -72,24 +72,19 @@ export class ActiveCellTool extends NotebookTools.Tool {
     (this.layout as PanelLayout).addWidget(new Widget({ node }));
 
     const update = async () => {
-      this._editorEl.innerHTML = '';
-      if (this._cellModel?.type === 'code') {
-        this._inputPrompt.executionCount = `${
-          (this._cellModel as CodeCellModel).executionCount ?? ''
-        }`;
-        this._inputPrompt.show();
-      } else {
-        this._inputPrompt.executionCount = null;
-        this._inputPrompt.hide();
+      const cellModel = this._cellModel;
+
+      if (!cellModel) {
+        return;
       }
 
-      if (this._cellModel) {
-        await languages.highlight(
-          this._cellModel.sharedModel.getSource().split('\n')[0],
-          languages.findByMIME(this._cellModel.mimeType),
-          this._editorEl
-        );
-      }
+      this._editorEl.innerHTML = '';
+
+      await languages.highlight(
+        cellModel.sharedModel.getSource().split('\n')[0],
+        languages.findByMIME(cellModel.mimeType),
+        this._editorEl
+      );
     };
 
     this._refreshDebouncer = new Debouncer(update, 150);
@@ -110,6 +105,20 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   private async refresh(): Promise<void> {
+    const cellModel = this._cellModel;
+
+    if (!cellModel) {
+      return;
+    }
+
+    if (isCodeCellModel(cellModel)) {
+      this._inputPrompt.executionCount = `${cellModel.executionCount ?? ''}`;
+      this._inputPrompt.show();
+    } else {
+      this._inputPrompt.executionCount = null;
+      this._inputPrompt.hide();
+    }
+
     await this._refreshDebouncer.invoke();
   }
 
