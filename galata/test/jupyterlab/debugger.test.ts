@@ -70,7 +70,7 @@ for (const c of showSourcesCases) {
 
       await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
       await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
+      await page.sidebar.openTab('jp-debugger-sidebar');
 
       await page.notebook.waitForCellGutter(0);
       await page.notebook.clickCellGutter(0, 2);
@@ -298,7 +298,7 @@ test.describe('Debugger Tests', () => {
       await createNotebook(page);
 
       await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
+      await page.sidebar.openTab('jp-debugger-sidebar');
 
       await setBreakpoint(page);
     }

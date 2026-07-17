@@ -53,7 +53,7 @@ export class DebuggerHelper {
       await button!.click();
     }
     try {
-      await waitForCondition(async () => await this.isOn(name), 2000);
+      await waitForCondition(async () => await this.isOn(name));
     } catch (error) {
       // Retry
       await this.switchOn(name);

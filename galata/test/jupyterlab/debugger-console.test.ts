@@ -23,7 +23,7 @@ async function setupDebuggerConsole(
 
   // Enable debugger
   await page.debugger.switchOn();
-  await page.waitForCondition(() => page.debugger.isOpen());
+  await page.sidebar.openTab('jp-debugger-sidebar');
 
   // Set a breakpoint on line 2 (the x = 42 line)
   await page.notebook.waitForCellGutter(0);
