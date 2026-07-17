@@ -10,10 +10,6 @@
   align-items: center;
 }
 
-.jp-Shortcuts-InputBoxNew {
-  margin-left: 10px;
-}
-
 .jp-mod-hidden {
   display: none;
 }
@@ -198,7 +194,8 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
 
 .jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
 .jp-Shortcuts-Row:hover button.jp-Shortcuts-Plus,
-.jp-Shortcuts-Row:hover .jp-Shortcuts-Or {
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Or,
+.jp-Shortcuts-Or:has(+ .jp-Shortcuts-Plus:focus-visible) {
   opacity: 1;
 }
 
@@ -283,6 +280,10 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
 
 .jp-Shortcuts-Plus {
   opacity: 0;
+}
+
+.jp-Shortcuts-Cell button.jp-Shortcuts-Plus {
+  margin: 0;
 }
 
 .jp-Shortcuts-SourceCell {

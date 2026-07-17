@@ -376,11 +376,12 @@ export class ShortcutItem extends React.Component<
     binding: IKeybinding,
     nonEmptyBindings: IKeybinding[]
   ): JSX.Element {
-    const showOr =
-      !(
-        index === this._nonEmptyBindings.length - 1 &&
-        Object.values(this.state.displayReplaceInput).some(Boolean)
-      ) && index < this._nonEmptyBindings.length - 1;
+    // Hide "or" after the last keybinding while any binding is being replaced.
+    // Otherwise show it between keybindings (forced) and before Add (on hover).
+    const showOr = !(
+      index === this._nonEmptyBindings.length - 1 &&
+      Object.values(this.state.displayReplaceInput).some(Boolean)
+    );
 
     return (
       <React.Fragment key={this.props.shortcut.id + '_' + index}>
@@ -408,7 +409,9 @@ export class ShortcutItem extends React.Component<
             ? this.getShortCutAsInput(binding, index)
             : this.getShortCutForDisplayOnly(binding)}
         </div>
-        {showOr ? this.getOrDisplayIfNeeded(true) : null}
+        {showOr
+          ? this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)
+          : null}
       </React.Fragment>
     );
   }
