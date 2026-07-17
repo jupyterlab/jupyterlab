@@ -502,13 +502,32 @@ describe('@jupyterlab/apputils', () => {
         // different kernel: without an in-flight signal, the getter falls
         // through to the previous kernel's status (typically "idle"),
         // masking the fact that a new kernel is being provisioned.
+        //
+        // We can't reliably assert on `kernelDisplayStatus` right after
+        // calling `changeKernel()` because that method awaits
+        // `_initStarted.promise` before reaching `_changeKernel` where
+        // the flag is set. Instead, hook `statusChanged` and snapshot
+        // the display status the moment `'starting'` is emitted from
+        // inside `_changeKernel`.
         await sessionContext.initialize();
         await sessionContext.session!.kernel!.info;
         const name = sessionContext.session?.kernel?.name;
 
-        const changePromise = sessionContext.changeKernel({ name });
-        expect(sessionContext.kernelDisplayStatus).toBe('starting');
-        await changePromise;
+        let displayWhileChanging: string | undefined;
+        const handler = (_: any, status: string) => {
+          if (status === 'starting' && displayWhileChanging === undefined) {
+            displayWhileChanging = sessionContext.kernelDisplayStatus;
+          }
+        };
+        sessionContext.statusChanged.connect(handler);
+
+        try {
+          await sessionContext.changeKernel({ name });
+        } finally {
+          sessionContext.statusChanged.disconnect(handler);
+        }
+
+        expect(displayWhileChanging).toBe('starting');
       });
     });
 
