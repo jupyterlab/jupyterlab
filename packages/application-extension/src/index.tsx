@@ -1529,14 +1529,20 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
+          const factory = query['open-with'] || undefined;
 
-          // Remove the file browser path from the query string.
+          // Remove tree resolver-only parameters from the parsed query object.
           delete query['file-browser-path'];
+          delete query['open-with'];
 
           // Clean up artifacts immediately upon routing.
           set.dispose();
 
-          delegate.resolve({ browser, file: PageConfig.getOption('treePath') });
+          delegate.resolve({
+            browser,
+            file: PageConfig.getOption('treePath'),
+            factory
+          });
         }
       })
     );
