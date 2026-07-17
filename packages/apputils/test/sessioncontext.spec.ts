@@ -496,6 +496,20 @@ describe('@jupyterlab/apputils', () => {
         await sessionContext.shutdown();
         expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
+
+      it('should be "starting" while a change-kernel request is in flight', async () => {
+        // Reproduces the case where an existing session switches to a
+        // different kernel: without an in-flight signal, the getter falls
+        // through to the previous kernel's status (typically "idle"),
+        // masking the fact that a new kernel is being provisioned.
+        await sessionContext.initialize();
+        await sessionContext.session!.kernel!.info;
+        const name = sessionContext.session?.kernel?.name;
+
+        const changePromise = sessionContext.changeKernel({ name });
+        expect(sessionContext.kernelDisplayStatus).toBe('starting');
+        await changePromise;
+      });
     });
 
     describe('#isDisposed', () => {
