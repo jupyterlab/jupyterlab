@@ -32,6 +32,7 @@
   animation-name: slide-animation;
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color3);
+  border-radius: var(--jp-border-radius);
   border-style: solid;
   background-color: var(--jp-layout-color0);
   margin-left: auto;
