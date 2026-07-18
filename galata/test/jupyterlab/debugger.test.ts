@@ -475,5 +475,7 @@ async function setBreakpoint(page: IJupyterLabPageFixture) {
   await page.notebook.run();
   await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
 
-  await page.notebook.clickCellGutter(0, 4);
+  await page.notebook.waitForCellGutter(0);
+  expect(await page.notebook.clickCellGutter(0, 4)).toBe(true);
+  await page.debugger.waitForBreakPoints();
 }
