@@ -44,6 +44,20 @@ test.describe('Console', () => {
     // Expect the editor content to not change
     await expect(cellEditor).toHaveText('2 + 2');
   });
+
+  test('Should rename the console from the tab context menu', async ({
+    page
+  }) => {
+    const newName = 'Custom Name';
+
+    await page.activity.getTabLocator('Console 1').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Rename Console…' }).click();
+
+    await page.locator('.jp-Dialog >> input').fill(newName);
+    await page.click('.jp-Dialog >> button >> text=Rename');
+
+    await expect(page.activity.getTabLocator(newName)).toBeVisible();
+  });
 });
 
 test.describe('Console (terminal mode)', () => {

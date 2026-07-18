@@ -1349,15 +1349,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.20.0, @codemirror/autocomplete@npm:^6.3.2, @codemirror/autocomplete@npm:^6.7.1":
-  version: 6.20.0
-  resolution: "@codemirror/autocomplete@npm:6.20.0"
+"@codemirror/autocomplete@npm:^6.0.0, @codemirror/autocomplete@npm:^6.10.2, @codemirror/autocomplete@npm:^6.20.0, @codemirror/autocomplete@npm:^6.3.2, @codemirror/autocomplete@npm:^6.7.1":
+  version: 6.20.3
+  resolution: "@codemirror/autocomplete@npm:6.20.3"
   dependencies:
     "@codemirror/language": ^6.0.0
     "@codemirror/state": ^6.0.0
     "@codemirror/view": ^6.17.0
     "@lezer/common": ^1.0.0
-  checksum: 0defd46302ab2763d10f3a51ef8f2b607dd7268843aaeec76a272e84723fe17f8a5ee5a7ad06e649066b69d9dad2a81d6a6cfdf7593290bd52b711b96c46518b
+  checksum: 872a0671363158e24087f7c2edcbd4435ebb4fb799c9f5ccb4589cf4dc34a80763dace4909a71d75a42c79b75a687ae129fae169c4f835ef8e4695a34e7e99ca
   languageName: node
   linkType: hard
 
@@ -1539,9 +1539,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.12.1, @codemirror/language@npm:^6.3.0, @codemirror/language@npm:^6.4.0, @codemirror/language@npm:^6.6.0, @codemirror/language@npm:^6.8.0":
-  version: 6.12.1
-  resolution: "@codemirror/language@npm:6.12.1"
+"@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.12.1, @codemirror/language@npm:^6.3.0, @codemirror/language@npm:^6.4.0, @codemirror/language@npm:^6.6.0, @codemirror/language@npm:^6.8.0, @codemirror/language@npm:^6.9.1":
+  version: 6.12.3
+  resolution: "@codemirror/language@npm:6.12.3"
   dependencies:
     "@codemirror/state": ^6.0.0
     "@codemirror/view": ^6.23.0
@@ -1549,7 +1549,7 @@ __metadata:
     "@lezer/highlight": ^1.0.0
     "@lezer/lr": ^1.0.0
     style-mod: ^4.0.0
-  checksum: f883e5337d8584a82678e4c25023320815892df1e33b05b777f499abd95ce8010cae7216a6c17d13139d84ae43dbe112c5ef3c091b705bd8ee8599ab0fa91637
+  checksum: 338a063b2362d15aa55b7140072ff0e6a4adb5ece2e224f9b67744b140c2443b0282c79e546a484cf9e3c3f50e85d856fbac090f435952c64b606a2123d7a0dd
   languageName: node
   linkType: hard
 
@@ -2783,6 +2783,7 @@ __metadata:
     "@lumino/coreutils": ^2.2.3
     "@lumino/disposable": ^2.1.6
     "@lumino/signaling": ^2.1.6
+    "@plutojl/lang-julia": ^1.2.0
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~5.0.5
@@ -3391,6 +3392,24 @@ __metadata:
     "@jupyterlab/ui-components": ^4.7.0-alpha.0
     "@lumino/commands": ^2.3.4
     "@lumino/widgets": ^2.9.0
+    "@rspack/cli": ^2.0.2
+    "@rspack/core": ^2.0.2
+    css-loader: ^6.7.1
+    mini-svg-data-uri: ^1.4.4
+    rimraf: ~5.0.5
+    style-loader: ~3.3.1
+    typescript: ~5.9.3
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/example-localization@workspace:examples/localization":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/example-localization@workspace:examples/localization"
+  dependencies:
+    "@jupyterlab/application": ^4.7.0-alpha.0
+    "@jupyterlab/coreutils": ^6.7.0-alpha.0
+    "@jupyterlab/theme-light-extension": ^4.7.0-alpha.0
+    "@jupyterlab/translation": ^4.7.0-alpha.0
     "@rspack/cli": ^2.0.2
     "@rspack/core": ^2.0.2
     css-loader: ^6.7.1
@@ -6261,6 +6280,29 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 29176a1fcf016a06299353f01de7f35817d78731294bfca62bfa44f18e2ad3a9b5f8a8480cf55046b597ee28c5c5340a4dd03a268f8fb853522ddd96a437204a
+  languageName: node
+  linkType: hard
+
+"@plutojl/lang-julia@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@plutojl/lang-julia@npm:1.2.0"
+  dependencies:
+    "@codemirror/autocomplete": ^6.10.2
+    "@codemirror/language": ^6.9.1
+    "@lezer/common": ^1.1.0
+    "@plutojl/lezer-julia": ^1.2.0
+  checksum: 622918292c173fd40abf17f4fd4fb1e871628b38c763f7b8a6c87d2f60e6a0ec1cadbc6fe5210d89b7613a9f3eef522138da219697eb925b84c39c9fd4a44d79
+  languageName: node
+  linkType: hard
+
+"@plutojl/lezer-julia@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@plutojl/lezer-julia@npm:1.2.0"
+  dependencies:
+    "@lezer/common": ^1.2.1
+    "@lezer/highlight": ^1.2.0
+    "@lezer/lr": ^1.4.0
+  checksum: ce47f5d819c76ebb347282f685636dba1a09c62554ce7fafbeb6e0b11bd2ac3692af1d79873a5fa81b6f32f4684d868ccdd3c5ae667d244e134645afb97ddd8e
   languageName: node
   linkType: hard
 

@@ -226,6 +226,45 @@ Keyboard Shortcuts in the Settings tab.
 </div>
 ```
 
+### Assigning a shortcut to a command without a default
+
+Not every command has a default keyboard shortcut. For example, **New Console
+for Notebook** (available from a notebook's right-click menu) has no shortcut
+assigned out of the box, but you can add one yourself in either of two ways.
+
+The quickest way is the add-shortcut tool in the Keyboard Shortcuts settings:
+click the **+** button in the toolbar at the top of the shortcuts list, search
+for the command by name, and press the key combination you want to assign.
+Conflicts with existing shortcuts are flagged as you type so you can adjust
+your choice.
+
+Alternatively, you can define the keybinding in JSON using the Advanced
+Settings Editor, which is convenient when you want to copy settings between
+installations. Add an entry that pairs the command's id with the keys you want:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "notebook:create-console",
+      "keys": ["Accel Shift J"],
+      "selector": ".jp-Notebook.jp-mod-commandMode"
+    }
+  ]
+}
+```
+
+With this setting, pressing {kbd}`Ctrl+Shift+J` ({kbd}`Cmd+Shift+J` on macOS)
+while a notebook is focused in command mode opens a console attached to it.
+`Accel` maps to {kbd}`Cmd` on macOS and {kbd}`Ctrl` on other platforms.
+
+To find a command's id, browse the {ref}`command list <commands>` or the
+existing entries in the Keyboard Shortcuts settings. When editing the JSON
+directly, choose a key combination that is not already bound in the same
+context.
+
+### Defining shortcuts running multiple commands (macros)
+
 To define a custom keyboard shortcut which runs more than one command, add a keyboard shortcut
 for `apputils:run-all-enabled` command in Keyboard Shortcuts advanced settings. The commands you
 wish to run are passed in the `args` argument as a list of strings:
