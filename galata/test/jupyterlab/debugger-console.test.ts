@@ -38,17 +38,20 @@ async function setupDebuggerConsole(
   // Wait for the debugger to stop at the breakpoint
   await page.debugger.waitForCallStack();
 
-  // Try to wait for variables, but don't fail if they don't appear
-  try {
-    await page.debugger.waitForVariables();
-  } catch (error) {
-    console.warn('Variables not loaded, continuing with test:', error);
-  }
+  await page.debugger.waitForVariables();
+  await page.getByLabel('Scope').selectOption('Locals');
+  await page
+    .getByRole('treeitem', { name: 'user_count:' })
+    .waitFor({ state: 'visible' });
 
   // Click the evaluate button in the callstack toolbar to open the debug console
   const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
   await evaluateButton.click();
   await page.locator(DEBUG_CONSOLE_SELECTOR).waitFor({ state: 'visible' });
+  await page
+    .locator(DEBUG_CONSOLE_WIDGET_SELECTOR)
+    .locator('.jp-CodeConsole-promptCell')
+    .waitFor({ state: 'visible' });
 }
 
 test.describe('Debugger Console', () => {
@@ -120,14 +123,10 @@ test.describe('Debugger Console', () => {
 
     // Click the evaluate button to close the console
     await evaluateButton.click();
-    await page.waitForTimeout(500);
-
-    // Verify the console is now closed
-    await expect(debugConsole).not.toBeVisible();
+    await expect(debugConsole).toBeHidden();
 
     // Click the evaluate button again to reopen the console
     await evaluateButton.click();
-    await page.waitForTimeout(500);
 
     // Verify the console is open again
     await expect(debugConsole).toBeVisible();

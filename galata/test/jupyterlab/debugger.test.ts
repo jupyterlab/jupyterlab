@@ -125,7 +125,7 @@ for (const c of showSourcesCases) {
 
       await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
       await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
+      await page.sidebar.openTab('jp-debugger-sidebar');
 
       await page.notebook.waitForCellGutter(0);
       await page.notebook.clickCellGutter(0, 8);
@@ -224,7 +224,7 @@ for (const c of showSourcesCases) {
       await page.click('.jp-FileEditor');
 
       await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
+      await page.sidebar.openTab('jp-debugger-sidebar');
 
       // Set breakpoint in script
       await page.notebook.waitForCodeGutter();
@@ -335,14 +335,11 @@ test.describe('Debugger Tests', () => {
       // Don't wait as it will be blocked.
       await page.notebook.runCell(1, { wait: false });
 
-      // Wait to be stopped on the breakpoint and the local variables to be displayed.
+      // Wait to be stopped on the breakpoint.
       await page.debugger.waitForCallStack();
 
       // Expect the copy entry to be in the menu.
-      await page.getByLabel('Scope').selectOption('Locals');
-      await page.getByRole('treeitem', { name: 'local_var:' }).click({
-        button: 'right'
-      });
+      await openVariableContextMenu(page, 'Locals', 'local_var');
 
       // Request the copy of the local variable to globals scope.
       await page
@@ -353,11 +350,7 @@ test.describe('Debugger Tests', () => {
       await copyToGlobalsRequest.promise;
 
       // Expect the context menu for global variables to not have the 'copy' entry.
-      await page.getByLabel('Scope').selectOption('Globals');
-      await page.getByRole('treeitem', { name: 'global_var:' }).click({
-        button: 'right'
-      });
-      await expect.soft(page.getByRole('menu')).toBeVisible();
+      await openVariableContextMenu(page, 'Globals', 'global_var');
       await expect(
         page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
       ).toHaveCount(0);
@@ -382,15 +375,11 @@ test.describe('Debugger Tests', () => {
       // Don't wait as it will be blocked.
       await page.notebook.runCell(1, { wait: false });
 
-      // Wait to be stopped on the breakpoint and the local variables to be displayed.
+      // Wait to be stopped on the breakpoint.
       await page.debugger.waitForCallStack();
 
-      await page.getByLabel('Scope').selectOption('Locals');
-
       // Expect the menu entry not to be visible.
-      await page.getByRole('treeitem', { name: 'local_var:' }).click({
-        button: 'right'
-      });
+      await openVariableContextMenu(page, 'Locals', 'local_var');
       await expect
         .soft(page.getByRole('menuitem', { name: 'Copy Variable to Globals' }))
         .not.toBeVisible();
@@ -408,24 +397,18 @@ test.describe('Debugger Tests', () => {
       // Don't wait as it will be blocked.
       await page.notebook.runCell(1, { wait: false });
 
-      // Wait to be stopped on the breakpoint and the local variables to be displayed.
+      // Wait to be stopped on the breakpoint.
       await page.debugger.waitForCallStack();
 
       // Copy value to clipboard
-      await page.getByLabel('Scope').selectOption('Locals');
-      await page.getByRole('treeitem', { name: 'local_var:' }).click({
-        button: 'right'
-      });
+      await openVariableContextMenu(page, 'Locals', 'local_var');
       await page.getByRole('menuitem', { name: 'Copy to Clipboard' }).click();
       expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
         '3'
       );
 
       // Copy to clipboard disabled for variables with empty value
-      await page.getByLabel('Scope').selectOption('Globals');
-      await page
-        .getByRole('treeitem', { name: 'special variables:' })
-        .click({ button: 'right' });
+      await openVariableContextMenu(page, 'Globals', 'special variables');
       await expect(
         page.getByRole('menuitem', { name: 'Copy to Clipboard' })
       ).toBeDisabled();
@@ -451,15 +434,28 @@ test.describe('Debugger Tests', () => {
       await page.notebook.addCell('code', 'import anyio');
       await page.notebook.runCell(2);
 
-      await page.waitForCondition(async () => {
-        const texts = await page
+      await expect(
+        page
           .locator('.jp-DebuggerKernelSource-source')
-          .allInnerTexts();
-        return texts.some(t => t.includes('anyio'));
-      });
+          .filter({ hasText: 'anyio' })
+          .first()
+      ).toBeVisible({ timeout: 30000 });
     });
   });
 });
+
+async function openVariableContextMenu(
+  page: IJupyterLabPageFixture,
+  scope: 'Globals' | 'Locals',
+  variableName: string
+): Promise<void> {
+  await page.debugger.waitForVariables();
+  await page.getByLabel('Scope').selectOption(scope);
+  const variable = page.getByRole('treeitem', { name: `${variableName}:` });
+  await variable.waitFor({ state: 'visible' });
+  await variable.click({ button: 'right' });
+  await page.getByRole('menu').waitFor({ state: 'visible' });
+}
 
 async function createNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.createNew();
