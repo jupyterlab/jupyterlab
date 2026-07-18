@@ -162,3 +162,5 @@ untitled*.txt
 
 # temporary files, useful for testing
 tmp
+.venv/
+jupyterlab-debug.log
