@@ -2812,13 +2812,32 @@ namespace Private {
         if (widget == null) {
           return;
         }
-        const oldName = TabBarSvg.titleLabel(widget.title);
+        const isDocument = widget instanceof DocumentWidget;
+        const oldName = isDocument
+          ? widget.context.localPath.split('/').pop()!
+          : TabBarSvg.titleLabel(widget.title);
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();
 
         if (newName !== oldName) {
-          widget.title.label = newName;
+          if (isDocument) {
+            const validNameExp = /[/\\:]/;
+            if (newName.length > 0 && !validNameExp.test(newName)) {
+              const oldPath = widget.context.path;
+              try {
+                await widget.context.rename(newName);
+              } finally {
+                if (widget.context.path === oldPath) {
+                  inputElement.value = oldName;
+                }
+              }
+            } else {
+              inputElement.value = oldName;
+            }
+          } else {
+            widget.title.label = newName;
+          }
         } else {
           inputElement.value = oldName;
         }
