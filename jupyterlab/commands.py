@@ -1671,7 +1671,7 @@ class _AppHandler:
         data: dict[str, Any],
         dtype: str,
     ) -> str:
-        """Update a local dependency.  Return `True` if changed."""
+        """Update a local dependency and return the tarball filename (existing if unchanged)."""
         # Extract the package in a temporary directory.
         existing = data["filename"]
         if not osp.exists(pjoin(dname, existing)):
