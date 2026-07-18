@@ -74,6 +74,18 @@ export class MarkdownViewer extends Widget {
   }
 
   /**
+   * The markdown source last rendered by this widget and its offset in the
+   * model.
+   *
+   * #### Notes
+   * Rendering is throttled: the model may be ahead of the returned source
+   * until the next rendering pass.
+   */
+  get renderedSource(): MarkdownViewer.IRenderedSource {
+    return this._renderedSource ?? this._computeRenderedSource();
+  }
+
+  /**
    * Set URI fragment identifier.
    */
   setFragment(fragment: string): void {
@@ -154,6 +166,16 @@ export class MarkdownViewer extends Widget {
   }
 
   /**
+   * The markdown source that a rendering pass started now would render.
+   */
+  private _computeRenderedSource(): MarkdownViewer.IRenderedSource {
+    const source = this.context.model.toString();
+    return this._config.hideFrontMatter
+      ? Private.removeFrontMatter(source)
+      : { source, lineOffset: 0 };
+  }
+
+  /**
    * Render the mime content.
    */
   private async _render(): Promise<void> {
@@ -171,13 +193,9 @@ export class MarkdownViewer extends Widget {
     // Set up for this rendering pass.
     this._renderRequested = false;
     const { context } = this;
-    const { model } = context;
-    const source = model.toString();
+    const renderedSource = this._computeRenderedSource();
     const data: JSONObject = {};
-    // If `hideFrontMatter`is true remove front matter.
-    data[MIMETYPE] = this._config.hideFrontMatter
-      ? Private.removeFrontMatter(source)
-      : source;
+    data[MIMETYPE] = renderedSource.source;
     const mimeModel = new MimeModel({
       data,
       metadata: { fragment: this._fragment }
@@ -188,6 +206,7 @@ export class MarkdownViewer extends Widget {
       this._isRendering = true;
       await this.renderer.renderModel(mimeModel);
       this._isRendering = false;
+      this._renderedSource = renderedSource;
 
       // If there is an outstanding request to render, go ahead and render
       if (this._renderRequested) {
@@ -217,6 +236,7 @@ export class MarkdownViewer extends Widget {
   private _ready = new PromiseDelegate<void>();
   private _isRendering = false;
   private _renderRequested = false;
+  private _renderedSource: MarkdownViewer.IRenderedSource | null = null;
   private _rendered = new Signal<MarkdownViewer, void>(this);
 }
 
@@ -274,6 +294,21 @@ export namespace MarkdownViewer {
      * The render timeout.
      */
     renderTimeout: number;
+  }
+
+  /**
+   * Markdown source text as rendered by the viewer.
+   */
+  export interface IRenderedSource {
+    /**
+     * The markdown source passed to the renderer.
+     */
+    source: string;
+
+    /**
+     * The number of model lines removed before `source`.
+     */
+    lineOffset: number;
   }
 
   /**
@@ -342,7 +377,7 @@ export namespace MarkdownViewerFactory {
   /**
    * The options used to initialize a MarkdownViewerFactory.
    */
-  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions<MarkdownDocument> {
     /**
      * The primary file type associated with the document.
      */
@@ -364,23 +399,28 @@ namespace Private {
    */
   export function createRegistryOptions(
     options: MarkdownViewerFactory.IOptions
-  ): DocumentRegistry.IWidgetFactoryOptions {
+  ): DocumentRegistry.IWidgetFactoryOptions<MarkdownDocument> {
     return {
       ...options,
       readOnly: true
-    } as DocumentRegistry.IWidgetFactoryOptions;
+    } as DocumentRegistry.IWidgetFactoryOptions<MarkdownDocument>;
   }
 
   /**
    * Remove YAML front matter from source.
    */
-  export function removeFrontMatter(source: string): string {
+  export function removeFrontMatter(
+    source: string
+  ): MarkdownViewer.IRenderedSource {
     const re = /^---\n[\s\S]*?\n(?:---|\.\.\.)\n/;
     const match = source.match(re);
     if (!match) {
-      return source;
+      return { source, lineOffset: 0 };
     }
     const { length } = match[0];
-    return source.slice(length);
+    return {
+      source: source.slice(length),
+      lineOffset: match[0].split('\n').length - 1
+    };
   }
 }

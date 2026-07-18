@@ -16,7 +16,10 @@ import type {
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
-import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
+import type {
+  IMarkdownBlockToken,
+  IMarkdownHeadingToken
+} from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type {
@@ -54,19 +57,23 @@ export interface IRenderOptions {
 /**
  * Create a markdown parser
  *
- * @param languages Editor languages
+ * @param languages - Editor languages
+ * @param options - Markdown render options
  * @returns Markdown parser
  */
 export function createMarkdownParser(
   languages: IEditorLanguageRegistry,
   options?: IRenderOptions
-) {
+): IMarkdownParser {
   return {
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
     },
     getHeadingTokens: (content: string): Promise<IMarkdownHeadingToken[]> => {
       return Private.getHeadingTokens(content, options);
+    },
+    getBlockTokens: (content: string): Promise<IMarkdownBlockToken[]> => {
+      return Private.getBlockTokens(content, options);
     }
   };
 }
@@ -101,6 +108,13 @@ export default plugin;
  * A namespace for private marked functions
  */
 namespace Private {
+  interface ILinedMarkedToken extends IMarkdownBlockToken {
+    /**
+     * The original marked token.
+     */
+    token: Token;
+  }
+
   let _initializing: PromiseDelegate<typeof marked> | null = null;
   let _marked: typeof marked | null = null;
   let _blocks: IFencedBlockRenderer[] = [];
@@ -269,44 +283,79 @@ namespace Private {
     content: string,
     options?: IRenderOptions
   ): Promise<IMarkdownHeadingToken[]> {
-    if (!_marked) {
-      _marked = await initializeMarked(options);
-    }
     const headings = new Array<IMarkdownHeadingToken>();
-    const tokens = _marked.lexer(content);
+    const blockTokens = await getLinedMarkedTokens(content, options);
 
     // Extract heading tokens and compute line numbers
     // Include three token types that may contain headings:
     // - heading: Standard markdown headings (# Title)
     // - html: Standalone HTML heading blocks (<h1>Title</h1>)
-    // - paragraph: Only paragraphs with nested HTML tokens (inline html tags) that might contain embedded headings (<span><h1>Title</h1></span>)
-    let currentLine = 0;
-    for (const token of tokens) {
+    // - paragraph: Only paragraphs with inline HTML heading tags
+    for (const token of blockTokens) {
       if (
         token.type === 'heading' ||
         (token.type === 'html' && containsHeadingTag(token.raw)) ||
-        (token.type === 'paragraph' && containsInlineHeading(token))
+        (token.type === 'paragraph' && containsInlineHeading(token.token))
       ) {
         headings.push({
           raw: token.raw,
-          line: currentLine
+          line: token.line
         });
       }
-      currentLine += token.raw.split('\n').length - 1;
     }
 
     return headings;
   }
 
-  function containsHeadingTag(raw: string) {
+  /**
+   * Extract top-level block metadata from markdown source.
+   */
+  export async function getBlockTokens(
+    content: string,
+    options?: IRenderOptions
+  ): Promise<IMarkdownBlockToken[]> {
+    return (await getLinedMarkedTokens(content, options)).map(token => ({
+      type: token.type,
+      raw: token.raw,
+      line: token.line
+    }));
+  }
+
+  async function getLinedMarkedTokens(
+    content: string,
+    options?: IRenderOptions
+  ): Promise<ILinedMarkedToken[]> {
+    if (!_marked) {
+      _marked = await initializeMarked(options);
+    }
+    const blockTokens = new Array<ILinedMarkedToken>();
+    const tokens = _marked.lexer(content);
+
+    let currentLine = 0;
+    for (const token of tokens) {
+      blockTokens.push({
+        type: token.type,
+        raw: token.raw,
+        line: currentLine,
+        token
+      });
+      currentLine += token.raw.split('\n').length - 1;
+    }
+
+    return blockTokens;
+  }
+
+  function containsHeadingTag(raw: string): boolean {
     return HEADING_TAG_REGEX.test(raw);
   }
 
-  function containsInlineHeading(token: Tokens.Generic): boolean {
-    if (!token.tokens) return false;
+  function containsInlineHeading(token: Token): boolean {
+    if (!('tokens' in token) || !token.tokens) {
+      return false;
+    }
 
     return token.tokens.some(
-      (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
+      (t: Token) => t.type === 'html' && containsHeadingTag(t.raw)
     );
   }
 }
