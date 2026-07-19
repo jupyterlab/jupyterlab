@@ -531,7 +531,7 @@ export namespace IDebugger {
       /**
        * An optional hashing seed provided by the kernel.
        */
-      seed?: string | number;
+      seed?: string;
     };
   }
 
@@ -663,7 +663,7 @@ export namespace IDebugger {
          */
         copyToGlobals?: boolean;
         hashMethod: string;
-        hashSeed: number;
+        hashSeed: string;
         isStarted: boolean;
         /**
          * Whether the kernel supports variable rich rendering or not.

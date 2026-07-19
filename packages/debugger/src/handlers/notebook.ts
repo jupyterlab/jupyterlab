@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
-import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ObservableMap } from '@jupyterlab/observables';
 import type { IDisposable } from '@lumino/disposable';
@@ -11,10 +11,6 @@ import { EditorHandler } from './editor';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
-
-type TNotebookCellList = NonNullable<
-  NotebookPanel['content']['model']
->['cells'];
 
 /**
  * A handler for notebooks.
@@ -95,7 +91,7 @@ export class NotebookHandler implements IDisposable {
    * Handle a notebook cells changed event.
    */
   private _onCellsChanged(
-    cells?: TNotebookCellList,
+    cells?: INotebookModel['cells'],
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this._notebookPanel.content.widgets.forEach(cell =>

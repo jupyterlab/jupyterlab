@@ -11,10 +11,6 @@ import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
 
-type TNotebookContext = DocumentRegistry.IContext<INotebookModel> & {
-  translator?: ITranslator;
-};
-
 /**
  * A widget factory for notebook panels.
  */
@@ -84,7 +80,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
-    const translator = (context as TNotebookContext).translator;
+    const translator = this.translator;
     const kernelHistory = new NotebookHistory({
       sessionContext: context.sessionContext,
       translator: translator

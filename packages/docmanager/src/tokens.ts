@@ -144,6 +144,21 @@ export interface IDocumentManagerDialogs {
 }
 
 /**
+ * State changes emitted by {@link IDocumentManager.stateChanged}.
+ */
+export type IDocumentManagerStateChange =
+  | IChangedArgs<
+      boolean,
+      boolean,
+      'autosave' | 'confirmClosingDocument' | 'renameUntitledFileOnSave'
+    >
+  | IChangedArgs<
+      number,
+      number,
+      'autosaveInterval' | 'lastModifiedCheckMargin'
+    >;
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {
@@ -190,10 +205,7 @@ export interface IDocumentManager extends IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  readonly stateChanged: ISignal<
-    IDocumentManager,
-    IChangedArgs<boolean | number>
-  >;
+  readonly stateChanged: ISignal<IDocumentManager, IDocumentManagerStateChange>;
 
   /**
    * Clone a widget.
