@@ -437,7 +437,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
     .selectOption('notebook: Restart Kernel and Run All Cells…');
   // Display the shortcut input and add a shortcut.
   await addShortcutRow.locator('.jp-Shortcuts-EmptyCell').first().hover();
-  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell a').click();
+  await addShortcutRow.locator('.jp-Shortcuts-Plus').click();
   const shortcutKey = addShortcutRow.locator('.jp-Shortcuts-Input').first();
   await shortcutKey.press('Control+r');
   await addShortcutRow.locator('.jp-Shortcuts-Submit').click();
@@ -458,7 +458,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   await dialog.waitFor({ state: 'detached' });
 
   // Save the new shortcut.
-  await addShortcutRow.getByTitle('Save shortcut').click();
+  await addShortcutRow.locator('.jp-Shortcuts-SaveNew').click();
   await addShortcutRow.waitFor({ state: 'detached' });
 
   // The shortcut should now be listed with the correct selector and args.
