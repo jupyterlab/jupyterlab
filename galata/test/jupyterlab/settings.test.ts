@@ -275,7 +275,7 @@ test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async
   expect(userPanelLines).toBeLessThan(10);
 });
 
-test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
+test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
   page
 }) => {
   // Settings are wide, hide the sidebar to increase available space
@@ -307,9 +307,10 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
   expect(await conflict.screenshot()).toMatchSnapshot(
     'settings-shortcuts-conflict.png'
   );
-  const cancelButton = conflict.locator('button >> text=Cancel');
-  await cancelButton.click();
+  // Cancel by dismissing the input (blur closes the editor and clears conflicts).
+  await filterInput.click();
 
+  await expect(newShortcutInput).toHaveCount(0);
   await expect(conflict).toHaveCount(0);
 });
 
