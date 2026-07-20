@@ -403,10 +403,33 @@ Administrators may lock specific plugins with:
 jupyter labextension lock my-extension:plugin
 ```
 
+They may also add an extension-level lock by using the extension name without
+a plugin suffix:
+
+```bash
+jupyter labextension lock my-extension
+```
+
+JupyterLab identifies the extension for a plugin from the plugin ID prefix
+before the first colon. For example, `my-extension:plugin` is treated as a
+plugin in the `my-extension` extension. Extension-level locks therefore apply
+only to plugins whose IDs use the same prefix up to the colon, such as
+`my-extension:plugin` and `my-extension:other-plugin`. Extension authors should
+use the NPM extension package name, a colon, then a string identifying the
+plugin inside the extension, as described in the
+[plugin ID convention](../extension/extension_dev.md#plugin-id-convention), so
+administrators can lock or unlock all plugins in an extension consistently.
+
 To unlock a locked plugin:
 
 ```bash
 jupyter labextension unlock my-extension:plugin
+```
+
+To remove an extension-level lock:
+
+```bash
+jupyter labextension unlock my-extension
 ```
 
 The locked plugins appear on the plugin list with a lock icon and cannot be enabled/disabled from the user interface:

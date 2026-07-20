@@ -235,7 +235,8 @@ class PluginManager(LoggingConfigurable):
         for plugin in plugins_or_extensions:
             if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
-                if plugin in self.options.lock_rules:
+                extension = plugin.split(":")[0]
+                if plugin in self.options.lock_rules or extension in self.options.lock_rules:
                     locked_subset.add(plugin)
             elif plugin in extensions_with_locked_plugins:
                 # this is an extension - we need to check for >any< plugin
