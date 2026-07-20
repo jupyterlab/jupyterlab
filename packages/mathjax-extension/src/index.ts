@@ -91,8 +91,15 @@ export class MathJaxTypesetter implements ILatexTypesetter {
     }
 
     this._mathDocument.options.elements = [node];
+    // `clear()` empties the document's math list before rendering, so that
+    // memory retained per math expression (most notably the compiled internal
+    // MathML tree) is bounded by the last typeset call rather than growing
+    // with the total amount of math on the page.
+    // This is also why we need to store the sources manually -
+    // we cannot extract them from MathJax state after `clear()`.
     this._mathDocument.clear().render();
     delete this._mathDocument.options.elements;
+    Private.recordTexSources(this._mathDocument);
     Private.hardenAnchorLinks(node);
   }
 
@@ -127,6 +134,18 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
 
     app.commands.addCommand(CommandIDs.copy, {
       execute: async () => {
+        // Find the math expression the context menu was opened on; this works
+        // across all typesetter instances (e.g. ones configured with
+        // different delimiters), unlike the fallback below which reflects
+        // whichever expression the default typesetter processed last.
+        const root = app.contextMenuHitTest(node =>
+          node.classList.contains('MathJax')
+        );
+        const tex = root ? Private.getTexSource(root) : undefined;
+        if (tex !== undefined) {
+          await navigator.clipboard.writeText(tex);
+          return;
+        }
         const md = await typesetter.mathDocument();
         const oJax: any = md.outputJax;
         await navigator.clipboard.writeText(oJax.math.math);
@@ -142,16 +161,19 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
 
     app.commands.addCommand(CommandIDs.scale, {
       execute: async (args: CommandArgs.scale) => {
-        const md = await typesetter.mathDocument();
         const scale = args['scale'] || 1.0;
-        md.outputJax.options.scale = scale;
-        md.rerender();
+        // Scale all documents so that every typesetter instance (e.g. ones
+        // configured with different delimiters) is affected alike.
+        for (const md of await Private.getMathDocuments()) {
+          md.outputJax.options.scale = scale;
+          md.rerender();
 
-        // Harden only the re-rendered anchors
-        for (const math of md.math) {
-          const root = math.typesetRoot as HTMLElement | null;
-          if (root) {
-            Private.hardenAnchorLinks(root);
+          // Harden only the re-rendered anchors
+          for (const math of md.math) {
+            const root = math.typesetRoot as HTMLElement | null;
+            if (root) {
+              Private.hardenAnchorLinks(root);
+            }
           }
         }
       },
@@ -272,6 +294,45 @@ namespace Private {
       _documents.set(key, document);
     }
     return document;
+  }
+
+  /**
+   * Get all MathDocuments created so far, so that document-wide commands
+   * (e.g. scaling) can operate across every delimiter configuration in use.
+   */
+  export function getMathDocuments(): Promise<MathDocument<any, any, any>[]> {
+    return Promise.all(_documents.values());
+  }
+
+  const _texSourceByRoot = new WeakMap<Element, string>();
+
+  /**
+   * Record the TeX source of each math expression typeset by `document`,
+   * keyed by its rendered container element.
+   *
+   * A MathDocument only retains the math items from its most recent
+   * `render()` call (each `typeset()` starts with `clear()`), so the source
+   * of earlier expressions must be captured here for the copy command to
+   * find the expression that was actually clicked. Unlike retaining the math
+   * items themselves, this only keeps the source string, and the `WeakMap`
+   * lets it be reclaimed as soon as the rendered node is garbage-collected.
+   */
+  export function recordTexSources(
+    document: MathDocument<any, any, any>
+  ): void {
+    for (const item of document.math) {
+      if (item.typesetRoot) {
+        _texSourceByRoot.set(item.typesetRoot, item.math);
+      }
+    }
+  }
+
+  /**
+   * Get the TeX source of the math expression rendered in `root`
+   * (a `mjx-container` element), if known.
+   */
+  export function getTexSource(root: Element): string | undefined {
+    return _texSourceByRoot.get(root);
   }
 
   /**

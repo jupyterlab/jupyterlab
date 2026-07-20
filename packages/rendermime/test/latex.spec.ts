@@ -134,6 +134,34 @@ describe('jupyter-ui', () => {
         expect(math).toEqual(['$$x = 5$$']);
         expect(text).toBe('total @@0@@ end');
       });
+
+      it('should still extract `\\\\(...\\\\)` inline math when dollarInlineMath is false', () => {
+        const input = 'hello, \\\\( /alpha \\\\), there';
+        const { text, math } = removeMath(input, { dollarInlineMath: false });
+        expect(math).toEqual(['\\\\( /alpha \\\\)']);
+        expect(text).toBe('hello, @@0@@, there');
+      });
+
+      it('should still extract `\\begin`/`\\end` environments when dollarInlineMath is false', () => {
+        const input = 'hello, \\begin{align} x \\end{align}, there';
+        const { text, math } = removeMath(input, { dollarInlineMath: false });
+        expect(math).toEqual(['\\begin{align} x \\end{align}']);
+        expect(text).toBe('hello, @@0@@, there');
+      });
+
+      it('should keep dollars in code spans intact when dollarInlineMath is false', () => {
+        const input = 'variables `$foo` and `$bar` cost $5';
+        const { text, math } = removeMath(input, { dollarInlineMath: false });
+        expect(math).toEqual([]);
+        expect(text).toBe(input);
+      });
+
+      it('should leave escaped `\\$` untouched when dollarInlineMath is false', () => {
+        const input = 'costs \\$5 and $10';
+        const { text, math } = removeMath(input, { dollarInlineMath: false });
+        expect(math).toEqual([]);
+        expect(text).toBe(input);
+      });
     });
   });
 

@@ -613,6 +613,11 @@ export namespace IRenderMime {
        * Set to `false` to render `$` literally (e.g. for currency amounts
        * such as "$5 and $10"). Display math (`$$...$$`) and the `\(...\)` /
        * `\[...\]` delimiters are unaffected by this option. Defaults to `true`.
+       *
+       * Note that this option applies wherever the typesetter is used, not
+       * only to Markdown: in particular, a `$...$` expression in a
+       * `text/latex` output (which is typeset directly, without Markdown
+       * pre-processing) is also left literal when this option is `false`.
        */
       readonly dollarInlineMath?: boolean;
     }
