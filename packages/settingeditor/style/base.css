@@ -276,7 +276,7 @@
 
 .jp-SettingsHeader-buttonbar > .jp-RestoreButton:focus-visible {
   outline-width: var(--jp-focus-outline-width);
-  outline-color: var(--jp-warn-outline-color, var(--warn-color-normal));
+  outline-color: var(--jp-warn-outline-color, var(--jp-warn-color-normal));
   outline-style: solid;
   outline-offset: 2px;
 }
