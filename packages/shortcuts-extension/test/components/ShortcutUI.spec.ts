@@ -10,6 +10,7 @@ import type {
 import { CommandRegistry } from '@lumino/commands';
 import type { JSONValue } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { Platform } from '@lumino/domutils';
 import { Signal } from '@lumino/signaling';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
@@ -129,6 +130,25 @@ describe('@jupyterlab/shortcut-extension', () => {
           selector: 'body'
         });
       });
+
+      it('should add a keybinding for given target with args', async () => {
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [],
+          args: { option: 1 },
+          selector: 'body',
+          category: 'test'
+        };
+        await shortcutUI.addKeybinding(target, ['Ctrl A', 'C']);
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl A', 'C'],
+          selector: 'body',
+          args: { option: 1 }
+        });
+      });
     });
 
     describe('#replaceKeybinding()', () => {
@@ -222,6 +242,40 @@ describe('@jupyterlab/shortcut-extension', () => {
         });
       });
 
+      it('should preserve target args and preventDefault when replacing a default keybinding', async () => {
+        const keybinding = {
+          keys: ['Ctrl A'],
+          isDefault: true,
+          preventDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: { option: 1 },
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        await shortcutUI.replaceKeybinding(target, keybinding, ['Ctrl X']);
+        expect(data.user.shortcuts).toHaveLength(2);
+        expect(data.user.shortcuts[0]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl A'],
+          selector: 'body',
+          args: { option: 1 },
+          disabled: true,
+          preventDefault: false
+        });
+        expect(data.user.shortcuts[1]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl X'],
+          selector: 'body',
+          args: { option: 1 },
+          preventDefault: false
+        });
+      });
+
       it('should replace a user keybinding whose active keys differ from fallback keys', async () => {
         // The stored `keys` are the cross-platform fallback; the resolved
         // platform keys (what the registry exposes and the UI edits) differ.
@@ -233,7 +287,9 @@ describe('@jupyterlab/shortcut-extension', () => {
           winKeys: ['Ctrl Alt Y'],
           linuxKeys: ['Ctrl Alt Y'],
           macKeys: ['Ctrl Alt Y'],
-          selector: 'body'
+          selector: 'body',
+          args: { option: 1 },
+          preventDefault: false
         } as CommandRegistry.IKeyBindingOptions);
         const keybinding = {
           keys: CommandRegistry.normalizeKeys({
@@ -248,14 +304,33 @@ describe('@jupyterlab/shortcut-extension', () => {
           id: 'test-id',
           command: 'test:command',
           keybindings: [keybinding],
-          args: {},
+          args: { option: 1 },
           selector: 'body',
           category: 'test'
         };
         await shortcutUI.replaceKeybinding(target, keybinding, ['Ctrl X']);
         // The existing user shortcut should be updated in place, not duplicated.
         expect(data.user.shortcuts).toHaveLength(1);
-        expect(data.user.shortcuts[0].keys).toEqual(['Ctrl X']);
+        const shortcut = data.user.shortcuts[0];
+        expect(CommandRegistry.normalizeKeys(shortcut)).toEqual(['Ctrl X']);
+        expect(shortcut.args).toEqual({ option: 1 });
+        expect(shortcut.preventDefault).toBe(false);
+        if (Platform.IS_WIN) {
+          expect(shortcut.winKeys).toEqual(['Ctrl X']);
+          expect(shortcut.linuxKeys).toEqual(['Ctrl Alt Y']);
+          expect(shortcut.macKeys).toEqual(['Ctrl Alt Y']);
+          expect(shortcut.keys).toEqual(['Accel Shift J']);
+        } else if (Platform.IS_MAC) {
+          expect(shortcut.macKeys).toEqual(['Ctrl X']);
+          expect(shortcut.winKeys).toEqual(['Ctrl Alt Y']);
+          expect(shortcut.linuxKeys).toEqual(['Ctrl Alt Y']);
+          expect(shortcut.keys).toEqual(['Accel Shift J']);
+        } else {
+          expect(shortcut.linuxKeys).toEqual(['Ctrl X']);
+          expect(shortcut.winKeys).toEqual(['Ctrl Alt Y']);
+          expect(shortcut.macKeys).toEqual(['Ctrl Alt Y']);
+          expect(shortcut.keys).toEqual(['Accel Shift J']);
+        }
       });
     });
 

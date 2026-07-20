@@ -145,6 +145,18 @@ describe('@jupyterlab/shortcut-extension', () => {
         const target = [...shortcutRegistry.values()][0];
         expect(target.keybindings[0].isDefault).toBe(true);
       });
+
+      it('should preserve preventDefault on keybindings', () => {
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Ctrl W'],
+          selector: 'body',
+          preventDefault: false
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const target = [...shortcutRegistry.values()][0];
+        expect(target.keybindings[0].preventDefault).toBe(false);
+      });
     });
 
     describe('#findConflictsFor()', () => {
@@ -166,6 +178,20 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(conflicts).toHaveLength(1);
       });
 
+      it('should normalize keys before checking conflicts', () => {
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel S'],
+          selector: 'body'
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const conflicts = shortcutRegistry.findConflictsFor(
+          ['Accel S'],
+          'body'
+        );
+        expect(conflicts).toHaveLength(1);
+      });
+
       it('should return conflicts for individual chords', () => {
         data.composite.shortcuts.push({
           command: 'test:command',
@@ -174,6 +200,20 @@ describe('@jupyterlab/shortcut-extension', () => {
         });
         const shortcutRegistry = new ShortcutRegistry(options);
         const conflicts = shortcutRegistry.findConflictsFor(['X', 'X'], 'body');
+        expect(conflicts).toHaveLength(1);
+      });
+
+      it('should normalize keys before checking individual chords', () => {
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel S'],
+          selector: 'body'
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const conflicts = shortcutRegistry.findConflictsFor(
+          ['Accel K', 'Accel S'],
+          'body'
+        );
         expect(conflicts).toHaveLength(1);
       });
 

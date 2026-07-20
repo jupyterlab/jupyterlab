@@ -75,7 +75,10 @@ export class ShortcutRegistry
         const keybinding: IKeybinding = {
           // Resolve platform-specific keys (`winKeys`/`linuxKeys`/`macKeys` with fallback to `keys`)
           keys: CommandRegistry.normalizeKeys(shortcut),
-          isDefault: !setByUser.has(keybindingKey)
+          isDefault: !setByUser.has(keybindingKey),
+          ...(shortcut.preventDefault === undefined
+            ? {}
+            : { preventDefault: shortcut.preventDefault })
         };
 
         const shortcutTarget = this.get(targetKey);
@@ -107,16 +110,17 @@ export class ShortcutRegistry
    */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[] {
     const checker = new KeybindingsConflictChecker({ registry: this });
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
 
     // First check the full chain
-    let conflicts = checker.findConflicts(keys, selector);
+    let conflicts = checker.findConflicts(normalizedKeys, selector);
 
     if (conflicts.length !== 0) {
       return conflicts;
     }
 
     // Then check each piece of the chain
-    for (const binding of keys) {
+    for (const binding of normalizedKeys) {
       conflicts = checker.findConflicts([binding], selector);
       if (conflicts.length !== 0) {
         return conflicts;
