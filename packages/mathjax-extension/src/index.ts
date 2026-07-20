@@ -6,14 +6,14 @@
  * @module mathjax-extension
  */
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
+
+import type { IRenderMime } from '@jupyterlab/rendermime';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -40,9 +40,33 @@ namespace CommandArgs {
  * The MathJax Typesetter.
  */
 export class MathJaxTypesetter implements ILatexTypesetter {
+  /**
+   * Construct a new MathJax typesetter.
+   *
+   * @param options - Options describing how math is recognized in the source
+   *   text (see {@link MathJaxTypesetter.IOptions}).
+   */
+  constructor(options: MathJaxTypesetter.IOptions = {}) {
+    this.mathParseOptions = {
+      dollarInlineMath: options.dollarInlineMath ?? true
+    };
+  }
+
+  /**
+   * The options describing how math is recognized in the source text.
+   *
+   * Exposed so that the Markdown pre-processor (`removeMath`) and this
+   * typesetter agree on whether a single `$` introduces inline math.
+   */
+  readonly mathParseOptions: IRenderMime.ILatexTypesetter.IMathParseOptions;
+
   protected async _ensureInitialized() {
     if (!this._initialized) {
-      this._mathDocument = await Private.ensureMathDocument();
+      this._mathDocument = await Private.ensureMathDocument(
+        this.mathParseOptions.dollarInlineMath === false
+          ? Private.INLINE_MATH_WITHOUT_DOLLAR
+          : Private.DEFAULT_INLINE_MATH
+      );
       this._initialized = true;
     }
   }
@@ -74,6 +98,19 @@ export class MathJaxTypesetter implements ILatexTypesetter {
 
   protected _initialized: boolean = false;
   protected _mathDocument: MathDocument<any, any, any>;
+}
+
+/**
+ * A namespace for `MathJaxTypesetter` statics.
+ */
+export namespace MathJaxTypesetter {
+  // Extends the provider-agnostic math-parsing options; MathJax-specific
+  // options can be added here later in backward-compatible fashion.
+  /**
+   * Options for constructing a {@link MathJaxTypesetter}.
+   */
+  export interface IOptions
+    extends IRenderMime.ILatexTypesetter.IMathParseOptions {}
 }
 
 /**
@@ -145,74 +182,131 @@ export default mathJaxPlugin;
  * A namespace for module-private functionality.
  */
 namespace Private {
-  let _loading: PromiseDelegate<MathDocument<any, any, any>> | null = null;
+  /**
+   * The default delimiters for inline math.
+   */
+  export const DEFAULT_INLINE_MATH: [string, string][] = [
+    ['$', '$'],
+    ['\\(', '\\)']
+  ];
 
-  export async function ensureMathDocument(): Promise<
-    MathDocument<any, any, any>
-  > {
+  /**
+   * The inline math delimiters with the single `$` pair removed, so that `$`
+   * is rendered literally.
+   */
+  export const INLINE_MATH_WITHOUT_DOLLAR: [string, string][] = [
+    ['\\(', '\\)']
+  ];
+
+  /**
+   * Load the MathJax modules and register the document handler.
+   *
+   * The heavy dynamic imports and the (global, one-time) handler registration
+   * are shared across all typesetters; only the per-instance document is built
+   * separately in {@link createMathDocument}. The returned bundle's type is
+   * inferred so no MathJax types need to be imported explicitly.
+   */
+  async function loadModules() {
+    void import('mathjax-full/js/input/tex/require/RequireConfiguration');
+
+    const [
+      { mathjax },
+      { CHTML },
+      { TeX },
+      { TeXFont },
+      { AllPackages },
+      { SafeHandler },
+      { HTMLHandler },
+      { browserAdaptor },
+      { AssistiveMmlHandler }
+    ] = await Promise.all([
+      import('mathjax-full/js/mathjax'),
+      import('mathjax-full/js/output/chtml'),
+      import('mathjax-full/js/input/tex'),
+      import('mathjax-full/js/output/chtml/fonts/tex'),
+      import('mathjax-full/js/input/tex/AllPackages'),
+      import('mathjax-full/js/ui/safe/SafeHandler'),
+      import('mathjax-full/js/handlers/html/HTMLHandler'),
+      import('mathjax-full/js/adaptors/browserAdaptor'),
+      import('mathjax-full/js/a11y/assistive-mml')
+    ]);
+
+    mathjax.handlers.register(
+      AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
+    );
+
+    return { mathjax, CHTML, TeX, TeXFont, AllPackages };
+  }
+
+  let _loading: ReturnType<typeof loadModules> | null = null;
+
+  /**
+   * Ensure the MathJax modules are loaded exactly once per page.
+   */
+  export function ensureMathModules(): ReturnType<typeof loadModules> {
     if (!_loading) {
-      _loading = new PromiseDelegate();
+      _loading = loadModules();
+    }
+    return _loading;
+  }
 
-      void import('mathjax-full/js/input/tex/require/RequireConfiguration');
+  const _documents = new Map<string, Promise<MathDocument<any, any, any>>>();
 
-      const [
-        { mathjax },
-        { CHTML },
-        { TeX },
-        { TeXFont },
-        { AllPackages },
-        { SafeHandler },
-        { HTMLHandler },
-        { browserAdaptor },
-        { AssistiveMmlHandler }
-      ] = await Promise.all([
-        import('mathjax-full/js/mathjax'),
-        import('mathjax-full/js/output/chtml'),
-        import('mathjax-full/js/input/tex'),
-        import('mathjax-full/js/output/chtml/fonts/tex'),
-        import('mathjax-full/js/input/tex/AllPackages'),
-        import('mathjax-full/js/ui/safe/SafeHandler'),
-        import('mathjax-full/js/handlers/html/HTMLHandler'),
-        import('mathjax-full/js/adaptors/browserAdaptor'),
-        import('mathjax-full/js/a11y/assistive-mml')
-      ]);
+  /**
+   * Get (or lazily create) the MathDocument for the given inline delimiters.
+   *
+   * Building a MathDocument costs on the order of ~5 ms and retains memory for
+   * the lifetime of the page. Caching one document per distinct delimiter
+   * configuration keeps that bounded, so constructing many typesetters with
+   * the same configuration (for example one per markdown cell across a large
+   * notebook) reuses a single document instead of multiplying the time and
+   * memory cost.
+   */
+  export function ensureMathDocument(
+    inlineMath: [string, string][]
+  ): Promise<MathDocument<any, any, any>> {
+    const key = JSON.stringify(inlineMath);
+    let document = _documents.get(key);
+    if (!document) {
+      document = createMathDocument(inlineMath);
+      _documents.set(key, document);
+    }
+    return document;
+  }
 
-      mathjax.handlers.register(
-        AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
-      );
+  /**
+   * Build a MathDocument configured with the given inline delimiters.
+   */
+  async function createMathDocument(
+    inlineMath: [string, string][]
+  ): Promise<MathDocument<any, any, any>> {
+    const { mathjax, CHTML, TeX, TeXFont, AllPackages } =
+      await ensureMathModules();
 
-      class EmptyFont extends TeXFont {
-        protected static defaultFonts = {} as any;
-      }
-
-      const chtml = new CHTML({
-        // Override dynamically generated fonts in favor of our font css
-        font: new EmptyFont()
-      });
-
-      const tex = new TeX({
-        packages: AllPackages.concat('require'),
-        inlineMath: [
-          ['$', '$'],
-          ['\\(', '\\)']
-        ],
-        displayMath: [
-          ['$$', '$$'],
-          ['\\[', '\\]']
-        ],
-        processEscapes: true,
-        processEnvironments: true
-      });
-
-      const mathDocument = mathjax.document(window.document, {
-        InputJax: tex,
-        OutputJax: chtml
-      });
-
-      _loading.resolve(mathDocument);
+    class EmptyFont extends TeXFont {
+      protected static defaultFonts = {} as any;
     }
 
-    return _loading.promise;
+    const chtml = new CHTML({
+      // Override dynamically generated fonts in favor of our font css
+      font: new EmptyFont()
+    });
+
+    const tex = new TeX({
+      packages: AllPackages.concat('require'),
+      inlineMath,
+      displayMath: [
+        ['$$', '$$'],
+        ['\\[', '\\]']
+      ],
+      processEscapes: true,
+      processEnvironments: true
+    });
+
+    return mathjax.document(window.document, {
+      InputJax: tex,
+      OutputJax: chtml
+    });
   }
 
   /**

@@ -332,8 +332,10 @@ export async function renderMarkdown(
 
   let html = '';
   if (markdownParser) {
-    // Separate math from normal markdown text.
-    const parts = removeMath(source);
+    // Separate math from normal markdown text. The delimiter configuration is
+    // sourced from the typesetter so that hiding math from the Markdown parser
+    // and the later typesetting agree on how `$` is treated.
+    const parts = removeMath(source, options.latexTypesetter?.mathParseOptions);
 
     // Convert the markdown to HTML.
     html = await markdownParser.render(parts['text']);

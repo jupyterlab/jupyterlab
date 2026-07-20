@@ -50,5 +50,37 @@ describe('@jupyterlab/mathjax-extension', () => {
         expect(host.innerHTML).toContain(input);
       });
     });
+
+    describe('constructor options', () => {
+      it('should treat `$` as inline math by default', () => {
+        expect(new MathJaxTypesetter().mathParseOptions?.dollarInlineMath).toBe(
+          true
+        );
+      });
+
+      it('should report dollarInlineMath=false when `$` is not a delimiter', () => {
+        const configured = new MathJaxTypesetter({ dollarInlineMath: false });
+        expect(configured.mathParseOptions?.dollarInlineMath).toBe(false);
+      });
+
+      it('should not typeset `$...$` when dollar inline math is disabled', async () => {
+        const configured = new MathJaxTypesetter({ dollarInlineMath: false });
+        const host = document.createElement('div');
+        host.innerHTML = '$1 + 1$';
+        document.body.appendChild(host);
+        await configured.typeset(host);
+        expect(host.innerHTML).toContain('$1 + 1$');
+        expect(host.innerHTML).not.toContain('<mn>1</mn>');
+      });
+
+      it('should still typeset `\\(...\\)` when dollar inline math is disabled', async () => {
+        const configured = new MathJaxTypesetter({ dollarInlineMath: false });
+        const host = document.createElement('div');
+        host.innerHTML = '\\(1 + 1\\)';
+        document.body.appendChild(host);
+        await configured.typeset(host);
+        expect(host.innerHTML).toContain('<mn>1</mn><mo>+</mo><mn>1</mn>');
+      });
+    });
   });
 });

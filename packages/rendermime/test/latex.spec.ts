@@ -112,6 +112,29 @@ describe('jupyter-ui', () => {
       expect(text).toBe('hello, @@0@@, there');
       expect(math).toEqual(['\\\\[\n          /alpha\n      \\\\]']);
     });
+
+    describe('dollarInlineMath option', () => {
+      it('should treat single `$` as inline math by default', () => {
+        const input = 'You owe me $5 and $10.';
+        const { text, math } = removeMath(input);
+        expect(math).toEqual(['$5 and $']);
+        expect(text).toBe('You owe me @@0@@10.');
+      });
+
+      it('should leave single `$` literal when dollarInlineMath is false', () => {
+        const input = 'You owe me $5 and $10.';
+        const { text, math } = removeMath(input, { dollarInlineMath: false });
+        expect(math).toEqual([]);
+        expect(text).toBe(input);
+      });
+
+      it('should still recognize `$$` display math when dollarInlineMath is false', () => {
+        const input = 'total $$x = 5$$ end';
+        const { text, math } = removeMath(input, { dollarInlineMath: false });
+        expect(math).toEqual(['$$x = 5$$']);
+        expect(text).toBe('total @@0@@ end');
+      });
+    });
   });
 
   describe('replaceMath()', () => {

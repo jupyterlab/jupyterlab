@@ -51,7 +51,6 @@
     "@jupyterlab/application": "^4.7.0-alpha.0",
     "@jupyterlab/rendermime": "^4.7.0-alpha.0",
     "@jupyterlab/translation": "^4.7.0-alpha.0",
-    "@lumino/coreutils": "^2.2.3",
     "mathjax-full": "^3.2.2"
   },
   "devDependencies": {

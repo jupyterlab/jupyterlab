@@ -610,6 +610,65 @@ describe('rendermime/factories', () => {
         w.dispose();
       });
 
+      // The following two tests demonstrate the public API for rendering
+      // Markdown with `$` treated literally. The math configuration lives on
+      // the typesetter (`mathParseOptions`); `removeMath` reads it so the
+      // Markdown pre-processing and the typesetting stay consistent. The
+      // stand-in typesetter below mirrors that consistency: it only converts
+      // `$...$` when it itself treats `$` as an inline delimiter.
+      function makeDollarTypesetter(
+        dollarInlineMath: boolean
+      ): IRenderMime.ILatexTypesetter {
+        const mathParseOptions = { dollarInlineMath };
+        return {
+          mathParseOptions,
+          typeset: (element: HTMLElement): void => {
+            if (mathParseOptions.dollarInlineMath) {
+              element.innerHTML = element.innerHTML.replace(
+                /\$([^$]+)\$/g,
+                '<math>$1</math>'
+              );
+            }
+          }
+        };
+      }
+
+      it('should render `$` literally when the typesetter disables dollar inline math', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = 'You owe me $5 and $10.';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser,
+          latexTypesetter: makeDollarTypesetter(false)
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toContain('$5 and $10');
+        expect(w.node.innerHTML).not.toContain('<math>');
+        w.dispose();
+      });
+
+      it('should typeset `$` as math by default (contrast)', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = 'You owe me $5 and $10.';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser,
+          latexTypesetter: makeDollarTypesetter(true)
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        // With the default delimiters the currency is mis-parsed as math.
+        expect(w.node.innerHTML).toContain('<math>');
+        w.dispose();
+      });
+
       it('should execute command when local link is clicked in untrusted content', async () => {
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
