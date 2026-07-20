@@ -511,6 +511,19 @@ async def test_pypi_manager_is_install_allowed_rejects_non_pypi_versions(version
     assert await manager.is_install_allowed("package", version) is expected
 
 
+async def test_pypi_manager_install_blocks_when_policy_denies():
+    manager = PyPIExtensionManager()
+    manager.is_install_allowed = AsyncMock(return_value=False)
+
+    with patch("jupyterlab.extensions.pypi.tornado.ioloop.IOLoop.current") as current_loop:
+        result = await manager.install("jupyterlab-evil", "1.0.0")
+
+    assert result.status == "error"
+    assert result.message == "install is not allowed"
+    manager.is_install_allowed.assert_awaited_once_with("jupyterlab-evil", "1.0.0")
+    current_loop.assert_not_called()
+
+
 async def test_handler_blocks_install_when_policy_denies():
     handler = Mock()
     handler.current_user = "user"

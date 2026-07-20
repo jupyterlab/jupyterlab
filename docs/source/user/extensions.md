@@ -211,6 +211,19 @@ search result and the user is free to install any source extension. This is the 
 To bring more security, you or your administrator can enable `blocklists` or `allowlists`
 mode. JupyterLab will check the extensions against the defined listings.
 
+:::{note}
+In security-sensitive multi-user deployments, extension manager listings are not
+a substitute for isolating the JupyterLab server environment from user-controlled
+kernels. If users can import JupyterLab server internals such as
+`jupyterlab.extensions.pypi.PyPIExtensionManager` from a kernel, the kernel and
+server are sharing an environment that users may be able to modify outside the
+Extension Manager. Administrators should run the server in an environment users
+cannot modify, and may run kernels in separate user-writable environments. With
+that separation, installing packages in a kernel environment does not install
+extension code into the server environment. See JupyterHub's guidance on
+[isolating packages in a read-only environment](https://jupyterhub.readthedocs.io/en/latest/explanation/websecurity.html#isolate-packages-in-a-read-only-environment).
+:::
+
 :::{warning}
 Only one mode at a time is allowed. If you or your server administrator configures
 both block and allow listings, the allow listing takes precedence.

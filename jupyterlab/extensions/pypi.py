@@ -400,7 +400,7 @@ class PyPIExtensionManager(ExtensionManager):
         Returns:
             The action result
         """
-        if not self.is_install_allowed(name, version):
+        if not await self.is_install_allowed(name, version):
             # is_install_allowed will log the reason
             return ActionResult(status="error", message="install is not allowed")
 
