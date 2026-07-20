@@ -254,6 +254,24 @@ describe('@jupyterlab/shortcut-extension', () => {
           selector: 'body'
         });
       });
+
+      it('should not add user shortcuts when replacing a default with the same keys', async () => {
+        const keybinding = {
+          keys: ['Ctrl A'],
+          isDefault: true
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        await shortcutUI.replaceKeybinding(target, keybinding, ['Ctrl A']);
+        expect(data.user.shortcuts).toHaveLength(0);
+      });
     });
 
     describe('#deleteKeybinding()', () => {
