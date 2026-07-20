@@ -599,9 +599,21 @@ export class PluginList extends ReactWidget {
     query?: string
   ): void {
     if (filter) {
-      this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
+      this._filter = (
+        plugin: ISettingRegistry.IPlugin
+      ): SettingsEditor.FilteredValues => {
+        const schemaTags = plugin.schema.tags;
+        if (
+          Array.isArray(schemaTags) &&
+          query !== undefined &&
+          (schemaTags as string[]).some(
+            tag => tag.toLowerCase() === query.toLowerCase()
+          )
+        ) {
+          return 'tag';
+        }
         if (!filter || filter(plugin.schema.title ?? '')) {
-          return null;
+          return 'all';
         }
         const filtered = this.getFilterString(
           filter,
@@ -651,8 +663,9 @@ export class PluginList extends ReactWidget {
     const icon = this.getHint(ICON_KEY, this._registry, plugin);
     const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
-    const filteredProperties = this._filter
-      ? this._filter(plugin)?.map(fieldValue => {
+    const filterResult = this._filter ? this._filter(plugin) : undefined;
+    const filteredProperties = Array.isArray(filterResult)
+      ? filterResult.map(fieldValue => {
           const highlightedIndices = StringExt.matchSumOfSquares(
             fieldValue.toLocaleLowerCase(),
             this._query?.toLocaleLowerCase() ?? ''
@@ -718,7 +731,7 @@ export class PluginList extends ReactWidget {
         return false;
       }
       const filtered = this._filter(plugin);
-      return filtered === null || filtered.length > 0;
+      return !Array.isArray(filtered) || filtered.length > 0;
     });
 
     const modifiedPlugins = allPlugins.filter(plugin => {
