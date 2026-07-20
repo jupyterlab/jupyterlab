@@ -163,7 +163,9 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
       execute: async (args: CommandArgs.scale) => {
         const scale = args['scale'] || 1.0;
         // Scale all documents so that every typesetter instance (e.g. ones
-        // configured with different delimiters) is affected alike.
+        // configured with different delimiters) is affected alike; remember
+        // the scale so that documents created later inherit it too.
+        Private.setScale(scale);
         for (const md of await Private.getMathDocuments()) {
           md.outputJax.options.scale = scale;
           md.rerender();
@@ -304,6 +306,17 @@ namespace Private {
     return Promise.all(_documents.values());
   }
 
+  let _scale: number | null = null;
+
+  /**
+   * Remember the requested scale factor, so that MathDocuments created later
+   * (e.g. on first use of a typesetter with a different delimiter
+   * configuration) start at the user's chosen scale rather than the default.
+   */
+  export function setScale(scale: number): void {
+    _scale = scale;
+  }
+
   const _texSourceByRoot = new WeakMap<Element, string>();
 
   /**
@@ -352,6 +365,9 @@ namespace Private {
       // Override dynamically generated fonts in favor of our font css
       font: new EmptyFont()
     });
+    if (_scale !== null) {
+      chtml.options.scale = _scale;
+    }
 
     const tex = new TeX({
       packages: AllPackages.concat('require'),
