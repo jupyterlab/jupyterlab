@@ -5,7 +5,10 @@
 
 import type { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
 import type { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
-import { ModalCommandPalette } from '@jupyterlab/apputils';
+import {
+  ModalCommandPalette,
+  RecentsCommandPalette
+} from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -14,7 +17,7 @@ import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
-import { CommandPalette } from '@lumino/widgets';
+import type { CommandPalette } from '@lumino/widgets';
 
 /**
  * The command IDs used by the apputils extension.
@@ -94,7 +97,7 @@ export namespace Palette {
   ): ICommandPalette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
-    const palette = Private.createPalette(app);
+    const palette = Private.createPalette(app, translator);
     const modalPalette = new ModalCommandPalette({
       commandPalette: palette,
       restore: () => {
@@ -128,6 +131,8 @@ export namespace Palette {
           modalPalette.attach();
         }
         modal = newModal;
+        palette.maxRecentCommands = settings.get('maxRecentCommands')
+          .composite as number;
       };
 
       Promise.all([loadSettings, app.restored])
@@ -187,9 +192,10 @@ export namespace Palette {
    */
   export function restore(
     app: JupyterFrontEnd,
-    restorer: ILayoutRestorer
+    restorer: ILayoutRestorer,
+    translator: ITranslator
   ): void {
-    const palette = Private.createPalette(app);
+    const palette = Private.createPalette(app, translator);
     // Let the application restorer track the command palette for restoration of
     // application state (e.g. setting the command palette as the current side bar
     // widget).
@@ -204,17 +210,24 @@ namespace Private {
   /**
    * The private command palette instance.
    */
-  let palette: CommandPalette;
+  let palette: RecentsCommandPalette;
 
   /**
    * Create the application-wide command palette.
    */
-  export function createPalette(app: JupyterFrontEnd): CommandPalette {
+  export function createPalette(
+    app: JupyterFrontEnd,
+    translator: ITranslator
+  ): RecentsCommandPalette {
     if (!palette) {
-      // use a renderer tweaked to use inline svg icons
-      palette = new CommandPalette({
+      // use a renderer tweaked to use inline svg icons and to display a
+      // badge for the recently executed commands
+      palette = new RecentsCommandPalette({
         commands: app.commands,
-        renderer: CommandPaletteSvg.defaultRenderer
+        renderer: new CommandPaletteSvg.Renderer({
+          translator,
+          isRecent: item => palette.isRecent(item)
+        })
       });
       palette.id = 'command-palette';
       palette.title.icon = paletteIcon;
