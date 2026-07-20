@@ -33,6 +33,13 @@
       "description": "Whether the command palette should be modal or in the left panel.",
       "type": "boolean",
       "default": true
+    },
+    "maxRecentCommands": {
+      "title": "Maximum Number of Recently Used Commands",
+      "description": "The maximum number of recently executed commands to display at the top of the command palette. Set to 0 to disable the recently used commands section.",
+      "type": "integer",
+      "minimum": 0,
+      "default": 5
     }
   },
   "type": "object",
