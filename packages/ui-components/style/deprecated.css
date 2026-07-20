@@ -522,12 +522,12 @@
   background-image: var(--jp-icon-refresh);
 }
 
-.jp-RestoreIcon {
-  background-image: var(--jp-icon-restore);
-}
-
 .jp-RegexIcon {
   background-image: var(--jp-icon-regex);
+}
+
+.jp-RestoreIcon {
+  background-image: var(--jp-icon-restore);
 }
 
 .jp-RunIcon {
