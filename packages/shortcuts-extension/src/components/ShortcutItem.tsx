@@ -86,6 +86,20 @@ export class ShortcutItem extends React.Component<
     );
   }
 
+  componentDidUpdate(): void {
+    if (this._pendingFocusKeybindingIndex === null) {
+      return;
+    }
+    const index =
+      this._pendingFocusKeybindingIndex === -1
+        ? this._nonEmptyBindings.length - 1
+        : this._pendingFocusKeybindingIndex;
+    this._pendingFocusKeybindingIndex = null;
+    if (index >= 0) {
+      this._focusShortcutContainer(index);
+    }
+  }
+
   private async _onActionRequested(
     _: unknown,
     action: IShortcutUI.ActionRequest
@@ -335,6 +349,9 @@ export class ShortcutItem extends React.Component<
           this.setState({ conflicts });
         }}
         clearConflict={() => this._clearConflictForBinding(binding)}
+        onCloseAfterSubmit={() =>
+          this._scheduleFocusShortcutContainer(location)
+        }
         toSymbols={this.toSymbols}
         displayInput={this.getDisplayReplaceInput(location)}
         placeholder={this.toSymbols(binding.keys.join(', '))}
@@ -448,6 +465,7 @@ export class ShortcutItem extends React.Component<
           this.setState({ conflicts });
         }}
         clearConflict={() => this._clearConflictForBinding(null)}
+        onCloseAfterSubmit={() => this._scheduleFocusNewKeybinding()}
         toSymbols={this.toSymbols}
         displayInput={this.state.displayNewInput}
         placeholder={''}
@@ -461,7 +479,10 @@ export class ShortcutItem extends React.Component<
   getShortCutsCell(nonEmptyBindings: IKeybinding[]): JSX.Element {
     return (
       <div className="jp-Shortcuts-Cell">
-        <div className={this.getClassNameForShortCuts(nonEmptyBindings)}>
+        <div
+          className={this.getClassNameForShortCuts(nonEmptyBindings)}
+          ref={this._shortcutCellRef}
+        >
           {nonEmptyBindings.map((key, index) =>
             this.getDivForKey(index, key, nonEmptyBindings)
           )}
@@ -549,6 +570,26 @@ export class ShortcutItem extends React.Component<
       binding => binding.keys.filter(k => k != '').length !== 0
     );
   }
+
+  private _focusShortcutContainer(keybindingIndex: number): void {
+    requestAnimationFrame(() => {
+      const container = this._shortcutCellRef.current?.querySelector(
+        `.jp-Shortcuts-ShortcutContainer[data-keybinding="${keybindingIndex}"]`
+      ) as HTMLElement | null;
+      container?.focus();
+    });
+  }
+
+  private _scheduleFocusShortcutContainer(keybindingIndex: number): void {
+    this._focusShortcutContainer(keybindingIndex);
+  }
+
+  private _scheduleFocusNewKeybinding(): void {
+    this._pendingFocusKeybindingIndex = -1;
+  }
+
+  private _shortcutCellRef = React.createRef<HTMLDivElement>();
+  private _pendingFocusKeybindingIndex: number | null = null;
 
   render(): JSX.Element {
     return (

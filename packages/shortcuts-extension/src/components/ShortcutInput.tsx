@@ -33,6 +33,7 @@ export interface IShortcutInputProps {
   displayConflicts: (conflicts: IConflicts) => void;
   clearConflict: () => void;
   toggleInput: () => void;
+  onCloseAfterSubmit?: () => void;
   shortcut: IShortcutTarget;
   /* If keybinding is not given, the input is used for adding a keybinding, otherwise for replacing a keybinding */
   keybinding?: IKeybinding;
@@ -105,7 +106,12 @@ export class ShortcutInput extends React.Component<
       activeConflicts: []
     });
     await this._handleOverwrite(conflicts, keys);
+    this._closeAfterSubmit();
+  };
+
+  private _closeAfterSubmit = (): void => {
     this.props.toggleInput();
+    this.props.onCloseAfterSubmit?.();
   };
 
   handleSubmit = async () => {
@@ -116,14 +122,14 @@ export class ShortcutInput extends React.Component<
     }
     if (!this._isReplacingExistingKeybinding) {
       await this._updateShortcut();
-      this.props.toggleInput();
+      this._closeAfterSubmit();
     } else {
       /** don't replace if field has not been edited */
       if (this.state.selected) {
-        this.props.toggleInput();
+        this._closeAfterSubmit();
       } else {
         await this._updateShortcut();
-        this.props.toggleInput();
+        this._closeAfterSubmit();
       }
     }
   };
