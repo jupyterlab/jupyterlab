@@ -292,6 +292,9 @@ export class ShortcutUI
     if (!found) {
       const requiresChange =
         !keybinding || !JSONExt.deepEqual(keybinding.keys, keys);
+      if (!requiresChange) {
+        return;
+      }
       const shouldDisableDefault =
         keybinding && keybinding.isDefault && requiresChange;
       if (shouldDisableDefault) {

@@ -123,6 +123,7 @@ export class ShortcutInput extends React.Component<
         this.props.toggleInput();
       } else {
         await this._updateShortcut();
+        this.props.toggleInput();
       }
     }
   };
