@@ -80,8 +80,11 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     // Multi-statement Python evaluated in the stopped frame via DAP (exec mode).
     // locals()/globals() are captured first to reflect the current frame's scope.
     // The last expression's value becomes reply.body.result.
-    // Returns JSON: {"tok_len": N, "items": [[text, type], ...]}
+    // Returns the JSON payload {"tok_len": N, "items": [[text, type], ...]}
+    // base64-encoded, so that its Python repr (which is what debugpy sends
+    // back) contains no escape sequences and can be decoded natively.
     const code = `
+import base64
 import json
 from IPython.core.completer import IPCompleter, CompletionContext
 _ns = locals()
@@ -97,7 +100,7 @@ _ctx = CompletionContext(
     cursor_line=0,
     limit=200,
 )
-json.dumps({
+base64.b64encode(json.dumps({
     'tok_len': len(_tok),
     'items': [
         [c.text, c.type or '']
@@ -105,7 +108,7 @@ json.dumps({
         for c in getattr(_c, _m)(_ctx).get('completions', [])
         if c.text
     ]
-})
+}).encode()).decode()
 `.trim();
 
     try {
@@ -119,7 +122,7 @@ json.dumps({
         return { start: 0, end: 0, items: [] };
       }
 
-      const data = _parseJsonFromPythonRepr(reply.body.result);
+      const data = _decodePayload(reply.body.result);
       if (!data || !data.items.length) {
         return { start: 0, end: 0, items: [] };
       }
@@ -147,24 +150,23 @@ json.dumps({
 }
 
 /**
- * Parse the Python repr of a json.dumps() result.
+ * Decode the payload from the evaluate result of the completion code.
+ *
  * debugpy returns reply.body.result as the Python repr of the evaluated
- * expression, so a JSON string comes back as a single-quoted Python string.
+ * expression. The expression base64-encodes the JSON payload, so - since
+ * base64 text contains no characters that repr escapes - the result is
+ * simply the base64 text wrapped in quotes, and the native `atob()` and
+ * `JSON.parse()` can do all of the decoding.
  */
-function _parseJsonFromPythonRepr(
+function _decodePayload(
   pythonRepr: string
 ): { tokLen: number; items: Array<[string, string]> } | null {
-  const trimmed = pythonRepr.trim();
-  let inner: string;
-  if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
-    inner = _unescapePythonRepr(trimmed.slice(1, -1));
-  } else if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-    inner = _unescapePythonRepr(trimmed.slice(1, -1));
-  } else {
+  const match = pythonRepr.trim().match(/^['"]([a-z0-9+/=]*)['"]$/i);
+  if (!match) {
     return null;
   }
   try {
-    const data = JSON.parse(inner);
+    const data = JSON.parse(atob(match[1]));
     if (typeof data?.tok_len !== 'number' || !Array.isArray(data?.items)) {
       return null;
     }
@@ -178,28 +180,6 @@ function _parseJsonFromPythonRepr(
   } catch {
     return null;
   }
-}
-
-/** Unescape a Python single-pass string repr (content between outer quotes). */
-function _unescapePythonRepr(s: string): string {
-  return s.replace(/\\([\s\S])/g, (_, c: string) => {
-    switch (c) {
-      case "'":
-        return "'";
-      case '"':
-        return '"';
-      case '\\':
-        return '\\';
-      case 'n':
-        return '\n';
-      case 't':
-        return '\t';
-      case 'r':
-        return '\r';
-      default:
-        return c;
-    }
-  });
 }
 
 export namespace DebuggerIPythonCompletionProvider {
