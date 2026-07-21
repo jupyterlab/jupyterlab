@@ -247,12 +247,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     const currentCells = new Set(cells);
     const headings: INotebookHeading[] = [];
     const documentLevels = new Array<number>();
-
-    this._cellToHeadingIndex = new WeakMap<Cell, number>();
-    this._runningCells = this._runningCells.filter(cell =>
-      currentCells.has(cell)
-    );
-    this._errorCells = this._errorCells.filter(cell => currentCells.has(cell));
+    const cellToHeadingIndex = new WeakMap<Cell, number>();
 
     // Generate headings by iterating through all notebook cells...
     for (let i = 0; i < cells.length; i++) {
@@ -313,12 +308,15 @@ export class NotebookToCModel extends TableOfContentsModel<
       }
 
       if (headings.length > 0) {
-        this._cellToHeadingIndex.set(cell, headings.length - 1);
-      } else {
-        // If no headings were found, remove the cell from the map
-        this._cellToHeadingIndex.delete(cell);
+        cellToHeadingIndex.set(cell, headings.length - 1);
       }
     }
+
+    this._cellToHeadingIndex = cellToHeadingIndex;
+    this._runningCells = this._runningCells.filter(cell =>
+      currentCells.has(cell)
+    );
+    this._errorCells = this._errorCells.filter(cell => currentCells.has(cell));
     this.updateRunningStatus(headings);
     return Promise.resolve(headings);
   }

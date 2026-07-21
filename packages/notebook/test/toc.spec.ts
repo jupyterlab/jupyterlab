@@ -128,6 +128,43 @@ describe('@jupyterlab/notebook', () => {
           RunningStatus.Idle.toString()
         );
       });
+
+      it('should preserve execution status updates during heading refresh', async () => {
+        panel.model!.sharedModel.insertCells(1, [
+          { cell_type: 'code', source: '1 / 0' }
+        ]);
+
+        await model.refresh();
+
+        const headingCell = panel.content.widgets[0];
+        const erroredCell = panel.content.widgets[1];
+        const getHeadings = headingCell.getHeadings.bind(headingCell);
+        let resumeRefresh: (() => void) | undefined;
+        const refreshGate = new Promise<void>(resolve => {
+          resumeRefresh = resolve;
+        });
+        const getHeadingsSpy = jest
+          .spyOn(headingCell, 'getHeadings')
+          .mockImplementation(async () => {
+            await refreshGate;
+            return getHeadings();
+          });
+
+        const refresh = model.refresh();
+        await Promise.resolve();
+
+        model.scheduleExecution(erroredCell);
+        model.finishExecution(erroredCell, false, new TestKernelError());
+
+        resumeRefresh!();
+        await refresh;
+        getHeadingsSpy.mockRestore();
+
+        expect(model.headings[0].isRunning).toBe(RunningStatus.Error);
+        expect(model.headings[0].dataset!['data-running']).toBe(
+          RunningStatus.Error.toString()
+        );
+      });
     });
   });
 });
