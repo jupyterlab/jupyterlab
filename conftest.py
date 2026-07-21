@@ -1,9 +1,16 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
-from _pytest.config import Config, Parser
-from _pytest.nodes import Item
+
+if TYPE_CHECKING:
+    from _pytest.config import Config
+    from _pytest.config.argparsing import Parser
+    from _pytest.nodes import Item
 
 pytest_plugins = [
     "pytest_jupyter.jupyter_server",

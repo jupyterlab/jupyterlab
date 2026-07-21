@@ -3,6 +3,8 @@
 
 """A standalone application demonstrating localization."""
 
+from __future__ import annotations
+
 import json
 import os
 
@@ -26,14 +28,14 @@ with open(os.path.join(HERE, "package.json")) as fid:
     version = json.load(fid)["version"]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type[ExampleApp]]]:
     return [{"module": __name__, "app": ExampleApp}]
 
 
 class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHandler):
     """Render the localization example."""
 
-    def get(self):
+    def get(self) -> None:
         config_data = {
             "appName": "JupyterLab Localization Example",
             "appVersion": version,
@@ -57,13 +59,18 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
 class ExampleTranslationsHandler(APIHandler):
     """Serve the translation catalogs bundled with this example."""
 
-    def initialize(self, catalogs, domain, languages):
+    def initialize(
+        self,
+        catalogs: dict[str, str],
+        domain: str,
+        languages: dict[str, dict[str, str]],
+    ) -> None:
         self.catalogs = catalogs
         self.domain = domain
         self.languages = languages
 
     @web.authenticated
-    def get(self, locale=None):
+    def get(self, locale: str | None = None) -> None:
         if locale is None:
             data = self.languages
             message = ""
@@ -100,7 +107,7 @@ class ExampleApp(LabServerApp):
     user_settings_dir = os.path.join(HERE, "build", "user_settings")
     workspaces_dir = os.path.join(HERE, "build", "workspaces")
 
-    def initialize_handlers(self):
+    def initialize_handlers(self) -> None:
         handler_options = {"catalogs": CATALOGS, "domain": DOMAIN, "languages": LANGUAGES}
         self.handlers.extend(
             [
