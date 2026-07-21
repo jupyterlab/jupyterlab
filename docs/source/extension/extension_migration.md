@@ -6,13 +6,34 @@
 
 # Extension Migration Guide
 
-## JupyterLab 4.5 to 4.6 (not released yet)
+## JupyterLab 4.6 to 4.7 (not released yet)
+
+### API updates
+
+- Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
+  `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
+  addons. Notable changes for extensions that interact with the terminal:
+  - `@xterm/addon-canvas` was removed upstream; when WebGL is not available the terminal now
+    falls back to the built-in DOM renderer, so the terminal may not contain a `<canvas>`
+    element anymore.
+  - The search addon no longer applies the `xterm-find-active-result-decoration` CSS class;
+    the active match is distinguished by its colors instead.
+  - The scrollbar is now rendered by a custom scrollable element instead of a native
+    `overflow-y: scroll` viewport; extensions styling or querying `.xterm-viewport` may need
+    updating.
+  - Extensions depending on `@xterm/*` packages themselves, for example to type against the
+    `Terminal.searchAddon` getter of `@jupyterlab/terminal`, should update them to the
+    versions used by `@jupyterlab/terminal` (`@xterm/xterm` 6.x and the matching addons).
+
+## JupyterLab 4.5 to 4.6
 
 ### Migrating to `jupyter-builder`
 
 JupyterLab's build tooling has moved out of the JupyterLab repository into a standalone package: [`jupyter-builder`](https://pypi.org/project/jupyter-builder/) (PyPI) and [`@jupyter/builder`](https://www.npmjs.com/package/@jupyter/builder) (npm). Existing extensions continue to work, but we recommend migrating so your build no longer depends on a full JupyterLab installation.
 
-The migration is two small changes.
+JupyterLab 4.6 also no longer depends on `setuptools` at runtime. If your extension uses `setuptools`-based packaging or build hooks, add `setuptools` to your own package requirements explicitly, or migrate to a PEP 517/518 build backend in [`pyproject.toml`](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html).
+
+The migration to `jupyter-builder` is two small changes:
 
 #### 1. Update `pyproject.toml`
 
@@ -74,6 +95,9 @@ Webpack config to Rspack.
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
 - The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
 - Synchronization properties (`syncEditable` and `syncCollapse`) of the {ts:class}`cells.Cell` class and its derivatives, as well as `CodeCell.syncScrolled`, now default to `undefined` rather than `false`. In notebook initialization, these values are now only set to `true` if `undefined`, so custom notebook content factories ({ts:interface}`notebook.NotebookPanel.IContentFactory`) can explicitly set them to `true` or `false` without being overwritten later.
+- JupyterLab now depends on `@jupyter/ydoc` v4, which sets the shared document dirty state to `true`
+  after every change, except for `setSource()` (and the `source` setter) which is used for document
+  initialization. With that, JupyterLab's document dirty indicator is now fully backed by a shared model.
 
 ### Testing with Galata
 
@@ -565,7 +589,7 @@ bumped their major version (following semver convention). We want to point out p
   - `CodeViewerWidget.IOptions` has changed to `{ factory, model, editorOptions }`.
 - `@jupyterlab/codemirror` from 3.x to 4.0
   : - Configuration parameters changes:
-  : - `fontFamily`, `fontSize` and `lineHeight`: grouped in a subdictionnary `customStyles`. - `insertSpaces`: changed for `indentUnit` that can take a value within ['Tab', '1', '2', '4', '8'] - `lineWrap`: changed - it is now a boolean. - `showTrailingSpace`: renamed `highlightTrailingWhitespace` - `coverGutterNextToScrollbar`: removed - `electricChars`: removed - `extraKeys`: removed - you should register new keymap using the CodeMirror extension `keymap.of(KeyBinding[])` - `handlePaste`: removed - `keymap`: removed - `lineSeparator`: removed - Line separator are normalized to `\n` - `lineWiseCopyCut`: removed - this is the default behavior - `scrollbarStyle`: removed - `styleSelectedText`: removed - `selectionPointer`: removed - `wordWrapColumn`: removed
+  : - `fontFamily`, `fontSize` and `lineHeight`: grouped in a nested `customStyles` dictionary. - `insertSpaces`: changed for `indentUnit` that can take a value within ['Tab', '1', '2', '4', '8'] - `lineWrap`: changed - it is now a boolean. - `showTrailingSpace`: renamed `highlightTrailingWhitespace` - `coverGutterNextToScrollbar`: removed - `electricChars`: removed - `extraKeys`: removed - you should register new keymap using the CodeMirror extension `keymap.of(KeyBinding[])` - `handlePaste`: removed - `keymap`: removed - `lineSeparator`: removed - Line separator are normalized to `\n` - `lineWiseCopyCut`: removed - this is the default behavior - `scrollbarStyle`: removed - `styleSelectedText`: removed - `selectionPointer`: removed - `wordWrapColumn`: removed
   - `Mode` has been removed. You can instead request the token `IEditorLanguageHandler`. That provides
     similar API:
     \- `Mode.registerModeInfo` -> `IEditorLanguageHandler.addLanguage`
@@ -855,7 +879,7 @@ To ease configuration, we have introduce a new helper function `jupyterlab.galat
 simplify the server configuration to be `jupyterlab.galata.configure_jupyter_server(c)`.
 :::
 
-Here are the changes in the Javascript package `@jupyterlab/galata` from 4.x to 5.x:
+Here are the changes in the JavaScript package `@jupyterlab/galata` from 4.x to 5.x:
 : - `ContentsHelper` and `galata.newContentsHelper` have new constructor arguments to use Playwright API request object:
 `new ContentsHelper(baseURL, page?, request?)` -> `new ContentsHelper(request?, page?)`
 `galata.newContentsHelper(baseURL, page?, request?)` -> `galata.newContentsHelper(request?, page?)`

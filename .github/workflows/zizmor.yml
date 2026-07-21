@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   zizmor:
-    name: zizmor latest via PyPI
+    name: zizmor pinned via PyPI
     runs-on: ubuntu-latest
     permissions:
       security-events: write # Required for upload-sarif (used by zizmor-action) to upload SARIF files.
@@ -25,7 +25,8 @@ jobs:
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
 
       - name: Run zizmor 🌈
-        run: uvx zizmor --format=sarif . > results.sarif
+        # Check zizmor version is aligned with the one in .pre-commit-config.yaml
+        run: uvx zizmor@1.25.2 --format=sarif . > results.sarif
         # Note: we are not passing GitHub token here, so it runs in offline mode;
         # online mode is known to exhaust Github rate limits due to extensive
         # GitHub API calls, see https://github.com/zizmorcore/zizmor/issues/278 and

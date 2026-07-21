@@ -111,7 +111,18 @@ const plugin: JupyterFrontEndPlugin<MyToken> = {
 
 The `id` and `activate` fields are required and the other fields may be omitted. For more information about how to use the `requires`, `optional`, or `provides` fields, see {ref}`services`.
 
-- `id` is a required unique string. The convention is to use the NPM extension package name, a colon, then a string identifying the plugin inside the extension.
+(plugin-id-convention)=
+
+- `id` is a required unique string. The convention is to use the NPM
+  extension package name, a colon, then a string identifying the plugin inside
+  the extension, for example `my-extension:plugin`. JupyterLab treats the part
+  before the first colon as the extension name when applying extension-level
+  configuration such as enabling, disabling, deferring, or locking all plugins
+  in that extension.
+  The `jupyter/token-format` rule from
+  [`@jupyter/eslint-plugin`](https://eslint-plugin.readthedocs.io/en/latest/rules/token-format/)
+  can enforce the related `<package>:<TokenSymbol>` convention for token IDs
+  used with `new Token(...)`.
 - `description` is an optional string. It allows to document the purpose of a plugin.
 - `autostart` indicates whether your plugin should be activated at application startup. Typically this should be `true`. If it is `false` or omitted, your plugin will be activated when any other plugin requests the token your plugin is providing.
 - `requires` and `optional` are lists of {ref}`tokens <tokens>` corresponding to services other plugins provide. These services will be given as arguments to the `activate` function when the plugin is activated. If a `requires` service is not registered with JupyterLab, an error will be thrown and the plugin will not be activated.
@@ -606,7 +617,7 @@ Then rebuilding your extension and refreshing JupyterLab in the browser should p
 
 If using Windows, you may need to configure your operating system for the `develop` command described above to work, please see the note: {ref}`important-for-windows-users`
 
-If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with `jupyter lab --dev-mode --extensions-in-dev-mode` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension doesn’t build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
+If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with `jupyter lab --dev-mode --extensions-in-dev-mode` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension doesn't build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
 
 If you are using TypeScript, the TypeScript compiler would complain because the dependencies of your extension may differ from those in JupyterLab. For that reason, you need to add to your `tsconfig.json` the path where to search for these dependencies by adding the option [paths](https://www.typescriptlang.org/tsconfig#paths):
 

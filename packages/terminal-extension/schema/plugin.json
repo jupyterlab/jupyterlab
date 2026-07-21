@@ -41,6 +41,7 @@
       "minimum": 1.0
     },
     "theme": {
+      "type": "string",
       "oneOf": [
         { "const": "dark", "title": "Dark" },
         { "const": "light", "title": "Light" },

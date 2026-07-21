@@ -75,6 +75,11 @@
         "rank": 10
       },
       {
+        "command": "console:rename",
+        "selector": "[data-type=\"console-title\"]",
+        "rank": 20
+      },
+      {
         "command": "console:restart-kernel",
         "selector": ".jp-CodeConsole",
         "rank": 30

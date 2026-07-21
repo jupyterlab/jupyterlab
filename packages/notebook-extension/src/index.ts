@@ -90,9 +90,14 @@ import {
   ToolbarItems
 } from '@jupyterlab/notebook';
 import type { IObservableList } from '@jupyterlab/observables';
+import { IPageHandler } from '@jupyterlab/outputarea';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
+import {
+  IMarkdownParser,
+  IRenderMimeRegistry,
+  MimeModel
+} from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -113,6 +118,7 @@ import {
   duplicateIcon,
   fastForwardIcon,
   IFormRendererRegistry,
+  infoIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -125,10 +131,11 @@ import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type {
   JSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { JSONExt, UUID } from '@lumino/coreutils';
+import { JSONExt, Token, UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -181,6 +188,8 @@ namespace CommandIDs {
   export const trust = 'notebook:trust';
 
   export const exportToFormat = 'notebook:export-to-format';
+
+  export const showExportGuidance = 'notebook:show-export-guidance';
 
   export const run = 'notebook:run-cell';
 
@@ -364,6 +373,30 @@ const FACTORY = 'Notebook';
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * Documentation page describing notebook export support.
+ */
+const NOTEBOOK_EXPORT_DOCS_URL =
+  'https://jupyterlab.readthedocs.io/en/stable/user/export.html';
+
+/**
+ * An interface describing how export guidance is presented to users.
+ */
+export interface INotebookExportGuidance {
+  /**
+   * Show guidance for enabling notebook exports.
+   */
+  showExportHelp(): Promise<void>;
+}
+
+/**
+ * A token describing a service for showing notebook export guidance.
+ */
+export const INotebookExportGuidance = new Token<INotebookExportGuidance>(
+  '@jupyterlab/notebook-extension:INotebookExportGuidance',
+  'A service for showing notebook export guidance.'
+);
 
 /**
  * Setting Id storing the customized toolbar definition.
@@ -641,13 +674,14 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds the export notebook commands.',
   autoStart: true,
   requires: [ITranslator, INotebookTracker],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [IMainMenu, ICommandPalette, INotebookExportGuidance],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     tracker: INotebookTracker,
     mainMenu: IMainMenu | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    exportGuidance: INotebookExportGuidance | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -738,21 +772,91 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.showExportGuidance, {
+      label: trans.__('Enable notebook exports'),
+      execute: () => {
+        if (exportGuidance) {
+          return exportGuidance.showExportHelp();
+        }
+        window.open(NOTEBOOK_EXPORT_DOCS_URL, '_blank', 'noopener,noreferrer');
+        return undefined;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     // Add a notebook group to the File menu.
-    let exportTo: Menu | null | undefined;
-    if (mainMenu) {
-      exportTo = mainMenu.fileMenu.items.find(
-        item =>
-          item.type === 'submenu' &&
-          item.submenu?.id === 'jp-mainmenu-file-notebookexport'
-      )?.submenu;
-    }
+    const fileMenu = mainMenu?.fileMenu as Menu | undefined;
+
+    const getExportMenu = (): Menu | undefined => {
+      return (
+        fileMenu?.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-file-notebookexport'
+        )?.submenu ?? undefined
+      );
+    };
 
     let formatsInitialized = false;
+    let paletteInitialized = false;
+    let exportFormats: Array<{ format: string; label: string }> | null = null;
+
+    const updateExportMenu = () => {
+      const exportTo = getExportMenu();
+      if (!exportTo || !exportFormats) {
+        return;
+      }
+
+      exportTo.clearItems();
+
+      if (exportFormats.length === 0) {
+        exportTo.addItem({
+          command: CommandIDs.showExportGuidance
+        });
+        return;
+      }
+
+      exportFormats.forEach(({ format, label }) => {
+        exportTo.addItem({
+          command: CommandIDs.exportToFormat,
+          args: {
+            format,
+            label,
+            isPalette: false
+          }
+        });
+      });
+
+      if (palette && !paletteInitialized) {
+        const category = trans.__('Notebook Operations');
+        exportFormats.forEach(({ format, label }) => {
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args: {
+              format,
+              label,
+              isPalette: true
+            }
+          });
+        });
+        paletteInitialized = true;
+      }
+    };
 
     /** Request formats only when a notebook might use them. */
     const maybeInitializeFormats = async () => {
       if (formatsInitialized) {
+        updateExportMenu();
+        return;
+      }
+
+      if (tracker.size === 0) {
         return;
       }
 
@@ -760,52 +864,95 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       formatsInitialized = true;
 
-      const response = await services.nbconvert.getExportFormats(false);
-
-      if (!response) {
-        return;
+      let response: NbConvert.IExportFormats | null = null;
+      try {
+        response = await services.nbconvert.getExportFormats(false);
+      } catch {
+        // Ignore fetch errors and fallback to export guidance.
       }
 
-      const formatLabels: any = Private.getFormatLabels(translator);
+      const formatLabels = Private.getFormatLabels(translator);
 
-      // Convert export list to palette and menu items.
-      const formatList = Object.keys(response);
-      formatList.forEach(function (key) {
-        const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
-        const capCaseKey = trans.__(formattedKey);
-        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-        let args = {
-          format: key,
-          label: labelStr,
-          isPalette: false
-        };
-        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-          if (exportTo) {
-            exportTo.addItem({
-              command: CommandIDs.exportToFormat,
-              args: args
-            });
-          }
-          if (palette) {
-            args = {
-              format: key,
-              label: labelStr,
-              isPalette: true
-            };
-            const category = trans.__('Notebook Operations');
-            palette.addItem({
-              command: CommandIDs.exportToFormat,
-              category,
-              args
-            });
-          }
-        }
-      });
+      // Convert export list to menu and palette items.
+      exportFormats = Object.keys(response ?? {})
+        .filter(key => !FORMAT_EXCLUDE.includes(key))
+        .map(key => {
+          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          const capCaseKey = trans.__(formattedKey);
+          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+          return {
+            format: key,
+            label: labelStr
+          };
+        });
+
+      updateExportMenu();
     };
 
     tracker.widgetAdded.connect(maybeInitializeFormats);
+    if (tracker.size > 0) {
+      void maybeInitializeFormats();
+    }
+    void app.restored.then(() => {
+      void maybeInitializeFormats();
+    });
   }
 };
+
+/**
+ * A plugin providing the default notebook export guidance service.
+ */
+export const exportGuidanceDialogPlugin: JupyterFrontEndPlugin<INotebookExportGuidance> =
+  {
+    id: '@jupyterlab/notebook-extension:export-guidance-dialog',
+    description:
+      'Provides the default notebook export guidance shown when no exporters are available.',
+    provides: INotebookExportGuidance,
+    autoStart: true,
+    requires: [ITranslator],
+    activate: (
+      app: JupyterFrontEnd,
+      translator: ITranslator
+    ): INotebookExportGuidance => {
+      const trans = translator.load('jupyterlab');
+      const { commands } = app;
+
+      const openExportDocs = (url: string, docsLabel: string) => {
+        if (commands.hasCommand('help:open')) {
+          return commands.execute('help:open', {
+            url,
+            text: docsLabel,
+            newBrowserTab: true
+          });
+        }
+
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return undefined;
+      };
+
+      return {
+        showExportHelp: async () => {
+          const result = await showDialog({
+            title: trans.__('Notebook exports are unavailable'),
+            body: trans.__(
+              'No notebook export formats are currently available. To enable exports, install nbconvert in the server environment or use another exporter supported by your deployment.'
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Close') }),
+              Dialog.okButton({ label: trans.__('Open Documentation') })
+            ]
+          });
+
+          if (result.button.accept) {
+            void openExportDocs(
+              NOTEBOOK_EXPORT_DOCS_URL,
+              trans.__('Notebook Export Documentation')
+            );
+          }
+        }
+      };
+    }
+  };
 
 /**
  * A plugin that adds a notebook trust status item to the status bar.
@@ -864,10 +1011,28 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       IRenderMimeRegistry,
       IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
+    optional: [
+      ISettingRegistry,
+      ISessionContextDialogs,
+      ITranslator,
+      IPageHandler
+    ],
     activate: activateWidgetFactory,
     autoStart: true
   };
+
+/**
+ * The pager output handler provider.
+ */
+const pageHandlerPlugin: JupyterFrontEndPlugin<IPageHandler> = {
+  id: '@jupyterlab/notebook-extension:page-handler',
+  description: 'Provides a handler for pager output payloads.',
+  autoStart: true,
+  provides: IPageHandler,
+  requires: [IRenderMimeRegistry],
+  optional: [ISettingRegistry, ITranslator],
+  activate: activatePageHandler
+};
 
 /**
  * The cloned output provider.
@@ -1268,7 +1433,8 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
               label: trans.__('Notebook (no kernel)'),
               factory: FACTORY,
               kernelPreference: {
-                shouldStart: false
+                shouldStart: false,
+                shouldReuse: false
               }
             }
           })
@@ -1287,7 +1453,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   cellExecutor,
   factory,
   trackerPlugin,
+  pageHandlerPlugin,
   executionIndicator,
+  exportGuidanceDialogPlugin,
   exportPlugin,
   tools,
   cellCounterItem,
@@ -1363,6 +1531,86 @@ function activateNotebookTools(
 }
 
 /**
+ * Activate the pager output handler provider.
+ */
+function activatePageHandler(
+  app: JupyterFrontEnd,
+  rendermime: IRenderMimeRegistry,
+  settingRegistry: ISettingRegistry | null,
+  translator_: ITranslator | null
+): IPageHandler {
+  const translator = translator_ ?? nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  let helpInBottomPanel = false;
+  let helpWidget: MainAreaWidget<Panel> | null = null;
+
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+
+  const updateConfig = (settings: ISettingRegistry.ISettings): void => {
+    helpInBottomPanel = settings.get('helpInBottomPanel').composite as boolean;
+  };
+
+  void fetchSettings
+    .then(settings => {
+      updateConfig(settings);
+      settings.changed.connect(() => {
+        updateConfig(settings);
+      });
+    })
+    .catch((reason: Error) => {
+      console.warn(reason.message);
+    });
+
+  return {
+    handlePage: payload => {
+      if (!helpInBottomPanel) {
+        return false;
+      }
+
+      const data = payload['data'];
+      if (!data || typeof data !== 'object') {
+        return false;
+      }
+
+      const mimeData = data as nbformat.IMimeBundle;
+      const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
+      const mimeType = rendermime.preferredMimeType(mimeData, 'any');
+      if (!mimeType) {
+        return false;
+      }
+
+      if (!helpWidget || helpWidget.isDisposed) {
+        const content = new Panel();
+        content.addClass('jp-HelpPanel');
+        helpWidget = new MainAreaWidget({ content });
+        helpWidget.id = 'jp-help-panel';
+        helpWidget.title.label = trans.__('Help');
+        helpWidget.title.icon = infoIcon;
+        helpWidget.title.closable = true;
+      }
+
+      const content = helpWidget.content;
+      content.widgets.forEach(widget => widget.dispose());
+
+      const renderer = rendermime.createRenderer(mimeType);
+      void renderer.renderModel(
+        new MimeModel({ data: mimeData, metadata, trusted: true })
+      );
+      content.addWidget(renderer);
+
+      if (!helpWidget.isAttached) {
+        app.shell.add(helpWidget, 'down');
+      }
+      app.shell.activateById(helpWidget.id);
+      return true;
+    }
+  };
+}
+
+/**
  * Activate the notebook widget factory.
  */
 function activateWidgetFactory(
@@ -1373,7 +1621,8 @@ function activateWidgetFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
   settingRegistry: ISettingRegistry | null,
   sessionContextDialogs_: ISessionContextDialogs | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  pageHandler: IPageHandler | null
 ): NotebookWidgetFactory.IFactory {
   const translator = translator_ ?? nullTranslator;
   const sessionContextDialogs =
@@ -1454,6 +1703,7 @@ function activateWidgetFactory(
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
+    pageHandler: pageHandler ?? undefined,
     mimeTypeService: editorServices.mimeTypeService,
     toolbarFactory,
     translator
@@ -1920,6 +2170,7 @@ function activateNotebookHandler(
   fetchSettings
     .then(settings => {
       updateConfig(settings);
+
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
@@ -2196,15 +2447,16 @@ function activateNotebookHandler(
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
-      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;
+    }`;
     const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
     if (sideBySideMarginTag) {
-      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+      sideBySideMarginTag.textContent = sideBySideMarginStyle;
     } else {
-      document.head.insertAdjacentHTML(
-        'beforeend',
-        `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
-      );
+      const style = document.createElement('style');
+      style.id = SIDE_BY_SIDE_STYLE_ID;
+      style.textContent = sideBySideMarginStyle;
+      document.head.appendChild(style);
     }
     factory.autoStartDefault = settings.get('autoStartDefaultKernel')
       .composite as boolean;

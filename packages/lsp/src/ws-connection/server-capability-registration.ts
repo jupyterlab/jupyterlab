@@ -2,8 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // Disclaimer/acknowledgement: Fragments are based on https://github.com/wylieconlon/lsp-editor-adapter,
 // which is copyright of wylieconlon and contributors and ISC licenced.
 // ISC licence is, quote, "functionally equivalent to the simplified BSD and MIT licenses,
@@ -17,7 +15,7 @@ import type {
 } from 'vscode-languageserver-protocol';
 
 interface IFlexibleServerCapabilities extends ServerCapabilities {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

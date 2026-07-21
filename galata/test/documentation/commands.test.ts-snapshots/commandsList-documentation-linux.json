@@ -212,6 +212,10 @@
             "bottom"
           ],
           "description": "The direction to split the tab"
+        },
+        "id": {
+          "type": "string",
+          "description": "The widget ID to split. Defaults to the context menu target."
         }
       },
       "required": [
@@ -1554,6 +1558,21 @@
     }
   },
   {
+    "id": "console:rename",
+    "label": "Rename Console…",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
+  },
+  {
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
@@ -2387,7 +2406,7 @@
     "label": "Redo",
     "caption": "",
     "shortcuts": [
-      "Ctrl Y"
+      "Ctrl Shift Z"
     ],
     "args": {
       "type": "object",
@@ -2657,6 +2676,21 @@
     }
   },
   {
+    "id": "filebrowser:open-directory",
+    "label": "Open the file browser for the provided `path`.",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to open in the file browser"
+        }
+      }
+    }
+  },
+  {
     "id": "filebrowser:open-path",
     "label": "Open from Path…",
     "caption": "Open from path",
@@ -2747,6 +2781,18 @@
     }
   },
   {
+    "id": "filebrowser:show-panel",
+    "label": "File Browser",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift F"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
     "caption": "",
@@ -2820,9 +2866,7 @@
     "id": "filebrowser:toggle-main",
     "label": "File Browser",
     "caption": "",
-    "shortcuts": [
-      "Ctrl Shift F"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -5034,6 +5078,16 @@
   {
     "id": "notebook:show-cell-outputs",
     "label": "Expand Selected Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "notebook:show-export-guidance",
+    "label": "Enable notebook exports",
     "caption": "",
     "shortcuts": [],
     "args": {

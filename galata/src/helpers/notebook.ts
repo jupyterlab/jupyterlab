@@ -67,9 +67,10 @@ export class NotebookHelper {
    * The notebook needs to exist in the current folder.
    *
    * @param name Notebook name
+   * @param options.noKernel If true, the notebook will be opened without a kernel
    * @returns Action success status
    */
-  async open(name: string): Promise<boolean> {
+  async open(name: string, options?: { noKernel?: boolean }): Promise<boolean> {
     try {
       // The notebook may not be rendered on the list if the upload
       // has just completed but the listing was not refreshed yet.
@@ -80,7 +81,16 @@ export class NotebookHelper {
       return false;
     }
 
-    await this.filebrowser.open(name);
+    if (options?.noKernel) {
+      await this.page.click(`.jp-DirListing-item span:has-text("${name}")`, {
+        button: 'right'
+      });
+      await Utils.waitForCondition(() => this.menu.isAnyOpen());
+      await this.page.hover('text=Open With');
+      await this.page.click('text=Notebook (no kernel)');
+    } else {
+      await this.filebrowser.open(name);
+    }
 
     return await this.isOpen(name);
   }
@@ -323,6 +333,25 @@ export class NotebookHelper {
   }
 
   /**
+   * Wait until kernel is ready to schedule cell execution.
+   *
+   * This is not the same as waiting for it to be idle.
+   * If this is not awaited and `enableKernelInitNotification` setting is off
+   * (which is the default) the tests can randomly fail without any error
+   * because the kernel ignores execution requests before startup completes.
+   * Also see: https://github.com/jupyterlab/jupyterlab/issues/15420
+   */
+  private async _waitUntilKernelReadyToScheduleExecution() {
+    await this.page.waitForFunction(() => {
+      const text =
+        document.querySelector('#jp-main-statusbar')?.textContent ?? '';
+      return !['Connecting', 'Initializing', 'Starting'].some(s =>
+        text.includes(s)
+      );
+    });
+  }
+
+  /**
    * Revert changes to the currently active notebook
    *
    * @returns Action success status
@@ -354,6 +383,9 @@ export class NotebookHelper {
     await this.page.evaluate(() => {
       window.galata.resetExecutionCount();
     });
+
+    await this._waitUntilKernelReadyToScheduleExecution();
+
     await this.menu.clickMenuItem('Run>Run All Cells');
     await this.waitForRun();
 
@@ -370,6 +402,7 @@ export class NotebookHelper {
     if (!(await this.isAnyActive())) {
       return false;
     }
+    await this._waitUntilKernelReadyToScheduleExecution();
 
     let callbackName = '';
 
@@ -442,11 +475,6 @@ export class NotebookHelper {
         .locator('[data-icon="ui-components:not-trusted"]')
         .count()) === 1
     ) {
-      // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
-      await this.page
-        .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
-        .waitFor();
-
       await this.page.keyboard.press('Control+Shift+C');
       await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
       await this.page.getByText('Trust Notebook').click();
@@ -1464,6 +1492,8 @@ export class NotebookHelper {
     await this.page.evaluate(cellIdx => {
       window.galata.resetExecutionCount(cellIdx);
     }, cellIndex);
+
+    await this._waitUntilKernelReadyToScheduleExecution();
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
