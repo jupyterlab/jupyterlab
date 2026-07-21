@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git",
+    "directory": "packages/cells"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
