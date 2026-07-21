@@ -258,8 +258,10 @@ export class ShortcutUI
     // `keybinding.keys` as exposed by the registry are platform-resolved and
     // normalized, while `keys` come from user input which may use e.g. `Accel`
     // where the registry surfaces `Cmd` or `Ctrl`; normalize before comparing.
-    // The raw `keys` are still used for persistence so that platform-agnostic
-    // modifiers like `Accel` are preserved in the user settings.
+    // The replacement/new binding still persists the raw `keys` so that
+    // platform-agnostic modifiers like `Accel` are preserved in the user
+    // settings; entries derived from existing keybindings (such as the
+    // `disabled` override of a default) persist the resolved `keybinding.keys`.
     const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
