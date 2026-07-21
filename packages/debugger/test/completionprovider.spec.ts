@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ICompletionContext } from '@jupyterlab/completer';
-import type { IDebugger } from '@jupyterlab/debugger';
+import type { IDebugger } from '../src/tokens';
 import { Widget } from '@lumino/widgets';
-import { DebuggerCompletionProvider } from '../src/debugger-completion-provider';
+import { DebuggerCompletionProvider } from '../src/completionprovider';
 
 interface IMockSessionOptions {
   /**

@@ -27,7 +27,9 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Debugger,
+  DebuggerCompletionProvider,
   DebuggerDisplayRegistry,
+  DebuggerIPythonCompletionProvider,
   IDebugger,
   IDebuggerConfig,
   IDebuggerDisplayRegistry,
@@ -56,8 +58,6 @@ import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
-import { DebuggerCompletionProvider } from './debugger-completion-provider';
-import { DebuggerIPythonCompletionProvider } from './debugger-ipython-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
 

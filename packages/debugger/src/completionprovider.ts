@@ -8,9 +8,9 @@ import type {
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
-import type { IDebugger } from '@jupyterlab/debugger';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { IDebugger } from './tokens';
 
 /**
  * Completion provider that uses the DAP `completions` request for suggestions.

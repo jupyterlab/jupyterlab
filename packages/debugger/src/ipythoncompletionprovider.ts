@@ -8,9 +8,9 @@ import type {
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
-import type { IDebugger } from '@jupyterlab/debugger';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { IDebugger } from './tokens';
 
 /**
  * Completion provider that delegates to IPython's matcher API for completions
@@ -77,43 +77,55 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     const textLiteral = JSON.stringify(textBeforeCursor);
     const offset = textBeforeCursor.length;
 
-    // Multi-statement Python evaluated in the stopped frame via DAP (exec mode).
-    // locals()/globals() are captured first to reflect the current frame's scope.
-    // The last expression's value becomes reply.body.result.
-    // Returns the JSON payload {"tok_len": N, "items": [[text, type], ...]}
-    // base64-encoded, so that its Python repr (which is what debugpy sends
-    // back) contains no escape sequences and can be decoded natively.
+    // Multi-statement Python evaluated in the stopped frame via DAP.
+    // debugpy execs multi-line repl code and discards the value of the last
+    // expression, so the payload is stored in a frame variable instead and
+    // read back with a second, single-expression evaluate request (repl
+    // assignments persist in the paused frame, like in the debug console).
+    // locals()/globals() are captured first to reflect the frame's scope.
+    // The payload {"tok_len": N, "items": [[text, type], ...]} is
+    // base64-encoded JSON, so that its Python repr (which is what debugpy
+    // sends back) contains no escape sequences and can be decoded natively.
     const code = `
 import base64
 import json
 from IPython.core.completer import IPCompleter, CompletionContext
-_ns = locals()
-_gs = globals()
-_c = IPCompleter(namespace=_ns, global_namespace=_gs)
-_c.line_buffer = ${textLiteral}
-_c.text_until_cursor = ${textLiteral}
-_tok = _c.splitter.split_line(${textLiteral})
-_ctx = CompletionContext(
-    token=_tok,
+__jlab_ns = locals()
+__jlab_gs = globals()
+__jlab_c = IPCompleter(namespace=__jlab_ns, global_namespace=__jlab_gs)
+__jlab_c.line_buffer = ${textLiteral}
+__jlab_c.text_until_cursor = ${textLiteral}
+__jlab_tok = __jlab_c.splitter.split_line(${textLiteral})
+__jlab_ctx = CompletionContext(
+    token=__jlab_tok,
     full_text=${textLiteral},
     cursor_position=${offset},
     cursor_line=0,
     limit=200,
 )
-base64.b64encode(json.dumps({
-    'tok_len': len(_tok),
+__jlab_payload = base64.b64encode(json.dumps({
+    'tok_len': len(__jlab_tok),
     'items': [
         [c.text, c.type or '']
         for _m in ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']
-        for c in getattr(_c, _m)(_ctx).get('completions', [])
+        for c in getattr(__jlab_c, _m)(__jlab_ctx).get('completions', [])
         if c.text
     ]
 }).encode()).decode()
 `.trim();
 
     try {
-      const reply = await session.sendRequest('evaluate', {
+      const setupReply = await session.sendRequest('evaluate', {
         expression: code,
+        frameId,
+        context: 'repl'
+      });
+      if (!setupReply.success) {
+        return { start: 0, end: 0, items: [] };
+      }
+
+      const reply = await session.sendRequest('evaluate', {
+        expression: '__jlab_payload',
         frameId,
         context: 'repl'
       });

@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ICompletionContext } from '@jupyterlab/completer';
-import type { IDebugger } from '@jupyterlab/debugger';
 import { Widget } from '@lumino/widgets';
-import { DebuggerIPythonCompletionProvider } from '../src/debugger-ipython-completion-provider';
+import { DebuggerIPythonCompletionProvider } from '../src/ipythoncompletionprovider';
+import type { IDebugger } from '../src/tokens';
 
 interface IMockSessionOptions {
   /**
@@ -48,8 +48,8 @@ function mockService(
 }
 
 /**
- * Simulate the `body.result` which debugpy returns for the evaluated
- * expression: the Python `repr()` of the base64-encoded JSON payload.
+ * Simulate the `body.result` which debugpy returns when reading back the
+ * payload variable: the Python `repr()` of the base64-encoded JSON payload.
  *
  * Base64 text contains no characters that `repr()` escapes, so the repr
  * is simply the text wrapped in single quotes.
@@ -59,16 +59,32 @@ function evaluateResultOf(json: string): string {
 }
 
 /**
- * Build the evaluate reply for a well-formed completions payload.
+ * Build the read-back result for a well-formed completions payload.
  */
-function evaluateReply(tokLen: number, items: Array<[string, string]>) {
-  const json = `{"tok_len": ${tokLen}, "items": ${JSON.stringify(items)}}`;
-  return {
-    success: true,
-    body: {
-      result: evaluateResultOf(json)
-    }
-  };
+function completionsPayload(
+  tokLen: number,
+  items: Array<[string, string]>
+): string {
+  return evaluateResultOf(
+    `{"tok_len": ${tokLen}, "items": ${JSON.stringify(items)}}`
+  );
+}
+
+/**
+ * Mock `sendRequest` for the two-step fetch: debugpy execs the multi-line
+ * setup code (returning an empty result) and the payload is then read back
+ * with a single-expression evaluate request.
+ */
+function mockEvaluate(payloadResult: string): jest.Mock {
+  return jest
+    .fn()
+    .mockImplementation((_command, args) =>
+      Promise.resolve(
+        args.expression === '__jlab_payload'
+          ? { success: true, body: { result: payloadResult } }
+          : { success: true, body: { result: '' } }
+      )
+    );
 }
 
 function makeProvider(
@@ -215,8 +231,8 @@ describe('DebuggerIPythonCompletionProvider', () => {
       ).toEqual({ start: 0, end: 0, items: [] });
     });
 
-    it('should evaluate in the stopped frame with the repl context', async () => {
-      const sendRequest = jest.fn().mockResolvedValue(evaluateReply(0, []));
+    it('should evaluate the setup code and read back the payload', async () => {
+      const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = new DebuggerIPythonCompletionProvider({
         debuggerService: mockService({
           frame: { id: 7 },
@@ -224,23 +240,34 @@ describe('DebuggerIPythonCompletionProvider', () => {
         })
       });
       await provider.fetch({ text: "df['", offset: 4 }, context);
-      expect(sendRequest).toHaveBeenCalledWith(
+      expect(sendRequest).toHaveBeenCalledTimes(2);
+      expect(sendRequest).toHaveBeenNthCalledWith(
+        1,
         'evaluate',
         expect.objectContaining({ frameId: 7, context: 'repl' })
+      );
+      expect(sendRequest).toHaveBeenNthCalledWith(
+        2,
+        'evaluate',
+        expect.objectContaining({
+          expression: '__jlab_payload',
+          frameId: 7,
+          context: 'repl'
+        })
       );
     });
 
     it('should only send the text up to the cursor', async () => {
-      const sendRequest = jest.fn().mockResolvedValue(evaluateReply(0, []));
+      const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = makeProvider(sendRequest);
       await provider.fetch({ text: "df['] + tail", offset: 4 }, context);
       const { expression } = sendRequest.mock.calls[0][1];
-      expect(expression).toContain(`_c.line_buffer = "df['"`);
+      expect(expression).toContain(`__jlab_c.line_buffer = "df['"`);
       expect(expression).toContain('cursor_position=4');
       expect(expression).not.toContain('tail');
     });
 
-    it('should return an empty reply when the request is unsuccessful', async () => {
+    it('should return an empty reply when the setup request is unsuccessful', async () => {
       const sendRequest = jest
         .fn()
         .mockResolvedValue({ success: false, body: { result: '' } });
@@ -248,10 +275,27 @@ describe('DebuggerIPythonCompletionProvider', () => {
       expect(
         await provider.fetch({ text: "df['", offset: 4 }, context)
       ).toEqual({ start: 0, end: 0, items: [] });
+      expect(sendRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return an empty reply when the payload request is unsuccessful', async () => {
+      const sendRequest = jest
+        .fn()
+        .mockImplementation((_command, args) =>
+          Promise.resolve(
+            args.expression === '__jlab_payload'
+              ? { success: false, body: { result: '' } }
+              : { success: true, body: { result: '' } }
+          )
+        );
+      const provider = makeProvider(sendRequest);
+      expect(
+        await provider.fetch({ text: "df['", offset: 4 }, context)
+      ).toEqual({ start: 0, end: 0, items: [] });
     });
 
     it('should return an empty reply when there are no completions', async () => {
-      const sendRequest = jest.fn().mockResolvedValue(evaluateReply(0, []));
+      const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = makeProvider(sendRequest);
       expect(
         await provider.fetch({ text: "df['", offset: 4 }, context)
@@ -272,8 +316,8 @@ describe('DebuggerIPythonCompletionProvider', () => {
     });
 
     it('should parse completions and derive the range from the token length', async () => {
-      const sendRequest = jest.fn().mockResolvedValue(
-        evaluateReply(2, [
+      const sendRequest = mockEvaluate(
+        completionsPayload(2, [
           ["'col_a'", 'dict key'],
           ["'col_b'", 'dict key']
         ])
@@ -290,9 +334,9 @@ describe('DebuggerIPythonCompletionProvider', () => {
     });
 
     it('should map an empty completion type to undefined', async () => {
-      const sendRequest = jest
-        .fn()
-        .mockResolvedValue(evaluateReply(1, [['n_rows=', '']]));
+      const sendRequest = mockEvaluate(
+        completionsPayload(1, [['n_rows=', '']])
+      );
       const provider = makeProvider(sendRequest);
       const reply = await provider.fetch({ text: 'fn(n', offset: 4 }, context);
       expect(reply.items[0].type).toBeUndefined();
@@ -300,38 +344,36 @@ describe('DebuggerIPythonCompletionProvider', () => {
 
     describe('payload decoding', () => {
       it('should round-trip keys containing single quotes', async () => {
-        const sendRequest = jest
-          .fn()
-          .mockResolvedValue(evaluateReply(1, [["'it's'", 'dict key']]));
+        const sendRequest = mockEvaluate(
+          completionsPayload(1, [["'it's'", 'dict key']])
+        );
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'd[', offset: 2 }, context);
         expect(reply.items[0].label).toBe("'it's'");
       });
 
       it('should round-trip keys containing double quotes', async () => {
-        const sendRequest = jest
-          .fn()
-          .mockResolvedValue(evaluateReply(1, [['say "hi"', 'dict key']]));
+        const sendRequest = mockEvaluate(
+          completionsPayload(1, [['say "hi"', 'dict key']])
+        );
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'd[', offset: 2 }, context);
         expect(reply.items[0].label).toBe('say "hi"');
       });
 
       it('should round-trip Windows paths containing backslashes', async () => {
-        const sendRequest = jest
-          .fn()
-          .mockResolvedValue(
-            evaluateReply(1, [['C:\\Users\\data.csv', 'path']])
-          );
+        const sendRequest = mockEvaluate(
+          completionsPayload(1, [['C:\\Users\\data.csv', 'path']])
+        );
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: "'C:", offset: 3 }, context);
         expect(reply.items[0].label).toBe('C:\\Users\\data.csv');
       });
 
       it('should round-trip newlines and tabs in completion text', async () => {
-        const sendRequest = jest
-          .fn()
-          .mockResolvedValue(evaluateReply(1, [["'a\nb\tc'", 'dict key']]));
+        const sendRequest = mockEvaluate(
+          completionsPayload(1, [["'a\nb\tc'", 'dict key']])
+        );
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'd[', offset: 2 }, context);
         expect(reply.items[0].label).toBe("'a\nb\tc'");
@@ -341,10 +383,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
         // Python's json.dumps escapes non-ASCII by default,
         // serializing "café" with a backslash-u escape sequence.
         const json = '{"tok_len": 1, "items": [["caf\\u00e9", ""]]}';
-        const sendRequest = jest.fn().mockResolvedValue({
-          success: true,
-          body: { result: evaluateResultOf(json) }
-        });
+        const sendRequest = mockEvaluate(evaluateResultOf(json));
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'caf', offset: 3 }, context);
         expect(reply.items[0].label).toBe('café');
@@ -352,10 +391,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
 
       it('should accept a double-quoted Python repr', async () => {
         const json = '{"tok_len": 1, "items": [["a", "keyword"]]}';
-        const sendRequest = jest.fn().mockResolvedValue({
-          success: true,
-          body: { result: '"' + btoa(json) + '"' }
-        });
+        const sendRequest = mockEvaluate('"' + btoa(json) + '"');
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'a', offset: 1 }, context);
         expect(reply.items).toHaveLength(1);
@@ -364,10 +400,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
       it('should ignore malformed items in the payload', async () => {
         const json =
           '{"tok_len": 1, "items": [["good", "keyword"], "bad", ["short"], 42]}';
-        const sendRequest = jest.fn().mockResolvedValue({
-          success: true,
-          body: { result: evaluateResultOf(json) }
-        });
+        const sendRequest = mockEvaluate(evaluateResultOf(json));
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'g', offset: 1 }, context);
         expect(reply.items).toEqual([
@@ -385,9 +418,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
           evaluateResultOf('{"items": [["a", "b"]]}')
         ]
       ])('should return an empty reply for %s', async (_, result) => {
-        const sendRequest = jest
-          .fn()
-          .mockResolvedValue({ success: true, body: { result } });
+        const sendRequest = mockEvaluate(result);
         const provider = makeProvider(sendRequest);
         expect(await provider.fetch({ text: 'a', offset: 1 }, context)).toEqual(
           { start: 0, end: 0, items: [] }
