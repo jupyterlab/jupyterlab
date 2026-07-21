@@ -339,8 +339,8 @@ class PyPIExtensionManager(ExtensionManager):
         return data
 
     @observe("package_metadata_cache_size")
-    def _observe_package_metadata_cache_size(self, change: dict[str, int]) -> None:
-        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
+    def _observe_package_metadata_cache_size(self, change: dict[str, object]) -> None:
+        self._fetch_package_metadata = alru_cache(maxsize=int(change["new"]))(
             partial(_fetch_package_metadata, self._httpx_client)
         )
 
