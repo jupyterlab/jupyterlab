@@ -785,6 +785,48 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.6.2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.1...f1beab4a2027af4719d6edc07d52d6cf5a39a432))
+
+### Bugs fixed
+
+- Backport of security patches to `4.6.x` branch [#19185](https://github.com/jupyterlab/jupyterlab/pull/19185) ([@krassowski](https://github.com/krassowski), [@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix resolving platform-specific shortcuts in keyboard shortcuts [#19112](https://github.com/jupyterlab/jupyterlab/pull/19112) ([@krassowski](https://github.com/krassowski))
+- Clear stale Table of Contents error markers [#19143](https://github.com/jupyterlab/jupyterlab/pull/19143) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix stale document load after rename during initialization [#19144](https://github.com/jupyterlab/jupyterlab/pull/19144) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix notebook initialization stealing focus [#19149](https://github.com/jupyterlab/jupyterlab/pull/19149) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix spurious 3s kernel restart delay [#19126](https://github.com/jupyterlab/jupyterlab/pull/19126) ([@afshin](https://github.com/afshin))
+- Stabilize Open in Terminal Galata test on Firefox [#19152](https://github.com/jupyterlab/jupyterlab/pull/19152) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix bottom activity bar restoring as collapsed [#19136](https://github.com/jupyterlab/jupyterlab/pull/19136) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Handle invalid file browser drag target [#19122](https://github.com/jupyterlab/jupyterlab/pull/19122) ([@GagandeepSingh20](https://github.com/GagandeepSingh20))
+- Stabilize flaky Firefox notebook Galata tests [#19008](https://github.com/jupyterlab/jupyterlab/pull/19008) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+
+### Maintenance and upkeep improvements
+
+- Update Jupyter Releaser GitHub Actions [#19145](https://github.com/jupyterlab/jupyterlab/pull/19145) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Fix a typo in release notes [#19116](https://github.com/jupyterlab/jupyterlab/pull/19116) ([@krassowski](https://github.com/krassowski))
+- Update migration guide - 4.6 was released [#19108](https://github.com/jupyterlab/jupyterlab/pull/19108) ([@krassowski](https://github.com/krassowski))
+
+### Other merged PRs
+
+- Bump brace-expansion from 1.1.11 to 1.1.16 in /jupyterlab/tests/mock_packages/test_no_hyphens [#19179](https://github.com/jupyterlab/jupyterlab/pull/19179) ([@dependabot[bot]](https://github.com/apps/dependabot))
+- Bump axios from 1.16.0 to 1.18.1 [#19178](https://github.com/jupyterlab/jupyterlab/pull/19178) ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-29&to=2026-07-21&type=c))
+
+@afshin ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2026-06-29..2026-07-21&type=Issues)) | @GagandeepSingh20 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AGagandeepSingh20+updated%3A2026-06-29..2026-07-21&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-06-29..2026-07-21&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-29..2026-07-21&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-29..2026-07-21&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.6.1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.0...4390320f122a610487c6352cd4cc68536b7edbe9))
@@ -828,8 +870,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-18&to=2026-06-29&type=c))
 
 @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-06-18..2026-06-29&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-06-18..2026-06-29&type=Issues)) | @DTiming24 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADTiming24+updated%3A2026-06-18..2026-06-29&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-18..2026-06-29&type=Issues)) | @Krish-876 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKrish-876+updated%3A2026-06-18..2026-06-29&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-18..2026-06-29&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.6.0
 
