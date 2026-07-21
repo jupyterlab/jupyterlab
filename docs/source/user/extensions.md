@@ -417,7 +417,7 @@ only to plugins whose IDs use the same prefix up to the colon, such as
 `my-extension:plugin` and `my-extension:other-plugin`. Extension authors should
 use the NPM extension package name, a colon, then a string identifying the
 plugin inside the extension, as described in the
-[plugin ID convention](../extension/extension_dev.md#plugin-id-convention), so
+{ref}`plugin ID convention <plugin-id-convention>`, so
 administrators can lock or unlock all plugins in an extension consistently.
 
 To unlock a locked plugin:
