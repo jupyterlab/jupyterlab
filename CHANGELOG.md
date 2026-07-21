@@ -603,6 +603,30 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.10
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.9...be9303f5bcd5308eaeae953c5a3c903046682c2c))
+
+### Bugs fixed
+
+- Backport of security patches to `4.5.x` branch [#19186](https://github.com/jupyterlab/jupyterlab/pull/19186) ([@krassowski](https://github.com/krassowski), [@MUFFANUJ](https://github.com/MUFFANUJ))
+
+### Maintenance and upkeep improvements
+
+- Reconfigure 4.5.x branch (4.6.x is new stable) [#19060](https://github.com/jupyterlab/jupyterlab/pull/19060) ([@krassowski](https://github.com/krassowski))
+- Split external link checks and only run if diff includes a URL [#19029](https://github.com/jupyterlab/jupyterlab/pull/19029) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-17&to=2026-07-21&type=c))
+
+@krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-17..2026-07-21&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-17..2026-07-21&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.9
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.8...26936727d7f197bab4f314ca50690cd162d50312))
@@ -623,8 +647,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-04&to=2026-06-17&type=c))
 
 @arun-357 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarun-357+updated%3A2026-06-04..2026-06-17&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2026-06-04..2026-06-17&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-04..2026-06-17&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-04..2026-06-17&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AYann-P+updated%3A2026-06-04..2026-06-17&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.8
 

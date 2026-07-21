@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mermaid",
-  "version": "4.5.9",
+  "version": "4.5.10",
   "description": "JupyterLab - Mermaid Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,9 +41,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.6.9",
-    "@jupyterlab/coreutils": "^6.5.9",
-    "@jupyterlab/rendermime-interfaces": "^3.13.9",
+    "@jupyterlab/apputils": "^4.6.10",
+    "@jupyterlab/coreutils": "^6.5.10",
+    "@jupyterlab/rendermime-interfaces": "^3.13.10",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/widgets": "^2.7.5",
     "@mermaid-js/layout-elk": "^0.2.0",
