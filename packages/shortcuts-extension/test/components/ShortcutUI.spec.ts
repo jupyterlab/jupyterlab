@@ -309,7 +309,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         });
       });
 
-      it('should not disable a default keybinding when it is replaced with equivalent keys using a platform-agnostic modifier', async () => {
+      it('should not create any override when a default keybinding is replaced with equivalent keys using a platform-agnostic modifier', async () => {
         const keybinding = {
           // The registry exposes platform-resolved normalized keys, e.g. for
           // a default defined as `Accel X` it exposes `Cmd X` on macOS and
@@ -332,13 +332,9 @@ describe('@jupyterlab/shortcut-extension', () => {
         registerKeybinding(target, keybinding);
         // The shortcut input captures the platform-agnostic form, e.g. `Accel X`.
         await shortcutUI.replaceKeybinding(target, keybinding, ['Accel X']);
-        // The keys are equivalent so the default must not get disabled.
-        expect(data.user.shortcuts).toHaveLength(1);
-        expect(data.user.shortcuts[0]).toEqual({
-          command: 'test:command',
-          keys: ['Accel X'],
-          selector: 'body'
-        });
+        // The keys are equivalent so the default must not get disabled,
+        // nor should a redundant (duplicating) override be added.
+        expect(data.user.shortcuts).toHaveLength(0);
       });
 
       it('should remove a redundant user override when a default keybinding is restored with equivalent keys using a platform-agnostic modifier', async () => {

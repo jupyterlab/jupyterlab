@@ -320,7 +320,9 @@ export class ShortcutUI
           })
         );
       }
-      if (keys.length !== 0) {
+      // If the new keys are equivalent to the current ones there is nothing
+      // to change; adding an override would duplicate the existing keybinding.
+      if (keys.length !== 0 && requiresChange) {
         newUserShortcuts.push(
           this._shortcutFromTarget(target, keys, {
             preventDefault: keybinding?.preventDefault
