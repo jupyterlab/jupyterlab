@@ -33,6 +33,7 @@ const code = [
   '    return alpha_arg + beta_arg',
   '',
   "data = {'alpha': 1, 'beta': 2}",
+  "big = {f'key_{i:03d}': i for i in range(120)}",
   'x = 1',
   'x += 1',
   'x'
@@ -128,6 +129,17 @@ describe('Debugger completion providers', () => {
       );
       const labels = reply.items.map(item => item.label);
       expect(labels.some(label => label.includes('alpha_arg'))).toBe(true);
+    });
+
+    it('should pass a large number of completions without truncation', async () => {
+      const reply = await provider().fetch(
+        { text: "big['", offset: 5 },
+        context
+      );
+      const labels = reply.items.map(item => item.label);
+      expect(labels.length).toBeGreaterThanOrEqual(120);
+      expect(labels.some(label => label.includes('key_000'))).toBe(true);
+      expect(labels.some(label => label.includes('key_119'))).toBe(true);
     });
   });
 });

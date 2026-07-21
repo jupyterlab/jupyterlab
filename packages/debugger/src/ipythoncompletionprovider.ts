@@ -86,6 +86,9 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     // The payload {"tok_len": N, "items": [[text, type], ...]} is
     // base64-encoded JSON, so that its Python repr (which is what debugpy
     // sends back) contains no escape sequences and can be decoded natively.
+    // A single string is used (rather than returning a dict) because
+    // debugpy may elide container reprs, while string results round-trip
+    // whole up to ~64 kB - ample headroom for the completion limit below.
     const code = `
 import base64
 import json
