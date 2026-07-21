@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import type { ITranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
@@ -129,11 +130,12 @@ export class ShortcutInput extends React.Component<
     conflicts: IShortcutTarget[],
     keys: string[]
   ) => {
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     for (const conflict of conflicts) {
       const conflictingBinding = conflict.keybindings.filter(
         binding =>
-          JSONExt.deepEqual(binding.keys, keys) ||
-          keys.some(key => JSONExt.deepEqual(binding.keys, [key]))
+          JSONExt.deepEqual(binding.keys, normalizedKeys) ||
+          normalizedKeys.some(key => JSONExt.deepEqual(binding.keys, [key]))
       )[0];
       if (!conflictingBinding) {
         console.error(
