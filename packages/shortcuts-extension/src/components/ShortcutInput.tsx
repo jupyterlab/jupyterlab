@@ -2,8 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as React from 'react';
 import type { ITranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
@@ -153,7 +151,7 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: Array<string>,
     currentChain: string
-  ): Array<any> => {
+  ): [string, string[], string] => {
     let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
     const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];
