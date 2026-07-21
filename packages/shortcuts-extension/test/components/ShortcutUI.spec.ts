@@ -309,6 +309,66 @@ describe('@jupyterlab/shortcut-extension', () => {
         });
       });
 
+      it('should not disable a default keybinding when it is replaced with equivalent keys using a platform-agnostic modifier', async () => {
+        const keybinding = {
+          // The registry exposes platform-resolved normalized keys, e.g. for
+          // a default defined as `Accel X` it exposes `Cmd X` on macOS and
+          // `Ctrl X` on other platforms.
+          keys: CommandRegistry.normalizeKeys({
+            command: 'test:command',
+            keys: ['Accel X'],
+            selector: 'body'
+          }),
+          isDefault: true
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        // The shortcut input captures the platform-agnostic form, e.g. `Accel X`.
+        await shortcutUI.replaceKeybinding(target, keybinding, ['Accel X']);
+        // The keys are equivalent so the default must not get disabled.
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0]).toEqual({
+          command: 'test:command',
+          keys: ['Accel X'],
+          selector: 'body'
+        });
+      });
+
+      it('should remove a redundant user override when a default keybinding is restored with equivalent keys using a platform-agnostic modifier', async () => {
+        // A user override duplicating the default keybinding.
+        data.user.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel X'],
+          selector: 'body'
+        });
+        const keybinding = {
+          keys: CommandRegistry.normalizeKeys({
+            command: 'test:command',
+            keys: ['Accel X'],
+            selector: 'body'
+          }),
+          isDefault: true
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        await shortcutUI.replaceKeybinding(target, keybinding, ['Accel X']);
+        // The keys are equivalent to the default so the override is not needed.
+        expect(data.user.shortcuts).toHaveLength(0);
+      });
+
       it('should replace a user keybinding whose active keys differ from fallback keys', async () => {
         // The stored `keys` are the cross-platform fallback; the resolved
         // platform keys (what the registry exposes and the UI edits) differ.

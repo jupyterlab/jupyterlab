@@ -255,6 +255,12 @@ export class ShortcutUI
     if (keys.length === 1 && keys[0] == '') {
       keys = [];
     }
+    // `keybinding.keys` as exposed by the registry are platform-resolved and
+    // normalized, while `keys` come from user input which may use e.g. `Accel`
+    // where the registry surfaces `Cmd` or `Ctrl`; normalize before comparing.
+    // The raw `keys` are still used for persistence so that platform-agnostic
+    // modifiers like `Accel` are preserved in the user settings.
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
     const newUserShortcuts = [];
@@ -276,7 +282,8 @@ export class ShortcutUI
         )
       ) {
         const matchesDefault =
-          keybinding.isDefault && JSONExt.deepEqual(keybinding.keys, keys);
+          keybinding.isDefault &&
+          JSONExt.deepEqual(keybinding.keys, normalizedKeys);
 
         // If the new `keys` are empty, do not copy this one over.
         // Also, if the keybinding is a default keybinding and the desired
@@ -299,7 +306,7 @@ export class ShortcutUI
     }
     if (!found) {
       const requiresChange =
-        !keybinding || !JSONExt.deepEqual(keybinding.keys, keys);
+        !keybinding || !JSONExt.deepEqual(keybinding.keys, normalizedKeys);
       const shouldDisableDefault =
         keybinding && keybinding.isDefault && requiresChange;
       if (shouldDisableDefault) {
