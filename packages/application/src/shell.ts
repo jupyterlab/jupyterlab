@@ -2813,24 +2813,27 @@ namespace Private {
           return;
         }
         const isDocument = widget instanceof DocumentWidget;
+        const displayedName = TabBarSvg.titleLabel(widget.title);
         const oldName = isDocument
           ? widget.context.localPath.split('/').pop()!
-          : TabBarSvg.titleLabel(widget.title);
+          : displayedName;
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();
 
-        if (newName !== oldName) {
+        if (newName !== displayedName) {
           if (isDocument) {
             const validNameExp = /[/\\:]/;
             if (newName.length > 0 && !validNameExp.test(newName)) {
               const oldPath = widget.context.path;
               try {
                 await widget.context.rename(newName);
-              } finally {
-                if (widget.context.path === oldPath) {
-                  inputElement.value = oldName;
-                }
+              } catch {
+                inputElement.value = oldName;
+                return;
+              }
+              if (widget.context.path === oldPath) {
+                inputElement.value = oldName;
               }
             } else {
               inputElement.value = oldName;
@@ -2839,7 +2842,7 @@ namespace Private {
             widget.title.label = newName;
           }
         } else {
-          inputElement.value = oldName;
+          inputElement.value = displayedName;
         }
       }
     }
