@@ -13,6 +13,55 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { IDebugger } from './tokens';
 
 /**
+ * Name of the completion helper function defined in the paused frame.
+ */
+const HELPER_NAME = '_jupyterlab_debugger_completions';
+
+/**
+ * Python definition of the completion helper. Runs IPython's matchers on
+ * the namespace of the paused frame (found via the caller frame, since the
+ * helper is called by an expression evaluated in that frame) and returns
+ * the payload - "tok_len" and "items" as `[text, type]` pairs - as
+ * base64-encoded JSON, so that its Python repr (which is what debugpy
+ * sends back) contains no escape sequences and can be decoded natively.
+ * A single string is returned (rather than a dict) because debugpy may
+ * elide container reprs, while string results round-trip whole up to
+ * ~64 kB - ample headroom for the completion limit below.
+ */
+const HELPER_DEFINITION = `
+def ${HELPER_NAME}(text, offset):
+    import base64
+    import inspect
+    import json
+    from IPython.core.completer import IPCompleter, CompletionContext
+    frame = inspect.currentframe().f_back
+    completer = IPCompleter(
+        namespace=frame.f_locals, global_namespace=frame.f_globals
+    )
+    completer.line_buffer = text
+    completer.text_until_cursor = text
+    token = completer.splitter.split_line(text)
+    context = CompletionContext(
+        token=token,
+        full_text=text,
+        cursor_position=offset,
+        cursor_line=0,
+        limit=200,
+    )
+    matchers = ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']
+    payload = {
+        'tok_len': len(token),
+        'items': [
+            [c.text, c.type or '']
+            for matcher in matchers
+            for c in getattr(completer, matcher)(context).get('completions', [])
+            if c.text
+        ],
+    }
+    return base64.b64encode(json.dumps(payload).encode()).decode()
+`.trim();
+
+/**
  * Completion provider that delegates to IPython's matcher API for completions
  * that DAP's `completions` request does not cover, specifically:
  * - dict_key_matcher: dict/DataFrame/numpy keys, custom _ipython_key_completions_()
@@ -77,49 +126,16 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     const textLiteral = JSON.stringify(textBeforeCursor);
     const offset = textBeforeCursor.length;
 
-    // Multi-statement Python evaluated in the stopped frame via DAP.
-    // debugpy execs multi-line repl code and discards the value of the last
-    // expression, so the payload is stored in a frame variable instead and
-    // read back with a second, single-expression evaluate request (repl
-    // assignments persist in the paused frame, like in the debug console).
-    // locals()/globals() are captured first to reflect the frame's scope.
-    // The payload {"tok_len": N, "items": [[text, type], ...]} is
-    // base64-encoded JSON, so that its Python repr (which is what debugpy
-    // sends back) contains no escape sequences and can be decoded natively.
-    // A single string is used (rather than returning a dict) because
-    // debugpy may elide container reprs, while string results round-trip
-    // whole up to ~64 kB - ample headroom for the completion limit below.
-    const code = `
-import base64
-import json
-from IPython.core.completer import IPCompleter, CompletionContext
-__jlab_ns = locals()
-__jlab_gs = globals()
-__jlab_c = IPCompleter(namespace=__jlab_ns, global_namespace=__jlab_gs)
-__jlab_c.line_buffer = ${textLiteral}
-__jlab_c.text_until_cursor = ${textLiteral}
-__jlab_tok = __jlab_c.splitter.split_line(${textLiteral})
-__jlab_ctx = CompletionContext(
-    token=__jlab_tok,
-    full_text=${textLiteral},
-    cursor_position=${offset},
-    cursor_line=0,
-    limit=200,
-)
-__jlab_payload = base64.b64encode(json.dumps({
-    'tok_len': len(__jlab_tok),
-    'items': [
-        [c.text, c.type or '']
-        for _m in ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']
-        for c in getattr(__jlab_c, _m)(__jlab_ctx).get('completions', [])
-        if c.text
-    ]
-}).encode()).decode()
-`.trim();
-
     try {
+      // debugpy execs multi-line repl code and discards the value of the
+      // last expression, so the work happens in two requests: define a
+      // helper function (definitions persist in the paused frame, like in
+      // the debug console), then call it as a single expression whose
+      // return value comes back in the reply. Only the helper's name leaks
+      // into the frame; its own locals are function-scoped. The stopped
+      // frame's namespace is read from the caller frame at call time.
       const setupReply = await session.sendRequest('evaluate', {
-        expression: code,
+        expression: HELPER_DEFINITION,
         frameId,
         context: 'repl'
       });
@@ -128,7 +144,7 @@ __jlab_payload = base64.b64encode(json.dumps({
       }
 
       const reply = await session.sendRequest('evaluate', {
-        expression: '__jlab_payload',
+        expression: `${HELPER_NAME}(${textLiteral}, ${offset})`,
         frameId,
         context: 'repl'
       });

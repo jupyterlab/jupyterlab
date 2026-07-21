@@ -71,16 +71,16 @@ function completionsPayload(
 }
 
 /**
- * Mock `sendRequest` for the two-step fetch: debugpy execs the multi-line
- * setup code (returning an empty result) and the payload is then read back
- * with a single-expression evaluate request.
+ * Mock `sendRequest` for the two-step fetch: debugpy execs the helper
+ * definition (returning an empty result) and the payload is then returned
+ * by a single-expression call of the helper.
  */
 function mockEvaluate(payloadResult: string): jest.Mock {
   return jest
     .fn()
     .mockImplementation((_command, args) =>
       Promise.resolve(
-        args.expression === '__jlab_payload'
+        args.expression.startsWith('_jupyterlab_debugger_completions(')
           ? { success: true, body: { result: payloadResult } }
           : { success: true, body: { result: '' } }
       )
@@ -231,7 +231,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
       ).toEqual({ start: 0, end: 0, items: [] });
     });
 
-    it('should evaluate the setup code and read back the payload', async () => {
+    it('should define the helper and call it to read back the payload', async () => {
       const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = new DebuggerIPythonCompletionProvider({
         debuggerService: mockService({
@@ -244,13 +244,19 @@ describe('DebuggerIPythonCompletionProvider', () => {
       expect(sendRequest).toHaveBeenNthCalledWith(
         1,
         'evaluate',
-        expect.objectContaining({ frameId: 7, context: 'repl' })
+        expect.objectContaining({
+          expression: expect.stringContaining(
+            'def _jupyterlab_debugger_completions('
+          ),
+          frameId: 7,
+          context: 'repl'
+        })
       );
       expect(sendRequest).toHaveBeenNthCalledWith(
         2,
         'evaluate',
         expect.objectContaining({
-          expression: '__jlab_payload',
+          expression: `_jupyterlab_debugger_completions("df['", 4)`,
           frameId: 7,
           context: 'repl'
         })
@@ -261,10 +267,10 @@ describe('DebuggerIPythonCompletionProvider', () => {
       const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = makeProvider(sendRequest);
       await provider.fetch({ text: "df['] + tail", offset: 4 }, context);
-      const { expression } = sendRequest.mock.calls[0][1];
-      expect(expression).toContain(`__jlab_c.line_buffer = "df['"`);
-      expect(expression).toContain('cursor_position=4');
-      expect(expression).not.toContain('tail');
+      const definition = sendRequest.mock.calls[0][1].expression;
+      const call = sendRequest.mock.calls[1][1].expression;
+      expect(definition).not.toContain('tail');
+      expect(call).toBe(`_jupyterlab_debugger_completions("df['", 4)`);
     });
 
     it('should return an empty reply when the setup request is unsuccessful', async () => {
@@ -283,7 +289,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
         .fn()
         .mockImplementation((_command, args) =>
           Promise.resolve(
-            args.expression === '__jlab_payload'
+            args.expression.startsWith('_jupyterlab_debugger_completions(')
               ? { success: false, body: { result: '' } }
               : { success: true, body: { result: '' } }
           )
