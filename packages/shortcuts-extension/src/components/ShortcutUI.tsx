@@ -5,8 +5,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
+import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { NewShortcutItem } from './NewShortcutItem';
 import { ShortcutItem } from './ShortcutItem';
@@ -22,6 +24,10 @@ import type {
   IShortcutTarget,
   IShortcutUI
 } from '../types';
+
+type ShortcutOverride = CommandRegistry.IKeyBindingOptions & {
+  disabled?: boolean;
+};
 
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
@@ -249,6 +255,14 @@ export class ShortcutUI
     if (keys.length === 1 && keys[0] == '') {
       keys = [];
     }
+    // `keybinding.keys` as exposed by the registry are platform-resolved and
+    // normalized, while `keys` come from user input which may use e.g. `Accel`
+    // where the registry surfaces `Cmd` or `Ctrl`; normalize before comparing.
+    // The replacement/new binding still persists the raw `keys` so that
+    // platform-agnostic modifiers like `Accel` are preserved in the user
+    // settings; entries derived from existing keybindings (such as the
+    // `disabled` override of a default) persist the resolved `keybinding.keys`.
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
     const newUserShortcuts = [];
@@ -261,20 +275,23 @@ export class ShortcutUI
         shortcut.selector === target.selector &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
         keybinding &&
-        JSONExt.deepEqual(keybinding.keys, shortcut.keys)
+        // `keybinding.keys` are the resolved (normalized) platform keys exposed
+        // by the registry, so compare against the resolved keys of the raw user
+        // shortcut rather than its (possibly platform-specific) `keys` fallback.
+        JSONExt.deepEqual(
+          keybinding.keys,
+          CommandRegistry.normalizeKeys(shortcut)
+        )
       ) {
         const matchesDefault =
-          keybinding.isDefault && JSONExt.deepEqual(keybinding.keys, keys);
+          keybinding.isDefault &&
+          JSONExt.deepEqual(keybinding.keys, normalizedKeys);
 
         // If the new `keys` are empty, do not copy this one over.
         // Also, if the keybinding is a default keybinding and the desired
         // new `keys` are the same as default, it does not need to be added.
         if (keys.length !== 0 && !matchesDefault) {
-          newUserShortcuts.push({
-            command: shortcut.command,
-            selector: shortcut.selector,
-            keys: keys
-          });
+          newUserShortcuts.push(this._setShortcutKeys(shortcut, keys));
         }
         found = true;
       } else if (
@@ -291,27 +308,77 @@ export class ShortcutUI
     }
     if (!found) {
       const requiresChange =
-        !keybinding || !JSONExt.deepEqual(keybinding.keys, keys);
+        !keybinding || !JSONExt.deepEqual(keybinding.keys, normalizedKeys);
       const shouldDisableDefault =
         keybinding && keybinding.isDefault && requiresChange;
       if (shouldDisableDefault) {
         // If the replaced keybinding is the default, disable it.
-        newUserShortcuts.push({
-          command: target.command,
-          selector: target.selector,
-          disabled: true,
-          keys: keybinding.keys
-        });
+        newUserShortcuts.push(
+          this._shortcutFromTarget(target, keybinding.keys, {
+            disabled: true,
+            preventDefault: keybinding.preventDefault
+          })
+        );
       }
-      if (keys.length !== 0) {
-        newUserShortcuts.push({
-          command: target.command,
-          selector: target.selector,
-          keys: keys
-        });
+      // If the new keys are equivalent to the current ones there is nothing
+      // to change; adding an override would duplicate the existing keybinding.
+      if (keys.length !== 0 && requiresChange) {
+        newUserShortcuts.push(
+          this._shortcutFromTarget(target, keys, {
+            preventDefault: keybinding?.preventDefault
+          })
+        );
       }
     }
     await settings.set('shortcuts', newUserShortcuts as any);
+  }
+
+  private _setShortcutKeys(
+    shortcut: CommandRegistry.IKeyBindingOptions,
+    keys: string[]
+  ): CommandRegistry.IKeyBindingOptions {
+    const keyField = this._platformKeys(shortcut);
+    return {
+      ...shortcut,
+      [keyField]: keys
+    };
+  }
+
+  private _shortcutFromTarget(
+    target: IShortcutTarget,
+    keys: string[],
+    options: { disabled?: boolean; preventDefault?: boolean } = {}
+  ): ShortcutOverride {
+    const shortcut: ShortcutOverride = {
+      command: target.command,
+      selector: target.selector,
+      keys
+    };
+    if (target.args && !JSONExt.deepEqual(target.args, {})) {
+      shortcut.args = target.args;
+    }
+    if (options.disabled) {
+      shortcut.disabled = true;
+    }
+    if (options.preventDefault !== undefined) {
+      shortcut.preventDefault = options.preventDefault;
+    }
+    return shortcut;
+  }
+
+  private _platformKeys(
+    shortcut: CommandRegistry.IKeyBindingOptions
+  ): 'keys' | 'winKeys' | 'macKeys' | 'linuxKeys' {
+    if (Platform.IS_WIN && shortcut.winKeys) {
+      return 'winKeys';
+    }
+    if (Platform.IS_MAC && shortcut.macKeys) {
+      return 'macKeys';
+    }
+    if (!Platform.IS_WIN && !Platform.IS_MAC && shortcut.linuxKeys) {
+      return 'linuxKeys';
+    }
+    return 'keys';
   }
 
   /**

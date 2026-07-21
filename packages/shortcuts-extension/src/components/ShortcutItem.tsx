@@ -29,7 +29,8 @@ const MAC_SYMBOLS: Record<string, string> = {
   Ctrl: '⌃',
   Alt: '⌥',
   Shift: '⇧',
-  Accel: '⌘'
+  Accel: '⌘',
+  Cmd: '⌘'
 };
 
 /** Props for ShortcutItem component */
