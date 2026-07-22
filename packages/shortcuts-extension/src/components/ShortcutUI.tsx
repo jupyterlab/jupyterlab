@@ -495,6 +495,7 @@ export class ShortcutUI
           updateSearchQuery={this.updateSearchQuery}
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
+          showAddCommand={this.state.showAddCommand}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           toggleAddCommandRow={this.toggleAddCommandRow}

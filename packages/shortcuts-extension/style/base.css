@@ -170,6 +170,7 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   width: 16px;
 }
 
+.jp-Shortcuts-AddShortcut.jp-mod-styled .jp-icon3[fill],
 .jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill] {
   fill: currentcolor;
 }
@@ -390,21 +391,29 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   outline-offset: 1px;
 }
 
-.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept {
-  background: var(--jp-shortcuts-button-hover-background);
+.jp-Shortcuts-AddShortcut.jp-mod-styled.jp-mod-accept {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept:hover {
-  background: var(--jp-accept-color-normal);
-}
-
-.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled:disabled {
+.jp-Shortcuts-AddShortcut.jp-mod-styled:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled .jp-icon3[fill] {
-  fill: var(--jp-ui-inverse-font-color0);
+.jp-Shortcuts-AddShortcut.jp-Shortcuts-Icon svg {
+  height: 20px;
+  width: 20px;
+}
+
+.jp-Shortcuts-AddShortcut.jp-mod-styled:focus-visible {
+  outline-offset: 1px;
 }
 
 .jp-Shortcuts-HeaderRowContainer {
