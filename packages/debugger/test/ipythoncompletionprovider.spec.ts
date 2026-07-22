@@ -143,6 +143,17 @@ describe('DebuggerIPythonCompletionProvider', () => {
       });
       expect(await provider.isApplicable(context)).toBe(true);
     });
+
+    it('should return false rather than reject when the kernel info fails', async () => {
+      const session = mockSession();
+      session.connection.kernel.info = Promise.reject(
+        new Error('connection closed')
+      );
+      const provider = new DebuggerIPythonCompletionProvider({
+        debuggerService: mockService({ frame: { id: 1 }, session })
+      });
+      await expect(provider.isApplicable(context)).resolves.toBe(false);
+    });
   });
 
   describe('#shouldShowContinuousHint()', () => {
@@ -372,13 +383,22 @@ describe('DebuggerIPythonCompletionProvider', () => {
 
       it('should ignore malformed items in the payload', async () => {
         const json =
-          '{"tok_len": 1, "items": [["good", "keyword"], "bad", ["short"], 42]}';
+          '{"tok_len": 1, "items": ' +
+          '[["good", "keyword"], "bad", ["short"], 42, [1, 2], ["x", 3]]}';
         const sendRequest = mockEvaluate(evaluateResultOf(json));
         const provider = makeProvider(sendRequest);
         const reply = await provider.fetch({ text: 'g', offset: 1 }, context);
         expect(reply.items).toEqual([
           { label: 'good', insertText: 'good', type: 'keyword' }
         ]);
+      });
+
+      it('should clamp the start to 0 when tok_len exceeds the offset', async () => {
+        const sendRequest = mockEvaluate(completionsPayload(10, [['a', '']]));
+        const provider = makeProvider(sendRequest);
+        const reply = await provider.fetch({ text: 'a', offset: 1 }, context);
+        expect(reply.start).toBe(0);
+        expect(reply.end).toBe(1);
       });
 
       it.each([
@@ -389,6 +409,14 @@ describe('DebuggerIPythonCompletionProvider', () => {
         [
           'a payload without tok_len',
           evaluateResultOf('{"items": [["a", "b"]]}')
+        ],
+        [
+          'a negative tok_len',
+          evaluateResultOf('{"tok_len": -1, "items": [["a", "b"]]}')
+        ],
+        [
+          'a non-integer tok_len',
+          evaluateResultOf('{"tok_len": 1.5, "items": [["a", "b"]]}')
         ]
       ])('should return an empty reply for %s', async (_, result) => {
         const sendRequest = mockEvaluate(result);

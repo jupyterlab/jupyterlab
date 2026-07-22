@@ -192,6 +192,21 @@ describe('DebuggerCompletionProvider', () => {
       );
     });
 
+    it('should return an empty reply when the body has no targets', async () => {
+      const sendRequest = jest
+        .fn()
+        .mockResolvedValue({ success: true, body: {} });
+      const provider = new DebuggerCompletionProvider({
+        debuggerService: mockService({
+          frame: { id: 1 },
+          session: mockSession({ sendRequest })
+        })
+      });
+      expect(await provider.fetch({ text: 'df.', offset: 3 }, context)).toEqual(
+        { start: 0, end: 0, items: [] }
+      );
+    });
+
     it('should return an empty reply when there are no targets', async () => {
       const sendRequest = jest
         .fn()

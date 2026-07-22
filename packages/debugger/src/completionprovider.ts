@@ -82,11 +82,10 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
         frameId
       });
 
-      if (!reply.success || !reply.body.targets.length) {
+      const targets = reply.body?.targets;
+      if (!reply.success || !targets?.length) {
         return { start: 0, end: 0, items: [] };
       }
-
-      const targets = reply.body.targets;
       // debugpy returns 0-based start positions (despite columnsStartAt1: true)
       const start = targets[0].start ?? request.offset;
       const end = start + (targets[0].length ?? 0);

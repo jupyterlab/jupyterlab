@@ -86,8 +86,16 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     if (!this._debuggerService.model.callstack.frame) {
       return false;
     }
-    const info = await this._debuggerService.session?.connection?.kernel?.info;
-    return info?.language_info?.name === 'python';
+    try {
+      const info =
+        await this._debuggerService.session?.connection?.kernel?.info;
+      return info?.language_info?.name === 'python';
+    } catch {
+      // A rejection here (e.g. the kernel connection closing) would
+      // otherwise reject the reconciliator's Promise.all and disable
+      // completions from all providers.
+      return false;
+    }
   }
 
   shouldShowContinuousHint(
@@ -154,7 +162,7 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
         return { start: 0, end: 0, items: [] };
       }
 
-      const start = request.offset - data.tokLen;
+      const start = Math.max(0, request.offset - data.tokLen);
       const end = request.offset;
 
       const items: CompletionHandler.ICompletionItem[] = data.items.map(
@@ -194,14 +202,23 @@ function _decodePayload(
   }
   try {
     const data = JSON.parse(atob(match[1]));
-    if (typeof data?.tok_len !== 'number' || !Array.isArray(data?.items)) {
+    const tokLen: unknown = data?.tok_len;
+    if (
+      typeof tokLen !== 'number' ||
+      !Number.isInteger(tokLen) ||
+      tokLen < 0 ||
+      !Array.isArray(data?.items)
+    ) {
       return null;
     }
     return {
-      tokLen: data.tok_len as number,
+      tokLen,
       items: (data.items as unknown[]).filter(
         (item): item is [string, string] =>
-          Array.isArray(item) && item.length >= 2
+          Array.isArray(item) &&
+          item.length >= 2 &&
+          typeof item[0] === 'string' &&
+          typeof item[1] === 'string'
       )
     };
   } catch {
