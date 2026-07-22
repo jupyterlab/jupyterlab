@@ -874,7 +874,7 @@ or load the version on disk (revert)?`,
       this.path
     );
     const revertBtn = Dialog.okButton({
-      label: this._trans.__('Revert'),
+      label: this._trans.__('Reload from Disk'),
       actions: ['revert']
     });
     const overwriteBtn = Dialog.warnButton({
