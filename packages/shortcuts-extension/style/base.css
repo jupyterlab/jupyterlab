@@ -46,11 +46,7 @@
   position: absolute;
   inset: 0;
   transform-origin: left center;
-  background-color: color-mix(
-    in srgb,
-    var(--jp-brand-color1) 25%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--jp-brand-color1) 25%, transparent);
   pointer-events: none;
   z-index: 0;
 }
@@ -93,7 +89,10 @@
 }
 
 .jp-mod-selected-InputText {
-  background-color: var(--jp-editor-selected-background, var(--jp-layout-color2));
+  background-color: var(
+    --jp-editor-selected-background,
+    var(--jp-layout-color2)
+  );
 }
 
 .jp-mod-waiting-InputText {
