@@ -9,7 +9,14 @@ export class LruCache<T, U> {
   protected _maxSize: number;
 
   constructor(options: LruCache.IOptions = {}) {
-    this._maxSize = options?.maxSize || DEFAULT_MAX_SIZE;
+    const maxSize = options.maxSize;
+    this._maxSize =
+      maxSize === undefined ||
+      maxSize === null ||
+      maxSize === 0 ||
+      Number.isNaN(maxSize)
+        ? DEFAULT_MAX_SIZE
+        : maxSize;
     if (this._maxSize < 1) {
       throw new Error('maxSize must be at least 1');
     }

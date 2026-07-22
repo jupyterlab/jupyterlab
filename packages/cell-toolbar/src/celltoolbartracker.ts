@@ -476,7 +476,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
-    return this._cellToolbarRect(activeCell)?.left || null;
+    return this._cellToolbarRect(activeCell)?.left ?? null;
   }
 
   private _enabled: boolean;

@@ -727,7 +727,7 @@ function* nodeIter<T extends Node>(
   let start = 0;
   let end;
   for (let node of nodes) {
-    end = start + (node.textContent?.length || 0);
+    end = start + (node.textContent?.length ?? 0);
     yield {
       node,
       start,

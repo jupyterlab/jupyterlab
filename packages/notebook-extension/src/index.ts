@@ -2273,8 +2273,12 @@ function activateNotebookHandler(
             value: settings.get('sideBySideOutputRatio').composite as number
           })
             .then(result => {
-              setSideBySideOutputRatio(result.value!);
-              if (result.value) {
+              if (
+                result.value !== null &&
+                Number.isFinite(result.value) &&
+                result.value >= 0
+              ) {
+                setSideBySideOutputRatio(result.value);
                 void settings.set('sideBySideOutputRatio', result.value);
               }
             })
