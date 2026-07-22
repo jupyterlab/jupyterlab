@@ -2,10 +2,9 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as React from 'react';
 import type { ITranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
@@ -129,11 +128,12 @@ export class ShortcutInput extends React.Component<
     conflicts: IShortcutTarget[],
     keys: string[]
   ) => {
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     for (const conflict of conflicts) {
       const conflictingBinding = conflict.keybindings.filter(
         binding =>
-          JSONExt.deepEqual(binding.keys, keys) ||
-          keys.some(key => JSONExt.deepEqual(binding.keys, [key]))
+          JSONExt.deepEqual(binding.keys, normalizedKeys) ||
+          normalizedKeys.some(key => JSONExt.deepEqual(binding.keys, [key]))
       )[0];
       if (!conflictingBinding) {
         console.error(
@@ -153,7 +153,7 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: Array<string>,
     currentChain: string
-  ): Array<any> => {
+  ): [string, string[], string] => {
     let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
     const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];

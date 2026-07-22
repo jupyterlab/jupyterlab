@@ -2466,15 +2466,16 @@ function activateNotebookHandler(
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
-      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;
+    }`;
     const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
     if (sideBySideMarginTag) {
-      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+      sideBySideMarginTag.textContent = sideBySideMarginStyle;
     } else {
-      document.head.insertAdjacentHTML(
-        'beforeend',
-        `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
-      );
+      const style = document.createElement('style');
+      style.id = SIDE_BY_SIDE_STYLE_ID;
+      style.textContent = sideBySideMarginStyle;
+      document.head.appendChild(style);
     }
     factory.autoStartDefault = settings.get('autoStartDefaultKernel')
       .composite as boolean;
