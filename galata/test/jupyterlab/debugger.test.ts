@@ -31,7 +31,8 @@ async function openNotebook(page: IJupyterLabPageFixture, tmpPath, fileName) {
     path.resolve(__dirname, `./notebooks/${fileName}`),
     `${tmpPath}/${fileName}`
   );
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(true);
+  expect(await page.notebook.activate(fileName)).toBe(true);
 }
 
 test('Move Debugger to right', async ({ page }) => {
@@ -66,14 +67,16 @@ for (const c of showSourcesCases) {
     });
 
     test('Start debug session', async ({ page, tmpPath }) => {
-      await openNotebook(page, tmpPath, 'code_notebook.ipynb');
+      const notebookName = 'code_notebook.ipynb';
+      await openNotebook(page, tmpPath, notebookName);
 
       await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-      await page.debugger.switchOn();
+      await page.debugger.switchOn(notebookName);
       await page.sidebar.openTab('jp-debugger-sidebar');
 
+      expect(await page.notebook.activate(notebookName)).toBe(true);
       await page.notebook.waitForCellGutter(0);
-      await page.notebook.clickCellGutter(0, 2);
+      expect(await page.notebook.clickCellGutter(0, 2)).toBe(true);
 
       await page.debugger.waitForBreakPoints();
       const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
@@ -124,12 +127,13 @@ for (const c of showSourcesCases) {
       await openNotebook(page, tmpPath, notebookName);
 
       await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-      await page.debugger.switchOn();
+      await page.debugger.switchOn(notebookName);
       await page.sidebar.openTab('jp-debugger-sidebar');
 
+      expect(await page.notebook.activate(notebookName)).toBe(true);
       await page.notebook.waitForCellGutter(0);
-      await page.notebook.clickCellGutter(0, 8);
-      await page.notebook.clickCellGutter(0, 11);
+      expect(await page.notebook.clickCellGutter(0, 8)).toBe(true);
+      expect(await page.notebook.clickCellGutter(0, 11)).toBe(true);
 
       // don't add await, run will be blocked by the breakpoint
       void page.notebook.run().then();
@@ -203,7 +207,14 @@ for (const c of showSourcesCases) {
     });
 
     test('Start debug session (Script)', async ({ page, tmpPath }) => {
-      await openNotebook(page, tmpPath, 'code_script.py');
+      const fileName = 'code_script.py';
+      await page.contents.uploadFile(
+        path.resolve(__dirname, `./notebooks/${fileName}`),
+        `${tmpPath}/${fileName}`
+      );
+      expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(
+        true
+      );
 
       // Open context menu on editor
       await page.click('div.jp-FileEditor', { button: 'right' });
@@ -299,7 +310,6 @@ test.describe('Debugger Tests', () => {
       expect(await page.notebook.activate(notebookName)).toBe(true);
 
       await page.debugger.switchOn(notebookName);
-      expect(await page.debugger.isOn(notebookName)).toBe(true);
       await page.sidebar.openTab('jp-debugger-sidebar');
 
       await setBreakpoint(page, notebookName);

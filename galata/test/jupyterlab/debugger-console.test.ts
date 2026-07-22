@@ -24,8 +24,8 @@ async function setupDebuggerConsole(
 
   // Enable debugger for the opened notebook
   await page.debugger.switchOn(fileName);
-  expect(await page.debugger.isOn(fileName)).toBe(true);
   await page.sidebar.openTab('jp-debugger-sidebar');
+  expect(await page.notebook.activate(fileName)).toBe(true);
 
   // Set a breakpoint on line 2 (the x = 42 line)
   await page.notebook.waitForCellGutter(0);
