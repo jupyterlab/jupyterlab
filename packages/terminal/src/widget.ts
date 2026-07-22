@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -69,10 +70,28 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Initialize settings.
     this._options = { ...ITerminal.defaultOptions, ...options };
 
+    // Track the link under the pointer so that it can be exposed when the
+    // context menu is opened (see `contextMenuLink`).
+    const setHoveredLink = (link: string | null): void => {
+      this._hoveredLink = link;
+    };
+
     const { theme, ...other } = this._options;
     const xtermOptions = {
       theme: Private.getXTermTheme(theme),
       allowProposedApi: true, // To support xtermjs SearchAddon coloring.
+      // Handle OSC 8 escape-sequence hyperlinks.
+      linkHandler: {
+        activate: (event: MouseEvent, uri: string) => {
+          void Private.activateLink(this._trans, uri);
+        },
+        hover: (event: MouseEvent, uri: string) => {
+          setHoveredLink(uri);
+        },
+        leave: () => {
+          setHoveredLink(null);
+        }
+      },
       ...other
     };
 
@@ -115,7 +134,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }, this);
 
     // Create the xterm.
-    Private.createTerminal(xtermOptions)
+    Private.createTerminal(xtermOptions, setHoveredLink)
       .then(([term, fitAddon, searchAddon]) => {
         this._term = term;
         this._fitAddon = fitAddon;
@@ -280,6 +299,16 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   /**
+   * The URI of the link under the pointer when the context menu was last
+   * opened over the terminal, or `null` if the context menu was not opened
+   * over a link.
+   * Public as needed by the `terminal:copy-link` command.
+   */
+  get contextMenuLink(): string | null {
+    return this._contextMenuLink;
+  }
+
+  /**
    * Process a message sent to the widget.
    *
    * @param msg - The message sent to the widget.
@@ -335,6 +364,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('keydown', this, true);
+    this.node.addEventListener('contextmenu', this);
     this.update();
   }
 
@@ -343,6 +373,10 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('keydown', this, true);
+    this.node.removeEventListener('contextmenu', this);
+    // The pointer leave callback may not fire when the widget is detached
+    // while a link is hovered, so reset the hovered link explicitly.
+    this._hoveredLink = null;
     this._clearEscapeResetTimer();
     this._escapePressedOnce = false;
   }
@@ -670,7 +704,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
   }
 
+  private _contextMenuLink: string | null = null;
   private _fitAddon: FitAddon;
+  private _hoveredLink: string | null = null;
   private _searchAddon: SearchAddon;
   private _needsResize = true;
   private _offsetWidth = -1;
@@ -702,6 +738,11 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     switch (event.type) {
       case 'keydown':
         this._evtKeyDown(event as KeyboardEvent);
+        break;
+      case 'contextmenu':
+        // Capture the hovered link when the context menu is being opened,
+        // as the pointer leaves the link once the menu is displayed.
+        this._contextMenuLink = this._hoveredLink;
         break;
       default:
         break;
@@ -884,9 +925,15 @@ namespace Private {
 
   /**
    * Create a xterm.js terminal asynchronously.
+   *
+   * @param options - The xterm.js terminal options.
+   *
+   * @param onLinkHover - A callback invoked with the URI of the link under
+   * the pointer, or `null` when the pointer leaves the link.
    */
   export async function createTerminal(
-    options: ITerminalOptions & ITerminalInitOnlyOptions
+    options: ITerminalOptions & ITerminalInitOnlyOptions,
+    onLinkHover: (link: string | null) => void
   ): Promise<[Xterm, FitAddon, SearchAddon]> {
     if (!initPromise) {
       initPromise = initialize();
@@ -902,8 +949,55 @@ namespace Private {
     const fitAddon = new FitAddon_();
     term.loadAddon(fitAddon);
     const searchAddon = new SearchAddon_();
-    term.loadAddon(new WeblinksAddon_());
+    term.loadAddon(
+      new WeblinksAddon_(undefined, {
+        hover: (event: MouseEvent, uri: string) => {
+          onLinkHover(uri);
+        },
+        leave: () => {
+          onLinkHover(null);
+        }
+      })
+    );
     term.loadAddon(searchAddon);
     return [term, fitAddon, searchAddon];
+  }
+
+  /**
+   * Open a link that was activated in the terminal.
+   *
+   * Like the default OSC 8 hyperlink activation behavior of xterm.js, the
+   * user is asked to confirm before navigating: the target URI of an
+   * escape-sequence hyperlink can be unrelated to the displayed text.
+   */
+  export async function activateLink(
+    trans: TranslationBundle,
+    uri: string
+  ): Promise<void> {
+    const { button } = await showDialog({
+      title: trans.__('Open Link?'),
+      body: trans.__(
+        'Do you want to navigate to %1? This link could potentially be dangerous.',
+        uri
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: trans.__('Open') })
+      ]
+    });
+    if (!button.accept) {
+      return;
+    }
+    const newWindow = window.open();
+    if (newWindow) {
+      try {
+        newWindow.opener = null;
+      } catch {
+        // no-op, Electron can throw
+      }
+      newWindow.location.href = uri;
+    } else {
+      console.warn('Opening link blocked as opener could not be cleared');
+    }
   }
 }
