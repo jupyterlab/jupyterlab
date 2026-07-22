@@ -4715,6 +4715,7 @@ __metadata:
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
+    eslint-plugin-playwright: ^2.2.0
     eslint-plugin-prettier: ^5.0.0
     eslint-plugin-react: ^7.37.0
     eslint-plugin-regexp: ^3.1.0
@@ -11990,6 +11991,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-playwright@npm:^2.2.0":
+  version: 2.10.4
+  resolution: "eslint-plugin-playwright@npm:2.10.4"
+  dependencies:
+    globals: ^17.3.0
+  peerDependencies:
+    eslint: ">=8.40.0"
+  checksum: 85c0cecd8b46b072dd7bca0c14ea7ea064f395de4808546d42047f9884a26eae877ef0435a4322efd79c46964e43a69df6f3d73e48f4c36129fbc96a7b32232e
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-prettier@npm:^5.0.0":
   version: 5.5.5
   resolution: "eslint-plugin-prettier@npm:5.5.5"
@@ -13132,6 +13144,13 @@ __metadata:
   version: 14.0.0
   resolution: "globals@npm:14.0.0"
   checksum: 534b8216736a5425737f59f6e6a5c7f386254560c9f41d24a9227d60ee3ad4a9e82c5b85def0e212e9d92162f83a92544be4c7fd4c902cb913736c10e08237ac
+  languageName: node
+  linkType: hard
+
+"globals@npm:^17.3.0":
+  version: 17.7.0
+  resolution: "globals@npm:17.7.0"
+  checksum: cdedb484e093bf34e819d571de7ae659fa85fa5fc0d51b99f6b23397cf6511982658d4b9bdc90e967acd7ca9704e12d5c8c117c281db757fec90e2ad83117347
   languageName: node
   linkType: hard
 

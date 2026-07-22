@@ -33,9 +33,7 @@ test('Move down a cell', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content);
 });
 
 test('Move up a cell', async ({ page }) => {
@@ -50,9 +48,7 @@ test('Move up a cell', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=1`).allTextContents()
-  ).toEqual(content);
+  await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveText(content);
 });
 
 test('Move down two cells with first active', async ({ page }) => {
@@ -76,12 +72,8 @@ test('Move down two cells with first active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveClass(
     /jp-mod-selected/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=4`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveText(content2);
 });
 
 test('Move up two cells with first active', async ({ page }) => {
@@ -105,12 +97,8 @@ test('Move up two cells with first active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=2`)).toHaveClass(
     /jp-mod-selected/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=1`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=2`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=2`)).toHaveText(content2);
 });
 
 test('Move down two cells with last active', async ({ page }) => {
@@ -133,12 +121,8 @@ test('Move down two cells with last active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=4`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveText(content2);
 });
 
 test('Move up two cells with last active', async ({ page }) => {
@@ -161,10 +145,6 @@ test('Move up two cells with last active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=4`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveText(content2);
 });

@@ -27,7 +27,7 @@ test.describe('Internationalization', () => {
     await page.goto();
 
     // Expect the default language to be English
-    expect.soft(await page.getAttribute('html', 'lang')).toEqual('en');
+    await expect.soft(page.locator('html')).toHaveAttribute('lang', 'en');
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     await page.sidebar.setWidth();
@@ -64,7 +64,6 @@ test.describe('Internationalization', () => {
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
 
     // Wait for fonts to be loaded (again, we are reloading)
-    await page.waitForLoadState('networkidle');
     await page.evaluate(() => document.fonts.ready);
 
     await page.addStyleTag({
@@ -76,7 +75,7 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
 
-    expect.soft(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
+    await expect.soft(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
@@ -137,6 +136,6 @@ test.describe('Internationalization', () => {
     await page.goto();
 
     expect.soft(requestedLanguage).toEqual('/default');
-    expect(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   });
 });

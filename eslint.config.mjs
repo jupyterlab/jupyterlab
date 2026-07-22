@@ -10,6 +10,7 @@ import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
 import tsdocPlugin from 'eslint-plugin-tsdoc';
 import regexpPlugin from 'eslint-plugin-regexp';
+import playwrightPlugin from 'eslint-plugin-playwright';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
@@ -492,8 +493,9 @@ export default defineConfig([
   },
   {
     files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
-
+    plugins: { playwright: playwrightPlugin },
     rules: {
+      // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
         {
@@ -508,7 +510,12 @@ export default defineConfig([
           message:
             "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
-      ]
+      ],
+      'playwright/no-wait-for-timeout': 'error',
+      'playwright/no-element-handle': 'error',
+      'playwright/no-networkidle': 'error',
+      'playwright/prefer-to-have-count': 'error',
+      'playwright/prefer-web-first-assertions': 'error'
     }
   },
   {

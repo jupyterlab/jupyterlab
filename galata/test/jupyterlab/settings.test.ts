@@ -241,6 +241,7 @@ test('Check codemirror settings can all be set at the same time.', async ({
     let locator = page.getByLabel(selectText);
     await locator.click();
     // Workaround for bug https://github.com/jupyterlab/jupyterlab/issues/18458
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(50);
     locators.push(locator);
   }
@@ -333,6 +334,8 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
 
   const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
   await shortcutKey.click();
+  // settle wait for CSS slide-in animation before screenshot
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(300);
   await firstRow.hover();
   expect(await firstRow.screenshot()).toMatchSnapshot(
@@ -395,7 +398,7 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
 
   // Filtering on a specific command should keep only one command.
   await filterInput.locator('input').fill('restart kernel and run all cells');
-  expect(await commandOptions.count()).toBe(1);
+  await expect(commandOptions).toHaveCount(1);
 });
 
 test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
@@ -481,6 +484,7 @@ test('Settings Export: Clicking the export button triggers a download and matche
     )
     .click();
   // Wait for the settings to be loaded
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(500);
 
   const downloadPromise = page.waitForEvent('download', { timeout: 5000 });

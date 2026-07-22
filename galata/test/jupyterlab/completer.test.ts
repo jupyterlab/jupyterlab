@@ -49,7 +49,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
 
       await expect(completer).toBeHidden();
       // Ensure the completer is still bound to the editor before pressing Tab
@@ -111,7 +110,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
 
       // Throttle requests to catch loading bar
@@ -165,7 +163,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
@@ -195,7 +192,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
@@ -218,7 +214,9 @@ test.describe('Completer', () => {
 
       await page.keyboard.type('import getopt\ngetopt.');
       await page.keyboard.press('Tab');
-      // we need to wait until the completer gets bound to the cell after entering it
+      // We need to wait until the completer gets bound to the cell after
+      // entering it.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(50);
     });
 

@@ -235,6 +235,7 @@ test.describe('Access cells in windowed notebook', () => {
 
     await page.filebrowser.open(target);
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(50);
 
     await page.notebook.getCellLocator(12);
