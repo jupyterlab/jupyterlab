@@ -20,16 +20,19 @@ export interface IAdvancedOptionsProps {
 
 function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
   const trans = props.translator.load('jupyterlab');
+  const selectorsLabel = props.showSelectors
+    ? trans.__('Hide Selectors')
+    : trans.__('Show Selectors');
   return (
     <div className="jp-Shortcuts-AdvancedOptions">
-      <a
-        className="jp-Shortcuts-AdvancedOptionsLink"
+      <button
+        type="button"
+        className="jp-Button jp-mod-styled jp-mod-reject jp-Shortcuts-SelectorsToggle"
+        aria-pressed={props.showSelectors}
         onClick={() => props.toggleSelectors()}
       >
-        {props.showSelectors
-          ? trans.__('Hide Selectors')
-          : trans.__('Show Selectors')}
-      </a>
+        {selectorsLabel}
+      </button>
       <Button
         className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
         onClick={props.toggleAddCommandRow}
