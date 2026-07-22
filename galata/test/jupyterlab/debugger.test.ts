@@ -295,12 +295,14 @@ test.describe('Debugger Tests', () => {
     async function init({ page, tmpPath }) {
       // Initialize the debugger.
       await page.goto(`tree/${tmpPath}`);
-      await createNotebook(page);
+      const notebookName = await createNotebook(page);
+      expect(await page.notebook.activate(notebookName)).toBe(true);
 
-      await page.debugger.switchOn();
+      await page.debugger.switchOn(notebookName);
+      expect(await page.debugger.isOn(notebookName)).toBe(true);
       await page.sidebar.openTab('jp-debugger-sidebar');
 
-      await setBreakpoint(page);
+      await setBreakpoint(page, notebookName);
     }
 
     test('Copy to globals should work only for local variables', async ({
@@ -457,15 +459,23 @@ async function openVariableContextMenu(
   await page.getByRole('menu').waitFor({ state: 'visible' });
 }
 
-async function createNotebook(page: IJupyterLabPageFixture) {
-  await page.notebook.createNew();
+async function createNotebook(page: IJupyterLabPageFixture): Promise<string> {
+  const notebookName = await page.notebook.createNew();
+  if (!notebookName) {
+    throw new Error('Failed to create notebook for debugger test.');
+  }
 
   await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+  return notebookName;
 }
 
-async function setBreakpoint(page: IJupyterLabPageFixture) {
+async function setBreakpoint(
+  page: IJupyterLabPageFixture,
+  notebookName: string
+) {
   // Close left side panel to avoid side effect when entering the cell editor.
   await page.sidebar.close('left');
+  expect(await page.notebook.activate(notebookName)).toBe(true);
 
   await page.notebook.setCell(
     0,
