@@ -167,10 +167,10 @@ export class ShortcutInput extends React.Component<
 
   private _onIdleTimerFire = (): void => {
     this._idleTimer = null;
-    this.setState({
-      phase: this.state.isFunctional ? 'ready' : 'incompleteIdle',
+    this.setState(prev => ({
+      phase: prev.isFunctional ? 'ready' : 'incompleteIdle',
       timerRunning: false
-    });
+    }));
   };
 
   handleSubmit = async () => {
