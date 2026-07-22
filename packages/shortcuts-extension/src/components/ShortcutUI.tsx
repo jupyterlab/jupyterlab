@@ -493,7 +493,6 @@ export class ShortcutUI
       <div className="jp-Shortcuts-ShortcutUI" id="jp-shortcutui">
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
-          resetShortcuts={this.resetShortcuts}
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
           updateSort={this.updateSort}

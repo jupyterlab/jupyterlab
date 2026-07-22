@@ -14,12 +14,9 @@ import type { IShortcutUI } from '../types';
 export interface IAdvancedOptionsProps {
   toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
-  resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
 }
-
-export interface ISymbolsProps {}
 
 function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
   const trans = props.translator.load('jupyterlab');
@@ -32,12 +29,6 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
         {props.showSelectors
           ? trans.__('Hide Selectors')
           : trans.__('Show Selectors')}
-      </a>
-      <a
-        className="jp-Shortcuts-AdvancedOptionsLink"
-        onClick={() => props.resetShortcuts()}
-      >
-        {trans.__('Reset All')}
       </a>
       <Button
         className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
@@ -57,7 +48,6 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
 
 /** State for TopNav component */
 export interface ITopNavProps {
-  resetShortcuts: IShortcutUI['resetShortcuts'];
   updateSearchQuery: IShortcutUI['updateSearchQuery'];
   toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
@@ -103,7 +93,6 @@ export class TopNav extends React.Component<ITopNavProps> {
           <AdvancedOptions
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
-            resetShortcuts={this.props.resetShortcuts}
             toggleAddCommandRow={this.props.toggleAddCommandRow}
             translator={this.props.translator}
           />
