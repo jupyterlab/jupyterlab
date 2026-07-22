@@ -35,12 +35,40 @@
   border-radius: var(--jp-border-radius);
   border-style: solid;
   background-color: var(--jp-layout-color0);
-  margin-left: auto;
-  padding-left: 10px;
-  width: 120px;
+  min-width: 120px;
   height: 26px;
   line-height: 26px;
   display: block;
+  position: relative;
+}
+
+.jp-Shortcuts-CaptureTimer {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background-color: color-mix(
+    in srgb,
+    var(--jp-brand-color1) 25%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.jp-Shortcuts-CaptureTimer.jp-mod-running {
+  /* Duration is set inline from CAPTURE_IDLE_MS */
+  animation-name: jp-shortcuts-capture-timer;
+  animation-timing-function: linear;
+}
+
+@keyframes jp-shortcuts-capture-timer {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .jp-Shortcuts-Input:focus {
@@ -54,19 +82,18 @@
 }
 
 .jp-Shortcuts-InputText {
-  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
   overflow-y: hidden;
-  margin: 0;
-  margin-top: 4px;
+  margin: 4px;
   padding: 0 5px;
   height: 18px;
   line-height: 18px;
-  width: fit-content;
+  width: max-content;
 }
 
 .jp-mod-selected-InputText {
-  background-color: var(--jp-shortcuts-button-background);
-  overflow: hidden;
+  background-color: var(--jp-editor-selected-background, var(--jp-layout-color2));
 }
 
 .jp-mod-waiting-InputText {

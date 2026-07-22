@@ -88,6 +88,17 @@ export class ShortcutItem extends React.Component<
   }
 
   componentDidUpdate(): void {
+    if (this._pendingFocusAddButton) {
+      this._pendingFocusAddButton = false;
+      requestAnimationFrame(() => {
+        (
+          this._shortcutCellRef.current?.querySelector(
+            '.jp-Shortcuts-Plus'
+          ) as HTMLElement | null
+        )?.focus();
+      });
+      return;
+    }
     if (this._pendingFocusKeybindingIndex === null) {
       return;
     }
@@ -353,6 +364,9 @@ export class ShortcutItem extends React.Component<
         onCloseAfterSubmit={() =>
           this._scheduleFocusShortcutContainer(location)
         }
+        onCloseAfterCancel={() =>
+          this._scheduleFocusShortcutContainer(location)
+        }
         toSymbols={this.toSymbols}
         displayInput={this.getDisplayReplaceInput(location)}
         placeholder={this.toSymbols(binding.keys.join(', '))}
@@ -469,6 +483,7 @@ export class ShortcutItem extends React.Component<
         }}
         clearConflict={() => this._clearConflictForBinding(null)}
         onCloseAfterSubmit={() => this._scheduleFocusNewKeybinding()}
+        onCloseAfterCancel={() => this._scheduleFocusAddButton()}
         toSymbols={this.toSymbols}
         displayInput={this.state.displayNewInput}
         placeholder={''}
@@ -591,8 +606,13 @@ export class ShortcutItem extends React.Component<
     this._pendingFocusKeybindingIndex = -1;
   }
 
+  private _scheduleFocusAddButton(): void {
+    this._pendingFocusAddButton = true;
+  }
+
   private _shortcutCellRef = React.createRef<HTMLDivElement>();
   private _pendingFocusKeybindingIndex: number | null = null;
+  private _pendingFocusAddButton = false;
 
   render(): JSX.Element {
     return (

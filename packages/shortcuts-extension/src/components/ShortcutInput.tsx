@@ -17,6 +17,11 @@ import type {
 
 export const CONFLICT_CONTAINER_CLASS = 'jp-Shortcuts-ConflictContainer';
 
+/** Idle time after the last keystroke before leaving active capture. */
+const CAPTURE_IDLE_MS = 2000;
+
+type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
+
 export interface IConflicts {
   keys: string[];
   conflictsWith: IShortcutTarget[];
@@ -33,6 +38,7 @@ export interface IShortcutInputProps {
   clearConflict: () => void;
   toggleInput: () => void;
   onCloseAfterSubmit?: () => void;
+  onCloseAfterCancel?: () => void;
   shortcut: IShortcutTarget;
   /* If keybinding is not given, the input is used for adding a keybinding, otherwise for replacing a keybinding */
   keybinding?: IKeybinding;
@@ -51,6 +57,10 @@ export interface IShortcutInputState {
   currentChain: string;
   selected: boolean;
   activeConflicts: IShortcutTarget[];
+  phase: CapturePhase;
+  /** Bumped to restart the CSS progress animation. */
+  timerGeneration: number;
+  timerRunning: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -69,8 +79,19 @@ export class ShortcutInput extends React.Component<
       keys: [],
       currentChain: '',
       selected: true,
-      activeConflicts: []
+      activeConflicts: [],
+      phase: 'capturing',
+      timerGeneration: 0,
+      timerRunning: false
     };
+  }
+
+  componentDidMount(): void {
+    this._inputRef.current?.focus();
+  }
+
+  componentWillUnmount(): void {
+    this._clearIdleTimer();
   }
 
   /** Whether this input replaces existing keybinding or creates a new one */
@@ -109,8 +130,47 @@ export class ShortcutInput extends React.Component<
   };
 
   private _closeAfterSubmit = (): void => {
+    this._clearIdleTimer();
     this.props.toggleInput();
     this.props.onCloseAfterSubmit?.();
+  };
+
+  private _cancel = (): void => {
+    this._clearIdleTimer();
+    this.props.toggleInput();
+    this.props.onCloseAfterCancel?.();
+  };
+
+  private _clearIdleTimer = (): void => {
+    if (this._idleTimer !== null) {
+      window.clearTimeout(this._idleTimer);
+      this._idleTimer = null;
+    }
+  };
+
+  private _resetIdleTimer = (): void => {
+    this._clearIdleTimer();
+    const hasKeys =
+      this.state.userInput !== '' ||
+      this.state.keys.length > 0 ||
+      this.state.currentChain !== '';
+    if (!hasKeys) {
+      this.setState({ timerRunning: false });
+      return;
+    }
+    this.setState(prev => ({
+      timerRunning: true,
+      timerGeneration: prev.timerGeneration + 1
+    }));
+    this._idleTimer = window.setTimeout(this._onIdleTimerFire, CAPTURE_IDLE_MS);
+  };
+
+  private _onIdleTimerFire = (): void => {
+    this._idleTimer = null;
+    this.setState({
+      phase: this.state.isFunctional ? 'ready' : 'incompleteIdle',
+      timerRunning: false
+    });
   };
 
   handleSubmit = async () => {
@@ -223,8 +283,8 @@ export class ShortcutInput extends React.Component<
 
         /** if not a modifier key, add to user input and current chain */
         if (modKeys.lastIndexOf(event.key) === -1) {
-          userInput = (userInput + ' ' + key).trim();
-          currentChain = (currentChain + ' ' + key).trim();
+          userInput = (userInput + ' ' + (key ?? event.key)).trim();
+          currentChain = (currentChain + ' ' + (key ?? event.key)).trim();
 
           /** if a modifier key, add to user input and current chain */
         } else {
@@ -264,8 +324,8 @@ export class ShortcutInput extends React.Component<
 
           /** if not a modifier key, add it regularly */
         } else {
-          userInput = (userInput + ' ' + key).trim();
-          currentChain = (currentChain + ' ' + key).trim();
+          userInput = (userInput + ' ' + (key ?? event.key)).trim();
+          currentChain = (currentChain + ' ' + (key ?? event.key)).trim();
         }
       }
     }
@@ -279,19 +339,14 @@ export class ShortcutInput extends React.Component<
   };
 
   /**
-   * Check if shortcut being typed will work
-   * (does not end with ctrl, alt, command, or shift)
-   * */
-  checkNonFunctional = (): boolean => {
+   * Whether the current chord can be saved (does not end with a modifier).
+   */
+  private _isChordFunctional(currentChain: string): boolean {
     const dontEnd = ['Ctrl', 'Alt', 'Accel', 'Shift'];
-    const shortcutKeys = this.state.currentChain.split(' ');
+    const shortcutKeys = currentChain.split(' ');
     const last = shortcutKeys[shortcutKeys.length - 1];
-    this.setState({
-      isFunctional: !(dontEnd.indexOf(last) !== -1)
-    });
-
-    return dontEnd.indexOf(last) !== -1;
-  };
+    return !(dontEnd.indexOf(last) !== -1);
+  }
 
   /** Check if shortcut being typed is already taken */
   checkShortcutAvailability = (
@@ -326,12 +381,19 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      event.stopPropagation();
-      this._submitRef.current?.focus();
-      return;
+    if (this.state.phase === 'incompleteIdle' || this.state.phase === 'ready') {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        this._cancel();
+        return;
+      }
+      if (event.key === 'Tab') {
+        // Allow normal focus movement; blur will dismiss the input.
+        return;
+      }
     }
+
     event.preventDefault();
     this.setState({ selected: false });
     const parsed = this.parseChaining(
@@ -346,22 +408,25 @@ export class ShortcutInput extends React.Component<
     const currentChain = parsed[2];
 
     const value = this.props.toSymbols(userInput);
-    let conflicts = this.checkShortcutAvailability(
+    const conflicts = this.checkShortcutAvailability(
       userInput,
       keys,
       currentChain
     );
+    const isFunctional = this._isChordFunctional(currentChain);
 
     this.setState(
       {
         value: value,
         userInput: userInput,
         keys: keys,
-        currentChain: currentChain
+        currentChain: currentChain,
+        isFunctional,
+        phase: 'capturing'
       },
       () => {
-        this.checkNonFunctional();
         this._emitConflicts(conflicts);
+        this._resetIdleTimer();
       }
     );
   };
@@ -390,7 +455,7 @@ export class ShortcutInput extends React.Component<
           tabIndex={0}
           className={inputClassName}
           onKeyDown={this.handleInput}
-          ref={input => input && input.focus()}
+          ref={this._inputRef}
           data-lm-suppress-shortcuts="true"
         >
           <p
@@ -406,6 +471,14 @@ export class ShortcutInput extends React.Component<
               ? trans.__('press keys')
               : this.state.value}
           </p>
+          {this.state.timerRunning ? (
+            <div
+              key={this.state.timerGeneration}
+              className="jp-Shortcuts-CaptureTimer jp-mod-running"
+              style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
+              aria-hidden="true"
+            />
+          ) : null}
         </div>
         {hasConflict ? (
           <button
@@ -449,10 +522,13 @@ export class ShortcutInput extends React.Component<
       // Do not hide input when clicking on conflict container as this would destroy the state
       return;
     }
+    this._clearIdleTimer();
     // Hide the input
     this.props.toggleInput();
   };
 
   private _ref: React.RefObject<HTMLDivElement>;
+  private _inputRef = React.createRef<HTMLDivElement>();
   private _submitRef = React.createRef<HTMLButtonElement>();
+  private _idleTimer: number | null = null;
 }
