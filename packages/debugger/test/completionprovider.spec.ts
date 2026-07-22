@@ -172,9 +172,51 @@ describe('DebuggerCompletionProvider', () => {
       await provider.fetch({ text: 'df.', offset: 3 }, context);
       expect(sendRequest).toHaveBeenCalledWith('completions', {
         text: 'df.',
+        line: 1,
         column: 4,
         frameId: 5
       });
+    });
+
+    it('should send the cursor line and a line-relative column for multi-line text', async () => {
+      const sendRequest = jest.fn().mockResolvedValue({
+        success: true,
+        body: { targets: [{ label: 'data', start: 0, length: 3 }] }
+      });
+      const provider = new DebuggerCompletionProvider({
+        debuggerService: mockService({
+          frame: { id: 5 },
+          session: mockSession({ sendRequest })
+        })
+      });
+      // Cursor at the end of the second line: line 2, column 4 (1-based).
+      await provider.fetch({ text: 'y = 1\ndat', offset: 9 }, context);
+      expect(sendRequest).toHaveBeenCalledWith('completions', {
+        text: 'y = 1\ndat',
+        line: 2,
+        column: 4,
+        frameId: 5
+      });
+    });
+
+    it('should map the line-relative start to an absolute offset for multi-line text', async () => {
+      // debugpy computes start within the cursor's line (0-based).
+      const sendRequest = jest.fn().mockResolvedValue({
+        success: true,
+        body: { targets: [{ label: 'data', start: 0, length: 3 }] }
+      });
+      const provider = new DebuggerCompletionProvider({
+        debuggerService: mockService({
+          frame: { id: 1 },
+          session: mockSession({ sendRequest })
+        })
+      });
+      const reply = await provider.fetch(
+        { text: 'y = 1\ndat', offset: 9 },
+        context
+      );
+      expect(reply.start).toBe(6);
+      expect(reply.end).toBe(9);
     });
 
     it('should return an empty reply when the request is unsuccessful', async () => {

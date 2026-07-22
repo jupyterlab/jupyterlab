@@ -103,6 +103,18 @@ describe('Debugger completion providers integration test', () => {
       const labels = reply.items.map(item => item.label);
       expect(labels).toContain('data');
     });
+
+    it('should complete variables when the cursor is on a later line', async () => {
+      const text = 'y = 1\ndat';
+      const reply = await provider().fetch(
+        { text, offset: text.length },
+        context
+      );
+      const labels = reply.items.map(item => item.label);
+      expect(labels).toContain('data');
+      expect(reply.start).toBe(text.indexOf('dat'));
+      expect(reply.end).toBe(text.length);
+    });
   });
 
   describe('DebuggerIPythonCompletionProvider', () => {
@@ -116,6 +128,17 @@ describe('Debugger completion providers integration test', () => {
     it('should complete dictionary keys', async () => {
       const reply = await provider().fetch(
         { text: "data['", offset: 6 },
+        context
+      );
+      const labels = reply.items.map(item => item.label);
+      expect(labels.some(label => label.includes('alpha'))).toBe(true);
+      expect(labels.some(label => label.includes('beta'))).toBe(true);
+    });
+
+    it('should complete dictionary keys when the cursor is on a later line', async () => {
+      const text = "y = 1\ndata['";
+      const reply = await provider().fetch(
+        { text, offset: text.length },
         context
       );
       const labels = reply.items.map(item => item.label);

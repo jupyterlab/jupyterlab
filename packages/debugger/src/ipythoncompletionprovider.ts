@@ -39,11 +39,13 @@ def ${HELPER_NAME}(text, offset, frame_locals, frame_globals):
     completer.line_buffer = text
     completer.text_until_cursor = text
     token = completer.splitter.split_line(text)
+    # cursor_position is measured within the cursor's line
+    lines = text[:offset].split('\\n')
     context = CompletionContext(
         token=token,
         full_text=text,
-        cursor_position=offset,
-        cursor_line=0,
+        cursor_position=len(lines[-1]),
+        cursor_line=len(lines) - 1,
         limit=200,
     )
     matchers = ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']

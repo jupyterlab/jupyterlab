@@ -75,10 +75,18 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
 
     const frameId = this._debuggerService.model.callstack.frame?.id;
 
+    // DAP line/column are 1-based (linesStartAt1/columnsStartAt1: true)
+    // and the column is measured within the cursor's line.
+    const lines = request.text.slice(0, request.offset).split('\n');
+    const lastLine = lines[lines.length - 1];
+    // Offset of the first character of the cursor's line in the full text.
+    const lineOffset = request.offset - lastLine.length;
+
     try {
       const reply = await session.sendRequest('completions', {
         text: request.text,
-        column: request.offset + 1, // DAP uses 1-based columns (columnsStartAt1: true)
+        line: lines.length,
+        column: lastLine.length + 1,
         frameId
       });
 
@@ -86,8 +94,9 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
       if (!reply.success || !targets?.length) {
         return { start: 0, end: 0, items: [] };
       }
-      // debugpy returns 0-based start positions (despite columnsStartAt1: true)
-      const start = targets[0].start ?? request.offset;
+      // debugpy returns start positions which are 0-based (despite
+      // columnsStartAt1: true) and relative to the cursor's line.
+      const start = lineOffset + (targets[0].start ?? lastLine.length);
       const end = start + (targets[0].length ?? 0);
 
       const items: CompletionHandler.ICompletionItem[] = targets.map(item => ({
