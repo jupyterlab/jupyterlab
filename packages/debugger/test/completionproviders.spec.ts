@@ -43,7 +43,7 @@ const breakpointLine = code.split('\n').indexOf('x += 1') + 1;
 
 const server = new JupyterServer();
 
-describe('Debugger completion providers', () => {
+describe('Debugger completion providers integration test', () => {
   const specsManager = new KernelSpecManager();
   const widget = new Widget();
   const context: ICompletionContext = { widget };
