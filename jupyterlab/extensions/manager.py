@@ -25,7 +25,7 @@ from jupyterlab.commands import (
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
 
 
-def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None) -> None:
+def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None):
     """Ensure that the app info has compat_errors field"""
     handler = _AppHandler(app_options)
     info["compat_errors"] = handler._get_extension_compat()
@@ -355,7 +355,7 @@ class ExtensionManager(PluginManager):
             )
             self._listing_fetch.start()
 
-    def __del__(self) -> None:
+    def __del__(self):
         if self._listing_fetch is not None:
             self._listing_fetch.stop()
 

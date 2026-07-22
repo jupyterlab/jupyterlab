@@ -16,7 +16,7 @@ MODULE_INDEXES = sorted(DOCS_API.glob("modules/*.html"))
 DASH_HTML = sorted(DOCS_API.rglob("*.html"))
 
 
-def add_package_indexes() -> None:
+def add_package_indexes():
     """Create ``pkg-name/index.html`` redirects to ``module/pkg-name/``.
 
     Added in 4.4.0a1
@@ -34,7 +34,7 @@ def add_package_indexes() -> None:
     sys.stdout.write(f"... {created} docs/api/source/<package-name>.html")
 
 
-def add_underscore_redirects() -> None:
+def add_underscore_redirects():
     """Create ``pkg_name.rest.html`` redirects to  ``pkg-name.rest.html``
 
     TypeDoc 0.27.0 uses less aggressive normalization:

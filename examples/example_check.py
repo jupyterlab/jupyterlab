@@ -77,7 +77,7 @@ def main() -> None:
         }
         ip = "127.0.0.1"
 
-        def initialize_settings(self) -> None:
+        def initialize_settings(self):
             run_test(self.serverapp, run_browser)
             super().initialize_settings()
 
@@ -90,7 +90,7 @@ def main() -> None:
     App.launch_instance()
 
 
-async def run_browser(url: str) -> None:
+async def run_browser(url: str):
     """Run the browser test and return an exit code."""
     # Run the browser test and return an exit code.
     target = Path(get_app_dir()) / "example_test"

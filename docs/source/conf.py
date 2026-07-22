@@ -159,7 +159,7 @@ todo_include_todos = False
 
 
 # build js docs and stage them to the build directory
-def build_api_docs(out_dir: Path) -> None:
+def build_api_docs(out_dir: Path):
     """build js api docs"""
     docs = HERE.parent
     root = docs.parent
@@ -194,7 +194,7 @@ FILES_LIST = [  # File paths should be relative to jupyterlab root folder
 SNIPPETS_FOLDER = "snippets"
 
 
-def copy_code_files(temp_folder: Path) -> None:
+def copy_code_files(temp_folder: Path):
     """Copy files in the temp_folder"""
     docs = HERE.parent
     root = docs.parent
@@ -577,7 +577,7 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
-def setup(app: "Sphinx") -> None:
+def setup(app: "Sphinx"):
     if SPELLING_BUILD_ENABLED:
         return
 
@@ -600,7 +600,7 @@ def setup(app: "Sphinx") -> None:
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
 
-    def clean_code_files(tmp_files: list[Path], app: "Sphinx", exception: Exception | None) -> None:
+    def clean_code_files(tmp_files: list[Path], app: "Sphinx", exception: Exception | None):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))

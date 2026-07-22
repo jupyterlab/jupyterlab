@@ -36,7 +36,7 @@ class deprecated:  # noqa
         alt_func: str | None = None,
         behavior: str = "warn",
         removed_version: str | None = None,
-    ) -> None:
+    ):
         self.alt_func = alt_func
         self.behavior = behavior
         self.removed_version = removed_version

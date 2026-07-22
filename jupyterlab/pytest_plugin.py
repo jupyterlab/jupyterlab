@@ -18,12 +18,12 @@ from jupyterlab.labapp import LabApp
 
 
 class LabAppFactory(Protocol):
-    def __call__(self, **kwargs: Any) -> LabApp:  # noqa: ANN401
+    def __call__(self, **kwargs: Any) -> LabApp:
         pass
 
 
 class FetchClient(Protocol):
-    def fetch(self, request: str, **kwargs: Any) -> Awaitable[HTTPResponse]:  # noqa: ANN401
+    def fetch(self, request: str, **kwargs: Any) -> Awaitable[HTTPResponse]:
         pass
 
 
@@ -33,7 +33,7 @@ class FetchFixture(Protocol):
         *parts: str,
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> Awaitable[HTTPResponse]:
         pass
 
@@ -60,7 +60,7 @@ def make_lab_app(
     schemas_dir: Path,
     workspaces_dir: Path,
 ) -> LabAppFactory:
-    def _make_lab_app(**kwargs: Any) -> LabApp:  # noqa: ANN401
+    def _make_lab_app(**kwargs: Any) -> LabApp:
         class TestLabApp(LabApp):
             base_url = "/lab"
             extension_url = "/lab"
@@ -136,7 +136,7 @@ def fetch_long(
         *parts: str,
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> Awaitable[HTTPResponse]:
         # Handle URL strings
         path_url = url_escape(url_path_join(*parts), plus=False)

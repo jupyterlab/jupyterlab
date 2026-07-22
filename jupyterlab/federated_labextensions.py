@@ -20,22 +20,22 @@ from jupyterlab.utils import deprecated
 
 
 @deprecated("jupyter_builder.federated_extensions.build_labextension")
-def build_labextension(*args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+def build_labextension(*args: Any, **kwargs: Any) -> None:
     return _build_labextension(*args, **kwargs)
 
 
 @deprecated("jupyter_builder.federated_extensions.watch_labextension")
-def watch_labextension(*args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+def watch_labextension(*args: Any, **kwargs: Any) -> None:
     return _watch_labextension(*args, **kwargs)
 
 
 @deprecated("jupyter_builder.federated_extensions.develop_labextension")
-def develop_labextension(*args: Any, **kwargs: Any) -> str:  # noqa: ANN401
+def develop_labextension(*args: Any, **kwargs: Any) -> str:
     return _develop_labextension(*args, **kwargs)
 
 
 @deprecated("jupyter_builder.federated_extensions.develop_labextension_py")
-def develop_labextension_py(*args: Any, **kwargs: Any) -> list[str]:  # noqa: ANN401
+def develop_labextension_py(*args: Any, **kwargs: Any) -> list[str]:
     return _develop_labextension_py(*args, **kwargs)
 
 

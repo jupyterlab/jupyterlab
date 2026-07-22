@@ -44,7 +44,7 @@ class ShellcheckBuilder(Builder):
     format = "shellcheck"
     epilog = __("Look for any errors in the above output or in %(outdir)s/output.txt")
 
-    def __init__(self, app: Sphinx, env: BuildEnvironment) -> None:
+    def __init__(self, app: Sphinx, env: BuildEnvironment):
         super().__init__(app, env)
         self._executable = app.config.shellcheck_executable
         self._prompt = app.config.shellcheck_prompt
@@ -64,10 +64,10 @@ class ShellcheckBuilder(Builder):
     def get_outdated_docs(self) -> set[str]:
         return self.env.found_docs
 
-    def prepare_writing(self, docnames: set[str]) -> None:
+    def prepare_writing(self, docnames: set[str]):
         return
 
-    def write_doc(self, docname: str, doctree: nodes.document) -> None:
+    def write_doc(self, docname: str, doctree: nodes.document):
         source_path = self.env.doc2path(docname, None)
 
         for node in doctree.findall(nodes.literal_block):

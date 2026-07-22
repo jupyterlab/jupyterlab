@@ -50,7 +50,7 @@ class SingleUserLabApp(SingleUserServerApp):
     def _default_url(self) -> str:
         return "/lab"
 
-    def find_server_extensions(self) -> None:
+    def find_server_extensions(self):
         """unconditionally enable jupyterlab server extension
 
         never called if using legacy SingleUserNotebookApp

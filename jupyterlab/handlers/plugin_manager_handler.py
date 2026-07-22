@@ -13,12 +13,12 @@ from jupyterlab.extensions.manager import PluginManager
 
 
 class PluginHandler(APIHandler):
-    def initialize(self, manager: PluginManager) -> None:
+    def initialize(self, manager: PluginManager):
         super().initialize()
         self.manager = manager
 
     @web.authenticated
-    async def get(self) -> None:
+    async def get(self):
         """GET query returns info on plugins locks"""
         # note: this is informative only - validation is server-side
         locks = await self.manager.plugin_locks()
@@ -26,7 +26,7 @@ class PluginHandler(APIHandler):
         self.finish(json.dumps(locks))
 
     @web.authenticated
-    async def post(self) -> None:
+    async def post(self):
         """POST query performs an action on a specific plugin
 
         Body arguments:

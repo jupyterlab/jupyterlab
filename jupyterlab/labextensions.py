@@ -162,7 +162,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         version = get_app_version(AppOptions(app_dir=self.app_dir))
         return version.endswith("-spliced")
 
-    def start(self) -> None:
+    def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
             msg = "Cannot run lab extension commands in core app"
             raise ValueError(msg)
@@ -326,7 +326,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
     verbose = Bool(False, help="Increase verbosity level.").tag(config=True)
     flags = list_flags
 
-    def run_task(self) -> None:
+    def run_task(self):
         list_extensions(
             app_options=AppOptions(
                 app_dir=self.app_dir,
@@ -346,7 +346,7 @@ class EnableLabExtensionsApp(BaseExtensionApp):
         config=True
     )
 
-    def run_task(self) -> None:
+    def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir,
             logger=self.log,
@@ -367,7 +367,7 @@ class DisableLabExtensionsApp(BaseExtensionApp):
         config=True
     )
 
-    def run_task(self) -> None:
+    def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir,
             logger=self.log,
@@ -394,7 +394,7 @@ class LockLabExtensionsApp(BaseExtensionApp):
         config=True
     )
 
-    def run_task(self) -> None:
+    def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir,
             logger=self.log,
@@ -412,7 +412,7 @@ class UnlockLabExtensionsApp(BaseExtensionApp):
         config=True
     )
 
-    def run_task(self) -> None:
+    def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir,
             logger=self.log,
@@ -435,7 +435,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
         help="Whether it should check only if the extensions is installed",
     )
 
-    def run_task(self) -> None:
+    def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir,
             logger=self.log,
@@ -457,11 +457,11 @@ class BuildLabExtensionAlias(BaseExtensionApp):
 
     description = "(deprecated) Build labextension - use 'jupyter-builder build' instead"
 
-    def parse_command_line(self, argv: Sequence[str] | None = None) -> None:
+    def parse_command_line(self, argv: Sequence[str] | None = None):
         # Capture raw args before traitlets can consume them
         self._builder_args = list(argv or [])
 
-    def start(self) -> None:
+    def start(self):
         self.log.warning(
             "\033[33m(Deprecated) 'jupyter labextension build' is deprecated, use 'jupyter-builder build' instead.\n \033[0m"
         )
@@ -473,10 +473,10 @@ class DevelopLabExtensionAlias(BaseExtensionApp):
 
     description = "(deprecated) Develop labextension - use 'jupyter-builder develop' instead"
 
-    def parse_command_line(self, argv: Sequence[str] | None = None) -> None:
+    def parse_command_line(self, argv: Sequence[str] | None = None):
         self._builder_args = list(argv or [])
 
-    def start(self) -> None:
+    def start(self):
         self.log.warning(
             "\033[33m(Deprecated) 'jupyter labextension develop' is deprecated, use 'jupyter-builder develop' instead.\n \033[0m"
         )
@@ -488,10 +488,10 @@ class WatchLabExtensionAlias(BaseExtensionApp):
 
     description = "(deprecated) Watch labextension - use 'jupyter-builder watch' instead"
 
-    def parse_command_line(self, argv: Sequence[str] | None = None) -> None:
+    def parse_command_line(self, argv: Sequence[str] | None = None):
         self._builder_args = list(argv or [])
 
-    def start(self) -> None:
+    def start(self):
         self.log.warning(
             "\033[33m(Deprecated) 'jupyter labextension watch' is deprecated, use 'jupyter-builder watch' instead.\n \033[0m"
         )
@@ -530,7 +530,7 @@ class LabExtensionApp(JupyterApp):
         "watch": (WatchLabExtensionAlias, "(deprecated) Watch labextension"),
     }
 
-    def start(self) -> None:
+    def start(self):
         """Perform the App's functions as configured"""
         super().start()
 

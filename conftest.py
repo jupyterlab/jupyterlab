@@ -19,7 +19,7 @@ pytest_plugins = [
 ]
 
 
-def pytest_addoption(parser: Parser) -> None:
+def pytest_addoption(parser: Parser):
     """
     Adds flags for pytest.
 
@@ -30,11 +30,11 @@ def pytest_addoption(parser: Parser) -> None:
     group.addoption("--slow", action="store_true", help="Run only slow tests")
 
 
-def pytest_configure(config: Config) -> None:
+def pytest_configure(config: Config):
     config.addinivalue_line("markers", "slow: mark test as slow to run")
 
 
-def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
+def pytest_collection_modifyitems(config: Config, items: list[Item]):
     if config.getoption("--quick"):
         skip_slow = pytest.mark.skip(reason="skipping slow test")
         for item in items:

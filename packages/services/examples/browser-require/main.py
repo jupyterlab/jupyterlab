@@ -57,7 +57,7 @@ class ExampleApp(LabServerApp):
     user_settings_dir = os.path.join(HERE, "build", "user_settings")
     workspaces_dir = os.path.join(HERE, "build", "workspaces")
 
-    def initialize_handlers(self) -> None:
+    def initialize_handlers(self):
         """Add example handler to Lab Server's handler list."""
         self.handlers.append(("/example", ExampleHandler))
 

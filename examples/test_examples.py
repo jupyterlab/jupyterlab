@@ -20,7 +20,7 @@ import tempfile
 here = osp.abspath(osp.dirname(__file__))
 
 
-def header(path: str) -> None:
+def header(path: str):
     test_name = osp.basename(path)
     print(
         "\n".join(("\n", "*" * 40, f"Starting {test_name} test in {path}", "*" * 40)),
@@ -28,7 +28,7 @@ def header(path: str) -> None:
     )
 
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--testPath", help="paths containing this string are tested")
     args = parser.parse_args()

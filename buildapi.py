@@ -20,7 +20,7 @@ def builder(
     version: str,
     *args: NpmBuilderValue,
     **kwargs: NpmBuilderValue,
-) -> None:
+):
     # Allow building from sdist without node.
     if target_name == "wheel" and not os.path.exists("dev_mode"):
         return

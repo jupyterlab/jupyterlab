@@ -86,12 +86,10 @@ class CoreConfig:
     configuration of the build system.
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         self._data = _get_default_core_data()
 
-    def add(
-        self, name: str, semver: str, extension: bool = False, mime_extension: bool = False
-    ) -> None:
+    def add(self, name: str, semver: str, extension: bool = False, mime_extension: bool = False):
         """Remove an extension/singleton.
 
         If neither extension or mimeExtension is True (the default)
@@ -129,7 +127,7 @@ class CoreConfig:
         else:
             data["jupyterlab"]["singletonPackages"].append(name)
 
-    def remove(self, name: str) -> None:
+    def remove(self, name: str):
         """Remove a package/extension.
 
         name: string
@@ -147,7 +145,7 @@ class CoreConfig:
 
         data["jupyterlab"]["singletonPackages"].remove(name)
 
-    def clear_packages(self, lab_only: bool = True) -> None:
+    def clear_packages(self, lab_only: bool = True):
         """Clear the packages/extensions."""
         data = self._data
         # Clear all dependencies
@@ -194,5 +192,5 @@ class CoreConfig:
         return self._data["jupyterlab"]["staticDir"]
 
     @static_dir.setter
-    def static_dir(self, static_dir: str) -> None:
+    def static_dir(self, static_dir: str):
         self._data["jupyterlab"]["staticDir"] = static_dir

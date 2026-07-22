@@ -64,13 +64,13 @@ class ExampleTranslationsHandler(APIHandler):
         catalogs: dict[str, str],
         domain: str,
         languages: dict[str, dict[str, str]],
-    ) -> None:
+    ):
         self.catalogs = catalogs
         self.domain = domain
         self.languages = languages
 
     @web.authenticated
-    def get(self, locale: str | None = None) -> None:
+    def get(self, locale: str | None = None):
         if locale is None:
             data = self.languages
             message = ""
@@ -107,7 +107,7 @@ class ExampleApp(LabServerApp):
     user_settings_dir = os.path.join(HERE, "build", "user_settings")
     workspaces_dir = os.path.join(HERE, "build", "workspaces")
 
-    def initialize_handlers(self) -> None:
+    def initialize_handlers(self):
         handler_options = {"catalogs": CATALOGS, "domain": DOMAIN, "languages": LANGUAGES}
         self.handlers.extend(
             [

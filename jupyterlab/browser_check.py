@@ -42,7 +42,7 @@ test_aliases["app-dir"] = "BrowserApp.app_dir"
 class LogErrorHandler(logging.StreamHandler):
     """A handler that exits with 1 on a logged error."""
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__(stream=sys.stderr)
         self.setLevel(logging.ERROR)
         self.errored = False
@@ -60,7 +60,7 @@ class LogErrorHandler(logging.StreamHandler):
             return False
         return super().filter(record)
 
-    def emit(self, record: logging.LogRecord) -> None:
+    def emit(self, record: logging.LogRecord):
         self.errored = True
         super().emit(record)
 
@@ -68,7 +68,7 @@ class LogErrorHandler(logging.StreamHandler):
 BrowserTest = Callable[[str], Awaitable[None] | int | None]
 
 
-def run_test(app: LabApp, func: BrowserTest) -> None:
+def run_test(app: LabApp, func: BrowserTest):
     """Synchronous entry point to run a test function.
     func is a function that accepts an app url as a parameter and returns a result.
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
@@ -77,7 +77,7 @@ def run_test(app: LabApp, func: BrowserTest) -> None:
     IOLoop.current().spawn_callback(run_test_async, app, func)
 
 
-async def run_test_async(app: LabApp, func: BrowserTest) -> None:
+async def run_test_async(app: LabApp, func: BrowserTest):
     """Run a test against the application.
     func is a function that accepts an app url as a parameter and returns a result.
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
@@ -138,7 +138,7 @@ async def run_test_async(app: LabApp, func: BrowserTest) -> None:
 
 async def run_async_process(
     cmd: Sequence[str],
-    **kwargs: Any,  # noqa: ANN401
+    **kwargs: Any,
 ) -> tuple[bytes, bytes]:
     """Run an asynchronous command"""
     proc = await asyncio.create_subprocess_exec(*cmd, **kwargs)
@@ -148,7 +148,7 @@ async def run_async_process(
     return stdout, stderr
 
 
-async def run_browser(url: str) -> None:
+async def run_browser(url: str):
     """Run the browser test and return an exit code."""
     browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
     if browser not in {"chromium", "firefox", "webkit"}:
@@ -196,7 +196,7 @@ class BrowserApp(LabApp):
     aliases = test_aliases
     test_browser = Bool(True)
 
-    def initialize_settings(self) -> None:
+    def initialize_settings(self):
         self.settings.setdefault("page_config_data", {})
         self.settings["page_config_data"]["browserTest"] = True
         self.settings["page_config_data"]["buildAvailable"] = False
@@ -204,7 +204,7 @@ class BrowserApp(LabApp):
         super().initialize_settings()
 
     def initialize_handlers(self) -> None:
-        def func(*args: Any, **kwargs: Any) -> int:  # noqa: ANN401
+        def func(*args: Any, **kwargs: Any) -> int:
             return 0
 
         if self.test_browser:

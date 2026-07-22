@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile, mkdtemp
 from traitlets.config import Config
 
 
-def configure_jupyter_server(c: Config) -> None:
+def configure_jupyter_server(c: Config):
     """Helper to configure the Jupyter Server for integration testing
     with Galata.
 

@@ -182,7 +182,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
 
     splice_source = Bool(False, config=True, help="Splice source packages into app directory.")
 
-    def start(self) -> None:
+    def start(self):
         app_dir = self.app_dir or get_app_dir()
         app_options = AppOptions(
             app_dir=app_dir,
@@ -271,7 +271,7 @@ class LabCleanApp(JupyterApp):
         help=f"Delete the entire contents of the app directory.\n{ext_warn_msg}",
     )
 
-    def start(self) -> None:
+    def start(self):
         app_options = LabCleanAppOptions(
             logger=self.log,
             core_config=self.core_config,
@@ -299,7 +299,7 @@ class LabPathApp(JupyterApp):
         '/lab/workspaces' in the default Jupyter configuration directory.
     """
 
-    def start(self) -> None:
+    def start(self):
         print(f"Application directory:   {get_app_dir()}")
         print(f"User Settings directory: {get_user_settings_dir()}")
         print(f"Workspaces directory: {get_workspaces_dir()}")
@@ -351,7 +351,7 @@ class LabWorkspaceApp(JupyterApp):
         LabWorkspaceListApp.description.splitlines()[0],
     )
 
-    def start(self) -> None:
+    def start(self):
         try:
             super().start()
             self.log.error("One of `export`, `import` or `list` must be specified.")
@@ -676,7 +676,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             return self.override_theme_url
         return ""
 
-    def initialize_templates(self) -> None:
+    def initialize_templates(self):
         # Determine which model to run JupyterLab
         if self.core_mode or self.app_dir.startswith(HERE + os.sep):
             self.core_mode = True
@@ -722,7 +722,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-    def _prepare_templates(self) -> None:
+    def _prepare_templates(self):
         super()._prepare_templates()
         self.jinja2_env.globals.update(custom_css=self.custom_css)
 
@@ -735,7 +735,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         except (AttributeError, OSError):
             return False
 
-    def initialize_handlers(self) -> None:  # noqa
+    def initialize_handlers(self):  # noqa
         handlers = []
 
         # Set config for Jupyterlab
@@ -932,7 +932,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.handlers.extend(handlers)
         super().initialize_handlers()
 
-    def initialize(self, argv: Sequence[str] | None = None) -> None:
+    def initialize(self, argv: Sequence[str] | None = None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
         if self.collaborative:

@@ -159,7 +159,7 @@ class CheckForUpdateHandler(APIHandler):
         self.update_checker.logger = self.log
 
     @web.authenticated
-    async def get(self) -> None:
+    async def get(self):
         """Check for updates.
         Response:
             {

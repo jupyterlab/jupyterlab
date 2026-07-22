@@ -14,12 +14,12 @@ from jupyterlab.extensions.manager import ExtensionManager
 
 
 class ExtensionHandler(APIHandler):
-    def initialize(self, manager: ExtensionManager) -> None:
+    def initialize(self, manager: ExtensionManager):
         super().initialize()
         self.manager = manager
 
     @web.authenticated
-    async def get(self) -> None:
+    async def get(self):
         """GET query returns info on extensions
 
         Query arguments:
@@ -96,7 +96,7 @@ class ExtensionHandler(APIHandler):
         self.finish(json.dumps(list(map(dataclasses.asdict, extensions))))
 
     @web.authenticated
-    async def post(self) -> None:
+    async def post(self):
         """POST query performs an action on a specific extension
 
         Body arguments:

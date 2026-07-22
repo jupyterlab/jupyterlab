@@ -24,7 +24,7 @@ class Builder:
     _kill_event = None
     _future = None
 
-    def __init__(self, core_mode: bool, app_options: AppOptions | dict | None = None) -> None:
+    def __init__(self, core_mode: bool, app_options: AppOptions | dict | None = None):
         app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.core_mode = core_mode
@@ -118,7 +118,7 @@ class Builder:
         kill_event: Event,
         core_config: CoreConfig,
         labextensions_path: list[str],
-    ) -> None:
+    ):
         app_options = AppOptions(
             app_dir=app_dir,
             logger=logger,
@@ -137,7 +137,7 @@ class Builder:
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
-    def initialize(self, builder: Builder | None = None, name: str | None = None) -> None:
+    def initialize(self, builder: Builder | None = None, name: str | None = None):
         super().initialize(name=name)
         self.builder = builder
 

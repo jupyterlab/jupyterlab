@@ -43,7 +43,7 @@ class ExampleApp(LabServerApp):
     user_settings_dir = os.path.join(HERE, "build", "user_settings")
     workspaces_dir = os.path.join(HERE, "build", "workspaces")
 
-    def initialize_settings(self) -> None:
+    def initialize_settings(self):
         super().initialize_settings()
         settings = self.serverapp.web_app.settings
         settings["terminals_available"] = False

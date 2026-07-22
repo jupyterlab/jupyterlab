@@ -6,7 +6,7 @@ from jupyter_server.utils import url_path_join
 from tornado.web import RedirectHandler
 
 
-def load_jupyter_server_extension(serverapp: ServerApp) -> None:
+def load_jupyter_server_extension(serverapp: ServerApp):
     from .labapp import LabApp  # noqa: PLC0415
 
     """Temporary server extension shim when using

@@ -278,6 +278,10 @@ lint.ignore = [
 "SIM105",
 ]
 
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
+
 [tool.ruff.lint.per-file-ignores]
 # F821 Undefined name `c`
 "binder/jupyter_config.py" = ["F821"]

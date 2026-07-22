@@ -29,7 +29,7 @@ RoleFunction = Callable[
 class TypeDocReference(SphinxRole):
     """Base class for TypeDoc references."""
 
-    def __init__(self, api_type: str) -> None:
+    def __init__(self, api_type: str):
         # namespaces are currently represented as modules in typedoc output but it might change
         self.api_type = "module" if api_type == "namespace" else api_type
         super().__init__()
@@ -102,7 +102,7 @@ class TypeScriptDomain(Domain):
     name = "ts"
     label = "TypeScript"
 
-    def __init__(self, env: BuildEnvironment) -> None:
+    def __init__(self, env: BuildEnvironment):
         super().__init__(env)
 
         # Create role functions for each API type
