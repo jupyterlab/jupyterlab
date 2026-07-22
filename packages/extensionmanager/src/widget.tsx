@@ -378,7 +378,8 @@ class Header extends ReactWidget {
         <FilterBox
           initialQuery={this.model.query || undefined}
           placeholder={this.trans.__('Search extensions')}
-          disabled={!this.model.isDisclaimed}
+          // A read-only manager only filters locally, so no disclaimer is needed.
+          disabled={this.model.canInstall && !this.model.isDisclaimed}
           updateFilter={(fn, query) => {
             this.model.query = query ?? '';
           }}
@@ -414,16 +415,21 @@ class Warning extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const canInstall = this.model.canInstall;
     return (
       <>
         <p>
-          {this.trans
-            .__(`The JupyterLab development team is excited to have a robust
+          {canInstall
+            ? this.trans
+                .__(`The JupyterLab development team is excited to have a robust
 third-party extension community. However, we do not review
 third-party extensions, and some extensions may introduce security
 risks or contain malicious code that runs on your machine. Moreover in order
 to work, this panel needs to fetch data from web services. Do you agree to
-activate this feature?`)}
+activate this feature?`)
+            : this.trans
+                .__(`To display extension author avatars, this panel fetches images
+from external web services. Do you want to allow these external requests?`)}
           <br />
           <a
             href="https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html"
@@ -453,17 +459,19 @@ activate this feature?`)}
             >
               {this.trans.__('Yes')}
             </Button>
-            <Button
-              className="jp-extensionmanager-disclaimer-disable"
-              onClick={() => {
-                this.model.isEnabled = false;
-              }}
-              title={this.trans.__(
-                'This will disable the extension manager panel; including the listing of installed extension.'
-              )}
-            >
-              {this.trans.__('No, disable')}
-            </Button>
+            {canInstall && (
+              <Button
+                className="jp-extensionmanager-disclaimer-disable"
+                onClick={() => {
+                  this.model.isEnabled = false;
+                }}
+                title={this.trans.__(
+                  'This will disable the extension manager panel, including the listing of installed extensions.'
+                )}
+              >
+                {this.trans.__('No, disable')}
+              </Button>
+            )}
           </div>
         )}
       </>
@@ -495,7 +503,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.isDisclaimed}
+            canFetch={this.model.canFetch}
             entries={this.model.installed.filter(pkg =>
               new RegExp(this.model.query.toLowerCase()).test(pkg.name)
             )}
@@ -505,7 +513,9 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
+              this.model.canPerformActions
+                ? this.onAction.bind(this)
+                : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -602,7 +612,7 @@ class SearchResult extends ReactWidget {
           </div>
         ) : (
           <ListView
-            canFetch={this.model.isDisclaimed}
+            canFetch={this.model.canFetch}
             entries={this.model.searchResult}
             initialPage={this.model.page}
             numPages={this.model.lastPage}
@@ -610,7 +620,9 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
+              this.model.canPerformActions
+                ? this.onAction.bind(this)
+                : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -650,8 +662,9 @@ export class ExtensionsPanel extends SidePanel {
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
     const warning = new Warning(model, this.trans);
-    warning.title.label = this.trans.__('Warning');
-
+    warning.title.label = model.canInstall
+      ? this.trans.__('Warning')
+      : this.trans.__('Author avatars');
     this.addWidget(warning);
 
     const installed = new PanelWithToolbar();
@@ -688,14 +701,19 @@ export class ExtensionsPanel extends SidePanel {
     }
 
     this._wasDisclaimed = this.model.isDisclaimed;
-    if (this.model.isDisclaimed) {
-      (this.content as AccordionPanel).collapse(0);
-      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
+    if (this.model.canInstall) {
+      if (this.model.isDisclaimed) {
+        (this.content as AccordionPanel).collapse(0);
+        (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
+      } else {
+        // If warning is not disclaimed expand only the warning panel
+        (this.content as AccordionPanel).expand(0);
+        (this.content as AccordionPanel).collapse(1);
+        (this.content as AccordionPanel).collapse(2);
+      }
     } else {
-      // If warning is not disclaimed expand only the warning panel
-      (this.content as AccordionPanel).expand(0);
-      (this.content as AccordionPanel).collapse(1);
-      (this.content as AccordionPanel).collapse(2);
+      // Read-only: start with the avatar opt-in panel collapsed.
+      (this.content as AccordionPanel).collapse(0);
     }
 
     this.model.stateChanged.connect(this._onStateChanged, this);
@@ -802,7 +820,10 @@ export class ExtensionsPanel extends SidePanel {
     if (!this._wasDisclaimed && this.model.isDisclaimed) {
       (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
-      (this.content as AccordionPanel).expand(2);
+      if (this.model.canInstall) {
+        // Only an installable manager has a search results panel.
+        (this.content as AccordionPanel).expand(2);
+      }
     }
     this._wasDisclaimed = this.model.isDisclaimed;
   }
