@@ -964,16 +964,41 @@ namespace Private {
   }
 
   /**
+   * The URI schemes that an activated link is allowed to open.
+   *
+   * Non-HTTP OSC 8 hyperlinks are already discarded by xterm.js (see the
+   * `allowNonHttpProtocols` option of its link handler API), and
+   * automatically detected web links are matched with an `https?://`
+   * pattern, so this list is a second line of defense, as recommended by
+   * the xterm.js documentation.
+   */
+  const ALLOWED_LINK_SCHEMES = ['http:', 'https:'];
+
+  /**
    * Open a link that was activated in the terminal.
    *
    * Like the default OSC 8 hyperlink activation behavior of xterm.js, the
    * user is asked to confirm before navigating: the target URI of an
-   * escape-sequence hyperlink can be unrelated to the displayed text.
+   * escape-sequence hyperlink can be unrelated to the displayed text. The
+   * target is also required to use one of the allowed URI schemes, as a
+   * second line of defense against unsafe navigation targets such as
+   * `javascript:` links.
    */
   export async function activateLink(
     trans: TranslationBundle,
     uri: string
   ): Promise<void> {
+    let scheme: string;
+    try {
+      scheme = new URL(uri).protocol;
+    } catch {
+      console.warn(`Not opening a link with an invalid URI: ${uri}`);
+      return;
+    }
+    if (!ALLOWED_LINK_SCHEMES.includes(scheme)) {
+      console.warn(`Not opening a link with a disallowed scheme: ${uri}`);
+      return;
+    }
     const { button } = await showDialog({
       title: trans.__('Open Link?'),
       body: trans.__(
@@ -997,7 +1022,9 @@ namespace Private {
       }
       newWindow.location.href = uri;
     } else {
-      console.warn('Opening link blocked as opener could not be cleared');
+      console.warn(
+        'Failed to open the link: the popup was blocked by the browser'
+      );
     }
   }
 }

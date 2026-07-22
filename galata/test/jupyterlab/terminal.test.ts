@@ -50,20 +50,18 @@ async function waitForTerminal(page: Page) {
 }
 
 /**
- * Hover over the beginning of the terminal row matching `rowText` until the
- * link on it gets detected.
+ * Get the viewport position of the beginning of the terminal row matching
+ * `rowText`.
  *
  * The row index is retrieved from the accessibility tree (which requires
- * the `screenReaderMode` setting), making the hover position independent of
- * the font metrics of the platform.
+ * the `screenReaderMode` setting), making the position independent of the
+ * font metrics of the platform.
  *
- * @param page - Playwright page (provided by galata fixture)
  * @param terminalLocator - Locator that matches the terminal container
- * @param rowText - Pattern matching the full text of the row to hover
- * @returns The hovered position, in viewport coordinates
+ * @param rowText - Pattern matching the full text of the row
+ * @returns The position, in viewport coordinates
  */
-async function hoverOverLink(
-  page: Page,
+async function rowPosition(
   terminalLocator: Locator,
   rowText: RegExp
 ): Promise<{ x: number; y: number }> {
@@ -83,10 +81,27 @@ async function hoverOverLink(
   // The accessibility tree rows map one-to-one to the rendered rows, so the
   // row index gives the vertical position of the row on the screen.
   const cellHeight = screenBox.height / rowCount;
-  const position = {
+  return {
     x: screenBox.x + 10,
     y: screenBox.y + (rowIndex + 0.5) * cellHeight
   };
+}
+
+/**
+ * Hover over the beginning of the terminal row matching `rowText` until the
+ * link on it gets detected.
+ *
+ * @param page - Playwright page (provided by galata fixture)
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param rowText - Pattern matching the full text of the row to hover
+ * @returns The hovered position, in viewport coordinates
+ */
+async function hoverOverLink(
+  page: Page,
+  terminalLocator: Locator,
+  rowText: RegExp
+): Promise<{ x: number; y: number }> {
+  const position = await rowPosition(terminalLocator, rowText);
   // Move the pointer onto the link until the linkifier flags it with the
   // pointer cursor.
   await expect
@@ -434,6 +449,52 @@ test.describe('Terminal', () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       'https://example.com/issues/42'
     );
+  });
+
+  test('Ignore an OSC 8 hyperlink with a disallowed scheme', async ({
+    page
+  }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // As a control that link detection works in this session, check that
+    // an allowed (https) escape-sequence hyperlink offers the copy entry.
+    await runCommand(
+      page,
+      terminal,
+      "printf '\\e]8;;https://example.com/\\e\\\\allowed\\e]8;;\\e\\\\\\n'"
+    );
+    const allowedPosition = await hoverOverLink(page, terminal, /^allowed\s*$/);
+    await page.mouse.click(allowedPosition.x, allowedPosition.y, {
+      button: 'right'
+    });
+    const copyLinkItem = page.getByRole('menuitem', {
+      name: 'Copy Link Address'
+    });
+    await expect(copyLinkItem).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(copyLinkItem).toBeHidden();
+
+    // A hyperlink with an unsafe scheme is not detected as a link at all:
+    // it cannot be activated and offers no copy entry.
+    await runCommand(
+      page,
+      terminal,
+      "printf '\\e]8;;javascript:alert(1)\\e\\\\dangerous\\e]8;;\\e\\\\\\n'"
+    );
+    const blockedPosition = await rowPosition(terminal, /^dangerous\s*$/);
+    // Move the pointer over the row as a real hover would.
+    await page.mouse.move(blockedPosition.x + 20, blockedPosition.y);
+    await page.mouse.move(blockedPosition.x, blockedPosition.y);
+    await page.mouse.click(blockedPosition.x, blockedPosition.y, {
+      button: 'right'
+    });
+    await expect(
+      page.getByRole('menuitem', { name: 'Refresh Terminal' })
+    ).toBeVisible();
+    await expect(copyLinkItem).toBeHidden();
   });
 
   test('Copy link address entry only shows over a link', async ({ page }) => {

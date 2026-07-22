@@ -71,6 +71,8 @@ Web addresses in the terminal output are detected automatically, as are
 hyperlinks emitted by programs using the OSC 8 escape sequence. Hovering
 over a link underlines it, and clicking it opens the target in a new
 browser tab (escape-sequence hyperlinks first show a confirmation dialog,
-since their target can differ from the displayed text). Right-clicking a
-link brings up the context menu with a "Copy Link Address" entry that
-copies the link target to the clipboard.
+since their target can differ from the displayed text). For safety, only
+`http` and `https` links are detected: a hyperlink emitted with any other
+scheme (such as `javascript:`) is ignored. Right-clicking a link brings
+up the context menu with a "Copy Link Address" entry that copies the link
+target to the clipboard.
