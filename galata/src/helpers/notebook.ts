@@ -1165,7 +1165,7 @@ export class NotebookHelper {
     if (!(panel && (await panel.count()))) {
       return false;
     }
-    return (await panel.locator('.cm-gutters')?.isVisible()) !== null;
+    return await panel.locator('.cm-gutters').isVisible();
   }
 
   /**

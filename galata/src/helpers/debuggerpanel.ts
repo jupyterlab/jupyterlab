@@ -38,26 +38,31 @@ export class DebuggerHelper {
    * @param name Notebook name
    */
   async switchOn(name?: string): Promise<void> {
-    const toolbar = await this.notebook.getToolbarLocator(name);
-    if (!toolbar) {
+    if (name && !(await this.notebook.activate(name))) {
+      return;
+    }
+
+    const panel = await this.notebook.activity.getPanelLocator(name);
+    const toolbar = panel?.locator('.jp-Toolbar').first();
+    if (!panel || !toolbar) {
       return;
     }
     const button = toolbar.locator('.jp-DebuggerBugButton');
     await waitForCondition(async () => (await button.count()) === 1);
     await waitForCondition(
       async () => (await button!.isDisabled()) === false,
-      2000
+      15000
     );
 
     if (!(await this.isOn(name))) {
       await button!.click();
     }
-    try {
-      await waitForCondition(async () => await this.isOn(name));
-    } catch (error) {
-      // Retry
-      await this.switchOn(name);
-    }
+
+    await waitForCondition(
+      async () =>
+        (await this.isOn(name)) &&
+        (await panel.getAttribute('data-jp-debugger')) === 'true'
+    );
   }
 
   /**

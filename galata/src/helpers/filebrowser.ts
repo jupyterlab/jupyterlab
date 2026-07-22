@@ -64,9 +64,7 @@ export class FileBrowserHelper {
    * @returns File status
    */
   async isFileListedInBrowser(fileName: string): Promise<boolean> {
-    const item = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .getByRole('listitem', { name: new RegExp(`^Name: ${fileName}`) });
+    const item = this.page.locator(this.xpBuildFileSelector(fileName));
 
     return (await item.count()) > 0;
   }
@@ -103,9 +101,7 @@ export class FileBrowserHelper {
     await this.revealFileInBrowser(filePath);
     const name = path.basename(filePath);
 
-    const fileItem = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .getByRole('listitem', { name: new RegExp(`^Name: ${name}`) });
+    const fileItem = this.page.locator(this.xpBuildFileSelector(name));
     if (await fileItem.count()) {
       if (factory) {
         await fileItem.click({ button: 'right' });
@@ -224,9 +220,7 @@ export class FileBrowserHelper {
   }
 
   protected async _openDirectory(dirName: string): Promise<boolean> {
-    const item = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .getByRole('listitem', { name: new RegExp(`^Name: ${dirName}`) });
+    const item = this.page.locator(this.xpBuildDirectorySelector(dirName));
 
     await Utils.waitForCondition(async () => (await item.count()) > 0);
     await this.contents.waitForAPIResponse(async () => {
