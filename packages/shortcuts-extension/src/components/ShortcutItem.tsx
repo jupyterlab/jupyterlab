@@ -405,6 +405,8 @@ export class ShortcutItem extends React.Component<
       <React.Fragment key={this.props.shortcut.id + '_' + index}>
         <div
           className="jp-Shortcuts-ShortcutContainer"
+          role="button"
+          aria-label={this._trans.__('Edit keybinding')}
           data-keybinding={index}
           data-shortcut={this.props.shortcut.id}
           tabIndex={this.isLocationBeingEdited(index) ? -1 : 0}

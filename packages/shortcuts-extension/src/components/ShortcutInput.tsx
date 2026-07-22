@@ -83,7 +83,7 @@ export class ShortcutInput extends React.Component<
     this.setState({ activeConflicts: conflicts });
     this.props.displayConflicts({
       conflictsWith: conflicts,
-      keys: this.state.keys,
+      keys,
       overwrite: async () => {
         await this._overwriteConflicts(conflicts, keys);
       },
