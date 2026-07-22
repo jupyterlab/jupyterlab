@@ -887,6 +887,16 @@
     }
   },
   {
+    "id": "apputils:toggle-toolbar",
+    "label": "Show Toolbar",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "apputils:update-notification",
     "label": "Update a notification",
     "caption": "Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",

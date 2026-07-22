@@ -1,0 +1,27 @@
+{
+  "title": "Toolbar",
+  "description": "Main area toolbar visibility settings.",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "apputils:toggle-toolbar",
+            "rank": 10.5
+          }
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "visible": {
+      "type": "boolean",
+      "title": "Toolbar Visibility",
+      "description": "Whether to show the toolbar for main area widgets.",
+      "default": true
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}

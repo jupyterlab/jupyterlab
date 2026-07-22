@@ -85,6 +85,8 @@ namespace CommandIDs {
 
   export const toggleHeader = 'apputils:toggle-header';
 
+  export const toggleToolbar = 'apputils:toggle-toolbar';
+
   export const displayShortcuts = 'apputils:display-shortcuts';
 }
 
@@ -373,6 +375,82 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
 
     if (palette) {
       palette.addItem({ command: CommandIDs.toggleHeader, category });
+    }
+  }
+};
+
+export const toggleToolbar: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:toggle-toolbar',
+  description: 'Adds a command to display the main area widget toolbar.',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ICommandPalette, ISettingRegistry],
+  activate: async (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    const trans = translator.load('jupyterlab');
+
+    const category: string = trans.__('Main Area');
+    const hasToolbar = (widget: Widget | null): widget is MainAreaWidget =>
+      widget instanceof MainAreaWidget && !widget.toolbar.isDisposed;
+    const settings = settingRegistry
+      ? await settingRegistry.load(toggleToolbar.id)
+      : null;
+    const readToolbarVisible = (): boolean => {
+      const visible = settings?.get('visible').composite;
+      return typeof visible === 'boolean' ? visible : true;
+    };
+    let toolbarVisible = readToolbarVisible();
+    const applyToolbarVisibility = (widget: Widget | null): void => {
+      if (hasToolbar(widget)) {
+        widget.toolbar.setHidden(!toolbarVisible);
+      }
+    };
+
+    app.commands.addCommand(CommandIDs.toggleToolbar, {
+      label: trans.__('Show Toolbar'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      isEnabled: () => hasToolbar(app.shell.currentWidget),
+      isToggled: () => {
+        const widget = app.shell.currentWidget;
+        return widget instanceof MainAreaWidget
+          ? !widget.toolbar.isHidden
+          : false;
+      },
+      execute: async () => {
+        const widget = app.shell.currentWidget;
+        if (hasToolbar(widget)) {
+          toolbarVisible = widget.toolbar.isHidden;
+          await settings?.set('visible', toolbarVisible);
+          applyToolbarVisibility(widget);
+          app.commands.notifyCommandChanged(CommandIDs.toggleToolbar);
+        }
+      }
+    });
+
+    app.shell.currentChanged?.connect(() => {
+      applyToolbarVisibility(app.shell.currentWidget);
+      app.commands.notifyCommandChanged(CommandIDs.toggleToolbar);
+    });
+
+    settings?.changed.connect(() => {
+      toolbarVisible = readToolbarVisible();
+      applyToolbarVisibility(app.shell.currentWidget);
+      app.commands.notifyCommandChanged(CommandIDs.toggleToolbar);
+    });
+
+    applyToolbarVisibility(app.shell.currentWidget);
+
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggleToolbar, category });
     }
   }
 };
@@ -945,6 +1023,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   themesPlugin,
   themesPaletteMenuPlugin,
   toggleHeader,
+  toggleToolbar,
   movableSectionRegistry,
   toolbarRegistry,
   utilityCommands,
