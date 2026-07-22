@@ -75,8 +75,10 @@ for (const c of showSourcesCases) {
       await page.sidebar.openTab('jp-debugger-sidebar');
 
       expect(await page.notebook.activate(notebookName)).toBe(true);
-      await page.notebook.waitForCellGutter(0);
-      expect(await page.notebook.clickCellGutter(0, 2)).toBe(true);
+      await page.notebook.waitForCellGutter(0, notebookName);
+      expect(await page.notebook.clickCellGutter(0, 2, notebookName)).toBe(
+        true
+      );
 
       await page.debugger.waitForBreakPoints();
       const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
@@ -131,9 +133,13 @@ for (const c of showSourcesCases) {
       await page.sidebar.openTab('jp-debugger-sidebar');
 
       expect(await page.notebook.activate(notebookName)).toBe(true);
-      await page.notebook.waitForCellGutter(0);
-      expect(await page.notebook.clickCellGutter(0, 8)).toBe(true);
-      expect(await page.notebook.clickCellGutter(0, 11)).toBe(true);
+      await page.notebook.waitForCellGutter(0, notebookName);
+      expect(await page.notebook.clickCellGutter(0, 8, notebookName)).toBe(
+        true
+      );
+      expect(await page.notebook.clickCellGutter(0, 11, notebookName)).toBe(
+        true
+      );
 
       // don't add await, run will be blocked by the breakpoint
       void page.notebook.run().then();
@@ -495,7 +501,7 @@ async function setBreakpoint(
   await page.notebook.run();
   await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
 
-  await page.notebook.waitForCellGutter(0);
-  expect(await page.notebook.clickCellGutter(0, 4)).toBe(true);
+  await page.notebook.waitForCellGutter(0, notebookName);
+  expect(await page.notebook.clickCellGutter(0, 4, notebookName)).toBe(true);
   await page.debugger.waitForBreakPoints();
 }

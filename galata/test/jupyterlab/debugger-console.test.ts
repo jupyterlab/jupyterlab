@@ -28,8 +28,8 @@ async function setupDebuggerConsole(
   expect(await page.notebook.activate(fileName)).toBe(true);
 
   // Set a breakpoint on line 2 (the x = 42 line)
-  await page.notebook.waitForCellGutter(0);
-  expect(await page.notebook.clickCellGutter(0, 5)).toBe(true);
+  await page.notebook.waitForCellGutter(0, fileName);
+  expect(await page.notebook.clickCellGutter(0, 5, fileName)).toBe(true);
 
   // Wait for breakpoint to be set
   await page.debugger.waitForBreakPoints();
