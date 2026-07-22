@@ -16,24 +16,26 @@ async function setupDebuggerConsole(
   tmpPath: string
 ) {
   // Open a notebook which has code setting variables to debug
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(true);
+  expect(await page.notebook.activate(fileName)).toBe(true);
 
   // Wait for kernel to be ready
   await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-  // Enable debugger
-  await page.debugger.switchOn();
+  // Enable debugger for the opened notebook
+  await page.debugger.switchOn(fileName);
+  expect(await page.debugger.isOn(fileName)).toBe(true);
   await page.sidebar.openTab('jp-debugger-sidebar');
 
   // Set a breakpoint on line 2 (the x = 42 line)
   await page.notebook.waitForCellGutter(0);
-  await page.notebook.clickCellGutter(0, 5);
+  expect(await page.notebook.clickCellGutter(0, 5)).toBe(true);
 
   // Wait for breakpoint to be set
   await page.debugger.waitForBreakPoints();
 
   // Run the cell (non-blocking) to hit the breakpoint
-  await page.notebook.runCell(0, { wait: false });
+  expect(await page.notebook.runCell(0, { wait: false })).toBe(true);
 
   // Wait for the debugger to stop at the breakpoint
   await page.debugger.waitForCallStack();
