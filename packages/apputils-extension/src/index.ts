@@ -384,16 +384,14 @@ export const toggleToolbar: JupyterFrontEndPlugin<void> = {
   description: 'Adds a command to display the main area widget toolbar.',
   autoStart: true,
   requires: [ITranslator],
-  optional: [ICommandPalette, ISettingRegistry],
+  optional: [ISettingRegistry],
   activate: async (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null
   ) => {
     const trans = translator.load('jupyterlab');
 
-    const category: string = trans.__('Main Area');
     const hasToolbar = (widget: Widget | null): widget is MainAreaWidget =>
       widget instanceof MainAreaWidget && !widget.toolbar.isDisposed;
     const settings = settingRegistry
@@ -448,10 +446,6 @@ export const toggleToolbar: JupyterFrontEndPlugin<void> = {
     });
 
     applyToolbarVisibility(app.shell.currentWidget);
-
-    if (palette) {
-      palette.addItem({ command: CommandIDs.toggleToolbar, category });
-    }
   }
 };
 

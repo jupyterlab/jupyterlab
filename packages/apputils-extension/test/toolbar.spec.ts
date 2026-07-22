@@ -33,7 +33,7 @@ describe('@jupyterlab/apputils-extension:toggle-toolbar', () => {
   async function activatePlugin(
     settingRegistry: ISettingRegistry | null = null
   ): Promise<void> {
-    await plugin.activate(app, nullTranslator, null, settingRegistry);
+    await plugin.activate(app, nullTranslator, settingRegistry);
   }
 
   function createMainAreaWidget(): {
