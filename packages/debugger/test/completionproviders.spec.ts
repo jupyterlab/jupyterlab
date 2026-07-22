@@ -34,6 +34,7 @@ const code = [
   '',
   "data = {'alpha': 1, 'beta': 2}",
   "big = {f'key_{i:03d}': i for i in range(120)}",
+  'tricky = {"it\'s": 1, \'say "hi"\': 2}',
   'x = 1',
   'x += 1',
   'x'
@@ -131,6 +132,17 @@ describe('Debugger completion providers integration test', () => {
       expect(labels.some(label => label.includes('alpha_arg'))).toBe(true);
     });
 
+    it('should complete dictionary keys containing quotes', async () => {
+      const reply = await provider().fetch(
+        { text: "tricky['", offset: 8 },
+        context
+      );
+      // Strip the escaping IPython adds for insertion into a quoted context.
+      const labels = reply.items.map(item => item.label.replace(/\\/g, ''));
+      expect(labels.some(label => label.includes("it's"))).toBe(true);
+      expect(labels.some(label => label.includes('say "hi"'))).toBe(true);
+    });
+
     it('should pass a large number of completions without truncation', async () => {
       const reply = await provider().fetch(
         { text: "big['", offset: 5 },
@@ -140,6 +152,19 @@ describe('Debugger completion providers integration test', () => {
       expect(labels.length).toBeGreaterThanOrEqual(120);
       expect(labels.some(label => label.includes('key_000'))).toBe(true);
       expect(labels.some(label => label.includes('key_119'))).toBe(true);
+    });
+
+    it('should not pollute the namespace of the paused frame', async () => {
+      // The fetches in the tests above must not have defined anything.
+      const reply = await session.sendRequest('evaluate', {
+        expression:
+          'any(name in globals() or name in locals() for name in ' +
+          "['completions_for', 'ns', 'frame_locals', 'frame_globals'])",
+        frameId: service.model.callstack.frame?.id,
+        context: 'repl'
+      });
+      expect(reply.success).toBe(true);
+      expect(reply.body.result).toBe('False');
     });
   });
 });

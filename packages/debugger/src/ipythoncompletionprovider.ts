@@ -13,14 +13,14 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { IDebugger } from './tokens';
 
 /**
- * Name of the completion helper function defined in the paused frame.
+ * Name of the completion helper function; only ever defined in a scratch
+ * namespace, never in the paused frame.
  */
-const HELPER_NAME = '_jupyterlab_debugger_completions';
+const HELPER_NAME = 'completions_for';
 
 /**
  * Python definition of the completion helper. Runs IPython's matchers on
- * the namespace of the paused frame (found via the caller frame, since the
- * helper is called by an expression evaluated in that frame) and returns
+ * the namespace of the paused frame (received as arguments) and returns
  * the payload - "tok_len" and "items" as `[text, type]` pairs - as
  * base64-encoded JSON, so that its Python repr (which is what debugpy
  * sends back) contains no escape sequences and can be decoded natively.
@@ -29,14 +29,12 @@ const HELPER_NAME = '_jupyterlab_debugger_completions';
  * ~64 kB - ample headroom for the completion limit below.
  */
 const HELPER_DEFINITION = `
-def ${HELPER_NAME}(text, offset):
+def ${HELPER_NAME}(text, offset, frame_locals, frame_globals):
     import base64
-    import inspect
     import json
     from IPython.core.completer import IPCompleter, CompletionContext
-    frame = inspect.currentframe().f_back
     completer = IPCompleter(
-        namespace=frame.f_locals, global_namespace=frame.f_globals
+        namespace=frame_locals, global_namespace=frame_globals
     )
     completer.line_buffer = text
     completer.text_until_cursor = text
@@ -126,25 +124,23 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     const textLiteral = JSON.stringify(textBeforeCursor);
     const offset = textBeforeCursor.length;
 
-    try {
-      // debugpy execs multi-line repl code and discards the value of the
-      // last expression, so the work happens in two requests: define a
-      // helper function (definitions persist in the paused frame, like in
-      // the debug console), then call it as a single expression whose
-      // return value comes back in the reply. Only the helper's name leaks
-      // into the frame; its own locals are function-scoped. The stopped
-      // frame's namespace is read from the caller frame at call time.
-      const setupReply = await session.sendRequest('evaluate', {
-        expression: HELPER_DEFINITION,
-        frameId,
-        context: 'repl'
-      });
-      if (!setupReply.success) {
-        return { start: 0, end: 0, items: [] };
-      }
+    // A single self-contained expression: the helper is exec'd into a
+    // scratch namespace and called immediately, so its return value comes
+    // back in this reply (debugpy only returns values for expressions, not
+    // for multi-line code, which it execs) and nothing is ever defined in
+    // the paused frame - the variables panel and completions stay clean.
+    // The frame's namespace is captured by the lambda defaults, which are
+    // evaluated in the frame; JSON.stringify makes the helper definition a
+    // valid single-line Python string literal.
+    const expression =
+      `(lambda ns={}, frame_locals=locals(), frame_globals=globals(): ` +
+      `(exec(${JSON.stringify(HELPER_DEFINITION)}, ns), ` +
+      `ns[${JSON.stringify(HELPER_NAME)}](` +
+      `${textLiteral}, ${offset}, frame_locals, frame_globals))[1])()`;
 
+    try {
       const reply = await session.sendRequest('evaluate', {
-        expression: `${HELPER_NAME}(${textLiteral}, ${offset})`,
+        expression,
         frameId,
         context: 'repl'
       });

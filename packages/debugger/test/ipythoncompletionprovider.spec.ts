@@ -71,20 +71,13 @@ function completionsPayload(
 }
 
 /**
- * Mock `sendRequest` for the two-step fetch: debugpy execs the helper
- * definition (returning an empty result) and the payload is then returned
- * by a single-expression call of the helper.
+ * Mock `sendRequest` resolving the single evaluate request of `fetch()`
+ * with the given result.
  */
 function mockEvaluate(payloadResult: string): jest.Mock {
   return jest
     .fn()
-    .mockImplementation((_command, args) =>
-      Promise.resolve(
-        args.expression.startsWith('_jupyterlab_debugger_completions(')
-          ? { success: true, body: { result: payloadResult } }
-          : { success: true, body: { result: '' } }
-      )
-    );
+    .mockResolvedValue({ success: true, body: { result: payloadResult } });
 }
 
 function makeProvider(
@@ -231,7 +224,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
       ).toEqual({ start: 0, end: 0, items: [] });
     });
 
-    it('should define the helper and call it to read back the payload', async () => {
+    it('should send a single self-contained evaluate request', async () => {
       const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = new DebuggerIPythonCompletionProvider({
         debuggerService: mockService({
@@ -240,60 +233,34 @@ describe('DebuggerIPythonCompletionProvider', () => {
         })
       });
       await provider.fetch({ text: "df['", offset: 4 }, context);
-      expect(sendRequest).toHaveBeenCalledTimes(2);
-      expect(sendRequest).toHaveBeenNthCalledWith(
-        1,
+      expect(sendRequest).toHaveBeenCalledTimes(1);
+      expect(sendRequest).toHaveBeenCalledWith(
         'evaluate',
         expect.objectContaining({
-          expression: expect.stringContaining(
-            'def _jupyterlab_debugger_completions('
-          ),
+          expression: expect.stringContaining('def completions_for('),
           frameId: 7,
           context: 'repl'
         })
       );
-      expect(sendRequest).toHaveBeenNthCalledWith(
-        2,
-        'evaluate',
-        expect.objectContaining({
-          expression: `_jupyterlab_debugger_completions("df['", 4)`,
-          frameId: 7,
-          context: 'repl'
-        })
-      );
+      const { expression } = sendRequest.mock.calls[0][1];
+      // A single expression (eval mode), not a multi-line block.
+      expect(expression).not.toContain('\n');
+      expect(expression).toContain(`("df['", 4, frame_locals, frame_globals)`);
     });
 
     it('should only send the text up to the cursor', async () => {
       const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = makeProvider(sendRequest);
       await provider.fetch({ text: "df['] + tail", offset: 4 }, context);
-      const definition = sendRequest.mock.calls[0][1].expression;
-      const call = sendRequest.mock.calls[1][1].expression;
-      expect(definition).not.toContain('tail');
-      expect(call).toBe(`_jupyterlab_debugger_completions("df['", 4)`);
+      const { expression } = sendRequest.mock.calls[0][1];
+      expect(expression).toContain(`"df['"`);
+      expect(expression).not.toContain('tail');
     });
 
-    it('should return an empty reply when the setup request is unsuccessful', async () => {
+    it('should return an empty reply when the request is unsuccessful', async () => {
       const sendRequest = jest
         .fn()
         .mockResolvedValue({ success: false, body: { result: '' } });
-      const provider = makeProvider(sendRequest);
-      expect(
-        await provider.fetch({ text: "df['", offset: 4 }, context)
-      ).toEqual({ start: 0, end: 0, items: [] });
-      expect(sendRequest).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return an empty reply when the payload request is unsuccessful', async () => {
-      const sendRequest = jest
-        .fn()
-        .mockImplementation((_command, args) =>
-          Promise.resolve(
-            args.expression.startsWith('_jupyterlab_debugger_completions(')
-              ? { success: false, body: { result: '' } }
-              : { success: true, body: { result: '' } }
-          )
-        );
       const provider = makeProvider(sendRequest);
       expect(
         await provider.fetch({ text: "df['", offset: 4 }, context)
