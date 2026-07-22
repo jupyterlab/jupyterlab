@@ -879,7 +879,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                             app_options=app_options,
                             ext_options={
                                 "lock_rules": lock_rules,
-                                "all_locked": self.lock_all_plugins,
+                                "lock_all": self.lock_all_plugins,
                             },
                             parent=self,
                         )

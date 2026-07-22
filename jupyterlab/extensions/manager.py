@@ -236,7 +236,8 @@ class PluginManager(LoggingConfigurable):
         for plugin in plugins_or_extensions:
             if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
-                if plugin in self.options.lock_rules:
+                extension = plugin.split(":")[0]
+                if plugin in self.options.lock_rules or extension in self.options.lock_rules:
                     locked_subset.add(plugin)
             elif plugin in extensions_with_locked_plugins:
                 # this is an extension - we need to check for >any< plugin
@@ -543,8 +544,8 @@ class ExtensionManager(PluginManager):
             return True
         if self._listings_cache is None:
             await self._fetch_listings()
-        normalized = self._normalize_name(name)
-        normalized_cache = {self._normalize_name(k) for k in self._listings_cache}
+        normalized = self._canonicalize_name(name)
+        normalized_cache = {self._canonicalize_name(k) for k in self._listings_cache}
         if self._listings_block_mode:
             return normalized not in normalized_cache
         else:
@@ -686,6 +687,10 @@ class ExtensionManager(PluginManager):
             Normalized name
         """
         return name
+
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize extension name for listing policy comparisons."""
+        return self._normalize_name(name)
 
     async def _update_extensions_list(
         self, query: str | None = None, page: int = 1, per_page: int = 30
