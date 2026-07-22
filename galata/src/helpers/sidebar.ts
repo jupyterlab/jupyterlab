@@ -62,7 +62,17 @@ export class SidebarHelper {
           return null;
         }
 
-        return sideBar.classList.contains('jp-mod-right') ? 'right' : 'left';
+        // In 'side' mode the bar exposes which side it lives on via the
+        // jp-mod-left/jp-mod-right classes. In 'top'/'bottom' mode the bar
+        // is a child of the side area wrapper, which carries `data-side`.
+        if (sideBar.classList.contains('jp-mod-right')) {
+          return 'right';
+        }
+        if (sideBar.classList.contains('jp-mod-left')) {
+          return 'left';
+        }
+        const area = sideBar.closest('.jp-SideArea');
+        return area?.getAttribute('data-side') === 'right' ? 'right' : 'left';
       },
       { tabSelector: this.buildTabSelector(id) }
     );

@@ -41,7 +41,12 @@
       "minimum": 1.0
     },
     "theme": {
-      "enum": ["dark", "light", "inherit"]
+      "type": "string",
+      "oneOf": [
+        { "const": "dark", "title": "Dark" },
+        { "const": "light", "title": "Light" },
+        { "const": "inherit", "title": "Inherit" }
+      ]
     },
     "scrollback": {
       "type": "number"

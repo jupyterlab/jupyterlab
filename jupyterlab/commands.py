@@ -138,21 +138,21 @@ def pjoin(*args):
     return osp.abspath(osp.join(*args))
 
 
-def get_user_settings_dir():
+def get_user_settings_dir() -> str:
     """Get the configured JupyterLab user settings directory."""
     settings_dir = os.environ.get("JUPYTERLAB_SETTINGS_DIR")
     settings_dir = settings_dir or pjoin(jupyter_config_dir(), "lab", "user-settings")
     return osp.abspath(settings_dir)
 
 
-def get_workspaces_dir():
+def get_workspaces_dir() -> str:
     """Get the configured JupyterLab workspaces directory."""
     workspaces_dir = os.environ.get("JUPYTERLAB_WORKSPACES_DIR")
     workspaces_dir = workspaces_dir or pjoin(jupyter_config_dir(), "lab", "workspaces")
     return osp.abspath(workspaces_dir)
 
 
-def get_app_dir():
+def get_app_dir() -> str:
     """Get the configured JupyterLab app directory."""
     # Default to the override environment variable.
     if os.environ.get("JUPYTERLAB_DIR"):
@@ -228,7 +228,7 @@ def dedupe_yarn(path, logger=None):
         yarn_proc.wait()
 
 
-def ensure_node_modules(cwd, logger=None):
+def ensure_node_modules(cwd, logger=None) -> bool:
     """Ensure that node_modules is up to date.
 
     Returns true if the node_modules was updated.
@@ -248,7 +248,7 @@ def ensure_node_modules(cwd, logger=None):
     return ret != 0
 
 
-def ensure_dev(logger=None):
+def ensure_dev(logger=None) -> None:
     """Ensure that the dev assets are available."""
     logger = _ensure_logger(logger)
     target = pjoin(DEV_DIR, "static")
@@ -259,7 +259,7 @@ def ensure_dev(logger=None):
         yarn_proc.wait()
 
 
-def ensure_core(logger=None):
+def ensure_core(logger=None) -> None:
     """Ensure that the core assets are available."""
     staging = pjoin(HERE, "staging")
     logger = _ensure_logger(logger)
@@ -272,17 +272,17 @@ def ensure_core(logger=None):
         yarn_proc.wait()
 
 
-def ensure_app(app_dir):
+def ensure_app(app_dir) -> list[str] | None:
     """Ensure that an application directory is available.
 
     If it does not exist, return a list of messages to prompt the user.
     """
     if osp.exists(pjoin(app_dir, "static", "index.html")):
-        return
+        return None
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jlpm run build:core` then `jupyter lab build` ",
+        "Please run `jlpm build:core` then `jupyter lab build` ",
         "or use a different app directory",
     ]
     return msgs
@@ -1004,7 +1004,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise
         """
         should_rebuild = False
-        for extname, _ in self.info["extensions"].items():
+        for extname in self.info["extensions"]:
             uninstalled = self.uninstall_extension(extname)
             should_rebuild = should_rebuild or uninstalled
         return should_rebuild
@@ -1015,7 +1015,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         should_rebuild = False
-        for extname, _ in self.info["extensions"].items():
+        for extname in self.info["extensions"]:
             if extname in self.info["local_extensions"]:
                 continue
             updated = self._update_extension(extname)
@@ -1340,10 +1340,7 @@ class _AppHandler:
             locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
-        disabled_core = []
-        for key in info["core_extensions"]:
-            if key in info["disabled"]:
-                disabled_core.append(key)
+        disabled_core = [key for key in info["core_extensions"] if key in info["disabled"]]
 
         info["disabled_core"] = disabled_core
 
@@ -1388,7 +1385,7 @@ class _AppHandler:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in [".yarnrc.yml", "yarn.js"]:
+        for fname in [".yarnrc.yml"]:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, "staging", fname), target)
 

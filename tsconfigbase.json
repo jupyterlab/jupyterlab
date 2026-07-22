@@ -24,10 +24,12 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strictBindCallApply": true,
     "strictBuiltinIteratorReturn": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
     "target": "ES2018",
-    "types": []
+    "types": [],
+    "verbatimModuleSyntax": true
   }
 }

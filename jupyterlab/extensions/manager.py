@@ -235,7 +235,8 @@ class PluginManager(LoggingConfigurable):
         for plugin in plugins_or_extensions:
             if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
-                if plugin in self.options.lock_rules:
+                extension = plugin.split(":")[0]
+                if plugin in self.options.lock_rules or extension in self.options.lock_rules:
                     locked_subset.add(plugin)
             elif plugin in extensions_with_locked_plugins:
                 # this is an extension - we need to check for >any< plugin
@@ -361,7 +362,7 @@ class ExtensionManager(PluginManager):
     @property
     def metadata(self) -> ExtensionManagerMetadata:
         """Extension manager metadata."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def get_latest_version(self, extension: str) -> str | None:
         """Return the latest available version for a given extension.
@@ -371,7 +372,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The latest available version
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def list_packages(
         self, query: str, page: int, per_page: int
@@ -386,7 +387,7 @@ class ExtensionManager(PluginManager):
             The available extensions in a mapping {name: metadata}
             The results last page; None if the manager does not support pagination
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def install(self, extension: str, version: str | None = None) -> ActionResult:
         """Install the required extension.
@@ -402,7 +403,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The action result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def uninstall(self, extension: str) -> ActionResult:
         """Uninstall the required extension.
@@ -417,7 +418,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The action result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @staticmethod
     def get_semver_version(version: str) -> str:
@@ -542,8 +543,8 @@ class ExtensionManager(PluginManager):
             return True
         if self._listings_cache is None:
             await self._fetch_listings()
-        normalized = self._normalize_name(name)
-        normalized_cache = {self._normalize_name(k) for k in self._listings_cache}
+        normalized = self._canonicalize_name(name)
+        normalized_cache = {self._canonicalize_name(k) for k in self._listings_cache}
         if self._listings_block_mode:
             return normalized not in normalized_cache
         else:
@@ -685,6 +686,10 @@ class ExtensionManager(PluginManager):
             Normalized name
         """
         return name
+
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize extension name for listing policy comparisons."""
+        return self._normalize_name(name)
 
     async def _update_extensions_list(
         self, query: str | None = None, page: int = 1, per_page: int = 30
