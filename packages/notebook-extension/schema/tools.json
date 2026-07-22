@@ -13,6 +13,10 @@
             "title": "Cell tool",
             "type": "null"
           },
+          "_CELL-ID": {
+            "title": "Cell ID",
+            "type": "null"
+          },
           "/editable": {
             "title": "Editable",
             "type": "boolean",
@@ -112,6 +116,7 @@
         }
       },
       "uiSchema": {
+        "ui:order": ["_CELL-TOOL", "_CELL-ID", "*"],
         "/editable": {
           "ui:widget": "select"
         },
@@ -122,6 +127,9 @@
       "metadataOptions": {
         "_CELL-TOOL": {
           "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.renderer"
+        },
+        "_CELL-ID": {
+          "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.cell-id"
         },
         "/raw_mimetype": {
           "cellTypes": ["raw"]
