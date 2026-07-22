@@ -49,6 +49,7 @@ dependencies = [
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
+    "typing-extensions>=4.4.0;python_version<\"3.12\"",
 ]
 dynamic = [
     "version",
