@@ -356,6 +356,8 @@ namespace CommandIDs {
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 
+  export const toggleToolbar = 'notebook:toggle-toolbar';
+
   export const copySelectedtext = 'notebook:copy-selected-text';
 
   export const pasteText = 'notebook:paste-text';
@@ -5228,6 +5230,28 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleToolbar, {
+    label: trans.__('Show Toolbar'),
+    caption: trans.__('Show or hide the notebook toolbar'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        current.toolbar.setHidden(!current.toolbar.isHidden);
+      }
+    },
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return current ? !current.toolbar.isHidden : false;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
   // All commands with isEnabled defined directly or in a semantic commands
   // To simplify here we added all commands as most of them have isEnabled
   const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
@@ -5277,7 +5301,8 @@ function populatePalette(
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
-    CommandIDs.virtualScrollbar
+    CommandIDs.virtualScrollbar,
+    CommandIDs.toggleToolbar
   ].forEach(command => {
     palette.addItem({ command, category });
   });
@@ -5424,6 +5449,11 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleMinimap.add({
     id: CommandIDs.virtualScrollbar,
     isEnabled: () => true
+  });
+
+  mainMenu.viewMenu.editorViewers.toggleToolbar.add({
+    id: CommandIDs.toggleToolbar,
+    isEnabled
   });
 
   // Add an ICodeRunner to the application run menu

@@ -40,7 +40,6 @@
   "@jupyterlab/apputils-extension:themes": "Provides the theme manager.",
   "@jupyterlab/apputils-extension:themes-palette-menu": "Adds theme commands to the menu and the command palette.",
   "@jupyterlab/apputils-extension:toggle-header": "Adds a command to display the main area widget content header.",
-  "@jupyterlab/apputils-extension:toggle-toolbar": "Adds a command to display the main area widget toolbar.",
   "@jupyterlab/apputils-extension:toolbar-registry": "Provides toolbar items registry.",
   "@jupyterlab/apputils-extension:utilityCommands": "Adds meta commands to run set of other commands.",
   "@jupyterlab/apputils-extension:workspaces": "Add workspace file type.",
