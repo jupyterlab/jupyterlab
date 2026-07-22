@@ -83,7 +83,8 @@ export class BuildManager {
    * Build the application.
    */
   build(): Promise<void> {
-    const { _trans, _url, serverSettings } = this;
+    const { _url, serverSettings } = this;
+    const trans = this._trans;
     const init = { method: 'POST' };
     const promise = ServerConnection.makeRequest(_url, init, serverSettings);
 
@@ -91,11 +92,11 @@ export class BuildManager {
       if (response.status === 400) {
         throw new ServerConnection.ResponseError(
           response,
-          _trans.__('Build aborted')
+          trans.__('Build aborted')
         );
       }
       if (response.status !== 200) {
-        const message = _trans.__(
+        const message = trans.__(
           `Build failed with %1.
 
         If you are experiencing the build failure after installing an extension (or trying to include previously installed extension after updating JupyterLab) please check the extension repository for new installation instructions as many extensions migrated to the prebuilt extensions system which no longer requires rebuilding JupyterLab (but uses a different installation procedure, typically involving a package manager such as 'pip' or 'conda').
