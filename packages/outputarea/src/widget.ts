@@ -306,23 +306,21 @@ export class OutputArea extends Widget {
    *
    * Clears the message handlers on the future so this output area can be
    * safely disposed without terminating the in-flight execution. The returned
-   * future can be re-attached to a new output area via `reattachFuture` method.
+   * future and display id targets can be passed to `reattachFuture`.
    *
    * Returns `null` if no future is currently attached.
    */
-  detachFuture(): Kernel.IShellFuture<
-    KernelMessage.IExecuteRequestMsg,
-    KernelMessage.IExecuteReplyMsg
-  > | null {
+  detachFuture(): OutputArea.IDetachedFuture | null {
     const future = this._future;
     if (!future) {
       return null;
     }
+    const displayIdMap = Private.cloneDisplayIdMap(this._displayIdMap);
     future.onIOPub = () => undefined;
     future.onReply = () => undefined;
     future.onStdin = () => undefined;
     this._future = null!;
-    return future;
+    return { future, displayIdMap };
   }
 
   /**
@@ -340,8 +338,6 @@ export class OutputArea extends Widget {
   ) {
     if (displayIdMap) {
       this._setDisplayIdMap(displayIdMap);
-    } else {
-      this._rebuildDisplayIdMap();
     }
     this._setFuture(future, false);
   }
@@ -485,31 +481,12 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Rebuild display id indices from the output models.
-   */
-  private _rebuildDisplayIdMap(): void {
-    this._displayIdMap.clear();
-    for (let i = 0; i < this.model.length; i++) {
-      const output = this.model.get(i);
-      const displayId = Private.getDisplayId(output.transient);
-      if (displayId && output.type === 'display_data') {
-        const targets = this._displayIdMap.get(displayId) ?? [];
-        targets.push(i);
-        this._displayIdMap.set(displayId, targets);
-      }
-    }
-  }
-
-  /**
    * Set display id indices from a captured map.
    */
   private _setDisplayIdMap(
     displayIdMap: ReadonlyMap<string, readonly number[]>
   ): void {
-    this._displayIdMap.clear();
-    displayIdMap.forEach((indices, displayId) => {
-      this._displayIdMap.set(displayId, [...indices]);
-    });
+    this._displayIdMap = Private.cloneDisplayIdMap(displayIdMap);
   }
 
   /**
@@ -1001,6 +978,24 @@ export class SimplifiedOutputArea extends OutputArea {
  * A namespace for OutputArea statics.
  */
 export namespace OutputArea {
+  /**
+   * A detached future with the display id targets for the current outputs.
+   */
+  export interface IDetachedFuture {
+    /**
+     * The kernel future detached from the output area.
+     */
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+
+    /**
+     * Display id targets captured when the future was detached.
+     */
+    displayIdMap: ReadonlyMap<string, readonly number[]>;
+  }
+
   /**
    * The options to create an `OutputArea`.
    */
@@ -1530,6 +1525,19 @@ export namespace Stdin {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Clone display id indices.
+   */
+  export function cloneDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): Map<string, number[]> {
+    const clone = new Map<string, number[]>();
+    displayIdMap.forEach((indices, displayId) => {
+      clone.set(displayId, [...indices]);
+    });
+    return clone;
+  }
+
   /**
    * Get a display id from transient output data.
    */

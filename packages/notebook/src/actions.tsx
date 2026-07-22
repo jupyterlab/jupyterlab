@@ -1753,10 +1753,12 @@ export namespace NotebookActions {
     if (storedExecutions) {
       const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
       redoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
-      redoItem?.meta.set(
-        Private.CELL_EXECUTION_SOURCE_META_KEY,
-        executionCaptureSource
-      );
+      if (executionCaptureSource) {
+        redoItem?.meta.set(
+          Private.CELL_EXECUTION_SOURCE_META_KEY,
+          executionCaptureSource
+        );
+      }
     }
 
     // Restore execution state on resurrected/moved cell widgets.
@@ -2721,7 +2723,7 @@ namespace Private {
      */
     outputs: nbformat.IOutput[];
     /** Display id targets from the output area when execution was detached. */
-    displayIdMap: Map<string, number[]>;
+    displayIdMap: ReadonlyMap<string, readonly number[]>;
   }
 
   function isOutputChangingIOPubMessage(
@@ -2769,7 +2771,7 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >,
     buffered: KernelMessage.IIOPubMessage[],
-    displayIdMap?: Map<string, number[]>
+    displayIdMap?: ReadonlyMap<string, readonly number[]>
   ): boolean {
     const currentFuture = cell.outputArea.future;
     if (currentFuture && currentFuture !== future) {
@@ -2784,25 +2786,6 @@ namespace Private {
     }
     buffered.length = 0;
     return true;
-  }
-
-  /**
-   * Get display id targets from the output models.
-   */
-  function getDisplayIdMap(
-    outputs: ICodeCellModel['outputs']
-  ): Map<string, number[]> {
-    const displayIdMap = new Map<string, number[]>();
-    for (let i = 0; i < outputs.length; i++) {
-      const output = outputs.get(i);
-      const displayId = output.transient?.['display_id'];
-      if (typeof displayId === 'string' && output.type === 'display_data') {
-        const targets = displayIdMap.get(displayId) ?? [];
-        targets.push(i);
-        displayIdMap.set(displayId, targets);
-      }
-    }
-    return displayIdMap;
   }
 
   /**
@@ -2845,16 +2828,21 @@ namespace Private {
   export function captureExecution(
     cell: CodeCell
   ): IStoredCellExecution | null {
-    const future = cell.outputArea.detachFuture();
-    if (!future) {
+    const detachedFuture = cell.outputArea.detachFuture();
+    if (!detachedFuture) {
       return null;
     }
+    const { future, displayIdMap } = detachedFuture;
     const outputs = cell.model.outputs.toJSON();
-    const displayIdMap = getDisplayIdMap(cell.model.outputs);
     let done = false;
-    void future.done.finally(() => {
-      done = true;
-    });
+    void future.done.then(
+      () => {
+        done = true;
+      },
+      () => {
+        done = true;
+      }
+    );
     const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
       buffered.push({ channel: 'iopub', msg });

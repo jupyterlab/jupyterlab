@@ -78,6 +78,22 @@ function createUpdateDisplayDataMessage(
   });
 }
 
+function createDisplayDataMessage(
+  data: Record<string, string>,
+  displayId: string
+): KernelMessage.IDisplayDataMsg {
+  return KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+    channel: 'iopub',
+    msgType: 'display_data',
+    session: UUID.uuid4(),
+    content: {
+      data,
+      metadata: {},
+      transient: { display_id: displayId }
+    }
+  });
+}
+
 class LogOutputArea extends OutputArea {
   methods: string[] = [];
 
@@ -464,20 +480,20 @@ describe('outputarea/widget', () => {
     });
 
     describe('#reattachFuture()', () => {
-      it('should rebuild display id targets from transient output data', () => {
+      it('should keep display id targets when reattaching to the same output area', () => {
         const displayId = 'display-id';
         const initialData = { 'text/plain': 'before' };
         const updatedData = { 'text/plain': 'after' };
-        model.fromJSON([
-          {
-            output_type: 'display_data',
-            data: initialData,
-            metadata: {},
-            transient: { display_id: displayId }
-          }
-        ]);
         const future = createResolvedFuture();
 
+        widget.future = future;
+        void future.onIOPub(createDisplayDataMessage(initialData, displayId));
+        const detachedFuture = widget.detachFuture();
+        expect(detachedFuture).not.toBeNull();
+        if (!detachedFuture) {
+          throw new Error('Expected a detached future.');
+        }
+        expect(detachedFuture.future).toBe(future);
         widget.reattachFuture(future);
         void future.onIOPub(
           createUpdateDisplayDataMessage(updatedData, displayId)
@@ -491,16 +507,25 @@ describe('outputarea/widget', () => {
         const displayId = 'display-id';
         const initialData = { 'text/plain': 'before' };
         const updatedData = { 'text/plain': 'after' };
-        model.fromJSON([
-          {
-            output_type: 'display_data',
-            data: initialData,
-            metadata: {}
-          }
-        ]);
         const future = createResolvedFuture();
 
-        widget.reattachFuture(future, new Map([[displayId, [0]]]));
+        widget.future = future;
+        void future.onIOPub(createDisplayDataMessage(initialData, displayId));
+        const restoredOutputs = model.toJSON();
+        const detachedFuture = widget.detachFuture();
+        expect(detachedFuture).not.toBeNull();
+        if (!detachedFuture) {
+          throw new Error('Expected a detached future.');
+        }
+        expect(detachedFuture.future).toBe(future);
+
+        widget.dispose();
+        model.dispose();
+        model = new OutputAreaModel({ trusted: true });
+        widget = new LogOutputArea({ rendermime, model });
+        model.fromJSON(restoredOutputs);
+
+        widget.reattachFuture(future, detachedFuture.displayIdMap);
         void future.onIOPub(
           createUpdateDisplayDataMessage(updatedData, displayId)
         );

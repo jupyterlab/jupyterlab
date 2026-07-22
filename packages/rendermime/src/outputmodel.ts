@@ -46,11 +46,6 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
   readonly streamText?: IObservableString;
 
   /**
-   * Transient data associated with the output.
-   */
-  readonly transient?: ReadonlyPartialJSONObject;
-
-  /**
    * Whether the output is trusted.
    */
   trusted: boolean;
@@ -173,18 +168,6 @@ export class OutputModel implements IOutputModel {
    */
   get metadata(): ReadonlyPartialJSONObject {
     return this._rawMetadata;
-  }
-
-  get transient(): ReadonlyPartialJSONObject {
-    const transient = this._raw['transient'];
-    if (
-      transient &&
-      typeof transient === 'object' &&
-      !Array.isArray(transient)
-    ) {
-      return transient as ReadonlyPartialJSONObject;
-    }
-    return {};
   }
 
   /**
