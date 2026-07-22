@@ -8,6 +8,7 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
+import { LiveText, mergeNodes } from './livetext';
 import { removeMath, replaceMath } from './latex';
 
 /**
@@ -699,119 +700,6 @@ function autolink(
 }
 
 /**
- * Split a shallow node (node without nested nodes inside) at a given text content position.
- *
- * @param node the shallow node to be split
- * @param at the position in textContent at which the split should occur
- */
-function splitShallowNode<T extends Node>(
-  node: T,
-  at: number
-): { pre: T; post: T } {
-  const pre = node.cloneNode() as T;
-  pre.textContent = (node.textContent ?? '').slice(0, at);
-  const post = node.cloneNode() as T;
-  post.textContent = (node.textContent ?? '').slice(at);
-  return {
-    pre,
-    post
-  };
-}
-
-/**
- * Iterate over some nodes, while tracking cumulative start and end position.
- */
-function* nodeIter<T extends Node>(
-  nodes: T[]
-): IterableIterator<{ node: T; start: number; end: number; isText: boolean }> {
-  let start = 0;
-  let end;
-  for (let node of nodes) {
-    end = start + (node.textContent?.length || 0);
-    yield {
-      node,
-      start,
-      end,
-      isText: node.nodeType === Node.TEXT_NODE
-    };
-    start = end;
-  }
-}
-
-/**
- * Align two collections of nodes.
- *
- * If a text node in one collections spans an element in the other, yield the spanned elements.
- * Otherwise, split the nodes such that yielded pair start and stop on the same position.
- */
-function* alignedNodes<T extends Node, U extends Node>(
-  a: T[],
-  b: U[]
-): IterableIterator<[T, null] | [null, U] | [T, U]> {
-  let iterA = nodeIter(a);
-  let iterB = nodeIter(b);
-  let nA = iterA.next();
-  let nB = iterB.next();
-  while (!nA.done && !nB.done) {
-    let A = nA.value;
-    let B = nB.value;
-
-    if (A.isText && A.start <= B.start && A.end >= B.end) {
-      // A is a text element that spans all of B, simply yield B
-      yield [null, B.node];
-      nB = iterB.next();
-    } else if (B.isText && B.start <= A.start && B.end >= A.end) {
-      // B is a text element that spans all of A, simply yield A
-      yield [A.node, null];
-      nA = iterA.next();
-    } else {
-      // There is some intersection, split one, unless they match exactly
-      if (A.end === B.end && A.start === B.start) {
-        yield [A.node, B.node];
-        nA = iterA.next();
-        nB = iterB.next();
-      } else if (A.end > B.end) {
-        /*
-        A |-----[======]---|
-        B |--[======]------|
-                    | <- Split A here
-                | <- trim B to start from here if needed
-        */
-        let { pre, post } = splitShallowNode(A.node, B.end - A.start);
-        if (B.start < A.start) {
-          // this node should not be yielded anywhere else, so ok to modify in-place
-          B.node.textContent = (B.node.textContent ?? '').slice(
-            A.start - B.start
-          );
-        }
-        yield [pre, B.node];
-        // Modify iteration result in-place:
-        A.node = post;
-        A.start = B.end;
-        nB = iterB.next();
-      } else if (B.end > A.end) {
-        let { pre, post } = splitShallowNode(B.node, A.end - B.start);
-        if (A.start < B.start) {
-          // this node should not be yielded anywhere else, so ok to modify in-place
-          A.node.textContent = (A.node.textContent ?? '').slice(
-            B.start - A.start
-          );
-        }
-        yield [A.node, pre];
-        // Modify iteration result in-place:
-        B.node = post;
-        B.start = A.end;
-        nA = iterA.next();
-      } else {
-        throw new Error(
-          `Unexpected intersection: ${JSON.stringify(A)} ${JSON.stringify(B)}`
-        );
-      }
-    }
-  }
-}
-
-/**
  * Render text into a host node.
  *
  * @param options - The options for rendering.
@@ -821,7 +709,9 @@ function* alignedNodes<T extends Node, U extends Node>(
 export async function renderText(
   options: renderText.IRenderOptions
 ): Promise<void> {
-  renderTextual(options, {
+  // Text has no post-render step, so we do not await completion here (rendering
+  // continues incrementally across animation frames).
+  void renderTextual(options, {
     checkWeb: true,
     checkPaths: false
   });
@@ -843,6 +733,90 @@ function nativeSanitize(source: string): string {
 const ansiPrefix = '\x1b';
 
 /**
+ * Minimum number of characters an incremental auto-linking step advances by;
+ * each step extends to the first safe break point (see `autoLinkBreak` and
+ * `autoLinkPathBreak`) at or after this offset. Advancing by a sizable stride rather than a single word
+ * amortizes the per-step overhead - cache lookup, prefix verification and
+ * node-array copying - over much more text; the per-frame time budget still
+ * decides how many steps run in one frame.
+ */
+const AUTO_LINK_STRIDE = 8192;
+
+/**
+ * Matches a whitespace character preceded by a non-space character - a safe
+ * point to split text for incremental auto-linking, as a URL never spans
+ * whitespace. The `g` flag makes `lastIndex` the search start position,
+ * letting the search begin at `AUTO_LINK_STRIDE` without slicing the string
+ * (the lookbehind may inspect characters before `lastIndex`).
+ */
+const autoLinkBreak = /(?<=\S)\s/g;
+
+/**
+ * The break point used when path auto-linking is enabled: only a line break
+ * is safe then, because a path link can span spaces within a line - the
+ * Python traceback locator in `File "/path/to/a.py", line 1` is part of the
+ * link - but no link spans a line break.
+ */
+const autoLinkPathBreak = /\n/g;
+
+/**
+ * Enum used exclusively for static analysis to ensure that each
+ * branch in `renderFrame` leads to explicit rendering decision.
+ */
+enum RenderingResult {
+  stop,
+  delay,
+  continue
+}
+
+/**
+ * How a render frame was invoked; decides which scheduling gates apply
+ * and what time budget the frame runs with.
+ */
+enum FrameInvocation {
+  /**
+   * A regular animation frame: subject to the visibility gate and to the
+   * round-robin render queue (both reserved for on-screen hosts).
+   */
+  animation,
+  /**
+   * Forced by the first-paint fallback watchdog under animation-frame
+   * starvation: bypasses all gates (see `armFallbackWatchdog`).
+   */
+  forced,
+  /**
+   * A background slice delivered during browser idle time to a host which has
+   * painted but is off-screen: bypasses the gates and runs with the budget
+   * derived from the idle deadline (see `scheduleIdleRendering`).
+   */
+  idle
+}
+
+/**
+ * Renders one frame of an incremental render and reports the decision taken.
+ */
+type FrameRenderer = (
+  timestamp: number,
+  invocation?: FrameInvocation,
+  budget?: number
+) => RenderingResult;
+
+/**
+ * Upper bound (in milliseconds) for the adaptive per-frame auto-linking
+ * budget.
+ *
+ * The default 10ms budget assumes frames are otherwise cheap. For very large
+ * outputs the browser-side cost of a frame - style recalculation, layout and
+ * paint of the content shifted by the newly inserted nodes - can reach
+ * hundreds of milliseconds, and the total rendering cost is then governed by
+ * the *number* of frames rather than the work done in each. When that happens
+ * the budget is scaled up towards the observed frame overhead (capped here),
+ * so that expensive layout passes are paid fewer times; outputs with cheap
+ * frames keep the responsive default.
+ */
+const MAX_FRAME_BUDGET = 200;
+
+/**
  * Render the textual representation into a host node.
  *
  * Implements the shared logic for `renderText` and `renderError`.
@@ -850,8 +824,427 @@ const ansiPrefix = '\x1b';
 function renderTextual(
   options: renderText.IRenderOptions,
   autoLinkOptions: IAutoLinkOptions
-): void {
+): Promise<void> {
   // Unpack the options.
+  const { host, sanitizer, source } = options;
+
+  // Settle the completion promise of any previous render for this host - it is
+  // being superseded by this call.
+  Private.settleRender(host);
+
+  // Escape hatch: when incremental auto-linking is disabled, render
+  // synchronously in a single pass (legacy behavior). Links then appear
+  // together with the text at first paint, at the cost of blocking on large
+  // outputs. Disabling incremental auto-linking thus also disables incremental
+  // rendering. Useful as a fallback and to benchmark the incremental pipeline.
+  if (sanitizer.getIncrementalAutolink?.() === false) {
+    // Abort any incremental rendering that may be in-flight for this host
+    // (e.g. if the setting was toggled mid-stream) before rendering synchronously.
+    Private.abortRendering(host);
+    renderTextualSync(options, autoLinkOptions);
+    return Promise.resolve();
+  }
+
+  // Completion promise: resolves once this render has finished (reached
+  // `stopRendering`) or has been superseded by a later render. `renderError`
+  // awaits it before resolving file-path links, which requires the anchors to
+  // already be present in the DOM.
+  let resolveRendered!: () => void;
+  const rendered = new Promise<void>(resolve => {
+    resolveRendered = resolve;
+  });
+  Private.registerRenderResolver(host, resolveRendered);
+
+  // We want to only manipulate DOM once per animation frame whether
+  // the autolink is enabled or not, because a stream can also choke
+  // rendering pipeline even if autolink is disabled. This acts as
+  // an effective debouncer which matches the refresh rate of the
+  // screen.
+  Private.cancelRenderingRequest(host);
+
+  // Stop rendering after 36000 frames: 10 minutes for a visible output
+  // (animation frames, assuming 60 Hz); up to an hour for an out-of-view one
+  // (background-tier slices arrive at most every 100ms in the idle fallback,
+  // see `idleFallbackPeriod`).
+  const maxIterations = 60 * 60 * 10;
+  let iteration = 0;
+
+  let fullPreTextContent: string | null = null;
+  let pre: HTMLPreElement;
+
+  // Auto-linking progress, carried across frames: the already-linkified prefix,
+  // the remaining text, and the linkified nodes produced so far. Persisting
+  // these in the closure (rather than re-deriving them from the auto-link
+  // cache on every step and frame) guarantees strictly monotonic progress -
+  // without it, a frame whose budget is exhausted by a single step over a
+  // large trailing node (e.g. a huge whitespace-free token) would redo exactly
+  // the same work on the next frame, forever - and avoids paying a
+  // full-prefix cache validation per step. The cache is still consulted once,
+  // on the first working frame, to reuse the results of a previous render for
+  // this host (i.e. the preceding stream chunk).
+  //
+  // Aliasing contract for `linkedNodes`: these nodes are NEVER placed in the
+  // DOM - `mergeNodes` receives clones of them - so they stay pristine while
+  // components like search highlighting mutate the rendered DOM. The cache
+  // entry written at the end of each frame may therefore alias them without
+  // cloning: both are only ever read by this renderer.
+  let autoLinkSeeded = false;
+  let alreadyAutoLinked = '';
+  let toBeAutoLinked = '';
+  let linkedNodes: (HTMLAnchorElement | Text)[] = [];
+
+  // The live `<pre>` this render commits its auto-linking progress into
+  // (append-only), one frame at a time; owns the live DOM and the commit
+  // cursor. Created on the first working frame (once `pre`/`fullPreTextContent`
+  // are known) and seeded then - see `LiveText`.
+  let liveText: LiveText | null = null;
+
+  // When the previous animation frame of this render finished its work (in
+  // the `performance.now()` time domain). The gap between it and the next
+  // frame's timestamp estimates the browser-side (style/layout/paint) cost
+  // per frame, which drives the adaptive budget (see `MAX_FRAME_BUDGET`).
+  let lastFrameEnd = 0;
+
+  // Number of frames for which rendering has been delayed because the host is
+  // not yet attached to the DOM (see the `!host.isConnected` handling below).
+  // Bounded so that a host that is disposed before ever attaching does not keep
+  // an animation-frame/watchdog loop alive indefinitely.
+  let disconnectedAttempts = 0;
+  const maxDisconnectedAttempts = 1000;
+
+  // Observe visibility (lazily - one persistent observer per host, not one per
+  // render, which with streamed outputs would mean one per chunk): rendering is
+  // deprioritized while the output is off-screen - work continues in the
+  // background (idle) tier at a reduced rate rather than competing with
+  // visible outputs for animation frames - and the observer promotes the host
+  // back as soon as it returns into view. Until the asynchronous observer
+  // callback first delivers, visibility is optimistically assumed (see
+  // `isHostVisible`) so the first paint is not held back.
+  Private.observeVisibility(host);
+
+  const stopRendering = () => {
+    // Remove the host from rendering queue. The visibility observer is left in
+    // place - it is persistent per host (see `observeVisibility`), so that
+    // subsequent renders (e.g. further stream chunks) reuse it.
+    Private.removeFromQueue(host);
+    // Clear the first-paint watchdog: rendering is over for this host, so
+    // there is nothing left to force-paint. On paths that painted this is a
+    // no-op (the watchdog is cleared on first paint); it matters for renders
+    // which stop without ever painting (a host discarded before being
+    // attached), where a stale watchdog would otherwise keep re-arming its
+    // timer - and strongly referencing the host - for as long as animation
+    // frames keep being produced.
+    Private.clearFallbackWatchdog(host);
+    // Wrap up the live DOM now that rendering has finished (frees the consumed
+    // tail records); the live state itself is kept for the next render (stream
+    // chunk) to adopt.
+    liveText?.finalize();
+    // Resolve the completion promise now that rendering has finished.
+    Private.settleRender(host);
+    return RenderingResult.stop;
+  };
+
+  // Schedule the next frame on the tier matching the current visibility:
+  // off-screen hosts which have already painted are parked in the background
+  // (idle) tier where they keep making progress during browser idle time;
+  // everything else (visible hosts, and hosts awaiting their first paint or
+  // attachment) goes through the animation-frame render queue.
+  const scheduleNextFrame = () => {
+    if (!Private.isHostVisible(host) && Private.hasPainted(host)) {
+      Private.scheduleIdleRendering(host, renderFrame);
+    } else {
+      Private.scheduleRendering(host, renderFrame);
+    }
+  };
+
+  const continueRendering = () => {
+    iteration += 1;
+    scheduleNextFrame();
+    return RenderingResult.continue;
+  };
+
+  const delayRendering = () => {
+    scheduleNextFrame();
+    return RenderingResult.delay;
+  };
+
+  const renderFrame: FrameRenderer = (
+    timestamp: number,
+    invocation: FrameInvocation = FrameInvocation.animation,
+    budget: number = 10
+  ): RenderingResult => {
+    if (!host.isConnected) {
+      // The host is not in the DOM. Note that even in full windowing notebook
+      // mode the output nodes are never removed; instead the cell gets hidden
+      // (usually with `display: none`, or for the active cell via opacity), so
+      // it stays connected. A disconnected host therefore means one of:
+      // - it has not been attached yet (the notebook is still being laid out,
+      //   which under load can outlast the first scheduled frame or the fallback
+      //   watchdog) - in which case we must wait rather than give up, otherwise
+      //   the first paint is lost while the synchronously-rendered siblings
+      //   (HTML/Markdown) still appear;
+      // - it has already painted and was then detached (e.g. the cell was
+      //   removed) - in which case we stop.
+      if (!Private.hasPainted(host)) {
+        if (disconnectedAttempts < maxDisconnectedAttempts) {
+          disconnectedAttempts += 1;
+          return delayRendering();
+        }
+        // Give up eventually so a host disposed before ever attaching does not
+        // keep the render loop alive forever.
+      }
+      return stopRendering();
+    }
+
+    // Gates applied to regular animation frames only:
+    // - if the output is not visible (scrolled away in full windowed notebook
+    //   mode), park it in the background tier: `delayRendering` re-schedules
+    //   through `scheduleNextFrame`, which sends off-screen hosts to the idle
+    //   tier where they keep making progress during browser idle time instead
+    //   of competing with visible outputs for animation frames;
+    // - otherwise wait for this host's round-robin turn in the render queue.
+    // Note: cannot use `checkVisibility` as it triggers style recalculation
+    // before we appended the new nodes from the stream, which leads to layout
+    // trashing. Instead we use intersection observer.
+    // The visibility gate is only applied once the host has been painted at
+    // least once: before the first paint the host has no content and, because
+    // `RenderedText` sets `contain: style layout`, collapses to zero height,
+    // which the intersection observer reports as not intersecting even when the
+    // output is within the viewport. Gating the first paint on the observer
+    // would therefore deadlock (never paint -> stays zero height -> never
+    // reported visible). This matches the documented intent that the first
+    // paint is not held back; only subsequent work (auto-linking, stream
+    // updates) is deprioritized while the output is off-screen.
+    //
+    // A `forced` frame (delivered by the fallback watchdog because animation
+    // frames are starved) bypasses both gates entirely: the render queue
+    // distributes work across animation frames to avoid janky frames, but that
+    // is moot when frames are not being produced, and letting the queue rotate
+    // this host past its turn would defeat the very purpose of the fallback
+    // (see `armFallbackWatchdog`). An `idle` slice likewise bypasses them: it
+    // exists precisely to run work for off-screen hosts, outside the queue.
+    if (
+      invocation === FrameInvocation.animation &&
+      ((!Private.isHostVisible(host) && Private.hasPainted(host)) ||
+        !Private.canRenderInFrame(timestamp, host))
+    ) {
+      return delayRendering();
+    }
+
+    const start = performance.now();
+    // Scale the budget towards the observed per-frame overhead: for very
+    // large outputs the browser-side frame cost (style/layout/paint of the
+    // content shifted by the insertions) dwarfs the default budget, and the
+    // total cost is then governed by the number of frames. Batching more
+    // progress into each frame when frames are expensive anyway means paying
+    // for fewer layout passes; cheap frames keep the responsive default.
+    // The gap since `lastFrameEnd` measures that overhead only when this host
+    // rendered in the immediately preceding frame (`lastFrameEnd` at or after
+    // that frame's start); otherwise it is dominated by other hosts' turns in
+    // the round-robin queue - or by time this host spent parked off-screen -
+    // and is ignored, so concurrently rendering outputs cannot escalate each
+    // other's budgets (see `previousFrameTime`). `MAX_FRAME_BUDGET` bounds
+    // the cost of a single expensive layout.
+    let frameBudget = budget;
+    if (
+      invocation === FrameInvocation.animation &&
+      lastFrameEnd > 0 &&
+      lastFrameEnd >= Private.previousFrameTime()
+    ) {
+      const overhead = timestamp - lastFrameEnd;
+      frameBudget = Math.min(MAX_FRAME_BUDGET, Math.max(budget, overhead));
+    }
+    Private.beginRendering(host);
+    // Record that this host has been painted so that subsequent frames (updates
+    // and auto-linking passes) are not treated as a first paint. From here on we
+    // are committed to writing to the DOM in this frame.
+    Private.markPainted(host);
+    // The plain text is about to be shown; the starvation watchdog is no longer
+    // needed for this host.
+    Private.clearFallbackWatchdog(host);
+
+    if (fullPreTextContent === null) {
+      const hasAnsiPrefix = source.includes(ansiPrefix);
+
+      // Create the HTML content:
+      // If no ANSI codes are present use a fast path for escaping.
+      const content = hasAnsiPrefix
+        ? sanitizer.sanitize(Private.ansiSpan(source), {
+            allowedTags: ['span']
+          })
+        : nativeSanitize(source);
+
+      // Set the sanitized content for the host node.
+      pre = document.createElement('pre');
+      pre.innerHTML = content;
+
+      const maybePreTextContent = pre.textContent;
+
+      if (!maybePreTextContent) {
+        // Short-circuit if there is no content to auto-link
+        host.replaceChildren(pre);
+        return stopRendering();
+      }
+      fullPreTextContent = maybePreTextContent;
+    }
+
+    const shouldAutoLink = sanitizer.getAutolink?.() ?? true;
+
+    if (!shouldAutoLink) {
+      host.replaceChildren(pre.cloneNode(true));
+      return stopRendering();
+    }
+    const cacheStore = Private.getCacheStore(autoLinkOptions);
+    if (!autoLinkSeeded) {
+      // First working frame: seed the progress from the auto-link cache left
+      // by a previous render for this host (the preceding stream chunk), if
+      // it is applicable to the current text. Subsequent frames continue from
+      // the closure state instead of consulting the cache again.
+      const applicableCache = getApplicableLinkCache(
+        cacheStore.get(host),
+        fullPreTextContent
+      );
+      alreadyAutoLinked = applicableCache ? applicableCache.processedText : '';
+      toBeAutoLinked = applicableCache
+        ? applicableCache.addedText
+        : fullPreTextContent;
+      // The previous render's nodes are dead (it can no longer run), so they
+      // can be adopted as this render's working nodes without cloning.
+      linkedNodes = applicableCache ? applicableCache.cachedNodes : [];
+      autoLinkSeeded = true;
+      // Establish the live DOM now, while `alreadyAutoLinked` still equals
+      // the seeded progress: adoption trims the committed region back to
+      // exactly this point, before the steps below advance it.
+      liveText = new LiveText(host, pre, fullPreTextContent);
+      liveText.seed(linkedNodes, alreadyAutoLinked.length);
+    }
+    let moreWorkToBeDone: boolean;
+    let elapsed: number;
+    // Defensive only: the loop below runs synchronously, so nothing can
+    // schedule a new frame while it is executing - a new stream chunk
+    // supersedes this render between frames instead (`renderTextual` cancels
+    // the pending frame request). Kept as a cheap safeguard in case a future
+    // change lets other code run mid-loop (e.g. yielding to the event loop).
+    let newRequest: number | undefined;
+
+    // The step break point: a place no link can span, so that splitting there
+    // cannot cut a link in two. With web links only, any whitespace qualifies;
+    // with path links a line break is required, because a path link can span
+    // spaces within a line (the `", line 1` locator of a Python traceback).
+    const stepBreak = autoLinkOptions.checkPaths
+      ? autoLinkPathBreak
+      : autoLinkBreak;
+
+    do {
+      // Find a safe break point at or after the stride, so that each step
+      // advances by at least `AUTO_LINK_STRIDE` characters.
+      stepBreak.lastIndex = AUTO_LINK_STRIDE;
+      const breakMatch = stepBreak.exec(toBeAutoLinked);
+      const breakIndex = breakMatch ? breakMatch.index : -1;
+
+      const before =
+        breakIndex === -1
+          ? toBeAutoLinked
+          : toBeAutoLinked.slice(0, breakIndex);
+      const after = breakIndex === -1 ? '' : toBeAutoLinked.slice(breakIndex);
+
+      // Linkify only this step's text and append to the running node list.
+      // Steps always split at a break point no link can span (see
+      // `stepBreak`), so the nodes from earlier steps stay valid as-is;
+      // adjacent Text nodes are merged to avoid unbounded fragmentation. (The seed boundary - where a
+      // new stream chunk may extend a URL from the previous chunk - is the one
+      // place a node can be invalidated, and is handled by
+      // `getApplicableLinkCache` when seeding above.)
+      const newAdditions = autolink(before, autoLinkOptions);
+      const lastNode = linkedNodes[linkedNodes.length - 1];
+      const firstNew = newAdditions[0];
+      if (lastNode instanceof Text && firstNew instanceof Text) {
+        lastNode.data += firstNew.data;
+        linkedNodes.push(...newAdditions.slice(1));
+      } else {
+        linkedNodes.push(...newAdditions);
+      }
+
+      alreadyAutoLinked += before;
+      toBeAutoLinked = after;
+      moreWorkToBeDone = toBeAutoLinked != '';
+      elapsed = performance.now() - start;
+      newRequest = Private.hasNewRenderingRequest(host);
+    } while (elapsed < frameBudget && moreWorkToBeDone && !newRequest);
+
+    // Persist this frame's progress for the next render of this host (i.e.
+    // the next stream chunk). No cloning: per the aliasing contract on
+    // `linkedNodes`, the working nodes never enter the DOM, so nothing outside
+    // this renderer (e.g. search highlighting, which mutates the rendered DOM)
+    // can touch them. The entry is consistent whenever it can be read - it is
+    // rewritten at the end of every frame, and reads only happen between
+    // frames.
+    cacheStore.set(host, {
+      preTextContent: alreadyAutoLinked,
+      linkedNodes
+    });
+
+    // Note: we set `keepExisting` to `true` in `IRenderMime.IRenderer`s which
+    // use this method to ensure that the previous node is not removed from DOM
+    // when new chunks of data comes from the stream.
+    liveText!.commit(linkedNodes, alreadyAutoLinked.length);
+
+    if (invocation === FrameInvocation.animation) {
+      lastFrameEnd = performance.now();
+    }
+
+    // Continue unless:
+    // - no more text needs to be linkified,
+    // - new stream part was received (and new request sent),
+    // - maximum iterations limit was exceeded,
+    if (moreWorkToBeDone && !newRequest && iteration < maxIterations) {
+      return continueRendering();
+    } else {
+      return stopRendering();
+    }
+  };
+
+  // Schedule the first paint through the normal animation-frame render queue.
+  Private.scheduleRendering(host, renderFrame);
+
+  // Until the host has painted, keep a watchdog that force-paints it if
+  // `requestAnimationFrame` turns out to be starved (background tab or heavy
+  // resource pressure), so the plain text is shown even when frames stop being
+  // produced. The watchdog only fires under genuine starvation - while frames
+  // are still being produced it simply lets the render queue deliver this host
+  // in due course (see `armFallbackWatchdog`). Subsequent frames (auto-linking
+  // passes, stream updates) rely on animation frames and idle slices alone, so
+  // auto-linking naturally backs off under resource pressure rather than
+  // competing for it.
+  //
+  // The callback returns `true` when the host still needs watching (the forced
+  // frame could not paint yet because the host is not attached), so the watchdog
+  // keeps trying until the host attaches and paints.
+  if (!Private.hasPainted(host)) {
+    Private.armFallbackWatchdog(
+      host,
+      () =>
+        renderFrame(performance.now(), FrameInvocation.forced) ===
+        RenderingResult.delay
+    );
+  }
+
+  return rendered;
+}
+
+/**
+ * Render the textual representation synchronously in a single pass.
+ *
+ * This is the legacy (non-incremental) rendering path, used when incremental
+ * rendering is disabled via the sanitizer settings. It produces the same final
+ * DOM as `renderTextual`, but without spreading the work across animation
+ * frames - so it blocks the main thread for the duration of the render and does
+ * not preserve selection while streaming.
+ */
+function renderTextualSync(
+  options: renderText.IRenderOptions,
+  autoLinkOptions: IAutoLinkOptions
+): void {
   const { host, sanitizer, source } = options;
 
   const hasAnsiPrefix = source.includes(ansiPrefix);
@@ -864,74 +1257,88 @@ function renderTextual(
       })
     : nativeSanitize(source);
 
-  // Set the sanitized content for the host node.
   const pre = document.createElement('pre');
   pre.innerHTML = content;
 
   const preTextContent = pre.textContent;
+  const shouldAutoLink = sanitizer.getAutolink?.() ?? true;
 
-  const cacheStoreOptions = [];
-  if (autoLinkOptions.checkWeb) {
-    cacheStoreOptions.push('web');
-  }
-  if (autoLinkOptions.checkPaths) {
-    cacheStoreOptions.push('paths');
-  }
-  const cacheStoreKey = cacheStoreOptions.join('-');
-  let cacheStore = Private.autoLinkCache.get(cacheStoreKey);
-  if (!cacheStore) {
-    cacheStore = new WeakMap();
-    Private.autoLinkCache.set(cacheStoreKey, cacheStore);
+  if (!preTextContent || !shouldAutoLink) {
+    // Nothing to auto-link (or auto-linking is disabled): use the sanitized
+    // `<pre>` as-is.
+    host.replaceChildren(pre);
+    return;
   }
 
-  let ret: HTMLPreElement;
-  if (preTextContent) {
-    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
-    let linkedNodes: (HTMLAnchorElement | Text)[];
-    if (sanitizer.getAutolink?.() ?? true) {
-      const cache = getApplicableLinkCache(
-        cacheStore.get(host),
-        preTextContent
-      );
-      if (cache) {
-        const { cachedNodes: fromCache, addedText } = cache;
-        const newAdditions = autolink(addedText, autoLinkOptions);
-        const lastInCache = fromCache[fromCache.length - 1];
-        const firstNewNode = newAdditions[0];
+  // Auto-link the whole content in a single pass, reusing the streaming cache -
+  // this is what keeps repeated renders of a growing stream from being O(n^2).
+  const cacheStore = Private.getCacheStore(autoLinkOptions);
+  const linkedNodes = incrementalAutoLink(
+    cacheStore,
+    options,
+    autoLinkOptions,
+    preTextContent
+  );
 
-        if (lastInCache instanceof Text && firstNewNode instanceof Text) {
-          const joiningNode = lastInCache;
-          joiningNode.data += firstNewNode.data;
-          linkedNodes = [
-            ...fromCache.slice(0, -1),
-            joiningNode,
-            ...newAdditions.slice(1)
-          ];
-        } else {
-          linkedNodes = [...fromCache, ...newAdditions];
-        }
-      } else {
-        linkedNodes = autolink(preTextContent, autoLinkOptions);
-      }
-      cacheStore.set(host, {
-        preTextContent,
-        // Clone the nodes before storing them in the cache in case if another component
-        // attempts to modify (e.g. dispose of) them - which is the case for search highlights!
-        linkedNodes: linkedNodes.map(
-          node => node.cloneNode(true) as HTMLAnchorElement | Text
-        )
-      });
+  if (linkedNodes.length === 1 && linkedNodes[0] instanceof Text) {
+    // No links were found; use the sanitized `<pre>` as-is.
+    host.replaceChildren(pre);
+    return;
+  }
+
+  // Persist clones in the cache so that a component mutating the rendered nodes
+  // (e.g. search highlighting) cannot corrupt the cache.
+  cacheStore.set(host, {
+    preTextContent,
+    linkedNodes: linkedNodes.map(
+      node => node.cloneNode(true) as HTMLAnchorElement | Text
+    )
+  });
+
+  const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
+  host.replaceChildren(mergeNodes(preNodes, linkedNodes));
+}
+
+function incrementalAutoLink(
+  cacheStore: WeakMap<HTMLElement, IAutoLinkCacheEntry>,
+  options: renderText.IRenderOptions,
+  autoLinkOptions: IAutoLinkOptions,
+  preFragmentToAutoLink: string
+): (HTMLAnchorElement | Text)[] {
+  const { host } = options;
+
+  // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
+  let linkedNodes: (HTMLAnchorElement | Text)[];
+
+  const cache = getApplicableLinkCache(
+    cacheStore.get(host),
+    preFragmentToAutoLink
+  );
+  if (cache) {
+    const { cachedNodes: fromCache, addedText } = cache;
+    const newAdditions = autolink(addedText, autoLinkOptions);
+    const lastInCache = fromCache[fromCache.length - 1];
+    const firstNewNode = newAdditions[0];
+
+    if (lastInCache instanceof Text && firstNewNode instanceof Text) {
+      const joiningNode = lastInCache;
+      joiningNode.data += firstNewNode.data;
+      linkedNodes = [
+        ...fromCache.slice(0, -1),
+        joiningNode,
+        ...newAdditions.slice(1)
+      ];
     } else {
-      linkedNodes = [document.createTextNode(content)];
+      linkedNodes = [...fromCache, ...newAdditions];
     }
-
-    const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
-    ret = mergeNodes(preNodes, linkedNodes);
   } else {
-    ret = document.createElement('pre');
+    linkedNodes = autolink(preFragmentToAutoLink, autoLinkOptions);
   }
-
-  host.appendChild(ret);
+  cacheStore.set(host, {
+    preTextContent: preFragmentToAutoLink,
+    linkedNodes
+  });
+  return linkedNodes;
 }
 
 /**
@@ -979,6 +1386,7 @@ function getApplicableLinkCache(
 ): {
   cachedNodes: IAutoLinkCacheEntry['linkedNodes'];
   addedText: string;
+  processedText: string;
 } | null {
   if (!cachedResult) {
     return null;
@@ -992,27 +1400,34 @@ function getApplicableLinkCache(
   let cachedNodes = cachedResult.linkedNodes;
   const lastCachedNode =
     cachedResult.linkedNodes[cachedResult.linkedNodes.length - 1];
+  let processedText = cachedResult.preTextContent;
 
-  // Only use cached nodes if:
-  // - the last cached node is a text node
-  // - the new content starts with a new line
-  // - the old content ends with a new line
+  // Decide how much of the cache the appended text lets us keep.
   if (
     cachedResult.preTextContent.endsWith('\n') ||
     addedText.startsWith('\n')
   ) {
-    // Second or third condition is met, we can use the cached nodes
-    // (this is a no-op, we just continue execution).
-  } else if (lastCachedNode instanceof Text) {
-    // The first condition is met, we can use the cached nodes,
-    // but first we remove the Text node to re-analyse its text.
-    // This is required when we cached `aaa www.one.com bbb www.`
-    // and the incoming addition is `two.com`. We can still
-    // use text node `aaa ` and anchor node `www.one.com`, but
-    // we need to pass `bbb www.` + `two.com` through linkify again.
+    // A newline on either side of the join means the appended text cannot
+    // extend the last cached node into (or out of) a link - a URL never spans
+    // a line break - so every cached node stays valid and we linkify only the
+    // addition (this is a no-op, we just continue execution).
+  } else if (
+    lastCachedNode instanceof Text ||
+    lastCachedNode instanceof HTMLAnchorElement
+  ) {
+    // Otherwise the appended text may merge with the last cached node, so we
+    // drop that node and re-analyse its text together with the addition. Every
+    // earlier node is shielded by it and stays valid. This covers both a
+    // trailing Text node (cached `aaa www.one.com bbb www.` + `two.com`: keep
+    // text `aaa ` and anchor `www.one.com`, re-linkify `bbb www.` + `two.com`)
+    // and a trailing anchor (cached `www.one.com` + `/path` extends the link,
+    // which matters when a stream chunk boundary falls right after a URL).
     cachedNodes = cachedNodes.slice(0, -1);
     addedText = lastCachedNode.textContent + addedText;
+    processedText = processedText.slice(0, -lastCachedNode.textContent!.length);
   } else {
+    // `linkedNodes` only ever holds Text or anchor nodes, so we reach here only
+    // when it is empty (`lastCachedNode` is undefined): nothing to reuse.
     return null;
   }
 
@@ -1022,7 +1437,8 @@ function getApplicableLinkCache(
   }
   return {
     cachedNodes,
-    addedText
+    addedText,
+    processedText
   };
 }
 
@@ -1039,7 +1455,10 @@ export async function renderError(
   // Unpack the options.
   const { host, linkHandler, resolver } = options;
 
-  renderTextual(options, {
+  // Wait for rendering to complete before patching paths: the path anchors must
+  // be in the DOM for `handlePaths` to resolve them. In the incremental pipeline
+  // rendering happens across animation frames, so this must be awaited.
+  await renderTextual(options, {
     checkWeb: true,
     checkPaths: true
   });
@@ -1048,66 +1467,6 @@ export async function renderError(
   if (resolver) {
     await Private.handlePaths(host, resolver, linkHandler);
   }
-}
-
-/**
- * Merge `<span>` nodes from a `<pre>` element with `<a>` nodes from linker.
- */
-function mergeNodes(
-  preNodes: (Text | HTMLSpanElement)[],
-  linkedNodes: (Text | HTMLAnchorElement)[]
-): HTMLPreElement {
-  const ret = document.createElement('pre');
-  let inAnchorElement = false;
-
-  const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
-
-  for (let nodes of alignedNodes(preNodes, linkedNodes)) {
-    if (!nodes[0]) {
-      combinedNodes.push(nodes[1]);
-      inAnchorElement = nodes[1].nodeType !== Node.TEXT_NODE;
-      continue;
-    } else if (!nodes[1]) {
-      combinedNodes.push(nodes[0]);
-      inAnchorElement = false;
-      continue;
-    }
-    let [preNode, linkNode] = nodes;
-
-    const lastCombined = combinedNodes[combinedNodes.length - 1];
-
-    // If we are already in an anchor element and the anchor element did not change,
-    // we should insert the node from <pre> which is either Text node or coloured span Element
-    // into the anchor content as a child
-    if (
-      inAnchorElement &&
-      (linkNode as HTMLAnchorElement).href ===
-        (lastCombined as HTMLAnchorElement).href
-    ) {
-      lastCombined.appendChild(preNode);
-    } else {
-      // the `linkNode` is either Text or AnchorElement;
-      const isAnchor = linkNode.nodeType !== Node.TEXT_NODE;
-      // if we are NOT about to start an anchor element, just add the pre Node
-      if (!isAnchor) {
-        combinedNodes.push(preNode);
-        inAnchorElement = false;
-      } else {
-        // otherwise start a new anchor; the contents of the `linkNode` and `preNode` should be the same,
-        // so we just put the neatly formatted `preNode` inside the anchor node (`linkNode`)
-        // and append that to combined nodes.
-        linkNode.textContent = '';
-        linkNode.appendChild(preNode);
-        combinedNodes.push(linkNode);
-        inAnchorElement = true;
-      }
-    }
-  }
-  // Do not reuse `pre` element. Clearing out previous children is too slow...
-  for (const child of combinedNodes) {
-    ret.appendChild(child);
-  }
-  return ret;
 }
 
 /**
@@ -1186,13 +1545,445 @@ export function hardenAnchorLinks(
  * The namespace for module implementation details.
  */
 namespace Private {
+  let lastFrameTimestamp: number | null = null;
+
+  /**
+   * Check if frame rendering can proceed in frame identified by timestamp
+   * from the first `requestAnimationFrame` callback argument. This argument
+   * is guaranteed to be the same for multiple requests executed on the same
+   * frame, which allows to limit number of animations to one per frame,
+   * and in turn avoids choking the rendering pipeline by creating tasks
+   * longer than the delta between frames.
+   *
+   * Also, we want to distribute the rendering between outputs to avoid
+   * displaying blank space while waiting for the previous output to be fully rendered.
+   */
+  export function canRenderInFrame(
+    timestamp: number,
+    host: HTMLElement
+  ): boolean {
+    if (lastFrameTimestamp !== timestamp) {
+      // Progress the round-robin queue: move the current front host to the back.
+      const front: HTMLElement | undefined = renderQueue.values().next().value;
+      if (front === undefined) {
+        throw Error('Render queue cannot be empty here!');
+      }
+      renderQueue.delete(front);
+      renderQueue.add(front);
+      lastFrameTimestamp = timestamp;
+    }
+    // Only the host now at the front of the queue may render in this frame. A
+    // `Set` iterates in insertion order, so its first value is the front.
+    const next: HTMLElement | undefined = renderQueue.values().next().value;
+    return next === host;
+  }
+
+  // A `Set` (not an array) so membership, appending, round-robin rotation and
+  // removal are all O(1): with an output-heavy notebook every in-flight host
+  // re-enqueues each frame, which would be O(n^2) per frame with an array.
+  const renderQueue = new Set<HTMLElement>();
+  const frameRequests = new WeakMap<HTMLElement, number>();
+
+  /**
+   * Timestamp (in the `performance.now()` / animation-frame time domain) at
+   * which an animation frame most recently ran. Used by the fallback watchdog to
+   * tell genuine `requestAnimationFrame` starvation (background tab, heavy
+   * resource pressure) apart from a host simply waiting its turn in the
+   * per-frame render queue.
+   */
+  let lastAnimationFrameTime = 0;
+
+  /**
+   * The animation-frame timestamp observed immediately before the most recent
+   * one (callbacks of multiple hosts within one frame share a timestamp).
+   *
+   * Used by the adaptive frame budget: the gap between a host's last
+   * frame-end and the current timestamp measures the browser-side rendering
+   * overhead of that host's own work only if the host rendered in the
+   * immediately preceding frame - that is, its frame-end falls at or after
+   * this timestamp. Otherwise the gap is dominated by other hosts' turns in
+   * the round-robin queue (or by time the host spent parked off-screen) and
+   * must not inflate the budget: concurrently rendering outputs would
+   * escalate each other's budgets up to `MAX_FRAME_BUDGET`, trading frame
+   * rate for no throughput gain.
+   */
+  let previousAnimationFrameTime = 0;
+
+  export function previousFrameTime(): number {
+    return previousAnimationFrameTime;
+  }
+
+  /**
+   * Self-rearming fallback watchdogs, one per host awaiting its first paint.
+   */
+  const fallbackWatchdogs = new WeakMap<HTMLElement, number>();
+
+  /**
+   * Arm a watchdog that force-paints an as-yet-unpainted host if animation
+   * frames are starved.
+   *
+   * The watchdog is *not* a plain timeout racing the animation frame: with the
+   * per-frame render queue a host may legitimately wait many frames for its
+   * turn (e.g. when opening a notebook with many outputs), which is far longer
+   * than the fallback delay. Firing unconditionally would therefore force a
+   * disruptive burst of out-of-turn paints. Instead, on each tick the watchdog
+   * checks whether animation frames are still being produced at all: if they
+   * are, it just re-arms and lets the queue deliver this host; only when frames
+   * have genuinely stopped does it force a paint.
+   *
+   * `forcePaint` returns `true` if the host still needs watching afterwards -
+   * i.e. the forced frame could not paint yet because the host is not attached -
+   * in which case the watchdog re-arms and keeps trying until it attaches.
+   */
+  export function armFallbackWatchdog(
+    host: HTMLElement,
+    forcePaint: () => boolean
+  ): void {
+    clearFallbackWatchdog(host);
+    const rearm = () =>
+      fallbackWatchdogs.set(
+        host,
+        window.setTimeout(tick, firstPaintFallbackDelay)
+      );
+    const tick = () => {
+      const framesStarved =
+        performance.now() - lastAnimationFrameTime >= firstPaintFallbackDelay;
+      if (!framesStarved) {
+        // Frames are still being produced; keep watching in case they stop
+        // before this host gets its turn in the render queue.
+        rearm();
+        return;
+      }
+      fallbackWatchdogs.delete(host);
+      // Cancel the pending (starved) animation frame so it does not fire later
+      // and re-render on top of the forced paint.
+      cancelRenderingRequest(host);
+      if (forcePaint()) {
+        // The host was not ready to paint (not attached yet); keep watching.
+        rearm();
+      }
+    };
+    rearm();
+  }
+
+  export function clearFallbackWatchdog(host: HTMLElement): void {
+    const timer = fallbackWatchdogs.get(host);
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+      fallbackWatchdogs.delete(host);
+    }
+  }
+
+  /**
+   * Hosts which have already had their content painted at least once.
+   *
+   * Used to distinguish a "first paint" - which should be shown as promptly and
+   * as resiliently as possible - from a subsequent update or auto-linking pass -
+   * which can be throttled to the frame rate.
+   */
+  const paintedHosts = new WeakSet<HTMLElement>();
+
+  export function hasPainted(host: HTMLElement): boolean {
+    return paintedHosts.has(host);
+  }
+
+  export function markPainted(host: HTMLElement): void {
+    paintedHosts.add(host);
+  }
+
+  /**
+   * Resolvers for the per-host render completion promise returned by
+   * `renderTextual`. A host has at most one in-flight render; its resolver is
+   * called (and cleared) when the render finishes or is superseded.
+   */
+  const renderResolvers = new WeakMap<HTMLElement, () => void>();
+
+  export function registerRenderResolver(
+    host: HTMLElement,
+    resolve: () => void
+  ): void {
+    renderResolvers.set(host, resolve);
+  }
+
+  /**
+   * Resolve and clear the pending render completion promise for a host, if any.
+   */
+  export function settleRender(host: HTMLElement): void {
+    const resolve = renderResolvers.get(host);
+    if (resolve) {
+      renderResolvers.delete(host);
+      resolve();
+    }
+  }
+
+  /**
+   * Delay (in milliseconds) used by the fallback watchdog: if no animation frame
+   * has run for at least this long while a host is still awaiting its first
+   * paint, the watchdog force-paints it.
+   *
+   * Animation frames do not fire in background tabs and can be starved by the
+   * browser under heavy resource pressure (e.g. when the OS starts swapping);
+   * the watchdog ensures the cheap first paint of the plain text is not held
+   * back in those cases. It is long enough that normally produced frames keep it
+   * from firing, so the fallback only kicks in when frames are genuinely not
+   * being produced.
+   */
+  const firstPaintFallbackDelay = 100;
+
+  export function cancelRenderingRequest(host: HTMLElement) {
+    // do not remove from queue - the expectation is that rendering will resume
+    const previousRequest = frameRequests.get(host);
+    if (previousRequest) {
+      window.cancelAnimationFrame(previousRequest);
+    }
+  }
+
+  export function scheduleRendering(host: HTMLElement, render: FrameRenderer) {
+    // The host may have been parked in the background tier (e.g. it is being
+    // promoted after scrolling back into view, or a new stream chunk arrived
+    // for it): pull it out, it now (re-)enters the animation-frame tier.
+    idleQueue.delete(host);
+    // Append to the queue; a no-op if the host is already queued, which
+    // preserves its current position (a `Set` keeps insertion order).
+    renderQueue.add(host);
+    const thisRequest = window.requestAnimationFrame(timestamp => {
+      // Record that an animation frame ran so the fallback watchdog can
+      // distinguish real starvation from queue waiting, and keep the previous
+      // distinct timestamp for the adaptive-budget check (see
+      // `previousFrameTime`).
+      if (timestamp !== lastAnimationFrameTime) {
+        previousAnimationFrameTime = lastAnimationFrameTime;
+        lastAnimationFrameTime = timestamp;
+      }
+      cancelRenderingRequest(host);
+      render(timestamp, FrameInvocation.animation);
+    });
+    frameRequests.set(host, thisRequest);
+  }
+
+  export function beginRendering(host: HTMLElement) {
+    frameRequests.delete(host);
+  }
+
+  export function removeFromQueue(host: HTMLElement) {
+    renderQueue.delete(host);
+    idleQueue.delete(host);
+  }
+
+  export function hasNewRenderingRequest(host: HTMLElement) {
+    return frameRequests.get(host);
+  }
+
+  /**
+   * Background (idle) rendering tier: hosts which have painted but are
+   * currently off-screen. They keep making progress during browser idle
+   * periods instead of competing with visible outputs for animation frames -
+   * so scrolling later lands on already-rendered content - while the
+   * round-robin `renderQueue` stays reserved for on-screen hosts. Like the
+   * render queue, this is a `Set` used as a round-robin queue.
+   */
+  const idleQueue = new Set<HTMLElement>();
+
+  /**
+   * The frame renderer of each host currently parked in the idle tier.
+   */
+  const idleRenderers = new WeakMap<HTMLElement, FrameRenderer>();
+
+  /**
+   * Handle of the pending idle callback (or its timer fallback) driving the
+   * idle tier, if any. A single callback serves the whole tier.
+   */
+  let idlePumpHandle: number | null = null;
+
+  /**
+   * Period and per-slice budget (both in milliseconds) of the `setTimeout`
+   * fallback used in browsers without `requestIdleCallback` (Safari): the
+   * background tier advances for up to 10ms every 100ms, a ~10% duty cycle
+   * that keeps off-screen rendering cheap without stalling it entirely.
+   */
+  const idleFallbackPeriod = 100;
+  const idleFallbackBudget = 10;
+
+  /**
+   * `requestIdleCallback` with a `setTimeout` fallback emulating a fixed-size
+   * idle deadline.
+   */
+  const requestIdle: (callback: (deadline: IdleDeadline) => void) => number =
+    typeof requestIdleCallback === 'function'
+      ? callback => requestIdleCallback(callback)
+      : callback =>
+          window.setTimeout(() => {
+            const start = performance.now();
+            callback({
+              didTimeout: false,
+              timeRemaining: () =>
+                Math.max(0, idleFallbackBudget - (performance.now() - start))
+            });
+          }, idleFallbackPeriod);
+
+  /**
+   * Park a host in the background (idle) tier, leaving the animation-frame
+   * tier if it was in it. Its rendering continues in browser idle time until
+   * it completes, or until the host is promoted back (see `promoteFromIdle`)
+   * or removed (`removeFromQueue`).
+   */
+  export function scheduleIdleRendering(
+    host: HTMLElement,
+    render: FrameRenderer
+  ): void {
+    renderQueue.delete(host);
+    idleQueue.add(host);
+    idleRenderers.set(host, render);
+    ensureIdlePump();
+  }
+
+  /**
+   * Promote a host parked in the idle tier back to the animation-frame tier;
+   * a no-op if the host is not in the idle tier.
+   */
+  function promoteFromIdle(host: HTMLElement): void {
+    if (!idleQueue.has(host)) {
+      return;
+    }
+    const render = idleRenderers.get(host);
+    if (render) {
+      scheduleRendering(host, render);
+    }
+  }
+
+  /**
+   * Request an idle callback to drive the idle tier, unless one is already
+   * pending or there is nothing to drive.
+   *
+   * Note that without spare main-thread time the browser may delay the idle
+   * callback indefinitely; that is intended - background rendering should
+   * yield entirely to whatever is keeping the page busy. Hosts which become
+   * visible in the meantime are promoted eagerly by their intersection
+   * observers rather than waiting for an idle slice.
+   */
+  function ensureIdlePump(): void {
+    if (idlePumpHandle !== null || idleQueue.size === 0) {
+      return;
+    }
+    idlePumpHandle = requestIdle(deadline => {
+      idlePumpHandle = null;
+      // Round-robin over the background tier for as long as the browser
+      // reports spare time. A host which still has work re-enqueues itself at
+      // the back (via `scheduleIdleRendering`), preserving fairness while
+      // allowing several slices within one long idle period; a host which
+      // finishes (or moves tiers) leaves the queue, so the loop terminates.
+      while (idleQueue.size > 0 && deadline.timeRemaining() > 1) {
+        const host: HTMLElement = idleQueue.values().next().value!;
+        idleQueue.delete(host);
+        const render = idleRenderers.get(host);
+        if (render) {
+          render(
+            performance.now(),
+            FrameInvocation.idle,
+            deadline.timeRemaining()
+          );
+        }
+      }
+      ensureIdlePump();
+    });
+  }
+
+  /**
+   * Per-host visibility as last reported by the persistent intersection
+   * observer (see `observeVisibility`). Hosts without an entry are assumed
+   * visible: this keeps the first paint optimistic (an unpainted host has no
+   * content and, with `contain: style layout`, zero height - so the observer
+   * would report it as not intersecting even inside the viewport) and errs
+   * towards rendering at full rate.
+   */
+  const hostVisibility = new WeakMap<HTMLElement, boolean>();
+
+  export function isHostVisible(host: HTMLElement): boolean {
+    return hostVisibility.get(host) ?? true;
+  }
+
+  /**
+   * Persistent intersection observers, one per host.
+   *
+   * An observer is created lazily on the first render for a host and then
+   * kept for the host's lifetime, so that subsequent renders (with streamed
+   * outputs: every chunk) reuse it instead of paying for an
+   * observe/disconnect cycle each. No explicit disconnection is needed:
+   * observation targets are held weakly (they do not prevent the host from
+   * being garbage collected), and this `WeakMap` keeps the observer itself
+   * alive only as long as its host.
+   */
+  const hostObservers = new WeakMap<HTMLElement, IntersectionObserver>();
+
+  /**
+   * Start observing the visibility of a host, unless it is already observed.
+   *
+   * Besides recording visibility (see `isHostVisible`), the observer promotes
+   * the host out of the background (idle) tier as soon as it comes back into
+   * view, so rendering resumes at full rate without waiting for an idle slice
+   * (idle callbacks can be delayed indefinitely on a busy page, e.g. while
+   * the user is scrolling through a heavy notebook).
+   */
+  export function observeVisibility(host: HTMLElement): void {
+    if (
+      typeof IntersectionObserver === 'undefined' ||
+      hostObservers.has(host)
+    ) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          hostVisibility.set(host, entry.isIntersecting);
+        }
+        if (isHostVisible(host)) {
+          promoteFromIdle(host);
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(host);
+    hostObservers.set(host, observer);
+  }
+
+  /**
+   * Abort any in-flight incremental rendering for a host: cancel its pending
+   * frame and fallback watchdog, remove it from the rendering queues (both the
+   * animation-frame and the idle tier), and disconnect its observer.
+   */
+  export function abortRendering(host: HTMLElement): void {
+    cancelRenderingRequest(host);
+    clearFallbackWatchdog(host);
+    removeFromQueue(host);
+    hostObservers.get(host)?.disconnect();
+    hostObservers.delete(host);
+    hostVisibility.delete(host);
+  }
+
   /**
    * Cache for auto-linking results to provide better performance when streaming outputs.
    */
-  export const autoLinkCache = new Map<
+  const autoLinkCache = new Map<
     string,
     WeakMap<HTMLElement, IAutoLinkCacheEntry>
   >();
+
+  export function getCacheStore(autoLinkOptions: IAutoLinkOptions) {
+    const cacheStoreOptions = [];
+    if (autoLinkOptions.checkWeb) {
+      cacheStoreOptions.push('web');
+    }
+    if (autoLinkOptions.checkPaths) {
+      cacheStoreOptions.push('paths');
+    }
+    const cacheStoreKey = cacheStoreOptions.join('-');
+    let cacheStore = autoLinkCache.get(cacheStoreKey);
+    if (!cacheStore) {
+      cacheStore = new WeakMap();
+      autoLinkCache.set(cacheStoreKey, cacheStore);
+    }
+    return cacheStore;
+  }
 
   /**
    * Eval the script tags contained in a host populated by `innerHTML`.
