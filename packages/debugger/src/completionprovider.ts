@@ -49,6 +49,11 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     changed: SourceChange,
     context?: ICompletionContext
   ): boolean {
+    // The visible completer already filters its items on typing;
+    // triggering another fetch would only cause redundant requests.
+    if (completerIsVisible) {
+      return false;
+    }
     const { sourceChange } = changed;
     if (!sourceChange || sourceChange.some(delta => delta.delete != null)) {
       return false;

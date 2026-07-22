@@ -34,6 +34,7 @@ const code = [
   '',
   "data = {'alpha': 1, 'beta': 2}",
   "big = {f'key_{i:03d}': i for i in range(120)}",
+  "huge = {f'k_{i:04d}': i for i in range(500)}",
   'tricky = {"it\'s": 1, \'say "hi"\': 2}',
   'x = 1',
   'x += 1',
@@ -175,6 +176,26 @@ describe('Debugger completion providers integration test', () => {
       expect(labels.length).toBeGreaterThanOrEqual(120);
       expect(labels.some(label => label.includes('key_000'))).toBe(true);
       expect(labels.some(label => label.includes('key_119'))).toBe(true);
+    });
+
+    it('should cap oversized replies and allow refetch to narrow them', async () => {
+      const capped = provider();
+      const reply = await capped.fetch({ text: "huge['", offset: 6 }, context);
+      // The limit is enforced rather than failing on an oversized payload.
+      expect(reply.items.length).toBe(200);
+      // A truncated reply allows narrowing by refetch while visible.
+      expect(
+        capped.shouldShowContinuousHint(true, {
+          sourceChange: [{ insert: 'k' }]
+        })
+      ).toBe(true);
+      // A complete reply does not.
+      await capped.fetch({ text: "data['", offset: 6 }, context);
+      expect(
+        capped.shouldShowContinuousHint(true, {
+          sourceChange: [{ insert: 'k' }]
+        })
+      ).toBe(false);
     });
 
     it('should not pollute the namespace of the paused frame', async () => {

@@ -63,10 +63,12 @@ function evaluateResultOf(json: string): string {
  */
 function completionsPayload(
   tokLen: number,
-  items: Array<[string, string]>
+  items: Array<[string, string]>,
+  truncated = false
 ): string {
   return evaluateResultOf(
-    `{"tok_len": ${tokLen}, "items": ${JSON.stringify(items)}}`
+    `{"tok_len": ${tokLen}, "truncated": ${truncated}, ` +
+      `"items": ${JSON.stringify(items)}}`
   );
 }
 
@@ -165,6 +167,44 @@ describe('DebuggerIPythonCompletionProvider', () => {
       expect(provider.shouldShowContinuousHint(false, {})).toBe(false);
     });
 
+    it('should return false when the completer is already visible', () => {
+      expect(
+        provider.shouldShowContinuousHint(true, {
+          sourceChange: [{ insert: "'" }]
+        })
+      ).toBe(false);
+    });
+
+    it('should allow a refetch while visible after a truncated reply', async () => {
+      const withTruncated = makeProvider(
+        mockEvaluate(completionsPayload(1, [['a', '']], true))
+      );
+      await withTruncated.fetch({ text: "d['a", offset: 4 }, context);
+      expect(
+        withTruncated.shouldShowContinuousHint(true, {
+          sourceChange: [{ insert: 'k' }]
+        })
+      ).toBe(true);
+      // Deletions still do not trigger a refetch.
+      expect(
+        withTruncated.shouldShowContinuousHint(true, {
+          sourceChange: [{ delete: 1 }]
+        })
+      ).toBe(false);
+    });
+
+    it('should suppress a refetch while visible after a complete reply', async () => {
+      const withComplete = makeProvider(
+        mockEvaluate(completionsPayload(1, [['a', '']], false))
+      );
+      await withComplete.fetch({ text: "d['a", offset: 4 }, context);
+      expect(
+        withComplete.shouldShowContinuousHint(true, {
+          sourceChange: [{ insert: 'k' }]
+        })
+      ).toBe(false);
+    });
+
     it('should return false when the change contains a deletion', () => {
       expect(
         provider.shouldShowContinuousHint(false, {
@@ -233,6 +273,19 @@ describe('DebuggerIPythonCompletionProvider', () => {
       expect(
         await provider.fetch({ text: "df['", offset: 4 }, context)
       ).toEqual({ start: 0, end: 0, items: [] });
+    });
+
+    it.each([
+      ['an identifier', 'dat'],
+      ['an attribute access', 'df.he'],
+      ['a closed call', 'df.head()']
+    ])('should skip the kernel round-trip for %s', async (_, text) => {
+      const sendRequest = mockEvaluate(completionsPayload(0, []));
+      const provider = makeProvider(sendRequest);
+      expect(
+        await provider.fetch({ text, offset: text.length }, context)
+      ).toEqual({ start: 0, end: 0, items: [] });
+      expect(sendRequest).not.toHaveBeenCalled();
     });
 
     it('should send a single self-contained evaluate request', async () => {
@@ -369,7 +422,10 @@ describe('DebuggerIPythonCompletionProvider', () => {
         const json = '{"tok_len": 1, "items": [["caf\\u00e9", ""]]}';
         const sendRequest = mockEvaluate(evaluateResultOf(json));
         const provider = makeProvider(sendRequest);
-        const reply = await provider.fetch({ text: 'caf', offset: 3 }, context);
+        const reply = await provider.fetch(
+          { text: "d['caf", offset: 6 },
+          context
+        );
         expect(reply.items[0].label).toBe('café');
       });
 
@@ -377,7 +433,10 @@ describe('DebuggerIPythonCompletionProvider', () => {
         const json = '{"tok_len": 1, "items": [["a", "keyword"]]}';
         const sendRequest = mockEvaluate('"' + btoa(json) + '"');
         const provider = makeProvider(sendRequest);
-        const reply = await provider.fetch({ text: 'a', offset: 1 }, context);
+        const reply = await provider.fetch(
+          { text: "d['a", offset: 4 },
+          context
+        );
         expect(reply.items).toHaveLength(1);
       });
 
@@ -387,7 +446,10 @@ describe('DebuggerIPythonCompletionProvider', () => {
           '[["good", "keyword"], "bad", ["short"], 42, [1, 2], ["x", 3]]}';
         const sendRequest = mockEvaluate(evaluateResultOf(json));
         const provider = makeProvider(sendRequest);
-        const reply = await provider.fetch({ text: 'g', offset: 1 }, context);
+        const reply = await provider.fetch(
+          { text: "d['g", offset: 4 },
+          context
+        );
         expect(reply.items).toEqual([
           { label: 'good', insertText: 'good', type: 'keyword' }
         ]);
@@ -396,9 +458,12 @@ describe('DebuggerIPythonCompletionProvider', () => {
       it('should clamp the start to 0 when tok_len exceeds the offset', async () => {
         const sendRequest = mockEvaluate(completionsPayload(10, [['a', '']]));
         const provider = makeProvider(sendRequest);
-        const reply = await provider.fetch({ text: 'a', offset: 1 }, context);
+        const reply = await provider.fetch(
+          { text: "d['a", offset: 4 },
+          context
+        );
         expect(reply.start).toBe(0);
-        expect(reply.end).toBe(1);
+        expect(reply.end).toBe(4);
       });
 
       it.each([
@@ -421,9 +486,9 @@ describe('DebuggerIPythonCompletionProvider', () => {
       ])('should return an empty reply for %s', async (_, result) => {
         const sendRequest = mockEvaluate(result);
         const provider = makeProvider(sendRequest);
-        expect(await provider.fetch({ text: 'a', offset: 1 }, context)).toEqual(
-          { start: 0, end: 0, items: [] }
-        );
+        expect(
+          await provider.fetch({ text: "d['a", offset: 4 }, context)
+        ).toEqual({ start: 0, end: 0, items: [] });
       });
     });
   });

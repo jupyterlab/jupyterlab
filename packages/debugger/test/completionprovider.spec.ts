@@ -104,6 +104,14 @@ describe('DebuggerCompletionProvider', () => {
       expect(provider.shouldShowContinuousHint(false, {})).toBe(false);
     });
 
+    it('should return false when the completer is already visible', () => {
+      expect(
+        provider.shouldShowContinuousHint(true, {
+          sourceChange: [{ insert: '.' }]
+        })
+      ).toBe(false);
+    });
+
     it('should return false when the change contains a deletion', () => {
       expect(
         provider.shouldShowContinuousHint(false, {

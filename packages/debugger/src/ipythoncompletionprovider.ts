@@ -19,6 +19,12 @@ import type { IDebugger } from './tokens';
 const HELPER_NAME = 'completions_for';
 
 /**
+ * Maximum number of completions returned by the helper. Also keeps the
+ * payload well within the size which debugpy can return whole (~64 kB).
+ */
+const COMPLETION_LIMIT = 200;
+
+/**
  * Python definition of the completion helper. Runs IPython's matchers on
  * the namespace of the paused frame (received as arguments) and returns
  * the payload - "tok_len" and "items" as `[text, type]` pairs - as
@@ -29,7 +35,7 @@ const HELPER_NAME = 'completions_for';
  * ~64 kB - ample headroom for the completion limit below.
  */
 const HELPER_DEFINITION = `
-def ${HELPER_NAME}(text, offset, frame_locals, frame_globals):
+def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, limit=${COMPLETION_LIMIT}):
     import base64
     import json
     from IPython.core.completer import IPCompleter, CompletionContext
@@ -46,17 +52,20 @@ def ${HELPER_NAME}(text, offset, frame_locals, frame_globals):
         full_text=text,
         cursor_position=len(lines[-1]),
         cursor_line=len(lines) - 1,
-        limit=200,
+        limit=limit,
     )
     matchers = ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']
+    matches = [
+        [c.text, c.type or '']
+        for matcher in matchers
+        for c in getattr(completer, matcher)(context).get('completions', [])
+        if c.text
+    ]
     payload = {
         'tok_len': len(token),
-        'items': [
-            [c.text, c.type or '']
-            for matcher in matchers
-            for c in getattr(completer, matcher)(context).get('completions', [])
-            if c.text
-        ],
+        # the context limit is only a hint to the matchers - enforce it
+        'truncated': len(matches) > limit,
+        'items': matches[:limit],
     }
     return base64.b64encode(json.dumps(payload).encode()).decode()
 `.trim();
@@ -109,6 +118,15 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     if (!sourceChange || sourceChange.some(delta => delta.delete != null)) {
       return false;
     }
+    if (completerIsVisible) {
+      // The visible completer filters its items on typing, so a refetch is
+      // only needed when the last reply was truncated by the completion
+      // limit - narrowing the prefix can then surface withheld items.
+      return (
+        this._lastReplyTruncated &&
+        sourceChange.some(delta => delta.insert != null)
+      );
+    }
     const dapTriggerChars = this._debuggerService.session?.capabilities
       ?.completionTriggerCharacters ?? ['.'];
     // Add quote characters to trigger dict-key completions automatically.
@@ -130,6 +148,15 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
 
     const frameId = this._debuggerService.model.callstack.frame?.id;
     const textBeforeCursor = request.text.slice(0, request.offset);
+
+    // The reconciliator fetches from all applicable providers in parallel,
+    // so skip the kernel round-trip when none of the IPython-only matchers
+    // can contribute (identifier/attribute completion is covered by the
+    // DAP provider).
+    if (!_hasMatcherContext(textBeforeCursor)) {
+      return { start: 0, end: 0, items: [] };
+    }
+
     // JSON.stringify produces a valid Python string literal for all inputs.
     const textLiteral = JSON.stringify(textBeforeCursor);
     const offset = textBeforeCursor.length;
@@ -163,6 +190,7 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
       if (!data || !data.items.length) {
         return { start: 0, end: 0, items: [] };
       }
+      this._lastReplyTruncated = data.truncated;
 
       const start = Math.max(0, request.offset - data.tokLen);
       const end = request.offset;
@@ -182,8 +210,28 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     }
   }
 
+  private _lastReplyTruncated = false;
   private _trans: TranslationBundle;
   private _debuggerService: IDebugger;
+}
+
+/**
+ * Cheap pre-filter: whether any of the IPython-only matchers can plausibly
+ * contribute at this cursor position - inside a subscript (dict keys),
+ * inside a call's argument list (keyword arguments), or inside a string
+ * literal (file paths). Permissive by design: a false positive only costs
+ * the kernel round-trip that would otherwise always happen, while a false
+ * negative would suppress completions.
+ */
+function _hasMatcherContext(textBeforeCursor: string): boolean {
+  return (
+    // Unclosed subscript, e.g. `data['al` or `df.loc[`.
+    /\[[^\]]*$/.test(textBeforeCursor) ||
+    // Unclosed call arguments, e.g. `plot(al`.
+    /\([^)]*$/.test(textBeforeCursor) ||
+    // Possibly inside a string literal, e.g. `open('./da`.
+    /['"][^'"]*$/.test(textBeforeCursor)
+  );
 }
 
 /**
@@ -195,9 +243,11 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
  * simply the base64 text wrapped in quotes, and the native `atob()` and
  * `JSON.parse()` can do all of the decoding.
  */
-function _decodePayload(
-  pythonRepr: string
-): { tokLen: number; items: Array<[string, string]> } | null {
+function _decodePayload(pythonRepr: string): {
+  tokLen: number;
+  items: Array<[string, string]>;
+  truncated: boolean;
+} | null {
   const match = pythonRepr.trim().match(/^['"]([a-z0-9+/=]*)['"]$/i);
   if (!match) {
     return null;
@@ -221,7 +271,8 @@ function _decodePayload(
           item.length >= 2 &&
           typeof item[0] === 'string' &&
           typeof item[1] === 'string'
-      )
+      ),
+      truncated: data.truncated === true
     };
   } catch {
     return null;
