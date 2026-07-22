@@ -108,7 +108,8 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
         label: item.label,
         insertText: item.text ?? item.label,
         documentation: item.detail,
-        type: item.type as string | undefined
+        // `CompletionItemType` is a union of string literals.
+        type: item.type
       }));
 
       return { start, end, items };
