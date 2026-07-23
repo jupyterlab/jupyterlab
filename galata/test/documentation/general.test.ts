@@ -670,29 +670,31 @@ test.describe('General', () => {
     );
     await freeezeKernelIds(dialog, mockedKernelIds);
 
-    // Freeze `terminal/X` identifier because under concurrent execution the
-    // server might be tracking another terminal already so instead of
-    // `terminal/1` the screenshot would show e.g. `terminal/2`.
+    // Freeze the terminal identifier because under concurrent execution the
+    // server might be tracking another terminal already, and the displayed
+    // terminal label can depend on the terminal tab title. Terminal labels are
+    // covered in terminal tests; keep this modal snapshot focused on layout.
     // Changing this via mocks would involve both intercepting terminal REST
     // API and then rewiring websocket connections which does not work
     // reliably in galata as of now.
     await dialog.evaluate(node => {
-      let changed = false;
-      for (let [_, entry] of node
-        .querySelectorAll('.jp-RunningSessions-itemLabel')
-        .entries()) {
-        const label = entry.textContent ?? '';
-        if (/terminals\/\d+/i.test(label)) {
-          entry.textContent = label.replace(/terminals\/\d+/gi, 'terminals/1');
-          changed = true;
-          break;
-        }
-      }
-      if (!changed) {
+      const terminalSection = Array.from(
+        node.querySelectorAll('.jp-RunningSessions-section')
+      ).find(section => {
+        const label = section.querySelector(
+          '.jp-SearchableSessions-titleLabel'
+        );
+        return label?.textContent?.toLowerCase() === 'terminals';
+      });
+      const terminalEntry = terminalSection?.querySelector(
+        '.jp-RunningSessions-itemLabel'
+      );
+      if (!terminalEntry) {
         throw Error(
           'Expected to find at least one terminal entry in the dialog.'
         );
       }
+      terminalEntry.textContent = 'terminals/1';
     });
 
     expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');
