@@ -193,6 +193,141 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#recentCommands', () => {
+      it('should return the recently executed commands, most recent first', () => {
+        click(itemNode('test:b'));
+        click(itemNode('test:a'));
+        expect(palette.recentCommands).toEqual([
+          { command: 'test:a', args: {} },
+          { command: 'test:b', args: {} }
+        ]);
+      });
+
+      it('should restore and pin the assigned commands', () => {
+        palette.recentCommands = [
+          { command: 'test:a', args: {} },
+          { command: 'test:b', args: {} }
+        ];
+        MessageLoop.flush();
+        const children = palette.contentNode.children;
+        expect(children[0].getAttribute('data-command')).toBe('test:a');
+        expect(children[1].getAttribute('data-command')).toBe('test:b');
+        expect(palette.isRecent(itemA)).toBe(true);
+        expect(palette.isRecent(itemB)).toBe(true);
+      });
+
+      it('should keep a command which does not resolve to an item', () => {
+        palette.recentCommands = [{ command: 'test:missing', args: {} }];
+        MessageLoop.flush();
+        expect(palette.recentCommands).toEqual([
+          { command: 'test:missing', args: {} }
+        ]);
+        const first = palette.contentNode.firstElementChild!;
+        expect(first.classList.contains('lm-CommandPalette-header')).toBe(true);
+      });
+
+      it('should deduplicate the assigned commands', () => {
+        palette.recentCommands = [
+          { command: 'test:a', args: {} },
+          { command: 'test:a', args: {} },
+          { command: 'test:b', args: {} }
+        ];
+        expect(palette.recentCommands).toEqual([
+          { command: 'test:a', args: {} },
+          { command: 'test:b', args: {} }
+        ]);
+      });
+
+      it('should truncate the assigned commands to the limit', () => {
+        palette.maxRecentCommands = 1;
+        palette.recentCommands = [
+          { command: 'test:a', args: {} },
+          { command: 'test:b', args: {} }
+        ];
+        expect(palette.recentCommands).toEqual([
+          { command: 'test:a', args: {} }
+        ]);
+      });
+
+      it('should clear the history when assigned an empty array', () => {
+        click(itemNode('test:a'));
+        click(itemNode('test:b'));
+        palette.recentCommands = [];
+        MessageLoop.flush();
+        expect(palette.recentCommands).toEqual([]);
+        const first = palette.contentNode.firstElementChild!;
+        expect(first.classList.contains('lm-CommandPalette-header')).toBe(true);
+      });
+
+      it('should let a command clear the history from its execute body', () => {
+        // The palette emits `itemTriggered` before the command runs, so
+        // the effects of the command on the history win over the
+        // tracking of the command itself.
+        commands.addCommand('test:clear', {
+          label: 'Clear',
+          execute: () => {
+            palette.recentCommands = [];
+          }
+        });
+        palette.addItem({ command: 'test:clear', category: 'One' });
+        MessageLoop.flush();
+
+        click(itemNode('test:a'));
+        click(itemNode('test:clear'));
+        expect(palette.recentCommands).toEqual([]);
+      });
+
+      it('should ignore malformed entries and strip extra fields', () => {
+        palette.recentCommands = [
+          null,
+          42,
+          'test:a',
+          { command: 42, args: {} },
+          { command: 'test:missing-args' },
+          { command: 'test:array-args', args: [] },
+          { command: 'test:a', args: {}, extra: 'dropped' }
+        ] as unknown as RecentsCommandPalette.IRecentCommand[];
+        expect(palette.recentCommands).toEqual([
+          { command: 'test:a', args: {} }
+        ]);
+      });
+    });
+
+    describe('#recentsChanged', () => {
+      it('should emit when a command is executed from the palette', () => {
+        let count = 0;
+        palette.recentsChanged.connect(() => count++);
+        click(itemNode('test:a'));
+        expect(count).toBe(1);
+      });
+
+      it('should emit when the history is truncated by a lower limit', () => {
+        click(itemNode('test:a'));
+        click(itemNode('test:b'));
+        let count = 0;
+        palette.recentsChanged.connect(() => count++);
+        palette.maxRecentCommands = 1;
+        expect(count).toBe(1);
+        palette.maxRecentCommands = 4;
+        expect(count).toBe(1);
+      });
+
+      it('should emit when the history is replaced', () => {
+        let count = 0;
+        palette.recentsChanged.connect(() => count++);
+        palette.recentCommands = [{ command: 'test:a', args: {} }];
+        expect(count).toBe(1);
+      });
+
+      it('should not emit when the history does not change', () => {
+        palette.recentCommands = [{ command: 'test:a', args: {} }];
+        let count = 0;
+        palette.recentsChanged.connect(() => count++);
+        palette.recentCommands = [{ command: 'test:a', args: {} }];
+        expect(count).toBe(0);
+      });
+    });
+
     describe('#isRecent()', () => {
       it('should test whether an item is a recently executed command', () => {
         click(itemNode('test:b'));

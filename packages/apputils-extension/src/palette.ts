@@ -10,6 +10,7 @@ import {
   RecentsCommandPalette
 } from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
@@ -24,9 +25,16 @@ import type { CommandPalette } from '@lumino/widgets';
  */
 namespace CommandIDs {
   export const activate = 'apputils:activate-command-palette';
+
+  export const clearRecents = 'apputils:clear-recent-commands';
 }
 
 const PALETTE_PLUGIN_ID = '@jupyterlab/apputils-extension:palette';
+
+/**
+ * The key used to store the recently executed commands in the state database.
+ */
+const RECENTS_STATE_KEY = 'command-palette:recents';
 
 /**
  * A thin wrapper around the `CommandPalette` class to conform with the
@@ -93,7 +101,8 @@ export namespace Palette {
   export function activate(
     app: JupyterFrontEnd,
     translator: ITranslator,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    state: IStateDB | null = null
   ): ICommandPalette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
@@ -116,6 +125,7 @@ export namespace Palette {
       trans.__('Command Palette Section')
     );
     shell.add(palette, 'left', { rank: 300, type: 'Command Palette' });
+    let settingsApplied: Promise<void> = Promise.resolve();
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
@@ -135,7 +145,7 @@ export namespace Palette {
           .composite as number;
       };
 
-      Promise.all([loadSettings, app.restored])
+      settingsApplied = Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
           updateSettings(settings);
           settings.changed.connect(settings => {
@@ -145,6 +155,43 @@ export namespace Palette {
         .catch((reason: Error) => {
           console.error(reason.message);
         });
+    }
+
+    if (state) {
+      // Restore the recently executed commands once the settings have been
+      // applied, so that the restored history is not truncated by a
+      // `maxRecentCommands` limit which is about to change.
+      const restored = settingsApplied
+        .then(() => state.fetch(RECENTS_STATE_KEY))
+        .then(value => {
+          const saved = (
+            value as
+              | { commands?: RecentsCommandPalette.IRecentCommand[] }
+              | undefined
+          )?.commands;
+          if (Array.isArray(saved)) {
+            // List the commands executed during this session first.
+            palette.recentCommands = [...palette.recentCommands, ...saved];
+          }
+        })
+        .catch((reason: Error) => {
+          console.error(
+            'Failed to restore the recently used commands.',
+            reason
+          );
+        });
+
+      // Save the history when it changes, once the restoration has completed
+      // so that an early save cannot overwrite the stored history.
+      palette.recentsChanged.connect(() => {
+        void restored
+          .then(() =>
+            state.save(RECENTS_STATE_KEY, { commands: palette.recentCommands })
+          )
+          .catch((reason: Error) => {
+            console.warn('Failed to save the recently used commands.', reason);
+          });
+      });
     }
 
     // Show the current palette shortcut in its title.
@@ -180,6 +227,30 @@ export namespace Palette {
         }
       },
       label: trans.__('Activate Command Palette')
+    });
+
+    commands.addCommand(CommandIDs.clearRecents, {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        palette.recentCommands = [];
+      },
+      isEnabled: () => palette.recentCommands.length > 0,
+      label: trans.__('Clear Recently Used Commands'),
+      caption: trans.__('Clear the list of recently used commands.')
+    });
+    palette.addItem({
+      command: CommandIDs.clearRecents,
+      category: trans.__('Command Palette')
+    });
+
+    // Keep the enabled state of the clear command up to date.
+    palette.recentsChanged.connect(() => {
+      commands.notifyCommandChanged(CommandIDs.clearRecents);
     });
 
     palette.inputNode.placeholder = trans.__('SEARCH');

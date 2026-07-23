@@ -4,9 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 import { searchIcon } from '@jupyterlab/ui-components';
-import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { CommandPalette, Panel, Widget } from '@lumino/widgets';
 
 /**
@@ -201,8 +206,10 @@ export namespace ModalCommandPalette {
  * Commands triggered from a menu, a keyboard shortcut, or a direct
  * invocation of the command registry are not tracked.
  *
- * The commands are tracked in memory, so the recently executed commands
- * are not preserved across page reloads.
+ * The commands are tracked in memory. The `recentCommands` accessors and
+ * the `recentsChanged` signal allow an external actor to save and restore
+ * the recently executed commands, for example to preserve them across
+ * page reloads.
  */
 export class RecentsCommandPalette extends CommandPalette {
   /**
@@ -215,7 +222,7 @@ export class RecentsCommandPalette extends CommandPalette {
     if (options.maxRecentCommands !== undefined) {
       this.maxRecentCommands = options.maxRecentCommands;
     }
-    this.itemExecuted.connect(this._onItemExecuted, this);
+    this.itemTriggered.connect(this._onItemTriggered, this);
   }
 
   /**
@@ -265,10 +272,83 @@ export class RecentsCommandPalette extends CommandPalette {
     // Drop the oldest commands which exceed the new limit.
     if (this._recentCommands.length > value) {
       this._recentCommands.length = value;
+      this._recentsChanged.emit(undefined);
     }
 
     // Refresh the search results.
     this.refresh();
+  }
+
+  /**
+   * The recently executed commands, ordered from most recently executed
+   * to least recently executed.
+   *
+   * #### Notes
+   * Assigning to this property replaces the command history, for example
+   * to restore the recently executed commands from an external storage.
+   *
+   * The assigned entries are normalized: an entry which is not a valid
+   * recent command is ignored, duplicate entries are deduplicated, and
+   * the history is truncated to the `maxRecentCommands` limit.
+   */
+  get recentCommands(): ReadonlyArray<RecentsCommandPalette.IRecentCommand> {
+    return [...this._recentCommands];
+  }
+
+  set recentCommands(
+    value: ReadonlyArray<RecentsCommandPalette.IRecentCommand>
+  ) {
+    // Normalize the entries, dropping the ones which do not conform to
+    // the expected shape, e.g. corrupted entries from an external storage.
+    const normalized: RecentsCommandPalette.IRecentCommand[] = [];
+    for (const entry of value as ReadonlyArray<unknown>) {
+      if (normalized.length >= this._maxRecentCommands) {
+        break;
+      }
+      if (!Private.isRecentCommand(entry)) {
+        continue;
+      }
+      const { command, args } = entry;
+      const duplicate = normalized.some(recent => {
+        return (
+          recent.command === command && JSONExt.deepEqual(recent.args, args)
+        );
+      });
+      if (!duplicate) {
+        normalized.push({ command, args });
+      }
+    }
+
+    // Bail if the history does not change.
+    const unchanged =
+      normalized.length === this._recentCommands.length &&
+      normalized.every((recent, index) => {
+        const current = this._recentCommands[index];
+        return (
+          recent.command === current.command &&
+          JSONExt.deepEqual(recent.args, current.args)
+        );
+      });
+    if (unchanged) {
+      return;
+    }
+
+    // Update the history and refresh the search results.
+    this._recentCommands = normalized;
+    this._recentsChanged.emit(undefined);
+    this.refresh();
+  }
+
+  /**
+   * A signal emitted when the recently executed commands change.
+   *
+   * #### Notes
+   * The signal is emitted when a command is executed from the palette,
+   * when the history is truncated by a lower `maxRecentCommands` limit,
+   * and when the history is replaced via the `recentCommands` setter.
+   */
+  get recentsChanged(): ISignal<this, void> {
+    return this._recentsChanged;
   }
 
   /**
@@ -355,9 +435,9 @@ export class RecentsCommandPalette extends CommandPalette {
   }
 
   /**
-   * Handle the `itemExecuted` signal of the command palette.
+   * Handle the `itemTriggered` signal of the command palette.
    */
-  private _onItemExecuted(
+  private _onItemTriggered(
     sender: CommandPalette,
     item: CommandPalette.IItem
   ): void {
@@ -384,10 +464,13 @@ export class RecentsCommandPalette extends CommandPalette {
     if (this._recentCommands.length > this._maxRecentCommands) {
       this._recentCommands.length = this._maxRecentCommands;
     }
+
+    this._recentsChanged.emit(undefined);
   }
 
   private _maxRecentCommands = DEFAULT_MAX_RECENT_COMMANDS;
-  private _recentCommands: Private.IRecentCommand[] = [];
+  private _recentCommands: RecentsCommandPalette.IRecentCommand[] = [];
+  private _recentsChanged = new Signal<this, void>(this);
   private _resolvedRecents = new Set<CommandPalette.IItem>();
 }
 
@@ -406,16 +489,16 @@ export namespace RecentsCommandPalette {
      */
     maxRecentCommands?: number;
   }
-}
 
-/**
- * The namespace for module private data.
- */
-namespace Private {
   /**
    * An object which represents a recently executed command.
+   *
+   * #### Notes
+   * The interface extends a read-only JSON object so that the recently
+   * executed commands can be serialized, for example to preserve them
+   * across page reloads.
    */
-  export interface IRecentCommand {
+  export interface IRecentCommand extends ReadonlyPartialJSONObject {
     /**
      * The command which was executed.
      */
@@ -425,5 +508,28 @@ namespace Private {
      * The arguments for the command.
      */
     readonly args: ReadonlyJSONObject;
+  }
+}
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Test whether a value is a valid recent command entry.
+   */
+  export function isRecentCommand(
+    value: unknown
+  ): value is RecentsCommandPalette.IRecentCommand {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+    const entry = value as { command?: unknown; args?: unknown };
+    return (
+      typeof entry.command === 'string' &&
+      typeof entry.args === 'object' &&
+      entry.args !== null &&
+      !Array.isArray(entry.args)
+    );
   }
 }
