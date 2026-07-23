@@ -22,7 +22,7 @@ if os.name == "nt":
 subprocess.check_call("python -m pip uninstall -y jupyterlab".split(), cwd=here)  # noqa S603
 
 
-def resolve_pattern(pat):
+def resolve_pattern(pat: str) -> list[str]:
     """handle a leading `#` or `@` in a pattern"""
     pat = pat.strip()
 

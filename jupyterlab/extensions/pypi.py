@@ -48,11 +48,16 @@ from jupyterlab.extensions.manager import (
 
 
 class ProxiedTransport(xmlrpc.client.Transport):
-    def set_proxy(self, host, port=None, headers=None):
+    def set_proxy(
+        self,
+        host: str,
+        port: str | int | None = None,
+        headers: dict[str, str] | None = None,
+    ):
         self.proxy = host, port
         self.proxy_headers = headers
 
-    def make_connection(self, host):
+    def make_connection(self, host: str) -> http.client.HTTPConnection:
         connection = http.client.HTTPConnection(*self.proxy)
         connection.set_tunnel(host, headers=self.proxy_headers)
         self._connection = host, connection
@@ -305,7 +310,12 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:  # noqa
+    async def __throttleRequest(  # noqa: N802
+        self,
+        recursive: bool,
+        fn: Callable,
+        *args: Any,
+    ) -> Any:  # noqa: ANN401
         """Throttle XMLRPC API request
 
         Args:
@@ -340,8 +350,8 @@ class PyPIExtensionManager(ExtensionManager):
         return data
 
     @observe("package_metadata_cache_size")
-    def _observe_package_metadata_cache_size(self, change):
-        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
+    def _observe_package_metadata_cache_size(self, change: dict[str, object]):
+        self._fetch_package_metadata = alru_cache(maxsize=int(change["new"]))(
             partial(_fetch_package_metadata, self._httpx_client)
         )
 

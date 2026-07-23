@@ -5,6 +5,7 @@
 
 import os
 import sys
+from collections.abc import Sequence
 
 from jupyter_server.serverapp import ServerApp
 from traitlets import default
@@ -46,7 +47,7 @@ else:
 
 class SingleUserLabApp(SingleUserServerApp):
     @default("default_url")
-    def _default_url(self):
+    def _default_url(self) -> str:
         return "/lab"
 
     def find_server_extensions(self):
@@ -58,7 +59,7 @@ class SingleUserLabApp(SingleUserServerApp):
         self.jpserver_extensions[LabApp.get_extension_package()] = True
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> None:
     return SingleUserLabApp.launch_instance(argv)
 
 

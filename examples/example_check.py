@@ -27,7 +27,7 @@ TEST_FILE = here / "example.spec.ts"
 REF_SNAPSHOT = Path(TEST_FILE.with_suffix(".ts-snapshots").name) / "example-linux.png"
 
 
-def _blob_report_name(example_dir):
+def _blob_report_name(example_dir: Path) -> str:
     try:
         stem = "-".join(example_dir.resolve().relative_to(here.parent).parts)
     except ValueError:
@@ -35,7 +35,7 @@ def _blob_report_name(example_dir):
     return f"{stem}.zip"
 
 
-def _playwright_config(example_dir):
+def _playwright_config(example_dir: Path) -> str:
     reporters = []
     if os.environ.get("CI"):
         reporters.append(
@@ -48,7 +48,7 @@ def _playwright_config(example_dir):
     return f"module.exports = {{\n  reporter: {json.dumps(reporters)}\n}};\n"
 
 
-def main():
+def main() -> None:
     # Load the main file and grab the example class so we can subclass
     example_dir = Path(sys.argv[-1])
     mod_path = (example_dir / "main.py").resolve()
@@ -81,7 +81,7 @@ def main():
             run_test(self.serverapp, run_browser)
             super().initialize_settings()
 
-    def _jupyter_server_extension_points():
+    def _jupyter_server_extension_points() -> list[dict[str, str | type]]:
         return [{"module": __name__, "app": App}]
 
     mod._jupyter_server_extension_points = _jupyter_server_extension_points
@@ -90,7 +90,7 @@ def main():
     App.launch_instance()
 
 
-async def run_browser(url):
+async def run_browser(url: str):
     """Run the browser test and return an exit code."""
     # Run the browser test and return an exit code.
     target = Path(get_app_dir()) / "example_test"

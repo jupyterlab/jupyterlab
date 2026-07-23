@@ -14,6 +14,7 @@ from traitlets import Enum
 from traitlets.config import Configurable, LoggingConfigurable
 
 from jupyterlab.commands import (
+    AppOptions,
     _AppHandler,
     _ensure_options,
     disable_extension,
@@ -24,7 +25,7 @@ from jupyterlab.commands import (
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
 
 
-def _ensure_compat_errors(info, app_options):
+def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None):
     """Ensure that the app info has compat_errors field"""
     handler = _AppHandler(app_options)
     info["compat_errors"] = handler._get_extension_compat()
@@ -37,7 +38,7 @@ _message_map = {
 }
 
 
-def _build_check_info(app_options):
+def _build_check_info(app_options: AppOptions | dict | None) -> dict[str, list[str]]:
     """Get info about packages scheduled for (un)install/update"""
     handler = _AppHandler(app_options)
     messages = handler.build_check(fast=True)
@@ -554,7 +555,7 @@ class ExtensionManager(PluginManager):
         return await self._is_allowed_by_listing(name)
 
     async def _get_installed_extensions(
-        self, get_latest_version=True
+        self, get_latest_version: bool = True
     ) -> dict[str, ExtensionPackage]:
         """Get the installed extensions.
 
@@ -668,7 +669,7 @@ class ExtensionManager(PluginManager):
                 companion = "kernel"
         return companion
 
-    def _get_scheduled_uninstall_info(self, name) -> dict | None:
+    def _get_scheduled_uninstall_info(self, name: str) -> dict | None:
         """Get information about a package that is scheduled for uninstallation"""
         target = self.app_dir / "staging" / "node_modules" / name / "package.json"
         if target.exists():
