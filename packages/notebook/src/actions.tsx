@@ -1398,48 +1398,60 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param preserveMetadata - Whether to preserve cell metadata.
    */
-  export function copy(notebook: Notebook): void {
-    Private.copyOrCut(notebook, false);
+  export function copy(
+    notebook: Notebook,
+    preserveMetadata: boolean = false
+  ): void {
+    Private.copyOrCut(notebook, false, preserveMetadata);
   }
 
   /**
    * Copy the selected cell(s) data to the system clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param preserveMetadata - Whether to preserve cell metadata.
    */
   export async function copyToSystemClipboard(
-    notebook: Notebook
+    notebook: Notebook,
+    preserveMetadata: boolean = false
   ): Promise<void> {
-    await Private.copyOrCutToSystemClipboard(notebook, false);
+    await Private.copyOrCutToSystemClipboard(notebook, false, preserveMetadata);
   }
 
   /**
    * Cut the selected cell data to a clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param preserveMetadata - Whether to preserve cell metadata.
    *
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
    */
-  export function cut(notebook: Notebook): void {
-    Private.copyOrCut(notebook, true);
+  export function cut(
+    notebook: Notebook,
+    preserveMetadata: boolean = false
+  ): void {
+    Private.copyOrCut(notebook, true, preserveMetadata);
   }
 
   /**
    * Cut the selected cell data to the system clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param preserveMetadata - Whether to preserve cell metadata.
    *
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
    */
   export async function cutToSystemClipboard(
-    notebook: Notebook
+    notebook: Notebook,
+    preserveMetadata: boolean = false
   ): Promise<void> {
-    await Private.copyOrCutToSystemClipboard(notebook, true);
+    await Private.copyOrCutToSystemClipboard(notebook, true, preserveMetadata);
   }
 
   /**
@@ -1530,6 +1542,8 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param preserveMetadata - Whether to preserve cell metadata in the duplicated cells.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
@@ -1537,9 +1551,10 @@ export namespace NotebookActions {
    */
   export function duplicate(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    preserveMetadata: boolean = false
   ): void {
-    const values = Private.selectedCells(notebook);
+    const values = Private.selectedCells(notebook, preserveMetadata);
 
     if (!values || values.length === 0) {
       return;
@@ -3097,10 +3112,14 @@ namespace Private {
    * Get the selected cell(s) without affecting the clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param preserveMetadata - Whether to preserve cell metadata in the returned cells.
    *
    * @returns A list of 0 or more selected cells
    */
-  export function selectedCells(notebook: Notebook): nbformat.ICell[] {
+  export function selectedCells(
+    notebook: Notebook,
+    preserveMetadata: boolean = false
+  ): nbformat.ICell[] {
     const cellsToInclude = new Set<Cell>();
 
     // Collect all selected/active cells and expand collapsed sections
@@ -3127,7 +3146,10 @@ namespace Private {
     return Array.from(cellsToInclude)
       .map(cell => cell.model.toJSON())
       .map(cellJSON => {
-        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+        if (
+          !preserveMetadata &&
+          (cellJSON.metadata as JSONObject).deletable !== undefined
+        ) {
           delete (cellJSON.metadata as JSONObject).deletable;
         }
         return cellJSON;
@@ -3141,7 +3163,11 @@ namespace Private {
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
    */
-  export function copyOrCut(notebook: Notebook, cut: boolean): void {
+  export function copyOrCut(
+    notebook: Notebook,
+    cut: boolean,
+    preserveMetadata: boolean = false
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -3152,7 +3178,7 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = Private.selectedCells(notebook);
+    const data = Private.selectedCells(notebook, preserveMetadata);
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
@@ -3174,10 +3200,13 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
+   *
+   * @param preserveMetadata - Whether to preserve cell metadata in the copied cells.
    */
   export async function copyOrCutToSystemClipboard(
     notebook: Notebook,
-    cut: boolean
+    cut: boolean,
+    preserveMetadata: boolean = false
   ): Promise<void> {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -3189,7 +3218,7 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = Private.selectedCells(notebook);
+    const data = Private.selectedCells(notebook, preserveMetadata);
 
     await clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
