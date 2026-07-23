@@ -20,6 +20,11 @@ export namespace Time {
   export type HumanStyle = Intl.ResolvedRelativeTimeFormatOptions['style'];
 
   /**
+   * The format style for timestamps.
+   */
+  export type TimestampFormat = 'relative' | 'absolute';
+
+  /**
    * Convert a timestring to a human readable string (e.g. 'two minutes ago').
    *
    * @param value - The date timestring or date object.
@@ -60,5 +65,25 @@ export namespace Time {
       timeStyle: 'short'
     });
     return formatter.format(new Date(value));
+  }
+
+  /**
+   * Convert a timestring to a user-configurable timestamp format.
+   *
+   * @param value - The date timestring or date object.
+   * @param format - The format style: 'relative' or 'absolute'
+   * @param humanStyle - The style for relative format: 'narrow', 'short', or 'long'
+   *
+   * @returns A formatted date string.
+   */
+  export function formatTimestamp(
+    value: string | Date,
+    format: TimestampFormat = 'absolute',
+    humanStyle: HumanStyle = 'long'
+  ): string {
+    if (format === 'absolute') {
+      return Time.format(value);
+    }
+    return formatHuman(value, humanStyle);
   }
 }
