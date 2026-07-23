@@ -112,6 +112,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
+    "mypy==1.20.2",
     "ruff==0.15.20",
 ]
 upgrade-extension = [
@@ -235,6 +236,27 @@ testpaths = "jupyterlab/tests"
 norecursedirs = "node_modules .git _build .ipynb_checkpoints"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml --durations=3"
 ignore = "tests examples"
+
+[tool.mypy]
+files = ["jupyterlab"]
+python_version = "3.10"
+ignore_missing_imports = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "jupyterlab.browser_check",
+    "jupyterlab.commands",
+    "jupyterlab.debuglog",
+    "jupyterlab.extensions.manager",
+    "jupyterlab.extensions.pypi",
+    "jupyterlab.handlers.announcements",
+    "jupyterlab.handlers.build_handler",
+    "jupyterlab.handlers.error_handler",
+    "jupyterlab.labapp",
+    "jupyterlab.upgrade_extension",
+]
+ignore_errors = true
 
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
