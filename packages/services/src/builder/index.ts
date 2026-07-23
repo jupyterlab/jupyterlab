@@ -20,12 +20,24 @@ export class BuildManager {
   constructor(options: BuildManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this.translator = options.translator ?? Private.nullTranslator;
   }
 
   /**
    * The server settings used to make API requests.
    */
   readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * The application language translator.
+   */
+  get translator(): BuildManager.ITranslator {
+    return this._translator;
+  }
+  set translator(value: BuildManager.ITranslator) {
+    this._translator = value;
+    this._trans = value.load('jupyterlab');
+  }
 
   /**
    * Test whether the build service is available.
@@ -72,19 +84,26 @@ export class BuildManager {
    */
   build(): Promise<void> {
     const { _url, serverSettings } = this;
+    const trans = this._trans;
     const init = { method: 'POST' };
     const promise = ServerConnection.makeRequest(_url, init, serverSettings);
 
     return promise.then(response => {
       if (response.status === 400) {
-        throw new ServerConnection.ResponseError(response, 'Build aborted');
+        throw new ServerConnection.ResponseError(
+          response,
+          trans.__('Build aborted')
+        );
       }
       if (response.status !== 200) {
-        const message = `Build failed with ${response.status}.
+        const message = trans.__(
+          `Build failed with %1.
 
         If you are experiencing the build failure after installing an extension (or trying to include previously installed extension after updating JupyterLab) please check the extension repository for new installation instructions as many extensions migrated to the prebuilt extensions system which no longer requires rebuilding JupyterLab (but uses a different installation procedure, typically involving a package manager such as 'pip' or 'conda').
 
-        If you specifically intended to install a source extension, please run 'jupyter lab build' on the server for full output.`;
+        If you specifically intended to install a source extension, please run 'jupyter lab build' on the server for full output.`,
+          response.status
+        );
         throw new ServerConnection.ResponseError(response, message);
       }
     });
@@ -112,6 +131,9 @@ export class BuildManager {
     const { baseUrl, appUrl } = this.serverSettings;
     return URLExt.join(baseUrl, appUrl, BUILD_SETTINGS_URL);
   }
+
+  private _translator: BuildManager.ITranslator;
+  private _trans: BuildManager.TranslationBundle;
 }
 
 /**
@@ -126,6 +148,36 @@ export namespace BuildManager {
      * The server settings used to make API requests.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
+
+  /**
+   * Bundle of translation functions.
+   */
+  export type TranslationBundle = {
+    /**
+     * Translate a message without plural inflection.
+     */
+    __(msgid: string, ...args: unknown[]): string;
+  };
+
+  /**
+   * Translation provider interface.
+   */
+  export interface ITranslator {
+    /**
+     * The code of the language in use.
+     */
+    readonly languageCode: string;
+
+    /**
+     * Load translation bundles for a given domain.
+     */
+    load(domain: string): TranslationBundle;
   }
 
   /**
@@ -152,4 +204,22 @@ export namespace Builder {
    * The interface for the build manager.
    */
   export interface IManager extends BuildManager {}
+}
+
+namespace Private {
+  export const nullTranslator: BuildManager.ITranslator = {
+    languageCode: 'en',
+    load: () => {
+      return {
+        __: (msgid: string, ...args: unknown[]): string => {
+          return args.reduce<string>((message, arg, index) => {
+            return message.replace(
+              new RegExp(`%${index + 1}`, 'g'),
+              () => `${arg}`
+            );
+          }, msgid);
+        }
+      };
+    }
+  };
 }
