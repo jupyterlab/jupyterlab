@@ -53,6 +53,9 @@ the results are ordered by relevance, and the recently run commands among them k
 `recently used` hint. Commands triggered from menus or keyboard shortcuts are not tracked.
 The number of recently used commands to display can be configured with the
 `'maxRecentCommands'` setting. Setting it to `0` disables the recently used commands.
+The recently used commands are saved as part of the current workspace, so they are
+preserved when the page is reloaded. The history can be cleared by running the
+`Clear Recently Used Commands` command, available from the command palette itself.
 
 (commands-list)=
 

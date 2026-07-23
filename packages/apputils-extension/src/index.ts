@@ -97,13 +97,14 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
   autoStart: true,
   requires: [ITranslator],
   provides: ICommandPalette,
-  optional: [ISettingRegistry],
+  optional: [ISettingRegistry, IStateDB],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    state: IStateDB | null
   ) => {
-    return Palette.activate(app, translator, settingRegistry);
+    return Palette.activate(app, translator, settingRegistry, state);
   }
 };
 
