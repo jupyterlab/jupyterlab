@@ -49,6 +49,73 @@ async function waitForTerminal(page: Page) {
   await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
 }
 
+/**
+ * Get the viewport position of the beginning of the terminal row matching
+ * `rowText`.
+ *
+ * The row index is retrieved from the accessibility tree (which requires
+ * the `screenReaderMode` setting), making the position independent of the
+ * font metrics of the platform.
+ *
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param rowText - Pattern matching the full text of the row
+ * @returns The position, in viewport coordinates
+ */
+async function rowPosition(
+  terminalLocator: Locator,
+  rowText: RegExp
+): Promise<{ x: number; y: number }> {
+  const rows = terminalLocator.locator('.xterm-accessibility-tree > div');
+  const row = rows.filter({ hasText: rowText }).first();
+  await row.waitFor();
+  const rowIndex = await row.evaluate(element =>
+    Array.prototype.indexOf.call(element.parentElement!.children, element)
+  );
+  const rowCount = await rows.count();
+  const screenBox = await terminalLocator
+    .locator('.xterm-screen')
+    .boundingBox();
+  if (!screenBox) {
+    throw new Error('Could not get the position of the terminal screen');
+  }
+  // The accessibility tree rows map one-to-one to the rendered rows, so the
+  // row index gives the vertical position of the row on the screen.
+  const cellHeight = screenBox.height / rowCount;
+  return {
+    x: screenBox.x + 10,
+    y: screenBox.y + (rowIndex + 0.5) * cellHeight
+  };
+}
+
+/**
+ * Hover over the beginning of the terminal row matching `rowText` until the
+ * link on it gets detected.
+ *
+ * @param page - Playwright page (provided by galata fixture)
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param rowText - Pattern matching the full text of the row to hover
+ * @returns The hovered position, in viewport coordinates
+ */
+async function hoverOverLink(
+  page: Page,
+  terminalLocator: Locator,
+  rowText: RegExp
+): Promise<{ x: number; y: number }> {
+  const position = await rowPosition(terminalLocator, rowText);
+  // Move the pointer onto the link until the linkifier flags it with the
+  // pointer cursor.
+  await expect
+    .poll(async () => {
+      await page.mouse.move(position.x + 20, position.y);
+      await page.mouse.move(position.x, position.y);
+      return terminalLocator
+        .locator('.jp-Terminal-body .xterm-cursor-pointer')
+        .count();
+    })
+    .toBeGreaterThan(0);
+  return position;
+}
+
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
@@ -286,7 +353,7 @@ test.describe('Terminal', () => {
     expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
   });
 
-  test('Terminal web link', async ({ page, tmpPath, browserName }) => {
+  test('Terminal web link', async ({ page, tmpPath }) => {
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
       .waitFor();
@@ -314,6 +381,137 @@ test.describe('Terminal', () => {
     await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
 
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
+  });
+
+  test('Copy link address from the terminal context menu', async ({ page }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
+
+    // Hover over the link on the output row to trigger link detection.
+    const position = await hoverOverLink(
+      page,
+      terminal,
+      /^https:\/\/jupyter\.org\/\s*$/
+    );
+
+    // Open the context menu over the link.
+    await page.mouse.click(position.x, position.y, { button: 'right' });
+
+    const menuItem = page.getByRole('menuitem', { name: 'Copy Link Address' });
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+
+    try {
+      await page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not need it either
+    }
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      'https://jupyter.org/'
+    );
+  });
+
+  test('Copy the target of an OSC 8 hyperlink from the terminal context menu', async ({
+    page
+  }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // Emit an escape-sequence hyperlink whose displayed text differs from
+    // its target.
+    await runCommand(
+      page,
+      terminal,
+      "printf '\\e]8;;https://example.com/issues/42\\e\\\\click-me\\e]8;;\\e\\\\\\n'"
+    );
+
+    // Hover over the link on the output row to trigger link detection.
+    const position = await hoverOverLink(page, terminal, /^click-me\s*$/);
+
+    // Open the context menu over the link.
+    await page.mouse.click(position.x, position.y, { button: 'right' });
+
+    const menuItem = page.getByRole('menuitem', { name: 'Copy Link Address' });
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+
+    try {
+      await page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not need it either
+    }
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      'https://example.com/issues/42'
+    );
+  });
+
+  test('Ignore an OSC 8 hyperlink with a disallowed scheme', async ({
+    page
+  }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // As a control that link detection works in this session, check that
+    // an allowed (https) escape-sequence hyperlink offers the copy entry.
+    await runCommand(
+      page,
+      terminal,
+      "printf '\\e]8;;https://example.com/\\e\\\\allowed\\e]8;;\\e\\\\\\n'"
+    );
+    const allowedPosition = await hoverOverLink(page, terminal, /^allowed\s*$/);
+    await page.mouse.click(allowedPosition.x, allowedPosition.y, {
+      button: 'right'
+    });
+    const copyLinkItem = page.getByRole('menuitem', {
+      name: 'Copy Link Address'
+    });
+    await expect(copyLinkItem).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(copyLinkItem).toBeHidden();
+
+    // A hyperlink with an unsafe scheme is not detected as a link at all:
+    // it cannot be activated and offers no copy entry.
+    await runCommand(
+      page,
+      terminal,
+      "printf '\\e]8;;javascript:alert(1)\\e\\\\dangerous\\e]8;;\\e\\\\\\n'"
+    );
+    const blockedPosition = await rowPosition(terminal, /^dangerous\s*$/);
+    // Move the pointer over the row as a real hover would.
+    await page.mouse.move(blockedPosition.x + 20, blockedPosition.y);
+    await page.mouse.move(blockedPosition.x, blockedPosition.y);
+    await page.mouse.click(blockedPosition.x, blockedPosition.y, {
+      button: 'right'
+    });
+    await expect(
+      page.getByRole('menuitem', { name: 'Refresh Terminal' })
+    ).toBeVisible();
+    await expect(copyLinkItem).toBeHidden();
+  });
+
+  test('Copy link address entry only shows over a link', async ({ page }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // Open the context menu away from any link.
+    await terminal.click({ button: 'right', position: { x: 200, y: 100 } });
+
+    await expect(
+      page.getByRole('menuitem', { name: 'Refresh Terminal' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('menuitem', { name: 'Copy Link Address' })
+    ).toBeHidden();
   });
 });
 
