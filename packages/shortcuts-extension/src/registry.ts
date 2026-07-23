@@ -4,7 +4,7 @@
  */
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ArrayExt, StringExt } from '@lumino/algorithm';
-import type { CommandRegistry } from '@lumino/commands';
+import { CommandRegistry } from '@lumino/commands';
 import type { PartialJSONArray } from '@lumino/coreutils';
 import type {
   IKeybinding,
@@ -73,8 +73,12 @@ export class ShortcutRegistry
         const keybindingKey = this._computeKeybindingId(shortcut);
 
         const keybinding: IKeybinding = {
-          keys: shortcut.keys,
-          isDefault: !setByUser.has(keybindingKey)
+          // Resolve platform-specific keys (`winKeys`/`linuxKeys`/`macKeys` with fallback to `keys`)
+          keys: CommandRegistry.normalizeKeys(shortcut),
+          isDefault: !setByUser.has(keybindingKey),
+          ...(shortcut.preventDefault === undefined
+            ? {}
+            : { preventDefault: shortcut.preventDefault })
         };
 
         const shortcutTarget = this.get(targetKey);
@@ -106,16 +110,17 @@ export class ShortcutRegistry
    */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[] {
     const checker = new KeybindingsConflictChecker({ registry: this });
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
 
     // First check the full chain
-    let conflicts = checker.findConflicts(keys, selector);
+    let conflicts = checker.findConflicts(normalizedKeys, selector);
 
     if (conflicts.length !== 0) {
       return conflicts;
     }
 
     // Then check each piece of the chain
-    for (const binding of keys) {
+    for (const binding of normalizedKeys) {
       conflicts = checker.findConflicts([binding], selector);
       if (conflicts.length !== 0) {
         return conflicts;
@@ -142,7 +147,7 @@ export class ShortcutRegistry
       shortcut.command,
       shortcut.selector,
       JSON.stringify(shortcut.args ?? {}),
-      shortcut.keys.join(' ')
+      CommandRegistry.normalizeKeys(shortcut).join(' ')
     ].join('_');
   }
 }

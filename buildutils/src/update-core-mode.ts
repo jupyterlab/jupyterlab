@@ -2,13 +2,15 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { program as commander } from 'commander';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 import { upgradeLock } from './update-staging-lock';
+
+interface IUpdateCoreModeOptions {
+  skipAssets?: boolean;
+}
 
 commander
   .description('Update the core mode package.json and staging assets')
@@ -16,7 +18,7 @@ commander
     '--skip-assets',
     'Skip the staging build - only update core.package.json metadata'
   )
-  .action((options: any) => {
+  .action((options: IUpdateCoreModeOptions) => {
     updateCoreMode(options.skipAssets);
   });
 
