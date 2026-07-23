@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { LabShell, LayoutRestorer } from '@jupyterlab/application';
+import { type DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
+import type { ServiceManager } from '@jupyterlab/services';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { StateDB } from '@jupyterlab/statedb';
 import { framePromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
@@ -1027,6 +1031,102 @@ describe('LabShell', () => {
       expect(widget.isVisible).toBe(false);
       shell.mode = 'single-document';
       expect(widget.isVisible).toBe(false);
+    });
+
+    it('should rename documents when Enter is pressed', async () => {
+      const manager: ServiceManager.IManager = new ServiceManagerMock();
+      await manager.ready;
+      const context = (await createFileContextWithMockedServices(
+        false,
+        manager
+      )) as DocumentRegistry.Context;
+      const widget = new DocumentWidget({
+        context,
+        content: new Widget()
+      });
+      widget.id = 'document';
+      const rename = jest.spyOn(context, 'rename').mockResolvedValue();
+
+      shell.mode = 'single-document';
+      shell.add(widget, 'main');
+      shell.activateById(widget.id);
+      simulate(widget.node, 'focus');
+      expect(shell.currentWidget).toBe(widget);
+      const oldName = context.localPath.split('/').pop()!;
+      const input = document.querySelector<HTMLInputElement>(
+        '#jp-title-panel-title input'
+      )!;
+      input.value = 'renamed.txt';
+      simulate(input, 'keyup', { key: 'Enter' });
+      await framePromise();
+
+      expect(rename).toHaveBeenCalledWith('renamed.txt');
+      expect(input.value).toBe(oldName);
+      context.dispose();
+    });
+
+    it('should not rename a document when its displayed title is unchanged', async () => {
+      const manager: ServiceManager.IManager = new ServiceManagerMock();
+      await manager.ready;
+      const context = (await createFileContextWithMockedServices(
+        false,
+        manager
+      )) as DocumentRegistry.Context;
+      const widget = new DocumentWidget({
+        context,
+        content: new Widget()
+      });
+      widget.id = 'document-custom-title';
+      widget.title.label = 'Custom title';
+      const rename = jest.spyOn(context, 'rename');
+
+      shell.mode = 'single-document';
+      shell.add(widget, 'main');
+      shell.activateById(widget.id);
+      simulate(widget.node, 'focus');
+      const input = document.querySelector<HTMLInputElement>(
+        '#jp-title-panel-title input'
+      )!;
+      expect(input.value).toBe('Custom title');
+      simulate(input, 'keyup', { key: 'Enter' });
+      await framePromise();
+
+      expect(rename).not.toHaveBeenCalled();
+      expect(input.value).toBe('Custom title');
+      context.dispose();
+    });
+
+    it('should restore the filename when a document rename rejects', async () => {
+      const manager: ServiceManager.IManager = new ServiceManagerMock();
+      await manager.ready;
+      const context = (await createFileContextWithMockedServices(
+        false,
+        manager
+      )) as DocumentRegistry.Context;
+      const widget = new DocumentWidget({
+        context,
+        content: new Widget()
+      });
+      widget.id = 'document-rejected-rename';
+      const rename = jest
+        .spyOn(context, 'rename')
+        .mockRejectedValue(new Error('Rename failed'));
+
+      shell.mode = 'single-document';
+      shell.add(widget, 'main');
+      shell.activateById(widget.id);
+      simulate(widget.node, 'focus');
+      const oldName = context.localPath.split('/').pop()!;
+      const input = document.querySelector<HTMLInputElement>(
+        '#jp-title-panel-title input'
+      )!;
+      input.value = 'renamed.txt';
+      simulate(input, 'keyup', { key: 'Enter' });
+      await framePromise();
+
+      expect(rename).toHaveBeenCalledWith('renamed.txt');
+      expect(input.value).toBe(oldName);
+      context.dispose();
     });
   });
 
