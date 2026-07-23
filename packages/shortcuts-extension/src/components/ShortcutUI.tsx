@@ -309,6 +309,9 @@ export class ShortcutUI
     if (!found) {
       const requiresChange =
         !keybinding || !JSONExt.deepEqual(keybinding.keys, normalizedKeys);
+      if (!requiresChange) {
+        return;
+      }
       const shouldDisableDefault =
         keybinding && keybinding.isDefault && requiresChange;
       if (shouldDisableDefault) {
@@ -490,9 +493,9 @@ export class ShortcutUI
       <div className="jp-Shortcuts-ShortcutUI" id="jp-shortcutui">
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
-          resetShortcuts={this.resetShortcuts}
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
+          showAddCommand={this.state.showAddCommand}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           toggleAddCommandRow={this.toggleAddCommandRow}

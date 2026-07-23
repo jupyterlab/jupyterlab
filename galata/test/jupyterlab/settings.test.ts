@@ -275,7 +275,7 @@ test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async
   expect(userPanelLines).toBeLessThan(10);
 });
 
-test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
+test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
   page
 }) => {
   // Settings are wide, hide the sidebar to increase available space
@@ -307,9 +307,10 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
   expect(await conflict.screenshot()).toMatchSnapshot(
     'settings-shortcuts-conflict.png'
   );
-  const cancelButton = conflict.locator('button >> text=Cancel');
-  await cancelButton.click();
+  // Cancel by dismissing the input (blur closes the editor and clears conflicts).
+  await filterInput.click();
 
+  await expect(newShortcutInput).toHaveCount(0);
   await expect(conflict).toHaveCount(0);
 });
 
@@ -359,11 +360,11 @@ test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
   await expect(addShortcutRow).not.toBeAttached();
 
   // Show the add shortcut row.
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Add shortcut').click();
   await expect(addShortcutRow).toBeAttached();
 
   // Hide the add shortcut row
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Collapse new shortcut row').click();
   await expect(addShortcutRow).not.toBeAttached();
 });
 
@@ -385,7 +386,7 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   );
 
   // Show the add shortcut row and count initial commands.
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Add shortcut').click();
   const initialCount = await commandOptions.count();
 
   // Filtering on notebook should reduce the count.
@@ -428,7 +429,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
 
   // Show the add shortcut row.
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Add shortcut').click();
 
   // Select the command.
   await addShortcutRow
@@ -436,7 +437,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
     .selectOption('notebook: Restart Kernel and Run All Cells…');
   // Display the shortcut input and add a shortcut.
   await addShortcutRow.locator('.jp-Shortcuts-EmptyCell').first().hover();
-  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell a').click();
+  await addShortcutRow.locator('.jp-Shortcuts-Plus').click();
   const shortcutKey = addShortcutRow.locator('.jp-Shortcuts-Input').first();
   await shortcutKey.press('Control+r');
   await addShortcutRow.locator('.jp-Shortcuts-Submit').click();
@@ -457,7 +458,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   await dialog.waitFor({ state: 'detached' });
 
   // Save the new shortcut.
-  await addShortcutRow.getByTitle('Save shortcut').click();
+  await addShortcutRow.locator('.jp-Shortcuts-SaveNew').click();
   await addShortcutRow.waitFor({ state: 'detached' });
 
   // The shortcut should now be listed with the correct selector and args.
