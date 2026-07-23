@@ -33,6 +33,11 @@ from packaging.version import InvalidVersion, Version
 from packaging.version import parse as parse_version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
+try:
+    from typing import override
+except ImportError:
+    from typing_extensions import override
+
 from jupyterlab._version import __version__
 from jupyterlab.extensions.manager import (
     ActionResult,
@@ -43,11 +48,16 @@ from jupyterlab.extensions.manager import (
 
 
 class ProxiedTransport(xmlrpc.client.Transport):
-    def set_proxy(self, host, port=None, headers=None):
+    def set_proxy(
+        self,
+        host: str,
+        port: str | int | None = None,
+        headers: dict[str, str] | None = None,
+    ):
         self.proxy = host, port
         self.proxy_headers = headers
 
-    def make_connection(self, host):
+    def make_connection(self, host: str) -> http.client.HTTPConnection:
         connection = http.client.HTTPConnection(*self.proxy)
         connection.set_tunnel(host, headers=self.proxy_headers)
         self._connection = host, connection
@@ -235,6 +245,7 @@ class PyPIExtensionManager(ExtensionManager):
         """Extension manager metadata."""
         return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
+    @override
     async def is_install_allowed(self, name: str, version: str | None = None) -> bool:
         try:
             canonicalize_name(name, validate=True)
@@ -251,6 +262,11 @@ class PyPIExtensionManager(ExtensionManager):
         if not allowed:
             self.log.warning(f"Installation denied by allowlist/blocklist for {name}")
         return allowed
+
+    @override
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize PyPI package names for listing policy comparisons."""
+        return canonicalize_name(name)
 
     async def get_latest_version(self, pkg: str) -> str | None:
         """Return the latest available version for a given extension.
@@ -294,7 +310,12 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:  # noqa
+    async def __throttleRequest(  # noqa: N802
+        self,
+        recursive: bool,
+        fn: Callable,
+        *args: Any,
+    ) -> Any:  # noqa: ANN401
         """Throttle XMLRPC API request
 
         Args:
@@ -329,8 +350,8 @@ class PyPIExtensionManager(ExtensionManager):
         return data
 
     @observe("package_metadata_cache_size")
-    def _observe_package_metadata_cache_size(self, change):
-        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
+    def _observe_package_metadata_cache_size(self, change: dict[str, object]):
+        self._fetch_package_metadata = alru_cache(maxsize=int(change["new"]))(
             partial(_fetch_package_metadata, self._httpx_client)
         )
 
@@ -498,7 +519,7 @@ class PyPIExtensionManager(ExtensionManager):
         Returns:
             The action result
         """
-        if not self.is_install_allowed(name, version):
+        if not await self.is_install_allowed(name, version):
             # is_install_allowed will log the reason
             return ActionResult(status="error", message="install is not allowed")
 

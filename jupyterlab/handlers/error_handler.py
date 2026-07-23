@@ -22,9 +22,9 @@ TEMPLATE = """
 
 
 class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
-    def initialize(self, messages=None, name=None):
+    def initialize(self, messages: list[str] | None = None, name: str | None = None):
         super().initialize(name=name)
-        self.messages = messages
+        self.messages = messages or []
 
     @web.authenticated
     @web.removeslash

@@ -245,7 +245,7 @@ def is_playwright_report(report: dict) -> bool:
     return isinstance(report, dict) and isinstance(report.get("suites"), list)
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     args = parse_arguments()
 

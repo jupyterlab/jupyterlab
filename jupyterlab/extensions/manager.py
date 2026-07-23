@@ -14,6 +14,7 @@ from traitlets import Enum
 from traitlets.config import Configurable, LoggingConfigurable
 
 from jupyterlab.commands import (
+    AppOptions,
     _AppHandler,
     _ensure_options,
     disable_extension,
@@ -24,7 +25,7 @@ from jupyterlab.commands import (
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
 
 
-def _ensure_compat_errors(info, app_options):
+def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None):
     """Ensure that the app info has compat_errors field"""
     handler = _AppHandler(app_options)
     info["compat_errors"] = handler._get_extension_compat()
@@ -37,7 +38,7 @@ _message_map = {
 }
 
 
-def _build_check_info(app_options):
+def _build_check_info(app_options: AppOptions | dict | None) -> dict[str, list[str]]:
     """Get info about packages scheduled for (un)install/update"""
     handler = _AppHandler(app_options)
     messages = handler.build_check(fast=True)
@@ -235,7 +236,8 @@ class PluginManager(LoggingConfigurable):
         for plugin in plugins_or_extensions:
             if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
-                if plugin in self.options.lock_rules:
+                extension = plugin.split(":")[0]
+                if plugin in self.options.lock_rules or extension in self.options.lock_rules:
                     locked_subset.add(plugin)
             elif plugin in extensions_with_locked_plugins:
                 # this is an extension - we need to check for >any< plugin
@@ -542,8 +544,8 @@ class ExtensionManager(PluginManager):
             return True
         if self._listings_cache is None:
             await self._fetch_listings()
-        normalized = self._normalize_name(name)
-        normalized_cache = {self._normalize_name(k) for k in self._listings_cache}
+        normalized = self._canonicalize_name(name)
+        normalized_cache = {self._canonicalize_name(k) for k in self._listings_cache}
         if self._listings_block_mode:
             return normalized not in normalized_cache
         else:
@@ -553,7 +555,7 @@ class ExtensionManager(PluginManager):
         return await self._is_allowed_by_listing(name)
 
     async def _get_installed_extensions(
-        self, get_latest_version=True
+        self, get_latest_version: bool = True
     ) -> dict[str, ExtensionPackage]:
         """Get the installed extensions.
 
@@ -667,7 +669,7 @@ class ExtensionManager(PluginManager):
                 companion = "kernel"
         return companion
 
-    def _get_scheduled_uninstall_info(self, name) -> dict | None:
+    def _get_scheduled_uninstall_info(self, name: str) -> dict | None:
         """Get information about a package that is scheduled for uninstallation"""
         target = self.app_dir / "staging" / "node_modules" / name / "package.json"
         if target.exists():
@@ -685,6 +687,10 @@ class ExtensionManager(PluginManager):
             Normalized name
         """
         return name
+
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize extension name for listing policy comparisons."""
+        return self._normalize_name(name)
 
     async def _update_extensions_list(
         self, query: str | None = None, page: int = 1, per_page: int = 30
