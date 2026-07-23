@@ -29,6 +29,7 @@ import {
   SemanticCommand,
   SessionContextDialogs,
   showDialog,
+  showErrorMessage,
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -172,6 +173,8 @@ namespace CommandIDs {
   export const changeKernel = 'notebook:change-kernel';
 
   export const getKernel = 'notebook:get-kernel';
+
+  export const commitMetadataAndSave = 'notebook:commit-metadata-and-save';
 
   export const createConsole = 'notebook:create-console';
 
@@ -1314,17 +1317,26 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
+    // The metadata editor tools currently alive, so that pending metadata
+    // changes can be committed before the notebook is saved.
+    const metadataTools = new Set<CellMetadataField | NotebookMetadataField>();
     // Register the custom fields.
     const cellComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new CellMetadataField({
+        const field = new CellMetadataField({
           editorFactory,
           tracker,
           label: 'Cell metadata',
           translator: translator
-        }).render(props);
+        });
+        metadataTools.add(field);
+        field.disposed.connect(() => {
+          metadataTools.delete(field);
+        });
+        return field.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -1334,18 +1346,48 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
 
     const notebookComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new NotebookMetadataField({
+        const field = new NotebookMetadataField({
           editorFactory,
           tracker,
           label: 'Notebook metadata',
           translator: translator
-        }).render(props);
+        });
+        metadataTools.add(field);
+        field.disposed.connect(() => {
+          metadataTools.delete(field);
+        });
+        return field.render(props);
       }
     };
     formRegistry.addRenderer(
       '@jupyterlab/notebook-extension:metadata-editor.notebook-metadata',
       notebookComponent
     );
+
+    app.commands.addCommand(CommandIDs.commitMetadataAndSave, {
+      label: trans.__('Commit Metadata and Save Notebook'),
+      caption: trans.__(
+        'Commit pending changes in the metadata editors, then save the notebook'
+      ),
+      execute: async () => {
+        for (const tool of metadataTools) {
+          const editor = tool.editor;
+          if (editor.isDisposed) {
+            continue;
+          }
+          if (!editor.commit()) {
+            void showErrorMessage(
+              trans.__('Invalid Metadata'),
+              trans.__(
+                'The notebook was not saved because the metadata editor contains invalid JSON. Fix the metadata or revert the change, then save again.'
+              )
+            );
+            return;
+          }
+        }
+        return app.commands.execute('docmanager:save');
+      }
+    });
   }
 };
 

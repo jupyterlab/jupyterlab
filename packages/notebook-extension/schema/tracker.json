@@ -380,6 +380,11 @@
   },
   "jupyter.lab.shortcuts": [
     {
+      "command": "notebook:commit-metadata-and-save",
+      "keys": ["Accel S"],
+      "selector": ".jp-MetadataEditorTool"
+    },
+    {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
