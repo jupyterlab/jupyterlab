@@ -45,7 +45,7 @@
 
 .lm-DockPanel-tabBar .lm-TabBar-tab,
 .lm-TabPanel-tabBar .lm-TabBar-tab {
-  flex: 0 1 var(--jp-private-horizontal-tab-width);
+  flex: 0 0 auto;
   align-items: center;
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
