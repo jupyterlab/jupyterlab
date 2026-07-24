@@ -1096,6 +1096,38 @@ describe('LabShell', () => {
       context.dispose();
     });
 
+    it('should not rename a document to its current filename', async () => {
+      const manager: ServiceManager.IManager = new ServiceManagerMock();
+      await manager.ready;
+      const context = (await createFileContextWithMockedServices(
+        false,
+        manager
+      )) as DocumentRegistry.Context;
+      const widget = new DocumentWidget({
+        context,
+        content: new Widget()
+      });
+      widget.id = 'document-current-filename';
+      widget.title.label = 'Custom title';
+      const rename = jest.spyOn(context, 'rename');
+
+      shell.mode = 'single-document';
+      shell.add(widget, 'main');
+      shell.activateById(widget.id);
+      simulate(widget.node, 'focus');
+      const fileName = context.localPath.split('/').pop()!;
+      const input = document.querySelector<HTMLInputElement>(
+        '#jp-title-panel-title input'
+      )!;
+      input.value = fileName;
+      simulate(input, 'keyup', { key: 'Enter' });
+      await framePromise();
+
+      expect(rename).not.toHaveBeenCalled();
+      expect(input.value).toBe(fileName);
+      context.dispose();
+    });
+
     it('should restore the filename when a document rename rejects', async () => {
       const manager: ServiceManager.IManager = new ServiceManagerMock();
       await manager.ready;

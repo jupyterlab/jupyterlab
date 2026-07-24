@@ -2814,35 +2814,48 @@ namespace Private {
         }
         const isDocument = widget instanceof DocumentWidget;
         const displayedName = TabBarSvg.titleLabel(widget.title);
-        const oldName = isDocument
+        // A document title may be customized independently of its file name.
+        const fileName = isDocument
           ? widget.context.localPath.split('/').pop()!
           : displayedName;
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();
 
-        if (newName !== displayedName) {
-          if (isDocument) {
-            const validNameExp = /[/\\:]/;
-            if (newName.length > 0 && !validNameExp.test(newName)) {
-              const oldPath = widget.context.path;
-              try {
-                await widget.context.rename(newName);
-              } catch {
-                inputElement.value = oldName;
-                return;
-              }
-              if (widget.context.path === oldPath) {
-                inputElement.value = oldName;
-              }
-            } else {
-              inputElement.value = oldName;
-            }
-          } else {
-            widget.title.label = newName;
-          }
-        } else {
+        if (newName === displayedName) {
           inputElement.value = displayedName;
+          return;
+        }
+
+        if (!isDocument) {
+          widget.title.label = newName;
+          return;
+        }
+
+        const invalidNameExp = /[/\\:]/;
+        if (
+          newName.length === 0 ||
+          invalidNameExp.test(newName) ||
+          newName === fileName
+        ) {
+          inputElement.value = fileName;
+          return;
+        }
+
+        // Rename through the context so its path and the contents manager stay
+        // synchronized instead of treating the edit as a display-title change.
+        const oldPath = widget.context.path;
+        try {
+          await widget.context.rename(newName);
+        } catch {
+          inputElement.value = fileName;
+          return;
+        }
+
+        // A completed rename updates context.path through the fileChanged
+        // signal. If it did not change, discard the uncommitted input value.
+        if (widget.context.path === oldPath) {
+          inputElement.value = fileName;
         }
       }
     }
