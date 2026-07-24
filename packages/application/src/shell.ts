@@ -1526,7 +1526,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           this._dockPanel.hiddenMode = Widget.HiddenMode.Scale;
           break;
         case 'contentVisibility':
-          this._dockPanel.hiddenMode = Widget.HiddenMode.ContentVisibility;
+          this._dockPanel.hiddenMode = Private.supportsContentVisibility()
+            ? Widget.HiddenMode.ContentVisibility
+            : Widget.HiddenMode.Display;
           break;
       }
     }
@@ -2070,6 +2072,21 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 }
 
 namespace Private {
+  /**
+   * Whether the browser supports CSS content visibility hiding.
+   */
+  export function supportsContentVisibility(): boolean {
+    return (
+      typeof navigator !== 'undefined' &&
+      /\b(?:HeadlessChrome|Chrome|Chromium|Edg|OPR)\//.test(
+        navigator.userAgent
+      ) &&
+      typeof CSS !== 'undefined' &&
+      typeof CSS.supports === 'function' &&
+      CSS.supports('content-visibility', 'hidden')
+    );
+  }
+
   /**
    * An object which holds a widget and its sort rank.
    */
