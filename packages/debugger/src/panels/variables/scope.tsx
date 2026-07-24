@@ -11,6 +11,8 @@ import type { IDebugger } from '../../tokens';
 import type { VariablesBodyGrid } from './grid';
 import type { VariablesBodyTree } from './tree';
 
+export const UNIFIED_SCOPE = '__unified__';
+
 /**
  * A React component to handle scope changes.
  *
@@ -31,12 +33,21 @@ const ScopeSwitcherComponent = ({
   grid: VariablesBodyGrid;
   trans: TranslationBundle;
 }): JSX.Element => {
-  const [value, setValue] = useState('-');
+  const [value, setValue] = useState(UNIFIED_SCOPE);
   const scopes = model.scopes;
 
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setValue(value);
+
+    if (value === UNIFIED_SCOPE) {
+      tree.unifiedView = true;
+      tree.scope = '';
+      grid.scope = '';
+      return;
+    }
+
+    tree.unifiedView = false;
     tree.scope = value;
     grid.scope = value;
   };
@@ -47,6 +58,7 @@ const ScopeSwitcherComponent = ({
       value={value}
       aria-label={trans.__('Scope')}
     >
+      <option value={UNIFIED_SCOPE}>{trans.__('Unified')}</option>
       {scopes.map(scope => (
         <option key={scope.name} value={scope.name}>
           {trans.__(scope.name)}
