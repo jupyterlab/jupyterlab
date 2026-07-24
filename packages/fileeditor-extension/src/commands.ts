@@ -1668,7 +1668,15 @@ export namespace Commands {
     consoleTracker: IConsoleTracker,
     isEnabled: () => boolean
   ): void {
-    const isEnabled_ = (current: IDocumentWidget<FileEditor>) =>
+    const hasConsoleForEditor = (current: IDocumentWidget<FileEditor>) =>
+      isEnabled() &&
+      current.context &&
+      !!consoleTracker.find(
+        widget =>
+          widget.sessionContext.path === current.context.path ||
+          widget.sessionContext.session?.path === current.context.path
+      );
+    const hasReadyConsoleForEditor = (current: IDocumentWidget<FileEditor>) =>
       isEnabled() &&
       current.context &&
       !!consoleTracker.find(
@@ -1676,15 +1684,15 @@ export namespace Commands {
       );
     menu.runMenu.codeRunners.restart.add({
       id: CommandIDs.restartConsole,
-      isEnabled: isEnabled_
+      isEnabled: hasReadyConsoleForEditor
     });
     menu.runMenu.codeRunners.run.add({
       id: CommandIDs.runCode,
-      isEnabled: isEnabled_
+      isEnabled: hasConsoleForEditor
     });
     menu.runMenu.codeRunners.runAll.add({
       id: CommandIDs.runAllCode,
-      isEnabled: isEnabled_
+      isEnabled: hasConsoleForEditor
     });
   }
 

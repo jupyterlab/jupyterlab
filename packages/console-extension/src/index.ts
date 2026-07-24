@@ -1317,21 +1317,32 @@ async function activateConsole(
         required: ['path', 'code']
       }
     },
-    execute: args => {
+    execute: async args => {
       const path = args['path'];
-      tracker.find(widget => {
-        if (widget.console.sessionContext.session?.path === path) {
-          if (args['activate'] !== false) {
-            shell.activateById(widget.id);
-          }
-          void widget.console.inject(
-            args['code'] as string,
-            args['metadata'] as JSONObject
-          );
-          return true;
-        }
-        return false;
+      const widget = tracker.find(widget => {
+        const sessionContext = widget.console.sessionContext;
+        return (
+          sessionContext.path === path || sessionContext.session?.path === path
+        );
       });
+      if (!widget) {
+        return;
+      }
+      if (args['activate'] !== false) {
+        shell.activateById(widget.id);
+      }
+      const sessionContext = widget.console.sessionContext;
+      await sessionContext.ready;
+      if (widget.isDisposed || widget.console.isDisposed) {
+        return;
+      }
+      if (!sessionContext.session?.kernel) {
+        return;
+      }
+      return widget.console.inject(
+        args['code'] as string,
+        args['metadata'] as JSONObject
+      );
     },
     isEnabled
   });
