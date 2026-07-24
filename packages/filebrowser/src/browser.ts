@@ -311,6 +311,17 @@ export class FileBrowser
   }
 
   /**
+   * The unit type for displaying file sizes
+   */
+  get fileSizeDisplayUnit(): 'decimal' | 'binary' {
+    return this._fileSizeDisplayUnit;
+  }
+  set fileSizeDisplayUnit(value: 'decimal' | 'binary') {
+    this._fileSizeDisplayUnit = value;
+    this.listing.fileSizeDisplayUnit = value;
+  }
+
+  /**
    * Whether to show a text box to filter files by name.
    */
   get showFileFilter(): boolean {
@@ -785,6 +796,7 @@ export class FileBrowser
   private _showDateCreatedColumn: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
+  private _fileSizeDisplayUnit: 'decimal' | 'binary' = 'decimal';
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
   private _sortFileNamesNaturally: boolean = true;
