@@ -31,7 +31,7 @@ describe('@jupyterlab/rendermime', () => {
 
     it('renders text and auto-links URLs across animation frames', async () => {
       const sanitizer = new Sanitizer();
-      await renderText({ host, sanitizer, source: 'see www.example.com here' });
+      void renderText({ host, sanitizer, source: 'see www.example.com here' });
 
       // Drive the requestAnimationFrame-based rendering loop to completion.
       jest.runAllTimers();
@@ -43,13 +43,48 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors[0].href).toContain('www.example.com');
     });
 
+    it('resolves the render promise at first paint, before auto-linking finishes', async () => {
+      // `renderText` resolves when the text is first painted, not when the
+      // whole incremental render completes: the promise must stay pending
+      // until a frame has run, then resolve once the text is on screen even
+      // though auto-linking (which lands the link) is still pending.
+      const sanitizer = new Sanitizer();
+      // Bust the frame budget so only one auto-linking step runs per frame,
+      // leaving the trailing URL for a later frame.
+      let clock = 0;
+      jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
+
+      const source = `${'x'.repeat(STRIDE + 8)} www.example.com more`;
+      let resolved = false;
+      const rendered = renderText({ host, sanitizer, source }).then(() => {
+        resolved = true;
+      });
+
+      // Not resolved before any animation frame has run - nothing is painted.
+      await Promise.resolve();
+      expect(resolved).toBe(false);
+      expect(host.textContent).toBe('');
+
+      // The first frame paints the whole text; the promise resolves here even
+      // though the URL has not been linkified yet.
+      jest.advanceTimersToNextTimer();
+      await rendered;
+      expect(resolved).toBe(true);
+      expect(host.textContent).toBe(source);
+      expect(host.querySelectorAll('a')).toHaveLength(0);
+
+      // Remaining frames finish the auto-linking.
+      jest.runAllTimers();
+      expect(host.querySelectorAll('a')).toHaveLength(1);
+    });
+
     it('paints even when requestAnimationFrame never fires', async () => {
       // Simulate requestAnimationFrame being starved (background tab or heavy
       // resource pressure): it hands back a handle but never calls back.
       jest.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1);
 
       const sanitizer = new Sanitizer();
-      await renderText({ host, sanitizer, source: 'see www.example.com here' });
+      void renderText({ host, sanitizer, source: 'see www.example.com here' });
 
       // Nothing is painted yet - the animation frame is never delivered.
       expect(host.textContent).toBe('');
@@ -82,7 +117,7 @@ describe('@jupyterlab/rendermime', () => {
         });
 
       const sanitizer = new Sanitizer();
-      await renderText({ host, sanitizer, source: 'see www.example.com here' });
+      void renderText({ host, sanitizer, source: 'see www.example.com here' });
 
       // The observer reports the still-empty (zero-height) host as off-screen
       // before it has had a chance to paint.
@@ -222,9 +257,9 @@ describe('@jupyterlab/rendermime', () => {
 
       // Simulate three stream chunks arriving before any frame is rendered
       // (each new chunk cancels the pending frame of the previous one).
-      await renderText({ host, sanitizer, source: 'aaa www.' });
-      await renderText({ host, sanitizer, source: 'aaa www.example.com bbb' });
-      await renderText({
+      void renderText({ host, sanitizer, source: 'aaa www.' });
+      void renderText({ host, sanitizer, source: 'aaa www.example.com bbb' });
+      void renderText({
         host,
         sanitizer,
         source: 'aaa www.example.com bbb www.example.org'
@@ -272,7 +307,7 @@ describe('@jupyterlab/rendermime', () => {
 
       const sanitizer = new Sanitizer();
       const source = `${'x'.repeat(STRIDE + 8)} www.example.com more`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
 
       // First frame: the full text paints, but the URL is not linkified yet.
       jest.advanceTimersByTime(16);
@@ -327,7 +362,7 @@ describe('@jupyterlab/rendermime', () => {
 
       const sanitizer = new Sanitizer();
       const source = `${'x'.repeat(STRIDE + 8)} www.example.com more`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
 
       // Paint the first frame, then park the host in the background tier.
       jest.advanceTimersByTime(16);
@@ -362,7 +397,7 @@ describe('@jupyterlab/rendermime', () => {
           throw new Error('synchronous rendering must not schedule a frame');
         });
 
-      await renderText({ host, sanitizer, source: 'see www.example.com here' });
+      void renderText({ host, sanitizer, source: 'see www.example.com here' });
 
       // The content (text and links) is present immediately, without a frame.
       expect(host.textContent).toBe('see www.example.com here');
@@ -389,7 +424,7 @@ describe('@jupyterlab/rendermime', () => {
       // the stride offset, and the next whitespace follows the URL.
       const padding = 'y'.repeat(STRIDE - 7);
       const source = `${padding} www.example.com and more text`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       expect(host.textContent).toBe(source);
@@ -404,7 +439,7 @@ describe('@jupyterlab/rendermime', () => {
       const sanitizer = new Sanitizer();
       const source = 'z'.repeat(STRIDE * 3);
 
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       expect(host.textContent).toBe(source);
@@ -426,7 +461,7 @@ describe('@jupyterlab/rendermime', () => {
       jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
 
       const source = `${'z'.repeat(STRIDE * 2)} www.example.com`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       expect(host.textContent).toBe(source);
@@ -620,7 +655,7 @@ describe('@jupyterlab/rendermime', () => {
       const source = `${'y'.repeat(STRIDE - 7)} www.example.com ${'z'.repeat(
         STRIDE
       )} www.example.org end`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
 
       // First frame: the first URL is committed.
       jest.advanceTimersByTime(16);
@@ -662,7 +697,7 @@ describe('@jupyterlab/rendermime', () => {
       const source = `${'y'.repeat(STRIDE - 7)} www.example.com ${'z'.repeat(
         STRIDE
       )} www.example.org end`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.advanceTimersByTime(16);
       expect(host.querySelectorAll('a')).toHaveLength(1);
 
@@ -694,7 +729,7 @@ describe('@jupyterlab/rendermime', () => {
       const source = `${'y'.repeat(STRIDE)} ${'z'.repeat(
         STRIDE
       )} www.example.org end`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.advanceTimersByTime(16);
 
       const pre = host.querySelector('pre')!;
@@ -738,7 +773,7 @@ describe('@jupyterlab/rendermime', () => {
       const source = `${'y'.repeat(STRIDE)} ${'z'.repeat(
         STRIDE
       )} www.example.org end`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.advanceTimersByTime(16);
 
       const pre = host.querySelector('pre')!;
@@ -764,7 +799,7 @@ describe('@jupyterlab/rendermime', () => {
 
       const padding = 'x'.repeat(STRIDE + 8);
       const source = `${padding} \x1b[0;31mcolored www.example.com\x1b[0m`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
 
       // First frame: only the padding is committed; the colored region is
       // still tail - yet its span (with the ANSI class) must be present.
@@ -786,13 +821,13 @@ describe('@jupyterlab/rendermime', () => {
       // rebuilt, so its nodes keep their identity across chunks.
       const sanitizer = new Sanitizer();
 
-      await renderText({ host, sanitizer, source: 'line1 www.a.com\n' });
+      void renderText({ host, sanitizer, source: 'line1 www.a.com\n' });
       jest.runAllTimers();
       const firstAnchor = host.querySelector('a');
       expect(firstAnchor!.textContent).toBe('www.a.com');
 
       // Newline chunk boundary: nothing needs re-analysis.
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: 'line1 www.a.com\nline2 www.'
@@ -802,7 +837,7 @@ describe('@jupyterlab/rendermime', () => {
       // Mid-link chunk boundary: `www.` + `b.com` must form one link, which
       // requires trimming the trailing committed region back - but not the
       // first line.
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: 'line1 www.a.com\nline2 www.b.com end'
@@ -831,7 +866,7 @@ describe('@jupyterlab/rendermime', () => {
       jest.spyOn(performance, 'now').mockImplementation(() => (clock += 1000));
 
       const chunk1 = `${'x'.repeat(STRIDE + 8)} progress 10%`;
-      await renderText({ host, sanitizer, source: chunk1 });
+      void renderText({ host, sanitizer, source: chunk1 });
       jest.runAllTimers();
       expect(host.textContent).toBe(chunk1);
       const preBefore = host.querySelector('pre');
@@ -841,7 +876,7 @@ describe('@jupyterlab/rendermime', () => {
       // HTML parsing normalizes it to `\n`, which would obscure the
       // `textContent` assertion below.)
       const source = `${chunk1} then progress 20% www.example.com`;
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       expect(host.textContent).toBe(source);
@@ -856,12 +891,12 @@ describe('@jupyterlab/rendermime', () => {
       // re-render with identical content is a complete no-op.
       const source = 'see www.example.com\n';
 
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
       const preBefore = host.querySelector('pre');
       const anchorBefore = host.querySelector('a');
 
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       expect(host.textContent).toBe(source);
@@ -876,9 +911,9 @@ describe('@jupyterlab/rendermime', () => {
       // and re-linkify it together with the addition into one extended link.
       const sanitizer = new Sanitizer();
 
-      await renderText({ host, sanitizer, source: 'see www.example.com' });
+      void renderText({ host, sanitizer, source: 'see www.example.com' });
       jest.runAllTimers();
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: 'see www.example.com/path/page'
@@ -915,7 +950,7 @@ describe('@jupyterlab/rendermime', () => {
       });
 
       const padding = 'x'.repeat(STRIDE + 8);
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: `${padding} \x1b[0;31mwww.example.com\x1b[0m more`
@@ -944,7 +979,7 @@ describe('@jupyterlab/rendermime', () => {
       jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
-      await renderText({ host, sanitizer, source: 'www.example.com and more' });
+      void renderText({ host, sanitizer, source: 'www.example.com and more' });
       jest.runAllTimers();
 
       const urlText = host.querySelector('a')!.firstChild as Text;
@@ -953,7 +988,7 @@ describe('@jupyterlab/rendermime', () => {
       expect(selection.toString()).toBe('www.e');
 
       // A further stream chunk rebuilds the DOM; the selection must survive.
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: 'www.example.com and more text'
@@ -971,7 +1006,7 @@ describe('@jupyterlab/rendermime', () => {
       jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
-      await renderText({ host, sanitizer, source: 'www.example.com and more' });
+      void renderText({ host, sanitizer, source: 'www.example.com and more' });
       jest.runAllTimers();
 
       // Select "example", strictly inside the linkified URL text node.
@@ -980,7 +1015,7 @@ describe('@jupyterlab/rendermime', () => {
       selection.setBaseAndExtent(urlText, 4, urlText, 11);
       expect(selection.toString()).toBe('example');
 
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: 'www.example.com and more text'
@@ -1003,7 +1038,7 @@ describe('@jupyterlab/rendermime', () => {
       // Only "com" is background-colored, so the anchor's first child is the
       // Text node "www.example." followed by a <span> holding "com".
       const source = 'pre www.example.\x1b[48;2;113;0;119mcom\x1b[0m post\n';
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       const comSpan = host.querySelector('a span');
@@ -1015,7 +1050,7 @@ describe('@jupyterlab/rendermime', () => {
 
       // A further stream chunk commits new content and must preserve the
       // selection sitting inside the earlier multi-part anchor.
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: source + 'next www.other.com\n'
@@ -1033,7 +1068,7 @@ describe('@jupyterlab/rendermime', () => {
       const sanitizer = new Sanitizer();
 
       const source = 'pre www.example.\x1b[48;2;113;0;119mcom\x1b[0m post\n';
-      await renderText({ host, sanitizer, source });
+      void renderText({ host, sanitizer, source });
       jest.runAllTimers();
 
       // Select "post" in the plain text that follows the multi-part anchor.
@@ -1043,7 +1078,7 @@ describe('@jupyterlab/rendermime', () => {
       selection.setBaseAndExtent(trailing, 1, trailing, 5);
       expect(selection.toString()).toBe('post');
 
-      await renderText({
+      void renderText({
         host,
         sanitizer,
         source: source + 'next www.other.com\n'

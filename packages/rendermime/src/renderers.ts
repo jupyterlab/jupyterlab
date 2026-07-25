@@ -709,12 +709,20 @@ function autolink(
 export async function renderText(
   options: renderText.IRenderOptions
 ): Promise<void> {
-  // Text has no post-render step, so we do not await completion here (rendering
-  // continues incrementally across animation frames).
-  void renderTextual(options, {
+  // Resolve when the text is first painted, not when the whole render
+  // finishes. Auto-linking runs incrementally across many animation frames
+  // after the text is on screen, and for an output that is off-screen (e.g.
+  // scrolled out of view in a long notebook) those frames are deferred to the
+  // browser's idle time, which a busy page can starve - so full completion can
+  // be many seconds away (bounded only by the render's ~10 minute safety cap).
+  // Returning the completion promise would make `renderModel` block for all of
+  // that. Unlike `renderError` - which must await completion so it can resolve
+  // file-path anchors once they exist in the DOM - text has no post-render
+  // step, so first paint is the meaningful "rendered" milestone here.
+  return renderTextual(options, {
     checkWeb: true,
     checkPaths: false
-  });
+  }).firstPainted;
 }
 
 /**
@@ -824,7 +832,7 @@ const MAX_FRAME_BUDGET = 200;
 function renderTextual(
   options: renderText.IRenderOptions,
   autoLinkOptions: IAutoLinkOptions
-): Promise<void> {
+): { firstPainted: Promise<void>; completed: Promise<void> } {
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
@@ -842,7 +850,9 @@ function renderTextual(
     // (e.g. if the setting was toggled mid-stream) before rendering synchronously.
     Private.abortRendering(host);
     renderTextualSync(options, autoLinkOptions);
-    return Promise.resolve();
+    // The synchronous pass paints everything in one go, so both milestones
+    // are already reached.
+    return { firstPainted: Promise.resolve(), completed: Promise.resolve() };
   }
 
   // Completion promise: resolves once this render has finished (reached
@@ -854,6 +864,17 @@ function renderTextual(
     resolveRendered = resolve;
   });
   Private.registerRenderResolver(host, resolveRendered);
+
+  // First-paint promise: resolves as soon as the plain text is written to the
+  // DOM (the first working frame), which is the milestone `renderText`
+  // reports. It resolves well before `rendered`, whose auto-linking tail can
+  // run for a long time - especially for off-screen outputs deferred to the
+  // browser's idle time (see `renderText`).
+  let resolveFirstPainted!: () => void;
+  const firstPainted = new Promise<void>(resolve => {
+    resolveFirstPainted = resolve;
+  });
+  Private.registerFirstPaintResolver(host, resolveFirstPainted);
 
   // We want to only manipulate DOM once per animation frame whether
   // the autolink is enabled or not, because a stream can also choke
@@ -1229,7 +1250,7 @@ function renderTextual(
     );
   }
 
-  return rendered;
+  return { firstPainted, completed: rendered };
 }
 
 /**
@@ -1457,11 +1478,13 @@ export async function renderError(
 
   // Wait for rendering to complete before patching paths: the path anchors must
   // be in the DOM for `handlePaths` to resolve them. In the incremental pipeline
-  // rendering happens across animation frames, so this must be awaited.
+  // rendering happens across animation frames, so this must be awaited. (Unlike
+  // `renderText`, which resolves at first paint, this awaits the `completed`
+  // milestone so *all* anchors exist.)
   await renderTextual(options, {
     checkWeb: true,
     checkPaths: true
-  });
+  }).completed;
 
   // Patch the paths if a resolver is available.
   if (resolver) {
@@ -1689,12 +1712,16 @@ namespace Private {
 
   export function markPainted(host: HTMLElement): void {
     paintedHosts.add(host);
+    // The output's text is now in the DOM: release the first-paint promise
+    // that `renderText` returns (see `firstPaintResolvers`).
+    resolveFirstPaint(host);
   }
 
   /**
-   * Resolvers for the per-host render completion promise returned by
-   * `renderTextual`. A host has at most one in-flight render; its resolver is
-   * called (and cleared) when the render finishes or is superseded.
+   * Resolvers for the per-host render completion promise (the `completed`
+   * promise `renderTextual` returns, awaited by `renderError`). A host has at
+   * most one in-flight render; its resolver is called (and cleared) when the
+   * render finishes or is superseded.
    */
   const renderResolvers = new WeakMap<HTMLElement, () => void>();
 
@@ -1706,9 +1733,39 @@ namespace Private {
   }
 
   /**
-   * Resolve and clear the pending render completion promise for a host, if any.
+   * Resolvers for the per-host first-paint promise (the `firstPainted` promise
+   * `renderTextual` returns, which is what `renderText` resolves on). Released
+   * as soon as the output's text is first written to the DOM (`markPainted`),
+   * or when the render ends without ever painting - superseded by a later
+   * render, or given up before the host attaches - via `settleRender`, so
+   * callers never hang.
+   */
+  const firstPaintResolvers = new WeakMap<HTMLElement, () => void>();
+
+  export function registerFirstPaintResolver(
+    host: HTMLElement,
+    resolve: () => void
+  ): void {
+    firstPaintResolvers.set(host, resolve);
+  }
+
+  function resolveFirstPaint(host: HTMLElement): void {
+    const resolve = firstPaintResolvers.get(host);
+    if (resolve) {
+      firstPaintResolvers.delete(host);
+      resolve();
+    }
+  }
+
+  /**
+   * Resolve and clear the pending completion and first-paint promises for a
+   * host, if any. Called when a render finishes (`stopRendering`) and when a
+   * later render supersedes it (start of `renderTextual`).
    */
   export function settleRender(host: HTMLElement): void {
+    // A render settled without ever painting (superseded, or given up before
+    // attaching) must still release its first-paint promise.
+    resolveFirstPaint(host);
     const resolve = renderResolvers.get(host);
     if (resolve) {
       renderResolvers.delete(host);
