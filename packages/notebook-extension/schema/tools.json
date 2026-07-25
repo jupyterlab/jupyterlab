@@ -13,10 +13,6 @@
             "title": "Cell tool",
             "type": "null"
           },
-          "_CELL-ID": {
-            "title": "Cell ID",
-            "type": "null"
-          },
           "/editable": {
             "title": "Editable",
             "type": "boolean",
@@ -46,6 +42,10 @@
                 "title": "Not deletable"
               }
             ]
+          },
+          "_CELL-ID": {
+            "title": "Cell ID",
+            "type": "null"
           },
           "/slideshow/slide_type": {
             "title": "Slide Type",
@@ -116,7 +116,7 @@
         }
       },
       "uiSchema": {
-        "ui:order": ["_CELL-TOOL", "_CELL-ID", "*"],
+        "ui:order": ["_CELL-TOOL", "/editable", "/deletable", "_CELL-ID", "*"],
         "/editable": {
           "ui:widget": "select"
         },
