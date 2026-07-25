@@ -437,14 +437,17 @@ function findTextSelectionNode(
 ) {
   if (textOffset !== null) {
     for (const node of [...root.childNodes]) {
-      // As much as possible avoid calling `textContent` here as it is slower
+      // Length of this node's text. Text nodes use the cheap `nodeValue`; for
+      // elements we must use the full `textContent`, not a single child, since
+      // a node can hold several text-bearing descendants (e.g. a linkified URL
+      // split across ANSI-colored spans, `<a>www.example.<span>com</span></a>`).
+      // Measuring only the first child would under-count the element and shift
+      // every offset after it, restoring the selection to the wrong place. This
+      // matches the full traversal in `computeSelectionCharacterOffset`.
       const nodeEnd =
         node instanceof Text
           ? node.nodeValue!.length
-          : ((node instanceof HTMLAnchorElement
-              ? (node.childNodes[0].nodeValue?.length ??
-                node.textContent?.length)
-              : node.textContent?.length) ?? 0);
+          : (node.textContent?.length ?? 0);
       // Use `>=` on the lower bound so an offset that falls exactly on a node
       // boundary is resolved to the start of that node. With a strict `>` the
       // offset `0` (start of content) and every inter-node boundary would be

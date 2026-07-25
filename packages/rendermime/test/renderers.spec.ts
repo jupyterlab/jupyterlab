@@ -989,5 +989,68 @@ describe('@jupyterlab/rendermime', () => {
 
       expect(window.getSelection()!.toString()).toBe('example');
     });
+
+    it('preserves a selection inside a later child of a multi-part linkified URL', async () => {
+      // Regression test: a linkified URL whose ANSI color changes partway
+      // through renders as an anchor with several children, e.g.
+      // `<a>www.example.<span>com</span></a>`. The selection-restore code must
+      // measure the anchor by its full text length, not just its first child;
+      // otherwise an offset inside a *later* child (here "com") is treated as
+      // outside the anchor and the selection is restored to the wrong place.
+      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      const sanitizer = new Sanitizer();
+
+      // Only "com" is background-colored, so the anchor's first child is the
+      // Text node "www.example." followed by a <span> holding "com".
+      const source = 'pre www.example.\x1b[48;2;113;0;119mcom\x1b[0m post\n';
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+
+      const comSpan = host.querySelector('a span');
+      const comText = comSpan!.firstChild as Text;
+      expect(comText.data).toBe('com');
+      const selection = window.getSelection()!;
+      selection.setBaseAndExtent(comText, 0, comText, 3);
+      expect(selection.toString()).toBe('com');
+
+      // A further stream chunk commits new content and must preserve the
+      // selection sitting inside the earlier multi-part anchor.
+      await renderText({
+        host,
+        sanitizer,
+        source: source + 'next www.other.com\n'
+      });
+      jest.runAllTimers();
+
+      expect(window.getSelection()!.toString()).toBe('com');
+    });
+
+    it('preserves a selection after a multi-part linkified URL', async () => {
+      // Companion to the above: under-counting the multi-child anchor's length
+      // shifts every character offset after it, so a selection in the text
+      // following the anchor is mis-restored too.
+      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      const sanitizer = new Sanitizer();
+
+      const source = 'pre www.example.\x1b[48;2;113;0;119mcom\x1b[0m post\n';
+      await renderText({ host, sanitizer, source });
+      jest.runAllTimers();
+
+      // Select "post" in the plain text that follows the multi-part anchor.
+      const trailing = host.querySelector('pre')!.lastChild as Text;
+      expect(trailing.data).toBe(' post\n');
+      const selection = window.getSelection()!;
+      selection.setBaseAndExtent(trailing, 1, trailing, 5);
+      expect(selection.toString()).toBe('post');
+
+      await renderText({
+        host,
+        sanitizer,
+        source: source + 'next www.other.com\n'
+      });
+      jest.runAllTimers();
+
+      expect(window.getSelection()!.toString()).toBe('post');
+    });
   });
 });
