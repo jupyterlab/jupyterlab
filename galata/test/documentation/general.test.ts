@@ -9,8 +9,7 @@ import {
   freeezeKernelIds,
   generateArrow,
   positionMouse,
-  positionMouseOver,
-  setTerminalTitle
+  positionMouseOver
 } from './utils';
 
 test.use({
@@ -63,7 +62,7 @@ test.describe('General', () => {
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
 
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
@@ -600,7 +599,7 @@ test.describe('General', () => {
     // Wait for the xterm.js element to be added in the DOM
     await page.locator('.jp-Terminal-body').waitFor();
 
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
     await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
@@ -627,7 +626,7 @@ test.describe('General', () => {
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'

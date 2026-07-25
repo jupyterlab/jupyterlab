@@ -5009,6 +5009,7 @@ __metadata:
     "@jupyterlab/running": ^4.7.0-alpha.1
     "@jupyterlab/services": ^7.7.0-alpha.1
     "@jupyterlab/settingregistry": ^4.7.0-alpha.1
+    "@jupyterlab/statedb": ^4.7.0-alpha.1
     "@jupyterlab/statusbar": ^4.7.0-alpha.1
     "@jupyterlab/terminal": ^4.7.0-alpha.1
     "@jupyterlab/translation": ^4.7.0-alpha.1

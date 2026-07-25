@@ -28,6 +28,7 @@ import type { Terminal } from '@jupyterlab/services';
 import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITerminal,
   ITerminalTracker,
@@ -45,7 +46,7 @@ import { VDomRenderer } from '@jupyterlab/ui-components';
 import { VDomModel } from '@jupyterlab/ui-components';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type { Widget } from '@lumino/widgets';
+import type { Title, Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
 
@@ -79,6 +80,10 @@ namespace CommandIDs {
  */
 const ESCAPE_HINT_DISPLAY_MS = 1500;
 
+const TERMINAL_TITLES_STATE_DB_ID = '@jupyterlab/terminal-extension:titles';
+
+type TerminalTitleState = Record<string, string>;
+
 const TERMINAL_OPTION_KEYS = new Set<string>(
   Object.keys(ITerminal.defaultOptions)
 );
@@ -93,6 +98,7 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   provides: ITerminalTracker,
   requires: [ISettingRegistry, ITranslator],
   optional: [
+    IStateDB,
     ICommandPalette,
     ILauncher,
     ILayoutRestorer,
@@ -180,6 +186,7 @@ function activate(
   app: JupyterFrontEnd,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
+  stateDB: IStateDB<TerminalTitleState> | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
@@ -404,7 +411,13 @@ function activate(
 
   // Add a sessions manager if the running extension is available
   if (runningSessionManagers) {
-    addRunningSessionManager(runningSessionManagers, app, tracker, translator);
+    addRunningSessionManager(
+      runningSessionManagers,
+      app,
+      tracker,
+      translator,
+      stateDB
+    );
   }
 
   if (searchRegistry) {
@@ -421,11 +434,17 @@ function addRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd,
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
-  translator: ITranslator
+  translator: ITranslator,
+  stateDB: IStateDB<TerminalTitleState> | null
 ) {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
-  const signaler = new RunningTerminalSignaler(manager, tracker);
+  const signaler = new RunningTerminalSignaler(
+    manager,
+    tracker,
+    stateDB,
+    name => trans.__('Terminal %1', name)
+  );
 
   class RunningTerminal implements IRunningSessions.IRunningItem {
     constructor(model: Terminal.IModel) {
@@ -438,10 +457,7 @@ function addRunningSessionManager(
       return terminalIcon;
     }
     label() {
-      return Private.runningTerminalLabel(this._model.name, tracker);
-    }
-    labelTitle() {
-      return Private.runningTerminalLabel(this._model.name, tracker);
+      return signaler.label(this._model.name);
     }
     shutdown() {
       return manager.shutdown(this._model.name);
@@ -469,9 +485,16 @@ function addRunningSessionManager(
 class RunningTerminalSignaler {
   constructor(
     manager: Terminal.IManager,
-    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>
+    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
+    stateDB: IStateDB<TerminalTitleState> | null,
+    defaultLabel: (name: string) => string
   ) {
-    manager.runningChanged.connect(this._emitRunningChanged, this);
+    this._stateDB = stateDB;
+    this._defaultLabel = defaultLabel;
+    this._ready = this._loadTitles(manager).catch(reason => {
+      console.warn('Failed to load terminal title state.', reason);
+    });
+    manager.runningChanged.connect(this._onRunningChanged, this);
     tracker.widgetAdded.connect((_, widget) => {
       this._watchWidget(widget);
       this._emitRunningChanged();
@@ -483,27 +506,124 @@ class RunningTerminalSignaler {
     return this._runningChanged;
   }
 
+  label(name: string): string {
+    return this._titles.get(name) ?? `terminals/${name}`;
+  }
+
   private _watchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
     if (this._widgets.has(widget)) {
       return;
     }
 
     this._widgets.add(widget);
-    widget.title.changed.connect(this._emitRunningChanged, this);
+    widget.title.changed.connect(this._syncWidgetTitle, this);
     widget.disposed.connect(this._unwatchWidget, this);
+    this._syncWidgetTitle(widget.title);
   }
 
   private _unwatchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
-    widget.title.changed.disconnect(this._emitRunningChanged, this);
+    widget.title.changed.disconnect(this._syncWidgetTitle, this);
     widget.disposed.disconnect(this._unwatchWidget, this);
     this._widgets.delete(widget);
     this._emitRunningChanged();
+  }
+
+  private _syncWidgetTitle(title: Title<Widget>): void {
+    void this._ready.then(() => {
+      const widget = Array.from(this._widgets).find(
+        widget => widget === title.owner
+      );
+      if (!widget || widget.isDisposed) {
+        return;
+      }
+
+      const name = widget.content.session.name;
+      const label = TabBarSvg.titleLabel(widget.title);
+      if (
+        label === '...' ||
+        this._titles.get(name) === label ||
+        (this._titles.has(name) && label === this._defaultLabel(name))
+      ) {
+        return;
+      }
+
+      this._titles.set(name, label);
+      this._saveTitles();
+      this._emitRunningChanged();
+    });
+  }
+
+  private _onRunningChanged(
+    manager: Terminal.IManager,
+    _models: Terminal.IModel[]
+  ): void {
+    void this._ready.then(() => {
+      if (this._pruneTitles(manager.running())) {
+        this._saveTitles();
+      }
+      this._emitRunningChanged();
+    });
+  }
+
+  private async _loadTitles(manager: Terminal.IManager): Promise<void> {
+    if (!this._stateDB) {
+      return;
+    }
+
+    const saved = await this._stateDB.fetch(TERMINAL_TITLES_STATE_DB_ID);
+    if (!saved) {
+      return;
+    }
+
+    for (const [name, label] of Object.entries(saved)) {
+      if (!this._titles.has(name)) {
+        this._titles.set(name, label);
+      }
+    }
+    await manager.ready;
+    if (this._pruneTitles(manager.running())) {
+      this._saveTitles();
+    }
+    this._emitRunningChanged();
+  }
+
+  private _pruneTitles(models: Iterable<Terminal.IModel>): boolean {
+    const names = new Set(Array.from(models, model => model.name));
+    let changed = false;
+    for (const name of this._titles.keys()) {
+      if (!names.has(name)) {
+        this._titles.delete(name);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  private _saveTitles(): void {
+    if (!this._stateDB) {
+      return;
+    }
+
+    const titles: TerminalTitleState = {};
+    for (const [name, label] of this._titles) {
+      titles[name] = label;
+    }
+
+    void this._stateDB
+      .save(TERMINAL_TITLES_STATE_DB_ID, titles)
+      .catch(reason => {
+        console.warn('Failed to save terminal title state.', reason);
+      });
   }
 
   private _emitRunningChanged(): void {
     this._runningChanged.emit(void 0);
   }
 
+  private _stateDB: IStateDB<TerminalTitleState> | null;
+  private _defaultLabel: (name: string) => string;
+  private _ready: Promise<void>;
+  private _titles = new Map<string, string>();
   private _widgets = new Set<MainAreaWidget<ITerminal.ITerminal>>();
   private _runningChanged = new Signal<this, void>(this);
 }
@@ -888,17 +1008,6 @@ namespace Private {
    */
   export function showErrorMessage(error: Error): void {
     console.error(`Failed to configure ${plugin.id}: ${error.message}`);
-  }
-
-  /**
-   * Get the running terminal label matching the Open Tabs section.
-   */
-  export function runningTerminalLabel(
-    name: string,
-    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>
-  ): string {
-    const widget = tracker.find(widget => widget.content.session.name === name);
-    return widget ? TabBarSvg.titleLabel(widget.title) : `terminals/${name}`;
   }
 }
 
