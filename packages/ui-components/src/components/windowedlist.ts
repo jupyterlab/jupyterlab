@@ -1847,6 +1847,9 @@ export class WindowedList<
     this._viewport.dataset.isScrolling = 'false';
     if (this._requiresTotalSizeUpdate) {
       this._updateTotalSize();
+      // The scroll height changes only after deferred size updates are applied.
+      // Re-run scrollback using the final post-scroll geometry.
+      this._scrollBackToItemOnResize();
     }
     this._requiresTotalSizeUpdate = false;
   }

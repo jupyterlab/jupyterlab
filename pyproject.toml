@@ -49,6 +49,7 @@ dependencies = [
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
+    "typing-extensions>=4.4.0;python_version<\"3.12\"",
 ]
 dynamic = [
     "version",
@@ -263,7 +264,7 @@ exclude = ["*.ipynb"]
 target-version = "py310"
 line-length = 100
 lint.select = [
-  "A", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
+  "A", "ANN", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
   "ICN", "LOG", "N", "PERF", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RSE",
   "RUF", "S", "SIM", "SLOT", "T", "TC", "TID", "UP", "W", "YTT",
 ]
@@ -278,6 +279,10 @@ lint.ignore = [
 "SIM105",
 ]
 
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
+
 [tool.ruff.lint.per-file-ignores]
 # F821 Undefined name `c`
 "binder/jupyter_config.py" = ["F821"]
@@ -286,16 +291,19 @@ lint.ignore = [
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "examples/federated/main.py" = ["RUF012"]
 # T201 `print` found
-"examples/test_examples.py" = ["T201"]
+"examples/test_examples.py" = ["T201", "ANN"]
 # T201 `print` found
 "galata/*" = ["T201"]
+# ANN is skipped for Python test and fixture files; annotations can change displayed source.
+"galata/test/**/*.py" = ["ANN"]
 # F821 Undefined name `c`
 "galata/jupyter_server_test_config.py" = ["F821"]
 "galata/jupyter_server_csp_test_config.py" = ["F821"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/browser_check.py" = ["RUF012"]
 # C901 method is too complex
-"jupyterlab/commands.py" = ["C901"]
+# ANN is being added incrementally; command helpers are covered separately.
+"jupyterlab/commands.py" = ["C901", "ANN"]
 # B028 No explicit `stacklevel` keyword argument found
 "jupyterlab/debuglog.py" = ["B028"]
 "jupyterlab/extensions/manager.py" = ["C901"]
@@ -310,6 +318,7 @@ lint.ignore = [
 # EM101 Exception must not use a string literal
 # PLR2004 Magic value used in comparison
 "jupyterlab/tests/*" = ["C901", "S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004"]
+"jupyterlab/tests/**" = ["ANN"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/tests/echo_kernel.py" = ["RUF012"]
 # T201 `print` found
