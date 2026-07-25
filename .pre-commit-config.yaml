@@ -83,6 +83,7 @@ repos:
       - id: mypy
         name: mypy
         entry: python -m mypy
+        args: [--config-file, pyproject.toml]
         language: system
         pass_filenames: false
         types: [python]
