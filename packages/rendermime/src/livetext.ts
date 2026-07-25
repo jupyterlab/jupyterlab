@@ -426,49 +426,43 @@ function computeSelectionCharacterOffset(
 }
 
 /**
- * Finds a text node and offset within the given root node
- * where the selection should be anchored to select exactly
- * from n-th character given by `textOffset`.
+ * Find the text node and offset within `root` that correspond to the character
+ * offset `textOffset` (as produced by `computeSelectionCharacterOffset`), so a
+ * selection can be restored after the DOM has been mutated.
+ *
+ * Walks the text nodes in document order, reading only their cheap `nodeValue`
+ * length. It never reads an element's `textContent`, which would serialize the
+ * element's whole subtree and allocate a string for every node passed - costly
+ * when many links precede the offset. Descending into every text-bearing
+ * descendant also keeps this consistent with the full traversal in
+ * `computeSelectionCharacterOffset`, so multi-child nodes (e.g. a linkified URL
+ * split across ANSI-colored spans) are handled correctly.
  */
 function findTextSelectionNode(
   root: Node,
-  textOffset: number | null,
-  offset: number = 0
-) {
-  if (textOffset !== null) {
-    for (const node of [...root.childNodes]) {
-      // Length of this node's text. Text nodes use the cheap `nodeValue`; for
-      // elements we must use the full `textContent`, not a single child, since
-      // a node can hold several text-bearing descendants (e.g. a linkified URL
-      // split across ANSI-colored spans, `<a>www.example.<span>com</span></a>`).
-      // Measuring only the first child would under-count the element and shift
-      // every offset after it, restoring the selection to the wrong place. This
-      // matches the full traversal in `computeSelectionCharacterOffset`.
-      const nodeEnd =
-        node instanceof Text
-          ? node.nodeValue!.length
-          : (node.textContent?.length ?? 0);
-      // Use `>=` on the lower bound so an offset that falls exactly on a node
-      // boundary is resolved to the start of that node. With a strict `>` the
-      // offset `0` (start of content) and every inter-node boundary would be
-      // missed, leaving the selection unrestored - the ranges are half-open
-      // [offset, offset + nodeEnd), so each character position still maps to
-      // exactly one node.
-      if (textOffset >= offset && textOffset < offset + nodeEnd) {
-        if (node instanceof Text) {
-          return { node, positionOffset: textOffset - offset };
-        } else {
-          return findTextSelectionNode(node, textOffset, offset);
-        }
-      } else {
-        offset += nodeEnd;
-      }
-    }
+  textOffset: number | null
+): { node: Text | null; positionOffset: number | null } {
+  if (textOffset === null) {
+    return { node: null, positionOffset: null };
   }
-  return {
-    node: null,
-    positionOffset: null
-  };
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let offset = 0;
+  for (
+    let node = walker.nextNode() as Text | null;
+    node !== null;
+    node = walker.nextNode() as Text | null
+  ) {
+    const length = node.nodeValue!.length;
+    // Half-open interval [offset, offset + length): an offset falling exactly
+    // on a node boundary resolves to the start of the following node, and an
+    // offset of 0 resolves to the very first character. Each character position
+    // therefore maps to exactly one text node. (Preserves prior behavior.)
+    if (textOffset >= offset && textOffset < offset + length) {
+      return { node, positionOffset: textOffset - offset };
+    }
+    offset += length;
+  }
+  return { node: null, positionOffset: null };
 }
 
 /**
@@ -481,9 +475,9 @@ function selectByOffsets(
   offsets: ISelectionOffsets
 ) {
   const { node: focusNode, positionOffset: focusOffset } =
-    findTextSelectionNode(root, offsets.focus, 0);
+    findTextSelectionNode(root, offsets.focus);
   const { node: anchorNode, positionOffset: anchorOffset } =
-    findTextSelectionNode(root, offsets.anchor, 0);
+    findTextSelectionNode(root, offsets.anchor);
   if (
     anchorNode &&
     focusNode &&
