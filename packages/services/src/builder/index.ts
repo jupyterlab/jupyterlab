@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -158,27 +159,12 @@ export namespace BuildManager {
   /**
    * Bundle of translation functions.
    */
-  export type TranslationBundle = {
-    /**
-     * Translate a message without plural inflection.
-     */
-    __(msgid: string, ...args: unknown[]): string;
-  };
+  export type TranslationBundle = IRenderMime.TranslationBundle;
 
   /**
    * Translation provider interface.
    */
-  export interface ITranslator {
-    /**
-     * The code of the language in use.
-     */
-    readonly languageCode: string;
-
-    /**
-     * Load translation bundles for a given domain.
-     */
-    load(domain: string): TranslationBundle;
-  }
+  export interface ITranslator extends IRenderMime.ITranslator {}
 
   /**
    * The build status response from the server.
@@ -207,19 +193,82 @@ export namespace Builder {
 }
 
 namespace Private {
+  function format(message: string, args: readonly unknown[]): string {
+    return message
+      .replace(/%%/g, '%% ')
+      .replace(/%(\d+)/g, (_match, index) => {
+        return `${args[Number(index) - 1]}`;
+      })
+      .replace(/%% /g, '%');
+  }
+
+  function formatPlural(
+    msgid: string,
+    msgidPlural: string,
+    n: number,
+    args: readonly unknown[]
+  ): string {
+    return format(n === 1 ? msgid : msgidPlural, [n, ...args]);
+  }
+
+  function gettext(msgid: string, ...args: unknown[]): string {
+    return format(msgid, args);
+  }
+
+  function ngettext(
+    msgid: string,
+    msgidPlural: string,
+    n: number,
+    ...args: unknown[]
+  ): string {
+    return formatPlural(msgid, msgidPlural, n, args);
+  }
+
+  function pgettext(
+    _msgctxt: string,
+    msgid: string,
+    ...args: unknown[]
+  ): string {
+    return gettext(msgid, ...args);
+  }
+
+  function npgettext(
+    _msgctxt: string,
+    msgid: string,
+    msgidPlural: string,
+    n: number,
+    ...args: unknown[]
+  ): string {
+    return ngettext(msgid, msgidPlural, n, ...args);
+  }
+
+  function dcnpgettext(
+    _domain: string,
+    msgctxt: string,
+    msgid: string,
+    msgidPlural: string,
+    n: number,
+    ...args: unknown[]
+  ): string {
+    return npgettext(msgctxt, msgid, msgidPlural, n, ...args);
+  }
+
+  const nullTranslationBundle: BuildManager.TranslationBundle = {
+    __: gettext,
+    _n: ngettext,
+    _p: pgettext,
+    _np: npgettext,
+    gettext,
+    ngettext,
+    pgettext,
+    npgettext,
+    dcnpgettext
+  };
+
   export const nullTranslator: BuildManager.ITranslator = {
     languageCode: 'en',
-    load: () => {
-      return {
-        __: (msgid: string, ...args: unknown[]): string => {
-          return args.reduce<string>((message, arg, index) => {
-            return message.replace(
-              new RegExp(`%${index + 1}`, 'g'),
-              () => `${arg}`
-            );
-          }, msgid);
-        }
-      };
+    load: (_domain: string): BuildManager.TranslationBundle => {
+      return nullTranslationBundle;
     }
   };
 }
