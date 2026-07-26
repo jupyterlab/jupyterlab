@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.21.1", "jupyter-builder>=1.0.2"]
+requires = ["hatchling>=1.21.1", "jupyter-builder>=1.1.1"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter-builder>=1.0.2",
+    "jupyter-builder>=1.1.1",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -125,7 +125,7 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=1.0.2",
+    "jupyter-builder>=1.1.1",
 ]
 docs = [
     { include-group = "builder" },
@@ -244,9 +244,6 @@ show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = [
-    "jupyter_builder.federated_extensions",
-    "jupyter_builder.jlpm",
-    "jupyter_builder.jupyterlab_semver",
     "jupyter_collaboration",
     "jupyterhub.singleuser",
     "jupyterhub.singleuser.mixins",
