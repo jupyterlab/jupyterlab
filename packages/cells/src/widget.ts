@@ -228,6 +228,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   initializeState(): this {
     this.loadCollapseState();
     this.loadEditableState();
+    this._handleTags();
     return this;
   }
 
@@ -725,8 +726,31 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           this.loadEditableState();
         }
         break;
+      case 'tags':
+        this._handleTags();
+        break;
       default:
         break;
+    }
+  }
+
+  private _handleTags(): void {
+    const dataset = this.node.dataset;
+    for (const key of Object.keys(dataset)) {
+      if (key === 'tag' || /^tag[A-Z]/.test(key)) {
+        delete dataset[key];
+      }
+    }
+
+    const tags = this.model.getMetadata('tags');
+    if (!Array.isArray(tags)) {
+      return;
+    }
+
+    for (const tag of tags) {
+      if (typeof tag === 'string' && /^[^\s"'/>=]+$/.test(tag)) {
+        this.node.setAttribute(`data-tag-${tag}`, '');
+      }
     }
   }
 

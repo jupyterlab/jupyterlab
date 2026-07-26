@@ -326,6 +326,59 @@ describe('cells/widget', () => {
       });
     });
 
+    describe('#tags', () => {
+      it('should reflect tag metadata on initialization', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({
+            cell_type: 'code',
+            metadata: { tags: ['parameters', 'hide-input'] }
+          }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model
+        }).initializeState();
+
+        expect(widget.node.hasAttribute('data-tag-parameters')).toEqual(true);
+        expect(widget.node.hasAttribute('data-tag-hide-input')).toEqual(true);
+      });
+
+      it('should reflect tag metadata changes', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model
+        }).initializeState();
+
+        model.setMetadata('tags', ['parameters', 'hide-input']);
+        expect(widget.node.hasAttribute('data-tag-parameters')).toEqual(true);
+        expect(widget.node.hasAttribute('data-tag-hide-input')).toEqual(true);
+
+        model.setMetadata('tags', ['hide-input']);
+        expect(widget.node.hasAttribute('data-tag-parameters')).toEqual(false);
+        expect(widget.node.hasAttribute('data-tag-hide-input')).toEqual(true);
+      });
+
+      it('should clear tag attributes when tag metadata is unset', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({
+            cell_type: 'code',
+            metadata: { tags: ['parameters'] }
+          }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model
+        }).initializeState();
+
+        expect(widget.node.hasAttribute('data-tag-parameters')).toEqual(true);
+        model.deleteMetadata('tags');
+        expect(widget.node.hasAttribute('data-tag-parameters')).toEqual(false);
+      });
+    });
+
     describe('#loadCollapseState()', () => {
       it('should load the input collapse state from the model', () => {
         const model = new TestModel({
