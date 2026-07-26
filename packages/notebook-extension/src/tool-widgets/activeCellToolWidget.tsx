@@ -108,6 +108,8 @@ export class ActiveCellTool extends NotebookTools.Tool {
     const cellModel = this._cellModel;
 
     if (!cellModel) {
+      // The active cell can be transiently unset during focus changes; keep
+      // the current prompt visible to avoid flickering while switching cells.
       return;
     }
 
