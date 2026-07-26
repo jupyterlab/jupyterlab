@@ -41,6 +41,7 @@ PROJECT_TO_BROWSER = {
     "jupyterlab": "chromium",
     "jupyterlab-firefox": "firefox",
 }
+GitHubJson = dict[str, object] | list[dict[str, object]]
 
 SECTION_RE = re.compile(r"^\s*\d+\s+(failed|flaky|passed|skipped)\b")
 PROJECT_RE = re.compile(r"^\[([^\]]+)\]\s*" + PLAYWRIGHT_SEPARATOR + r"\s*")
@@ -98,7 +99,7 @@ class GitHubClient:
         if token:
             self._headers["Authorization"] = f"Bearer {token}"
 
-    def get_json(self, path: str, params: dict[str, str | int] | None = None):
+    def get_json(self, path: str, params: dict[str, str | int] | None = None) -> GitHubJson:
         """Return decoded JSON from a GitHub API path."""
         url = f"{API_ROOT}{path}"
         if params:
