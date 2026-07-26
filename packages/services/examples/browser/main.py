@@ -18,14 +18,14 @@ with open(os.path.join(HERE, "package.json")) as fid:
     version = json.load(fid)["version"]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type[LabServerApp]]]:
     return [{"module": __name__, "app": ExampleApp}]
 
 
 class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHandler):
     """Handle requests between the main app page and notebook server."""
 
-    def get(self):
+    def get(self) -> None:
         """Get the main page for the application's interface."""
         config_data = {
             # Use camelCase here, since that's what the lab components expect
