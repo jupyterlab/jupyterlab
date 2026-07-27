@@ -7,6 +7,7 @@ import dataclasses
 import json
 import os
 import sys
+from collections.abc import Sequence
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -308,7 +309,7 @@ class LabWorkspaceExportApp(WorkspaceExportApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -316,7 +317,7 @@ class LabWorkspaceImportApp(WorkspaceImportApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -324,7 +325,7 @@ class LabWorkspaceListApp(WorkspaceListApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -389,11 +390,11 @@ class LabLicensesApp(LicensesApp):
     }
 
     @default("app_dir")
-    def _default_app_dir(self):
+    def _default_app_dir(self) -> str:
         return get_app_dir()
 
     @default("static_dir")
-    def _default_static_dir(self):
+    def _default_static_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
 
@@ -623,7 +624,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     @default("app_dir")
-    def _default_app_dir(self):
+    def _default_app_dir(self) -> str:
         app_dir = get_app_dir()
         if self.core_mode:
             app_dir = HERE
@@ -632,37 +633,37 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         return app_dir
 
     @default("app_settings_dir")
-    def _default_app_settings_dir(self):
+    def _default_app_settings_dir(self) -> str:
         return pjoin(self.app_dir, "settings")
 
     @default("app_version")
-    def _default_app_version(self):
+    def _default_app_version(self) -> str:
         return app_version
 
     @default("cache_files")
-    def _default_cache_files(self):
+    def _default_cache_files(self) -> bool:
         return False
 
     @default("schemas_dir")
-    def _default_schemas_dir(self):
+    def _default_schemas_dir(self) -> str:
         return pjoin(self.app_dir, "schemas")
 
     @default("templates_dir")
-    def _default_templates_dir(self):
+    def _default_templates_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
     @default("themes_dir")
-    def _default_themes_dir(self):
+    def _default_themes_dir(self) -> str:
         if self.override_theme_url:
             return ""
         return pjoin(self.app_dir, "themes")
 
     @default("static_dir")
-    def _default_static_dir(self):
+    def _default_static_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
     @default("static_url_prefix")
-    def _default_static_url_prefix(self):
+    def _default_static_url_prefix(self) -> str:
         if self.override_static_url:
             return self.override_static_url
         else:
@@ -670,7 +671,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             return ujoin(self.serverapp.base_url, static_url)
 
     @default("theme_url")
-    def _default_theme_url(self):
+    def _default_theme_url(self) -> str:
         if self.override_theme_url:
             return self.override_theme_url
         return ""
@@ -725,7 +726,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super()._prepare_templates()
         self.jinja2_env.globals.update(custom_css=self.custom_css)
 
-    def _preferred_path_is_home(self):
+    def _preferred_path_is_home(self) -> bool:
         """Whether the preferred path resolves to the user's home directory."""
         try:
             contents_manager = self.serverapp.contents_manager
@@ -931,7 +932,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.handlers.extend(handlers)
         super().initialize_handlers()
 
-    def initialize(self, argv=None):
+    def initialize(self, argv: Sequence[str] | None = None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
         if self.collaborative:
