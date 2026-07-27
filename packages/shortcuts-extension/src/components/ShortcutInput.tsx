@@ -19,6 +19,7 @@ export const CONFLICT_CONTAINER_CLASS = 'jp-Shortcuts-ConflictContainer';
 
 /** Idle time after the last keystroke before leaving active capture. */
 const CAPTURE_IDLE_MS = 2000;
+const CAPTURE_IDLE_SECONDS = CAPTURE_IDLE_MS / 1000;
 
 type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
 
@@ -72,6 +73,7 @@ export class ShortcutInput extends React.Component<
   constructor(props: IShortcutInputProps) {
     super(props);
     this._ref = React.createRef();
+    this._hintId = `jp-Shortcuts-CaptureHint-${ShortcutInput._nextHintId++}`;
 
     this.state = {
       value: this.props.placeholder,
@@ -466,6 +468,11 @@ export class ShortcutInput extends React.Component<
       inputClassName += ' jp-mod-unavailable-Input';
     }
     const statusMessage = this._statusMessage(trans);
+    const captureHint = trans._n(
+      'Capture pauses %1 second after the last key.',
+      'Capture pauses %1 seconds after the last key.',
+      CAPTURE_IDLE_SECONDS
+    );
     return (
       <div
         className={
@@ -478,72 +485,78 @@ export class ShortcutInput extends React.Component<
         ref={this._ref}
         onBlur={this._handleBlur}
       >
-        <div
-          tabIndex={0}
-          className={inputClassName}
-          onKeyDown={this.handleInput}
-          ref={this._inputRef}
-          data-lm-suppress-shortcuts="true"
-        >
-          <p
-            className={
-              this.state.selected && this._isReplacingExistingKeybinding
-                ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
-                : this.state.value === ''
-                  ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
-                  : 'jp-Shortcuts-InputText'
-            }
+        <div className="jp-Shortcuts-InputBox-controls">
+          <div
+            tabIndex={0}
+            className={inputClassName}
+            onKeyDown={this.handleInput}
+            ref={this._inputRef}
+            data-lm-suppress-shortcuts="true"
+            aria-describedby={this._hintId}
           >
-            {this.state.value === ''
-              ? trans.__('press keys')
-              : this.state.value}
-          </p>
-          {this.state.timerRunning ? (
-            <div
-              key={this.state.timerGeneration}
-              className="jp-Shortcuts-CaptureTimer jp-mod-running"
-              style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
-              aria-hidden="true"
-            />
-          ) : null}
+            <p
+              className={
+                this.state.selected && this._isReplacingExistingKeybinding
+                  ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
+                  : this.state.value === ''
+                    ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
+                    : 'jp-Shortcuts-InputText'
+              }
+            >
+              {this.state.value === ''
+                ? trans.__('press keys')
+                : this.state.value}
+            </p>
+            {this.state.timerRunning ? (
+              <div
+                key={this.state.timerGeneration}
+                className="jp-Shortcuts-CaptureTimer jp-mod-running"
+                style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
+                aria-hidden="true"
+              />
+            ) : null}
+          </div>
+          <div
+            className="jp-sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {statusMessage}
+          </div>
+          {hasConflict ? (
+            <button
+              ref={this._submitRef}
+              type="button"
+              className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
+                !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+              }`}
+              disabled={!this.state.isFunctional}
+              onClick={this.handleSubmit}
+              title={trans.__('Overwrite')}
+              aria-label={trans.__('Overwrite')}
+            >
+              {trans.__('Overwrite')}
+            </button>
+          ) : (
+            <button
+              ref={this._submitRef}
+              type="button"
+              className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
+                !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+              }`}
+              disabled={!this.state.isFunctional}
+              onClick={this.handleSubmit}
+              title={trans.__('Save shortcut')}
+              aria-label={trans.__('Save shortcut')}
+            >
+              <checkIcon.react tag={null} />
+            </button>
+          )}
         </div>
-        <div
-          className="jp-sr-only"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {statusMessage}
-        </div>
-        {hasConflict ? (
-          <button
-            ref={this._submitRef}
-            type="button"
-            className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
-              !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
-            }`}
-            disabled={!this.state.isFunctional}
-            onClick={this.handleSubmit}
-            title={trans.__('Overwrite')}
-            aria-label={trans.__('Overwrite')}
-          >
-            {trans.__('Overwrite')}
-          </button>
-        ) : (
-          <button
-            ref={this._submitRef}
-            type="button"
-            className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
-              !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
-            }`}
-            disabled={!this.state.isFunctional}
-            onClick={this.handleSubmit}
-            title={trans.__('Save shortcut')}
-            aria-label={trans.__('Save shortcut')}
-          >
-            <checkIcon.react tag={null} />
-          </button>
-        )}
+        <p id={this._hintId} className="jp-Shortcuts-CaptureHint">
+          {captureHint}
+        </p>
       </div>
     );
   }
@@ -565,6 +578,8 @@ export class ShortcutInput extends React.Component<
   private _ref: React.RefObject<HTMLDivElement>;
   private _inputRef = React.createRef<HTMLDivElement>();
   private _submitRef = React.createRef<HTMLButtonElement>();
+  private _hintId: string;
   private _idleTimer: number | null = null;
   private _announceStartRaf: number | null = null;
+  private static _nextHintId = 0;
 }
