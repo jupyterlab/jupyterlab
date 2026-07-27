@@ -244,10 +244,13 @@ show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = [
+    "copier",
     "jupyter_collaboration",
     "jupyterhub.singleuser",
     "jupyterhub.singleuser.mixins",
     "notebook_shim.shim",
+    "tomli",
+    "tomli_w",
     "tomllib",
 ]
 ignore_missing_imports = true
