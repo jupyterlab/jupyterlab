@@ -256,6 +256,11 @@ module = [
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = ["numpy", "numpy.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
+[[tool.mypy.overrides]]
 module = ["jupyterlab.browser_check"]
 disable_error_code = ["arg-type", "assignment"]
 
