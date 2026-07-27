@@ -371,14 +371,7 @@ test.describe('Terminal', () => {
       timeout: 5000
     });
 
-    // Hover over the link to trigger link highlighting.
-    await terminal.hover({ position: { x: 6, y: 27 } });
-
-    // We need to retry once with 2s pause to avoid flakiness.
-    await page.waitForTimeout(2000);
-    await terminal.hover({ position: { x: 10, y: 27 } });
-
-    await terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor();
+    await hoverOverLink(page, terminal, /^https:\/\/jupyter\.org\/\s*$/);
 
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
   });
