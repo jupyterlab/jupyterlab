@@ -61,6 +61,8 @@ export interface IShortcutInputState {
   /** Bumped to restart the CSS progress animation. */
   timerGeneration: number;
   timerRunning: boolean;
+  /** One-shot start announcement for the polite live region. */
+  announceCaptureStart: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -82,16 +84,26 @@ export class ShortcutInput extends React.Component<
       activeConflicts: [],
       phase: 'capturing',
       timerGeneration: 0,
-      timerRunning: false
+      timerRunning: false,
+      announceCaptureStart: false
     };
   }
 
   componentDidMount(): void {
     this._inputRef.current?.focus();
+    // Defer so aria-live announces; initial mount content is often skipped.
+    this._announceStartRaf = requestAnimationFrame(() => {
+      this._announceStartRaf = null;
+      this.setState({ announceCaptureStart: true });
+    });
   }
 
   componentWillUnmount(): void {
     this._clearIdleTimer();
+    if (this._announceStartRaf !== null) {
+      cancelAnimationFrame(this._announceStartRaf);
+      this._announceStartRaf = null;
+    }
   }
 
   /** Whether this input replaces existing keybinding or creates a new one */
@@ -422,7 +434,8 @@ export class ShortcutInput extends React.Component<
         keys: keys,
         currentChain: currentChain,
         isFunctional,
-        phase: 'capturing'
+        phase: 'capturing',
+        announceCaptureStart: false
       },
       () => {
         this._emitConflicts(conflicts);
@@ -430,6 +443,19 @@ export class ShortcutInput extends React.Component<
       }
     );
   };
+
+  private _statusMessage(trans: ReturnType<ITranslator['load']>): string {
+    if (this.state.phase === 'ready') {
+      return trans.__('Shortcut ready.');
+    }
+    if (this.state.phase === 'incompleteIdle') {
+      return trans.__('Incomplete shortcut. Continue typing.');
+    }
+    if (this.state.announceCaptureStart) {
+      return trans.__('Capturing shortcut keys.');
+    }
+    return '';
+  }
 
   render() {
     const trans = this.props.translator.load('jupyterlab');
@@ -439,6 +465,7 @@ export class ShortcutInput extends React.Component<
     if (!this.state.isAvailable) {
       inputClassName += ' jp-mod-unavailable-Input';
     }
+    const statusMessage = this._statusMessage(trans);
     return (
       <div
         className={
@@ -479,6 +506,14 @@ export class ShortcutInput extends React.Component<
               aria-hidden="true"
             />
           ) : null}
+        </div>
+        <div
+          className="jp-sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {statusMessage}
         </div>
         {hasConflict ? (
           <button
@@ -531,4 +566,5 @@ export class ShortcutInput extends React.Component<
   private _inputRef = React.createRef<HTMLDivElement>();
   private _submitRef = React.createRef<HTMLButtonElement>();
   private _idleTimer: number | null = null;
+  private _announceStartRaf: number | null = null;
 }
