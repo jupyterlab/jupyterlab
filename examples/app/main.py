@@ -16,7 +16,7 @@ with open(os.path.join(HERE, "package.json")) as fid:
     version = json.load(fid)["version"]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type[LabServerApp]]]:
     return [{"module": __name__, "app": ExampleApp}]
 
 
