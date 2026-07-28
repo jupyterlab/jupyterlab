@@ -393,6 +393,7 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
 
 button.jp-mod-styled.jp-Shortcuts-SelectorsToggle {
   margin-right: 15px;
+  min-width: fit-content;
 }
 
 button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
