@@ -95,6 +95,10 @@ for (const mode of windowingModes) {
         await notebook.scrollToCell(cell);
       }, lastCellIndex);
 
+      // The cell should render (attach + become visible) before we check its
+      // position, so a slow render doesn't get misreported as a scroll failure.
+      await expect(lastCell).toBeVisible({ timeout: 30000 });
+
       // The last cell should eventually be scrolled into the viewport.
       await expect(lastCell).toBeInViewport({ timeout: 30000 });
     });
