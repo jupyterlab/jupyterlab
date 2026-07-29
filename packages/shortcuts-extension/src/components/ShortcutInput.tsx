@@ -106,6 +106,10 @@ export class ShortcutInput extends React.Component<
       cancelAnimationFrame(this._announceStartRaf);
       this._announceStartRaf = null;
     }
+    if (this._blurRaf !== null) {
+      cancelAnimationFrame(this._blurRaf);
+      this._blurRaf = null;
+    }
   }
 
   /** Whether this input replaces existing keybinding or creates a new one */
@@ -561,18 +565,26 @@ export class ShortcutInput extends React.Component<
     );
   }
 
-  private _handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (this._ref.current?.contains(event.relatedTarget)) {
-      // Do not hide when clicking inside the input
-      return;
+  private _handleBlur = (): void => {
+    if (this._blurRaf !== null) {
+      cancelAnimationFrame(this._blurRaf);
     }
-    if (event.relatedTarget?.closest(`.${CONFLICT_CONTAINER_CLASS}`)) {
-      // Do not hide input when clicking on conflict container as this would destroy the state
-      return;
-    }
-    this._clearIdleTimer();
-    // Hide the input
-    this.props.toggleInput();
+    // Defer until focus settles (Edge may emit a spurious focusout with relatedTarget null).
+    this._blurRaf = requestAnimationFrame(() => {
+      this._blurRaf = null;
+      const root = this._ref.current;
+      const active = document.activeElement;
+
+      if (root?.contains(active)) {
+        return;
+      }
+      if (active?.closest(`.${CONFLICT_CONTAINER_CLASS}`)) {
+        return;
+      }
+
+      this._clearIdleTimer();
+      this.props.toggleInput();
+    });
   };
 
   private _ref: React.RefObject<HTMLDivElement>;
@@ -581,5 +593,6 @@ export class ShortcutInput extends React.Component<
   private _hintId: string;
   private _idleTimer: number | null = null;
   private _announceStartRaf: number | null = null;
+  private _blurRaf: number | null = null;
   private static _nextHintId = 0;
 }
