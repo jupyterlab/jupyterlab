@@ -361,7 +361,7 @@ This improves compatibility with extensions that do not support arbitrary drives
 
 ### Kernel subshells support
 
-Kernel subshells, introduced in [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html),
+Kernel subshells, introduced in [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/),
 enable concurrent code execution in kernels that support them.
 When performing long-running computations (such as training a model), subshells enable users to:
 - Use `ipywidgets` with updates displayed immediately
