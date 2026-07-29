@@ -36,6 +36,7 @@ export class FileEditor extends Widget {
   constructor(options: FileEditor.IOptions) {
     super();
     this.addClass('jp-FileEditor');
+    this.node.tabIndex = 0;
 
     const context = (this._context = options.context);
     this._mimeTypeService = options.mimeTypeService;
@@ -98,6 +99,9 @@ export class FileEditor extends Widget {
       return;
     }
     switch (event.type) {
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
       case 'mousedown':
         this._ensureFocus();
         break;
@@ -112,6 +116,7 @@ export class FileEditor extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     const node = this.node;
+    node.addEventListener('keydown', this, true);
     node.addEventListener('mousedown', this);
   }
 
@@ -120,7 +125,31 @@ export class FileEditor extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     const node = this.node;
+    node.removeEventListener('keydown', this, true);
     node.removeEventListener('mousedown', this);
+  }
+
+  /**
+   * Handle the `'keydown'` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !this.editor.hasFocus()) {
+      event.preventDefault();
+      this.node.tabIndex = -1;
+      this.editor.setOption('tabFocusable', true);
+      this.editor.focus();
+      return;
+    }
+
+    if (event.key !== 'Escape' || !this.editor.hasFocus()) {
+      return;
+    }
+    // Set to command mode.
+    event.preventDefault();
+    event.stopPropagation();
+    this.editor.setOption('tabFocusable', false);
+    this.node.tabIndex = 0;
+    this.node.focus();
   }
 
   /**
@@ -135,6 +164,8 @@ export class FileEditor extends Widget {
    */
   private _ensureFocus(): void {
     if (!this.editor.hasFocus()) {
+      this.node.tabIndex = -1;
+      this.editor.setOption('tabFocusable', true);
       this.editor.focus();
     }
   }
