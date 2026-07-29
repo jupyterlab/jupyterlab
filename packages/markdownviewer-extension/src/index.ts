@@ -11,6 +11,10 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  GenericSearchProvider,
+  ISearchProviderRegistry
+} from '@jupyterlab/documentsearch';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
@@ -51,7 +55,7 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   id: '@jupyterlab/markdownviewer-extension:plugin',
   description: 'Adds markdown file viewer and provides its tracker.',
   provides: IMarkdownViewerTracker,
-  requires: [IRenderMimeRegistry, ITranslator],
+  requires: [IRenderMimeRegistry, ITranslator, ISearchProviderRegistry],
   optional: [
     ILayoutRestorer,
     ISettingRegistry,
@@ -68,6 +72,7 @@ function activate(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  registry: ISearchProviderRegistry,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
@@ -84,6 +89,11 @@ function activate(
     namespace
   });
 
+  registry.add('markdownviewer', {
+    isApplicable: (widget): widget is MarkdownViewer =>
+      widget instanceof MarkdownViewer,
+    createNew: widget => GenericSearchProvider.createNew(widget, registry)
+  });
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
   };
