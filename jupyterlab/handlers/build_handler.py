@@ -46,7 +46,8 @@ class Builder:
             status = "needed" if messages else "stable"
             if messages:
                 self.log.warning("Build recommended")
-                [self.log.warning(m) for m in messages]
+                for message in messages:
+                    self.log.warning(message)
             else:
                 self.log.info("Build is up to date")
         except ValueError:
