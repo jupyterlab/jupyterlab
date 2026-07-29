@@ -1,0 +1,480 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["unicorn"],
+  "jsPlugins": ["oxlint-plugin-eslint"],
+  "categories": {
+    "correctness": "off"
+  },
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": [
+    "**/node_modules",
+    "**/build",
+    "**/lib",
+    "**/mock_packages",
+    "**/static",
+    "**/typings",
+    "**/schemas",
+    "**/themes",
+    "**/coverage",
+    "**/*.map.js",
+    "**/*.bundle.js",
+    "dev_mode/index.js",
+    "!dev_mode/static/index.out.js",
+    "dev_mode/workspaces",
+    "docs/_build",
+    "docs/api",
+    "docs/build",
+    "docs/source/api",
+    "examples/example.spec.ts",
+    "examples/federated/core_package/index.template.js",
+    "examples/federated/core_package/index.js",
+    "examples/federated/labextensions",
+    "galata/playwright-report",
+    "jupyterlab/chrome-test.js",
+    "jupyterlab/geckodriver",
+    "jupyterlab/staging/index.js",
+    "jupyterlab/staging/webpack.config.js",
+    "packages/codemirror/test/foo*.js",
+    "packages/extensionmanager-extension/examples/listings",
+    "packages/nbconvert-css/raw.js",
+    "packages/nbconvert-css/style/index.js",
+    "packages/services/dist",
+    "packages/ui-components/src/icon/iconimports.ts",
+    "**/.idea/",
+    "**/.history/",
+    "**/.vscode/",
+    "packages/lsp/src/_*",
+    "packages/lsp/schema.js",
+    "**/.pixi"
+  ],
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["**/*.js", "**/*.jsx"],
+      "rules": {
+        "constructor-super": "error",
+        "for-direction": "error",
+        "getter-return": "error",
+        "no-async-promise-executor": "error",
+        "no-case-declarations": "warn",
+        "no-class-assign": "error",
+        "no-compare-neg-zero": "error",
+        "no-cond-assign": "error",
+        "no-const-assign": "error",
+        "no-constant-binary-expression": "error",
+        "no-constant-condition": "error",
+        "no-control-regex": "warn",
+        "no-debugger": "error",
+        "no-delete-var": "error",
+        "no-dupe-class-members": "error",
+        "no-dupe-else-if": "error",
+        "no-dupe-keys": "error",
+        "no-duplicate-case": "error",
+        "no-empty": "error",
+        "no-empty-character-class": "error",
+        "no-empty-pattern": "error",
+        "no-empty-static-block": "error",
+        "no-ex-assign": "error",
+        "no-extra-boolean-cast": "error",
+        "no-fallthrough": "error",
+        "no-func-assign": "error",
+        "no-global-assign": "error",
+        "no-import-assign": "error",
+        "no-invalid-regexp": "error",
+        "no-irregular-whitespace": "error",
+        "no-loss-of-precision": "error",
+        "no-misleading-character-class": "error",
+        "no-new-native-nonconstructor": "error",
+        "no-nonoctal-decimal-escape": "error",
+        "no-obj-calls": "error",
+        "no-prototype-builtins": "off",
+        "no-redeclare": [
+          "error",
+          {
+            "builtinGlobals": false
+          }
+        ],
+        "no-regex-spaces": "error",
+        "no-self-assign": "error",
+        "no-setter-return": "error",
+        "no-shadow-restricted-names": "error",
+        "no-sparse-arrays": "error",
+        "no-this-before-super": "error",
+        "no-unassigned-vars": "error",
+        "no-unreachable": "error",
+        "no-unsafe-finally": "error",
+        "no-unsafe-negation": "error",
+        "no-unsafe-optional-chaining": "error",
+        "no-unused-labels": "error",
+        "no-unused-private-class-members": "error",
+        "no-unused-vars": "error",
+        "no-useless-backreference": "error",
+        "no-useless-catch": "error",
+        "no-useless-escape": "off",
+        "no-with": "error",
+        "preserve-caught-error": "error",
+        "require-yield": "error",
+        "use-isnan": "error",
+        "valid-typeof": "error",
+        "id-match": ["error", "^[a-zA-Z_]+[a-zA-Z0-9_]*$"],
+        "no-inner-declarations": "off",
+        "prefer-const": "off"
+      },
+      "env": {
+        "es2022": true,
+        "commonjs": true,
+        "jest": true,
+        "browser": true,
+        "node": true
+      },
+      "globals": {
+        "fdescribe": "readonly",
+        "pit": "readonly",
+        "HTMLCollectionOf": "readonly",
+        "JSX": "readonly",
+        "NodeJS": "readonly",
+        "ScrollLogicalPosition": "readonly"
+      }
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "constructor-super": "off",
+        "for-direction": "error",
+        "getter-return": "off",
+        "no-async-promise-executor": "error",
+        "no-case-declarations": "warn",
+        "no-class-assign": "off",
+        "no-compare-neg-zero": "error",
+        "no-cond-assign": "error",
+        "no-const-assign": "off",
+        "no-constant-binary-expression": "error",
+        "no-constant-condition": "error",
+        "no-control-regex": "warn",
+        "no-debugger": "error",
+        "no-delete-var": "error",
+        "no-dupe-class-members": "off",
+        "no-dupe-else-if": "error",
+        "no-dupe-keys": "off",
+        "no-duplicate-case": "error",
+        "no-empty": "error",
+        "no-empty-character-class": "off",
+        "no-empty-pattern": "error",
+        "no-empty-static-block": "error",
+        "no-ex-assign": "error",
+        "no-extra-boolean-cast": "error",
+        "no-fallthrough": "error",
+        "no-func-assign": "off",
+        "no-global-assign": "error",
+        "no-import-assign": "off",
+        "no-invalid-regexp": "off",
+        "no-irregular-whitespace": "error",
+        "no-loss-of-precision": "error",
+        "no-misleading-character-class": "error",
+        "no-new-native-nonconstructor": "off",
+        "no-nonoctal-decimal-escape": "error",
+        "no-obj-calls": "off",
+        "no-prototype-builtins": "off",
+        "no-redeclare": "off",
+        "no-regex-spaces": "error",
+        "no-self-assign": "error",
+        "no-setter-return": "off",
+        "no-shadow-restricted-names": "error",
+        "no-sparse-arrays": "error",
+        "no-this-before-super": "off",
+        "no-unassigned-vars": "error",
+        "no-unreachable": "off",
+        "no-unsafe-finally": "error",
+        "no-unsafe-negation": "off",
+        "no-unsafe-optional-chaining": "error",
+        "no-unused-labels": "error",
+        "no-unused-private-class-members": "error",
+        "no-unused-vars": [
+          "warn",
+          {
+            "args": "none"
+          }
+        ],
+        "no-useless-backreference": "off",
+        "no-useless-catch": "error",
+        "no-useless-escape": "off",
+        "no-with": "off",
+        "preserve-caught-error": "off",
+        "require-yield": "error",
+        "use-isnan": "error",
+        "valid-typeof": "error",
+        "no-var": "error",
+        "prefer-const": "off",
+        "prefer-rest-params": "error",
+        "prefer-spread": "error",
+        "no-array-constructor": "error",
+        "no-unused-expressions": "warn",
+        "typescript/ban-ts-comment": [
+          "warn",
+          {
+            "ts-ignore": true
+          }
+        ],
+        "typescript/no-duplicate-enum-values": "error",
+        "typescript/no-empty-object-type": "off",
+        "typescript/no-explicit-any": "error",
+        "typescript/no-extra-non-null-assertion": "error",
+        "typescript/no-misused-new": "error",
+        "typescript/no-namespace": "off",
+        "typescript/no-non-null-asserted-optional-chain": "warn",
+        "typescript/no-require-imports": "warn",
+        "typescript/no-this-alias": "error",
+        "typescript/no-unnecessary-type-constraint": "error",
+        "typescript/no-unsafe-declaration-merging": "error",
+        "typescript/no-unsafe-function-type": "warn",
+        "typescript/no-wrapper-object-types": "error",
+        "typescript/prefer-as-const": "error",
+        "typescript/prefer-namespace-keyword": "error",
+        "typescript/triple-slash-reference": "warn",
+        "prefer-regex-literals": "error",
+        "regexp/confusing-quantifier": "warn",
+        "regexp/control-character-escape": "error",
+        "regexp/match-any": "error",
+        "regexp/negation": "error",
+        "regexp/no-contradiction-with-assertion": "error",
+        "regexp/no-dupe-characters-character-class": "error",
+        "regexp/no-dupe-disjunctions": "error",
+        "regexp/no-empty-alternative": "warn",
+        "regexp/no-empty-capturing-group": "error",
+        "regexp/no-empty-character-class": "error",
+        "regexp/no-empty-group": "error",
+        "regexp/no-empty-lookarounds-assertion": "error",
+        "regexp/no-empty-string-literal": "error",
+        "regexp/no-escape-backspace": "error",
+        "regexp/no-extra-lookaround-assertions": "error",
+        "regexp/no-invalid-regexp": "error",
+        "regexp/no-invisible-character": "error",
+        "regexp/no-lazy-ends": "warn",
+        "regexp/no-legacy-features": "error",
+        "regexp/no-misleading-capturing-group": "error",
+        "regexp/no-misleading-unicode-character": "error",
+        "regexp/no-missing-g-flag": "error",
+        "regexp/no-non-standard-flag": "error",
+        "regexp/no-obscure-range": "error",
+        "regexp/no-optional-assertion": "error",
+        "regexp/no-potentially-useless-backreference": "warn",
+        "regexp/no-super-linear-backtracking": "error",
+        "regexp/no-trivially-nested-assertion": "error",
+        "regexp/no-trivially-nested-quantifier": "error",
+        "regexp/no-unused-capturing-group": "error",
+        "regexp/no-useless-assertions": "error",
+        "regexp/no-useless-backreference": "error",
+        "regexp/no-useless-character-class": "error",
+        "regexp/no-useless-dollar-replacements": "error",
+        "regexp/no-useless-escape": "error",
+        "regexp/no-useless-flag": "warn",
+        "regexp/no-useless-lazy": "error",
+        "regexp/no-useless-non-capturing-group": "error",
+        "regexp/no-useless-quantifier": "error",
+        "regexp/no-useless-range": "error",
+        "regexp/no-useless-set-operand": "error",
+        "regexp/no-useless-string-literal": "error",
+        "regexp/no-useless-two-nums-quantifier": "error",
+        "regexp/no-zero-quantifier": "error",
+        "regexp/optimal-lookaround-quantifier": "warn",
+        "regexp/optimal-quantifier-concatenation": "error",
+        "regexp/prefer-character-class": "error",
+        "regexp/prefer-d": "error",
+        "regexp/prefer-plus-quantifier": "error",
+        "regexp/prefer-predefined-assertion": "error",
+        "regexp/prefer-question-quantifier": "error",
+        "regexp/prefer-range": "error",
+        "regexp/prefer-set-operation": "error",
+        "regexp/prefer-star-quantifier": "error",
+        "regexp/prefer-unicode-codepoint-escapes": "error",
+        "regexp/prefer-w": "error",
+        "regexp/simplify-set-operations": "error",
+        "regexp/sort-flags": "error",
+        "regexp/strict": "error",
+        "regexp/use-ignore-case": "error",
+        "jupyter/command-described-by": "error",
+        "jupyter/plugin-activation-args": "off",
+        "jupyter/plugin-description": "error",
+        "jupyter/token-format": "error",
+        "jupyter/no-translation-concatenation": "error",
+        "jupyter/no-untranslated-string": "error",
+        "tsdoc/syntax": "warn",
+        "jupyter/require-soft-assertions-before-snapshots": "error",
+        "id-match": ["error", "^[a-zA-Z_]+[a-zA-Z0-9_]*$"],
+        "no-inner-declarations": "off",
+        "eqeqeq": "error",
+        "no-use-before-define": "off",
+        "typescript/no-non-null-assertion": "off",
+        "typescript/explicit-function-return-type": "off",
+        "typescript/no-var-requires": "off",
+        "typescript/no-empty-interface": "off",
+        "typescript/no-inferrable-types": "off",
+        "typescript/consistent-type-imports": [
+          "error",
+          {
+            "prefer": "type-imports",
+            "fixStyle": "separate-type-imports"
+          }
+        ],
+        "eslint-js/no-restricted-syntax": [
+          "error",
+          {
+            "selector": "CallExpression[callee.type=\"MemberExpression\"][callee.object.name=\"PageConfig\"][callee.property.name=\"getBaseUrl\"]",
+            "message": "PageConfig.getBaseUrl() should only be called in makeSettings() function and in tests/examples"
+          },
+          {
+            "selector": "TSInterfaceDeclaration[id.name!=/^I[A-Z]/]:not(TSModuleDeclaration TSInterfaceDeclaration)",
+            "message": "Interface name must start with 'I' followed by an uppercase letter (e.g. IFoo, IMyService). See the TypeScript Style Guide."
+          }
+        ],
+        "eslint-js/sort-imports": [
+          "error",
+          {
+            "ignoreCase": true,
+            "ignoreDeclarationSort": true,
+            "ignoreMemberSort": false,
+            "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+            "allowSeparatedGroups": false
+          }
+        ]
+      },
+      "plugins": ["typescript"],
+      "jsPlugins": [
+        "eslint-plugin-regexp",
+        "./.oxlint-plugins/jupyter.js",
+        "eslint-plugin-tsdoc"
+      ],
+      "env": {
+        "es2018": true,
+        "commonjs": true,
+        "jest": true,
+        "browser": true,
+        "node": true
+      },
+      "globals": {
+        "fdescribe": "readonly",
+        "pit": "readonly",
+        "HTMLCollectionOf": "readonly",
+        "JSX": "readonly",
+        "NodeJS": "readonly",
+        "ScrollLogicalPosition": "readonly"
+      }
+    },
+    {
+      "files": ["packages/**/*.spec.ts", "testutils/**/*.spec.ts"],
+      "rules": {
+        "jest/expect-expect": "warn",
+        "jest/no-alias-methods": "error",
+        "jest/no-commented-out-tests": "warn",
+        "jest/no-conditional-expect": "warn",
+        "jest/no-deprecated-functions": "error",
+        "jest/no-disabled-tests": "warn",
+        "jest/no-done-callback": "error",
+        "jest/no-export": "error",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "jest/no-interpolation-in-snapshots": "error",
+        "jest/no-jasmine-globals": "error",
+        "jest/no-mocks-import": "error",
+        "jest/no-standalone-expect": [
+          "error",
+          {
+            "additionalTestBlockFunctions": ["it"]
+          }
+        ],
+        "jest/no-test-prefixes": "error",
+        "jest/valid-describe-callback": "error",
+        "jest/valid-expect": "error",
+        "jest/valid-expect-in-promise": "error",
+        "jest/valid-title": "warn",
+        "typescript/no-require-imports": "off"
+      },
+      "plugins": ["typescript", "jest"]
+    },
+    {
+      "files": [
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/test/**/*.ts",
+        "**/test/**/*.tsx",
+        "**/tests/**/*.ts",
+        "**/tests/**/*.tsx",
+        "testutils/**/*.ts",
+        "testutils/**/*.tsx",
+        "galata/test/**/*.ts",
+        "galata/test/**/*.tsx"
+      ],
+      "rules": {
+        "typescript/no-explicit-any": "off"
+      },
+      "plugins": ["typescript"]
+    },
+    {
+      "files": [
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/test/**/*.ts",
+        "**/tests/**/*.ts",
+        "examples/**/*.ts",
+        "packages/*/examples/**/*.ts",
+        "packages/services/src/serverconnection.ts",
+        "docs/source/extension/*.tsx"
+      ],
+      "rules": {
+        "jupyter/command-described-by": "off",
+        "jupyter/no-untranslated-string": "off"
+      },
+      "jsPlugins": ["./.oxlint-plugins/jupyter.js"]
+    },
+    {
+      "files": ["**/schema/*.json"],
+      "rules": {
+        "jupyter/no-schema-enum": "error"
+      },
+      "jsPlugins": ["./.oxlint-plugins/jupyter.js"]
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "eqeqeq": "off"
+      }
+    },
+    {
+      "files": [
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/test/**/*.ts",
+        "**/test/**/*.tsx",
+        "**/tests/**/*.ts",
+        "**/tests/**/*.tsx",
+        "testutils/**/*.ts",
+        "testutils/**/*.tsx",
+        "examples/**/*.ts",
+        "packages/*/examples/**/*.ts",
+        "packages/services/src/serverconnection.ts",
+        "docs/source/extension/*.tsx"
+      ],
+      "rules": {
+        "eslint-js/no-restricted-syntax": "off"
+      }
+    },
+    {
+      "files": ["galata/test/**/*.ts", "galata/test/**/*.tsx"],
+      "rules": {
+        "eslint-js/no-restricted-syntax": [
+          "error",
+          {
+            "selector": "CallExpression[callee.property.name='screenshot'] > ObjectExpression > Property[key.name='path']",
+            "message": "Do not pass 'path' to screenshot(). Save the result of toMatchSnapshot() or use expect() assertions instead."
+          },
+          {
+            "selector": "CallExpression[callee.object.object.name='test'][callee.object.property.name='describe'][callee.property.name='configure'] > ObjectExpression > Property[key.name='mode'][value.value='serial']",
+            "message": "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
+          }
+        ]
+      }
+    }
+  ]
+}
