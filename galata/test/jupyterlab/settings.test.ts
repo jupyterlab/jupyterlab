@@ -304,7 +304,8 @@ test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
 
   await expect(conflict).toHaveCount(1);
 
-  expect(await conflict.screenshot()).toMatchSnapshot(
+  const shortcutList = shortcutsForm.locator('.jp-Shortcuts-ShortcutList');
+  expect(await shortcutList.screenshot()).toMatchSnapshot(
     'settings-shortcuts-conflict.png'
   );
   // Cancel by dismissing the input (blur closes the editor and clears conflicts).
