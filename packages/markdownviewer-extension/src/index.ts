@@ -94,6 +94,7 @@ function activate(
       widget instanceof MarkdownViewer,
     createNew: widget => GenericSearchProvider.createNew(widget, registry)
   });
+
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
   };
