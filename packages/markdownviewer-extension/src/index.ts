@@ -260,6 +260,7 @@ function activate(
     command: CommandIDs.copy,
     selector: '.jp-MarkdownViewer'
   });
+
   if (tocRegistry) {
     tocRegistry.add(
       new MarkdownViewerTableOfContentsFactory(
