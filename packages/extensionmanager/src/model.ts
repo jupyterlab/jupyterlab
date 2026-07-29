@@ -468,7 +468,7 @@ export class ListModel extends VDomModel {
       const extensions = await this.fetchInstalled(force);
       this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
-      this.installedError = reason.toString();
+      this.installedError = String(reason);
     } finally {
       this._isLoadingInstalledExtensions = false;
       this.stateChanged.emit();
@@ -535,7 +535,7 @@ export class ListModel extends VDomModel {
         pkg => !installedNames.includes(pkg.name)
       );
     } catch (reason) {
-      this.searchError = reason.toString();
+      this.searchError = String(reason);
     } finally {
       this._isSearching = false;
       this.stateChanged.emit();
@@ -753,7 +753,9 @@ namespace Private {
         settings
       );
     } catch (error) {
-      throw new ServerConnection.NetworkError(error);
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();
@@ -761,7 +763,7 @@ namespace Private {
     if (data.length > 0) {
       try {
         data = JSON.parse(data);
-      } catch (error) {
+      } catch {
         console.log('Not a JSON response body.', response);
       }
     }

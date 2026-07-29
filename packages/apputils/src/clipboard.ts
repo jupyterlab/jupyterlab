@@ -214,7 +214,10 @@ namespace Private {
         text = await systemClipboard.readText();
       } catch (reason) {
         console.warn('Failed to read data from clipboard:', reason);
-        if (reason.name === 'NotAllowedError') {
+        if (
+          reason instanceof DOMException &&
+          reason.name === 'NotAllowedError'
+        ) {
           // If the clipboard API is not allowed, fall back to the
           // internal clipboard.
           return this.fallback.hasData(mime);
@@ -245,7 +248,10 @@ namespace Private {
         return this.convertStringToData(mime, text);
       } catch (reason) {
         console.warn('Failed to read data from clipboard:', reason);
-        if (reason.name === 'NotAllowedError') {
+        if (
+          reason instanceof DOMException &&
+          reason.name === 'NotAllowedError'
+        ) {
           // If the clipboard API is not allowed, fall back to the
           // internal clipboard.
           return this.fallback.getData(mime);

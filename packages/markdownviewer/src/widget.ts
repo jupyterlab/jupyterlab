@@ -202,7 +202,7 @@ export class MarkdownViewer extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason instanceof Error ? reason : String(reason)
       );
     }
   }
