@@ -6,16 +6,23 @@ import {
   bugDotIcon,
   bugIcon,
   CommandToolbarButton,
+  CommandToolbarButtonComponent,
   jupyterIcon,
+  LabIcon,
   ReactiveToolbar,
+  ReactWidget,
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 import type { PanelLayout } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
+import * as React from 'react';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
@@ -441,6 +448,118 @@ describe('@jupyterlab/ui-components', () => {
 
           button.dispose();
         });
+      });
+    });
+
+    describe('re-render optimization', () => {
+      let commands: CommandRegistry;
+      const id = 'test:rerender';
+      let enabled = true;
+      let iconClassValue = 'initial-icon-class';
+
+      async function render(button: CommandToolbarButton) {
+        button.update();
+        await framePromise();
+        await button.renderPromise;
+      }
+
+      beforeEach(() => {
+        commands = new CommandRegistry();
+        enabled = true;
+        iconClassValue = 'initial-icon-class';
+        commands.addCommand(id, {
+          execute: () => undefined,
+          label: 'Re-render test',
+          icon: blankIcon,
+          iconClass: () => iconClassValue,
+          isEnabled: () => enabled
+        });
+      });
+
+      it('should not re-render the button when an unrelated command change is notified', async () => {
+        const button = new CommandToolbarButton({ commands, id });
+        await render(button);
+
+        // Spy is installed after the initial render so its call count starts
+        // at zero; `resolveReact` is only invoked while rendering the button
+        // subtree, so it is a proxy for "the button re-rendered".
+        const resolveReact = jest.spyOn(LabIcon, 'resolveReact');
+        try {
+          // A `changed` notification with no underlying state change (the
+          // common case when switching tabs) must not re-render the button.
+          commands.notifyCommandChanged(id);
+          await framePromise();
+          expect(resolveReact).not.toHaveBeenCalled();
+
+          // A `many-changed` notification (also emitted on tab switch) must
+          // likewise be a no-op when nothing relevant changed.
+          commands.notifyCommandChanged();
+          await framePromise();
+          expect(resolveReact).not.toHaveBeenCalled();
+        } finally {
+          resolveReact.mockRestore();
+        }
+        button.dispose();
+      });
+
+      it('should re-render the button when the command state changes', async () => {
+        const button = new CommandToolbarButton({ commands, id });
+        await render(button);
+
+        const resolveReact = jest.spyOn(LabIcon, 'resolveReact');
+        try {
+          enabled = false;
+          commands.notifyCommandChanged(id);
+          await framePromise();
+          expect(resolveReact).toHaveBeenCalled();
+        } finally {
+          resolveReact.mockRestore();
+        }
+        button.dispose();
+      });
+
+      it('should not execute the command with stale arguments after args change', async () => {
+        // Regression test: when only the command arguments change (the visual
+        // props stay identical), the memoized button must still re-render so
+        // that its click handler dispatches the command with the new args.
+        const execute = jest.fn();
+        const argsId = 'test:rerender-args';
+        commands.addCommand(argsId, {
+          execute,
+          label: 'Args test',
+          icon: blankIcon
+        });
+
+        class Wrapper extends ReactWidget {
+          args: ReadonlyJSONObject = { value: 1 };
+          render(): React.ReactElement {
+            return React.createElement(CommandToolbarButtonComponent, {
+              commands,
+              id: argsId,
+              args: this.args
+            });
+          }
+        }
+
+        const wrapper = new Wrapper();
+        Widget.attach(wrapper, document.body);
+        await framePromise();
+        await wrapper.renderPromise;
+
+        simulate(wrapper.node.firstElementChild!, 'click');
+        expect(execute).toHaveBeenLastCalledWith({ value: 1 });
+
+        // Change the args (new reference and content); the rendered output of
+        // the button is unchanged, but the handler must pick up the new args.
+        wrapper.args = { value: 2 };
+        wrapper.update();
+        await framePromise();
+        await wrapper.renderPromise;
+
+        simulate(wrapper.node.firstElementChild!, 'click');
+        expect(execute).toHaveBeenLastCalledWith({ value: 2 });
+
+        wrapper.dispose();
       });
     });
   });
