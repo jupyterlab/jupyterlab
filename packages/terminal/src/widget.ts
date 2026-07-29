@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, Notification, showDialog } from '@jupyterlab/apputils';
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -1022,8 +1022,11 @@ namespace Private {
       }
       newWindow.location.href = uri;
     } else {
-      console.warn(
-        'Failed to open the link: the popup was blocked by the browser'
+      Notification.error(
+        trans.__(
+          'Failed to open the link: the popup was blocked by the browser.'
+        ),
+        { autoClose: 5000 }
       );
     }
   }
