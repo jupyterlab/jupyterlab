@@ -958,14 +958,14 @@ export class SessionContext implements ISessionContext {
       this._statusChanged.emit('starting');
       try {
         await this._session.changeKernel(model);
-        return this._session.kernel;
       } catch (err) {
+        this._isChangingKernel = false;
         void this._handleSessionError(err);
         throw err;
-      } finally {
-        this._isChangingKernel = false;
-        this._statusChanged.emit(this._session?.kernel?.status || 'unknown');
       }
+      this._isChangingKernel = false;
+      this._statusChanged.emit(this._session?.kernel?.status || 'unknown');
+      return this._session.kernel;
     }
 
     // Use a UUID for the path to overcome a race condition on the server

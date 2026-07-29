@@ -529,6 +529,46 @@ describe('@jupyterlab/apputils', () => {
 
         expect(displayWhileChanging).toBe('starting');
       });
+
+      it('should not emit a redundant "unknown" status if change-kernel is rejected', async () => {
+        // Before the fix, `_changeKernel`'s `finally` block emitted the
+        // post-change status unconditionally, even though the `catch`
+        // branch's `_handleSessionError()` call already tears down the
+        // session (and therefore already emits a settled status). That
+        // made the `finally` emission a redundant *third* "unknown" on
+        // top of the two inherent emissions that any session teardown
+        // produces: one proxied from the disposed kernel's own status
+        // change, and one from `_handleNewSession(null)`'s explicit
+        // fallback. This test guards against that redundant emission
+        // reappearing; it does not assert only one "unknown" is emitted,
+        // since the two teardown-inherent emissions are pre-existing
+        // behavior of `_handleNewSession` unrelated to `changeKernel`.
+        await sessionContext.initialize();
+        await sessionContext.session!.kernel!.info;
+
+        jest
+          .spyOn(sessionContext.session!, 'changeKernel')
+          .mockRejectedValue(new Error('mock error'));
+
+        const statuses: string[] = [];
+        const handler = (_: any, status: string) => {
+          statuses.push(status);
+        };
+        sessionContext.statusChanged.connect(handler);
+
+        let caught = false;
+        const promise = sessionContext
+          .changeKernel({ name: 'echo' })
+          .catch(() => {
+            caught = true;
+          });
+        await Promise.all([promise, acceptDialog()]);
+        sessionContext.statusChanged.disconnect(handler);
+
+        expect(caught).toBe(true);
+        expect(statuses).toEqual(['starting', 'unknown', 'unknown']);
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
+      });
     });
 
     describe('#isDisposed', () => {
