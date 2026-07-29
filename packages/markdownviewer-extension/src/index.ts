@@ -10,7 +10,10 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
-import { GenericSearchProvider, ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import {
+  GenericSearchProvider,
+  ISearchProviderRegistry
+} from '@jupyterlab/documentsearch';
 import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
@@ -90,6 +93,7 @@ function activate(
       widget instanceof MarkdownViewer,
     createNew: widget => GenericSearchProvider.createNew(widget, registry)
   });
+
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
   };
