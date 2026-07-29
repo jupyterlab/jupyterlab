@@ -265,10 +265,6 @@ module = ["jupyterlab.browser_check"]
 disable_error_code = ["arg-type", "assignment"]
 
 [[tool.mypy.overrides]]
-module = ["jupyterlab.commands"]
-disable_error_code = ["arg-type", "attr-defined"]
-
-[[tool.mypy.overrides]]
 module = ["jupyterlab.debuglog"]
 disable_error_code = ["attr-defined"]
 
@@ -389,8 +385,7 @@ suppress-none-returning = true
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/browser_check.py" = ["RUF012"]
 # C901 method is too complex
-# ANN is being added incrementally; command helpers are covered separately.
-"jupyterlab/commands.py" = ["C901", "ANN"]
+"jupyterlab/commands.py" = ["C901"]
 # B028 No explicit `stacklevel` keyword argument found
 "jupyterlab/debuglog.py" = ["B028"]
 "jupyterlab/extensions/manager.py" = ["C901"]

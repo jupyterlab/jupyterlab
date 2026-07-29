@@ -26,7 +26,8 @@ from tempfile import TemporaryDirectory
 from threading import Event
 from typing import Any
 from urllib.error import URLError
-from urllib.request import Request, quote, urljoin, urlopen
+from urllib.parse import quote, urljoin
+from urllib.request import Request, urlopen
 
 from jupyter_builder.jlpm import YARN_PATH
 from jupyter_builder.jupyterlab_semver import Range, gt, gte, lt, lte, make_semver
@@ -73,7 +74,7 @@ YARN_DEFAULT_REGISTRY = "https://registry.yarnpkg.com"
 class ProgressProcess(Process):
     def __init__(
         self,
-        cmd: list[str] | tuple[str, ...],
+        cmd: list[str],
         logger: logging.Logger | None = None,
         cwd: str | os.PathLike[str] | None = None,
         kill_event: Event | None = None,
@@ -176,8 +177,8 @@ def get_app_dir() -> str:
     # Ensure that USER_BASE is defined
     if hasattr(site, "getuserbase"):
         site.getuserbase()
-    userbase = getattr(site, "USER_BASE", None)
-    if HERE.startswith(userbase) and not app_dir.startswith(userbase):
+    userbase: str | None = getattr(site, "USER_BASE", None)
+    if userbase and HERE.startswith(userbase) and not app_dir.startswith(userbase):
         app_dir = pjoin(userbase, "share", "jupyter", "lab")
 
     # Check for a system install in '/usr/local/share'.
@@ -344,7 +345,7 @@ def watch_dev(logger: logging.Logger | None = None) -> list[WatchHelper]:
         ["node", YARN_PATH, "run", "watch"],
         cwd=DEV_DIR,
         logger=logger,
-        startup_regex=RSPACK_EXPECT,
+        startup_regex=RSPACK_EXPECT.pattern,
     )
 
     return [*package_procs, wp_proc]
@@ -667,8 +668,12 @@ def get_latest_compatible_package_versions(
 def read_package(target: str | os.PathLike[str]) -> dict[str, Any]:
     """Read the package data in a given target tarball."""
     with tarfile.open(target, "r") as tar:
-        with tar.extractfile("package/package.json") as f:
-            data = json.loads(f.read().decode("utf8"))
+        package_json = tar.extractfile("package/package.json")
+        if package_json is None:
+            msg = f"Could not read package/package.json from {target}"
+            raise ValueError(msg)
+        with package_json:
+            data = json.loads(package_json.read().decode("utf8"))
         data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
     return data
 
@@ -713,7 +718,7 @@ class _AppHandler:
     def install_extension(
         self,
         extension: str | os.PathLike[str],
-        existing: Any = None,
+        existing: object = None,
         pin: str | None = None,
     ) -> bool:
         """Install an extension package into JupyterLab.
@@ -827,7 +832,7 @@ class _AppHandler:
         proc = WatchHelper(
             ["node", YARN_PATH, "run", "watch"],
             cwd=pjoin(self.app_dir, "staging"),
-            startup_regex=RSPACK_EXPECT,
+            startup_regex=RSPACK_EXPECT.pattern,
             logger=self.logger,
         )
         return [proc]
@@ -867,7 +872,8 @@ class _AppHandler:
         uninstalled_core = info["uninstalled_core"]
         if uninstalled_core:
             logger.info("\nUninstalled core extensions:")
-            [logger.info(f"    {item}") for item in sorted(uninstalled_core)]
+            for item in sorted(uninstalled_core):
+                logger.info(f"    {item}")
 
         all_exts = (
             list(info["federated_extensions"])
@@ -896,12 +902,14 @@ class _AppHandler:
             logger.info(
                 "\nThe following source extensions are overshadowed by older prebuilt extensions:"
             )
-            [logger.info(f"    {name}") for name in sorted(improper_shadowed)]
+            for name in sorted(improper_shadowed):
+                logger.info(f"    {name}")
 
         messages = self.build_check(fast=True)
         if messages:
             logger.info("\nBuild recommended, please run `jupyter lab build`:")
-            [logger.info(f"    {item}") for item in messages]
+            for item in messages:
+                logger.info(f"    {item}")
 
     def build_check(self, fast: bool | None = None) -> list[str]:  # noqa
         """Determine whether JupyterLab should be built.
@@ -986,7 +994,7 @@ class _AppHandler:
 
         return messages
 
-    def uninstall_extension(self, name: str) -> bool:
+    def uninstall_extension(self, name: str | None) -> bool:
         """Uninstall an extension by name.
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -1066,12 +1074,12 @@ class _AppHandler:
             should_rebuild = should_rebuild or updated
         return should_rebuild
 
-    def update_extension(self, name: str) -> bool:
+    def update_extension(self, name: str | None) -> bool:
         """Update an extension by name.
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
-        if name not in self.info["extensions"]:
+        if name is None or name not in self.info["extensions"]:
             self.logger.warning(f'No labextension named "{name}" installed')
             return False
         return self._update_extension(name)
@@ -1119,7 +1127,8 @@ class _AppHandler:
         self.logger.warning(
             f"Installing {path} as a linked package because it does not have extension metadata:"
         )
-        [self.logger.warning(f"   {m}") for m in messages]
+        for m in messages:
+            self.logger.warning(f"   {m}")
 
         # Add to metadata.
         config = self._read_build_config()
@@ -1778,7 +1787,7 @@ class _AppHandler:
 
     def _get_linked_packages(self) -> dict[str, Any]:
         """Get the linked packages."""
-        info = self._get_local_data("linked_packages")
+        info: dict[str, Any] = dict(self._get_local_data("linked_packages"))
         dname = pjoin(self.app_dir, "staging", "linked_packages")
         for name, source in info.items():
             info[name] = {"source": source, "filename": "", "tar_dir": dname}
@@ -2032,7 +2041,7 @@ class _AppHandler:
         if is_dir and not osp.exists(pjoin(source, "node_modules")):
             self._run(["node", YARN_PATH, "install"], cwd=source)
 
-        info = {"source": source, "is_dir": is_dir}
+        info: dict[str, Any] = {"source": source, "is_dir": is_dir}
 
         ret = self._run([which("npm"), "pack", source], cwd=tempdir)
         if ret != 0:
@@ -2092,6 +2101,8 @@ class _AppHandler:
                     return None
                 # Valid
                 return version
+
+        return None
 
     def latest_compatible_package_versions(self, names: list[str]) -> dict[str, str]:
         """Get the latest compatible versions of several packages
@@ -2175,6 +2186,9 @@ class _AppHandler:
                     # to not have to update their versions for each
                     # Jupyterlab prerelease version.
                     c = _compare_ranges(core_deps[key], value, drop_prerelease1=True)
+                    if c is None:
+                        # Compatibility could not be determined.
+                        continue
                     lab_newer_than_latest = lab_newer_than_latest or c < 0
                     latest_newer_than_lab = latest_newer_than_lab or c > 0
 
@@ -2235,7 +2249,7 @@ def _yarn_config(logger: logging.Logger) -> dict[str, dict[str, Any]]:
     {"yarn config": dict, "npm config": dict}
     if unsuccessful, the subdictionaries are empty
     """
-    configuration = {"yarn config": {}, "npm config": {}}
+    configuration: dict[str, dict[str, Any]] = {"yarn config": {}, "npm config": {}}
     try:
         node = which("node")
     except ValueError:  # Node not found == user with no need for building jupyterlab
@@ -2377,12 +2391,14 @@ def _tarsum(input_file: str | os.PathLike[str]) -> str:
         for member in tar:
             if not member.isfile():
                 continue
-            with tar.extractfile(member) as f:
-                if f:  # Check if f is not None (safety check)
+            f = tar.extractfile(member)
+            if f is None:  # Check if f is not None (safety check)
+                continue
+            with f:
+                data = f.read(chunk_size)
+                while data:
+                    h.update(data)
                     data = f.read(chunk_size)
-                    while data:
-                        h.update(data)
-                        data = f.read(chunk_size)
 
     return h.hexdigest()
 
@@ -2461,7 +2477,7 @@ def _compare_ranges(  # noqa: PLR0912
         return None
 
     # Set return_value to a sentinel value
-    return_value = False
+    return_value: int | None = False
 
     # r1.set may be a list of ranges if the range involved an ||, so we need to test for overlaps between each pair.
     for r1set, r2set in itertools.product(r1.set, r2.set):
@@ -2490,7 +2506,7 @@ def _compare_ranges(  # noqa: PLR0912
         gy = gte if x1 == x2 else gt
 
         # Handle unbounded (>) specifiers.
-        def noop(x: Any, y: Any, z: Any) -> bool:
+        def noop(x: object, y: object, loose: bool) -> bool:
             return True
 
         if x1 == x2 and o1.startswith(">"):
@@ -2571,7 +2587,7 @@ def _is_locked(name: str, locked: dict[str, bool] | None = None) -> LockStatus:
         if name == extension_part:
             locked_plugins.add(lock)
 
-    return LockStatus(entire_extension_locked=False, locked_plugins=locked_plugins)
+    return LockStatus(entire_extension_locked=False, locked_plugins=frozenset(locked_plugins))
 
 
 def _format_compatibility_errors(
@@ -2675,6 +2691,9 @@ def _compat_error_age(errors: list[tuple[str, str, str]]) -> int:
         # to not have to update their versions for each
         # Jupyterlab prerelease version.
         c = _compare_ranges(ext, jlab, drop_prerelease1=True)
+        if c is None:
+            # Compatibility could not be determined.
+            continue
         any_newer = any_newer or c < 0
         any_older = any_older or c > 0
     if any_older and not any_newer:
@@ -2730,7 +2749,7 @@ def _semver_key(version: str, prerelease_first: bool = False) -> tuple[Any, ...]
     (0.x -> 1.0-pre -> 1.x -> 2.0-pre -> 2.x).
     """
     v = make_semver(version, True)
-    key = ((0,) if v.prerelease else (1,)) if prerelease_first else ()
+    key: tuple[Any, ...] = ((0,) if v.prerelease else (1,)) if prerelease_first else ()
     key = (*key, v.major, v.minor, v.patch)
     if not prerelease_first:
         #  NOT having a prerelease is > having one
@@ -2762,4 +2781,4 @@ def _fetch_package_metadata(registry: str, name: str, logger: logging.Logger) ->
 
 
 if __name__ == "__main__":
-    watch_dev(HERE)
+    watch_dev()
