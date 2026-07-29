@@ -287,6 +287,49 @@ wish to run are passed in the `args` argument as a list of strings:
 In this example `docmanager:save` and `application:close` commands are mapped to `Accel T`.
 The commands are run in succession when you use the shortcut.
 
+### Shortcuts for R operators
+
+You can use the same macro command to add shortcuts for operators that are
+common in R, such as `<-` and `%>%`. Add one entry for each operator in the
+Keyboard Shortcuts settings:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "apputils:run-first-enabled",
+      "keys": ["Alt -"],
+      "args": {
+        "commands": [
+          "console:replace-selection",
+          "fileeditor:replace-selection",
+          "notebook:replace-selection"
+        ],
+        "args": {"text": "<- "}
+      },
+      "selector": "body"
+    },
+    {
+      "command": "apputils:run-first-enabled",
+      "keys": ["Accel Shift M"],
+      "args": {
+        "commands": [
+          "console:replace-selection",
+          "fileeditor:replace-selection",
+          "notebook:replace-selection"
+        ],
+        "args": {"text": "%>% "}
+      },
+      "selector": "body"
+    }
+  ]
+}
+```
+
+`run-first-enabled` sends the replacement to the first command that is
+available in the current context. On macOS, `Accel` is `Cmd`; on Windows and
+Linux, it is `Ctrl`.
+
 ### Markdown editing shortcuts
 
 When editing markdown cells, you can use {kbd}`Ctrl+B` ({kbd}`Cmd+B` on macOS) to toggle bold formatting.
