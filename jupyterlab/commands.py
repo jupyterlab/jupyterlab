@@ -1265,7 +1265,7 @@ class _AppHandler:
         extension: str,
         value: bool,
         level: str = "sys_prefix",
-    ) -> bool | None:
+    ) -> bool:
         """Lock or unlock a lab extension (/plugin)."""
         app_settings_dir = osp.join(self.app_dir, "settings")
 
@@ -1287,6 +1287,7 @@ class _AppHandler:
         locked[extension] = value
         page_config["lockedExtensions"] = locked
         write_page_config(page_config, level=level)
+        return True
 
     def check_extension(
         self,
@@ -2065,7 +2066,7 @@ class _AppHandler:
         try:
             metadata = _fetch_package_metadata(self.registry, name, self.logger)
         except URLError:
-            return
+            return None
         versions = metadata.get("versions", {})
 
         # Sort pre-release first, as we will reverse the sort:
@@ -2088,7 +2089,7 @@ class _AppHandler:
                     info = self._extract_package(f"{name}@{version}", tempdir)
                 if _validate_extension(info["data"]):
                     # Invalid, do not consider other versions
-                    return
+                    return None
                 # Valid
                 return version
 
@@ -2434,7 +2435,7 @@ def _test_overlap(
         spec1, spec2, drop_prerelease1=drop_prerelease1, drop_prerelease2=drop_prerelease2
     )
     if cmp is None:
-        return
+        return None
     return cmp == 0
 
 
@@ -2457,7 +2458,7 @@ def _compare_ranges(  # noqa: PLR0912
 
     # If either range is empty, we cannot verify.
     if not r1.range or not r2.range:
-        return
+        return None
 
     # Set return_value to a sentinel value
     return_value = False
