@@ -6,7 +6,7 @@
 import logging
 import subprocess
 from os.path import join as pjoin
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from jupyterlab import commands
 
@@ -14,6 +14,20 @@ from .test_jupyterlab import AppHandlerTest
 
 
 class TestAppHandlerRegistry(AppHandlerTest):
+    def test_node_check_requires_npm(self):
+        # patch should be applied on `jupyterlab.commands` and not on `jupyterlab_server.process`
+        # See https://docs.python.org/3/library/unittest.mock.html#where-to-patch
+        with patch("jupyterlab.commands.which") as which:
+            which.side_effect = ["/usr/bin/node", ValueError("Command not found")]
+
+            logger = logging.getLogger("jupyterlab")
+            with self.assertRaisesRegex(
+                ValueError, r"Please install Node\.js .* and npm before continuing\."
+            ):
+                commands._node_check(logger)
+
+            self.assertEqual(which.call_args_list, [call("node"), call("npm")])
+
     def test_node_not_available(self):
         # patch should be applied on `jupyterlab.commands` and not on `jupyterlab_server.process`
         # See https://docs.python.org/3/library/unittest.mock.html#where-to-patch
