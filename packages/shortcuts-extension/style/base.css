@@ -114,8 +114,9 @@
 button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
 button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   cursor: not-allowed;
-  background-color: var(--jp-layout-color3);
+  background-color: transparent;
   color: var(--jp-content-font-color3);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .jp-Shortcuts-Overwrite {
