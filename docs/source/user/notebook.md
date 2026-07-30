@@ -306,3 +306,28 @@ Mermaid diagrams are rendered automatically in Markdown cells in notebooks opene
 ## Paste code cells without output
 
 When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+(notebook-links)=
+
+## Links in notebooks
+
+Markdown cells in notebooks support several types of links:
+
+**External URLs**
+
+Standard URLs such as `https://example.com` open in a browser tab.
+
+**Relative paths**
+
+Links with relative paths are resolved relative to the notebook file's
+location on the server. For example, if your notebook is at
+`notebooks/analysis.ipynb`, a link to `data/results.csv` resolves to
+`notebooks/data/results.csv`. This also works for links to other
+notebooks or text files, which open in a new tab in JupyterLab.
+
+**Anchor links**
+
+You can link to a section within the same notebook using an anchor:
+
+```markdown
+See the [introduction section](#introduction).
+```
