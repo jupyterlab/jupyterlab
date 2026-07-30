@@ -183,7 +183,8 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
 }
 
 .jp-Shortcuts-AddShortcut.jp-mod-styled .jp-icon3[fill],
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill] {
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill],
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew .jp-icon3[fill] {
   fill: currentcolor;
 }
 
@@ -217,20 +218,6 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
 
 .jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
   width: 40%;
-}
-
-.jp-Shortcuts-Row-newShortcut
-  .jp-Shortcuts-SaveNew:not(:disabled)
-  .jp-icon3[fill] {
-  fill: var(--jp-ui-inverse-font-color0);
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled) {
-  background: var(--jp-shortcuts-button-hover-background);
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew:not(:disabled):hover {
-  background: var(--jp-accept-color-normal);
 }
 
 .jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
