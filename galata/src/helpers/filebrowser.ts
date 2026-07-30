@@ -22,9 +22,9 @@ export class FileBrowserHelper {
    * @returns XPath to file in file browser
    */
   xpBuildFileSelector(fileName: string): string {
-    return `//div[@id='filebrowser']//li[./span[${Utils.xpContainsClass(
+    return `//div[@id='filebrowser']//li[.//span[${Utils.xpContainsClass(
       'jp-DirListing-itemText'
-    )} and ./span[text()="${fileName}"]]]`;
+    )} and .//span[text()="${fileName}"]]]`;
   }
 
   /**
@@ -34,9 +34,9 @@ export class FileBrowserHelper {
    * @returns XPath to directory in file browser
    */
   xpBuildDirectorySelector(dirName: string): string {
-    return `//div[@id='filebrowser']//li[@data-isdir='true' and ./span[${Utils.xpContainsClass(
+    return `//div[@id='filebrowser']//li[@data-isdir='true' and .//span[${Utils.xpContainsClass(
       'jp-DirListing-itemText'
-    )} and ./span[text()="${dirName}"]]]`;
+    )} and .//span[text()="${dirName}"]]]`;
   }
 
   /**

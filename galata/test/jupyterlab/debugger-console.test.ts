@@ -16,6 +16,10 @@ async function setupDebuggerConsole(
   tmpPath: string
 ) {
   // Open a notebook which has code setting variables to debug
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `./notebooks/${fileName}`),
+    `${tmpPath}/${fileName}`
+  );
   expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(true);
   expect(await page.notebook.activate(fileName)).toBe(true);
 
@@ -57,7 +61,6 @@ async function setupDebuggerConsole(
 }
 
 test.describe('Debugger Console', () => {
-  test.use({ tmpPath: 'test-debugger-console' });
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
@@ -67,14 +70,6 @@ test.describe('Debugger Console', () => {
         providerTimeout: 60000
       }
     }
-  });
-
-  test.beforeAll(async ({ tmpPath, request }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${fileName}`),
-      `${tmpPath}/${fileName}`
-    );
   });
 
   test.beforeEach(async ({ page, tmpPath }) => {
