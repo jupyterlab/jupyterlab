@@ -1369,6 +1369,12 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Commit pending changes in the metadata editors, then save the notebook'
       ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         for (const tool of metadataTools) {
           const editor = tool.editor;
