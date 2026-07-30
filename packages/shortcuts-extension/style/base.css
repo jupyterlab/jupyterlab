@@ -194,7 +194,7 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
 }
 
 .jp-Shortcuts-EmptyCell {
-  height: 32px;
+  min-height: 32px;
 }
 
 .jp-Shortcuts-Row {
