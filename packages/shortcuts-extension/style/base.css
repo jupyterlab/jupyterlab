@@ -112,7 +112,8 @@
 }
 
 button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
-button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
+button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit,
+button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   cursor: not-allowed;
   background-color: transparent;
   color: var(--jp-content-font-color3);
