@@ -410,6 +410,30 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     super.dispose();
   }
 
+  protected onChildRemoved(msg: Widget.ChildMessage): void {
+    // If the widget is being moved to the popup opener, keep tracking its
+    // intended position so it can be restored to the right slot later.
+    if (msg.child.parent === this.popupOpener) {
+      return;
+    }
+    const name = Private.nameProperty.get(msg.child);
+    if (!name || name === TOOLBAR_OPENER_NAME) {
+      return;
+    }
+    const position = this._widgetPositions.get(name);
+    if (position === undefined) {
+      return;
+    }
+    this._widgetPositions.delete(name);
+    this._widgetWidths.delete(name);
+    // Shift down all items that were logically after the removed one.
+    this._widgetPositions.forEach((pos, key) => {
+      if (pos > position) {
+        this._widgetPositions.set(key, pos - 1);
+      }
+    });
+  }
+
   /**
    * Insert an item into the toolbar at the after a target item.
    *
