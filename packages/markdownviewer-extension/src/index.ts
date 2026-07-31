@@ -258,7 +258,8 @@ function activate(
 
   app.contextMenu.addItem({
     command: CommandIDs.copy,
-    selector: '.jp-MarkdownViewer'
+    selector: '.jp-MarkdownViewer',
+    rank: 0
   });
 
   if (tocRegistry) {
