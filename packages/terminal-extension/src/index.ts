@@ -36,6 +36,7 @@ import {
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
+  linkIcon,
   pasteIcon,
   refreshIcon,
   terminalIcon
@@ -51,6 +52,8 @@ import { TerminalSearchProvider } from './searchprovider';
  */
 namespace CommandIDs {
   export const copy = 'terminal:copy';
+
+  export const copyLink = 'terminal:copy-link';
 
   export const createNew = 'terminal:create-new';
 
@@ -649,6 +652,57 @@ function addCommands(
     },
     icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Copy'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  /**
+   * Get the terminal widget the context menu was opened over, falling back
+   * to the current terminal.
+   */
+  const contextMenuTerminal =
+    (): MainAreaWidget<ITerminal.ITerminal> | null => {
+      const hitNode = app.contextMenuHitTest(node =>
+        node.classList.contains('jp-Terminal')
+      );
+      if (hitNode) {
+        const widget = tracker.find(value => value.content.node === hitNode);
+        if (widget) {
+          return widget;
+        }
+      }
+      return tracker.currentWidget;
+    };
+
+  /**
+   * Get the URI of the link the context menu was opened over, or `null` if
+   * the context menu was not opened over a link.
+   */
+  const contextMenuLink = (): string | null => {
+    const content = contextMenuTerminal()?.content;
+    return content instanceof XTerm ? content.contextMenuLink : null;
+  };
+
+  /**
+   * Add copy link command
+   */
+  commands.addCommand(CommandIDs.copyLink, {
+    execute: () => {
+      const link = contextMenuLink();
+
+      if (link) {
+        Clipboard.copyToSystem(link);
+      }
+    },
+    isEnabled: () => Boolean(contextMenuLink()),
+    // Only show the command when the context menu was opened over a link.
+    isVisible: () => Boolean(contextMenuLink()),
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Copy Link Address'),
     describedBy: {
       args: {
         type: 'object',

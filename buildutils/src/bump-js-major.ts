@@ -2,12 +2,15 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { program as commander } from 'commander';
 import semver from 'semver';
 import path from 'path';
 import * as utils from './utils';
+
+interface IBumpJSOptions {
+  force?: boolean;
+  dryRun?: boolean;
+}
 
 /**
  * Get the packages that depend on a given package, recursively.
@@ -36,7 +39,7 @@ commander
   .arguments('<package> [others...]')
   .option('--force', 'Force the upgrade')
   .option('--dry-run', 'Show what would be executed')
-  .action((pkg: string, others: Array<string>, options: any) => {
+  .action((pkg: string, others: Array<string>, options: IBumpJSOptions) => {
     utils.exitOnUncaughtException();
     others.push(pkg);
     const toBump: Set<string> = new Set();

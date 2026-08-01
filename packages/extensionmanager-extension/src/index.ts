@@ -11,7 +11,11 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
-import { ExtensionsPanel, ListModel } from '@jupyterlab/extensionmanager';
+import {
+  ExtensionsPanel,
+  IExtensionManagerModel,
+  ListModel
+} from '@jupyterlab/extensionmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -35,19 +39,27 @@ const plugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds the extension manager plugin.',
   autoStart: true,
   requires: [ISettingRegistry],
-  optional: [ITranslator, ILayoutRestorer, ICommandPalette],
+  optional: [
+    ITranslator,
+    ILayoutRestorer,
+    ICommandPalette,
+    IExtensionManagerModel
+  ],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator | null,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    extensionManagerModel: IExtensionManagerModel | null
   ) => {
     const { commands, shell, serviceManager } = app;
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    const model = new ListModel(serviceManager, translator);
+    // Use the model provided by the distribution, if any, else the default.
+    const model =
+      extensionManagerModel ?? new ListModel(serviceManager, translator);
 
     const createView = () => {
       const v = new ExtensionsPanel({ model, translator: translator! });
@@ -71,12 +83,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // Create a view by default, so it can be restored when loading the workspace.
     let view: ExtensionsPanel | null = createView();
 
+    if (!model.canInstall) {
+      // A read-only manager cannot be toggled off; keep the panel enabled.
+      model.isEnabled = true;
+    }
+
     // If the extension is enabled or disabled,
     // add or remove it from the left area.
     Promise.all([app.restored, registry.load(PLUGIN_ID)])
       .then(([, settings]) => {
         model.isDisclaimed = settings.get('disclaimed').composite as boolean;
-        model.isEnabled = settings.get('enabled').composite as boolean;
         model.stateChanged.connect(() => {
           if (
             model.isDisclaimed !==
@@ -87,6 +103,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
             });
           }
           if (
+            model.canInstall &&
             model.isEnabled !== (settings.get('enabled').composite as boolean)
           ) {
             settings.set('enabled', model.isEnabled).catch(reason => {
@@ -95,15 +112,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
           }
         });
 
-        if (model.isEnabled) {
-          view = view ?? createView();
-        } else {
-          view?.dispose();
-          view = null;
-        }
-
         settings.changed.connect(async () => {
           model.isDisclaimed = settings.get('disclaimed').composite as boolean;
+          // Only an installable manager exposes the enable/disable toggle.
+          if (!model.canInstall) {
+            return;
+          }
           model.isEnabled = settings.get('enabled').composite as boolean;
           app.commands.notifyCommandChanged(CommandIDs.toggle);
 
@@ -121,6 +135,19 @@ const plugin: JupyterFrontEndPlugin<void> = {
             view = null;
           }
         });
+
+        // The rest wires the enable/disable lifecycle of an installable manager.
+        if (!model.canInstall) {
+          return;
+        }
+
+        model.isEnabled = settings.get('enabled').composite as boolean;
+        if (model.isEnabled) {
+          view = view ?? createView();
+        } else {
+          view?.dispose();
+          view = null;
+        }
       })
       .catch(reason => {
         console.error(
@@ -162,6 +189,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
       },
       isToggled: () => model.isEnabled,
+      // Read-only managers are always enabled and cannot be disabled.
+      isVisible: () => model.canInstall,
       describedBy: {
         args: {
           type: 'object',

@@ -32,6 +32,10 @@ from collections import ChainMap
 from functools import partial
 from pathlib import Path
 from subprocess import check_call
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 HERE = Path(__file__).parent.resolve()
 
@@ -573,7 +577,7 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
-def setup(app):
+def setup(app: "Sphinx"):
     if SPELLING_BUILD_ENABLED:
         return
 
@@ -596,7 +600,7 @@ def setup(app):
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
 
-    def clean_code_files(tmp_files, app, exception):
+    def clean_code_files(tmp_files: list[Path], app: "Sphinx", exception: Exception | None):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))
