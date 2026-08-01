@@ -945,7 +945,10 @@ export namespace Commands {
       isVisible: () => {
         const widget = tracker.currentWidget;
         return (
-          (widget && PathExt.extname(widget.context.path) === '.md') || false
+          (isEnabled() &&
+            widget &&
+            PathExt.extname(widget.context.path) === '.md') ||
+          false
         );
       },
       icon: markdownIcon,
@@ -1481,6 +1484,8 @@ export namespace Commands {
 
     addCreateNewMarkdownCommandToPalette(palette, trans);
 
+    addMarkdownPreviewCommandToPalette(palette, trans);
+
     addChangeFontSizeCommandsToPalette(palette, trans);
   }
 
@@ -1532,6 +1537,20 @@ export namespace Commands {
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
       args: { isPalette: true },
+      category: paletteCategory
+    });
+  }
+
+  /**
+   * Add a Markdown Preview command to the File Editor palette
+   */
+  export function addMarkdownPreviewCommandToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ): void {
+    const paletteCategory = trans.__('Text Editor');
+    palette.addItem({
+      command: CommandIDs.markdownPreview,
       category: paletteCategory
     });
   }

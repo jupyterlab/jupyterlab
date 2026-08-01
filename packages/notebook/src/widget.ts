@@ -2883,6 +2883,10 @@ export class Notebook extends StaticNotebook {
    * Ensure that the notebook has proper focus.
    */
   private _ensureFocus(force = false): void {
+    const activeElement = document.activeElement;
+    if (!force && activeElement && !this.node.contains(activeElement)) {
+      return;
+    }
     // No-op is the footer has the focus.
     const footer = (this.layout as NotebookWindowedLayout).footer;
     if (footer && document.activeElement === footer.node) {
