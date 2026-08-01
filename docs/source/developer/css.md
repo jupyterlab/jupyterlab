@@ -81,6 +81,48 @@ in their own `index.css` file, but should do so sparingly.
 Again, we consider the names of the public CSS variables in this package
 to be our public API for CSS.
 
+### Theme-aware extension styles
+
+Extension styles should use JupyterLab CSS variables rather than hard-coded
+colors when possible. JupyterLab themes define public variables such as
+`--jp-ui-font-color1`, `--jp-content-font-color1`, `--jp-layout-color1`, and
+`--jp-border-color1`; using these variables allows extension UI to adapt when
+users switch between light, dark, high-contrast, or custom themes.
+
+For example, avoid hard-coded colors:
+
+```css
+.my-extension-panel {
+  color: black;
+  background: white;
+}
+```
+
+Prefer JupyterLab theme variables:
+
+```css
+.my-extension-panel {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  border-color: var(--jp-border-color1);
+}
+```
+
+Extensions can also define their own CSS variables in terms of JupyterLab
+variables and then use those extension variables throughout their styles:
+
+```css
+:root {
+  --my-extension-color: var(--jp-content-font-color1);
+  --my-extension-background: var(--jp-layout-color1);
+}
+
+.my-extension-panel {
+  color: var(--my-extension-color);
+  background: var(--my-extension-background);
+}
+```
+
 ## File organization
 
 We are organizing our CSS files in the following manner:
