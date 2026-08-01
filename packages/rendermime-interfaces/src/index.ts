@@ -584,6 +584,43 @@ export namespace IRenderMime {
      *   happen synchronously or asynchronously.
      */
     typeset(element: HTMLElement): void | Promise<void>;
+
+    /**
+     * Options describing how math is recognized in the source text.
+     *
+     * These options are shared with the Markdown pre-processing step
+     * (`removeMath`) so that hiding math from the Markdown parser and
+     * typesetting it stay consistent. When omitted, the default options
+     * are assumed, including a single `$` delimiter for inline math.
+     */
+    readonly mathParseOptions?: ILatexTypesetter.IMathParseOptions;
+  }
+
+  /**
+   * The namespace for `ILatexTypesetter` associated interfaces.
+   */
+  export namespace ILatexTypesetter {
+    /**
+     * Options describing how math is recognized in the source text.
+     */
+    export interface IMathParseOptions {
+      // In future further source-recognition options (e.g. explicit inline/display
+      // delimiter pairs, or whether `\begin...\end` environments are treated as
+      // math) can be added here as needed.
+      /**
+       * Whether a single `$` should be treated as an inline math delimiter.
+       *
+       * Set to `false` to render `$` literally (e.g. for currency amounts
+       * such as "$5 and $10"). Display math (`$$...$$`) and the `\(...\)` /
+       * `\[...\]` delimiters are unaffected by this option. Defaults to `true`.
+       *
+       * Note that this option applies wherever the typesetter is used, not
+       * only to Markdown: in particular, a `$...$` expression in a
+       * `text/latex` output (which is typeset directly, without Markdown
+       * pre-processing) is also left literal when this option is `false`.
+       */
+      readonly dollarInlineMath?: boolean;
+    }
   }
 
   /**
