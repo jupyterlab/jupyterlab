@@ -265,10 +265,6 @@ module = ["jupyterlab.browser_check"]
 disable_error_code = ["arg-type", "assignment"]
 
 [[tool.mypy.overrides]]
-module = ["jupyterlab.debuglog"]
-disable_error_code = ["attr-defined"]
-
-[[tool.mypy.overrides]]
 module = ["jupyterlab.extensions.manager"]
 disable_error_code = [
     "arg-type",
@@ -304,20 +300,8 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.build_handler"]
-disable_error_code = ["arg-type", "misc", "override", "union-attr", "var-annotated"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.error_handler"]
-disable_error_code = ["arg-type", "override"]
-
-[[tool.mypy.overrides]]
 module = ["jupyterlab.labapp"]
 disable_error_code = ["arg-type", "assignment", "union-attr"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.upgrade_extension"]
-disable_error_code = ["assignment", "operator"]
 
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
