@@ -24,7 +24,8 @@ class _DebugLogApp(Protocol):
     log_datefmt: str
     _log_formatter_cls: type[logging.Formatter]
 
-    def exit(self, exit_status: int | str | None = None) -> None: ...
+    def exit(self, exit_status: int | str | None = None) -> None:
+        pass
 
 
 class DebugLogFileMixin(Configurable):
