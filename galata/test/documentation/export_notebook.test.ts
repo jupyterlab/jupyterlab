@@ -56,6 +56,13 @@ test.describe('Export Notebook', () => {
       .getByText('Common Tools')
       .click();
 
+    // Keep this documentation screenshot focused on the slide type controls.
+    await page.addStyleTag({
+      content: `.jp-CellIdField {
+        display: none;
+      }`
+    });
+
     await page
       .locator('.jp-ActiveCellTool')
       .getByText(/# The Lorenz/)
