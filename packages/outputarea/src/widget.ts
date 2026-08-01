@@ -306,23 +306,21 @@ export class OutputArea extends Widget {
    *
    * Clears the message handlers on the future so this output area can be
    * safely disposed without terminating the in-flight execution. The returned
-   * future can be re-attached to a new output area via `reattachFuture` method.
+   * future and display id targets can be passed to `reattachFuture`.
    *
    * Returns `null` if no future is currently attached.
    */
-  detachFuture(): Kernel.IShellFuture<
-    KernelMessage.IExecuteRequestMsg,
-    KernelMessage.IExecuteReplyMsg
-  > | null {
+  detachFuture(): OutputArea.IDetachedFuture | null {
     const future = this._future;
     if (!future) {
       return null;
     }
+    const displayIdMap = Private.cloneDisplayIdMap(this._displayIdMap);
     future.onIOPub = () => undefined;
     future.onReply = () => undefined;
     future.onStdin = () => undefined;
     this._future = null!;
-    return future;
+    return { future, displayIdMap };
   }
 
   /**
@@ -335,8 +333,12 @@ export class OutputArea extends Widget {
     future: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
-    >
+    >,
+    displayIdMap?: ReadonlyMap<string, readonly number[]>
   ) {
+    if (displayIdMap) {
+      this._setDisplayIdMap(displayIdMap);
+    }
     this._setFuture(future, false);
   }
 
@@ -476,6 +478,15 @@ export class OutputArea extends Widget {
         }
       }
     });
+  }
+
+  /**
+   * Set display id indices from a captured map.
+   */
+  private _setDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): void {
+    this._displayIdMap = Private.cloneDisplayIdMap(displayIdMap);
   }
 
   /**
@@ -806,7 +817,7 @@ export class OutputArea extends Widget {
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
     const transient = ((msg.content as any).transient || {}) as JSONObject;
-    const displayId = transient['display_id'] as string;
+    const displayId = Private.getDisplayId(transient);
     let targets: number[] | undefined;
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
@@ -824,7 +835,7 @@ export class OutputArea extends Widget {
       }
       case 'update_display_data':
         output = { ...msg.content, output_type: 'display_data' };
-        targets = this._displayIdMap.get(displayId);
+        targets = displayId ? this._displayIdMap.get(displayId) : undefined;
         if (targets) {
           for (const index of targets) {
             model.set(index, output);
@@ -967,6 +978,24 @@ export class SimplifiedOutputArea extends OutputArea {
  * A namespace for OutputArea statics.
  */
 export namespace OutputArea {
+  /**
+   * A detached future with the display id targets for the current outputs.
+   */
+  export interface IDetachedFuture {
+    /**
+     * The kernel future detached from the output area.
+     */
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+
+    /**
+     * Display id targets captured when the future was detached.
+     */
+    displayIdMap: ReadonlyMap<string, readonly number[]>;
+  }
+
   /**
    * The options to create an `OutputArea`.
    */
@@ -1496,6 +1525,29 @@ export namespace Stdin {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Clone display id indices.
+   */
+  export function cloneDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): Map<string, number[]> {
+    const clone = new Map<string, number[]>();
+    displayIdMap.forEach((indices, displayId) => {
+      clone.set(displayId, [...indices]);
+    });
+    return clone;
+  }
+
+  /**
+   * Get a display id from transient output data.
+   */
+  export function getDisplayId(
+    transient?: ReadonlyPartialJSONObject
+  ): string | undefined {
+    const displayId = transient?.['display_id'];
+    return typeof displayId === 'string' ? displayId : undefined;
+  }
+
   /**
    * Create the node for an InputWidget.
    */
