@@ -16,12 +16,6 @@
       "path": "../docregistry"
     },
     {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../rendermime-interfaces"
-    },
-    {
       "path": "../services"
     },
     {

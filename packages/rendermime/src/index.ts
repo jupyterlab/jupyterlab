@@ -17,4 +17,3 @@ export * from './registry';
 export * from './renderers';
 export * from './tokens';
 export * from './widgets';
-export * from './utils';
