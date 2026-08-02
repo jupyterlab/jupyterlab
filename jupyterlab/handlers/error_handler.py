@@ -28,6 +28,9 @@ class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
         messages: list[str] | None = None,
     ) -> None:
         if isinstance(name, list):
+            if messages is not None:
+                msg = "messages was provided both positionally and as a keyword"
+                raise TypeError(msg)
             messages = name
             name = ""
         super().initialize(name=name or "")

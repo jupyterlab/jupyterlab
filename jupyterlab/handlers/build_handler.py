@@ -151,6 +151,9 @@ class Builder:
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
     def initialize(self, name: str | Builder | None = "", builder: Builder | None = None) -> None:
         if isinstance(name, Builder):
+            if builder is not None:
+                msg = "builder was provided both positionally and as a keyword"
+                raise TypeError(msg)
             builder = name
             name = ""
         super().initialize(name=name or "")
