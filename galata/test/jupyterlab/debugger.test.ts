@@ -31,445 +31,513 @@ async function openNotebook(page: IJupyterLabPageFixture, tmpPath, fileName) {
     path.resolve(__dirname, `./notebooks/${fileName}`),
     `${tmpPath}/${fileName}`
   );
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(true);
+  expect(await page.notebook.activate(fileName)).toBe(true);
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 }
 
-test('Move Debugger to right', async ({ page }) => {
-  await page.sidebar.moveTabToRight('jp-debugger-sidebar');
-  expect(await page.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
-    'right'
-  );
-});
+test.describe.serial('Debugger', () => {
+  test('Move Debugger to right', async ({ page }) => {
+    await page.sidebar.moveTabToRight('jp-debugger-sidebar');
+    expect(await page.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
+      'right'
+    );
+  });
 
-test('Open Debugger on right', async ({ page }) => {
-  await page.sidebar.openTab('jp-debugger-sidebar');
-  expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
-});
+  test('Open Debugger on right', async ({ page }) => {
+    await page.sidebar.openTab('jp-debugger-sidebar');
+    expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
+  });
 
-/* Parametrized tests : tests depending on showSourcesInMainArea setting */
-for (const c of showSourcesCases) {
-  test.describe(`Debugger – ${c.name}`, () => {
-    test.use({
-      mockSettings: {
-        ...galata.DEFAULT_SETTINGS,
-        '@jupyterlab/debugger-extension:main': {
-          showSourcesInMainArea: c.showSourcesInMainArea
+  /* Parametrized tests : tests depending on showSourcesInMainArea setting */
+  for (const c of showSourcesCases) {
+    test.describe(`Debugger – ${c.name}`, () => {
+      let openedDocument: string | null = null;
+      let openedDocumentIsNotebook = false;
+
+      test.use({
+        mockSettings: {
+          ...galata.DEFAULT_SETTINGS,
+          '@jupyterlab/debugger-extension:main': {
+            showSourcesInMainArea: c.showSourcesInMainArea
+          }
         }
-      }
-    });
+      });
 
-    test.afterEach(async ({ page }) => {
-      await page.click('jp-button[title^=Continue]');
+      test.afterEach(async ({ page }) => {
+        await page.evaluate(async () => {
+          const debuggerService = await window.galata.getPlugin(
+            '@jupyterlab/debugger-extension:service'
+          );
+          if (debuggerService?.hasStoppedThreads()) {
+            await debuggerService.continue();
+          }
+        });
+        if (
+          openedDocument &&
+          (await page.activity.activateTab(openedDocument))
+        ) {
+          if (await page.debugger.isOn(openedDocument)) {
+            await page.debugger.switchOff(openedDocument);
+            await page.waitForTimeout(500);
+          }
+          if (openedDocumentIsNotebook) {
+            await page.notebook.close();
+          } else {
+            await page.activity.closePanel(openedDocument);
+          }
+        }
+        openedDocument = null;
+        openedDocumentIsNotebook = false;
+      });
+
+      test('Start debug session', async ({ page, tmpPath }) => {
+        const notebookName = 'code_notebook.ipynb';
+        openedDocument = notebookName;
+        openedDocumentIsNotebook = true;
+        await openNotebook(page, tmpPath, notebookName);
+
+        await page.debugger.switchOn(notebookName);
+        await page.sidebar.openTab('jp-debugger-sidebar');
+
+        expect(await page.notebook.activate(notebookName)).toBe(true);
+        await page.notebook.waitForCellGutter(0, notebookName);
+        expect(await page.notebook.clickCellGutter(0, 2, notebookName)).toBe(
+          true
+        );
+
+        await page.debugger.waitForBreakPoints();
+        const breakpointsPanel =
+          await page.debugger.getBreakPointsPanelLocator();
+        expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
+
+        const callStackPanel = await page.debugger.getCallStackPanelLocator();
+        expect(await callStackPanel.innerText()).toBe('');
+
+        expect(
+          await page.notebook.runCell(0, { inplace: true, wait: false })
+        ).toBe(true);
+
+        await page.debugger.waitForCallStack();
+        expect(await callStackPanel.innerText()).toMatch(/Cell \[\*\]/);
+
+        await page.debugger.waitForVariables();
+        const variablesPanel = await page.debugger.getVariablesPanelLocator();
+        await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
+        const variablesBox = await variablesPanel.boundingBox();
+
+        if (c.expectSourcesPanel) {
+          expect
+            .soft(variablesBox?.height)
+            .toBeLessThan(
+              120
+            ); /* smaller variable panel (112 px high) when sources panel is displayed */
+
+          await page.debugger.waitForSources();
+          const sourcesPanel = await page.debugger.getSourcePanelLocator();
+          expect(await sourcesPanel.screenshot()).toMatchSnapshot(
+            `start-debug-session-sources${c.screenshotSuffix}.png`
+          );
+        } else {
+          expect(variablesBox?.height).toBeGreaterThan(
+            140
+          ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+        }
+      });
+
+      test('Rich variables inspector', async ({ page, tmpPath }) => {
+        await page.contents.uploadFile(
+          path.resolve(__dirname, './notebooks/WidgetArch.png'),
+          `${tmpPath}/WidgetArch.png`
+        );
+
+        const notebookName = 'image_notebook.ipynb';
+        openedDocument = notebookName;
+        openedDocumentIsNotebook = true;
+        const globalVar = 'global_img';
+        const localVar = 'local_img';
+
+        await openNotebook(page, tmpPath, notebookName);
+
+        await page.debugger.switchOn(notebookName);
+        await page.sidebar.openTab('jp-debugger-sidebar');
+
+        expect(await page.notebook.activate(notebookName)).toBe(true);
+        await page.notebook.waitForCellGutter(0, notebookName);
+        expect(await page.notebook.clickCellGutter(0, 8, notebookName)).toBe(
+          true
+        );
+        expect(await page.notebook.clickCellGutter(0, 11, notebookName)).toBe(
+          true
+        );
+
+        expect(
+          await page.notebook.runCell(0, { inplace: true, wait: false })
+        ).toBe(true);
+
+        await page.debugger.waitForCallStack();
+
+        await page.debugger.waitForVariables();
+
+        // Wait for the expected global variable to render
+        await page
+          .getByRole('treeitem', { name: `${globalVar}:` })
+          .waitFor({ state: 'visible' });
+
+        const variablesPanel = await page.debugger.getVariablesPanelLocator();
+        const variablesBox = await variablesPanel.boundingBox();
+
+        if (!c.expectSourcesPanel) {
+          /* Variables panel snapshot only when the sources panel is not displayed */
+          expect
+            .soft(variablesBox?.height)
+            .toBeGreaterThan(
+              140
+            ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+          expect
+            .soft(await variablesPanel.screenshot())
+            .toMatchSnapshot(
+              `image-debug-session-global-variables${c.screenshotSuffix}.png`
+            );
+        } else {
+          expect
+            .soft(variablesBox?.height)
+            .toBeLessThan(
+              120
+            ); /* smaller variable panel (112 px high) when sources panel is displayed */
+        }
+
+        await page.debugger.renderVariable(globalVar);
+        let richVariableTab = await page.activity.getPanelLocator(
+          `${globalVar} - ${notebookName}`
+        );
+
+        if (!c.expectSourcesPanel) {
+          expect
+            .soft(await richVariableTab?.screenshot())
+            .toMatchSnapshot(
+              `image-debug-session-global-rich-variables${c.screenshotSuffix}.png`
+            );
+        }
+
+        await page.activity.closePanel(`${globalVar} - ${notebookName}`);
+
+        await page.getByRole('button', { name: 'Continue (F9)' }).click();
+
+        await page.debugger.waitForCallStack();
+        await page.debugger.waitForVariables();
+
+        // Wait for the expected local variable to render
+        await page
+          .getByRole('treeitem', { name: `${localVar}:` })
+          .waitFor({ state: 'visible' });
+
+        await page.debugger.renderVariable(localVar);
+        richVariableTab = await page.activity.getPanelLocator(
+          `${localVar} - ${notebookName}`
+        );
+        if (!c.expectSourcesPanel) {
+          expect(await richVariableTab?.screenshot()).toMatchSnapshot(
+            `image-debug-session-local-rich-variable${c.screenshotSuffix}.png`
+          );
+        }
+      });
+
+      test('Start debug session (Script)', async ({ page, tmpPath }) => {
+        const fileName = 'code_script.py';
+        openedDocument = fileName;
+        openedDocumentIsNotebook = false;
+        await page.contents.uploadFile(
+          path.resolve(__dirname, `./notebooks/${fileName}`),
+          `${tmpPath}/${fileName}`
+        );
+        expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(
+          true
+        );
+
+        // Open context menu on editor
+        await page.click('div.jp-FileEditor', { button: 'right' });
+
+        const menu = await page.menu.getOpenMenuLocator();
+        await menu
+          ?.getByRole('menuitem', { name: 'Create Console for Editor' })
+          .click();
+
+        await page.getByRole('dialog').waitFor();
+        const select = page.getByRole('dialog').getByRole('combobox');
+        await select.selectOption('Python 3 (ipykernel)');
+        await page.getByRole('button', { name: 'Select Kernel' }).click();
+
+        await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
+        await page.debugger.switchOn();
+        await page.sidebar.openTab('jp-debugger-sidebar');
+
+        // Activate editor tab
+        await page.click('.jp-FileEditor');
+
+        // Set breakpoint in script
+        await page.notebook.waitForCodeGutter();
+        await page.notebook.clickCodeGutter(2);
+
+        await page.debugger.waitForBreakPoints();
+        const breakpointsPanel =
+          await page.debugger.getBreakPointsPanelLocator();
+        expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
+
+        const callStackPanel = await page.debugger.getCallStackPanelLocator();
+        expect(await callStackPanel.innerText()).toBe('');
+
+        // Run script (blocked by breakpoint)
+        await page.menu.clickMenuItem('Run>Run All Code');
+
+        await page.debugger.waitForCallStack();
+        expect(await callStackPanel.innerText()).toMatch(/In \[\*\]/);
+
+        await page.debugger.waitForVariables();
+        const variablesPanel = await page.debugger.getVariablesPanelLocator();
+        const variablesBox = await variablesPanel.boundingBox();
+
+        if (!c.expectSourcesPanel) {
+          // Variables panel snapshot only when the sources panel is not displayed
+          expect
+            .soft(variablesBox?.height)
+            .toBeGreaterThan(
+              140
+            ); /* Variables panel is higher (149 px high) when sources panel is displayed */
+          expect
+            .soft(await variablesPanel.screenshot())
+            .toMatchSnapshot(
+              `start-debug-session-script-variables${c.screenshotSuffix}.png`
+            );
+        } else {
+          /* Sources panel snapshot only when the source panel is displayed */
+          expect(variablesBox?.height).toBeLessThan(
+            120
+          ); /* smaller variable panel (112 px high) when sources panel is displayed */
+          await page.debugger.waitForSources();
+          const sourcesPanel = await page.debugger.getSourcePanelLocator();
+          expect(await sourcesPanel.screenshot()).toMatchSnapshot(
+            `start-debug-session-script-sources${c.screenshotSuffix}.png`
+          );
+        }
+      });
+    });
+  }
+
+  /* Non parametrized tests */
+  test.describe('Debugger Tests', () => {
+    test.afterEach(async ({ page }, testInfo) => {
+      if (
+        !testInfo.annotations.some(
+          annotation => annotation.type === 'skip-continue'
+        )
+      ) {
+        await page.evaluate(async () => {
+          const debuggerService = await window.galata.getPlugin(
+            '@jupyterlab/debugger-extension:service'
+          );
+          if (debuggerService?.hasStoppedThreads()) {
+            await debuggerService.continue();
+          }
+        });
+      }
       await page.debugger.switchOff();
       await page.waitForTimeout(500);
       await page.notebook.close();
     });
 
-    test('Start debug session', async ({ page, tmpPath }) => {
-      await openNotebook(page, tmpPath, 'code_notebook.ipynb');
+    test.describe('Debugger Variables', () => {
+      test.use({ autoGoto: false });
 
-      await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-      await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
+      async function init({ page, tmpPath }): Promise<string> {
+        // Initialize the debugger.
+        await page.goto(`tree/${tmpPath}`);
+        const notebookName = await createNotebook(page);
+        expect(await page.notebook.activate(notebookName)).toBe(true);
 
-      await page.notebook.waitForCellGutter(0);
-      await page.notebook.clickCellGutter(0, 2);
+        await page.debugger.switchOn(notebookName);
+        await page.sidebar.openTab('jp-debugger-sidebar');
 
-      await page.debugger.waitForBreakPoints();
-      const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-      expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
+        await setBreakpoint(page, notebookName);
 
-      const callStackPanel = await page.debugger.getCallStackPanelLocator();
-      expect(await callStackPanel.innerText()).toBe('');
-
-      void page.notebook.run();
-
-      await page.debugger.waitForCallStack();
-      expect(await callStackPanel.innerText()).toMatch(/Cell \[\*\]/);
-
-      await page.debugger.waitForVariables();
-      const variablesPanel = await page.debugger.getVariablesPanelLocator();
-      await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
-      const variablesBox = await variablesPanel.boundingBox();
-
-      if (c.expectSourcesPanel) {
-        expect
-          .soft(variablesBox?.height)
-          .toBeLessThan(
-            120
-          ); /* smaller variable panel (112 px high) when sources panel is displayed */
-
-        await page.debugger.waitForSources();
-        const sourcesPanel = await page.debugger.getSourcePanelLocator();
-        expect(await sourcesPanel.screenshot()).toMatchSnapshot(
-          `start-debug-session-sources${c.screenshotSuffix}.png`
-        );
-      } else {
-        expect(variablesBox?.height).toBeGreaterThan(
-          140
-        ); /* Variables panel is higher (149 px high) when sources panel is displayed */
-      }
-    });
-
-    test('Rich variables inspector', async ({ page, tmpPath }) => {
-      await page.contents.uploadFile(
-        path.resolve(__dirname, './notebooks/WidgetArch.png'),
-        `${tmpPath}/WidgetArch.png`
-      );
-
-      const notebookName = 'image_notebook.ipynb';
-      const globalVar = 'global_img';
-      const localVar = 'local_img';
-
-      await openNotebook(page, tmpPath, notebookName);
-
-      await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-      await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
-
-      await page.notebook.waitForCellGutter(0);
-      await page.notebook.clickCellGutter(0, 8);
-      await page.notebook.clickCellGutter(0, 11);
-
-      // don't add await, run will be blocked by the breakpoint
-      void page.notebook.run().then();
-
-      await page.debugger.waitForCallStack();
-
-      await page.debugger.waitForVariables();
-
-      // Wait for the expected global variable to render
-      await page
-        .getByRole('treeitem', { name: `${globalVar}:` })
-        .waitFor({ state: 'visible' });
-
-      const variablesPanel = await page.debugger.getVariablesPanelLocator();
-      const variablesBox = await variablesPanel.boundingBox();
-
-      if (!c.expectSourcesPanel) {
-        /* Variables panel snapshot only when the sources panel is not displayed */
-        expect
-          .soft(variablesBox?.height)
-          .toBeGreaterThan(
-            140
-          ); /* Variables panel is higher (149 px high) when sources panel is displayed */
-        expect
-          .soft(await variablesPanel.screenshot())
-          .toMatchSnapshot(
-            `image-debug-session-global-variables${c.screenshotSuffix}.png`
-          );
-      } else {
-        expect
-          .soft(variablesBox?.height)
-          .toBeLessThan(
-            120
-          ); /* smaller variable panel (112 px high) when sources panel is displayed */
+        return notebookName;
       }
 
-      await page.debugger.renderVariable(globalVar);
-      let richVariableTab = await page.activity.getPanelLocator(
-        `${globalVar} - ${notebookName}`
-      );
+      test('Copy to globals should work only for local variables', async ({
+        page,
+        tmpPath
+      }) => {
+        const copyToGlobalsRequest = new PromiseDelegate<void>();
 
-      if (!c.expectSourcesPanel) {
-        expect
-          .soft(await richVariableTab?.screenshot())
-          .toMatchSnapshot(
-            `image-debug-session-global-rich-variables${c.screenshotSuffix}.png`
-          );
-      }
-
-      await page.activity.closePanel(`${globalVar} - ${notebookName}`);
-
-      await page.getByRole('button', { name: 'Continue (F9)' }).click();
-
-      await page.debugger.waitForCallStack();
-      await page.debugger.waitForVariables();
-
-      // Wait for the expected local variable to render
-      await page
-        .getByRole('treeitem', { name: `${localVar}:` })
-        .waitFor({ state: 'visible' });
-
-      await page.debugger.renderVariable(localVar);
-      richVariableTab = await page.activity.getPanelLocator(
-        `${localVar} - ${notebookName}`
-      );
-      if (!c.expectSourcesPanel) {
-        expect(await richVariableTab?.screenshot()).toMatchSnapshot(
-          `image-debug-session-local-rich-variable${c.screenshotSuffix}.png`
-        );
-      }
-    });
-
-    test('Start debug session (Script)', async ({ page, tmpPath }) => {
-      await openNotebook(page, tmpPath, 'code_script.py');
-
-      // Open context menu on editor
-      await page.click('div.jp-FileEditor', { button: 'right' });
-
-      const menu = await page.menu.getOpenMenuLocator();
-      await menu
-        ?.getByRole('menuitem', { name: 'Create Console for Editor' })
-        .click();
-
-      await page.getByRole('dialog').waitFor();
-      const select = page.getByRole('dialog').getByRole('combobox');
-      await select.selectOption('Python 3 (ipykernel)');
-      await page.getByRole('button', { name: 'Select Kernel' }).click();
-
-      await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-
-      // Activate editor tab
-      await page.click('.jp-FileEditor');
-
-      await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
-
-      // Set breakpoint in script
-      await page.notebook.waitForCodeGutter();
-      await page.notebook.clickCodeGutter(2);
-
-      await page.debugger.waitForBreakPoints();
-      const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-      expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
-
-      const callStackPanel = await page.debugger.getCallStackPanelLocator();
-      expect(await callStackPanel.innerText()).toBe('');
-
-      // Run script (blocked by breakpoint)
-      await page.menu.clickMenuItem('Run>Run All Code');
-
-      await page.debugger.waitForCallStack();
-      expect(await callStackPanel.innerText()).toMatch(/In \[\*\]/);
-
-      await page.debugger.waitForVariables();
-      const variablesPanel = await page.debugger.getVariablesPanelLocator();
-      const variablesBox = await variablesPanel.boundingBox();
-
-      if (!c.expectSourcesPanel) {
-        // Variables panel snapshot only when the sources panel is not displayed
-        expect
-          .soft(variablesBox?.height)
-          .toBeGreaterThan(
-            140
-          ); /* Variables panel is higher (149 px high) when sources panel is displayed */
-        expect
-          .soft(await variablesPanel.screenshot())
-          .toMatchSnapshot(
-            `start-debug-session-script-variables${c.screenshotSuffix}.png`
-          );
-      } else {
-        /* Sources panel snapshot only when the source panel is displayed */
-        expect(variablesBox?.height).toBeLessThan(
-          120
-        ); /* smaller variable panel (112 px high) when sources panel is displayed */
-        await page.debugger.waitForSources();
-        const sourcesPanel = await page.debugger.getSourcePanelLocator();
-        expect(await sourcesPanel.screenshot()).toMatchSnapshot(
-          `start-debug-session-script-sources${c.screenshotSuffix}.png`
-        );
-      }
-    });
-  });
-}
-
-/* Non parametrized tests */
-test.describe('Debugger Tests', () => {
-  test.afterEach(async ({ page }, testInfo) => {
-    if (
-      !testInfo.annotations.some(
-        annotation => annotation.type === 'skip-continue'
-      )
-    ) {
-      await page.click('jp-button[title^=Continue]');
-    }
-    await page.debugger.switchOff();
-    await page.waitForTimeout(500);
-    await page.notebook.close();
-  });
-
-  test.describe('Debugger Variables', () => {
-    test.use({ autoGoto: false });
-
-    async function init({ page, tmpPath }) {
-      // Initialize the debugger.
-      await page.goto(`tree/${tmpPath}`);
-      await createNotebook(page);
-
-      await page.debugger.switchOn();
-      await page.waitForCondition(() => page.debugger.isOpen());
-
-      await setBreakpoint(page);
-    }
-
-    test('Copy to globals should work only for local variables', async ({
-      page,
-      tmpPath
-    }) => {
-      const copyToGlobalsRequest = new PromiseDelegate<void>();
-
-      // Listener to the websocket, to catch the 'copyToGlobals' request.
-      page.on('websocket', ws => {
-        ws.on('framesent', event => {
-          let message = event.payload;
-          if (Buffer.isBuffer(event.payload)) {
-            message = event.payload.toString('binary');
-          }
-          if (message.includes('copyToGlobals')) {
-            copyToGlobalsRequest.resolve();
-          }
+        // Listener to the websocket, to catch the 'copyToGlobals' request.
+        page.on('websocket', ws => {
+          ws.on('framesent', event => {
+            let message = event.payload;
+            if (Buffer.isBuffer(event.payload)) {
+              message = event.payload.toString('binary');
+            }
+            if (message.includes('copyToGlobals')) {
+              copyToGlobalsRequest.resolve();
+            }
+          });
         });
+
+        const notebookName = await init({ page, tmpPath });
+
+        // Kernel supports copyToGlobals.
+        await page.evaluate(async () => {
+          const debuggerService = await window.galata.getPlugin(
+            '@jupyterlab/debugger-extension:service'
+          );
+          debuggerService!.model.supportCopyToGlobals = true;
+        });
+
+        expect(await page.notebook.activate(notebookName)).toBe(true);
+        expect(
+          await page.notebook.runCell(1, { inplace: true, wait: false })
+        ).toBe(true);
+        await page.debugger.waitForCallStack();
+
+        // Expect the copy entry to be in the menu.
+        await openVariableContextMenu(page, 'Locals', 'local_var');
+
+        // Request the copy of the local variable to globals scope.
+        await page
+          .getByRole('menuitem', { name: 'Copy Variable to Globals' })
+          .click();
+
+        // Wait for the request to be sent.
+        await copyToGlobalsRequest.promise;
+
+        // Expect the context menu for global variables to not have the 'copy' entry.
+        await openVariableContextMenu(page, 'Globals', 'global_var');
+        await expect(
+          page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
+        ).toHaveCount(0);
+
+        await page.getByRole('menu').press('Escape');
       });
 
-      await init({ page, tmpPath });
+      test('Copy to globals not available from kernel', async ({
+        page,
+        tmpPath
+      }) => {
+        const notebookName = await init({ page, tmpPath });
 
-      // Kernel supports copyToGlobals.
-      await page.evaluate(async () => {
-        const debuggerService = await window.galata.getPlugin(
-          '@jupyterlab/debugger-extension:service'
+        // Kernel doesn't support copyToGlobals.
+        await page.evaluate(async () => {
+          const debuggerService = await window.galata.getPlugin(
+            '@jupyterlab/debugger-extension:service'
+          );
+          debuggerService!.model.supportCopyToGlobals = false;
+        });
+
+        expect(await page.notebook.activate(notebookName)).toBe(true);
+        expect(
+          await page.notebook.runCell(1, { inplace: true, wait: false })
+        ).toBe(true);
+        await page.debugger.waitForCallStack();
+
+        // Expect the menu entry not to be visible.
+        await openVariableContextMenu(page, 'Locals', 'local_var');
+        await expect
+          .soft(
+            page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
+          )
+          .not.toBeVisible();
+
+        // Close the contextual menu
+        await page.keyboard.press('Escape');
+        await expect(
+          page.getByRole('menuitem', { name: 'Copy to Clipboard' })
+        ).toHaveCount(0);
+      });
+
+      test('Copy to clipboard', async ({ page, tmpPath, browserName }) => {
+        const notebookName = await init({ page, tmpPath });
+
+        expect(await page.notebook.activate(notebookName)).toBe(true);
+        expect(
+          await page.notebook.runCell(1, { inplace: true, wait: false })
+        ).toBe(true);
+        await page.debugger.waitForCallStack();
+
+        // Copy value to clipboard
+        await openVariableContextMenu(page, 'Locals', 'local_var');
+        await page.getByRole('menuitem', { name: 'Copy to Clipboard' }).click();
+        expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+          '3'
         );
-        debuggerService!.model.supportCopyToGlobals = true;
+
+        // Copy to clipboard disabled for variables with empty value
+        await openVariableContextMenu(page, 'Globals', 'special variables');
+        await expect(
+          page.getByRole('menuitem', { name: 'Copy to Clipboard' })
+        ).toBeDisabled();
+
+        // Close the contextual menu
+        await page.keyboard.press('Escape');
+        await expect(
+          page.getByRole('menuitem', { name: 'Copy to Clipboard' })
+        ).toHaveCount(0);
       });
 
-      // Don't wait as it will be blocked.
-      await page.notebook.runCell(1, { wait: false });
+      test('Kernel Sources panel updates after execute_reply', async ({
+        page,
+        tmpPath
+      }) => {
+        test.info().annotations.push({
+          type: 'skip-continue',
+          description: 'This test does not pause on a debugger breakpoint'
+        });
 
-      // Wait to be stopped on the breakpoint and the local variables to be displayed.
-      await page.debugger.waitForCallStack();
+        await init({ page, tmpPath });
 
-      // Expect the copy entry to be in the menu.
-      await page.getByLabel('Scope').selectOption('Locals');
-      await page.getByRole('treeitem', { name: 'local_var:' }).click({
-        button: 'right'
-      });
+        await page.notebook.addCell('code', 'import anyio');
+        await page.notebook.runCell(2);
 
-      // Request the copy of the local variable to globals scope.
-      await page
-        .getByRole('menuitem', { name: 'Copy Variable to Globals' })
-        .click();
-
-      // Wait for the request to be sent.
-      await copyToGlobalsRequest.promise;
-
-      // Expect the context menu for global variables to not have the 'copy' entry.
-      await page.getByLabel('Scope').selectOption('Globals');
-      await page.getByRole('treeitem', { name: 'global_var:' }).click({
-        button: 'right'
-      });
-      await expect.soft(page.getByRole('menu')).toBeVisible();
-      await expect(
-        page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
-      ).toHaveCount(0);
-
-      await page.getByRole('menu').press('Escape');
-    });
-
-    test('Copy to globals not available from kernel', async ({
-      page,
-      tmpPath
-    }) => {
-      await init({ page, tmpPath });
-
-      // Kernel doesn't support copyToGlobals.
-      await page.evaluate(async () => {
-        const debuggerService = await window.galata.getPlugin(
-          '@jupyterlab/debugger-extension:service'
-        );
-        debuggerService!.model.supportCopyToGlobals = false;
-      });
-
-      // Don't wait as it will be blocked.
-      await page.notebook.runCell(1, { wait: false });
-
-      // Wait to be stopped on the breakpoint and the local variables to be displayed.
-      await page.debugger.waitForCallStack();
-
-      await page.getByLabel('Scope').selectOption('Locals');
-
-      // Expect the menu entry not to be visible.
-      await page.getByRole('treeitem', { name: 'local_var:' }).click({
-        button: 'right'
-      });
-      await expect
-        .soft(page.getByRole('menuitem', { name: 'Copy Variable to Globals' }))
-        .not.toBeVisible();
-
-      // Close the contextual menu
-      await page.keyboard.press('Escape');
-      await expect(
-        page.getByRole('menuitem', { name: 'Copy to Clipboard' })
-      ).toHaveCount(0);
-    });
-
-    test('Copy to clipboard', async ({ page, tmpPath, browserName }) => {
-      await init({ page, tmpPath });
-
-      // Don't wait as it will be blocked.
-      await page.notebook.runCell(1, { wait: false });
-
-      // Wait to be stopped on the breakpoint and the local variables to be displayed.
-      await page.debugger.waitForCallStack();
-
-      // Copy value to clipboard
-      await page.getByLabel('Scope').selectOption('Locals');
-      await page.getByRole('treeitem', { name: 'local_var:' }).click({
-        button: 'right'
-      });
-      await page.getByRole('menuitem', { name: 'Copy to Clipboard' }).click();
-      expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-        '3'
-      );
-
-      // Copy to clipboard disabled for variables with empty value
-      await page.getByLabel('Scope').selectOption('Globals');
-      await page
-        .getByRole('treeitem', { name: 'special variables:' })
-        .click({ button: 'right' });
-      await expect(
-        page.getByRole('menuitem', { name: 'Copy to Clipboard' })
-      ).toBeDisabled();
-
-      // Close the contextual menu
-      await page.keyboard.press('Escape');
-      await expect(
-        page.getByRole('menuitem', { name: 'Copy to Clipboard' })
-      ).toHaveCount(0);
-    });
-
-    test('Kernel Sources panel updates after execute_reply', async ({
-      page,
-      tmpPath
-    }) => {
-      test.info().annotations.push({
-        type: 'skip-continue',
-        description: 'This test does not pause on a debugger breakpoint'
-      });
-
-      await init({ page, tmpPath });
-
-      await page.notebook.addCell('code', 'import anyio');
-      await page.notebook.runCell(2);
-
-      await page.waitForCondition(async () => {
-        const texts = await page
-          .locator('.jp-DebuggerKernelSource-source')
-          .allInnerTexts();
-        return texts.some(t => t.includes('anyio'));
+        await expect(
+          page
+            .locator('.jp-DebuggerKernelSource-source')
+            .filter({ hasText: 'anyio' })
+            .first()
+        ).toBeVisible({ timeout: 30000 });
       });
     });
   });
 });
 
-async function createNotebook(page: IJupyterLabPageFixture) {
-  await page.notebook.createNew();
-
-  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+async function openVariableContextMenu(
+  page: IJupyterLabPageFixture,
+  scope: 'Globals' | 'Locals',
+  variableName: string
+): Promise<void> {
+  await page.debugger.waitForVariables();
+  await page.getByLabel('Scope').selectOption(scope);
+  const variable = page.getByRole('treeitem', { name: `${variableName}:` });
+  await variable.waitFor({ state: 'visible' });
+  await variable.click({ button: 'right' });
+  await page.getByRole('menu').waitFor({ state: 'visible' });
 }
 
-async function setBreakpoint(page: IJupyterLabPageFixture) {
+async function createNotebook(page: IJupyterLabPageFixture): Promise<string> {
+  const notebookName = await page.notebook.createNew();
+  if (!notebookName) {
+    throw new Error('Failed to create notebook for debugger test.');
+  }
+
+  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+  return notebookName;
+}
+
+async function setBreakpoint(
+  page: IJupyterLabPageFixture,
+  notebookName: string
+) {
   // Close left side panel to avoid side effect when entering the cell editor.
   await page.sidebar.close('left');
+  expect(await page.notebook.activate(notebookName)).toBe(true);
 
   await page.notebook.setCell(
     0,
@@ -479,5 +547,7 @@ async function setBreakpoint(page: IJupyterLabPageFixture) {
   await page.notebook.run();
   await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
 
-  await page.notebook.clickCellGutter(0, 4);
+  await page.notebook.waitForCellGutter(0, notebookName);
+  expect(await page.notebook.clickCellGutter(0, 4, notebookName)).toBe(true);
+  await page.debugger.waitForBreakPoints();
 }
