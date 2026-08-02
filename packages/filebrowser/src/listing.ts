@@ -654,7 +654,8 @@ export class DirListing extends Widget {
   shutdownKernels(): Promise<void> {
     const model = this._model;
     const items = this._sortedItems;
-    const paths = items.map(item => item.path);
+    const prefix = model.driveName ? model.driveName + ':' : '';
+    const paths = items.map(item => prefix + item.path);
 
     const promises = Array.from(this._model.sessions())
       .filter(session => {
@@ -1209,7 +1210,8 @@ export class DirListing extends Widget {
     }
 
     // Handle file session statuses.
-    const paths = items.map(item => item.path);
+    const prefix = this._model.driveName ? this._model.driveName + ':' : '';
+    const paths = items.map(item => prefix + item.path);
     for (const session of this._model.sessions()) {
       const index = ArrayExt.firstIndexOf(paths, session.path);
       const node = nodes[index];

@@ -628,8 +628,9 @@ export class FileBrowserModel implements IDisposable {
     };
     this._items = contents.content;
     this._paths.clear();
+    const prefix = this.driveName.length > 0 ? this.driveName + ':' : '';
     contents.content.forEach((model: Contents.IModel) => {
-      this._paths.add(model.path);
+      this._paths.add(prefix + model.path);
     });
   }
 
