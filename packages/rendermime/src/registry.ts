@@ -5,6 +5,7 @@
 import { Sanitizer } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { ServerConnection } from '@jupyterlab/services';
 import type { Contents } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -353,6 +354,7 @@ export namespace RenderMimeRegistry {
     constructor(options: IUrlResolverOptions) {
       this._path = options.path;
       this._contents = options.contents;
+      this._getKernelId = options.getKernelId;
     }
 
     /**
@@ -422,41 +424,11 @@ export namespace RenderMimeRegistry {
     async resolvePath(
       path: string
     ): Promise<IRenderMime.IResolvedLocation | null> {
-      // TODO: a clean implementation would be server-side and depends on:
-      // https://github.com/jupyter-server/jupyter_server/issues/1280
-
-      const rootDir = PageConfig.getOption('rootUri').replace('file://', '');
-      // Workaround: expand `~` path using root dir (if it matches).
-      if (path.startsWith('~/') && rootDir.startsWith('/home/')) {
-        // For now we assume that kernel is in root dir.
-        path = rootDir.split('/').slice(0, 3).join('/') + path.substring(1);
+      const resolved = await this._resolvePathUsingServerApi(path);
+      if (resolved !== undefined) {
+        return resolved;
       }
-      if (path.startsWith(rootDir) || path.startsWith('./')) {
-        try {
-          const relativePath = path.replace(rootDir, '');
-          // If file exists on the server we have guessed right
-          const response = await this._contents.get(relativePath, {
-            content: false
-          });
-          return {
-            path: response.path,
-            scope: 'server'
-          };
-        } catch (error) {
-          // The file seems like should be on the server but is not.
-          console.warn(`Could not resolve location of ${path} on server`);
-          return null;
-        }
-      }
-      // The file is not accessible from jupyter-server but maybe it is
-      // available from DAP `source`; we assume the path is available
-      // from kernel because currently we have no way of checking this
-      // without introducing a cycle (unless we were to set the debugger
-      // service instance on the resolver later).
-      return {
-        path: path,
-        scope: 'kernel'
-      };
+      return this._resolvePathUsingLegacyHeuristics(path);
     }
 
     /**
@@ -474,8 +446,118 @@ export namespace RenderMimeRegistry {
       }
     }
 
+    private async _resolvePathUsingServerApi(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null | undefined> {
+      if (this._resolvePathApiAvailable === false) {
+        return undefined;
+      }
+
+      const params: Private.IResolvePathQuery = { path };
+      const kernelId = this._getKernelId?.();
+      if (kernelId) {
+        // `kernel` is expected by jupyter-server resolvePath handler.
+        params.kernel = kernelId;
+      }
+
+      let response = await this._makeResolvePathRequest(params);
+      if (!response) {
+        console.warn(`Could not resolve location of ${path} using server API`);
+        return null;
+      }
+
+      if (response.status === 404) {
+        this._resolvePathApiAvailable = false;
+        return undefined;
+      }
+      if (!response.ok) {
+        console.warn(`Could not resolve location of ${path} using server API`);
+        return null;
+      }
+      this._resolvePathApiAvailable = true;
+
+      try {
+        const data =
+          (await response.json()) as Private.IResolvePathResponse | null;
+        const resolved =
+          data?.resolved?.filter(Private.isResolvedLocation) ?? [];
+        const hasUnresolvedKernelScope =
+          data?.unresolved?.some(
+            item =>
+              !!item &&
+              typeof item === 'object' &&
+              (item as { scope?: unknown }).scope === 'kernel'
+          ) ?? false;
+        if (!resolved.length) {
+          if (hasUnresolvedKernelScope) {
+            return null;
+          }
+          return null;
+        }
+
+        // Prefer server-scoped paths when both scopes are available.
+        return resolved.find(item => item.scope === 'server') ?? resolved[0];
+      } catch {
+        console.warn(`Could not resolve location of ${path} using server API`);
+        return null;
+      }
+    }
+
+    private async _makeResolvePathRequest(
+      params: Private.IResolvePathQuery
+    ): Promise<Response | null> {
+      const serverSettings = this._contents.serverSettings;
+      const url =
+        URLExt.join(serverSettings.baseUrl, 'api', 'resolvePath') +
+        URLExt.objectToQueryString(params);
+      try {
+        return await ServerConnection.makeRequest(url, {}, serverSettings);
+      } catch {
+        return null;
+      }
+    }
+
+    private async _resolvePathUsingLegacyHeuristics(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const rootDir = PageConfig.getOption('rootUri').replace('file://', '');
+      // Workaround: expand `~` path using root dir (if it matches).
+      if (path.startsWith('~/') && rootDir.startsWith('/home/')) {
+        // For now we assume that kernel is in root dir.
+        path = rootDir.split('/').slice(0, 3).join('/') + path.substring(1);
+      }
+      if (path.startsWith(rootDir) || path.startsWith('./')) {
+        try {
+          const relativePath = path.replace(rootDir, '');
+          // If file exists on the server we have guessed right.
+          const response = await this._contents.get(relativePath, {
+            content: false
+          });
+          return {
+            path: response.path,
+            scope: 'server'
+          };
+        } catch {
+          // The file seems like it should be on the server but is not.
+          console.warn(`Could not resolve location of ${path} on server`);
+          return null;
+        }
+      }
+      // The file is not accessible from jupyter-server but maybe it is
+      // available from DAP `source`; we assume the path is available
+      // from kernel because currently we have no way of checking this
+      // without introducing a cycle (unless we were to set the debugger
+      // service instance on the resolver later).
+      return {
+        path: path,
+        scope: 'kernel'
+      };
+    }
+
     private _path: string;
     private _contents: Contents.IManager;
+    private _getKernelId?: () => string | null | undefined;
+    private _resolvePathApiAvailable: boolean | null = null;
   }
 
   /**
@@ -494,6 +576,11 @@ export namespace RenderMimeRegistry {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
+
+    /**
+     * Get the current kernel id used by the `resolvePath` endpoint.
+     */
+    getKernelId?: () => string | null | undefined;
   }
 
   /**
@@ -513,6 +600,30 @@ export namespace RenderMimeRegistry {
  * The namespace for the module implementation details.
  */
 namespace Private {
+  export interface IResolvePathQuery {
+    [key: string]: string | undefined;
+    path: string;
+    kernel?: string;
+  }
+
+  export interface IResolvePathResponse {
+    resolved?: unknown[];
+    unresolved?: unknown[];
+  }
+
+  export function isResolvedLocation(
+    item: unknown
+  ): item is IRenderMime.IResolvedLocation {
+    if (!item || typeof item !== 'object') {
+      return false;
+    }
+    const candidate = item as Partial<IRenderMime.IResolvedLocation>;
+    return (
+      typeof candidate.path === 'string' &&
+      (candidate.scope === 'server' || candidate.scope === 'kernel')
+    );
+  }
+
   /**
    * A type alias for a mime rank and tie-breaking id.
    */

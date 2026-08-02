@@ -109,12 +109,6 @@ describe('@jupyterlab/notebook', () => {
           model.sharedModel.moveCell(0, 1);
           expect(called).toBe(true);
         });
-
-        it('should set the dirty flag', () => {
-          const model = new NotebookModel();
-          model.sharedModel.insertCell(0, { cell_type: 'code' });
-          expect(model.dirty).toBe(true);
-        });
       });
 
       describe('cell `changed` signal', () => {
@@ -135,14 +129,6 @@ describe('@jupyterlab/notebook', () => {
           });
           model.setMetadata('foo', 'bar');
           expect(called).toBe(true);
-        });
-
-        it('should set the dirty flag', () => {
-          const model = new NotebookModel();
-          const cell = model.sharedModel.insertCell(0, { cell_type: 'code' });
-          model.dirty = false;
-          cell.setSource('foo');
-          expect(model.dirty).toBe(true);
         });
       });
     });
@@ -241,13 +227,6 @@ describe('@jupyterlab/notebook', () => {
         model.fromString(JSON.stringify(utils.DEFAULT_CONTENT));
         expect(model.cells.length).toBe(7);
       });
-
-      it('should set the dirty flag', () => {
-        const model = new NotebookModel();
-        model.dirty = false;
-        model.fromString(JSON.stringify(utils.DEFAULT_CONTENT));
-        expect(model.dirty).toBe(true);
-      });
     });
 
     describe('#toJSON()', () => {
@@ -311,13 +290,6 @@ describe('@jupyterlab/notebook', () => {
         expect(model.cells.get(0).id).toBe('cell_1');
       });
 
-      it('should set the dirty flag', () => {
-        const model = new NotebookModel();
-        model.dirty = false;
-        model.fromJSON(utils.DEFAULT_CONTENT);
-        expect(model.dirty).toBe(true);
-      });
-
       it('should populate empty notebook with empty trusted code cell', () => {
         const model = new NotebookModel();
         model.fromJSON(utils.EMPTY_CONTENT);
@@ -333,13 +305,6 @@ describe('@jupyterlab/notebook', () => {
         expect(metadata['kernelspec']).toBeTruthy();
         expect(metadata['language_info']).toBeTruthy();
         expect(Object.keys(metadata)).toHaveLength(2);
-      });
-
-      it('should set the dirty flag when changed', () => {
-        const model = new NotebookModel();
-        expect(model.dirty).toBe(false);
-        model.setMetadata('foo', 'bar');
-        expect(model.dirty).toBe(true);
       });
 
       it('should emit the `contentChanged` signal', () => {

@@ -9,7 +9,6 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
-  DockPanelSvg,
   LabIcon,
   TabBarSvg,
   tabIcon,
@@ -36,6 +35,7 @@ import {
 } from '@lumino/widgets';
 import type { JupyterFrontEnd } from './frontend';
 import type { LayoutRestorer } from './layoutrestorer';
+import { OptimizedDockPanelSvg } from './dockpanel';
 
 /**
  * The class name added to AppShell instances.
@@ -141,6 +141,14 @@ export namespace ILabShell {
      * Set to `false` for a more compact layout.
      */
     dockPanelPadding?: boolean;
+
+    /**
+     * Whether to freeze panel dimensions during handle drag to improve resize
+     * performance when panels contain heavy DOM content.
+     *
+     * The default is `true`.
+     */
+    optimizeResize?: boolean;
 
     /**
      * Position of the side activity bars.
@@ -389,7 +397,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel =
       new Private.RestorableSplitPanel());
-    const dockPanel = (this._dockPanel = new DockPanelSvg({
+    const dockPanel = (this._dockPanel = new OptimizedDockPanelSvg({
       hiddenMode: Widget.HiddenMode.Display
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -877,7 +885,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * The alpha version of this method only supports activating the "main" area.
    *
    * @alpha
-   * @param area Name of area to activate
+   * @param area - Name of area to activate
    */
   activateArea(area: ILabShell.Area = 'main'): void {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
@@ -999,9 +1007,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Add a widget to the JupyterLab shell
    *
-   * @param widget Widget
-   * @param area Area
-   * @param options Options
+   * @param widget - Widget
+   * @param area - Area
+   * @param options - Options
    */
   add(
     widget: Widget,
@@ -1080,9 +1088,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * The new layout is stored in the shell user layout. Callers are
    * responsible for persisting it when needed.
    *
-   * @param widget Widget to move
-   * @param area New area
-   * @param mode Mode to change
+   * @param widget - Widget to move
+   * @param area - New area
+   * @param mode - Mode to change
    * @returns The new user layout
    */
   move(
@@ -1207,7 +1215,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Whether an side tab bar is visible or not.
    *
-   * @param side Sidebar of interest
+   * @param side - Sidebar of interest
    * @returns Side tab bar visibility
    */
   isSideTabBarVisible(side: 'left' | 'right'): boolean {
@@ -1485,7 +1493,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Toggle side tab bar visibility
    *
-   * @param side Sidebar of interest
+   * @param side - Sidebar of interest
    */
   toggleSideTabBarVisibility(side: 'right' | 'left'): void {
     if (side === 'right') {
@@ -1506,7 +1514,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Update the shell configuration.
    *
-   * @param config Shell configuration
+   * @param config - Shell configuration
    */
   updateConfig(config: Partial<ILabShell.IConfig>): void {
     if (config.hiddenMode) {
@@ -1537,6 +1545,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._dockPanel.fit();
     }
 
+    if (config.optimizeResize !== undefined) {
+      this._dockPanel.optimizeResize = config.optimizeResize;
+    }
+
     if (config.activityBarPosition !== undefined) {
       this._setActivityBarPosition('left', config.activityBarPosition);
       this._setActivityBarPosition('right', config.activityBarPosition);
@@ -1546,8 +1558,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Move the activity bar of a side area to a new position.
    *
-   * @param side The side area to update.
-   * @param position The new position of the activity bar.
+   * @param side - The side area to update.
+   * @param position - The new position of the activity bar.
    */
   private _setActivityBarPosition(
     side: 'left' | 'right',
@@ -2024,7 +2036,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     ILabShell.ICurrentPathChangedArgs
   >(this);
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
-  private _dockPanel: DockPanel;
+  private _dockPanel: OptimizedDockPanelSvg;
   private _downPanel: TabPanel;
   private _isRestored = false;
   private _lastDownAreaSize = DEFAULT_DOWN_AREA_SIZE;
@@ -2415,7 +2427,10 @@ namespace Private {
      * Dehydrate the side bar data.
      */
     dehydrate(): ILabShell.ISideArea {
-      const collapsed = this._sideBar.currentTitle === null;
+      const collapsed =
+        this._position === 'side'
+          ? this._sideBar.currentTitle === null
+          : this._isCollapsedByUser;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
       const widgetStates: {

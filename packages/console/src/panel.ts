@@ -9,6 +9,7 @@ import {
 } from '@jupyterlab/apputils';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time } from '@jupyterlab/coreutils';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ServiceManager } from '@jupyterlab/services';
@@ -47,6 +48,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       manager,
       modelFactory,
       sessionContext,
+      pageHandler,
       translator
     } = options;
     this.translator = translator ?? nullTranslator;
@@ -73,7 +75,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     const resolver = new RenderMimeRegistry.UrlResolver({
       path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => sessionContext?.session?.kernel?.id
     });
     rendermime = rendermime.clone({ resolver });
 
@@ -84,6 +87,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       mimeTypeService,
       contentFactory,
       modelFactory,
+      pageHandler,
       translator
     });
     this.content.addWidget(this.console);
@@ -259,6 +263,11 @@ export namespace ConsolePanel {
     translator?: ITranslator;
 
     /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
+
+    /**
      * A function to call when the kernel is busy.
      */
     setBusy?: () => IDisposable;
@@ -307,7 +316,7 @@ export namespace ConsolePanel {
   /**
    * The console renderer token.
    */
-  export const IContentFactory = new Token<IContentFactory>(
+  export const IContentFactory = new Token<ConsolePanel.IContentFactory>(
     '@jupyterlab/console:IContentFactory',
     'A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.'
   );

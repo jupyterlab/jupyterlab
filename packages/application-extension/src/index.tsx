@@ -278,7 +278,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     function getZoomTarget(widget: Widget): HTMLElement {
       const node = widget.node;
 
-      let target = node.querySelector('.jp-zoom-target') as HTMLElement;
+      const target = node.querySelector<HTMLElement>('.jp-zoom-target');
       if (target) return target;
 
       node.classList.add('jp-zoom-target');
@@ -837,7 +837,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return find(labShell.widgets('main'), w => w.id === id) ?? null;
       };
 
-      commands.addCommand('application:split-tab', {
+      commands.addCommand(CommandIDs.splitTab, {
         label: args => {
           const direction = args?.['direction'] as
             | 'left'
@@ -869,6 +869,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 type: 'string',
                 enum: ['left', 'right', 'top', 'bottom'],
                 description: trans.__('The direction to split the tab')
+              },
+              id: {
+                type: 'string',
+                description: trans.__(
+                  'The widget ID to split. Defaults to the context menu target.'
+                )
               }
             },
             required: ['direction']
@@ -899,7 +905,16 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             | 'top'
             | 'bottom';
 
-          const widget = contextMenuTabWidget();
+          // Get the widget from its id if provided.
+          let widget = args?.['id']
+            ? find(labShell.widgets('main'), value => value.id === args?.['id'])
+            : null;
+
+          // Get the widget from the context menu hit test.
+          if (!widget) {
+            widget = contextMenuTabWidget();
+          }
+
           if (widget && direction) {
             labShell.moveTab(widget, direction);
           }
@@ -944,7 +959,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       if (!target) return null;
 
       // closest lumino widget node
-      const node = target.closest('.lm-Widget') as HTMLElement;
+      const node = target.closest<HTMLElement>('.lm-Widget');
       if (!node) return null;
 
       for (const widget of shell.widgets('main')) {
@@ -1487,8 +1502,9 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
+    // eslint-disable-next-line prefer-regex-literals
     const treePattern = new RegExp(
-      '/(lab|doc)(/workspaces/[a-zA-Z0-9-_]+)?(/tree/.*)?'
+      '/(lab|doc)(/workspaces/[\\w-]+)?(/tree/.*)?'
     );
 
     set.add(
@@ -1592,15 +1608,15 @@ const busy: JupyterFrontEndPlugin<void> = {
   requires: [ILabStatus],
   activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
     status.busySignal.connect((_, isBusy) => {
-      const favicon = document.querySelector(
+      const favicon = document.querySelector<HTMLLinkElement>(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
-      ) as HTMLLinkElement;
+      );
       if (!favicon) {
         return;
       }
-      const newFavicon = document.querySelector(
+      const newFavicon = document.querySelector<HTMLLinkElement>(
         `link${isBusy ? '.busy.favicon' : '.idle.favicon'}`
-      ) as HTMLLinkElement;
+      );
       if (!newFavicon) {
         return;
       }

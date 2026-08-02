@@ -6,7 +6,7 @@ name: 'Auto Author Assign'
 # Never checkout the PR and run ANY local code on it.
 #####
 
-on:
+on: # zizmor: ignore[dangerous-triggers] safe metadata-only PR labeling; no checkout or code execution
   pull_request_target:
     types: [opened, reopened]
 

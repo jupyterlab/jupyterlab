@@ -97,7 +97,9 @@
 }
 
 .jp-BreadCrumbs-item:focus-visible {
-  outline: 2px solid var(--jp-brand-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-style: solid;
+  outline-color: var(--jp-focus-outline-color);
 }
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
@@ -136,10 +138,6 @@
 
 .jp-FileDialog .jp-new-name-title {
   margin-top: 12px;
-}
-
-.jp-FileBrowser .lm-AccordionPanel > h3:first-child {
-  display: none;
 }
 
 .jp-FileBrowser-filterToolbar > .jp-FileBrowser-filterBox {
@@ -414,8 +412,8 @@
 .jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
   /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
   when it gets replaced with `jp-DirListing-editor` when editing the file name */
-  outline-width: 2px;
-  outline-color: var(--jp-inverse-layout-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
   outline-style: solid;
   outline-offset: -4px;
 }
@@ -481,4 +479,44 @@
   min-width: 120px;
   min-height: 120px;
   outline: none;
+}
+
+/*-----------------------------------------------------------------------------
+| FileBrowser movable sections
+|----------------------------------------------------------------------------*/
+
+.jp-FileBrowser-accordion {
+  flex: 1 1 auto;
+  position: relative;
+  min-height: 0;
+}
+
+.jp-movable-section-dragHandle {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0 4px;
+  opacity: 0.5;
+  cursor: grab;
+}
+
+.jp-movable-section-dragHandle::before {
+  content: '⠿';
+  font-size: var(--jp-ui-font-size1);
+  line-height: 1;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-mod-dragging .jp-movable-section-dragHandle {
+  cursor: grabbing;
+}
+
+.jp-movable-section-dropIndicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--jp-brand-color1);
+  pointer-events: none;
+  z-index: 10;
 }

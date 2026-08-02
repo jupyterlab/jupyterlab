@@ -14,7 +14,6 @@
  * - simplified `YUndoManagerConfig` by removing public methods
  * - moved `_onStackItemAdded`, `_onStackItemPopped` and `_storeSelection` definitions out of constructor
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PluginValue, ViewUpdate } from '@codemirror/view';
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import { Facet } from '@codemirror/state';
@@ -23,7 +22,7 @@ import { ySyncAnnotation, ySyncFacet } from './ybinding';
 import type { UndoManager } from 'yjs';
 
 interface IStackItem {
-  meta: Map<any, any>;
+  meta: Map<unknown, unknown>;
 }
 
 export class YUndoManagerConfig {
@@ -58,7 +57,7 @@ class YUndoManagerPluginValue implements PluginValue {
     changedParentTypes
   }: {
     stackItem: IStackItem;
-    changedParentTypes: Map<any, any>;
+    changedParentTypes: Map<unknown, unknown>;
   }) => {
     // only store metadata if this type was affected
     if (
@@ -73,7 +72,7 @@ class YUndoManagerPluginValue implements PluginValue {
   _onStackItemPopped = ({ stackItem }: { stackItem: IStackItem }) => {
     const sel = stackItem.meta.get(this);
     if (sel) {
-      const selection = this._syncConf.fromYRange(sel);
+      const selection = this._syncConf.fromYRange(sel as YRange);
       this._view.dispatch(
         this._view.state.update({
           selection,

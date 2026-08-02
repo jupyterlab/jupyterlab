@@ -37,7 +37,7 @@ export class ThemeHelper {
    */
   async getTheme(): Promise<string> {
     return await this.page.evaluate(() => {
-      return document.body.dataset.jpThemeName as string;
+      return document.body.dataset.jpThemeName!;
     });
   }
 

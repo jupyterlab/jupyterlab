@@ -210,9 +210,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
-    expect(
-      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
-    ).toMatchSnapshot('reexpand_headers_03a.png');
+    expect
+      .soft(
+        await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
+      )
+      .toMatchSnapshot('reexpand_headers_03a.png');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');

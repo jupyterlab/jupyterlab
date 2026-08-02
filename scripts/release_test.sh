@@ -8,7 +8,8 @@
 
 # initialize the shell
 set -ex
-. $(conda info --base)/etc/profile.d/conda.sh
+# shellcheck source=/dev/null
+. "$(conda info --base)/etc/profile.d/conda.sh"
 
 OUTPUT_DIR=$(pwd)/build/${GROUP}_output
 
@@ -18,11 +19,11 @@ TEST_DIR=$(mktemp -d -t ${JLAB_TEST_ENV}XXXXX)
 conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n "$JLAB_TEST_ENV" nodejs python pip wheel setuptools
 conda activate "$JLAB_TEST_ENV"
 
-python -m pip install $(ls dist/*.whl)
+python -m pip install dist/*.whl
 
-cp examples/notebooks/*.ipynb $TEST_DIR/
-cp -r jupyterlab/tests/mock_packages $TEST_DIR
-pushd $TEST_DIR
+cp examples/notebooks/*.ipynb "${TEST_DIR}/"
+cp -r jupyterlab/tests/mock_packages "${TEST_DIR}"
+pushd "${TEST_DIR}"
 
 ls -ltr
 
@@ -42,10 +43,10 @@ conda install --override-channels --strict-channel-priority -c conda-forge -c no
 popd
 
 # re-install, because pip
-python -m pip install $(ls dist/*.whl)
+python -m pip install dist/*.whl
 
 # back to testing
-pushd $TEST_DIR
+pushd "${TEST_DIR}"
 
 jupyter lab build --debug
 

@@ -15,6 +15,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableList } from '@jupyterlab/observables';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
@@ -245,6 +246,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._updateNotebookConfig();
+    this._pageHandler = options.pageHandler;
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
     this.kernelHistory = options.kernelHistory;
@@ -437,24 +439,27 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this.model!.sharedModel.moveCells(from, boundedTo, n);
 
     for (let i = 0; i < n; i++) {
-      const newCell = this.widgets[to + i];
+      const newIndex = from > boundedTo ? boundedTo + i : boundedTo - n + 1 + i;
+      const newCell = this.widgets[newIndex];
       const view = viewModel[i];
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
       }
 
-      if (from > to) {
-        if (this.widgets[to + i].model.type === 'code') {
-          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+      if (from > boundedTo) {
+        if (this.widgets[boundedTo + i].model.type === 'code') {
+          (this.widgets[boundedTo + i].model as CodeCellModel).isDirty =
+            dirtyState[i];
         }
       } else {
-        if (this.widgets[to + i - n + 1].model.type === 'code') {
-          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+        if (this.widgets[boundedTo + i - n + 1].model.type === 'code') {
+          (this.widgets[boundedTo + i - n + 1].model as CodeCellModel).isDirty =
             dirtyState[i];
         }
       }
     }
+    this._refreshCollapsedHeadingVisibility();
   }
 
   /**
@@ -726,6 +731,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
+      pageHandler: this._pageHandler,
       rendermime,
       translator: this.translator
     };
@@ -902,6 +908,35 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       .catch(error => {
         console.warn('Failed to resolve headings: ', error);
       });
+  }
+
+  /**
+   * Recompute hidden cells from the current collapsed heading structure.
+   */
+  private _refreshCollapsedHeadingVisibility(): void {
+    for (const cell of this.widgets) {
+      cell.setHidden(false);
+    }
+
+    for (const cell of this.widgets) {
+      if (!(cell instanceof MarkdownCell) || !cell.headingCollapsed) {
+        continue;
+      }
+      if (cell.headingsResolved) {
+        NotebookActions.setHeadingCollapse(cell, true, this);
+        continue;
+      }
+      cell
+        .getHeadings()
+        .then(() => {
+          if (!cell.isDisposed && cell.headingCollapsed) {
+            this._refreshCollapsedHeadingVisibility();
+          }
+        })
+        .catch(error => {
+          console.warn('Failed to resolve headings: ', error);
+        });
+    }
   }
 
   /**
@@ -1190,6 +1225,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -1244,6 +1280,11 @@ export namespace StaticNotebook {
      * The renderer used by the underlying windowed list.
      */
     renderer?: WindowedList.IRenderer;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**
@@ -1786,8 +1827,30 @@ export class Notebook extends StaticNotebook {
         this.activeCellIndex = newActiveCellIndex;
       }
     }
+    switch (args.type) {
+      case 'add':
+      case 'set':
+        args.oldValues.forEach(model => {
+          model.contentChanged.disconnect(this._onCellContentChanged, this);
+        });
+        args.newValues.forEach(model => {
+          model.contentChanged.connect(this._onCellContentChanged, this);
+        });
+        break;
+      case 'remove':
+      case 'clear':
+        args.oldValues.forEach(model => {
+          if (model) {
+            model.contentChanged.disconnect(this._onCellContentChanged, this);
+          }
+        });
+        break;
+      case 'move':
+        break;
+      default:
+        break;
+    }
   }
-
   /**
    * A signal emitted when the active cell changes.
    *
@@ -1937,6 +2000,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._ensureFocus();
+
     if (newValue === oldValue) {
       return;
     }
@@ -2031,16 +2095,25 @@ export class Notebook extends StaticNotebook {
     if (newActiveCellIndex >= 0) {
       this.activeCellIndex = newActiveCellIndex;
     }
+
+    // Deselect all cells first to clear any stale selection state.
+    this.deselectAll();
     if (from > to) {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to + idx]);
+          const widget = this.widgets[to + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     } else {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to - n + 1 + idx]);
+          const widget = this.widgets[to - n + 1 + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     }
@@ -2058,6 +2131,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
     Private.selectedProperty.set(widget, true);
+    this._selectCollapsedSection(widget);
     this._selectionChanged.emit(void 0);
     this.update();
   }
@@ -2072,6 +2146,19 @@ export class Notebook extends StaticNotebook {
   deselect(widget: Cell): void {
     if (!Private.selectedProperty.get(widget)) {
       return;
+    }
+    // Deselect all children if widget is a collapsed heading
+    if (
+      widget instanceof MarkdownCell &&
+      widget.headingCollapsed &&
+      widget.numberChildNodes > 0
+    ) {
+      const idx = this.widgets.indexOf(widget);
+      for (let i = idx + 1; i <= idx + widget.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], false);
+        }
+      }
     }
     Private.selectedProperty.set(widget, false);
     this._selectionChanged.emit(void 0);
@@ -2108,11 +2195,8 @@ export class Notebook extends StaticNotebook {
     }
     if (changed) {
       this._selectionChanged.emit(void 0);
+      this.update();
     }
-    // Make sure we have a valid active cell.
-    // eslint-disable-next-line no-self-assign
-    this.activeCellIndex = this.activeCellIndex;
-    this.update();
   }
 
   /**
@@ -2206,6 +2290,25 @@ export class Notebook extends StaticNotebook {
     Private.selectedProperty.set(this.widgets[index], true);
 
     if (selectionChanged) {
+      this._selectionChanged.emit(void 0);
+    }
+  }
+
+  /**
+   * Select all child cells of a collapsed heading, if applicable.
+   */
+  private _selectCollapsedSection(cell: Cell | null): void {
+    if (
+      cell instanceof MarkdownCell &&
+      cell.headingCollapsed &&
+      cell.numberChildNodes > 0
+    ) {
+      const idx = this.widgets.indexOf(cell);
+      for (let i = idx; i <= idx + cell.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], true);
+        }
+      }
       this._selectionChanged.emit(void 0);
     }
   }
@@ -2426,6 +2529,90 @@ export class Notebook extends StaticNotebook {
         super.handleEvent(event);
         break;
     }
+  }
+
+  /**
+   * Pop and return the top cell from the back stack, pushing to forward stack.
+   * @experimental
+   */
+  popLastModifiedCell(): Cell | null {
+    const activeId = this.activeCell?.model.id;
+
+    while (this._lastModifiedCellBackStack.length) {
+      const id = this._lastModifiedCellBackStack.pop()!;
+
+      // Skip active cell
+      if (id === activeId) {
+        this._lastModifiedCellForwardStack.push(id);
+        continue;
+      }
+
+      const cell = this.widgets.find(c => c.model.id === id);
+      if (cell && !cell.isDisposed) {
+        this._lastModifiedCellForwardStack.push(id);
+        return cell;
+      }
+    }
+    return null;
+  }
+  /**
+   * Pop and return the top cell from the forward stack, pushing to back stack.
+   * @experimental
+   */
+  popNextModifiedCell(): Cell | null {
+    const activeId = this.activeCell?.model.id;
+
+    while (this._lastModifiedCellForwardStack.length) {
+      const id = this._lastModifiedCellForwardStack.pop()!;
+
+      if (id === activeId) {
+        this._lastModifiedCellBackStack.push(id);
+        continue;
+      }
+
+      const cell = this.widgets.find(c => c.model.id === id);
+      if (cell && !cell.isDisposed) {
+        this._lastModifiedCellBackStack.push(id);
+        return cell;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Check if there is a navigable cell in the back stack.
+   * @experimental
+   */
+  hasNavigableModifiedCellBack(): boolean {
+    const activeId = this.activeCell?.model.id;
+    for (let i = this._lastModifiedCellBackStack.length - 1; i >= 0; i--) {
+      const id = this._lastModifiedCellBackStack[i];
+      if (id !== activeId) {
+        const cell = this.widgets.find(c => c.model.id === id);
+        if (cell && !cell.isDisposed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check if there is a navigable cell in the forward stack.
+   * @experimental
+   */
+  hasNavigableModifiedCellForward(): boolean {
+    const activeId = this.activeCell?.model.id;
+    for (let i = this._lastModifiedCellForwardStack.length - 1; i >= 0; i--) {
+      const id = this._lastModifiedCellForwardStack[i];
+      if (id !== activeId) {
+        const cell = this.widgets.find(c => c.model.id === id);
+        if (cell && !cell.isDisposed) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -2696,6 +2883,10 @@ export class Notebook extends StaticNotebook {
    * Ensure that the notebook has proper focus.
    */
   private _ensureFocus(force = false): void {
+    const activeElement = document.activeElement;
+    if (!force && activeElement && !this.node.contains(activeElement)) {
+      return;
+    }
     // No-op is the footer has the focus.
     const footer = (this.layout as NotebookWindowedLayout).footer;
     if (footer && document.activeElement === footer.node) {
@@ -2820,9 +3011,9 @@ export class Notebook extends StaticNotebook {
             (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
               : 'data-jupyter-id';
-          const element = this.node.querySelector(
+          const element = this.node.querySelector<HTMLElement>(
             `h${heading.level}[${attribute}="${CSS.escape(id)}"]`
-          ) as HTMLElement;
+          )!;
 
           return {
             cell,
@@ -3236,8 +3427,8 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
-      // Move the cells one by one
-      this.moveCell(fromIndex, toIndex, toMove.length);
+      // Move the selected block of cells, preserving in-flight executions.
+      NotebookActions.moveCells(this, fromIndex, toIndex, toMove.length);
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -3484,6 +3675,40 @@ export class Notebook extends StaticNotebook {
     }
   }
 
+  /**
+   * Handle a cell content change.
+   */
+  private _onCellContentChanged(sender: ICellModel): void {
+    const id = sender.id;
+    const backStack = this._lastModifiedCellBackStack;
+
+    // Do nothing if the last modified cell is the same as this one
+    if (backStack.length > 0 && backStack[backStack.length - 1] === id) {
+      return;
+    }
+
+    // Remove if already present elsewhere in the stack to move it to the top
+    const idx = backStack.lastIndexOf(id);
+    if (idx !== -1) {
+      backStack.splice(idx, 1);
+    }
+    backStack.push(id);
+    if (backStack.length > Notebook.MAX_MODIFIED_STACK) {
+      backStack.shift();
+    }
+
+    // Clear forward stack when a new cell is modified
+    this._lastModifiedCellForwardStack = [];
+    this._stateChanged.emit({
+      name: 'lastModifiedCellStack',
+      oldValue: null,
+      newValue: null
+    });
+  }
+
+  private _lastModifiedCellBackStack: string[] = [];
+  private _lastModifiedCellForwardStack: string[] = [];
+  private static readonly MAX_MODIFIED_STACK = 50;
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';

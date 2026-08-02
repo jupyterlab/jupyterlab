@@ -672,8 +672,9 @@ export class GalataInpage implements IGalataInpage {
 
     let counter = 0;
     if (nb) {
-      if (nb.model) {
+      if (nb.model && nb.model.cells) {
         if (cellIndex === undefined) {
+          // cells is overwritten with `null` on notebook disposal
           for (const cell of nb.model.cells) {
             if (cell.type === 'code') {
               counter +=

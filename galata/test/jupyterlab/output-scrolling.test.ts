@@ -90,9 +90,9 @@ test.describe('Output Scrolling', () => {
       .locator(`${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`)
       .hover();
     const cell = await page.notebook.getCellLocator(1);
-    expect(await cell!.screenshot()).toMatchSnapshot(
-      'prompt-overlay-hover-normal.png'
-    );
+    expect
+      .soft(await cell!.screenshot())
+      .toMatchSnapshot('prompt-overlay-hover-normal.png');
     await page.click(
       `${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`
     );

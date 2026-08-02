@@ -8,8 +8,11 @@ import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
+import tsdocPlugin from 'eslint-plugin-tsdoc';
+import regexpPlugin from 'eslint-plugin-regexp';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
+import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 
 // Filter globals to remove any with leading/trailing whitespace
@@ -50,7 +53,6 @@ export default defineConfig([
     'galata/playwright-report',
     'jupyterlab/chrome-test.js',
     'jupyterlab/geckodriver',
-    'jupyterlab/staging/yarn.js',
     'jupyterlab/staging/index.js',
     'jupyterlab/staging/webpack.config.js',
     'packages/codemirror/test/foo*.js',
@@ -195,13 +197,18 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
-    extends: [js.configs.recommended, tseslint.configs.recommended],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      regexpPlugin.configs.recommended
+    ],
 
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       jest: jestPlugin,
       react: reactPlugin,
-      jupyter: jupyterPlugin
+      jupyter: jupyterPlugin,
+      tsdoc: tsdocPlugin
     },
 
     languageOptions: {
@@ -234,6 +241,8 @@ export default defineConfig([
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-untranslated-string': 'error',
+      'tsdoc/syntax': 'warn',
+      'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -256,6 +265,7 @@ export default defineConfig([
 
       '@typescript-eslint/no-use-before-define': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/non-nullable-type-assertion-style': 'error',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
@@ -458,7 +468,8 @@ export default defineConfig([
     ],
 
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off'
     }
   },
   {
@@ -498,6 +509,14 @@ export default defineConfig([
             "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
       ]
+    }
+  },
+  {
+    files: ['**/schema/*.json'],
+    languageOptions: { parser: jsoncParser },
+    plugins: { jupyter: jupyterPlugin },
+    rules: {
+      'jupyter/no-schema-enum': 'error'
     }
   },
   prettierPluginRecommended,

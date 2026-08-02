@@ -2157,6 +2157,10 @@ export class DirListing extends Widget {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
     const index = Private.hitTestNodes(this._items, event);
+    if (index === -1 || index >= this._items.length) {
+      event.dropAction = 'none';
+      return;
+    }
     this._items[index].classList.add(DROP_TARGET_CLASS);
   }
 
@@ -3943,7 +3947,7 @@ namespace Private {
     edit: HTMLInputElement,
     original: string
   ): Promise<string> {
-    const parent = text.parentElement as HTMLElement;
+    const parent = text.parentElement!;
     parent.replaceChild(edit, text);
     edit.focus();
     const index = edit.value.lastIndexOf('.');

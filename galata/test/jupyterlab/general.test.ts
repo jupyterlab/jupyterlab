@@ -2,9 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
+import { waitForLauncherIcons } from './utils';
 
 test.describe('General Tests', () => {
   test('Launch Screen', async ({ page }) => {
+    await waitForLauncherIcons(page);
     const imageName = 'launch.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });

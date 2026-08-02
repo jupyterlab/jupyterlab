@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type {
   CellSearchProvider,
@@ -66,7 +64,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
   }
 
-  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<any>) {
+  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
     if (args.name === 'mode') {
       // Delay the update to ensure that `document.activeElement` settled.
       window.setTimeout(() => {
