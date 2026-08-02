@@ -4,6 +4,7 @@
  */
 
 import type { ElementHandle, Locator, Page } from '@playwright/test';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { SidebarHelper } from './sidebar';
 import type { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
@@ -48,21 +49,50 @@ export class DebuggerHelper {
       return;
     }
     const button = toolbar.locator('.jp-DebuggerBugButton');
-    await waitForCondition(async () => (await button.count()) === 1);
-    await waitForCondition(
-      async () => (await button!.isDisabled()) === false,
-      15000
-    );
+    await button.waitFor();
+    await toolbar
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
 
-    if (!(await this.isOn(name))) {
-      await button!.click();
+    const isNotebookPanel =
+      (await panel.locator('.jp-NotebookPanel-notebook').count()) > 0;
+    const panelId = isNotebookPanel ? await panel.getAttribute('id') : null;
+    const isDebugging = async () =>
+      isNotebookPanel
+        ? (await panel.getAttribute('data-jp-debugger')) === 'true'
+        : await this.isOn(name);
+
+    if (isNotebookPanel && panelId && !(await isDebugging())) {
+      await this.page.evaluate(async panelId => {
+        const widgets = window.jupyterapp.shell.widgets('main');
+        const widget = Array.from(widgets).find(
+          widget => widget.id === panelId
+        );
+        if (widget) {
+          const notebookPanel = widget as NotebookPanel;
+          window.jupyterapp.shell.activateById(notebookPanel.id);
+          await notebookPanel.sessionContext.ready;
+          await notebookPanel.sessionContext.session?.kernel?.info;
+          window.jupyterapp.shell.activateById(notebookPanel.id);
+        }
+      }, panelId);
     }
 
-    await waitForCondition(
-      async () =>
-        (await this.isOn(name)) &&
-        (await panel.getAttribute('data-jp-debugger')) === 'true'
-    );
+    if (!(await isDebugging())) {
+      await button!.click();
+    }
+    await toolbar
+      .locator('.jp-DebuggerBugButton[aria-pressed="true"]')
+      .waitFor();
+
+    if (isNotebookPanel) {
+      if (!panelId) {
+        throw new Error('Notebook panel id not found.');
+      }
+      await this.page
+        .locator(`[id="${panelId}"][data-jp-debugger="true"]`)
+        .waitFor({ state: 'attached' });
+    }
   }
 
   /**
