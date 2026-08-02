@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Logger } from './logger';
-import {
+import type {
   ILogger,
   ILoggerRegistry,
   ILoggerRegistryChange,

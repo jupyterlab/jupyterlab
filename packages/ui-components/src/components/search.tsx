@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -114,7 +115,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
     }
 
     // Update the match if the score is better.
-    if (match && match.score <= score) {
+    if (match.score <= score) {
       score = match.score;
       indices = match.indices;
     }

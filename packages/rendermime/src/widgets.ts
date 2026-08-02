@@ -3,13 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { URLExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as renderers from './renderers';
 
@@ -31,6 +32,7 @@ export abstract class RenderedCommon
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
+    this.trustHandler = options.trustHandler ?? null;
     this.translator = options.translator ?? nullTranslator;
     this.latexTypesetter = options.latexTypesetter;
     this.markdownParser = options.markdownParser ?? null;
@@ -56,6 +58,11 @@ export abstract class RenderedCommon
    * The link handler.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The trust handler.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
 
   /**
    * The latexTypesetter.
@@ -102,6 +109,11 @@ export abstract class RenderedCommon
 
     // Toggle the trusted class on the widget.
     this.toggleClass('jp-mod-trusted', model.trusted);
+    if (model.trusted) {
+      this.trustHandler?.markTrusted(this.node);
+    } else {
+      this.trustHandler?.unmarkTrusted(this.node);
+    }
 
     // Render the actual content.
     await this.render(model);
@@ -149,11 +161,17 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
   setFragment(fragment: string): void {
     let el;
     try {
-      el = this.node.querySelector(
-        fragment.startsWith('#')
-          ? `#${CSS.escape(fragment.slice(1))}`
-          : fragment
-      );
+      if (fragment.startsWith('#')) {
+        const id = fragment.slice(1);
+        const escapedId = CSS.escape(id);
+        if (this.sanitizer.allowNamedProperties) {
+          el = this.node.querySelector(`#${escapedId}`);
+        } else {
+          el = this.node.querySelector(`[data-jupyter-id="${escapedId}"]`);
+        }
+      } else {
+        el = this.node.querySelector(fragment);
+      }
     } catch (error) {
       console.warn('Unable to set URI fragment identifier.', error);
     }
@@ -618,8 +636,8 @@ namespace Private {
       typeof data === 'string'
         ? data
         : Array.isArray(data)
-        ? (data as string[]).join('\n')
-        : '';
+          ? (data as string[]).join('\n')
+          : '';
 
     return (
       source

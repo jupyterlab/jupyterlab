@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { CommandPalette, Widget } from '@lumino/widgets';
-import { ISessionContext } from './sessioncontext';
-import { Licenses } from './licenses';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { AccordionPanel, CommandPalette, Widget } from '@lumino/widgets';
+import type { ISessionContext } from './sessioncontext';
+import type { Licenses } from './licenses';
 
 /**
  * The command palette token.
@@ -418,4 +418,225 @@ export const IToolbarWidgetRegistry = new Token<IToolbarWidgetRegistry>(
   '@jupyterlab/apputils:IToolbarWidgetRegistry',
   `A registry for toolbar widgets. Require this
   if you want to build the toolbar dynamically from a data definition (stored in settings for example).`
+);
+
+/**
+ * A section entry returned by {@link IMovableSectionSource.getSections}.
+ *
+ * Bundles the three pieces of information the move plugin needs to identify,
+ * display, and transfer a sidebar section.
+ */
+export interface ISectionEntry {
+  /**
+   * Stable identifier for this section, equal to the widget's Lumino `id`.
+   *
+   * The move plugin uses this to persist which sections have been moved and
+   * to restore them to the correct panel on reload.
+   */
+  readonly id: string;
+
+  /**
+   * The `.jp-AccordionPanel-title` DOM element rendered by Lumino as the
+   * visual header of this section.
+   *
+   * The move plugin attaches the `jp-movable-section` CSS class to this node
+   * so that Lumino's context-menu selector fires when the user right-clicks
+   * the header.
+   */
+  readonly titleNode: HTMLElement;
+
+  /**
+   * The content widget for this section.
+   */
+  readonly widget: Widget;
+}
+
+/**
+ * Implemented by sidebar panels whose accordion sections can be moved to
+ * another panel by the user.
+ *
+ * Register an implementation with
+ * {@link IMovableSectionRegistry.registerSource}.
+ */
+export interface IMovableSectionSource {
+  /**
+   * Return the currently-available sections with their title DOM nodes.
+   */
+  getSections(): ReadonlyArray<ISectionEntry>;
+
+  /**
+   * Detach the section identified by `sectionId` and return its widget so
+   * the move plugin can hand it to a target panel.
+   *
+   * A typical implementation sets `widget.parent = null`, which detaches the
+   * widget from the `AccordionPanel` without destroying it. Returns `null` if
+   * no section with the given id currently exists in this panel.
+   *
+   * @param sectionId - The {@link ISectionEntry.id} of the section to remove.
+   */
+  removeSectionById(sectionId: string): Widget | null;
+
+  /**
+   * Re-attach a widget that was previously removed by
+   * {@link removeSectionById}.
+   *
+   * Called when the user chooses "Move back to …" on a section that was
+   * originally owned by this panel. A typical implementation calls
+   * `this.addWidget(widget)`.
+   *
+   * @param widget - The widget returned by an earlier {@link removeSectionById}
+   *   call.
+   */
+  reinsertSection(widget: Widget): void;
+
+  /**
+   * The `AccordionPanel` that renders this sidebar's sections.
+   *
+   * The move plugin reads this to set up drag-to-reorder handles after a
+   * section is moved.
+   */
+  readonly accordionPanel: AccordionPanel | null;
+
+  /**
+   * Emitted each time a new section widget is added to this panel.
+   *
+   * Implementations should emit this signal from `addWidget` (or equivalent)
+   * with a fully-populated {@link ISectionEntry} for the newly added widget.
+   */
+  readonly sectionAdded: ISignal<this, ISectionEntry>;
+}
+
+/**
+ * Implemented by panels that can host sections moved in from another sidebar.
+ *
+ * Register an implementation with
+ * {@link IMovableSectionRegistry.registerTarget}.
+ */
+export interface IMovableSectionDestination {
+  /**
+   * Insert a section widget into this panel.
+   *
+   * Called by the move plugin when the user selects "Move to …" from the
+   * context menu. A typical implementation calls `this.addWidget(widget)`.
+   *
+   * @param widget - The widget detached from its source panel.
+   */
+  addSection(widget: Widget): void;
+
+  /**
+   * Remove a section widget that was previously added via {@link addSection}.
+   *
+   * Called by the move plugin when the user moves the section back to its
+   * original panel. A typical implementation sets `widget.parent = null`.
+   *
+   * @param widget - The widget to detach.
+   */
+  removeSectionWidget(widget: Widget): void;
+
+  /**
+   * All section widgets currently hosted by this panel.
+   *
+   * Queried by the move plugin during state restoration to find sections that
+   * were persisted as belonging to this panel. Must stay in sync with
+   * {@link addSection} and {@link removeSectionWidget} calls.
+   */
+  readonly sections: ReadonlyArray<Widget>;
+
+  /**
+   * The `AccordionPanel` that wraps the hosted sections, or `null` if none
+   * has been created yet.
+   *
+   * The move plugin reads this to set up drag-to-reorder handles and to access
+   * the title elements of hosted sections.
+   */
+  readonly accordionPanel: AccordionPanel | null;
+}
+
+/**
+ * Registry that pairs source and target panels so the move plugin can wire up
+ * context-menu "Move to …" actions between them.
+ */
+export interface IMovableSectionRegistry {
+  /**
+   * Register a sidebar as a source of moveable sections.
+   *
+   * After registration the move plugin adds a "Move to <target>" context-menu
+   * item to each section header in `sidebar`. The `label` appears in the menu
+   * as "Move back to <label>" on the destination side.
+   *
+   * @param id - Stable plugin-scoped identifier, e.g.
+   *   `'@my-org/my-ext:panel'`. Must be unique across all registered sources.
+   * @param label - Human-readable panel name shown in the context menu.
+   * @param sidebar - The panel implementing {@link IMovableSectionSource}.
+   */
+  registerSource(
+    id: string,
+    label: string,
+    sidebar: IMovableSectionSource
+  ): void;
+
+  /**
+   * Register a panel as a destination that can receive sections.
+   *
+   * After registration the move plugin adds a "Move to <label>" context-menu
+   * item to eligible section headers in all registered source panels.
+   *
+   * @param id - Stable plugin-scoped identifier. Must be unique across all
+   *   registered targets.
+   * @param label - Human-readable panel name shown in the context menu.
+   * @param panel - The panel implementing {@link IMovableSectionDestination}.
+   */
+  registerTarget(
+    id: string,
+    label: string,
+    panel: IMovableSectionDestination
+  ): void;
+
+  /**
+   * Return all registered source sidebars keyed by their `id`.
+   */
+  getSources(): ReadonlyMap<
+    string,
+    { label: string; sidebar: IMovableSectionSource }
+  >;
+
+  /**
+   * Return all registered target panels keyed by their `id`.
+   */
+  getTargets(): ReadonlyMap<
+    string,
+    { label: string; panel: IMovableSectionDestination }
+  >;
+
+  /**
+   * Fired each time a new source sidebar is registered via
+   * {@link registerSource}.
+   *
+   * The move plugin listens to this signal to retroactively wire up context
+   * menus for sources that register after the plugin has already activated.
+   */
+  readonly sourcePanelRegistered: ISignal<
+    IMovableSectionRegistry,
+    { id: string; label: string; sidebar: IMovableSectionSource }
+  >;
+
+  /**
+   * Fired each time a new target panel is registered via
+   * {@link registerTarget}.
+   *
+   * The move plugin listens to this signal to add the new target as an option
+   * in the context menus of all currently-registered source panels.
+   */
+  readonly targetPanelRegistered: ISignal<
+    IMovableSectionRegistry,
+    { id: string; label: string; panel: IMovableSectionDestination }
+  >;
+}
+
+/**
+ * The movable section registry token.
+ */
+export const IMovableSectionRegistry = new Token<IMovableSectionRegistry>(
+  '@jupyterlab/apputils:IMovableSectionRegistry',
+  'A registry for panels that can exchange moveable sections.'
 );

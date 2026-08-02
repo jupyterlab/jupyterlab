@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { ISearchProvider, SearchProvider } from '@jupyterlab/documentsearch';
-import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { ISearchProvider } from '@jupyterlab/documentsearch';
+import { SearchProvider } from '@jupyterlab/documentsearch';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { Widget } from '@lumino/widgets';
 
 // The type for which isApplicable returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;

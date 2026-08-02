@@ -1,17 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, Time } from '@jupyterlab/coreutils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { Contents } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { Time } from '@jupyterlab/coreutils';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { Contents } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
-import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
+import type { IMessageHandler, Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
-import { IDocumentManagerDialogs, IRecentsManager } from './tokens';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import type { IDocumentManagerDialogs, IRecentsManager } from './tokens';
 import { DocumentManagerDialogs } from './dialogs';
 
 /**
@@ -61,7 +69,10 @@ export class DocumentWidgetManager implements IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  get stateChanged(): ISignal<DocumentWidgetManager, IChangedArgs<any>> {
+  get stateChanged(): ISignal<
+    DocumentWidgetManager,
+    IChangedArgs<boolean, boolean, 'confirmClosingDocument'>
+  > {
     return this._stateChanged;
   }
 
@@ -467,7 +478,10 @@ export class DocumentWidgetManager implements IDisposable {
     // Ask confirmation
     if (this.confirmClosingDocument) {
       const { shouldClose, ignoreSave, doNotAskAgain } =
-        await dialogs.confirmClose({ fileName, isDirty });
+        await dialogs.confirmClose({
+          fileName,
+          isDirty
+        });
 
       if (doNotAskAgain) {
         this.confirmClosingDocument = false;
@@ -539,9 +553,10 @@ export class DocumentWidgetManager implements IDisposable {
   private _activateRequested = new Signal<this, string>(this);
   private _confirmClosingTab = false;
   private _isDisposed = false;
-  private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
-    this
-  );
+  private _stateChanged = new Signal<
+    DocumentWidgetManager,
+    IChangedArgs<boolean, boolean, 'confirmClosingDocument'>
+  >(this);
   private _recentsManager: IRecentsManager | null;
   private _dialogs: IDocumentManagerDialogs | null;
 }

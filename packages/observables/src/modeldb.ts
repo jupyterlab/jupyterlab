@@ -1,21 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONExt,
+import type {
   JSONObject,
   JSONValue,
   PartialJSONValue
 } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { IObservableJSON, ObservableJSON } from './observablejson';
-import { IObservableMap, ObservableMap } from './observablemap';
-import { IObservableString, ObservableString } from './observablestring';
-import {
-  IObservableUndoableList,
-  ObservableUndoableList
-} from './undoablelist';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { IObservableJSON } from './observablejson';
+import { ObservableJSON } from './observablejson';
+import type { IObservableMap } from './observablemap';
+import { ObservableMap } from './observablemap';
+import type { IObservableString } from './observablestring';
+import { ObservableString } from './observablestring';
+import type { IObservableUndoableList } from './undoablelist';
+import { ObservableUndoableList } from './undoablelist';
 
 /**
  * String type annotations for Observable objects that can be

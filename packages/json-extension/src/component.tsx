@@ -2,10 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { jupyterHighlightStyle } from '@jupyterlab/codemirror';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
-import { Tag, tags } from '@lezer/highlight';
-import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
+import type { Tag } from '@lezer/highlight';
+import { tags } from '@lezer/highlight';
+import type { JSONArray, JSONObject, JSONValue } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
 import Highlighter from 'react-highlight-words';
 import { JSONTree } from 'react-json-tree';
@@ -49,7 +52,7 @@ export class Component extends React.Component<IProps, IState> {
   timer: number = 0;
 
   componentDidMount(): void {
-    StyleModule.mount(document, jupyterHighlightStyle.module as StyleModule);
+    StyleModule.mount(document, jupyterHighlightStyle.module!);
   }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {

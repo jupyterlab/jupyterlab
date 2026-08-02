@@ -1,37 +1,37 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { CommsOverSubshells, ServerConnection } from '..';
 
 import { CommHandler } from './comm';
 
-import * as Kernel from './kernel';
+import type * as Kernel from './kernel';
 
 import * as KernelMessage from './messages';
 
-import {
-  KernelControlFutureHandler,
-  KernelFutureHandler,
-  KernelShellFutureHandler
-} from './future';
+import type { KernelFutureHandler } from './future';
+import { KernelControlFutureHandler, KernelShellFutureHandler } from './future';
 
 import * as validate from './validate';
-import { KernelSpec } from '../kernelspec';
+import type { KernelSpec } from '../kernelspec';
 
 import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 // Stub for requirejs.
 declare let requirejs: any;
 
-const KERNEL_INFO_TIMEOUT = 3000;
-const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
+export const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
 const STARTING_KERNEL_SESSION = '';
 
 /**
@@ -65,6 +65,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
+    this._kernelInfoTimeout =
+      options?.kernelInfoTimeout ?? DEFAULT_KERNEL_INFO_TIMEOUT;
   }
 
   get disposed(): ISignal<this, void> {
@@ -296,6 +298,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       handleComms: false,
       kernelAPIClient: this._kernelAPIClient,
       commsOverSubshells: CommsOverSubshells.Disabled,
+      kernelInfoTimeout: this._kernelInfoTimeout,
       ...options
     });
   }
@@ -469,11 +472,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // If we have a kernel_info_request and we are starting or restarting, send the
     // kernel_info_request immediately if we can, and if not throw an error so
     // we can retry later. On restarting we do this because we must get at least one message
-    // from the kernel to reset the kernel session (thus clearing the restart
-    // status sentinel).
+    // from the kernel before sending pending messages.
     if (
-      (this._kernelSession === STARTING_KERNEL_SESSION ||
-        this._kernelSession === RESTARTING_KERNEL_SESSION) &&
+      (this._kernelSession === STARTING_KERNEL_SESSION || this._isRestarting) &&
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
@@ -493,10 +494,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     // Send if the ws allows it, otherwise queue the message.
-    if (
-      this.connectionStatus === 'connected' &&
-      this._kernelSession !== RESTARTING_KERNEL_SESSION
-    ) {
+    if (this.connectionStatus === 'connected' && !this._isRestarting) {
       this._ws!.send(
         this.serverSettings.serializer.serialize(msg, this._ws!.protocol)
       );
@@ -552,11 +550,16 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
     this._updateStatus('restarting');
     this._clearKernelState();
-    this._kernelSession = RESTARTING_KERNEL_SESSION;
-    await this._kernelAPIClient.restart(this.id);
-    // Reconnect to the kernel to address cases where kernel ports
-    // have changed during the restart.
-    await this.reconnect();
+    this._isRestarting = true;
+    try {
+      await this._kernelAPIClient.restart(this.id);
+      // Reconnect to the kernel to address cases where kernel ports
+      // have changed during the restart.
+      await this.reconnect();
+    } catch (error) {
+      this._isRestarting = false;
+      throw error;
+    }
     this.hasPendingInput = false;
   }
 
@@ -1285,7 +1288,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // stop sending messages.
     while (
       this.connectionStatus === 'connected' &&
-      this._kernelSession !== RESTARTING_KERNEL_SESSION &&
+      !this._isRestarting &&
       this._pendingMessages.length > 0
     ) {
       this._sendMessage(this._pendingMessages[0], false);
@@ -1442,7 +1445,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     );
 
     // Strip any authentication from the display string.
-    const display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
+    const display = partialUrl.replace(/^((?:\w+:)?\/\/)[^@/]+@/, '$1');
     console.debug(`Starting WebSocket: ${display}`);
 
     let url = URLExt.join(
@@ -1469,7 +1472,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     let alreadyCalledOnclose = false;
 
-    const getKernelModel = async (evt: Event) => {
+    const getKernelModel = async (evt: CloseEvent | ErrorEvent) => {
       if (this._isDisposed) {
         return;
       }
@@ -1503,7 +1506,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       return;
     };
 
-    const earlyClose = async (evt: Event) => {
+    const earlyClose = async (evt: CloseEvent | ErrorEvent) => {
       // If the websocket was closed early, that could mean
       // that the kernel is actually dead. Try getting
       // information about the kernel from the API call,
@@ -1545,7 +1548,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     if (this.status !== 'dead') {
       if (connectionStatus === 'connected') {
-        let restarting = this._kernelSession === RESTARTING_KERNEL_SESSION;
+        let restarting = this._isRestarting;
 
         // Send a kernel info request to make sure we send at least one
         // message to get kernel status back. Always request kernel info
@@ -1563,12 +1566,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
             return;
           }
           sendPendingCalled = true;
-          if (restarting && this._kernelSession === RESTARTING_KERNEL_SESSION) {
+          if (restarting && this._isRestarting) {
             // We were restarting and a message didn't arrive to set the
             // session, but we just assume the restart succeeded and send any
             // pending messages.
 
             // FIXME: it would be better to retry the kernel_info_request here
+            this._isRestarting = false;
             this._kernelSession = '';
           }
           clearTimeout(timeoutHandle);
@@ -1576,11 +1580,19 @@ export class KernelConnection implements Kernel.IKernelConnection {
             this._sendPending();
           }
         };
-        void p.then(sendPendingOnce);
+        void p.then(() => {
+          if (restarting) {
+            this._isRestarting = false;
+          }
+          sendPendingOnce();
+        });
         // FIXME: if sent while zmq subscriptions are not established,
         // kernelInfo may not resolve, so use a timeout to ensure we don't hang forever.
         // It may be preferable to retry kernelInfo rather than give up after one timeout.
-        let timeoutHandle = setTimeout(sendPendingOnce, KERNEL_INFO_TIMEOUT);
+        let timeoutHandle = setTimeout(
+          sendPendingOnce,
+          this._kernelInfoTimeout
+        );
       } else {
         // If the connection is down, then we do not know what is happening
         // with the kernel, so set the status to unknown.
@@ -1628,8 +1640,18 @@ export class KernelConnection implements Kernel.IKernelConnection {
       }
     }
     if (msg.channel === 'iopub') {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.header.msg_type) {
         case 'status': {
+          const untrackedMessageTypesRaw = PageConfig.getOption(
+            'untracked_message_types'
+          );
+          let untrackedMessageTypes = JSON.parse(
+            untrackedMessageTypesRaw || '[]'
+          );
+          if (untrackedMessageTypes.includes(msg.parent_header.msg_type)) {
+            break;
+          }
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
@@ -1702,9 +1724,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.warn(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       // Try reconnection with subprotocols if the server had supported them.
       // Otherwise, try reconnection without subprotocols.
@@ -1800,10 +1820,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle a websocket close event.
    */
-  private _onWSClose = (evt: Event) => {
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent | ErrorEvent) => {
+    if (this.isDisposed) {
+      return;
     }
+
+    if ('code' in evt && (evt.code === 1000 || evt.code === 1001)) {
+      this._updateConnectionStatus('disconnected');
+      return;
+    }
+
+    this._reconnect();
   };
 
   get hasPendingInput(): boolean {
@@ -1820,6 +1847,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _status: KernelMessage.Status = 'unknown';
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
+  private _isRestarting = false;
   private _clientId: string;
   private _isDisposed = false;
   /**
@@ -1877,6 +1905,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   private _supportsSubshells = false;
   private _subshellId: string | null;
+  private _kernelInfoTimeout: number = DEFAULT_KERNEL_INFO_TIMEOUT;
 }
 
 /**
@@ -1887,6 +1916,7 @@ namespace Private {
    * Log the current kernel status.
    */
   export function logKernelStatus(kernel: Kernel.IKernelConnection): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (kernel.status) {
       case 'idle':
       case 'busy':

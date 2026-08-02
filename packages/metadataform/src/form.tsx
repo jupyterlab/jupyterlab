@@ -7,13 +7,13 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 import { FormComponent } from '@jupyterlab/ui-components';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { IChangeEvent } from '@rjsf/core';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
-import { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
 
-import { MetadataForm } from './token';
+import type { MetadataForm } from './token';
 
 /**
  * A ReactWidget with the form itself.
@@ -41,7 +41,7 @@ export class FormWidget extends ReactWidget {
       <FormComponent
         validator={validatorAjv8}
         schema={this._props.properties as JSONSchema7}
-        formData={this._props.formData as Record<string, any>}
+        formData={this._props.formData}
         formContext={formContext}
         uiSchema={this._props.uiSchema}
         liveValidate

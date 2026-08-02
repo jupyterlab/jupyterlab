@@ -10,6 +10,9 @@ export class LruCache<T, U> {
 
   constructor(options: LruCache.IOptions = {}) {
     this._maxSize = options?.maxSize || DEFAULT_MAX_SIZE;
+    if (this._maxSize < 1) {
+      throw new Error('maxSize must be at least 1');
+    }
   }
 
   /**
@@ -43,7 +46,8 @@ export class LruCache<T, U> {
    */
   set(key: T, value: U): void {
     if (this._map.size >= this._maxSize) {
-      this._map.delete(this._map.keys().next().value);
+      // Map is non-empty since maxSize >= 1
+      this._map.delete(this._map.keys().next().value!);
     }
     this._map.set(key, value);
   }

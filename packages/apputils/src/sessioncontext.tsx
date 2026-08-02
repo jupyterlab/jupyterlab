@@ -1,24 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import {
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type {
   Kernel,
   KernelMessage,
   KernelSpec,
   ServerConnection,
   Session
 } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
@@ -282,6 +282,11 @@ export namespace ISessionContext {
     readonly shouldStart?: boolean;
 
     /**
+     * Reuse an existing session on the current path (default `true`).
+     */
+    readonly shouldReuse?: boolean;
+
+    /**
      * A kernel can be started (default `true`).
      */
     readonly canStart?: boolean;
@@ -329,7 +334,10 @@ export namespace ISessionContext {
      * kernel name and resolves with `true`. If no kernel has been started,
      * this is a no-op, and resolves with `false`.
      */
-    restart(session: ISessionContext): Promise<boolean>;
+    restart(
+      session: ISessionContext,
+      restartOptions?: ISessionContext.IRestartOptions
+    ): Promise<boolean>;
   }
 
   /**
@@ -344,6 +352,15 @@ export namespace ISessionContext {
      * Optional setting registry used to access restart dialog preference.
      */
     settingRegistry?: ISettingRegistry | null;
+  }
+  /**
+   * On before restarting the kernel options
+   */
+  export interface IRestartOptions {
+    /**
+     * Method to be called before restarting the kernel
+     */
+    onBeforeRestart: () => Promise<void>;
   }
 }
 
@@ -603,6 +620,10 @@ export class SessionContext implements ISessionContext {
       return 'restarting';
     }
 
+    if (this._isChangingKernel) {
+      return 'starting';
+    }
+
     if (this._pendingKernelName === this.noKernelName) {
       return 'unknown';
     }
@@ -791,7 +812,8 @@ export class SessionContext implements ISessionContext {
    * @returns A promise that resolves with whether to ask the user to select a kernel.
    *
    * #### Notes
-   * If a server session exists on the current path, we will connect to it.
+   * If a server session exists on the current path, we will connect to it
+   * unless `kernelPreference.shouldReuse === false`.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -823,16 +845,21 @@ export class SessionContext implements ISessionContext {
     const manager = this.sessionManager;
     await manager.ready;
     await manager.refreshRunning();
-    const model = find(manager.running(), item => {
-      return item.path === this._path;
-    });
-    if (model) {
-      try {
-        const session = manager.connectTo({ model });
-        this._handleNewSession(session);
-      } catch (err) {
-        void this._handleSessionError(err);
-        return Promise.reject(err);
+    const preference = this.kernelPreference;
+    const shouldConnectToPathSession = preference.shouldReuse !== false;
+
+    if (shouldConnectToPathSession) {
+      const model = find(manager.running(), item => {
+        return item.path === this._path;
+      });
+      if (model) {
+        try {
+          const session = manager.connectTo({ model });
+          this._handleNewSession(session);
+        } catch (err) {
+          void this._handleSessionError(err);
+          return Promise.reject(err);
+        }
       }
     }
 
@@ -927,13 +954,18 @@ export class SessionContext implements ISessionContext {
 
     // If we already have a session, just change the kernel.
     if (this._session && !this._isTerminating) {
+      this._isChangingKernel = true;
+      this._statusChanged.emit('starting');
       try {
         await this._session.changeKernel(model);
-        return this._session.kernel;
       } catch (err) {
+        this._isChangingKernel = false;
         void this._handleSessionError(err);
         throw err;
       }
+      this._isChangingKernel = false;
+      this._statusChanged.emit(this._session?.kernel?.status || 'unknown');
+      return this._session.kernel;
     }
 
     // Use a UUID for the path to overcome a race condition on the server
@@ -1220,6 +1252,7 @@ export class SessionContext implements ISessionContext {
   private _isReady = false;
   private _isTerminating = false;
   private _isRestarting = false;
+  private _isChangingKernel = false;
   private _kernelChanged = new Signal<
     this,
     Session.ISessionConnection.IKernelChangedArgs
@@ -1433,7 +1466,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    * If there is no kernel, we start a kernel with the last run
    * kernel name and resolves with `true`.
    */
-  async restart(sessionContext: ISessionContext): Promise<boolean> {
+  async restart(
+    sessionContext: ISessionContext,
+    restartOptions?: ISessionContext.IRestartOptions
+  ): Promise<boolean> {
     const trans = this._translator.load('jupyterlab');
 
     await sessionContext.initialize();
@@ -1499,7 +1535,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
           skipKernelRestartDialog: true
         };
       }
-
+      await restartOptions?.onBeforeRestart();
       await sessionContext.restartKernel();
       return true;
     }
@@ -1825,7 +1861,7 @@ namespace Private {
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select') as HTMLSelectElement;
+      const selector = this.node.querySelector<HTMLSelectElement>('select')!;
       return JSON.parse(selector.value) as Kernel.IModel;
     }
   }
@@ -1843,9 +1879,7 @@ namespace Private {
 
     const body = document.createElement('div');
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${
-      sessionContext.name
-    }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name}"`;
     body.appendChild(text);
 
     const select = document.createElement('select');

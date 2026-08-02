@@ -1,14 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { Printing } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IInspector } from './tokens';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PanelLayout } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
+import type { IInspector } from './tokens';
 
 /**
  * The class name added to inspector panels.
@@ -47,9 +44,7 @@ export class InspectorPanel
         `<p>${options.initialContent}</p>`
       );
     } else {
-      const placeholderHeadline = `<h3>${this._trans.__(
-        'No Documentation'
-      )}</h3>`;
+      const placeholderHeadline = `<h3>${this._trans.__('No Documentation')}</h3>`;
       const placeholderText = `<p>${this._trans.__(
         'Move the cursor to a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
       )}</p>`;
@@ -119,7 +114,7 @@ export class InspectorPanel
    * Handle inspector update signals.
    */
   protected onInspectorUpdate(
-    sender: any,
+    sender: IInspector.IInspectable,
     args: IInspector.IInspectorUpdate
   ): void {
     const { content } = args;
@@ -138,7 +133,10 @@ export class InspectorPanel
   /**
    * Handle source disposed signals.
    */
-  protected onSourceDisposed(sender: any, args: void): void {
+  protected onSourceDisposed(
+    sender: IInspector.IInspectable,
+    args: void
+  ): void {
     this.source = null;
   }
 

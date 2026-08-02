@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
+const webpackWindow = window as unknown as Window & {
+  __webpack_public_path__: string;
+};
+webpackWindow.__webpack_public_path__ = URLExt.join(
   PageConfig.getBaseUrl(),
   'example/'
 );
@@ -10,7 +12,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 // Import style through JS file to deduplicate them.
 import './style';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 import {
   Toolbar as AppToolbar,
   CommandToolbarButton,
@@ -145,8 +147,18 @@ function createApp(manager: ServiceManager.IManager): void {
     mime: 'text/x-ipythongfm',
     load: async () => {
       const m = await import('@codemirror/lang-markdown');
+      type TCodeLanguageResolver = Extract<
+        NonNullable<
+          NonNullable<Parameters<typeof m.markdown>[0]>['codeLanguages']
+        >,
+        (info: string) => unknown
+      >;
+      const codeLanguages: TCodeLanguageResolver = info =>
+        languages.findBest(
+          info
+        ) as unknown as ReturnType<TCodeLanguageResolver>;
       return m.markdown({
-        codeLanguages: (info: string) => languages.findBest(info) as any
+        codeLanguages
       });
     }
   });
@@ -155,8 +167,9 @@ function createApp(manager: ServiceManager.IManager): void {
     languages
   });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
-  const editorFactory = factoryService.newInlineEditor;
-  const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
+  const contentFactory = new NotebookPanel.ContentFactory({
+    editorFactory: factoryService.newInlineEditor
+  });
 
   const sessionContextDialogs = new SessionContextDialogs();
   const toolbarFactory = (panel: NotebookPanel) =>
@@ -277,7 +290,6 @@ function createApp(manager: ServiceManager.IManager): void {
   window.addEventListener('resize', () => {
     panel.update();
   });
-
   setupCommands(commands, palette, nbWidget, handler, sessionContextDialogs);
 
   console.debug('Example started!');

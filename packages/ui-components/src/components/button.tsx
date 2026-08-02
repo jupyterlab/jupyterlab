@@ -9,8 +9,7 @@ import { classes } from '../utils';
 /**
  * Button component property
  */
-export interface IButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface IButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Whether this button should use minimal styles.
    */

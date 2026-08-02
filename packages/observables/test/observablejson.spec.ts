@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
+import type { IObservableJSON } from '@jupyterlab/observables';
+import { ObservableJSON } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableJSON', () => {

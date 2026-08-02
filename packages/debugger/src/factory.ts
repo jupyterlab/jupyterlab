@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditor,
-  CodeEditorWrapper,
-  IEditorServices
-} from '@jupyterlab/codeeditor';
-import { IDebugger } from './tokens';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { IDebugger } from './tokens';
 
 /**
  * A widget factory for read only editors.

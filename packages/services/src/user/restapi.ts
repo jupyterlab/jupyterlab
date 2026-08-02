@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '../serverconnection';
-import { IUser, IUserAPIClient } from './user';
+import type { IUser, IUserAPIClient } from './user';
 
 import { URLExt } from '@jupyterlab/coreutils';
 

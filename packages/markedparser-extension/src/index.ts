@@ -9,13 +9,14 @@
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
+import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type {
@@ -29,6 +30,8 @@ import type {
 
 // highlight cache key separator
 const FENCE = '```~~~';
+
+const HEADING_TAG_REGEX = /^<h[1-6]\b[^>]*>/i;
 
 /**
  * An interface for fenced code block renderers.
@@ -61,6 +64,9 @@ export function createMarkdownParser(
   return {
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
+    },
+    getHeadingTokens: (content: string): Promise<IMarkdownHeadingToken[]> => {
+      return Private.getHeadingTokens(content, options);
     }
   };
 }
@@ -186,7 +192,8 @@ namespace Private {
     const renderer = new Renderer_();
     const originalCode = renderer.code;
 
-    renderer.code = ({ text, lang, escaped }) => {
+    renderer.code = token => {
+      const { text, lang } = token;
       // handle block renderers
       for (const block of _blocks) {
         if (lang && block.languages.includes(lang)) {
@@ -205,7 +212,7 @@ namespace Private {
       }
 
       // fall back to calling with the renderer as `this`
-      return originalCode.call(renderer, { text, lang, escaped });
+      return originalCode.call(renderer, token);
     };
 
     return renderer;
@@ -253,5 +260,53 @@ namespace Private {
         }
         await highlight(token as Tokens.Code);
     }
+  }
+
+  /**
+   * Extract heading metadata from markdown source.
+   */
+  export async function getHeadingTokens(
+    content: string,
+    options?: IRenderOptions
+  ): Promise<IMarkdownHeadingToken[]> {
+    if (!_marked) {
+      _marked = await initializeMarked(options);
+    }
+    const headings = new Array<IMarkdownHeadingToken>();
+    const tokens = _marked.lexer(content);
+
+    // Extract heading tokens and compute line numbers
+    // Include three token types that may contain headings:
+    // - heading: Standard markdown headings (# Title)
+    // - html: Standalone HTML heading blocks (<h1>Title</h1>)
+    // - paragraph: Only paragraphs with nested HTML tokens (inline html tags) that might contain embedded headings (<span><h1>Title</h1></span>)
+    let currentLine = 0;
+    for (const token of tokens) {
+      if (
+        token.type === 'heading' ||
+        (token.type === 'html' && containsHeadingTag(token.raw)) ||
+        (token.type === 'paragraph' && containsInlineHeading(token))
+      ) {
+        headings.push({
+          raw: token.raw,
+          line: currentLine
+        });
+      }
+      currentLine += token.raw.split('\n').length - 1;
+    }
+
+    return headings;
+  }
+
+  function containsHeadingTag(raw: string) {
+    return HEADING_TAG_REGEX.test(raw);
+  }
+
+  function containsInlineHeading(token: Tokens.Generic): boolean {
+    if (!token.tokens) return false;
+
+    return token.tokens.some(
+      (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
+    );
   }
 }

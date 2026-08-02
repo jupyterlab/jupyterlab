@@ -2,13 +2,13 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 import * as React from 'react';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
-import {
+import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutTarget,
@@ -128,11 +128,12 @@ export class ShortcutInput extends React.Component<
     conflicts: IShortcutTarget[],
     keys: string[]
   ) => {
+    const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     for (const conflict of conflicts) {
       const conflictingBinding = conflict.keybindings.filter(
         binding =>
-          JSONExt.deepEqual(binding.keys, keys) ||
-          keys.some(key => JSONExt.deepEqual(binding.keys, [key]))
+          JSONExt.deepEqual(binding.keys, normalizedKeys) ||
+          normalizedKeys.some(key => JSONExt.deepEqual(binding.keys, [key]))
       )[0];
       if (!conflictingBinding) {
         console.error(
@@ -152,7 +153,7 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: Array<string>,
     currentChain: string
-  ): Array<any> => {
+  ): [string, string[], string] => {
     let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
     const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];
@@ -366,8 +367,8 @@ export class ShortcutInput extends React.Component<
               this.state.selected && this._isReplacingExistingKeybinding
                 ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
                 : this.state.value === ''
-                ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
-                : 'jp-Shortcuts-InputText'
+                  ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
+                  : 'jp-Shortcuts-InputText'
             }
           >
             {this.state.value === ''
@@ -380,8 +381,8 @@ export class ShortcutInput extends React.Component<
             !this.state.isFunctional
               ? 'jp-Shortcuts-Submit jp-mod-defunc-Submit'
               : !this.state.isAvailable
-              ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
-              : 'jp-Shortcuts-Submit'
+                ? 'jp-Shortcuts-Submit jp-mod-conflict-Submit'
+                : 'jp-Shortcuts-Submit'
           }
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={this.handleSubmit}

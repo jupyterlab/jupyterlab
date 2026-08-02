@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import { IStream, Signal, Stream } from '@lumino/signaling';
+import type { IStream } from '@lumino/signaling';
+import { Signal, Stream } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
 /**

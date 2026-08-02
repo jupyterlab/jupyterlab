@@ -320,4 +320,36 @@ test.describe('Inline Completer', () => {
       expect(noGhostTextHeight).toEqual(finalHeight);
     });
   });
+  test.describe('Ghost text with Syntax Highlighting', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          ...SHARED_SETTINGS,
+          showWidget: 'never',
+          ghostSyntaxHighlighting: true
+        }
+      }
+    });
+
+    test('should apply syntax highlighting', async ({ page }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      // Type 'ug' (the cell already has 's') which matches 'suggestion_1 = 1' from the setup notebook.
+      await page.keyboard.type('ug');
+
+      // Wait for the ghost text to appear.
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      // The ghost text should contain the rest of the suggestion.
+      await expect(ghostText).toHaveText('gestion_1 = 1');
+
+      // Wait a brief moment for highlighting to apply.
+      await page.waitForTimeout(100);
+
+      // Take a screenshot of the entire cell.
+      const imageName = 'ghost-text-with-syntax-highlighting.png';
+      expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
+    });
+  });
 });

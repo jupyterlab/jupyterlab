@@ -1,21 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import {
-  Dialog,
-  ISessionContext,
-  Printing,
-  showDialog
-} from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { Dialog, Printing, showDialog } from '@jupyterlab/apputils';
 import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
-import { INotebookModel } from './model';
-import { Notebook, StaticNotebook } from './widget';
-import { Message } from '@lumino/messaging';
+import type { INotebookModel } from './model';
+import type { StaticNotebook } from './widget';
+import { Notebook } from './widget';
+import type { Message } from '@lumino/messaging';
 
 /**
  * The class name added to notebook panels.
@@ -192,7 +189,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(
-    sender: any,
+    sender: ISessionContext,
     args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     if (!this.model || !args.newValue) {

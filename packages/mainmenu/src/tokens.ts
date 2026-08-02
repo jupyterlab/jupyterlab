@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MenuFactory } from '@jupyterlab/apputils';
+import type { MenuFactory } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
-import { IEditMenu } from './edit';
-import { IFileMenu } from './file';
-import { IHelpMenu } from './help';
-import { IKernelMenu } from './kernel';
-import { IRunMenu } from './run';
-import { ISettingsMenu } from './settings';
-import { ITabsMenu } from './tabs';
-import { IViewMenu } from './view';
+import type { Menu } from '@lumino/widgets';
+import type { IEditMenu } from './edit';
+import type { IFileMenu } from './file';
+import type { IHelpMenu } from './help';
+import type { IKernelMenu } from './kernel';
+import type { IRunMenu } from './run';
+import type { ISettingsMenu } from './settings';
+import type { ITabsMenu } from './tabs';
+import type { IViewMenu } from './view';
 
 /**
  * The main menu token.

@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
-import * as Kernel from './kernel';
+import type * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 
 declare let setImmediate: any;
@@ -17,9 +18,9 @@ declare let setImmediate: any;
  *
  */
 export abstract class KernelFutureHandler<
-    REQUEST extends KernelMessage.IShellControlMessage,
-    REPLY extends KernelMessage.IShellControlMessage
-  >
+  REQUEST extends KernelMessage.IShellControlMessage,
+  REPLY extends KernelMessage.IShellControlMessage
+>
   extends DisposableDelegate
   implements Kernel.IFuture<REQUEST, REPLY>
 {
@@ -314,17 +315,16 @@ export abstract class KernelFutureHandler<
 }
 
 export class KernelControlFutureHandler<
-    REQUEST extends
-      KernelMessage.IControlMessage = KernelMessage.IControlMessage,
-    REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
-  >
+  REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+  REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
+>
   extends KernelFutureHandler<REQUEST, REPLY>
   implements Kernel.IControlFuture<REQUEST, REPLY> {}
 
 export class KernelShellFutureHandler<
-    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
-    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
-  >
+  REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+  REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+>
   extends KernelFutureHandler<REQUEST, REPLY>
   implements Kernel.IShellFuture<REQUEST, REPLY> {}
 

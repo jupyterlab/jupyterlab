@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../codeeditor"
     },
     {

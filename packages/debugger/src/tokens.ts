@@ -1,23 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { KernelMessage, Session } from '@jupyterlab/services';
 
-import { KernelMessage, Session } from '@jupyterlab/services';
+import type { ISharedText } from '@jupyter/ydoc';
 
-import { ISharedText } from '@jupyter/ydoc';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { ISignal, Signal } from '@lumino/signaling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Panel } from '@lumino/widgets';
 
-import { Panel } from '@lumino/widgets';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebuggerHandler } from './handler';
 
-import { DebuggerHandler } from './handler';
+import type { IDebuggerSourceDisplayProvider } from './displayregistry';
 
 /**
  * An interface describing an application's visual debugger.
@@ -202,6 +204,11 @@ export interface IDebugger {
   stop(): Promise<void>;
 
   /**
+   * Signal emitted when the debugger stops.
+   */
+  readonly stopped: ISignal<IDebugger, void>;
+
+  /**
    * Update all breakpoints of a cell at once.
    *
    * @param code - The code in the cell where the breakpoints are set.
@@ -287,6 +294,10 @@ export namespace IDebugger {
      * Map of breakpoints to send back to the kernel after it has restarted
      */
     breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+    /**
+     * Prefix for temporary files associated with this kernel session
+     */
+    tmpPrefix?: string;
   };
 
   /**
@@ -520,7 +531,7 @@ export namespace IDebugger {
       /**
        * An optional hashing seed provided by the kernel.
        */
-      seed?: any;
+      seed?: string;
     };
   }
 
@@ -652,7 +663,7 @@ export namespace IDebugger {
          */
         copyToGlobals?: boolean;
         hashMethod: string;
-        hashSeed: number;
+        hashSeed: string;
         isStarted: boolean;
         /**
          * Whether the kernel supports variable rich rendering or not.
@@ -747,11 +758,10 @@ export namespace IDebugger {
    * #### Notes
    * This is experimental API
    */
-  export interface IVariableSelection
-    extends Pick<
-      DebugProtocol.Variable,
-      'name' | 'type' | 'variablesReference' | 'value'
-    > {}
+  export interface IVariableSelection extends Pick<
+    DebugProtocol.Variable,
+    'name' | 'type' | 'variablesReference' | 'value'
+  > {}
 
   /**
    * Debugger sidebar interface.
@@ -994,7 +1004,9 @@ export namespace IDebugger {
     export interface ISources {
       /**
        * Signal emitted when the current frame changes.
+       * @deprecated since 4.6.0, will be removed in 5.0.
        */
+
       readonly currentFrameChanged: ISignal<
         IDebugger.Model.ICallstack,
         IDebugger.IStackFrame | null
@@ -1003,7 +1015,12 @@ export namespace IDebugger {
       /**
        * Return the current source.
        */
-      currentSource: IDebugger.Source | null;
+      readonly currentSource: IDebugger.Source | null;
+
+      /**
+       * Return the current frame.
+       */
+      readonly currentFrame: IDebugger.IStackFrame | null;
 
       /**
        * Signal emitted when the current source changes.
@@ -1111,6 +1128,21 @@ export namespace IDebugger {
 }
 
 /**
+ * Interface token for the Debugger Display Registry service.
+ */
+export interface IDebuggerDisplayRegistry {
+  /**
+   * Register a display provider.
+   */
+  register(provider: IDebuggerSourceDisplayProvider): void;
+
+  /**
+   * Get a display name for a given source.
+   */
+  getDisplayName(source: IDebugger.Source): string;
+}
+
+/**
  * The visual debugger token.
  */
 export const IDebugger = new Token<IDebugger>(
@@ -1156,4 +1188,12 @@ export const IDebuggerHandler = new Token<IDebugger.IHandler>(
 export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
   '@jupyterlab/debugger:IDebuggerSourceViewer',
   'A debugger source viewer.'
+);
+
+/**
+ * Debugger display registry token.
+ */
+export const IDebuggerDisplayRegistry = new Token<IDebuggerDisplayRegistry>(
+  '@jupyterlab/debugger:IDebuggerDisplayRegistry',
+  'A service for registering display labels for cells/files in the debugger.'
 );

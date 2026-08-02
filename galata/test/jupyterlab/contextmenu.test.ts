@@ -42,11 +42,6 @@ test.describe('Application Context Menu', () => {
     await page.filebrowser.openHomeDirectory();
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Open file browser context menu on folder', async ({ page }) => {
     await page.sidebar.openTab(filebrowserId);
     expect(await page.sidebar.isTabOpen(filebrowserId)).toBeTruthy();

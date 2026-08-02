@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type {
   JSONObject,
   JSONValue,
   PartialJSONArray,
@@ -14,12 +14,16 @@ import {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import Ajv, { Options as AjvOptions } from 'ajv';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Options as AjvOptions } from 'ajv';
+import Ajv from 'ajv';
 import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
-import { ISettingRegistry } from './tokens';
+import type { ISettingRegistry } from './tokens';
 
 /**
  * An alias for the JSON deep copy function.
@@ -283,7 +287,10 @@ export class SettingRegistry implements ISettingRegistry {
         .forEach(plugin => this._unloadedPlugins.set(plugin.id, plugin));
 
       // Preload with any available data at instantiation-time.
-      this._ready = this._preload(options.plugins);
+      this._isReady = false;
+      this._ready = this._preload(options.plugins).then(() => {
+        this._isReady = true;
+      });
     }
   }
 
@@ -411,7 +418,7 @@ export class SettingRegistry implements ISettingRegistry {
     await this._ready;
 
     const fetched = await this.connector.fetch(plugin);
-    const plugins = this.plugins; // eslint-disable-line
+    const plugins = this.plugins;
     const registry = this; // eslint-disable-line
 
     if (fetched === undefined) {
@@ -441,7 +448,9 @@ export class SettingRegistry implements ISettingRegistry {
    */
   async remove(plugin: string, key: string): Promise<void> {
     // Wait for data preload before allowing normal operation.
-    await this._ready;
+    if (!this._isReady) {
+      await this._ready;
+    }
 
     const plugins = this.plugins;
 
@@ -473,7 +482,9 @@ export class SettingRegistry implements ISettingRegistry {
    */
   async set(plugin: string, key: string, value: JSONValue): Promise<void> {
     // Wait for data preload before allowing normal operation.
-    await this._ready;
+    if (!this._isReady) {
+      await this._ready;
+    }
 
     const plugins = this.plugins;
 
@@ -545,7 +556,9 @@ export class SettingRegistry implements ISettingRegistry {
    */
   async upload(plugin: string, raw: string): Promise<void> {
     // Wait for data preload before allowing normal operation.
-    await this._ready;
+    if (!this._isReady) {
+      await this._ready;
+    }
 
     const plugins = this.plugins;
 
@@ -617,34 +630,63 @@ export class SettingRegistry implements ISettingRegistry {
    * Save a plugin in the registry.
    */
   private async _save(plugin: string): Promise<void> {
-    const plugins = this.plugins;
+    const previousSave = this._saveQueue.get(plugin) ?? Promise.resolve();
+    const snapshot = this.plugins[plugin]?.raw;
+    let queuedSave: Promise<void>;
 
-    if (!(plugin in plugins)) {
-      throw new Error(`${plugin} does not exist in setting registry.`);
-    }
+    const savePlugin = async (): Promise<void> => {
+      const plugins = this.plugins;
 
-    try {
-      await this._validate(plugins[plugin]);
-    } catch (errors) {
-      console.warn(`${plugin} validation errors:`, errors);
-      throw new Error(`${plugin} failed to validate; check console.`);
-    }
-    await this.connector.save(plugin, plugins[plugin].raw);
+      if (!(plugin in plugins)) {
+        throw new Error(`${plugin} does not exist in setting registry.`);
+      }
 
-    // Fetch and reload the data to guarantee server and client are in sync.
-    const fetched = await this.connector.fetch(plugin);
-    if (fetched === undefined) {
-      throw [
-        {
-          instancePath: '',
-          keyword: 'id',
-          message: `Could not fetch settings for ${plugin}.`,
-          schemaPath: ''
-        } as ISchemaValidator.IError
-      ];
-    }
-    await this._load(await this._transform('fetch', fetched));
-    this._pluginChanged.emit(plugin);
+      if (snapshot === undefined) {
+        throw new Error(`${plugin} does not exist in setting registry.`);
+      }
+
+      const snapshotPlugin = { ...plugins[plugin], raw: snapshot };
+
+      try {
+        this._validateData(snapshotPlugin);
+      } catch (errors) {
+        console.warn(`${plugin} validation errors:`, errors);
+        throw new Error(`${plugin} failed to validate; check console.`);
+      }
+      await this.connector.save(plugin, snapshot);
+      if (this._saveQueue.get(plugin) !== queuedSave) {
+        return;
+      }
+
+      // Fetch and reload the data to guarantee server and client are in sync.
+      const fetched = await this.connector.fetch(plugin);
+      if (this._saveQueue.get(plugin) !== queuedSave) {
+        return;
+      }
+      if (fetched === undefined) {
+        throw [
+          {
+            instancePath: '',
+            keyword: 'id',
+            message: `Could not fetch settings for ${plugin}.`,
+            schemaPath: ''
+          } as ISchemaValidator.IError
+        ];
+      }
+      await this._load(await this._transform('fetch', fetched));
+      this._pluginChanged.emit(plugin);
+    };
+
+    // Continue save queue even if the previous request failed.
+    queuedSave = previousSave.then(savePlugin, savePlugin);
+
+    this._saveQueue.set(plugin, queuedSave);
+
+    return queuedSave.finally(() => {
+      if (this._saveQueue.get(plugin) === queuedSave) {
+        this._saveQueue.delete(plugin);
+      }
+    });
   }
 
   /**
@@ -692,18 +734,27 @@ export class SettingRegistry implements ISettingRegistry {
    */
   private async _validate(plugin: ISettingRegistry.IPlugin): Promise<void> {
     // Validate the user data and create the composite data.
-    const errors = this.validator.validateData(plugin);
-
-    if (errors) {
-      throw errors;
-    }
+    this._validateData(plugin);
 
     // Apply a transformation if necessary and set the local copy.
     this.plugins[plugin.id] = await this._transform('compose', plugin);
   }
 
+  /**
+   * Validate a plugin without updating the registry cache.
+   */
+  private _validateData(plugin: ISettingRegistry.IPlugin): void {
+    const errors = this.validator.validateData(plugin);
+
+    if (errors) {
+      throw errors;
+    }
+  }
+
   private _pluginChanged = new Signal<this, string>(this);
+  private _isReady = true;
   private _ready = Promise.resolve();
+  private _saveQueue = new Map<string, Promise<void>>();
   private _transformers: {
     [plugin: string]: {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;

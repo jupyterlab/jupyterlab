@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IConsoleCellExecutor } from '@jupyterlab/console';
-import { IDebugger } from '@jupyterlab/debugger';
-import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { IConsoleCellExecutor } from '@jupyterlab/console';
+import type { IDebugger } from '@jupyterlab/debugger';
+import type { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
+import type { TranslationBundle } from '@jupyterlab/translation';
 /**
  * Custom console cell executor that uses debugger evaluation.
  */

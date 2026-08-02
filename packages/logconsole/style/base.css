@@ -14,7 +14,7 @@
 .jp-LogConsolePanel .jp-OutputArea-prompt {
   width: 85px;
   color: var(--jp-ui-font-color2);
-  font-size: 13px;
+  font-size: var(--jp-code-font-size);
   padding: 2px;
 }
 
@@ -40,7 +40,7 @@
 
 .jp-LogConsoleListPlaceholder {
   padding: 5px;
-  font-size: 13px;
+  font-size: var(--jp-code-font-size);
   color: var(--jp-ui-font-color3);
 }
 

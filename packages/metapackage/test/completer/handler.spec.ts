@@ -1,22 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { Signal } from '@lumino/signaling';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { Signal } from '@lumino/signaling';
+import type {
+  ICompletionContext,
+  ICompletionProvider
+} from '@jupyterlab/completer';
 import {
   Completer,
   CompleterModel,
   CompletionHandler,
   CompletionTriggerKind,
-  ICompletionContext,
-  ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
-import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
 class TestCompleterModel extends CompleterModel {
@@ -428,12 +430,50 @@ describe('@jupyterlab/completer', () => {
         expect(spy).toHaveBeenCalledTimes(1);
         expect(spy).toHaveBeenLastCalledWith(
           false,
-          {
-            sourceChange: [{ retain: 4 }, { insert: 'a' }]
-          } as SourceChange,
+          { sourceChange: [{ retain: 4 }, { insert: 'a' }] } as SourceChange,
           context
         );
         spy.mockRestore();
+      });
+
+      it('should ignore stale completion replies', async () => {
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        handler.completer.reset();
+
+        let resolvePending!: (
+          reply: CompletionHandler.ICompletionItemsReply
+        ) => void;
+        const pending = new Promise<CompletionHandler.ICompletionItemsReply>(
+          resolve => {
+            resolvePending = resolve;
+          }
+        );
+        const fetch = jest.spyOn(provider, 'fetch').mockReturnValue(pending);
+        const shouldShow = jest
+          .spyOn(provider, 'shouldShowContinuousHint')
+          .mockReturnValueOnce(true)
+          .mockReturnValue(false);
+        const model = handler.completer.model!;
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+        expect(fetch).toHaveBeenCalledTimes(1);
+
+        handler.editor!.model.sharedModel.updateSource(5, 5, ':');
+        await new Promise(process.nextTick);
+        resolvePending({
+          start: 0,
+          end: 1,
+          items: [{ label: 'alpha' }]
+        });
+        await new Promise(process.nextTick);
+
+        expect(model.original).toBeNull();
+        expect(model.completionItems()).toHaveLength(0);
+        fetch.mockRestore();
+        shouldShow.mockRestore();
       });
     });
 

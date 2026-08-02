@@ -3,7 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { FeatureManager, IFeature } from '@jupyterlab/lsp';
+import type { IFeature } from '@jupyterlab/lsp';
+import { FeatureManager } from '@jupyterlab/lsp';
 
 const feature1: IFeature = {
   id: 'foo',

@@ -5,7 +5,7 @@
  * @module apputils
  */
 import { Toolbar as UIToolbar } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**
@@ -19,8 +19,6 @@ export {
   CommandToolbarButton,
   CommandToolbarButtonComponent,
   IFrame,
-  IUseSignalProps,
-  IUseSignalState,
   HoverBox,
   ReactWidget,
   Spinner,
@@ -30,6 +28,10 @@ export {
   UseSignal,
   VDomModel,
   VDomRenderer
+} from '@jupyterlab/ui-components';
+export type {
+  IUseSignalProps,
+  IUseSignalState
 } from '@jupyterlab/ui-components';
 
 export * from './clipboard';
@@ -49,6 +51,7 @@ export * from './sanitizer';
 export * from './semanticCommand';
 export * from './sessioncontext';
 export * from './thememanager';
+export * from './movableSectionRegistry';
 export * from './tokens';
 export {
   ToolbarWidgetRegistry,

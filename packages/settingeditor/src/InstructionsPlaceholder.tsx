@@ -5,7 +5,7 @@
 
 import React from 'react';
 
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 
 type ISettingsEditorPlaceholderProps = {
   translator: ITranslator;

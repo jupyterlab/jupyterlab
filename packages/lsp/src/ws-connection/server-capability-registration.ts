@@ -2,21 +2,20 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 // Disclaimer/acknowledgement: Fragments are based on https://github.com/wylieconlon/lsp-editor-adapter,
 // which is copyright of wylieconlon and contributors and ISC licenced.
 // ISC licence is, quote, "functionally equivalent to the simplified BSD and MIT licenses,
 // but without language deemed unnecessary following the Berne Convention." (Wikipedia).
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
 
-import {
+import type {
   Registration,
   ServerCapabilities,
   Unregistration
 } from 'vscode-languageserver-protocol';
 
 interface IFlexibleServerCapabilities extends ServerCapabilities {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

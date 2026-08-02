@@ -7,7 +7,21 @@ import * as path from 'path';
 const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-Completer';
 
+// Completer is performance-critical; it must show up quickly.
+// If it does not, the test can fail rather than wait
+// for the 60-second test-wide timeout to lapse.
+const COMPLETER_TIMEOUT = 15000;
+
 test.describe('Completer', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/completer-extension:manager': {
+        providerTimeout: 60000
+      }
+    }
+  });
+
   test.describe('Notebook', () => {
     test.beforeEach(async ({ page }) => {
       await page.notebook.createNew(fileName);
@@ -26,16 +40,25 @@ test.describe('Completer', () => {
       await page.notebook.enterCellEditingMode(1);
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
+
       await expect(completer).toBeHidden();
+      // Ensure the completer is still bound to the editor before pressing Tab
+      // again; this guards against a brief window after Escape where the editor
+      // state hasn't settled yet.
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       const imageName = 'completer.png';
       expect.soft(await completer.screenshot()).toMatchSnapshot(imageName);
       // Accept the completion
@@ -45,11 +68,8 @@ test.describe('Completer', () => {
       // Completer shouldn't show up, but Completer should be enabled
       await page.keyboard.press('Enter');
       await page.keyboard.press('Tab');
-      let locator = page.locator(
-        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
-      );
-      await expect(locator).toHaveCount(1);
-      await expect(locator).toHaveClass(/jp-mod-completer-enabled/);
+      await expect(editor).toHaveCount(1);
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
       completer = page.locator(COMPLETER_SELECTOR);
 
       await expect(completer).toBeHidden();
@@ -82,10 +102,14 @@ test.describe('Completer', () => {
       await page.notebook.enterCellEditingMode(1);
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
@@ -99,7 +123,7 @@ test.describe('Completer', () => {
 
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page
         .locator('.jp-Completer-loading-bar')
         .waitFor({ state: 'detached' });
@@ -125,16 +149,27 @@ test.describe('Completer', () => {
       await page.keyboard.press('End');
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+
+      // For the token completion specifically we need to wait for CodeMirror
+      // to actually generate the tokens. This corresponds to the editor having
+      // syntax highlighting already painted over.
+      // `int` will have `cm-builtin` class once highlighting was applied.
+      const cell = await page.notebook.getCellLocator(0);
+      await cell!.locator('.cm-builtin').waitFor();
+
       await page.keyboard.press('Tab');
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       const imageName = 'token-completer.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
@@ -151,17 +186,20 @@ test.describe('Completer', () => {
       await page.notebook.enterCellEditingMode(1);
 
       // we need to wait until the completer gets bound to the cell after entering it
-      await page.waitForTimeout(50);
+      const editor = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
       await page.keyboard.press('Tab');
 
       let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.type('g', { delay: 50 });
 
       const imageName = 'completer-filter.png';
@@ -186,7 +224,7 @@ test.describe('Completer', () => {
 
     test('Open completer on console', async ({ page }) => {
       const completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
 
       const imageName = 'completer-console.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
@@ -194,7 +232,7 @@ test.describe('Completer', () => {
 
     test('Filter console completer suggestions by typing', async ({ page }) => {
       const completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor();
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
 
       await page.keyboard.type('g', { delay: 10 });
 

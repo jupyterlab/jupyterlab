@@ -4,12 +4,9 @@
  */
 import { ShortcutRegistry } from '@jupyterlab/shortcuts-extension/lib/registry';
 import { CommandRegistry } from '@lumino/commands';
-import { IDataConnector } from '@jupyterlab/statedb';
-import {
-  ISettingRegistry,
-  SettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
 
 import pluginSchema from '../schema/shortcuts.json';
 
@@ -102,6 +99,29 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(targets[0].keybindings).toHaveLength(2);
       });
 
+      it('should resolve platform-specific keys', () => {
+        // The `keys` value is the cross-platform fallback; `winKeys`/`linuxKeys`/
+        // `macKeys` take precedence on their respective platform (as done by
+        // Lumino's `addKeyBinding`). The registry should expose the resolved
+        // keys so the UI reflects the binding that is actually active.
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel Shift Z'],
+          winKeys: ['Ctrl Y'],
+          linuxKeys: ['Ctrl Y'],
+          selector: 'body'
+        } as CommandRegistry.IKeyBindingOptions);
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const target = [...shortcutRegistry.values()][0];
+        expect(target.keybindings[0].keys).toEqual(
+          CommandRegistry.normalizeKeys({
+            keys: ['Accel Shift Z'],
+            winKeys: ['Ctrl Y'],
+            linuxKeys: ['Ctrl Y']
+          } as CommandRegistry.IKeyBindingOptions)
+        );
+      });
+
       it('should mark keybindings created by user as non-default', () => {
         const shortcut = {
           command: 'test:command',
@@ -125,6 +145,18 @@ describe('@jupyterlab/shortcut-extension', () => {
         const target = [...shortcutRegistry.values()][0];
         expect(target.keybindings[0].isDefault).toBe(true);
       });
+
+      it('should preserve preventDefault on keybindings', () => {
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Ctrl W'],
+          selector: 'body',
+          preventDefault: false
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const target = [...shortcutRegistry.values()][0];
+        expect(target.keybindings[0].preventDefault).toBe(false);
+      });
     });
 
     describe('#findConflictsFor()', () => {
@@ -146,6 +178,20 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(conflicts).toHaveLength(1);
       });
 
+      it('should normalize keys before checking conflicts', () => {
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel S'],
+          selector: 'body'
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const conflicts = shortcutRegistry.findConflictsFor(
+          ['Accel S'],
+          'body'
+        );
+        expect(conflicts).toHaveLength(1);
+      });
+
       it('should return conflicts for individual chords', () => {
         data.composite.shortcuts.push({
           command: 'test:command',
@@ -154,6 +200,20 @@ describe('@jupyterlab/shortcut-extension', () => {
         });
         const shortcutRegistry = new ShortcutRegistry(options);
         const conflicts = shortcutRegistry.findConflictsFor(['X', 'X'], 'body');
+        expect(conflicts).toHaveLength(1);
+      });
+
+      it('should normalize keys before checking individual chords', () => {
+        data.composite.shortcuts.push({
+          command: 'test:command',
+          keys: ['Accel S'],
+          selector: 'body'
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const conflicts = shortcutRegistry.findConflictsFor(
+          ['Accel K', 'Accel S'],
+          'body'
+        );
         expect(conflicts).toHaveLength(1);
       });
 

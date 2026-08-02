@@ -12,6 +12,7 @@ e.g. python example_check.py ./app
 """
 
 import importlib.util
+import json
 import os
 import shutil
 import sys
@@ -26,7 +27,28 @@ TEST_FILE = here / "example.spec.ts"
 REF_SNAPSHOT = Path(TEST_FILE.with_suffix(".ts-snapshots").name) / "example-linux.png"
 
 
-def main():
+def _blob_report_name(example_dir: Path) -> str:
+    try:
+        stem = "-".join(example_dir.resolve().relative_to(here.parent).parts)
+    except ValueError:
+        stem = example_dir.name
+    return f"{stem}.zip"
+
+
+def _playwright_config(example_dir: Path) -> str:
+    reporters = []
+    if os.environ.get("CI"):
+        reporters.append(
+            [
+                "blob",
+                {"outputDir": "blob-report", "fileName": _blob_report_name(example_dir)},
+            ]
+        )
+    reporters.append(["json", {"outputFile": "test-results/report.json"}])
+    return f"module.exports = {{\n  reporter: {json.dumps(reporters)}\n}};\n"
+
+
+def main() -> None:
     # Load the main file and grab the example class so we can subclass
     example_dir = Path(sys.argv[-1])
     mod_path = (example_dir / "main.py").resolve()
@@ -59,16 +81,16 @@ def main():
             run_test(self.serverapp, run_browser)
             super().initialize_settings()
 
-        def _jupyter_server_extension_points():
-            return [{"module": __name__, "app": App}]
+    def _jupyter_server_extension_points() -> list[dict[str, str | type]]:
+        return [{"module": __name__, "app": App}]
 
-        mod._jupyter_server_extension_points = _jupyter_server_extension_points
+    mod._jupyter_server_extension_points = _jupyter_server_extension_points
 
     App.__name__ = example_dir.name.capitalize() + "Test"
     App.launch_instance()
 
 
-async def run_browser(url):
+async def run_browser(url: str):
     """Run the browser test and return an exit code."""
     # Run the browser test and return an exit code.
     target = Path(get_app_dir()) / "example_test"
@@ -76,8 +98,14 @@ async def run_browser(url):
         if not target.exists():
             target.mkdir(parents=True, exist_ok=True)
         await run_async_process(["npm", "init", "-y"], cwd=str(target))
-        await run_async_process(["npm", "install", "-D", "@playwright/test@^1"], cwd=str(target))
-        await run_async_process(["npx", "playwright", "install", "chromium"], cwd=str(target))
+        playwright_version = os.environ.get("PLAYWRIGHT_VERSION", "^1")
+        await run_async_process(
+            ["npm", "install", "-D", f"@playwright/test@{playwright_version}"],
+            cwd=str(target),
+        )
+        await run_async_process(
+            ["npx", "playwright", "install", "--only-shell", "chromium"], cwd=str(target)
+        )
     test_target = target / TEST_FILE.name
 
     # Copy test file
@@ -85,8 +113,9 @@ async def run_browser(url):
         str(TEST_FILE),
         str(test_target),
     )
-    # Copy reference snapshot
     example_dir = Path(sys.argv[-1])
+    (target / "playwright.config.js").write_text(_playwright_config(example_dir))
+    # Copy reference snapshot
     snapshot = example_dir / REF_SNAPSHOT
     has_snapshot = False
     if snapshot.exists():
@@ -97,13 +126,21 @@ async def run_browser(url):
 
     results_target = target / "test-results"
     dst = example_dir / results_target.name
+    blob_report_target = target / "blob-report"
+    blob_dst = example_dir / blob_report_target.name
     # Force creation of the results folder as it may be listed in the filebrowser to avoid
     # snapshots discrepancy
     dst.mkdir(exist_ok=True)
+    if results_target.exists():
+        shutil.rmtree(results_target)
+    if blob_report_target.exists():
+        shutil.rmtree(blob_report_target)
 
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
+    current_env["EXAMPLE_NAME"] = example_dir.name
     current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
+
     try:
         await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
     finally:
@@ -112,6 +149,10 @@ async def run_browser(url):
             if dst.exists():
                 shutil.rmtree(dst)
             shutil.copytree(str(results_target), str(dst))
+        if blob_report_target.exists():
+            if blob_dst.exists():
+                shutil.rmtree(blob_dst)
+            shutil.copytree(str(blob_report_target), str(blob_dst))
 
 
 if __name__ == "__main__":

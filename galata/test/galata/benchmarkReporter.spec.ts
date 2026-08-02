@@ -2,14 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
-import { TestResult } from '@playwright/test/reporter';
-import BenchmarkReporter, {
-  benchmark,
-  IReportRecord
-} from '../../src/benchmarkReporter';
+import type { TestResult } from '@playwright/test/reporter';
+import type { IReportRecord } from '../../src/benchmarkReporter';
+import BenchmarkReporter, { benchmark } from '../../src/benchmarkReporter';
 import fs from 'fs';
 import path from 'path';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 const MOCK_DATA = {
   nSamples: 20,

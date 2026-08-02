@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module rendermime-interfaces
@@ -368,6 +369,11 @@ export namespace IRenderMime {
     linkHandler: ILinkHandler | null;
 
     /**
+     * An optional trust handler.
+     */
+    trustHandler?: ITrustHandler | null;
+
+    /**
      * The LaTeX typesetter.
      */
     latexTypesetter: ILatexTypesetter | null;
@@ -426,6 +432,11 @@ export namespace IRenderMime {
      * @returns Whether to allow name and id properties.
      */
     readonly allowNamedProperties?: boolean;
+
+    /**
+     * @returns Whether to allow command linker attributes.
+     */
+    readonly allowCommandLinker?: boolean;
   }
 
   /**
@@ -442,6 +453,7 @@ export namespace IRenderMime {
      * @param id an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
+
     /**
      * Add the path handler to the node.
      *
@@ -459,6 +471,21 @@ export namespace IRenderMime {
       scope: 'kernel' | 'server',
       id?: string
     ): void;
+  }
+
+  /**
+   * An object that handles trust boundaries for rendered content.
+   */
+  export interface ITrustHandler {
+    /**
+     * Mark a trusted DOM boundary.
+     */
+    markTrusted(node: HTMLElement): void;
+
+    /**
+     * Remove a trusted DOM boundary previously set by `markTrusted`.
+     */
+    unmarkTrusted(node: HTMLElement): void;
   }
 
   export interface IResolvedLocation {
@@ -557,6 +584,43 @@ export namespace IRenderMime {
      *   happen synchronously or asynchronously.
      */
     typeset(element: HTMLElement): void | Promise<void>;
+
+    /**
+     * Options describing how math is recognized in the source text.
+     *
+     * These options are shared with the Markdown pre-processing step
+     * (`removeMath`) so that hiding math from the Markdown parser and
+     * typesetting it stay consistent. When omitted, the default options
+     * are assumed, including a single `$` delimiter for inline math.
+     */
+    readonly mathParseOptions?: ILatexTypesetter.IMathParseOptions;
+  }
+
+  /**
+   * The namespace for `ILatexTypesetter` associated interfaces.
+   */
+  export namespace ILatexTypesetter {
+    /**
+     * Options describing how math is recognized in the source text.
+     */
+    export interface IMathParseOptions {
+      // In future further source-recognition options (e.g. explicit inline/display
+      // delimiter pairs, or whether `\begin...\end` environments are treated as
+      // math) can be added here as needed.
+      /**
+       * Whether a single `$` should be treated as an inline math delimiter.
+       *
+       * Set to `false` to render `$` literally (e.g. for currency amounts
+       * such as "$5 and $10"). Display math (`$$...$$`) and the `\(...\)` /
+       * `\[...\]` delimiters are unaffected by this option. Defaults to `true`.
+       *
+       * Note that this option applies wherever the typesetter is used, not
+       * only to Markdown: in particular, a `$...$` expression in a
+       * `text/latex` output (which is typeset directly, without Markdown
+       * pre-processing) is also left literal when this option is `false`.
+       */
+      readonly dollarInlineMath?: boolean;
+    }
   }
 
   /**

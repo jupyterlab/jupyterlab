@@ -3,11 +3,11 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   ICommandPalette,
   ILicensesClient,
@@ -24,7 +24,7 @@ import {
   refreshIcon,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * The command IDs used by the licenses plugin.
@@ -147,7 +147,7 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: (args: any) => {
+      execute: args => {
         // bail if no license API is available from the server
         if (!PageConfig.getOption('licensesUrl')) {
           console.warn('No license API available from the server');

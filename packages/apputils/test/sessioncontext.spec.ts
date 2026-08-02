@@ -1,20 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  ISessionContext,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Dialog,
-  ISessionContext,
-  ISessionContextDialogs,
   SessionContext,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
+import type { Session } from '@jupyterlab/services';
 import {
   KernelManager,
   KernelSpecManager,
   SessionAPI,
   SessionManager
 } from '@jupyterlab/services';
-import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
+import type { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 import {
   acceptDialog,
   dismissDialog,
@@ -300,6 +303,81 @@ describe('@jupyterlab/apputils', () => {
         other.dispose();
       });
 
+      it('should keep no kernel when shouldReuse is false even if a path session exists', async () => {
+        const refreshRunning = jest
+          .spyOn(sessionManager, 'refreshRunning')
+          .mockResolvedValue(undefined);
+        const pathSessionModel: Session.IModel = {
+          id: UUID.uuid4(),
+          path,
+          name: '',
+          type: 'test',
+          kernel: {
+            id: UUID.uuid4(),
+            name: specsManager.specs!.default
+          }
+        };
+        const running = jest
+          .spyOn(sessionManager, 'running')
+          .mockReturnValue([pathSessionModel][Symbol.iterator]());
+        const connectTo = jest.spyOn(sessionManager, 'connectTo');
+        try {
+          const kernelPreference = {
+            ...sessionContext.kernelPreference,
+            shouldStart: false,
+            shouldReuse: false
+          };
+          sessionContext.kernelPreference = kernelPreference;
+          expect(sessionContext.kernelPreference.shouldReuse).toBe(false);
+
+          const result = await sessionContext.initialize();
+          expect(result).toBe(false);
+          expect(connectTo).not.toHaveBeenCalled();
+          expect(sessionContext.session?.kernel).toBeFalsy();
+        } finally {
+          refreshRunning.mockRestore();
+          running.mockRestore();
+          connectTo.mockRestore();
+        }
+      });
+
+      it('should connect to a path session when shouldStart is false', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel?.id).toBe(other.kernel?.id);
+        other.dispose();
+      });
+
+      it('should connect to a path session when shouldStart is false and a kernel id is provided', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false,
+          id: other.kernel!.id
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel?.id).toBe(other.kernel?.id);
+        other.dispose();
+      });
+
       it('should connect to an existing kernel', async () => {
         // Shut down and dispose the session so it can be re-instantiated.
         await sessionContext.shutdown();
@@ -416,6 +494,79 @@ describe('@jupyterlab/apputils', () => {
       it('should be "unknown" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
+      });
+
+      it('should be "starting" while a change-kernel request is in flight', async () => {
+        // Reproduces the case where an existing session switches to a
+        // different kernel: without an in-flight signal, the getter falls
+        // through to the previous kernel's status (typically "idle"),
+        // masking the fact that a new kernel is being provisioned.
+        //
+        // We can't reliably assert on `kernelDisplayStatus` right after
+        // calling `changeKernel()` because that method awaits
+        // `_initStarted.promise` before reaching `_changeKernel` where
+        // the flag is set. Instead, hook `statusChanged` and snapshot
+        // the display status the moment `'starting'` is emitted from
+        // inside `_changeKernel`.
+        await sessionContext.initialize();
+        await sessionContext.session!.kernel!.info;
+        const name = sessionContext.session?.kernel?.name;
+
+        let displayWhileChanging: string | undefined;
+        const handler = (_: any, status: string) => {
+          if (status === 'starting' && displayWhileChanging === undefined) {
+            displayWhileChanging = sessionContext.kernelDisplayStatus;
+          }
+        };
+        sessionContext.statusChanged.connect(handler);
+
+        try {
+          await sessionContext.changeKernel({ name });
+        } finally {
+          sessionContext.statusChanged.disconnect(handler);
+        }
+
+        expect(displayWhileChanging).toBe('starting');
+      });
+
+      it('should not emit a redundant "unknown" status if change-kernel is rejected', async () => {
+        // Before the fix, `_changeKernel`'s `finally` block emitted the
+        // post-change status unconditionally, even though the `catch`
+        // branch's `_handleSessionError()` call already tears down the
+        // session (and therefore already emits a settled status). That
+        // made the `finally` emission a redundant *third* "unknown" on
+        // top of the two inherent emissions that any session teardown
+        // produces: one proxied from the disposed kernel's own status
+        // change, and one from `_handleNewSession(null)`'s explicit
+        // fallback. This test guards against that redundant emission
+        // reappearing; it does not assert only one "unknown" is emitted,
+        // since the two teardown-inherent emissions are pre-existing
+        // behavior of `_handleNewSession` unrelated to `changeKernel`.
+        await sessionContext.initialize();
+        await sessionContext.session!.kernel!.info;
+
+        jest
+          .spyOn(sessionContext.session!, 'changeKernel')
+          .mockRejectedValue(new Error('mock error'));
+
+        const statuses: string[] = [];
+        const handler = (_: any, status: string) => {
+          statuses.push(status);
+        };
+        sessionContext.statusChanged.connect(handler);
+
+        let caught = false;
+        const promise = sessionContext
+          .changeKernel({ name: 'echo' })
+          .catch(() => {
+            caught = true;
+          });
+        await Promise.all([promise, acceptDialog()]);
+        sessionContext.statusChanged.disconnect(handler);
+
+        expect(caught).toBe(true);
+        expect(statuses).toEqual(['starting', 'unknown', 'unknown']);
         expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
     });

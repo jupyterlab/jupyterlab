@@ -4,7 +4,7 @@
 import { TreeView } from '@jupyter/react-components';
 import * as React from 'react';
 import { TableOfContentsItem } from './tocitem';
-import { TableOfContents } from './tokens';
+import type { TableOfContents } from './tokens';
 
 /**
  * Interface describing component properties.

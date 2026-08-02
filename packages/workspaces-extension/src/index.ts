@@ -2,15 +2,16 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module workspaces-extension
  */
-import {
+import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { JupyterLab } from '@jupyterlab/application';
 import {
   IWorkspaceCommands,
   IWorkspacesModel,
@@ -57,6 +58,7 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
   description: 'Populates "File" main menu with Workspaces submenu.',
   requires: [IWorkspaceCommands],
   autoStart: true,
+  // eslint-disable-next-line jupyter/plugin-activation-args
   activate: () => {
     // no-op - the menu items come from schema matching the name of the plugin
   }

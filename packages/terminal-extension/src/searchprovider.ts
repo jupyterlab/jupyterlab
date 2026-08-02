@@ -2,14 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import {
+import type {
   IReplaceOptions,
-  ISearchProvider,
-  SearchProvider
+  ISearchProvider
 } from '@jupyterlab/documentsearch';
+import { SearchProvider } from '@jupyterlab/documentsearch';
 import { Terminal } from '@jupyterlab/terminal';
-import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { Widget } from '@lumino/widgets';
 import type {
   ISearchDecorationOptions,
   ISearchOptions
@@ -224,6 +224,10 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
       // The following two need to be in string #rrggbb format to be acceptable to xtermjs.
       activeMatchBackground,
       matchBackground,
+      // The selection is rendered above the search decorations and hides
+      // activeMatchBackground on the active match; the border is drawn on
+      // the decoration overlay itself and stays visible.
+      activeMatchBorder: activeMatchBackground,
       // The following two are compulsory so they need to be set but we do not use them.
       matchOverviewRuler: '',
       activeMatchColorOverviewRuler: ''

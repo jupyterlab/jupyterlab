@@ -5,24 +5,29 @@
  * @module terminal-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Terminal, TerminalAPI } from '@jupyterlab/services';
+import type { IRunningSessions } from '@jupyterlab/running';
+import { IRunningSessionManagers } from '@jupyterlab/running';
+import type { Terminal } from '@jupyterlab/services';
+import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import {
   ITerminal,
   ITerminalTracker,
@@ -31,11 +36,15 @@ import {
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
+  linkIcon,
   pasteIcon,
   refreshIcon,
   terminalIcon
 } from '@jupyterlab/ui-components';
-import { Menu, Widget } from '@lumino/widgets';
+import { VDomRenderer } from '@jupyterlab/ui-components';
+import { VDomModel } from '@jupyterlab/ui-components';
+import type { Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
 
 /**
@@ -43,6 +52,8 @@ import { TerminalSearchProvider } from './searchprovider';
  */
 namespace CommandIDs {
   export const copy = 'terminal:copy';
+
+  export const copyLink = 'terminal:copy-link';
 
   export const createNew = 'terminal:create-new';
 
@@ -59,7 +70,18 @@ namespace CommandIDs {
   export const setTheme = 'terminal:set-theme';
 
   export const shutdown = 'terminal:shut-down';
+
+  export const openFolderInTerminal = 'terminal:open-folder-in-terminal';
 }
+
+/**
+ * The duration in milliseconds to display the escape hint.
+ */
+const ESCAPE_HINT_DISPLAY_MS = 1500;
+
+const TERMINAL_OPTION_KEYS = new Set<string>(
+  Object.keys(ITerminal.defaultOptions)
+);
 
 /**
  * The default terminal extension.
@@ -77,15 +99,79 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
     IMainMenu,
     IThemeManager,
     IRunningSessionManagers,
-    ISearchProviderRegistry
+    ISearchProviderRegistry,
+    IStatusBar
   ],
   autoStart: true
 };
 
 /**
- * Export the plugin as default.
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
  */
-export default plugin;
+const openFolderInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/terminal-extension:open-folder-in-terminal',
+  description: 'Adds an "Open in Terminal" command for the file browser.',
+  requires: [IFileBrowserFactory, ITranslator, ITerminalTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    fileBrowserFactory: IFileBrowserFactory,
+    translator: ITranslator,
+    tracker: ITerminalTracker
+  ): void => {
+    if (!app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openFolderInTerminal, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const { tracker } = fileBrowserFactory;
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const items = Array.from(widget.selectedItems());
+        if (items.length === 0) {
+          return;
+        }
+
+        for (const item of items) {
+          // Only open a terminal for directories.
+          if (item.type !== 'directory') {
+            continue;
+          }
+          try {
+            // Open one terminal for each selected directory.
+            await commands.execute(CommandIDs.createNew, {
+              cwd: item.path
+            });
+          } catch (error) {
+            void showErrorMessage(
+              trans.__('Failed to open new terminal'),
+              error as Error
+            );
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+export default [plugin, openFolderInTerminalPlugin];
 
 /**
  * Activate the terminal plugin.
@@ -100,7 +186,8 @@ function activate(
   mainMenu: IMainMenu | null,
   themeManager: IThemeManager | null,
   runningSessionManagers: IRunningSessionManagers | null,
-  searchRegistry: ISearchProviderRegistry | null
+  searchRegistry: ISearchProviderRegistry | null,
+  statusBar: IStatusBar | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
   const { serviceManager, commands } = app;
@@ -109,6 +196,22 @@ function activate(
   const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
     namespace
   });
+  const escapeHintStatus = statusBar
+    ? new EscapeHintStatus({
+        text: trans.__('Press Escape twice to leave terminal focus.')
+      })
+    : null;
+  let clearEscapeHintTimeout: number | null = null;
+
+  if (statusBar && escapeHintStatus) {
+    statusBar.registerStatusItem('@jupyterlab/terminal-extension:escape-hint', {
+      item: escapeHintStatus,
+      align: 'middle',
+      rank: 10,
+      isActive: () => escapeHintStatus.model.isActive,
+      activeStateChanged: escapeHintStatus.model.stateChanged
+    });
+  }
 
   // Bail if there are no terminals available.
   if (!serviceManager.terminals.isAvailable()) {
@@ -137,8 +240,13 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as any)[key] = settings.composite[key];
+    Object.keys(options).forEach(key => {
+      Reflect.deleteProperty(options, key);
+    });
+    Object.entries(settings.composite).forEach(([key, value]) => {
+      if (Private.isTerminalOption(key)) {
+        Object.assign(options, { [key]: value });
+      }
     });
   }
 
@@ -188,6 +296,23 @@ function activate(
   });
 
   addCommands(app, tracker, settingRegistry, translator, options);
+
+  tracker.widgetAdded.connect((_, widget) => {
+    widget.content.escapeHintRequested.connect(() => {
+      if (!escapeHintStatus) {
+        return;
+      }
+
+      if (clearEscapeHintTimeout !== null) {
+        window.clearTimeout(clearEscapeHintTimeout);
+      }
+      escapeHintStatus.model.setActive(true);
+      clearEscapeHintTimeout = window.setTimeout(() => {
+        escapeHintStatus.model.setActive(false);
+        clearEscapeHintTimeout = null;
+      }, ESCAPE_HINT_DISPLAY_MS);
+    });
+  });
 
   if (mainMenu) {
     // Add "Terminal Theme" menu below "Theme" menu.
@@ -392,6 +517,7 @@ function addCommands(
       const term = new XTerm(session, options, translator);
 
       term.title.icon = terminalIcon;
+      // eslint-disable-next-line jupyter/no-untranslated-string
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
@@ -535,6 +661,57 @@ function addCommands(
   });
 
   /**
+   * Get the terminal widget the context menu was opened over, falling back
+   * to the current terminal.
+   */
+  const contextMenuTerminal =
+    (): MainAreaWidget<ITerminal.ITerminal> | null => {
+      const hitNode = app.contextMenuHitTest(node =>
+        node.classList.contains('jp-Terminal')
+      );
+      if (hitNode) {
+        const widget = tracker.find(value => value.content.node === hitNode);
+        if (widget) {
+          return widget;
+        }
+      }
+      return tracker.currentWidget;
+    };
+
+  /**
+   * Get the URI of the link the context menu was opened over, or `null` if
+   * the context menu was not opened over a link.
+   */
+  const contextMenuLink = (): string | null => {
+    const content = contextMenuTerminal()?.content;
+    return content instanceof XTerm ? content.contextMenuLink : null;
+  };
+
+  /**
+   * Add copy link command
+   */
+  commands.addCommand(CommandIDs.copyLink, {
+    execute: () => {
+      const link = contextMenuLink();
+
+      if (link) {
+        Clipboard.copyToSystem(link);
+      }
+    },
+    isEnabled: () => Boolean(contextMenuLink()),
+    // Only show the command when the context menu was opened over a link.
+    isVisible: () => Boolean(contextMenuLink()),
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Copy Link Address'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  /**
    * Add paste command
    */
   commands.addCommand(CommandIDs.paste, {
@@ -639,10 +816,11 @@ function addCommands(
         return trans.__('Set terminal theme to the provided `theme`.');
       }
       const theme = args['theme'] as string;
+      const rawTheme = theme[0].toLocaleUpperCase() + theme.slice(1);
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
-          : trans.__(theme[0].toUpperCase() + theme.slice(1));
+          : trans.__(rawTheme);
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;
@@ -701,9 +879,54 @@ function addCommands(
  */
 namespace Private {
   /**
+   * Whether a setting key is a terminal widget option.
+   */
+  export function isTerminalOption(
+    key: string
+  ): key is keyof ITerminal.IOptions {
+    return TERMINAL_OPTION_KEYS.has(key);
+  }
+
+  /**
    *  Utility function for consistent error reporting
    */
   export function showErrorMessage(error: Error): void {
     console.error(`Failed to configure ${plugin.id}: ${error.message}`);
+  }
+}
+
+class EscapeHintModel extends VDomModel {
+  get isActive(): boolean {
+    return this._isActive;
+  }
+
+  setActive(active: boolean): void {
+    if (this._isActive === active) {
+      return;
+    }
+    this._isActive = active;
+    this.stateChanged.emit(undefined);
+  }
+
+  private _isActive = false;
+}
+
+class EscapeHintStatus extends VDomRenderer<EscapeHintModel> {
+  constructor(options: EscapeHintStatus.IOptions) {
+    super(new EscapeHintModel());
+    this._text = options.text;
+    this.addClass('jp-mod-highlighted');
+  }
+
+  render() {
+    return TextItem({ source: this._text });
+  }
+
+  private _text: string;
+}
+
+namespace EscapeHintStatus {
+  export interface IOptions {
+    text: string;
   }
 }

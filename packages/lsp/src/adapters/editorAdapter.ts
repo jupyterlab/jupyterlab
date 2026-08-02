@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   IConfigurableExtension,
   IEditorExtensionFactory
 } from '@jupyterlab/codemirror';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapter';
-import { Document } from '../tokens';
+import type { WidgetLSPAdapter } from './adapter';
+import type { Document } from '../tokens';
 
 /**
  * The CodeEditor.IEditor adapter.
@@ -73,7 +73,7 @@ export class EditorAdapter implements IDisposable {
     });
   }
 
-  private _widgetAdapter: WidgetLSPAdapter<any>;
+  private _widgetAdapter: WidgetLSPAdapter;
   private _extensions: EditorAdapter.ILSPEditorExtensionFactory[];
 }
 
@@ -101,8 +101,10 @@ export namespace EditorAdapter {
     extensions: ILSPEditorExtensionFactory[];
   }
 
-  export interface ILSPEditorExtensionFactory
-    extends Omit<IEditorExtensionFactory<any>, 'factory'> {
+  export interface ILSPEditorExtensionFactory extends Omit<
+    IEditorExtensionFactory<unknown>,
+    'factory'
+  > {
     /**
      * Extension factory.
      *
@@ -111,7 +113,7 @@ export namespace EditorAdapter {
      */
     readonly factory: (
       options: IFactoryOptions
-    ) => IConfigurableExtension<any> | null;
+    ) => IConfigurableExtension<unknown> | null;
   }
 
   export interface IFactoryOptions extends IEditorExtensionFactory.IOptions {
@@ -126,6 +128,6 @@ export namespace EditorAdapter {
     /**
      * The widget lsp adapter.
      */
-    widgetAdapter: WidgetLSPAdapter<any>;
+    widgetAdapter: WidgetLSPAdapter;
   }
 }

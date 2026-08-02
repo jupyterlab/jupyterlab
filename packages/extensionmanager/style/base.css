@@ -80,16 +80,6 @@
 }
 
 /*
-  Section headers
-*/
-
-.jp-extensionmanager-view .jp-SidePanel-header .jp-extensionmanager-error {
-  text-transform: none;
-  font-size: var(--jp-ui-font-size1);
-  font-weight: 400;
-}
-
-/*
   Error messages
 */
 
@@ -100,13 +90,6 @@
 /*
   List view pagination styling
 */
-
-.jp-extensionmanager-view ul.pagination {
-  display: flex;
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
-}
 
 .jp-extensionmanager-pagination li {
   display: inline-block;
@@ -166,11 +149,6 @@
 }
 
 /* Precedence order update/error/warning matters! */
-
-.jp-extensionmanager-entry.jp-extensionmanager-entry-update {
-  border-left: solid 8px var(--jp-brand-color2);
-  padding-left: 4px;
-}
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-error {
   border-left: solid 8px var(--jp-error-color2);
@@ -295,28 +273,6 @@
   flex-direction: row;
   padding-block-start: 4px;
   justify-content: flex-end;
-}
-
-/*
-  Rebuild prompt dialog
-*/
-
-.jp-extensionmanager-buildprompt {
-  background-color: var(--jp-brand-color1);
-  color: var(--jp-ui-inverse-font-color1);
-  padding: 4px 8px;
-  font-size: var(--jp-ui-font-size1);
-  font-weight: 400;
-}
-
-.jp-extensionmanager-buildprompt button {
-  border: none;
-  background-color: transparent;
-  color: var(--jp-ui-inverse-font-color1);
-  font-size: var(--jp-ui-font-size1);
-  font-weight: 600;
-  float: right;
-  margin: 4px;
 }
 
 /*

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import traceback
 import warnings
+from collections.abc import Iterator
 
 from traitlets import Unicode
 from traitlets.config import Configurable
@@ -19,7 +20,7 @@ class DebugLogFileMixin(Configurable):
     debug_log_path = Unicode("", config=True, help="Path to use for the debug log file")
 
     @contextlib.contextmanager
-    def debug_logging(self):
+    def debug_logging(self) -> Iterator[None]:
         log_path = self.debug_log_path
         if os.path.isdir(log_path):
             log_path = os.path.join(log_path, "jupyterlab-debug.log")

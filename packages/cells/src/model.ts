@@ -2,25 +2,31 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { AttachmentsModel, IAttachmentsModel } from '@jupyterlab/attachments';
+import type { IAttachmentsModel } from '@jupyterlab/attachments';
+import { AttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 
-import { IObservableString, ObservableValue } from '@jupyterlab/observables';
+import type {
+  IObservableString,
+  ObservableValue
+} from '@jupyterlab/observables';
 
-import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+import type { IOutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaModel } from '@jupyterlab/outputarea';
+import type { IOutputModel } from '@jupyterlab/rendermime';
 
-import {
+import type {
   CellChange,
-  createMutex,
-  createStandaloneCell,
   IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
@@ -30,6 +36,7 @@ import {
   ISharedRawCell,
   YCodeCell
 } from '@jupyter/ydoc';
+import { createMutex, createStandaloneCell } from '@jupyter/ydoc';
 
 const globalModelDBMutex = createMutex();
 
@@ -496,8 +503,9 @@ export namespace AttachmentsCellModel {
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
-  export interface IOptions<T extends ISharedCell>
-    extends CellModel.IOptions<T> {
+  export interface IOptions<
+    T extends ISharedCell
+  > extends CellModel.IOptions<T> {
     /**
      * The factory for attachment model creation.
      */
@@ -628,6 +636,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.sharedModel.changed.connect(this._onSharedModelChanged, this);
     this._outputs.changed.connect(this.onGenericChange, this);
     this._outputs.changed.connect(this.onOutputsChange, this);
+    // Stream outputs added as initial values don't fire 'add' events (list.changed
+    // isn't connected during OutputAreaModel construction), so onOutputsChange never
+    // runs for them and their streamText.changed listener is never set up.
+    // Connect those listeners now so stream appends propagate back to Y.js.
+    for (let i = 0; i < this._outputs.length; i++) {
+      const output = this._outputs.get(i);
+      if (output.type === 'stream') {
+        this._connectStreamListener(output, i);
+      }
+    }
   }
 
   /**
@@ -742,6 +760,36 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Connect the streamText.changed listener that propagates stream text
+   * appends from the in-memory OutputAreaModel back to Y.js.
+   *
+   * Must be called outside any globalModelDBMutex block so the connection is
+   * established even for outputs that were part of the initial cell state.
+   */
+  private _connectStreamListener(output: IOutputModel, index: number): void {
+    output.streamText!.changed.connect(
+      (
+        _sender: IObservableString,
+        textEvent: IObservableString.IChangedArgs
+      ) => {
+        if (
+          textEvent.options !== undefined &&
+          (textEvent.options as { [key: string]: any })['silent']
+        ) {
+          return;
+        }
+        const codeCell = this.sharedModel as YCodeCell;
+        if (textEvent.type === 'remove') {
+          codeCell.removeStreamOutput(index, textEvent.start, 'silent-change');
+        } else {
+          codeCell.appendStreamOutput(index, textEvent.value, 'silent-change');
+        }
+      },
+      this
+    );
+  }
+
+  /**
    * Handle a change to the cell outputs modelDB and reflect it in the shared model.
    */
   protected onOutputsChange(
@@ -749,41 +797,29 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     event: IOutputAreaModel.ChangedArgs
   ): void {
     const codeCell = this.sharedModel as YCodeCell;
+    // Connect stream text listeners outside the mutex so the connection is
+    // established even when this handler is called re-entrantly from within
+    // _onSharedModelChanged's globalModelDBMutex block (which happens when
+    // a cell is initialized from Y.js data after a move or undo). Without
+    // this, stream text appended after a move is never synced back to Y.js,
+    // causing a subsequent move to lose those outputs (stale toJSON).
+    // A 'set' event that replaces the output model (e.g. when the trusted
+    // state changes) also needs a fresh listener, as the previous one was
+    // bound to the now-discarded model.
+    if (
+      event.type === 'add' ||
+      (event.type === 'set' && event.oldValues[0] !== event.newValues[0])
+    ) {
+      for (const output of event.newValues) {
+        if (output.type === 'stream') {
+          this._connectStreamListener(output, event.newIndex);
+        }
+      }
+    }
     globalModelDBMutex(() => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (event.type) {
         case 'add': {
-          for (const output of event.newValues) {
-            if (output.type === 'stream') {
-              output.streamText!.changed.connect(
-                (
-                  sender: IObservableString,
-                  textEvent: IObservableString.IChangedArgs
-                ) => {
-                  if (
-                    textEvent.options !== undefined &&
-                    (textEvent.options as { [key: string]: any })['silent']
-                  ) {
-                    return;
-                  }
-                  const codeCell = this.sharedModel as YCodeCell;
-                  if (textEvent.type === 'remove') {
-                    codeCell.removeStreamOutput(
-                      event.newIndex,
-                      textEvent.start,
-                      'silent-change'
-                    );
-                  } else {
-                    codeCell.appendStreamOutput(
-                      event.newIndex,
-                      textEvent.value,
-                      'silent-change'
-                    );
-                  }
-                },
-                this
-              );
-            }
-          }
           const outputs = event.newValues.map(output => output.toJSON());
           codeCell.updateOutputs(
             event.newIndex,
@@ -925,8 +961,10 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions
-    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
+  export interface IOptions extends Omit<
+    CellModel.IOptions<ISharedCodeCell>,
+    'cell_type'
+  > {
     /**
      * The factory for output area model creation.
      */

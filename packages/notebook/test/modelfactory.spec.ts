@@ -1,8 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
-import { Cell, CodeCellModel, ICodeCellModel } from '@jupyterlab/cells';
+import type { YCodeCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
+import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
+import { CodeCellModel } from '@jupyterlab/cells';
 import {
   NotebookModel,
   NotebookModelFactory,

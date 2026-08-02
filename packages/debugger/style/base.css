@@ -64,3 +64,7 @@
 .jp-DebuggerPausedButton:hover {
   background: var(--jp-layout-color3);
 }
+
+.jp-DebuggerStopButton path {
+  fill: var(--jp-error-color0) !important;
+}

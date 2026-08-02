@@ -1,14 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-import { IDebugger } from '../tokens';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
+import type { IDebugger } from '../tokens';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import { runIcon, stepOverIcon, stopIcon } from '@jupyterlab/ui-components';
 
 /**
  * A reusable helper to show a "Paused in Debugger" overlay and block interactions.
@@ -27,6 +24,7 @@ export class DebuggerPausedOverlay implements IDisposable {
     text.textContent = this._trans.__('Paused in Debugger');
     overlay.appendChild(text);
 
+    // Continue
     const continueBtn = document.createElement('button');
     continueBtn.className = 'jp-DebuggerPausedButton';
     continueBtn.title = this._trans.__('Continue');
@@ -34,7 +32,9 @@ export class DebuggerPausedOverlay implements IDisposable {
     continueBtn.onclick = () => {
       void this._debuggerService.continue();
     };
+    overlay.appendChild(continueBtn);
 
+    // Step over
     const nextBtn = document.createElement('button');
     nextBtn.className = 'jp-DebuggerPausedButton';
     nextBtn.title = this._trans.__('Next');
@@ -42,9 +42,18 @@ export class DebuggerPausedOverlay implements IDisposable {
     nextBtn.onclick = () => {
       void this._debuggerService.next();
     };
-
-    overlay.appendChild(continueBtn);
     overlay.appendChild(nextBtn);
+
+    // Stop Debugger
+    const stopBtn = document.createElement('button');
+    stopBtn.className = 'jp-DebuggerPausedButton jp-DebuggerStopButton';
+    stopBtn.title = this._trans.__('Stop Debugger');
+    stopIcon.element({ container: stopBtn, elementPosition: 'center' });
+    stopBtn.onclick = async () => {
+      // Disconnects the debugger session
+      await this._debuggerService.stop();
+    };
+    overlay.appendChild(stopBtn);
 
     overlay.style.pointerEvents = 'auto';
     this._overlay = overlay;

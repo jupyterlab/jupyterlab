@@ -1,24 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
-  ISessionContext,
   MainAreaWidget,
   SessionContext,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time } from '@jupyterlab/coreutils';
-import {
-  IRenderMimeRegistry,
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-import { ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IPageHandler } from '@jupyterlab/outputarea';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ServiceManager } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
 import { Token, UUID } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
 import { CodeConsole } from './widget';
 import type { IConsoleCellExecutor } from './tokens';
@@ -48,6 +48,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       manager,
       modelFactory,
       sessionContext,
+      pageHandler,
       translator
     } = options;
     this.translator = translator ?? nullTranslator;
@@ -74,7 +75,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     const resolver = new RenderMimeRegistry.UrlResolver({
       path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => sessionContext?.session?.kernel?.id
     });
     rendermime = rendermime.clone({ resolver });
 
@@ -85,6 +87,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       mimeTypeService,
       contentFactory,
       modelFactory,
+      pageHandler,
       translator
     });
     this.content.addWidget(this.console);
@@ -101,12 +104,16 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     this.console.executed.connect(this._onExecuted, this);
     this._updateTitlePanel();
-    sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
-    sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
+    if (!options.preventTitleUpdate) {
+      sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
+      sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
+    }
 
     this.title.icon = consoleIcon;
     this.title.closable = true;
     this.id = `console-${count}`;
+
+    this._preventTitleUpdate = options.preventTitleUpdate ?? false;
   }
 
   /**
@@ -165,13 +172,21 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Update the console panel title.
    */
   private _updateTitlePanel(): void {
-    Private.updateTitle(this, this._connected, this._executed, this.translator);
+    if (!this._preventTitleUpdate) {
+      Private.updateTitle(
+        this,
+        this._connected,
+        this._executed,
+        this.translator
+      );
+    }
   }
 
   translator: ITranslator;
   private _executed: Date | null = null;
   private _connected: Date | null = null;
   private _sessionContext: ISessionContext;
+  private _preventTitleUpdate: boolean = false;
 }
 
 /**
@@ -248,9 +263,19 @@ export namespace ConsolePanel {
     translator?: ITranslator;
 
     /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
+
+    /**
      * A function to call when the kernel is busy.
      */
     setBusy?: () => IDisposable;
+
+    /**
+     * Whether to update the panel title on kernel/cell events or not.
+     */
+    preventTitleUpdate?: boolean;
   }
 
   /**
@@ -291,7 +316,7 @@ export namespace ConsolePanel {
   /**
    * The console renderer token.
    */
-  export const IContentFactory = new Token<IContentFactory>(
+  export const IContentFactory = new Token<ConsolePanel.IContentFactory>(
     '@jupyterlab/console:IContentFactory',
     'A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.'
   );

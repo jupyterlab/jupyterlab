@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { TableOfContents } from '../tokens';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import { renderMarkdown } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { TableOfContents } from '../tokens';
 
 /**
  * Markdown heading
@@ -78,35 +79,40 @@ export async function parseHeadings(
   markdownText: string,
   parser: IMarkdownParser | null
 ): Promise<IMarkdownHeading[]> {
-  if (!parser) {
-    console.warn("Couldn't parse headings; Markdown parser is null");
+  if (!parser || !parser.getHeadingTokens) {
+    console.warn(
+      'Unable to parse headings; Markdown parser is missing or does not implement getHeadingTokens().'
+    );
     return [];
   }
-  const renderedHtml = await parser.render(markdownText);
 
-  const headings = new Array<IMarkdownHeading>();
-  const domParser = new DOMParser();
-  const htmlDocument = domParser.parseFromString(renderedHtml, 'text/html');
+  // Get the heading tokens from the parser, including the source line metadata
+  const headingTokens = await parser.getHeadingTokens(markdownText);
 
-  // Query all heading elements (h1-h6)
-  const headingElements = htmlDocument.querySelectorAll(
-    'h1, h2, h3, h4, h5, h6'
+  // Convert each heading token into HTML and extract the heading elements,
+  // as this provides a clean and reliable way to retrieve the headings.
+  const parseHeadings = await Promise.all(
+    headingTokens.map(async token => {
+      const renderedHtml = await parser.render(token.raw);
+      const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
+      const htmlHeadings = Array.from(
+        dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
+
+      return htmlHeadings.map(e => ({
+        text: e.textContent?.trim() || '',
+        line: token.line,
+        level: parseInt(e.tagName[1], 10),
+        raw: token.raw.replace(/\n+$/, ''),
+        skip: skipHeading.test(token.raw)
+      }));
+    })
   );
 
-  headingElements.forEach((headingElement, lineIdx) => {
-    const level = parseInt(headingElement.tagName.substring(1), 10);
-    const headingText = headingElement.textContent?.trim() || '';
-
-    headings.push({
-      text: headingText,
-      line: lineIdx, // Line index within the parsed HTML, not the original Markdown source line
-      level: level,
-      raw: headingElement.outerHTML, // Parsed HTML string, not raw Markdown
-      skip: skipHeading.test(headingElement.outerHTML)
-    });
-  });
-
-  return headings;
+  return parseHeadings.reduce(
+    (acc, curr) => acc.concat(curr),
+    [] as IMarkdownHeading[]
+  );
 }
 
 /**
@@ -189,8 +195,8 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 // Returns the length of ``` or ~~~ fences.
 function extractLeadingFences(line: string) {
   let match;
-  if (line.startsWith('`')) match = line.match(/^(`{3,})/);
-  else match = line.match(/^(~{3,})/);
+  if (line.startsWith('`')) match = line.match(/^`{3,}/);
+  else match = line.match(/^~{3,}/);
   return match ? match[0].length : 0;
 }
 
@@ -299,7 +305,7 @@ interface IHeader {
  */
 function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
-  let match = line.match(/^([#]{1,6}) (.*)/);
+  let match = line.match(/^(#{1,6}) (.*)/);
   if (match) {
     return {
       text: cleanTitle(match[2]),
@@ -310,7 +316,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   }
   // Case: Markdown heading (alternative style)
   if (nextLine) {
-    match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
+    match = nextLine.match(/^ {0,3}([=]{2,}|-{2,})\s*$/);
     if (match) {
       return {
         text: cleanTitle(line),
@@ -321,7 +327,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
     }
   }
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
-  match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i);
+  match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i); // eslint-disable-line regexp/no-super-linear-backtracking
   if (match) {
     return {
       text: match[2],
@@ -343,4 +349,4 @@ function cleanTitle(heading: string): string {
  * Ignore title with html tag with a class name equal to `jp-toc-ignore` or `tocSkip`
  */
 const skipHeading =
-  /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;
+  /<\w+\s(?:.*?\s)?class="(?:.*?\s)?(?:jp-toc-ignore|tocSkip)(?:\s.*?)?"(?:\s.*?)?>/;

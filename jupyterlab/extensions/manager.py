@@ -7,7 +7,6 @@ import json
 import re
 from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
-from typing import Optional, Union
 
 import tornado
 from jupyterlab_server.translation_utils import translator
@@ -15,6 +14,7 @@ from traitlets import Enum
 from traitlets.config import Configurable, LoggingConfigurable
 
 from jupyterlab.commands import (
+    AppOptions,
     _AppHandler,
     _ensure_options,
     disable_extension,
@@ -25,7 +25,7 @@ from jupyterlab.commands import (
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
 
 
-def _ensure_compat_errors(info, app_options):
+def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None):
     """Ensure that the app info has compat_errors field"""
     handler = _AppHandler(app_options)
     info["compat_errors"] = handler._get_extension_compat()
@@ -38,7 +38,7 @@ _message_map = {
 }
 
 
-def _build_check_info(app_options):
+def _build_check_info(app_options: AppOptions | dict | None) -> dict[str, list[str]]:
     """Get info about packages scheduled for (un)install/update"""
     handler = _AppHandler(app_options)
     messages = handler.build_check(fast=True)
@@ -85,20 +85,20 @@ class ExtensionPackage:
     pkg_type: str
     allowed: bool = True
     approved: bool = False
-    companion: Optional[str] = None
+    companion: str | None = None
     core: bool = False
     enabled: bool = False
-    install: Optional[dict] = None
-    installed: Optional[bool] = None
+    install: dict | None = None
+    installed: bool | None = None
     installed_version: str = ""
     latest_version: str = ""
     status: str = "ok"
-    author: Optional[str] = None
-    license: Optional[str] = None
-    bug_tracker_url: Optional[str] = None
-    documentation_url: Optional[str] = None
-    package_manager_url: Optional[str] = None
-    repository_url: Optional[str] = None
+    author: str | None = None
+    license: str | None = None
+    bug_tracker_url: str | None = None
+    documentation_url: str | None = None
+    package_manager_url: str | None = None
+    repository_url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -114,7 +114,7 @@ class ActionResult:
     # Note: no simple way to use Enum in dataclass - https://stackoverflow.com/questions/72859557/typing-dataclass-that-can-only-take-enum-values
     #       keeping str for simplicity
     status: str
-    message: Optional[str] = None
+    message: str | None = None
     needs_restart: list[str] = field(default_factory=list)
 
 
@@ -162,7 +162,7 @@ class ExtensionManagerMetadata:
 
     name: str
     can_install: bool = False
-    install_path: Optional[str] = None
+    install_path: str | None = None
 
 
 @dataclass
@@ -174,7 +174,7 @@ class ExtensionsCache:
         last_page: Last available page result
     """
 
-    cache: dict[int, Optional[dict[str, ExtensionPackage]]] = field(default_factory=dict)
+    cache: dict[int, dict[str, ExtensionPackage] | None] = field(default_factory=dict)
     last_page: int = 1
 
 
@@ -201,9 +201,9 @@ class PluginManager(LoggingConfigurable):
 
     def __init__(
         self,
-        app_options: Optional[dict] = None,
-        ext_options: Optional[dict] = None,
-        parent: Optional[Configurable] = None,
+        app_options: dict | None = None,
+        ext_options: dict | None = None,
+        parent: Configurable | None = None,
     ) -> None:
         super().__init__(parent=parent)
         self.log.debug(
@@ -236,7 +236,8 @@ class PluginManager(LoggingConfigurable):
         for plugin in plugins_or_extensions:
             if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
-                if plugin in self.options.lock_rules:
+                extension = plugin.split(":")[0]
+                if plugin in self.options.lock_rules or extension in self.options.lock_rules:
                     locked_subset.add(plugin)
             elif plugin in extensions_with_locked_plugins:
                 # this is an extension - we need to check for >any< plugin
@@ -244,7 +245,7 @@ class PluginManager(LoggingConfigurable):
                 locked_subset.add(plugin)
         return locked_subset
 
-    async def disable(self, plugins: Union[str, list[str]]) -> ActionResult:
+    async def disable(self, plugins: str | list[str]) -> ActionResult:
         """Disable a set of plugins (or an extension).
 
         Args:
@@ -270,7 +271,7 @@ class PluginManager(LoggingConfigurable):
         except Exception as err:
             return ActionResult(status="error", message=repr(err))
 
-    async def enable(self, plugins: Union[str, list[str]]) -> ActionResult:
+    async def enable(self, plugins: str | list[str]) -> ActionResult:
         """Enable a set of plugins (or an extension).
 
         Args:
@@ -327,19 +328,19 @@ class ExtensionManager(PluginManager):
 
     def __init__(
         self,
-        app_options: Optional[dict] = None,
-        ext_options: Optional[dict] = None,
-        parent: Optional[Configurable] = None,
+        app_options: dict | None = None,
+        ext_options: dict | None = None,
+        parent: Configurable | None = None,
     ) -> None:
         super().__init__(app_options=app_options, ext_options=ext_options, parent=parent)
         self.log = self.app_options.logger
         self.app_dir = Path(self.app_options.app_dir)
         self.core_config = self.app_options.core_config
         self.options = ExtensionManagerOptions(**(ext_options or {}))
-        self._extensions_cache: dict[Optional[str], ExtensionsCache] = {}
-        self._listings_cache: Optional[dict] = None
+        self._extensions_cache: dict[str | None, ExtensionsCache] = {}
+        self._listings_cache: dict | None = None
         self._listings_block_mode = True
-        self._listing_fetch: Optional[tornado.ioloop.PeriodicCallback] = None
+        self._listing_fetch: tornado.ioloop.PeriodicCallback | None = None
 
         if len(self.options.allowed_extensions_uris) or len(self.options.blocked_extensions_uris):
             self._listings_block_mode = len(self.options.allowed_extensions_uris) == 0
@@ -362,9 +363,9 @@ class ExtensionManager(PluginManager):
     @property
     def metadata(self) -> ExtensionManagerMetadata:
         """Extension manager metadata."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    async def get_latest_version(self, extension: str) -> Optional[str]:
+    async def get_latest_version(self, extension: str) -> str | None:
         """Return the latest available version for a given extension.
 
         Args:
@@ -372,11 +373,11 @@ class ExtensionManager(PluginManager):
         Returns:
             The latest available version
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], int | None]:
         """List the available extensions.
 
         Args:
@@ -387,9 +388,9 @@ class ExtensionManager(PluginManager):
             The available extensions in a mapping {name: metadata}
             The results last page; None if the manager does not support pagination
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    async def install(self, extension: str, version: Optional[str] = None) -> ActionResult:
+    async def install(self, extension: str, version: str | None = None) -> ActionResult:
         """Install the required extension.
 
         Note:
@@ -403,7 +404,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The action result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     async def uninstall(self, extension: str) -> ActionResult:
         """Uninstall the required extension.
@@ -418,7 +419,7 @@ class ExtensionManager(PluginManager):
         Returns:
             The action result
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @staticmethod
     def get_semver_version(version: str) -> str:
@@ -456,8 +457,8 @@ class ExtensionManager(PluginManager):
         return extension.name
 
     async def list_extensions(
-        self, query: Optional[str] = None, page: int = 1, per_page: int = 30
-    ) -> tuple[list[ExtensionPackage], Optional[int]]:
+        self, query: str | None = None, page: int = 1, per_page: int = 30
+    ) -> tuple[list[ExtensionPackage], int | None]:
         """List extensions for a given ``query`` search term.
 
         This will return the extensions installed (if ``query`` is None) or
@@ -487,21 +488,21 @@ class ExtensionManager(PluginManager):
             if self._listings_block_mode:
                 for name, ext in cache.items():
                     if name not in listing:
-                        extensions.append(replace(ext, allowed=True))
+                        extensions.append(ext)
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
             else:
                 for name, ext in cache.items():
                     if name in listing:
-                        extensions.append(replace(ext, allowed=True))
+                        extensions.append(ext)
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
 
         return extensions, self._extensions_cache[query].last_page
 
-    async def refresh(self, query: Optional[str], page: int, per_page: int) -> None:
+    async def refresh(self, query: str | None, page: int, per_page: int) -> None:
         """Refresh the list of extensions."""
         if query in self._extensions_cache:
             self._extensions_cache[query].cache[page] = None
@@ -537,8 +538,24 @@ class ExtensionManager(PluginManager):
 
         self._listings_cache = {r["name"]: r for r in rules}
 
+    async def _is_allowed_by_listing(self, name: str) -> bool:
+        """Return whether the listing policy permits installing this extension."""
+        if self._listing_fetch is None:
+            return True
+        if self._listings_cache is None:
+            await self._fetch_listings()
+        normalized = self._canonicalize_name(name)
+        normalized_cache = {self._canonicalize_name(k) for k in self._listings_cache}
+        if self._listings_block_mode:
+            return normalized not in normalized_cache
+        else:
+            return normalized in normalized_cache
+
+    async def is_install_allowed(self, name: str, _version: str | None = None) -> bool:
+        return await self._is_allowed_by_listing(name)
+
     async def _get_installed_extensions(
-        self, get_latest_version=True
+        self, get_latest_version: bool = True
     ) -> dict[str, ExtensionPackage]:
         """Get the installed extensions.
 
@@ -643,7 +660,7 @@ class ExtensionManager(PluginManager):
 
         return extensions
 
-    def _get_companion(self, data: dict) -> Optional[str]:
+    def _get_companion(self, data: dict) -> str | None:
         companion = None
         if "discovery" in data["jupyterlab"]:
             if "server" in data["jupyterlab"]["discovery"]:
@@ -652,7 +669,7 @@ class ExtensionManager(PluginManager):
                 companion = "kernel"
         return companion
 
-    def _get_scheduled_uninstall_info(self, name) -> Optional[dict]:
+    def _get_scheduled_uninstall_info(self, name: str) -> dict | None:
         """Get information about a package that is scheduled for uninstallation"""
         target = self.app_dir / "staging" / "node_modules" / name / "package.json"
         if target.exists():
@@ -671,8 +688,12 @@ class ExtensionManager(PluginManager):
         """
         return name
 
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize extension name for listing policy comparisons."""
+        return self._normalize_name(name)
+
     async def _update_extensions_list(
-        self, query: Optional[str] = None, page: int = 1, per_page: int = 30
+        self, query: str | None = None, page: int = 1, per_page: int = 30
     ) -> None:
         """Update the list of extensions"""
         last_page = None

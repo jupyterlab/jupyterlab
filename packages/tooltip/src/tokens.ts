@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Kernel } from '@jupyterlab/services';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { Kernel } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The tooltip manager token.

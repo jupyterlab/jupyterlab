@@ -4,9 +4,10 @@
  */
 
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Workspace } from '@jupyterlab/services';
-import { IWorkspacesModel } from './tokens';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Workspace } from '@jupyterlab/services';
+import type { IWorkspacesModel } from './tokens';
 
 /**
  * The default duration of the auto-refresh in ms

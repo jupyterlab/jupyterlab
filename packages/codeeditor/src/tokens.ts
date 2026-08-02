@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
-import { CodeEditor } from './editor';
-import { IEditorFactoryService } from './factory';
-import { IEditorMimeTypeService } from './mimetype';
+import type { Widget } from '@lumino/widgets';
+import type { CodeEditor } from './editor';
+import type { IEditorFactoryService } from './factory';
+import type { IEditorMimeTypeService } from './mimetype';
 
 /**
  * A class added to editors that can host a completer.

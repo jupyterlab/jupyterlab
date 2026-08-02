@@ -57,11 +57,26 @@ describe('@jupyterlab/codemirror', () => {
           container
         );
         expect(container.innerHTML).toEqual(
-          `<span class="ͼ19">(</span>defun check-login <span class="ͼ19">(</span>name password<span class="ͼ19">)</span> <span class="ͼ11">; absolutely secure</span>
-      <span class="ͼ19">(</span>if <span class="ͼ19">(</span>equal name <span class="ͼ12">"admin"</span><span class="ͼ19">)</span>
-        <span class="ͼ19">(</span>equal password <span class="ͼ12">"12345"</span><span class="ͼ19">)</span>
-        <span class="ͼ1d">#t</span><span class="ͼ19">)</span><span class="ͼ19">)</span>`
+          `<span class="ͼ1a">(</span>defun check-login <span class="ͼ1a">(</span>name password<span class="ͼ1a">)</span> <span class="ͼ12">; absolutely secure</span>
+      <span class="ͼ1a">(</span>if <span class="ͼ1a">(</span>equal name <span class="ͼ13">"admin"</span><span class="ͼ1a">)</span>
+        <span class="ͼ1a">(</span>equal password <span class="ͼ13">"12345"</span><span class="ͼ1a">)</span>
+        <span class="ͼ1e">#t</span><span class="ͼ1a">)</span><span class="ͼ1a">)</span>`
         );
+      });
+
+      it('should render single-character code blocks', async () => {
+        const container = document.createElement('pre');
+
+        const singleChar = 'x';
+        await languages.highlight(
+          singleChar,
+          languages.findBest('text/foo'),
+          container
+        );
+
+        // Before the fix: container was empty, textContent === ''
+        // After the fix: textContent should equal the original code
+        expect(container.textContent).toBe(singleChar);
       });
     });
   });

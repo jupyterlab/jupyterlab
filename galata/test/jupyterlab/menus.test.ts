@@ -65,6 +65,37 @@ test.describe('General Tests', () => {
     await page.menu.closeAll();
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
+
+  test('Export menu shows guidance when no format is available', async ({
+    page
+  }) => {
+    await page.route(/\/api\/nbconvert(\?.*)?$/, (route, request) => {
+      if (request.method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: '{}'
+        });
+      }
+
+      return route.continue();
+    });
+
+    await page.goto();
+    await page.notebook.createNew();
+
+    await page.menu.openLocator('File>Save and Export Notebook As');
+    const exportMenu = await page.menu.getOpenMenuLocator();
+    expect(exportMenu).toBeDefined();
+    expect(
+      await exportMenu!
+        .getByRole('menuitem', {
+          name: 'Enable notebook exports'
+        })
+        .count()
+    ).toBe(1);
+    expect(await exportMenu!.getByRole('menuitem').count()).toBe(1);
+  });
 });
 
 const EXPECTED_MISSING_COMMANDS_MAINMENU = ['hub:control-panel', 'hub:logout'];
@@ -148,6 +179,7 @@ function reduceItem(
   | ISettingRegistry.IMenuItem
   | { [id: string]: ISettingRegistry.IMenuItem[] }
   | null {
+  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (item.type ?? 'command') {
     case 'command':
       if (!commands.includes(item.command)) {

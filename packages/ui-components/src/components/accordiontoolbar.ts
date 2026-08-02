@@ -1,15 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@lumino/messaging';
-import {
-  AccordionLayout,
-  AccordionPanel,
-  Title,
-  Widget
-} from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { Title } from '@lumino/widgets';
+import { AccordionLayout, AccordionPanel, Widget } from '@lumino/widgets';
 import { caretDownIcon } from '../icon';
-import { Toolbar } from './toolbar';
+import type { Toolbar } from './toolbar';
 
 /**
  * Accordion panel layout that adds a toolbar in widget title if present.

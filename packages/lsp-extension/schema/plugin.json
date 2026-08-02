@@ -39,7 +39,11 @@
     "activate": {
       "title": "Activate",
       "description": "Enable or disable the language server services.",
-      "enum": ["off", "on"],
+      "type": "string",
+      "oneOf": [
+        { "const": "off", "title": "Off" },
+        { "const": "on", "title": "On" }
+      ],
       "default": "off"
     },
     "languageServers": {
@@ -55,7 +59,12 @@
     },
     "setTrace": {
       "title": "Ask servers to send trace notifications",
-      "enum": ["off", "messages", "verbose"],
+      "type": "string",
+      "oneOf": [
+        { "const": "off", "title": "Off" },
+        { "const": "messages", "title": "Messages" },
+        { "const": "verbose", "title": "Verbose" }
+      ],
       "default": "off",
       "description": "Whether to ask server to send logs with execution trace (for debugging). Accepted values are: \"off\", \"messages\", \"verbose\". Servers are allowed to ignore this request."
     },

@@ -3,41 +3,81 @@
 
 var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
+var chromiumArgs = [
+  // Ensures that subpixel font rendering in Chrome is the same on CI as locally
+  '--disable-lcd-text',
+  // The terminal renders with WebGL when available and with the DOM renderer
+  // otherwise, each rasterizing text slightly differently. WebGL availability
+  // varies between CI runners, so disable it to keep screenshots deterministic.
+  '--disable-webgl'
+];
+
 module.exports = {
   ...baseConfig,
+  reporter: process.env.CI
+    ? [['blob'], ['json', { outputFile: 'test-results/report.json' }]]
+    : [['list'], ['html', { open: 'on-failure' }]],
   projects: [
     {
       name: 'documentation',
       // Try one retry as some tests are flaky
       retries: process.env.CI ? 2 : 0,
-      testMatch: 'test/documentation/**/*.test.ts',
+      testMatch: [
+        'test/documentation/**/*.test.ts',
+        'test/documentation/**/*.spec.ts'
+      ],
       testIgnore: '**/.ipynb_checkpoints/**',
       timeout: 90000,
       use: {
         launchOptions: {
           // Force slow motion
-          slowMo: 30
+          slowMo: 30,
+          args: chromiumArgs
         }
       }
     },
     {
       name: 'galata',
       testMatch: 'test/galata/**',
-      testIgnore: '**/.ipynb_checkpoints/**'
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
+    },
+    {
+      name: 'csp',
+      testMatch: 'test/csp/**',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
     },
     {
       name: 'jupyterlab',
-      testMatch: 'test/jupyterlab/**/*.test.ts',
+      testMatch: [
+        'test/jupyterlab/**/*.test.ts',
+        'test/jupyterlab/**/*.spec.ts'
+      ],
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {
           permissions: ['clipboard-read', 'clipboard-write']
+        },
+        launchOptions: {
+          args: chromiumArgs
         }
       }
     },
     {
       name: 'jupyterlab-firefox',
-      testMatch: 'test/jupyterlab/**/*.test.ts',
+      testMatch: [
+        'test/jupyterlab/**/*.test.ts',
+        'test/jupyterlab/**/*.spec.ts'
+      ],
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {
@@ -53,5 +93,7 @@ module.exports = {
   // Switch to 'always' to keep raw assets for all tests
   preserveOutput: 'failures-only', // Breaks HTML report if use.video == 'on'
   // Try one retry as some tests are flaky
-  retries: process.env.CI ? 1 : 0
+  retries: process.env.CI ? 1 : 0,
+  // For equal spread across shards
+  fullyParallel: true
 };

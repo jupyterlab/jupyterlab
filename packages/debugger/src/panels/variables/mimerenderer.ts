@@ -4,16 +4,14 @@
  */
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { IRenderMimeRegistry, MimeModel } from '@jupyterlab/rendermime';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { MimeModel } from '@jupyterlab/rendermime';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 const RENDERER_PANEL_CLASS = 'jp-VariableRendererPanel';
 const RENDERER_PANEL_RENDERER_CLASS = 'jp-VariableRendererPanel-renderer';

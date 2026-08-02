@@ -5,11 +5,12 @@
 
 import { Dialog } from '@jupyterlab/apputils';
 
-import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import type { Cell } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 

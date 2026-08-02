@@ -6,12 +6,11 @@
  * @packageDocumentation
  * @module pluginmanager-extension
  */
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -23,7 +22,7 @@ import {
   extensionIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import {
   IPluginManager,
   PluginListModel,
@@ -199,6 +198,6 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [pluginmanager];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [pluginmanager];
 
 export default plugins;

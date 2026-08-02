@@ -1,25 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelMessage } from '@jupyterlab/services';
-import {
-  ICompletionContext,
-  KernelCompleterProvider
-} from '@jupyterlab/completer';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ICompletionContext } from '@jupyterlab/completer';
+import { KernelCompleterProvider } from '@jupyterlab/completer';
+import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import {
   KernelMock,
   SessionConnectionMock
 } from '@jupyterlab/services/lib/testutils';
+import type { SourceChange } from '@jupyter/ydoc';
 
 describe('completer/default/kernelprovider', () => {
   describe('KernelCompleterProvider', () => {
     const provider = new KernelCompleterProvider();
     const kernel = new KernelMock({});
     const connection = new SessionConnectionMock({}, kernel);
+    const editorWidget = createEditorWidget();
+    editorWidget.model.mimeType = 'text/x-python';
     const context: ICompletionContext = {
-      widget: null as any,
+      widget: editorWidget,
+      editor: editorWidget.editor,
       session: connection
     };
+
+    afterAll(() => {
+      editorWidget.dispose();
+    });
 
     describe('#fetch()', () => {
       it('should accept results with `_jupyter_types_experimental` metadata', async () => {
@@ -167,6 +174,49 @@ describe('completer/default/kernelprovider', () => {
             { label: 'plot.xy' }
           ]
         });
+      });
+    });
+
+    describe('#shouldShowContinuousHint()', () => {
+      const change = (insert: string): SourceChange => ({
+        sourceChange: [{ insert }]
+      });
+
+      it.each(['a', '1', '_', '$', 'é'])(
+        'should trigger for identifier character %s',
+        insert => {
+          expect(
+            provider.shouldShowContinuousHint(false, change(insert), context)
+          ).toBe(true);
+        }
+      );
+
+      it.each([' ', '.', ')', ':', '\n', 'ab'])(
+        'should not trigger for %j',
+        insert => {
+          expect(
+            provider.shouldShowContinuousHint(false, change(insert), context)
+          ).toBe(false);
+        }
+      );
+
+      it('should not trigger while the completer is visible', () => {
+        expect(
+          provider.shouldShowContinuousHint(true, change('a'), context)
+        ).toBe(false);
+      });
+
+      it('should not trigger on deletions or unknown changes', () => {
+        expect(
+          provider.shouldShowContinuousHint(
+            false,
+            { sourceChange: [{ delete: 1 }] },
+            context
+          )
+        ).toBe(false);
+        expect(provider.shouldShowContinuousHint(false, {}, context)).toBe(
+          false
+        );
       });
     });
   });

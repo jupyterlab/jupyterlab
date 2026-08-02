@@ -4,11 +4,11 @@
  */
 
 import { VDomRenderer } from '@jupyterlab/apputils';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { FilterBox, lockIcon, Table } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import * as React from 'react';
-import { Action, IEntry, PluginListModel } from './model';
+import type { Action, IEntry, PluginListModel } from './model';
 
 /**
  * A namespace for plugins panel.
@@ -183,8 +183,8 @@ class AvailableList extends VDomRenderer<PluginListModel> {
                                 'To enable/disable, please acknowledge the disclaimer.'
                               )
                           : row.enabled
-                          ? this.trans.__('Disable %1 plugin', row.id)
-                          : this.trans.__('Enable %1 plugin', row.id)
+                            ? this.trans.__('Disable %1 plugin', row.id)
+                            : this.trans.__('Enable %1 plugin', row.id)
                       }
                       onChange={(
                         event: React.ChangeEvent<HTMLInputElement>

@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import type { IPluginNameToInterfaceMap } from '../extension';
-import { galata } from '../galata';
+import type { galata } from '../galata';
 import * as Utils from '../utils';
-import { MenuHelper } from './menu';
+import type { MenuHelper } from './menu';
 
 /**
  * Sidebar helpers
@@ -61,7 +62,17 @@ export class SidebarHelper {
           return null;
         }
 
-        return sideBar.classList.contains('jp-mod-right') ? 'right' : 'left';
+        // In 'side' mode the bar exposes which side it lives on via the
+        // jp-mod-left/jp-mod-right classes. In 'top'/'bottom' mode the bar
+        // is a child of the side area wrapper, which carries `data-side`.
+        if (sideBar.classList.contains('jp-mod-right')) {
+          return 'right';
+        }
+        if (sideBar.classList.contains('jp-mod-left')) {
+          return 'left';
+        }
+        const area = sideBar.closest('.jp-SideArea');
+        return area?.getAttribute('data-side') === 'right' ? 'right' : 'left';
       },
       { tabSelector: this.buildTabSelector(id) }
     );

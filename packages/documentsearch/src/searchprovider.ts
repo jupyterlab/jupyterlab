@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
-import {
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import type {
   IFilter,
   IFilters,
   IReplaceOptions,
@@ -14,9 +15,9 @@ import {
 /**
  * Abstract class implementing the search provider interface.
  */
-export abstract class SearchProvider<T extends Widget = Widget>
-  implements ISearchProvider
-{
+export abstract class SearchProvider<
+  T extends Widget = Widget
+> implements ISearchProvider {
   /**
    * Constructor
    *

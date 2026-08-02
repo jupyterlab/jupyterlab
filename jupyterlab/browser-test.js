@@ -7,7 +7,6 @@ const playwright = require('playwright');
 const path = require('path');
 const fs = require('fs');
 
-// eslint-disable-next-line no-redeclare
 const URL = process.argv[2];
 const BROWSER_VAR = 'JLAB_BROWSER_TYPE';
 const BROWSER = process.env[BROWSER_VAR] || 'chromium';
@@ -28,7 +27,6 @@ if (OUTPUT) {
 }
 
 async function main() {
-  /* eslint-disable no-console */
   console.info(`Starting headless ${BROWSER}...`);
   let testError = null;
 
@@ -37,7 +35,7 @@ async function main() {
     headless: HEADLESS,
     logger: {
       isEnabled: () => !!OUTPUT,
-      log: (name, severity, message, args) => console.log(name, message)
+      log: (name, severity, message, args) => console.log(name, message) // eslint-disable-line no-unused-vars
     }
   });
 

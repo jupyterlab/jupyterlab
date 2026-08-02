@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import type { JupyterLab } from '@jupyterlab/application';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 
 export function PluginRequiredMessage(props: {
   plugin: JupyterLab.IPluginInfo;
   dependants: JupyterLab.IPluginInfo[];
   trans: TranslationBundle;
-}): React.ReactElement<any> {
+}): React.ReactElement {
   return (
     <>
       {props.trans.__(
@@ -29,7 +29,7 @@ export function PluginInUseMessage(props: {
   plugin: JupyterLab.IPluginInfo;
   optionalDependants: JupyterLab.IPluginInfo[];
   trans: TranslationBundle;
-}): React.ReactElement<any> {
+}): React.ReactElement {
   return (
     <div className={'jp-pluginmanager-PluginInUseMessage'}>
       {props.trans.__(

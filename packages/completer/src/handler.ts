@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   CellChange,
   FileChange,
   ISharedBaseCell,
@@ -9,31 +9,31 @@ import {
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import {
-  CodeEditor,
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS,
   COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { IDataConnector } from '@jupyterlab/statedb';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import type { TransactionSpec } from '@codemirror/state';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { InlineCompleter } from './inline';
-import {
-  CompletionTriggerKind,
+import type { InlineCompleter } from './inline';
+import type {
   IInlineCompletionItem,
   IInlineCompletionList,
   IInlineCompletionProviderInfo,
-  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
-import { Completer } from './widget';
+import { CompletionTriggerKind, InlineCompletionTriggerKind } from './tokens';
+import type { Completer } from './widget';
 
 /**
  * A completion handler for editors.
@@ -344,6 +344,8 @@ export class CompletionHandler implements IDisposable {
     if (!editor) {
       return;
     }
+    const position = editor.getCursorPosition();
+    const state = this.getState(editor, position);
     if (
       model &&
       this._autoCompletion &&
@@ -351,12 +353,10 @@ export class CompletionHandler implements IDisposable {
       (await this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
-      ))
+      )) &&
+      this._isCurrentState(editor, state)
     ) {
-      void this._makeRequest(
-        editor.getCursorPosition(),
-        CompletionTriggerKind.TriggerCharacter
-      );
+      void this._makeRequest(position, CompletionTriggerKind.TriggerCharacter);
     }
 
     const inlineModel = this.inlineCompleter?.model;
@@ -436,6 +436,10 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
+        if (!this._isCurrentState(editor, state)) {
+          return;
+        }
+
         const model = this._updateModel(state, reply.start, reply.end);
         if (!model) {
           return;
@@ -455,6 +459,19 @@ export class CompletionHandler implements IDisposable {
       .catch(p => {
         /* Fails silently. */
       });
+  }
+
+  private _isCurrentState(
+    editor: CodeEditor.IEditor,
+    state: Completer.ITextState
+  ): boolean {
+    const position = editor.getCursorPosition();
+    return (
+      editor === this.editor &&
+      state.text === editor.model.sharedModel.getSource() &&
+      state.line === position.line &&
+      state.column === position.column
+    );
   }
 
   private async _makeInlineRequest(
@@ -689,8 +706,8 @@ export namespace CompletionHandler {
    * A reply to a completion items fetch request.
    */
   export interface ICompletionItemsReply<
-    T extends
-      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends CompletionHandler.ICompletionItem =
+      CompletionHandler.ICompletionItem
   > {
     /**
      * The starting index for the substring being replaced by completion.
