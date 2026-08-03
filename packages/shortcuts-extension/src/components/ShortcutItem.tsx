@@ -285,7 +285,10 @@ export class ShortcutItem extends React.Component<
               title={this._trans.__('Save shortcut')}
               aria-label={this._trans.__(
                 'Save shortcut %1 for %2',
-                this.toSymbols(this.props.shortcut.keybindings.join(', ')),
+                this.props.shortcut.keybindings
+                  .map(binding => this.toSymbols(binding.keys.join(', ')))
+                  .filter(keys => keys.length > 0)
+                  .join('; '),
                 this.props.shortcut.label ?? this.props.shortcut.command
               )}
               disabled={
