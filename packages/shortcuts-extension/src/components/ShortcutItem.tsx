@@ -17,7 +17,7 @@ import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { CustomOptionsDialog } from './ShortcutCustomOptions';
 import type { IConflicts } from './ShortcutInput';
-import { CONFLICT_CONTAINER_CLASS, ShortcutInput } from './ShortcutInput';
+import { ShortcutInput } from './ShortcutInput';
 import { ShortcutRegistry } from '../registry';
 import type {
   IKeybinding,
@@ -526,7 +526,7 @@ export class ShortcutItem extends React.Component<
     }
     return (
       <div className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
-        <div className={CONFLICT_CONTAINER_CLASS}>
+        <div className="jp-Shortcuts-ConflictContainer">
           {conflicts.map(conflict => {
             const key =
               conflict.keys.join(' ') +

@@ -15,8 +15,6 @@ import type {
   IShortcutUI
 } from '../types';
 
-export const CONFLICT_CONTAINER_CLASS = 'jp-Shortcuts-ConflictContainer';
-
 /** Idle time after the last keystroke before leaving active capture. */
 const CAPTURE_IDLE_MS = 2000;
 const CAPTURE_IDLE_SECONDS = CAPTURE_IDLE_MS / 1000;
@@ -576,9 +574,6 @@ export class ShortcutInput extends React.Component<
       const active = document.activeElement;
 
       if (root?.contains(active)) {
-        return;
-      }
-      if (active?.closest(`.${CONFLICT_CONTAINER_CLASS}`)) {
         return;
       }
 
