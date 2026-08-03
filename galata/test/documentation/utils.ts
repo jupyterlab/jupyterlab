@@ -143,6 +143,57 @@ export async function freeezeKernelIds(
   );
 }
 
+/**
+ * Work around a MathJax rendering race that makes notebook screenshots flaky.
+ *
+ * MathJax (CHTML, `matchFontHeight: true`) scales each equation to match the
+ * surrounding font by measuring the container's `ex`/`em`. When it typesets
+ * against a zero-width container (which happens when the notebook is typeset
+ * while not the visible/active tab) it falls back to a smaller `exFactor` and
+ * renders the equation ~12% too small - and that wrong size sticks.
+ *
+ * A mis-sized equation in a markdown cell shifts every cell below it; in the
+ * windowed notebook the scroll compensation snaps to an integer pixel, leaving
+ * a sub-pixel (~0.2px) residual that moves a glyph row across the device-pixel
+ * grid in the next code cell, flipping a line by 1px between runs.
+ *
+ * Re-render the markdown cells while the notebook is visible so the equations
+ * typeset against a properly laid-out container at their correct size, making
+ * the layout below them deterministic. Must be called while the target
+ * notebook is the active tab and before it gets covered by other panels.
+ */
+export async function ensureMathTypeset(page: Page): Promise<void> {
+  // Display equations render as `<mjx-container display="true">`.
+  await page.locator('mjx-container[display="true"]').first().waitFor();
+  await page.evaluate(async () => {
+    const nextFrame = () =>
+      new Promise(resolve => requestAnimationFrame(() => resolve(null)));
+    // A correctly typeset display equation is clearly taller than the
+    // mis-scaled fallback (the two observed states are ~66px and ~58px).
+    const hasMisScaledEquation = () =>
+      Array.from(
+        document.querySelectorAll('mjx-container[display="true"]')
+      ).some(node => (node as HTMLElement).getBoundingClientRect().height < 60);
+    const jupyterapp = (window as any).jupyterapp;
+    for (let attempt = 0; attempt < 25; attempt++) {
+      await nextFrame();
+      if (!hasMisScaledEquation()) {
+        return;
+      }
+      for (const panel of Array.from(
+        jupyterapp.shell.widgets('main')
+      ) as any[]) {
+        for (const cell of panel?.content?.widgets ?? []) {
+          if (cell.model?.type === 'markdown' && cell.rendered) {
+            cell.rendered = false;
+            cell.rendered = true;
+          }
+        }
+      }
+    }
+  });
+}
+
 export async function setTerminalTitle(page: Page, title: string) {
   const terminal = page.locator('.jp-Terminal-body');
   await terminal.waitFor();

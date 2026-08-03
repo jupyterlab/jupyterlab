@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { UseSignal } from '@jupyterlab/ui-components';
 
 import React from 'react';
@@ -24,9 +22,15 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const onFilterChange = (e: any) => {
-    const filter = (e.target as HTMLInputElement).value;
-    props.model.filter = filter;
+  const onFilterChange = (event: CustomEvent<unknown>) => {
+    const target = event.target;
+    if (!hasStringValue(target)) {
+      console.error(
+        'Search input event target does not provide a string value.'
+      );
+      return;
+    }
+    props.model.filter = target.value;
   };
   return (
     <Search
@@ -37,6 +41,14 @@ const FilterBox = (props: IFilterBoxProps) => {
     />
   );
 };
+
+function hasStringValue(
+  target: EventTarget | null
+): target is EventTarget & { value: string } {
+  return (
+    target !== null && 'value' in target && typeof target.value === 'string'
+  );
+}
 
 /**
  * A widget which hosts a input textbox to filter on file names.

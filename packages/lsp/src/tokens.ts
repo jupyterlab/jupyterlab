@@ -76,6 +76,93 @@ export type TSpecsMap = Map<TServerKeys, SCHEMA.LanguageServerSpec>;
  */
 export type TLanguageId = string;
 
+/**
+ * @alpha
+ *
+ * Runtime language server session/spec provider.
+ */
+export interface ILanguageServerProvider {
+  /**
+   * @alpha
+   *
+   * Provider identifier.
+   */
+  readonly id: string;
+
+  /**
+   * @alpha
+   *
+   * Signal emitted when provider sessions/specs are changed.
+   */
+  readonly sessionsChanged?: ISignal<ILanguageServerProvider, void>;
+
+  /**
+   * @alpha
+   *
+   * Fetch runtime language server data.
+   */
+  fetch(): Promise<ILanguageServerProvider.IFetchResult | null>;
+}
+
+export namespace ILanguageServerProvider {
+  /**
+   * Arguments used to create a transport for a specific language server.
+   */
+  export interface ITransportOptions {
+    /**
+     * Language server identifier.
+     */
+    languageServerId: TLanguageServerId;
+
+    /**
+     * Default websocket URL for the server.
+     */
+    socketUrl: string;
+
+    /**
+     * Jupyter server connection settings.
+     */
+    settings: ServerConnection.ISettings;
+  }
+
+  /**
+   * Transport factory for runtime language server connections.
+   */
+  export type TTransportFactory = (options: ITransportOptions) => WebSocket;
+
+  /**
+   * Per-server transport factories.
+   */
+  export interface ITransportFactoryMap {
+    [key: string]: TTransportFactory;
+  }
+
+  /**
+   * Runtime language server data contributed by a provider.
+   */
+  export interface IFetchResult {
+    /**
+     * Runtime sessions for language servers.
+     */
+    sessions?: TSessionMap | SCHEMA.Sessions;
+
+    /**
+     * Runtime specs for language servers.
+     */
+    specs?: TSpecsMap | SCHEMA.LanguageServerSpecsMap;
+
+    /**
+     * Provider status code.
+     */
+    statusCode?: number;
+
+    /**
+     * Optional transport factory/factories.
+     */
+    transport?: ITransportFactoryMap;
+  }
+}
+
 export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
@@ -90,6 +177,13 @@ export interface ILanguageServerManager extends IDisposable {
    * The current session information of running language servers.
    */
   readonly sessions: TSessionMap;
+
+  /**
+   * @alpha
+   *
+   * The known language server specifications.
+   */
+  readonly specs: TSpecsMap;
 
   /**
    * @alpha
@@ -143,7 +237,7 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
-   * An ordered list of matching >running< sessions, with servers of higher rank higher in the list
+   * An ordered list of matching running sessions, with servers of higher rank higher in the list
    */
   getMatchingServers(
     options: ILanguageServerManager.IGetServerIdOptions
@@ -164,6 +258,22 @@ export interface ILanguageServerManager extends IDisposable {
    * Set the configuration for language servers
    */
   setConfiguration(configuration: TLanguageServerConfigurations): void;
+
+  /**
+   * @alpha
+   *
+   * Register a runtime language server provider.
+   */
+  registerProvider?(provider: ILanguageServerProvider): IDisposable;
+
+  /**
+   * @alpha
+   *
+   * Get a runtime transport factory for a language server.
+   */
+  getTransportFactory(
+    languageServerId: TLanguageServerId
+  ): ILanguageServerProvider.TTransportFactory | null;
 
   /**
    * @alpha
@@ -453,7 +563,8 @@ export interface ILSPDocumentConnectionManager {
 
   /**
    * Create a new connection to the language server
-   * @return A promise of the LSP connection
+   *
+   * Returns a promise of the LSP connection.
    */
   connect(
     options: ISocketConnectionOptions,
@@ -622,7 +733,7 @@ export interface IWidgetLSPAdapterTracker<
   /**
    * Find the first instance in the tracker that satisfies a filter function.
    *
-   * @param fn The filter function to call on each instance.
+   * @param fn - The filter function to call on each instance.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.
@@ -754,6 +865,7 @@ export namespace Method {
     COMPLETION = 'textDocument/completion',
     COMPLETION_ITEM_RESOLVE = 'completionItem/resolve',
     DEFINITION = 'textDocument/definition',
+    DIAGNOSTIC = 'textDocument/diagnostic',
     DOCUMENT_COLOR = 'textDocument/documentColor',
     DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight',
     DOCUMENT_SYMBOL = 'textDocument/documentSymbol',
@@ -825,6 +937,7 @@ export interface IClientRequestParams {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
   [Method.ClientRequest.DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DIAGNOSTIC]: lsp.DocumentDiagnosticParams;
   [Method.ClientRequest.DOCUMENT_COLOR]: lsp.DocumentColorParams;
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbolParams;
@@ -835,6 +948,7 @@ export interface IClientRequestParams {
   [Method.ClientRequest.RENAME]: lsp.RenameParams;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.LINKED_EDITING_RANGE]: lsp.LinkedEditingRangeParams;
   [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValueParams;
   [Method.ClientRequest.INLAY_HINT]: lsp.InlayHintParams;
   [Method.ClientRequest.WORKSPACE_SYMBOL]: lsp.WorkspaceSymbolParams;
@@ -851,6 +965,7 @@ export interface IClientResult {
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: AnyCompletion;
   [Method.ClientRequest.DEFINITION]: AnyLocation;
+  [Method.ClientRequest.DIAGNOSTIC]: lsp.DocumentDiagnosticReport;
   [Method.ClientRequest.DOCUMENT_COLOR]: lsp.ColorInformation[];
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
@@ -861,6 +976,7 @@ export interface IClientResult {
   [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
+  [Method.ClientRequest.LINKED_EDITING_RANGE]: lsp.LinkedEditingRanges | null;
   [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValue[] | null;
   [Method.ClientRequest.INLAY_HINT]: lsp.InlayHint[] | null;
   [Method.ClientRequest.WORKSPACE_SYMBOL]:
@@ -1018,6 +1134,22 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
   /**
    * @alpha
    *
+   * Send a client request to the language server.
+   *
+   * @param method - The LSP method to request.
+   * @param params - The parameters for the request.
+   * @param options - Options for the request.
+   * @returns The response from the language server.
+   */
+  request<M extends Method.ClientRequest>(
+    method: M,
+    params: IClientRequestParams[M],
+    options?: ILSPConnection.IRequestOptions
+  ): Promise<IClientResult[M]>;
+
+  /**
+   * @alpha
+   *
    * Lists server capabilities.
    */
   serverCapabilities: lsp.ServerCapabilities;
@@ -1043,4 +1175,16 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * Send all changes to the server.
    */
   sendFullTextChange(text: string, documentInfo: IDocumentInfo): void;
+}
+
+export namespace ILSPConnection {
+  /**
+   * Options for an LSP request.
+   */
+  export interface IRequestOptions {
+    /**
+     * A signal used to cancel the request.
+     */
+    signal?: AbortSignal;
+  }
 }

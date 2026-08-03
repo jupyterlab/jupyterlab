@@ -1025,6 +1025,29 @@ describe('@jupyter/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
+      it('should not steal focus from outside the notebook when setting mode', async () => {
+        const widget = createActiveWidget();
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        Widget.attach(widget, document.body);
+        try {
+          await framePromise();
+
+          input.focus();
+          expect(document.activeElement).toBe(input);
+          expect(widget.node.contains(input)).toBe(false);
+          widget.mode = 'edit';
+          expect(document.activeElement).toBe(input);
+          await framePromise();
+
+          expect(widget.mode).toBe('edit');
+          expect(document.activeElement).toBe(input);
+        } finally {
+          widget.dispose();
+          input.remove();
+        }
+      });
+
       it('should emit the `stateChanged` signal', () => {
         const widget = createActiveWidget();
         let called = false;
@@ -1311,6 +1334,117 @@ describe('@jupyter/notebook', () => {
         expect(selected(widget)).toEqual([0, 2, 3, 4]);
         widget.deselectAll();
         expect(selected(widget)).toEqual([]);
+      });
+
+      it('should not auto-select children when activating a collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Activate the heading
+        widget.activeCellIndex = 0;
+
+        // Children should not be selected just from activation
+        expect(selected(widget)).toEqual([]);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should include children when explicitly selecting a collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Explicitly select the heading
+        widget.select(heading);
+
+        // Children should be selected when explicitly selecting the heading
+        expect(selected(widget)).toEqual([0, 1, 2]);
+      });
+
+      it('should clear all selections without side effects on deselectAll', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[2]);
+
+        // All selections should be cleared
+        widget.deselectAll();
+        expect(selected(widget)).toEqual([]);
+        expect(widget.activeCellIndex).toBe(0);
       });
     });
 

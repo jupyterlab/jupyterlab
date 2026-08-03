@@ -66,7 +66,8 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-sql',
     '@codemirror/lang-wast',
     '@codemirror/lang-xml',
-    '@codemirror/legacy-modes'
+    '@codemirror/legacy-modes',
+    '@plutojl/lang-julia'
   ],
   '@jupyterlab/codemirror-extension': [
     '@codemirror/lang-markdown',
@@ -346,6 +347,21 @@ function ensureBranch(): string[] {
       while (newData.indexOf(toReplace) !== -1) {
         newData = newData.replace(toReplace, badgeLink);
       }
+    }
+
+    if (filePath === 'packages/notebook-extension/src/index.ts') {
+      // Runtime help links should point users to stable documentation.
+      const runtimeHelpLinks = [
+        'https://jupyterlab.readthedocs.io/en/stable/user/export.html'
+      ];
+      runtimeHelpLinks.forEach(stableLink => {
+        const versionedLink = stableLink.replace('/stable/', `/${rtdVersion}/`);
+        if (stableLink !== versionedLink) {
+          while (newData.indexOf(versionedLink) !== -1) {
+            newData = newData.replace(versionedLink, stableLink);
+          }
+        }
+      });
     }
 
     if (newData !== oldData) {

@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module terminal-extension
@@ -29,11 +28,15 @@ import type { Terminal } from '@jupyterlab/services';
 import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
-import type { ITerminal } from '@jupyterlab/terminal';
-import { ITerminalTracker, Terminal as XTerm } from '@jupyterlab/terminal';
+import {
+  ITerminal,
+  ITerminalTracker,
+  Terminal as XTerm
+} from '@jupyterlab/terminal';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
+  linkIcon,
   pasteIcon,
   refreshIcon,
   terminalIcon
@@ -49,6 +52,8 @@ import { TerminalSearchProvider } from './searchprovider';
  */
 namespace CommandIDs {
   export const copy = 'terminal:copy';
+
+  export const copyLink = 'terminal:copy-link';
 
   export const createNew = 'terminal:create-new';
 
@@ -73,6 +78,10 @@ namespace CommandIDs {
  * The duration in milliseconds to display the escape hint.
  */
 const ESCAPE_HINT_DISPLAY_MS = 1500;
+
+const TERMINAL_OPTION_KEYS = new Set<string>(
+  Object.keys(ITerminal.defaultOptions)
+);
 
 /**
  * The default terminal extension.
@@ -231,8 +240,13 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as any)[key] = settings.composite[key];
+    Object.keys(options).forEach(key => {
+      Reflect.deleteProperty(options, key);
+    });
+    Object.entries(settings.composite).forEach(([key, value]) => {
+      if (Private.isTerminalOption(key)) {
+        Object.assign(options, { [key]: value });
+      }
     });
   }
 
@@ -647,6 +661,57 @@ function addCommands(
   });
 
   /**
+   * Get the terminal widget the context menu was opened over, falling back
+   * to the current terminal.
+   */
+  const contextMenuTerminal =
+    (): MainAreaWidget<ITerminal.ITerminal> | null => {
+      const hitNode = app.contextMenuHitTest(node =>
+        node.classList.contains('jp-Terminal')
+      );
+      if (hitNode) {
+        const widget = tracker.find(value => value.content.node === hitNode);
+        if (widget) {
+          return widget;
+        }
+      }
+      return tracker.currentWidget;
+    };
+
+  /**
+   * Get the URI of the link the context menu was opened over, or `null` if
+   * the context menu was not opened over a link.
+   */
+  const contextMenuLink = (): string | null => {
+    const content = contextMenuTerminal()?.content;
+    return content instanceof XTerm ? content.contextMenuLink : null;
+  };
+
+  /**
+   * Add copy link command
+   */
+  commands.addCommand(CommandIDs.copyLink, {
+    execute: () => {
+      const link = contextMenuLink();
+
+      if (link) {
+        Clipboard.copyToSystem(link);
+      }
+    },
+    isEnabled: () => Boolean(contextMenuLink()),
+    // Only show the command when the context menu was opened over a link.
+    isVisible: () => Boolean(contextMenuLink()),
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Copy Link Address'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  /**
    * Add paste command
    */
   commands.addCommand(CommandIDs.paste, {
@@ -703,7 +768,7 @@ function addCommands(
     label: trans.__('Increase Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize < 72) {
+      if (fontSize !== undefined && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
@@ -723,7 +788,7 @@ function addCommands(
     label: trans.__('Decrease Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize > 9) {
+      if (fontSize !== undefined && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
@@ -813,6 +878,15 @@ function addCommands(
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Whether a setting key is a terminal widget option.
+   */
+  export function isTerminalOption(
+    key: string
+  ): key is keyof ITerminal.IOptions {
+    return TERMINAL_OPTION_KEYS.has(key);
+  }
+
   /**
    *  Utility function for consistent error reporting
    */

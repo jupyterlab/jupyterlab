@@ -34,7 +34,7 @@ please assume that no one else is working on it (even if someone previously
 volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
-If you believe you’ve found a security vulnerability in JupyterLab or
+If you believe you've found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
 prefer to encrypt your security reports, you can use [this PGP public
 key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
@@ -125,6 +125,12 @@ pre-commit run
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
+To run the GitHub Actions security analysis locally before pushing, use
+`pre-commit run zizmor --files .github/workflows/<workflow>.yml` or
+`pre-commit run zizmor --all-files`.
+
+The local hook is pinned and kept aligned with the CI `zizmor` version.
+For day-to-day development, prefer targeted runs with `--files`.
 You may also install [ruff integration](https://docs.astral.sh/ruff/integrations)
 into your text editor to format code automatically.
 
@@ -878,7 +884,7 @@ Documentation is written in Markdown. To ensure that the Read the Docs page buil
 need to install the documentation dependencies with `pip`:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e . --group docs
 ```
 
 To test the docs run:

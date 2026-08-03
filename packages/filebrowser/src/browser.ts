@@ -25,6 +25,7 @@ import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import type { FilterFileBrowserModel } from './model';
+import type { Message } from '@lumino/messaging';
 
 /**
  * The class name added to file browsers.
@@ -462,6 +463,13 @@ export class FileBrowser
       return;
     }
     this.listing.activate();
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._focusListingContentOrCrumb();
   }
 
   /**

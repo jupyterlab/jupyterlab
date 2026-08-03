@@ -24,6 +24,11 @@ import type { ISignal } from '@lumino/signaling';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
+interface IDebuggerAvailability {
+  kernelId: string;
+  available: boolean;
+}
+
 /**
  * Add a bug icon to the widget toolbar to enable and disable debugging.
  *
@@ -334,8 +339,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         this._iconButtons[widget.id] = updateIconButton(
           widget,
           toggleDebugging,
-          this._service.isStarted,
-          enabled
+          enabled,
+          this._service.isStarted
         );
       } else {
         updateIconButtonState(
@@ -386,7 +391,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
-    addToolbarButton(false);
+    const kernelId = connection.kernel?.id ?? connection.id;
+    const debuggingAvailable = this._debuggerAvailability[widget.id];
+    addToolbarButton(
+      debuggingAvailable?.kernelId === kernelId
+        ? debuggingAvailable.available
+        : false
+    );
 
     // listen to the disposed signals
     widget.disposed.connect(async () => {
@@ -395,10 +406,15 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
       removeHandlers();
       delete this._iconButtons[widget.id];
+      delete this._debuggerAvailability[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
     });
 
     const debuggingEnabled = await this._service.isAvailable(connection);
+    this._debuggerAvailability[widget.id] = {
+      kernelId,
+      available: debuggingEnabled
+    };
     if (!debuggingEnabled) {
       removeHandlers();
       updateIconButtonState(this._iconButtons[widget.id]!, false, false);
@@ -496,6 +512,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   } = {};
   private _iconButtons: {
     [id: string]: ToolbarButton | undefined;
+  } = {};
+  private _debuggerAvailability: {
+    [id: string]: IDebuggerAvailability | undefined;
   } = {};
   private _shellMessageHandlers: {
     [id: string]: (

@@ -34,6 +34,14 @@ describe('@jupyterlab/coreutils', () => {
         });
         expect(monitor).toBeInstanceOf(ActivityMonitor);
       });
+
+      it('should treat timeout 0 as the default', () => {
+        const monitor = new ActivityMonitor<TestObject, number>({
+          signal,
+          timeout: 0
+        });
+        expect(monitor.timeout).toBe(1000);
+      });
     });
 
     describe('#activityStopped', () => {

@@ -15,6 +15,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableList } from '@jupyterlab/observables';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
@@ -245,6 +246,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._updateNotebookConfig();
+    this._pageHandler = options.pageHandler;
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
     this.kernelHistory = options.kernelHistory;
@@ -729,6 +731,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
+      pageHandler: this._pageHandler,
       rendermime,
       translator: this.translator
     };
@@ -967,7 +970,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
   private _scheduleCellRenderOnIdle() {
     if (this.notebookConfig.windowingMode !== 'none' && !this.isDisposed) {
-      if (!this._idleCallBack) {
+      if (this._idleCallBack === null) {
         this._idleCallBack = requestIdleCallback(
           (deadline: IdleDeadline) => {
             this._idleCallBack = null;
@@ -1070,7 +1073,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this._scheduleCellRenderOnIdle();
       }
     } else {
-      if (this._idleCallBack) {
+      if (this._idleCallBack !== null) {
         window.cancelIdleCallback(this._idleCallBack);
         this._idleCallBack = null;
       }
@@ -1222,6 +1225,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -1276,6 +1280,11 @@ export namespace StaticNotebook {
      * The renderer used by the underlying windowed list.
      */
     renderer?: WindowedList.IRenderer;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**
@@ -1669,7 +1678,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       state = 'error';
     } else if (model.executionState == 'running') {
       content = '[*]';
-    } else if (model.executionCount) {
+    } else if (model.executionCount !== null) {
       content = `[${model.executionCount}]`;
     } else {
       content = '[ ]';
@@ -1991,6 +2000,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._ensureFocus();
+
     if (newValue === oldValue) {
       return;
     }
@@ -2085,16 +2095,25 @@ export class Notebook extends StaticNotebook {
     if (newActiveCellIndex >= 0) {
       this.activeCellIndex = newActiveCellIndex;
     }
+
+    // Deselect all cells first to clear any stale selection state.
+    this.deselectAll();
     if (from > to) {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to + idx]);
+          const widget = this.widgets[to + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     } else {
       isSelected.forEach((selected, idx) => {
         if (selected) {
-          this.select(this.widgets[to - n + 1 + idx]);
+          const widget = this.widgets[to - n + 1 + idx];
+          if (widget) {
+            this.select(widget);
+          }
         }
       });
     }
@@ -2112,6 +2131,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
     Private.selectedProperty.set(widget, true);
+    this._selectCollapsedSection(widget);
     this._selectionChanged.emit(void 0);
     this.update();
   }
@@ -2126,6 +2146,19 @@ export class Notebook extends StaticNotebook {
   deselect(widget: Cell): void {
     if (!Private.selectedProperty.get(widget)) {
       return;
+    }
+    // Deselect all children if widget is a collapsed heading
+    if (
+      widget instanceof MarkdownCell &&
+      widget.headingCollapsed &&
+      widget.numberChildNodes > 0
+    ) {
+      const idx = this.widgets.indexOf(widget);
+      for (let i = idx + 1; i <= idx + widget.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], false);
+        }
+      }
     }
     Private.selectedProperty.set(widget, false);
     this._selectionChanged.emit(void 0);
@@ -2162,11 +2195,8 @@ export class Notebook extends StaticNotebook {
     }
     if (changed) {
       this._selectionChanged.emit(void 0);
+      this.update();
     }
-    // Make sure we have a valid active cell.
-    // eslint-disable-next-line no-self-assign
-    this.activeCellIndex = this.activeCellIndex;
-    this.update();
   }
 
   /**
@@ -2260,6 +2290,25 @@ export class Notebook extends StaticNotebook {
     Private.selectedProperty.set(this.widgets[index], true);
 
     if (selectionChanged) {
+      this._selectionChanged.emit(void 0);
+    }
+  }
+
+  /**
+   * Select all child cells of a collapsed heading, if applicable.
+   */
+  private _selectCollapsedSection(cell: Cell | null): void {
+    if (
+      cell instanceof MarkdownCell &&
+      cell.headingCollapsed &&
+      cell.numberChildNodes > 0
+    ) {
+      const idx = this.widgets.indexOf(cell);
+      for (let i = idx; i <= idx + cell.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], true);
+        }
+      }
       this._selectionChanged.emit(void 0);
     }
   }
@@ -2834,6 +2883,10 @@ export class Notebook extends StaticNotebook {
    * Ensure that the notebook has proper focus.
    */
   private _ensureFocus(force = false): void {
+    const activeElement = document.activeElement;
+    if (!force && activeElement && !this.node.contains(activeElement)) {
+      return;
+    }
     // No-op is the footer has the focus.
     const footer = (this.layout as NotebookWindowedLayout).footer;
     if (footer && document.activeElement === footer.node) {
@@ -2958,9 +3011,9 @@ export class Notebook extends StaticNotebook {
             (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
               : 'data-jupyter-id';
-          const element = this.node.querySelector(
+          const element = this.node.querySelector<HTMLElement>(
             `h${heading.level}[${attribute}="${CSS.escape(id)}"]`
-          ) as HTMLElement;
+          )!;
 
           return {
             cell,
@@ -3374,8 +3427,8 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
-      // Move the cells one by one
-      this.moveCell(fromIndex, toIndex, toMove.length);
+      // Move the selected block of cells, preserving in-flight executions.
+      NotebookActions.moveCells(this, fromIndex, toIndex, toMove.length);
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -3421,7 +3474,7 @@ export class Notebook extends StaticNotebook {
       const executionCount = (activeCell.model as ICodeCellModel)
         .executionCount;
       countString = ' ';
-      if (executionCount) {
+      if (executionCount !== null) {
         countString = executionCount.toString();
       }
     } else {

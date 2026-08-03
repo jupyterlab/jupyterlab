@@ -586,9 +586,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
           // to the saved position of the first item of the popup toolbar.
 
           // Get the saved position of the widget to insert.
-          const widget = widgetsToRemove.pop() as Widget;
+          const widget = widgetsToRemove.pop()!;
           const name = Private.nameProperty.get(widget);
-          width -= this._widgetWidths.get(name) || 0;
+          width -= this._widgetWidths.get(name) ?? 0;
           const position = this._widgetPositions.get(name) ?? 0;
 
           // Get the saved position of the first item in the popup toolbar.
@@ -724,7 +724,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
 
   private _getWidgetWidth(widget: Widget): number {
     const widgetName = Private.nameProperty.get(widget);
-    return this._widgetWidths.get(widgetName) || 0;
+    return this._widgetWidths.get(widgetName) ?? 0;
   }
 
   protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();

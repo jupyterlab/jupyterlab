@@ -9,6 +9,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import type {
   Document,
   IAdapterOptions,
+  ILSPConnection,
   IVirtualPosition
 } from '@jupyterlab/lsp';
 import {
@@ -301,9 +302,7 @@ describe('@jupyterlab/lsp', () => {
       jest
         .spyOn(connectionManager.languageServerManager, 'isEnabled', 'get')
         .mockReturnValue(true);
-      jest
-        .spyOn(connectionManager.languageServerManager, 'getMatchingServers')
-        .mockReturnValue(['pylsp']);
+      jest.spyOn(connectionManager, 'connect').mockResolvedValue(undefined);
       featureManager.register({ id: 'foo-feature' });
 
       widgetAdapter['initVirtual']();
@@ -333,12 +332,80 @@ describe('@jupyterlab/lsp', () => {
       jest
         .spyOn(connectionManager.languageServerManager, 'isEnabled', 'get')
         .mockReturnValue(true);
-      jest
-        .spyOn(connectionManager.languageServerManager, 'getMatchingServers')
-        .mockReturnValue(['pylsp']);
+      jest.spyOn(connectionManager, 'connect').mockResolvedValue(undefined);
       featureManager.register({ id: 'foo-feature' });
 
       expect(contentChangedConnectSpy).toHaveBeenCalled();
+    });
+
+    it('should retry connecting an existing virtual document when LSP becomes active', async () => {
+      const { widgetAdapter, connectionManager, featureManager } =
+        await createMockAdapter(adapterTracker);
+      const virtualDocument = widgetAdapter.virtualDocument!;
+      const connectDocumentSpy = jest
+        .spyOn(connectionManager, 'connect')
+        .mockResolvedValue(undefined);
+
+      jest
+        .spyOn(connectionManager.languageServerManager, 'isEnabled', 'get')
+        .mockReturnValue(true);
+
+      featureManager.register({ id: 'foo-feature' });
+
+      expect(connectDocumentSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ virtualDocument })
+      );
+    });
+
+    it('should not retry connecting an already connected virtual document', async () => {
+      const { widgetAdapter, connectionManager, featureManager } =
+        await createMockAdapter(adapterTracker);
+      const virtualDocument = widgetAdapter.virtualDocument!;
+      const connectDocumentSpy = jest
+        .spyOn(connectionManager, 'connect')
+        .mockResolvedValue(undefined);
+
+      jest
+        .spyOn(connectionManager.languageServerManager, 'isEnabled', 'get')
+        .mockReturnValue(true);
+      connectionManager.connections.set(virtualDocument.uri, {
+        isReady: true
+      } as any);
+
+      featureManager.register({ id: 'foo-feature' });
+
+      expect(connectDocumentSpy).not.toHaveBeenCalled();
+    });
+
+    it('should queue a single retry while connection is pending', async () => {
+      const { connectionManager, featureManager } =
+        await createMockAdapter(adapterTracker);
+      const firstConnection = new PromiseDelegate<ILSPConnection | undefined>();
+      const retriedConnection = new PromiseDelegate<void>();
+      const connectDocumentSpy = jest
+        .spyOn(connectionManager, 'connect')
+        .mockReturnValueOnce(firstConnection.promise)
+        .mockImplementationOnce(() => {
+          retriedConnection.resolve();
+          return Promise.resolve(undefined);
+        });
+
+      jest
+        .spyOn(connectionManager.languageServerManager, 'isEnabled', 'get')
+        .mockReturnValue(true);
+
+      featureManager.register({ id: 'foo-feature' });
+      expect(connectDocumentSpy).toHaveBeenCalledTimes(1);
+
+      (connectionManager.languageServerManager.sessionsChanged as any).emit(
+        void 0
+      );
+      expect(connectDocumentSpy).toHaveBeenCalledTimes(1);
+
+      firstConnection.resolve(undefined);
+      await retriedConnection.promise;
+
+      expect(connectDocumentSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

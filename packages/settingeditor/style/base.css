@@ -136,6 +136,13 @@
   background: var(--jp-layout-color2);
 }
 
+.jp-PluginList-entry:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: calc(var(--jp-focus-outline-width) * -1);
+}
+
 .jp-PluginList-entry li {
   margin-left: 27px;
   margin-top: 5px;
@@ -265,6 +272,13 @@
   background-color: var(--jp-warn-color-normal);
   border: 0;
   color: var(--jp-ui-inverse-font-color0);
+}
+
+.jp-SettingsHeader-buttonbar > .jp-RestoreButton:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-warn-color-normal);
+  outline-style: solid;
+  outline-offset: 2px;
 }
 
 .jp-PluginEditor {

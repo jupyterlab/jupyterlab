@@ -1,6 +1,6 @@
 name: Update PR comment with UI test report
 
-on:
+on: # zizmor: ignore[dangerous-triggers] required to post report from workflow_run artifact to PR comment
   workflow_run:
     workflows: ["UI Tests"]
     types: [completed]

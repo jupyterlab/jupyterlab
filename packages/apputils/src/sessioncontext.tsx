@@ -620,6 +620,10 @@ export class SessionContext implements ISessionContext {
       return 'restarting';
     }
 
+    if (this._isChangingKernel) {
+      return 'starting';
+    }
+
     if (this._pendingKernelName === this.noKernelName) {
       return 'unknown';
     }
@@ -950,13 +954,18 @@ export class SessionContext implements ISessionContext {
 
     // If we already have a session, just change the kernel.
     if (this._session && !this._isTerminating) {
+      this._isChangingKernel = true;
+      this._statusChanged.emit('starting');
       try {
         await this._session.changeKernel(model);
-        return this._session.kernel;
       } catch (err) {
+        this._isChangingKernel = false;
         void this._handleSessionError(err);
         throw err;
       }
+      this._isChangingKernel = false;
+      this._statusChanged.emit(this._session?.kernel?.status || 'unknown');
+      return this._session.kernel;
     }
 
     // Use a UUID for the path to overcome a race condition on the server
@@ -1243,6 +1252,7 @@ export class SessionContext implements ISessionContext {
   private _isReady = false;
   private _isTerminating = false;
   private _isRestarting = false;
+  private _isChangingKernel = false;
   private _kernelChanged = new Signal<
     this,
     Session.ISessionConnection.IKernelChangedArgs
@@ -1851,7 +1861,7 @@ namespace Private {
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select') as HTMLSelectElement;
+      const selector = this.node.querySelector<HTMLSelectElement>('select')!;
       return JSON.parse(selector.value) as Kernel.IModel;
     }
   }

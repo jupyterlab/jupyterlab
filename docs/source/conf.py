@@ -32,6 +32,10 @@ from collections import ChainMap
 from functools import partial
 from pathlib import Path
 from subprocess import check_call
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 HERE = Path(__file__).parent.resolve()
 
@@ -52,9 +56,12 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
     "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
+
+mermaid_version = "latest"
 
 SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
 
@@ -81,6 +88,7 @@ if SPELLING_BUILD_ENABLED:
 
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
+myst_fence_as_directive = ["mermaid"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -414,7 +422,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 You can now test JupyterLab 4.6.0 Beta · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6-beta">RELEASE NOTES</a>',
+    "announcement": '🚀 JupyterLab 4.6.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -569,7 +577,7 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
-def setup(app):
+def setup(app: "Sphinx"):
     if SPELLING_BUILD_ENABLED:
         return
 
@@ -592,7 +600,7 @@ def setup(app):
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
 
-    def clean_code_files(tmp_files, app, exception):
+    def clean_code_files(tmp_files: list[Path], app: "Sphinx", exception: Exception | None):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))

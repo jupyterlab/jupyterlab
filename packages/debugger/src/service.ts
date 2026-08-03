@@ -411,7 +411,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     const modules = await this.session.sendRequest('modules', {});
     this._pendingKernelSources = modules.body.modules.map(module => ({
       name: module.name as string,
-      path: module.path as string
+      path: module.path!
     }));
 
     void this._displayModulesDebouncer.invoke();

@@ -11,6 +11,7 @@ from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
 from jupyterlab.extensions.manager import (
+    ActionResult,
     ExtensionManager,
     ExtensionPackage,
     PluginManager,
@@ -220,6 +221,22 @@ async def test_ExtensionManager_is_install_allowed_allowlist(mock_client):
     assert await manager.is_install_allowed("jupyterlab-evil") is False
 
 
+@pytest.mark.parametrize(
+    "name",
+    ["jupyterlab-git", "JupyterLab-Git", "JupyterLab.Git", "jupyterlab_git"],
+)
+async def test_pypi_manager_allows_canonical_package_name_allowlist_matches(name):
+    manager = PyPIExtensionManager(
+        ext_options={"allowed_extensions_uris": {"http://dummy-allowed-extension"}}
+    )
+    manager._listings_cache = {"jupyterlab-git": {"name": "jupyterlab-git"}}
+    if manager._listing_fetch is not None:
+        manager._listing_fetch.stop()
+
+    assert await manager.is_install_allowed(name) is True
+    assert await manager.is_install_allowed("jupyterlab-evil") is False
+
+
 @patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
 async def test_ExtensionManager_is_install_allowed_blocklist(mock_client):
     mock_client.body = json.dumps({"blocked_extensions": [{"name": "jupyterlab-evil"}]}).encode()
@@ -228,6 +245,48 @@ async def test_ExtensionManager_is_install_allowed_blocklist(mock_client):
     )
     assert await manager.is_install_allowed("jupyterlab-evil") is False
     assert await manager.is_install_allowed("jupyterlab-git") is True
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["jupyterlab-git", "JupyterLab-Git", "JupyterLab.Git", "jupyterlab_git"],
+)
+async def test_handler_blocks_pypi_canonical_package_name_blocklist_matches(name):
+    manager = PyPIExtensionManager(
+        ext_options={"blocked_extensions_uris": {"http://dummy-blocked-extension"}}
+    )
+    manager._listings_cache = {"jupyterlab-git": {"name": "jupyterlab-git"}}
+    if manager._listing_fetch is not None:
+        manager._listing_fetch.stop()
+    manager.install = AsyncMock(return_value=ActionResult(status="ok", needs_restart=[]))
+
+    handler = Mock()
+    handler.current_user = "user"
+    handler.get_json_body.return_value = {"cmd": "install", "extension_name": name}
+    handler.manager = manager
+    handler.set_status = Mock()
+    handler.finish = Mock()
+
+    with pytest.raises(web.HTTPError) as exc_info:
+        await ExtensionHandler.post(handler)
+    assert exc_info.value.status_code == 422
+    assert "was blocked" in exc_info.value.log_message
+    manager.install.assert_not_called()
+
+
+async def test_pypi_manager_install_blocks_policy_denial_before_pip():
+    manager = PyPIExtensionManager(
+        ext_options={"blocked_extensions_uris": {"http://dummy-blocked-extension"}}
+    )
+    manager._listings_cache = {"jupyterlab-git": {"name": "jupyterlab-git"}}
+    if manager._listing_fetch is not None:
+        manager._listing_fetch.stop()
+
+    with patch("jupyterlab.extensions.pypi.run") as run_mock:
+        result = await manager.install("JupyterLab.Git")
+
+    assert result == ActionResult(status="error", message="install is not allowed")
+    run_mock.assert_not_called()
 
 
 @patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
@@ -577,6 +636,19 @@ async def test_pypi_manager_is_install_allowed_rejects_non_pypi_names(name, expe
 async def test_pypi_manager_is_install_allowed_rejects_non_pypi_versions(version, expected):
     manager = PyPIExtensionManager()
     assert await manager.is_install_allowed("package", version) is expected
+
+
+async def test_pypi_manager_install_blocks_when_policy_denies():
+    manager = PyPIExtensionManager()
+    manager.is_install_allowed = AsyncMock(return_value=False)
+
+    with patch("jupyterlab.extensions.pypi.tornado.ioloop.IOLoop.current") as current_loop:
+        result = await manager.install("jupyterlab-evil", "1.0.0")
+
+    assert result.status == "error"
+    assert result.message == "install is not allowed"
+    manager.is_install_allowed.assert_awaited_once_with("jupyterlab-evil", "1.0.0")
+    current_loop.assert_not_called()
 
 
 async def test_handler_blocks_install_when_policy_denies():
