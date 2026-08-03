@@ -380,6 +380,18 @@
   },
   "jupyter.lab.shortcuts": [
     {
+      "command": "notebook:replace-selection",
+      "keys": ["Alt -"],
+      "selector": ".jp-NotebookPanel[data-jp-kernel-language='r'] .jp-Notebook.jp-mod-editMode",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-NotebookPanel[data-jp-kernel-language='r'] .jp-Notebook.jp-mod-editMode",
+      "args": { "text": "%>% " }
+    },
+    {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"

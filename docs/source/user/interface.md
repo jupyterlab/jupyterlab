@@ -289,9 +289,13 @@ The commands are run in succession when you use the shortcut.
 
 ### Shortcuts for R operators
 
-You can use the same macro command to add shortcuts for operators that are
-common in R, such as `<-` and `%>%`. Add one entry for each operator in the
-Keyboard Shortcuts settings:
+JupyterLab provides shortcuts for operators that are common in R when an R
+kernel is active. Press `Alt -` to insert `<-` or `Accel Shift M` to insert
+`%>%`. These shortcuts are scoped to R kernel-backed notebooks and consoles,
+so they do not affect editors using another kernel.
+
+To add the same shortcuts to a text editor, or to customize the keys, you can
+use the macro command in the Keyboard Shortcuts settings:
 
 ```json
 {

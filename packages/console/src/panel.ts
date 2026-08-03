@@ -104,6 +104,24 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     this.console.executed.connect(this._onExecuted, this);
     this._updateTitlePanel();
+    sessionContext.kernelChanged.connect((_, args) => {
+      const kernel = args.newValue;
+      if (!kernel) {
+        delete this.node.dataset.jpKernelLanguage;
+        return;
+      }
+      void kernel.spec.then(spec => {
+        if (this.isDisposed || this.sessionContext.session?.kernel !== kernel) {
+          return;
+        }
+        const language = spec?.language?.toLowerCase();
+        if (language) {
+          this.node.dataset.jpKernelLanguage = language;
+        } else {
+          delete this.node.dataset.jpKernelLanguage;
+        }
+      });
+    });
     if (!options.preventTitleUpdate) {
       sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
       sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
