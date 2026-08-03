@@ -53,7 +53,7 @@ export class Context<
       new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
-    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
+    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin ?? 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
@@ -693,6 +693,9 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
+        if (path !== this._path) {
+          return this._revert(initializeModel);
+        }
         if (contents.content) {
           if (contents.format === 'json') {
             model.fromJSON(contents.content);
@@ -719,6 +722,9 @@ export class Context<
         }
       })
       .catch(async err => {
+        if (!this.isDisposed && path !== this._path) {
+          return this._revert(initializeModel);
+        }
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(

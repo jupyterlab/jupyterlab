@@ -643,8 +643,8 @@ export class VirtualDocument implements IDisposable {
       this.sourceLines.set(this.lastSourceLine + i, {
         editorLine: i,
         editorShift: {
-          line: editorShift.line - (virtualShift?.line || 0),
-          column: i === 0 ? editorShift.column - (virtualShift?.column || 0) : 0
+          line: editorShift.line - (virtualShift?.line ?? 0),
+          column: i === 0 ? editorShift.column - (virtualShift?.column ?? 0) : 0
         },
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: ceEditor,
