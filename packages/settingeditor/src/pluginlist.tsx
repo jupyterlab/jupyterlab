@@ -563,6 +563,7 @@ export class PluginList extends ReactWidget {
    * @param props - Schema properties being filtered
    * @param definitions - Definitions to use for filling in references in properties
    * @param ref - Reference to a definition
+   * @param query - Search query, matched exactly against the setting tags
    * @returns - The titles and keys that match the search, and the title (or
    * the key, if there is no title) of each setting whose nested settings match.
    */
@@ -570,9 +571,10 @@ export class PluginList extends ReactWidget {
     filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
     definitions?: any,
-    ref?: string
+    ref?: string,
+    query?: string
   ): string[] {
-    return this._getMatches(filter, props, definitions, ref).map(
+    return this._getMatches(filter, props, definitions, ref, query).map(
       match => match.label
     );
   }
@@ -587,6 +589,7 @@ export class PluginList extends ReactWidget {
     props: ISettingRegistry.IProperty,
     definitions?: any,
     ref?: string,
+    query?: string,
     seen?: Set<string>,
     path: string[] = []
   ): ISearchMatch[] {
@@ -610,6 +613,7 @@ export class PluginList extends ReactWidget {
         items,
         definitions,
         items['$ref'] as string,
+        query,
         seen,
         path
       );
@@ -646,6 +650,15 @@ export class PluginList extends ReactWidget {
       if (filter(value)) {
         add(value, true);
       }
+      if (
+        query !== undefined &&
+        Array.isArray(subProps.tags) &&
+        (subProps.tags as string[]).some(
+          tag => tag.toLowerCase() === query.toLowerCase()
+        )
+      ) {
+        add((subProps.title as string) ?? value, subProps.title === undefined);
+      }
 
       // Finally, recurse on the properties left.
       const nested = this._getMatches(
@@ -653,6 +666,7 @@ export class PluginList extends ReactWidget {
         subProps as ISettingRegistry.IProperty,
         definitions,
         subProps['$ref'] as string,
+        query,
         seen,
         settingPath
       );
@@ -703,6 +717,7 @@ export class PluginList extends ReactWidget {
           this._getSearchableSchema(plugin),
           plugin.schema.definitions,
           undefined,
+          query,
           seen
         );
       };
