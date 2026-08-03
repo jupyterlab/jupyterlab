@@ -620,7 +620,11 @@ test('Read-only cells should remain read-only after changing settings', async ({
   await page.notebook
     .getToolbarItemLocator('kernelName')
     .then(item => item?.click());
-  await page.locator('.jp-Dialog-checkbox').click();
+  await page
+    .locator(
+      '.jp-Dialog-checkbox:has-text("Always start the preferred kernel")'
+    )
+    .click();
   await page.locator('.jp-Dialog-button:has-text("Select")').click();
 
   // Assert the first cell is still read-only
