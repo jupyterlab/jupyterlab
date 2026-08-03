@@ -72,6 +72,7 @@ export class ShortcutInput extends React.Component<
     super(props);
     this._ref = React.createRef();
     this._hintId = `jp-Shortcuts-CaptureHint-${ShortcutInput._nextHintId++}`;
+    this._conflictId = `${this._hintId}-conflict`;
 
     this.state = {
       value: this.props.placeholder,
@@ -461,6 +462,18 @@ export class ShortcutInput extends React.Component<
     return '';
   }
 
+  private _conflictMessage(trans: ReturnType<ITranslator['load']>): string {
+    if (this.state.isAvailable || this.state.activeConflicts.length === 0) {
+      return '';
+    }
+    return trans.__(
+      'Shortcut already in use by %1.',
+      this.state.activeConflicts
+        .map(target => target.label ?? target.command)
+        .join(', ')
+    );
+  }
+
   render() {
     const trans = this.props.translator.load('jupyterlab');
     const hasConflict =
@@ -470,6 +483,10 @@ export class ShortcutInput extends React.Component<
       inputClassName += ' jp-mod-unavailable-Input';
     }
     const statusMessage = this._statusMessage(trans);
+    const conflictMessage = this._conflictMessage(trans);
+    const describedBy = conflictMessage
+      ? `${this._hintId} ${this._conflictId}`
+      : this._hintId;
     const captureHint = trans._n(
       'Capture pauses %1 second after the last key.',
       'Capture pauses %1 seconds after the last key.',
@@ -494,7 +511,8 @@ export class ShortcutInput extends React.Component<
             onKeyDown={this.handleInput}
             ref={this._inputRef}
             data-lm-suppress-shortcuts="true"
-            aria-describedby={this._hintId}
+            aria-invalid={hasConflict || undefined}
+            aria-describedby={describedBy}
           >
             <p
               className={
@@ -525,6 +543,15 @@ export class ShortcutInput extends React.Component<
             aria-atomic="true"
           >
             {statusMessage}
+          </div>
+          <div
+            id={this._conflictId}
+            className="jp-sr-only"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
+            {conflictMessage}
           </div>
           {hasConflict ? (
             <button
@@ -586,6 +613,7 @@ export class ShortcutInput extends React.Component<
   private _inputRef = React.createRef<HTMLDivElement>();
   private _submitRef = React.createRef<HTMLButtonElement>();
   private _hintId: string;
+  private _conflictId: string;
   private _idleTimer: number | null = null;
   private _announceStartRaf: number | null = null;
   private _blurRaf: number | null = null;
