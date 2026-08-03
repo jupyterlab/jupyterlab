@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+import { URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -318,6 +319,87 @@ export class RenderedImage extends RenderedCommon {
 }
 
 /**
+ * A mime renderer for displaying URI lists.
+ *
+ * Handles both data URLs (e.g. `data:video/mp4;base64,...`) and plain
+ * file/HTTP URLs pointing to audio or video resources.  The media type
+ * is inferred from the MIME type embedded in the data URL, or from the
+ * file-extension of the path/URL when no data URL is used.
+ */
+export class RenderedURIList extends RenderedCommon {
+  /**
+   * Construct a new rendered URI list widget.
+   *
+   * @param options - The options for initializing the widget.
+   */
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.addClass('jp-RenderedHTML');
+    // this.addClass('jp-RenderedURIList');
+  }
+
+  /**
+   * Render a mime model.
+   *
+   * @param model - The mime model to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   */
+  async render(model: IRenderMime.IMimeModel): Promise<void> {
+    this._clearMediaElement();
+
+    const source = Private.getFirstURI(model.data[this.mimeType]);
+    const mediaType = Private.getMediaType(source);
+
+    if (!mediaType) {
+      // Render a clean fallback link for PDF, TXT, ZIP, etc.
+      const anchor = document.createElement('a');
+      anchor.href = source;
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.textContent = source;
+      this.node.appendChild(anchor);
+      return;
+    }
+
+    const url = await Private.resolveSource(source, mediaType, this.resolver);
+
+    if (this.isDisposed) {
+      return;
+    }
+
+    const element = document.createElement(mediaType);
+    element.controls = true;
+    element.src = url;
+    this._mediaElement = element;
+    this.node.appendChild(element);
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._clearMediaElement();
+    super.dispose();
+  }
+
+  private _clearMediaElement(): void {
+    if (this._mediaElement) {
+      this._mediaElement.pause();
+      this._mediaElement.removeAttribute('src');
+      this._mediaElement.load();
+      this._mediaElement.remove();
+      this._mediaElement = null;
+    }
+  }
+
+  private _mediaElement: HTMLAudioElement | HTMLVideoElement | null = null;
+}
+
+/**
  * A mime renderer for displaying Markdown with embedded latex.
  */
 export class RenderedMarkdown extends RenderedHTMLCommon {
@@ -514,10 +596,108 @@ export class RenderedJavaScript extends RenderedCommon {
   }
 }
 
+export enum MediaType {
+  Audio = 'audio',
+  Video = 'video'
+}
+
 /**
  * The namespace for module implementation details.
  */
 namespace Private {
+  const AUDIO_EXTENSIONS = [
+    '.aac',
+    '.flac',
+    '.m4a',
+    '.mid',
+    '.midi',
+    '.mp3',
+    '.oga',
+    '.ogg',
+    '.opus',
+    '.wav'
+  ];
+
+  const VIDEO_EXTENSIONS = [
+    '.3gp',
+    '.avi',
+    '.m4v',
+    '.mkv',
+    '.mov',
+    '.mp4',
+    '.mpeg',
+    '.mpg',
+    '.ogv',
+    '.webm'
+  ];
+
+  export function getFirstURI(data: unknown): string {
+    const source =
+      typeof data === 'string'
+        ? data
+        : Array.isArray(data)
+          ? (data as string[]).join('\n')
+          : '';
+
+    return (
+      source
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .find(line => line !== '' && !line.startsWith('#')) ?? ''
+    );
+  }
+
+  export function getMediaType(source: string): MediaType | null {
+    const dataURLMatch = /^data:([^;,]+)/i.exec(source);
+    const mimeType = dataURLMatch?.[1].toLowerCase();
+
+    if (mimeType?.startsWith('audio/')) {
+      return MediaType.Audio;
+    }
+    if (mimeType?.startsWith('video/')) {
+      return MediaType.Video;
+    }
+
+    const path = source.split(/[?#]/, 1)[0].toLowerCase();
+    if (AUDIO_EXTENSIONS.some(extension => path.endsWith(extension))) {
+      return MediaType.Audio;
+    }
+    if (VIDEO_EXTENSIONS.some(extension => path.endsWith(extension))) {
+      return MediaType.Video;
+    }
+
+    return null;
+  }
+
+  export async function resolveSource(
+    source: string,
+    tag: MediaType,
+    resolver: IRenderMime.IResolver | null
+  ): Promise<string> {
+    if (source.startsWith('data:')) {
+      return source;
+    }
+
+    const isLocal = resolver?.isLocal
+      ? resolver.isLocal(source)
+      : URLExt.isLocal(source);
+
+    if (!resolver || !isLocal) {
+      return source;
+    }
+
+    try {
+      const resolved = await resolver.resolveUrl(source, {
+        attribute: 'src',
+        tag
+      });
+      return resolver.getDownloadUrl(resolved);
+    } catch (error) {
+      console.warn(`Could not resolve URI list source: ${source}`, error);
+      return source;
+    }
+  }
+
   /**
    * Run typesetter on the given node and harden links.
    */
