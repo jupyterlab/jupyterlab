@@ -320,7 +320,13 @@ describe('@jupyterlab/settingeditor', () => {
         title: 'Tagged Plugin',
         tags: ['my-tag'],
         properties: {
-          value: { title: 'Value', type: 'string', default: 'x' }
+          value: { title: 'Value', type: 'string', default: 'x' },
+          taggedProp: {
+            title: 'Tagged Property',
+            type: 'string',
+            default: 'y',
+            tags: ['prop-tag']
+          }
         }
       };
 
@@ -356,6 +362,24 @@ describe('@jupyterlab/settingeditor', () => {
         list.setFilter(updateFilterFunction('Tagged', false, false), 'Tagged');
         const plugin = model.plugins.find(p => p.id === taggedId)!;
         expect(list.filter!(plugin)).toBe('all');
+      });
+
+      it('should return matching property names when query matches a property tag', () => {
+        list.setFilter(
+          updateFilterFunction('prop-tag', false, false),
+          'prop-tag'
+        );
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toEqual(['Tagged Property']);
+      });
+
+      it('should match property tags case-insensitively', () => {
+        list.setFilter(
+          updateFilterFunction('PROP-TAG', false, false),
+          'PROP-TAG'
+        );
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toEqual(['Tagged Property']);
       });
     });
   });

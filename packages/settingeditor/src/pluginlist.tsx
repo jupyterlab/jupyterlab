@@ -518,7 +518,8 @@ export class PluginList extends ReactWidget {
     filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
     definitions?: any,
-    ref?: string
+    ref?: string,
+    query?: string
   ): string[] {
     // If properties given are references, populate properties
     // with corresponding definition.
@@ -546,7 +547,8 @@ export class PluginList extends ReactWidget {
         filter,
         props,
         definitions,
-        props['$ref'] as string
+        props['$ref'] as string,
+        query
       );
     }
 
@@ -576,6 +578,15 @@ export class PluginList extends ReactWidget {
       if (filter(value)) {
         acc.push(value);
       }
+      if (
+        query !== undefined &&
+        Array.isArray(subProps.tags) &&
+        (subProps.tags as string[]).some(
+          tag => tag.toLowerCase() === query.toLowerCase()
+        )
+      ) {
+        acc.push(subProps.title as string);
+      }
 
       // Finally, recurse on the properties left.
       acc.concat(
@@ -583,7 +594,8 @@ export class PluginList extends ReactWidget {
           filter,
           subProps as ISettingRegistry.IProperty,
           definitions,
-          subProps['$ref'] as string
+          subProps['$ref'] as string,
+          query
         )
       );
       return acc;
@@ -618,7 +630,9 @@ export class PluginList extends ReactWidget {
         const filtered = this.getFilterString(
           filter,
           plugin.schema ?? {},
-          plugin.schema.definitions
+          plugin.schema.definitions,
+          undefined,
+          query
         );
         return filtered;
       };
