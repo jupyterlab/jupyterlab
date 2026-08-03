@@ -256,12 +256,6 @@ function activate(
     }
   });
 
-  app.contextMenu.addItem({
-    command: CommandIDs.copy,
-    selector: '.jp-MarkdownViewer',
-    rank: 0
-  });
-
   if (tocRegistry) {
     tocRegistry.add(
       new MarkdownViewerTableOfContentsFactory(
