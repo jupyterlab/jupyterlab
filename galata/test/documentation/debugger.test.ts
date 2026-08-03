@@ -520,6 +520,12 @@ async function stopOnBreakpoint(page: IJupyterLabPageFixture, tmpPath: string) {
 
   await createNotebook(page);
 
+  // Leave the notebook alone in the main area, as the screenshots taken of it
+  // would otherwise show the launcher opened on start-up as a background tab.
+  const launcher = page.activity.getTabLocator('Launcher');
+  await launcher.locator('.lm-TabBar-tabCloseIcon').click();
+  await launcher.waitFor({ state: 'detached' });
+
   await page.debugger.switchOn();
   await page.waitForCondition(() => page.debugger.isOpen());
   await page.sidebar.setWidth(275, 'right');
