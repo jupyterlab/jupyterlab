@@ -668,8 +668,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               key={name}
               title={filter.title}
               description={
-                filter.description +
-                (name == 'selection' ? selectionKeyHint : '')
+                description + (name == 'selection' ? selectionKeyHint : '')
               }
               isEnabled={true}
               onToggle={async () => {
