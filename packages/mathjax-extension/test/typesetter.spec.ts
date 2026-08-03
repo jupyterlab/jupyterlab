@@ -9,7 +9,7 @@ describe('@jupyterlab/mathjax-extension', () => {
     beforeEach(() => {
       typesetter = new MathJaxTypesetter();
     });
-    describe('.typeset()', () => {
+    describe('#typeset()', () => {
       it('should typeset inline equations', async () => {
         const host = document.createElement('div');
         host.innerHTML = '$1 + 1$';
@@ -48,6 +48,52 @@ describe('@jupyterlab/mathjax-extension', () => {
         document.body.appendChild(host);
         await typesetter.typeset(host);
         expect(host.innerHTML).toContain(input);
+      });
+    });
+
+    describe('#constructor()', () => {
+      it('should treat `$` as inline math by default', () => {
+        expect(new MathJaxTypesetter().mathParseOptions?.dollarInlineMath).toBe(
+          true
+        );
+      });
+
+      it('should report dollarInlineMath=false when `$` is not a delimiter', () => {
+        const configured = new MathJaxTypesetter({ dollarInlineMath: false });
+        expect(configured.mathParseOptions?.dollarInlineMath).toBe(false);
+      });
+
+      it('should not typeset `$...$` when dollar inline math is disabled', async () => {
+        const configured = new MathJaxTypesetter({ dollarInlineMath: false });
+        const host = document.createElement('div');
+        host.innerHTML = '$1 + 1$';
+        document.body.appendChild(host);
+        await configured.typeset(host);
+        expect(host.innerHTML).toContain('$1 + 1$');
+        expect(host.innerHTML).not.toContain('<mn>1</mn>');
+      });
+
+      it('should still typeset `\\(...\\)` when dollar inline math is disabled', async () => {
+        const configured = new MathJaxTypesetter({ dollarInlineMath: false });
+        const host = document.createElement('div');
+        host.innerHTML = '\\(1 + 1\\)';
+        document.body.appendChild(host);
+        await configured.typeset(host);
+        expect(host.innerHTML).toContain('<mn>1</mn><mo>+</mo><mn>1</mn>');
+      });
+    });
+
+    describe('#mathDocument()', () => {
+      it('should share a MathDocument between typesetters with equal options', async () => {
+        const a = new MathJaxTypesetter();
+        const b = new MathJaxTypesetter({ dollarInlineMath: true });
+        expect(await a.mathDocument()).toBe(await b.mathDocument());
+      });
+
+      it('should use a distinct MathDocument for distinct options', async () => {
+        const a = new MathJaxTypesetter();
+        const b = new MathJaxTypesetter({ dollarInlineMath: false });
+        expect(await a.mathDocument()).not.toBe(await b.mathDocument());
       });
     });
   });
