@@ -803,7 +803,7 @@
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "kernelStatus": {
       "title": "Kernel status icon configuration",
