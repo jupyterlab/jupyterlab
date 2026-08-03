@@ -283,7 +283,11 @@ export class ShortcutItem extends React.Component<
               className="jp-Button jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew jp-Shortcuts-Icon"
               onClick={this.props.newShortcutUtils?.saveShortcut}
               title={this._trans.__('Save shortcut')}
-              aria-label={this._trans.__('Save shortcut')}
+              aria-label={this._trans.__(
+                'Save shortcut %1 for %2',
+                this.toSymbols(this.props.shortcut.keybindings.join(', ')),
+                this.props.shortcut.label ?? this.props.shortcut.command
+              )}
               disabled={
                 !this.props.shortcut.command ||
                 !this.props.shortcut.keybindings.length ||
@@ -420,7 +424,11 @@ export class ShortcutItem extends React.Component<
         <div
           className="jp-Shortcuts-ShortcutContainer"
           role="button"
-          aria-label={this._trans.__('Edit keybinding')}
+          aria-label={this._trans.__(
+            'Edit keybinding %1 for %2',
+            this.toSymbols(binding.keys.join(', ')),
+            this.props.shortcut.label ?? this.props.shortcut.command
+          )}
           data-keybinding={index}
           data-shortcut={this.props.shortcut.id}
           tabIndex={this.isLocationBeingEdited(index) ? -1 : 0}
