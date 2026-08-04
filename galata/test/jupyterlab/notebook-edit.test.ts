@@ -181,6 +181,36 @@ test.describe('Notebook Edit', () => {
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
+  test('Shift-click extends cell selection after selecting editor text', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', 'first');
+    await page.notebook.addCell('code', 'second');
+    await page.notebook.addCell('code', 'third');
+
+    await page.notebook.enterCellEditingMode(0);
+    await page.keyboard.press('Home');
+    await page.keyboard.press('Shift+End');
+
+    await expect
+      .poll(async () => page.evaluate(() => window.getSelection()?.toString()))
+      .toBe('first');
+
+    const firstCell = await page.notebook.getCellLocator(0);
+    const secondCell = await page.notebook.getCellLocator(1);
+    const thirdCell = await page.notebook.getCellLocator(2);
+
+    await firstCell!.locator('.jp-InputArea-prompt').click();
+    await thirdCell!.locator('.jp-InputArea-prompt').click({
+      modifiers: ['Shift']
+    });
+
+    await expect(firstCell!).toHaveClass(/jp-mod-selected/);
+    await expect(secondCell!).toHaveClass(/jp-mod-selected/);
+    await expect(thirdCell!).toHaveClass(/jp-mod-selected/);
+    await expect(thirdCell!).toHaveClass(/jp-mod-active/);
+  });
+
   test('Move cells up', async ({ page }) => {
     await populateNotebook(page);
     const imageName = 'move-cell-up.png';
