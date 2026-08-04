@@ -3167,7 +3167,11 @@ export class Notebook extends StaticNotebook {
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
       // We don't want to prevent the default selection behavior
       // if there is currently text selected in an output.
-      const hasSelection = (window.getSelection() ?? '').toString() !== '';
+      const selection = window.getSelection();
+      const hasSelection =
+        !!selection &&
+        selection.toString() !== '' &&
+        !Private.selectionInEditor(selection, this.widgets);
       if (
         button === 0 &&
         shiftKey &&
@@ -3827,6 +3831,25 @@ namespace Private {
     protected onUpdateRequest(msg: Message): void {
       // This is a no-op.
     }
+  }
+
+  /**
+   * Whether a browser selection is anchored inside a notebook cell editor.
+   */
+  export function selectionInEditor(
+    selection: Selection,
+    cells: readonly Cell[]
+  ): boolean {
+    const { anchorNode, focusNode } = selection;
+
+    return cells.some(cell => {
+      const editorNode = cell.editorWidget?.node;
+      return (
+        !!editorNode &&
+        ((!!anchorNode && editorNode.contains(anchorNode)) ||
+          (!!focusNode && editorNode.contains(focusNode)))
+      );
+    });
   }
 
   /**
