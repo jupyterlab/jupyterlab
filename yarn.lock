@@ -5010,10 +5010,12 @@ __metadata:
     "@jupyterlab/running": ^4.7.0-alpha.1
     "@jupyterlab/services": ^7.7.0-alpha.1
     "@jupyterlab/settingregistry": ^4.7.0-alpha.1
+    "@jupyterlab/statedb": ^4.7.0-alpha.1
     "@jupyterlab/statusbar": ^4.7.0-alpha.1
     "@jupyterlab/terminal": ^4.7.0-alpha.1
     "@jupyterlab/translation": ^4.7.0-alpha.1
     "@jupyterlab/ui-components": ^4.7.0-alpha.1
+    "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.9.0
     "@types/webpack-env": ^1.18.0
     "@xterm/addon-search": ~0.16.0

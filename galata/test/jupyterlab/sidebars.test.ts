@@ -413,6 +413,17 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
     await expect(openTabsHostedTitle).toBeVisible();
     await expect(terminalsHostedTitle).toBeVisible();
 
+    // Keep this layout snapshot focused on hosted section placement. Terminal
+    // labels are covered in terminal tests and can vary with terminal titles.
+    const hostedTerminalLabels = page
+      .locator('.jp-FileBrowser-accordion .jp-RunningSessions-section')
+      .nth(1)
+      .locator('.jp-RunningSessions-itemLabel');
+    await expect(hostedTerminalLabels.first()).toBeVisible();
+    await hostedTerminalLabels.first().evaluate(node => {
+      node.textContent = 'terminals/1';
+    });
+
     // Screenshot with both sections visible in the file browser accordion
     const leftPanel = page.sidebar.getContentPanelLocator('left');
     expect(await leftPanel.screenshot()).toMatchSnapshot(
