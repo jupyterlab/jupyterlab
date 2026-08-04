@@ -970,7 +970,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
   private _scheduleCellRenderOnIdle() {
     if (this.notebookConfig.windowingMode !== 'none' && !this.isDisposed) {
-      if (!this._idleCallBack) {
+      if (this._idleCallBack === null) {
         this._idleCallBack = requestIdleCallback(
           (deadline: IdleDeadline) => {
             this._idleCallBack = null;
@@ -1073,7 +1073,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this._scheduleCellRenderOnIdle();
       }
     } else {
-      if (this._idleCallBack) {
+      if (this._idleCallBack !== null) {
         window.cancelIdleCallback(this._idleCallBack);
         this._idleCallBack = null;
       }
@@ -1678,7 +1678,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       state = 'error';
     } else if (model.executionState == 'running') {
       content = '[*]';
-    } else if (model.executionCount) {
+    } else if (model.executionCount !== null) {
       content = `[${model.executionCount}]`;
     } else {
       content = '[ ]';
@@ -3474,7 +3474,7 @@ export class Notebook extends StaticNotebook {
       const executionCount = (activeCell.model as ICodeCellModel)
         .executionCount;
       countString = ' ';
-      if (executionCount) {
+      if (executionCount !== null) {
         countString = executionCount.toString();
       }
     } else {
