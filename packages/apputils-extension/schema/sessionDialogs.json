@@ -7,7 +7,8 @@
       "title": "Skip kernel restart Dialog",
       "description": "Whether the kernel restart confirmation dialog is skipped when restarting the kernel.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     }
   },
   "type": "object"
