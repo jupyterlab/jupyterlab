@@ -60,6 +60,23 @@ export class MathJaxTypesetter implements ILatexTypesetter {
    */
   readonly mathParseOptions: IRenderMime.ILatexTypesetter.IMathParseOptions;
 
+  /**
+   * Create a new MathJax typesetter with the given parse options.
+   *
+   * Options which are not given are inherited from this typesetter; this
+   * typesetter is left unchanged. The underlying MathDocument is shared with
+   * any other typesetter using the same options, so this is cheap to call.
+   *
+   * @param options - The parse options to apply.
+   */
+  withParseOptions(
+    options: IRenderMime.ILatexTypesetter.IMathParseOptions
+  ): MathJaxTypesetter {
+    return new MathJaxTypesetter(
+      Private.mergeParseOptions(this.mathParseOptions, options)
+    );
+  }
+
   protected async _ensureInitialized() {
     if (!this._initialized) {
       this._mathDocument = await Private.ensureMathDocument(
@@ -213,6 +230,23 @@ namespace Private {
     ['$', '$'],
     ['\\(', '\\)']
   ];
+
+  /**
+   * Merge parse options, where an `undefined` value in `overrides` means
+   * "keep the current value" rather than "reset to the default".
+   */
+  export function mergeParseOptions(
+    base: IRenderMime.ILatexTypesetter.IMathParseOptions,
+    overrides: IRenderMime.ILatexTypesetter.IMathParseOptions
+  ): IRenderMime.ILatexTypesetter.IMathParseOptions {
+    const merged: Record<string, unknown> = { ...base };
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value !== undefined) {
+        merged[key] = value;
+      }
+    }
+    return merged as IRenderMime.ILatexTypesetter.IMathParseOptions;
+  }
 
   /**
    * The inline math delimiters with the single `$` pair removed, so that `$`
