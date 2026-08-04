@@ -1328,7 +1328,7 @@ export class WindowedList<
           this._viewport.dataset.isScrolling = 'true';
         }
 
-        if (this._timerToClearScrollStatus) {
+        if (this._timerToClearScrollStatus !== null) {
           window.clearTimeout(this._timerToClearScrollStatus);
         }
         // TODO: remove once `scrollend` event is supported by Safari
@@ -1694,11 +1694,11 @@ export class WindowedList<
    * Clear any outstanding timeout and enqueue scrolling to a new item.
    */
   private _resetScrollToItem(): void {
-    if (this._resetScrollToItemTimeout) {
+    if (this._resetScrollToItemTimeout !== null) {
       clearTimeout(this._resetScrollToItemTimeout);
     }
 
-    if (this._programmaticScrollTimeout) {
+    if (this._programmaticScrollTimeout !== null) {
       clearTimeout(this._programmaticScrollTimeout);
     }
 
@@ -1841,7 +1841,7 @@ export class WindowedList<
    * Handle `scrollend` events on the scroller.
    */
   private _onScrollEnd() {
-    if (this._timerToClearScrollStatus) {
+    if (this._timerToClearScrollStatus !== null) {
       window.clearTimeout(this._timerToClearScrollStatus);
     }
     this._viewport.dataset.isScrolling = 'false';

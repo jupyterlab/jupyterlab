@@ -1695,7 +1695,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.model.executionState == 'running') {
       prompt = '*';
     } else {
-      prompt = `${this.model.executionCount || ''}`;
+      prompt = `${this.model.executionCount ?? ''}`;
     }
     this._setPrompt(prompt);
   }
