@@ -129,19 +129,22 @@
       "title": "Clear Cells on Execute",
       "description": "Whether to clear the console when code is executed.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "clearCodeContentOnExecute": {
       "title": "Clear Code Content on Execute",
       "description": "Whether to clear the code content of the console when code is executed.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "hideCodeInput": {
       "title": "Hide Code Input",
       "description": "Whether to hide the code input after a cell is executed.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "interactionMode": {
       "title": "Interaction mode",
@@ -157,7 +160,8 @@
       "title": "Show All Kernel Activity",
       "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "promptCellConfig": {
       "title": "Prompt Cell Configuration",
@@ -178,13 +182,15 @@
         { "const": "left", "title": "Left" },
         { "const": "right", "title": "Right" }
       ],
-      "default": "bottom"
+      "default": "bottom",
+      "tags": ["%UI%"]
     },
     "showBanner": {
       "title": "Show Banner",
       "description": "Whether to show the kernel banner.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "toolbar": {
       "title": "Console panel toolbar items",
@@ -193,7 +199,8 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "type": "array",
-      "default": []
+      "default": [],
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,

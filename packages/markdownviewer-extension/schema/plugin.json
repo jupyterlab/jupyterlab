@@ -38,31 +38,36 @@
       "title": "Font Family",
       "description": "The font family used to render markdown.\nIf `null`, value from current theme is used.",
       "$ref": "#/definitions/fontFamily",
-      "default": null
+      "default": null,
+      "tags": ["%UI%"]
     },
     "fontSize": {
       "title": "Font Size",
       "description": "The size in pixel of the font used to render markdown.\nIf `null`, value from current theme is used.",
       "$ref": "#/definitions/fontSize",
-      "default": null
+      "default": null,
+      "tags": ["%UI%"]
     },
     "lineHeight": {
       "title": "Line Height",
       "description": "The line height used to render markdown.\nIf `null`, value from current theme is used.",
       "$ref": "#/definitions/lineHeight",
-      "default": null
+      "default": null,
+      "tags": ["%UI%"]
     },
     "lineWidth": {
       "title": "Line Width",
       "description": "The text line width expressed in CSS ch units.\nIf `null`, lines fit the viewport width.",
       "$ref": "#/definitions/lineWidth",
-      "default": null
+      "default": null,
+      "tags": ["%UI%"]
     },
     "hideFrontMatter": {
       "title": "Hide Front Matter",
       "description": "Whether to hide YAML front matter.\nThe YAML front matter must be placed at the top of the document,\nstarted by a line of three dashes (---) and ended by a line of\nthree dashes (---) or three points (...).",
       "$ref": "#/definitions/hideFrontMatter",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "renderTimeout": {
       "title": "Render Timeout",
