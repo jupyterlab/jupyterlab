@@ -201,7 +201,8 @@
       "title": "Scroll behavior",
       "description": "Whether to scroll past the end of text document.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "toolbar": {
       "title": "Text editor toolbar items",
@@ -210,7 +211,8 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "type": "array",
-      "default": []
+      "default": [],
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,
