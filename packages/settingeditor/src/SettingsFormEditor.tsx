@@ -10,6 +10,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { FormComponent } from '@jupyterlab/ui-components';
+import { Button } from '@jupyterlab/ui-components';
 import type {
   PartialJSONObject,
   ReadonlyJSONObject,
@@ -21,7 +22,8 @@ import type { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import type { Field, UiSchema } from '@rjsf/utils';
 import type { JSONSchema7 } from 'json-schema';
-import { Button } from '@jupyterlab/ui-components';
+
+import type { SettingsEditor } from './settingseditor';
 
 /**
  * Indentation to use when saving the settings as JSON document.
@@ -71,7 +73,7 @@ export namespace SettingsFormEditor {
     /**
      * List of strings that match search value.
      */
-    filteredValues: string[] | null;
+    filteredValues: SettingsEditor.FilteredValues;
   }
 
   export interface IState {
@@ -329,7 +331,9 @@ export class SettingsFormEditor extends React.Component<
     }
   }
 
-  private _setFilteredSchema(prevFilteredValues?: string[] | null) {
+  private _setFilteredSchema(
+    prevFilteredValues?: SettingsEditor.FilteredValues
+  ) {
     // Update the filtered value if the filter or the schema has changed.
     if (
       prevFilteredValues === undefined ||
@@ -343,10 +347,13 @@ export class SettingsFormEditor extends React.Component<
        * Only show fields that match search value.
        */
       const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
-      if (this.props.filteredValues?.length ?? 0 > 0) {
+      if (
+        Array.isArray(this.props.filteredValues) &&
+        this.props.filteredValues.length > 0
+      ) {
         for (const field in filteredSchema.properties) {
           if (
-            !this.props.filteredValues?.includes(
+            !this.props.filteredValues.includes(
               filteredSchema.properties[field].title ?? field
             )
           ) {
