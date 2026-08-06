@@ -97,13 +97,14 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
   autoStart: true,
   requires: [ITranslator],
   provides: ICommandPalette,
-  optional: [ISettingRegistry],
+  optional: [ISettingRegistry, IStateDB],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    state: IStateDB | null
   ) => {
-    return Palette.activate(app, translator, settingRegistry);
+    return Palette.activate(app, translator, settingRegistry, state);
   }
 };
 
@@ -120,9 +121,13 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   description: 'Restores the command palette.',
   autoStart: true,
-  requires: [ILayoutRestorer],
-  activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer) => {
-    Palette.restore(app, restorer);
+  requires: [ILayoutRestorer, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    translator: ITranslator
+  ) => {
+    Palette.restore(app, restorer, translator);
   }
 };
 
