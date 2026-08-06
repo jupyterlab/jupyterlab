@@ -358,6 +358,8 @@ lint.ignore = [
 "E501",
 # PLR0913 Too many arguments to function call
 "PLR0913",
+# PLR0917 Too many positional arguments
+"PLR0917",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]

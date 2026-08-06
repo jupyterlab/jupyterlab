@@ -64,8 +64,8 @@ Let's define a function that adds two elements:
 
 ```python
 def add(a, b):
-   res = a + b
-   return res
+    res = a + b
+    return res
 ```
 
 We can call the function and print the result:
