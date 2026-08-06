@@ -113,7 +113,7 @@ dev = [
     "hatch",
     "bump2version",
     "mypy==1.20.2",
-    "ruff==0.15.20",
+    "ruff==0.16.1",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
