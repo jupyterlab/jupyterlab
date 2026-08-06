@@ -3,6 +3,7 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { signalToPromise, testEmission } from '@jupyterlab/testing';
+import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -431,6 +432,78 @@ describe('@jupyterlab/apputils', () => {
         expect(tracker.has(widget)).toBe(true);
         widget.dispose();
         expect(tracker.has(widget)).toBe(false);
+      });
+    });
+
+    describe('#restore()', () => {
+      function createRestoreOptions() {
+        const connector = {
+          fetch: jest.fn(async () => undefined),
+          list: jest.fn(async () => ({ ids: [], values: [] })),
+          remove: jest.fn(async () => undefined),
+          save: jest.fn(async () => undefined)
+        };
+
+        return {
+          command: 'test:restore',
+          connector,
+          name: (widget: Widget) => widget.id,
+          registry: new CommandRegistry()
+        };
+      }
+
+      it('should restore with the supplied options', async () => {
+        const options = createRestoreOptions();
+
+        await tracker.restore(options);
+
+        expect(options.connector.list).toHaveBeenCalledTimes(1);
+        expect(options.connector.list).toHaveBeenCalledWith(namespace);
+        await expect(tracker.restored).resolves.toBeUndefined();
+      });
+
+      it('should prefer deferred options', async () => {
+        const deferred = createRestoreOptions();
+        const supplied = createRestoreOptions();
+
+        tracker.defer(deferred);
+        await tracker.restore(supplied);
+
+        expect(deferred.connector.list).toHaveBeenCalledTimes(1);
+        expect(supplied.connector.list).not.toHaveBeenCalled();
+      });
+
+      it('should consume deferred options only once', async () => {
+        const deferred = createRestoreOptions();
+        const warning = jest.spyOn(console, 'warn').mockImplementation();
+
+        try {
+          tracker.defer(deferred);
+          await tracker.restore();
+          await expect(tracker.restore()).resolves.toBeUndefined();
+
+          expect(deferred.connector.list).toHaveBeenCalledTimes(1);
+          expect(warning).toHaveBeenCalledWith(
+            'No options provided to restore the tracker.'
+          );
+        } finally {
+          warning.mockRestore();
+        }
+      });
+
+      it('should warn when no options are available', async () => {
+        const warning = jest.spyOn(console, 'warn').mockImplementation();
+
+        try {
+          await expect(tracker.restore()).resolves.toBeUndefined();
+
+          expect(warning).toHaveBeenCalledTimes(1);
+          expect(warning).toHaveBeenCalledWith(
+            'No options provided to restore the tracker.'
+          );
+        } finally {
+          warning.mockRestore();
+        }
       });
     });
 
