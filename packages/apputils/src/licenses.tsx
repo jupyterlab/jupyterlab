@@ -372,7 +372,7 @@ export namespace Licenses {
       if (options.packageFilter) {
         this._packageFilter = options.packageFilter;
       }
-      if (options.currentPackageIndex) {
+      if (options.currentPackageIndex !== undefined) {
         this._currentPackageIndex = options.currentPackageIndex;
       }
     }

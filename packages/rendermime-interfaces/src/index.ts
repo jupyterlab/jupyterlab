@@ -594,6 +594,33 @@ export namespace IRenderMime {
      * are assumed, including a single `$` delimiter for inline math.
      */
     readonly mathParseOptions?: ILatexTypesetter.IMathParseOptions;
+
+    /**
+     * Create a typesetter of the same kind, using the given parse options.
+     *
+     * This allows extensions to adjust how math is recognized without
+     * hard-coding a specific implementation, so that the typesetter chosen by
+     * the user (e.g. KaTeX rather than MathJax) is respected:
+     *
+     * ```ts
+     * const typesetter = rmRegistry.latexTypesetter;
+     * const latexTypesetter =
+     *   typesetter?.withParseOptions?.({ dollarInlineMath: false }) ?? typesetter;
+     * const renderer = rmRegistry
+     *   .clone({ latexTypesetter })
+     *   .createRenderer('text/markdown');
+     * ```
+     *
+     * Implementing this method is optional; callers should fall back to the
+     * original typesetter when it is not available.
+     *
+     * @param options - The parse options to apply. Options which are omitted
+     *   (or `undefined`) are inherited from this typesetter.
+     * @returns A new typesetter; this typesetter is left unchanged.
+     */
+    withParseOptions?(
+      options: ILatexTypesetter.IMathParseOptions
+    ): ILatexTypesetter;
   }
 
   /**
