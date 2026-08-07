@@ -12,7 +12,7 @@
       },
       {
         "command": "markdownviewer:edit",
-        "selector": ".jp-RenderedMarkdown"
+        "selector": ".jp-MarkdownViewer"
       }
     ]
   },
