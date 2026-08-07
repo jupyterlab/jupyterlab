@@ -3181,6 +3181,11 @@ export class Notebook extends StaticNotebook {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
 
+        // Preventing the default also stops the browser from collapsing any
+        // text selection which is already there; drop it explicitly so that
+        // stale highlighted text is not left over the new cell selection.
+        window.getSelection()?.removeAllRanges();
+
         // Shift-click - extend selection
         try {
           this.extendContiguousSelectionTo(index);
