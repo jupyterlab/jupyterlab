@@ -24,16 +24,12 @@ TEMPLATE = """
 class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
     def initialize(
         self,
-        name: str | list[str] | None = "",
+        name: str = "",
+        *args: object,
         messages: list[str] | None = None,
+        **kwargs: object,
     ) -> None:
-        if isinstance(name, list):
-            if messages is not None:
-                msg = "messages was provided both positionally and as a keyword"
-                raise TypeError(msg)
-            messages = name
-            name = ""
-        super().initialize(name=name or "")
+        super().initialize(name, *args, **kwargs)
         self.messages = messages or []
 
     @web.authenticated
