@@ -67,21 +67,6 @@ const NB_CLASS = 'jp-Notebook';
 const NB_CELL_CLASS = 'jp-Notebook-cell';
 
 /**
- * The class name added to a cell output area.
- */
-const CELL_OUTPUT_AREA_CLASS = 'jp-Cell-outputArea';
-
-/**
- * The class name added to a cell editor area.
- */
-const CELL_EDITOR_AREA_CLASS = 'jp-InputArea-editor';
-
-/**
- * Selector for output text selection boundaries.
- */
-const OUTPUT_SELECTION_BOUNDARY_SELECTOR = `.${CELL_OUTPUT_AREA_CLASS}, .${CELL_EDITOR_AREA_CLASS}`;
-
-/**
  * The class name added to a notebook in edit mode.
  */
 const EDIT_CLASS = 'jp-mod-editMode';
@@ -3180,17 +3165,17 @@ export class Notebook extends StaticNotebook {
     if (targetArea === 'notebook') {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
-      // We don't want to prevent the default selection behavior
-      // when extending a text selection within the same output.
-      const selection = window.getSelection();
-      const shouldExtendOutputSelection =
-        !!selection &&
-        selection.toString() !== '' &&
-        Private.selectionInSameOutputArea(selection, target);
+      // We don't want to prevent the default selection behavior when the user
+      // is extending a text selection within the same region of the cell.
+      const isExtendingText = Private.isExtendingTextInSameRegion(
+        window.getSelection(),
+        widget,
+        target
+      );
       if (
         button === 0 &&
         shiftKey &&
-        !shouldExtendOutputSelection &&
+        !isExtendingText &&
         !['INPUT', 'OPTION'].includes(target.tagName)
       ) {
         // Prevent browser selecting text in prompt or output
@@ -3849,46 +3834,75 @@ namespace Private {
   }
 
   /**
-   * Whether a browser selection is contained in the same output as a target.
+   * Check whether `node` is `parent` or a descendant of it.
+   *
+   * Unlike `Node.contains()` this traverses out of open shadow roots, so a
+   * node rendered by a widget library which attaches a shadow root (such as
+   * Panel or Bokeh) is still recognised as belonging to its host subtree.
    */
-  export function selectionInSameOutputArea(
-    selection: Selection,
-    target: HTMLElement
-  ): boolean {
-    const { anchorNode, focusNode } = selection;
-    const targetOutput = closestSelectionOutput(target);
-
-    return (
-      !!targetOutput &&
-      closestSelectionOutput(anchorNode) === targetOutput &&
-      closestSelectionOutput(focusNode) === targetOutput
-    );
+  function containsDeep(parent: Node, node: Node | null): boolean {
+    let current = node;
+    while (current) {
+      if (parent.contains(current)) {
+        return true;
+      }
+      const root = current.getRootNode();
+      current = root instanceof ShadowRoot ? root.host : null;
+    }
+    return false;
   }
 
   /**
-   * Find the nearest output area for a node, stopping at editor boundaries.
+   * Whether a cell exposes an output area.
+   *
+   * #### Notes
+   * This is a structural check rather than `instanceof CodeCell` so that it
+   * still holds when a federated extension loads its own copy of
+   * `@jupyterlab/cells`.
    */
-  function closestSelectionOutput(node: Node | null): HTMLElement | null {
-    while (node) {
-      const element =
-        node instanceof Element ? node : (node.parentElement ?? null);
-      const closest = element?.closest(OUTPUT_SELECTION_BOUNDARY_SELECTOR);
+  function hasOutputArea(cell: Cell): cell is CodeCell {
+    return 'outputArea' in cell;
+  }
 
-      if (closest?.classList.contains(CELL_OUTPUT_AREA_CLASS)) {
-        return closest as HTMLElement;
-      }
-      if (closest?.classList.contains(CELL_EDITOR_AREA_CLASS)) {
-        return null;
-      }
-
-      const root = (element ?? node).getRootNode();
-      if (root instanceof ShadowRoot) {
-        node = root.host;
-      } else {
-        node = null;
-      }
+  /**
+   * The regions of a cell whose text the browser, rather than the notebook,
+   * is responsible for selecting: the output area of a code cell and the
+   * rendered input of a rendered markdown or raw cell.
+   */
+  function textRegionsOf(cell: Cell): Node[] {
+    const regions: Node[] = [];
+    if (hasOutputArea(cell)) {
+      regions.push(cell.outputArea.node);
     }
-    return null;
+    const rendered = cell.inputArea?.renderedInput;
+    if (rendered) {
+      regions.push(rendered.node);
+    }
+    return regions;
+  }
+
+  /**
+   * Whether a shift-click on `target` is the user extending a text selection
+   * which already lives in the same text region of `cell`.
+   *
+   * In that case the notebook must not turn the gesture into a cell range
+   * selection; see https://github.com/jupyterlab/jupyterlab/issues/4800.
+   */
+  export function isExtendingTextInSameRegion(
+    selection: Selection | null,
+    cell: Cell,
+    target: Node
+  ): boolean {
+    if (!selection || selection.isCollapsed) {
+      return false;
+    }
+    const { anchorNode, focusNode } = selection;
+    return textRegionsOf(cell).some(
+      region =>
+        containsDeep(region, target) &&
+        containsDeep(region, anchorNode) &&
+        containsDeep(region, focusNode)
+    );
   }
 
   /**
