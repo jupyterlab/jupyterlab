@@ -142,6 +142,7 @@ test.describe('Inline completer', () => {
     const completer = page.locator(INLINE_COMPLETER_SELECTOR);
     await completer.waitFor();
     // Wait for the widget to reach full opacity.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
 
     expect(
@@ -272,6 +273,7 @@ async function invokeInlineCompleter(
   await page.notebook.runCell(1, true);
   await page.notebook.enterCellEditingMode(PROMPT_CELL);
   // We need to wait until the completer gets bound to the cell after entering it.
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(50);
 
   await page.keyboard.press('u');

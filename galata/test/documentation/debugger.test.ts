@@ -68,9 +68,6 @@ test.describe('Debugger', () => {
 
     await setBreakpoint(page);
 
-    // Wait for breakpoint to finish appearing
-    await page.waitForTimeout(150);
-
     const breakpointIcon = page
       .locator('.jp-NotebookPanel-notebook')
       .first()
@@ -79,6 +76,7 @@ test.describe('Debugger', () => {
       .nth(2)
       .locator('span.cm-breakpoint-icon');
 
+    // Wait for breakpoint to finish appearing
     await breakpointIcon.waitFor();
     expect(
       await page.screenshot({
@@ -317,6 +315,7 @@ test.describe('Debugger', () => {
       await inspector.waitFor();
       await expect(inspector.locator('canvas')).not.toHaveCount(0);
       // The table of the inspected variable is painted on the next frames.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(200);
 
       expect(
