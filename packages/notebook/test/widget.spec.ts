@@ -1846,7 +1846,30 @@ describe('@jupyter/notebook', () => {
           expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
-        it('should not extend a selection if there is text selected in the output', () => {
+        it('should allow shift-click selection within a single output', () => {
+          const codeCellIndex = 3;
+          widget.activeCellIndex = codeCellIndex;
+
+          // Set a selection in the active cell outputs.
+          const output = (widget.activeCell as CodeCell).outputArea.node;
+          const selection = window.getSelection()!;
+          selection.selectAllChildren(output);
+
+          // Shift click within the same output should preserve browser text selection.
+          const mouseDownEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          });
+          output.dispatchEvent(mouseDownEvent);
+          expect(mouseDownEvent.defaultPrevented).toBe(false);
+          expect(widget.activeCellIndex).toBe(codeCellIndex);
+          expect(selected(widget)).toEqual([]);
+
+          selection.removeAllRanges();
+        });
+
+        it('should extend cell selection when shift-clicking outside selected output', () => {
           const codeCellIndex = 3;
           widget.activeCellIndex = codeCellIndex;
 
@@ -1856,12 +1879,18 @@ describe('@jupyter/notebook', () => {
             (widget.activeCell as CodeCell).outputArea.node
           );
 
-          // Shift click below, which should not extend cells selection.
+          // Shift click below, which should extend cell selection.
           simulate(widget.widgets[codeCellIndex + 2].node, 'mousedown', {
             shiftKey: true
           });
-          expect(widget.activeCellIndex).toBe(codeCellIndex);
-          expect(selected(widget)).toEqual([]);
+          expect(widget.activeCellIndex).toBe(codeCellIndex + 2);
+          expect(selected(widget)).toEqual([
+            codeCellIndex,
+            codeCellIndex + 1,
+            codeCellIndex + 2
+          ]);
+
+          selection.removeAllRanges();
         });
 
         it('should leave a markdown cell rendered', async () => {

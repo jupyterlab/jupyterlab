@@ -67,6 +67,21 @@ const NB_CLASS = 'jp-Notebook';
 const NB_CELL_CLASS = 'jp-Notebook-cell';
 
 /**
+ * The class name added to a cell output area.
+ */
+const CELL_OUTPUT_AREA_CLASS = 'jp-Cell-outputArea';
+
+/**
+ * The class name added to a cell editor area.
+ */
+const CELL_EDITOR_AREA_CLASS = 'jp-InputArea-editor';
+
+/**
+ * Selector for output text selection boundaries.
+ */
+const OUTPUT_SELECTION_BOUNDARY_SELECTOR = `.${CELL_OUTPUT_AREA_CLASS}, .${CELL_EDITOR_AREA_CLASS}`;
+
+/**
  * The class name added to a notebook in edit mode.
  */
 const EDIT_CLASS = 'jp-mod-editMode';
@@ -3166,16 +3181,16 @@ export class Notebook extends StaticNotebook {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
       // We don't want to prevent the default selection behavior
-      // if there is currently text selected in an output.
+      // when extending a text selection within the same output.
       const selection = window.getSelection();
-      const hasSelection =
+      const shouldExtendOutputSelection =
         !!selection &&
         selection.toString() !== '' &&
-        !Private.selectionInEditor(selection, this.widgets);
+        Private.selectionInSameOutputArea(selection, target);
       if (
         button === 0 &&
         shiftKey &&
-        !hasSelection &&
+        !shouldExtendOutputSelection &&
         !['INPUT', 'OPTION'].includes(target.tagName)
       ) {
         // Prevent browser selecting text in prompt or output
@@ -3834,22 +3849,46 @@ namespace Private {
   }
 
   /**
-   * Whether a browser selection is anchored inside a notebook cell editor.
+   * Whether a browser selection is contained in the same output as a target.
    */
-  export function selectionInEditor(
+  export function selectionInSameOutputArea(
     selection: Selection,
-    cells: readonly Cell[]
+    target: HTMLElement
   ): boolean {
     const { anchorNode, focusNode } = selection;
+    const targetOutput = closestSelectionOutput(target);
 
-    return cells.some(cell => {
-      const editorNode = cell.editorWidget?.node;
-      return (
-        !!editorNode &&
-        ((!!anchorNode && editorNode.contains(anchorNode)) ||
-          (!!focusNode && editorNode.contains(focusNode)))
-      );
-    });
+    return (
+      !!targetOutput &&
+      closestSelectionOutput(anchorNode) === targetOutput &&
+      closestSelectionOutput(focusNode) === targetOutput
+    );
+  }
+
+  /**
+   * Find the nearest output area for a node, stopping at editor boundaries.
+   */
+  function closestSelectionOutput(node: Node | null): HTMLElement | null {
+    while (node) {
+      const element =
+        node instanceof Element ? node : (node.parentElement ?? null);
+      const closest = element?.closest(OUTPUT_SELECTION_BOUNDARY_SELECTOR);
+
+      if (closest?.classList.contains(CELL_OUTPUT_AREA_CLASS)) {
+        return closest as HTMLElement;
+      }
+      if (closest?.classList.contains(CELL_EDITOR_AREA_CLASS)) {
+        return null;
+      }
+
+      const root = (element ?? node).getRootNode();
+      if (root instanceof ShadowRoot) {
+        node = root.host;
+      } else {
+        node = null;
+      }
+    }
+    return null;
   }
 
   /**
