@@ -6,6 +6,17 @@ import { expect, galata, test } from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
 
+/**
+ * A minimal output attaching an open shadow root, as done by widget libraries
+ * such as Panel or Bokeh.
+ */
+const shadowDOMOutput = `\
+from IPython.display import HTML
+HTML("""<div id='shadow-host'></div><script>
+document.querySelector('#shadow-host').attachShadow({mode: 'open'}).innerHTML =
+  '<p id="shadow-first">alpha beta gamma</p><p id="shadow-second">delta epsilon zeta</p>';
+</script>""")`;
+
 async function populateNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.setCell(0, 'raw', 'Just a raw cell');
   await page.notebook.addCell(
@@ -13,6 +24,46 @@ async function populateNotebook(page: IJupyterLabPageFixture) {
     '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
   );
   await page.notebook.addCell('code', '2 ** 3');
+}
+
+/**
+ * Select the first occurrence of `text` below `rootSelector`.
+ *
+ * When `pierceShadow` is set, `rootSelector` must point at a shadow host and
+ * the text is looked up in its open shadow root rather than in its light DOM.
+ */
+async function selectText(
+  page: IJupyterLabPageFixture,
+  rootSelector: string,
+  text: string,
+  pierceShadow = false
+): Promise<void> {
+  await page.evaluate(
+    ({ rootSelector, text, pierceShadow }) => {
+      const host = document.querySelector(rootSelector);
+      const root = pierceShadow ? host?.shadowRoot : host;
+      if (!root) {
+        throw new Error(`No root found for ${rootSelector}`);
+      }
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const start = node.textContent?.indexOf(text) ?? -1;
+        if (start === -1) {
+          continue;
+        }
+        const range = document.createRange();
+        range.setStart(node, start);
+        range.setEnd(node, start + text.length);
+        const selection = window.getSelection()!;
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return;
+      }
+      throw new Error(`Text "${text}" not found below ${rootSelector}`);
+    },
+    { rootSelector, text, pierceShadow }
+  );
 }
 
 test.describe('Notebook Edit', () => {
@@ -209,6 +260,78 @@ test.describe('Notebook Edit', () => {
     await expect(secondCell!).toHaveClass(/jp-mod-selected/);
     await expect(thirdCell!).toHaveClass(/jp-mod-selected/);
     await expect(thirdCell!).toHaveClass(/jp-mod-active/);
+  });
+
+  test('Shift-click extends text selection in a rendered markdown cell', async ({
+    page
+  }) => {
+    await page.notebook.setCell(
+      0,
+      'markdown',
+      'alpha beta gamma\n\ndelta epsilon zeta'
+    );
+    await page.notebook.addCell('code', '1 + 1');
+    await page.notebook.addCell('code', '2 + 2');
+
+    // Render the markdown cell.
+    await page.notebook.runCell(0);
+
+    const firstCell = await page.notebook.getCellLocator(0);
+    const secondCell = await page.notebook.getCellLocator(1);
+    const thirdCell = await page.notebook.getCellLocator(2);
+    await firstCell!.locator('.jp-MarkdownOutput').waitFor();
+
+    // Make the last cell active, so that extending the cell selection to the
+    // first cell would visibly select all three cells.
+    await thirdCell!.locator('.jp-InputArea-prompt').click();
+
+    await selectText(page, '.jp-MarkdownOutput', 'beta');
+
+    // Shift-click a later paragraph of the SAME rendered markdown cell.
+    await firstCell!
+      .locator('.jp-MarkdownOutput p')
+      .nth(1)
+      .click({ modifiers: ['Shift'] });
+
+    // The browser owns this gesture: the notebook must not turn it into a
+    // cell range selection, and the text selection must reach the click.
+    // Note that the active cell is itself `jp-mod-selected`, so the cells in
+    // between are what tell a range selection apart from a single one.
+    await expect(secondCell!).not.toHaveClass(/jp-mod-selected/);
+    await expect(thirdCell!).not.toHaveClass(/jp-mod-selected/);
+    expect(
+      await page.evaluate(() => window.getSelection()?.toString() ?? '')
+    ).toContain('delta');
+  });
+
+  test('Shift-click extends text selection in an output using shadow DOM', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', shadowDOMOutput);
+    await page.notebook.addCell('code', '1 + 1');
+    await page.notebook.addCell('code', '2 + 2');
+
+    await page.notebook.runCell(0);
+
+    const firstCell = await page.notebook.getCellLocator(0);
+    const secondCell = await page.notebook.getCellLocator(1);
+    const thirdCell = await page.notebook.getCellLocator(2);
+    await firstCell!.locator('#shadow-host').waitFor();
+
+    // Make the last cell active, see the markdown test above.
+    await thirdCell!.locator('.jp-InputArea-prompt').click();
+
+    await selectText(page, '#shadow-host', 'beta', true);
+
+    // Shift-click a later paragraph inside the SAME shadow root.
+    await firstCell!.locator('#shadow-second').click({ modifiers: ['Shift'] });
+
+    // See the markdown test above on why the in-between cells are checked.
+    await expect(secondCell!).not.toHaveClass(/jp-mod-selected/);
+    await expect(thirdCell!).not.toHaveClass(/jp-mod-selected/);
+    expect(
+      await page.evaluate(() => window.getSelection()?.toString() ?? '')
+    ).toContain('delta');
   });
 
   test('Move cells up', async ({ page }) => {
