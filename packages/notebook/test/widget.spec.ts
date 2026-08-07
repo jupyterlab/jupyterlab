@@ -1754,6 +1754,9 @@ describe('@jupyter/notebook', () => {
 
       afterEach(() => {
         widget.dispose();
+        // The selection is shared by the whole document, so it must be reset
+        // even when an assertion above threw.
+        window.getSelection()?.removeAllRanges();
       });
 
       describe('mousedown', () => {
@@ -1854,8 +1857,11 @@ describe('@jupyter/notebook', () => {
           const output = (widget.activeCell as CodeCell).outputArea.node;
           const selection = window.getSelection()!;
           selection.selectAllChildren(output);
+          // Guard the fixture: without output text there is nothing to extend.
+          expect(selection.toString()).not.toBe('');
 
-          // Shift click within the same output should preserve browser text selection.
+          // Shift click within the same output should preserve browser text
+          // selection, which is what `defaultPrevented` being false means here.
           const mouseDownEvent = new MouseEvent('mousedown', {
             bubbles: true,
             cancelable: true,
@@ -1865,8 +1871,6 @@ describe('@jupyter/notebook', () => {
           expect(mouseDownEvent.defaultPrevented).toBe(false);
           expect(widget.activeCellIndex).toBe(codeCellIndex);
           expect(selected(widget)).toEqual([]);
-
-          selection.removeAllRanges();
         });
 
         it('should extend cell selection when shift-clicking outside selected output', () => {
@@ -1889,8 +1893,6 @@ describe('@jupyter/notebook', () => {
             codeCellIndex + 1,
             codeCellIndex + 2
           ]);
-
-          selection.removeAllRanges();
         });
 
         it('should leave a markdown cell rendered', async () => {
