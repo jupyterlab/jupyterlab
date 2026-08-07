@@ -315,6 +315,7 @@ test.describe('Debugger', () => {
       await inspector.waitFor();
       await expect(inspector.locator('canvas')).not.toHaveCount(0);
       // The table of the inspected variable is painted on the next frames.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(200);
 
       expect(

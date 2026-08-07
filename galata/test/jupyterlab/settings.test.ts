@@ -306,6 +306,7 @@ test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
   await expect(conflict).toHaveCount(1);
 
   // Wait for the capture idle timer (2s) so the progress bar is not mid-animation.
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(2100);
 
   const shortcutList = shortcutsForm.locator('.jp-Shortcuts-ShortcutList');
