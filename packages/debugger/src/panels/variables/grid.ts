@@ -30,7 +30,12 @@ export class VariablesBodyGrid extends Panel {
     this.model = options.model;
     this.themeManager = options.themeManager;
     this.translator = options.translator;
-    this.model.changed.connect(() => this.update(), this);
+    this._initialScopes = options.scopes;
+    this.model.changed.connect(() => {
+      // The model took over the scopes given at instantiation.
+      this._initialScopes = undefined;
+      this.update();
+    }, this);
     this.addClass('jp-DebuggerVariables-body');
   }
 
@@ -76,6 +81,10 @@ export class VariablesBodyGrid extends Panel {
 
     // Lazily load the datagrid module when the first grid is requested.
     const { Grid } = await (this._pending = import('./gridpanel'));
+    if (this.isDisposed) {
+      this._pending = null;
+      return;
+    }
     const { commands, model, themeManager, translator } = this;
 
     this._grid = new Grid({ commands, model, themeManager, translator });
@@ -89,10 +98,19 @@ export class VariablesBodyGrid extends Panel {
    * Wait until actually displaying the grid to trigger initialization.
    */
   protected onBeforeShow(msg: Message): void {
-    if (!this._grid && !this._pending) {
+    void this.initialize();
+    super.onBeforeShow(msg);
+  }
+
+  /**
+   * Trigger initialization for a grid which is displayed as soon as it is
+   * attached, as it never gets a `before-show` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    if (this.isVisible) {
       void this.initialize();
     }
-    super.onBeforeShow(msg);
   }
 
   /**
@@ -103,13 +121,14 @@ export class VariablesBodyGrid extends Panel {
       const { dataModel } = this._grid;
       dataModel.filter = this._filter;
       dataModel.scope = this._scope;
-      dataModel.setData(this.model.scopes ?? []);
+      dataModel.setData(this._initialScopes ?? this.model.scopes ?? []);
     }
     super.onUpdateRequest(msg);
   }
 
   private _filter: Set<string> = new Set();
   private _grid: GridPanelModule.Grid | null = null;
+  private _initialScopes: IDebugger.IScope[] | undefined;
   private _pending: Promise<unknown> | null = null;
   private _scope: string;
 }

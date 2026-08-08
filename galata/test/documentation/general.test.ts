@@ -485,6 +485,7 @@ test.describe('General', () => {
 
     if (testInfo.config.updateSnapshots !== 'none') {
       // Wait a bit for the map to load when updating the snapshots
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
     }
 
@@ -607,6 +608,7 @@ test.describe('General', () => {
     await page.keyboard.press('Enter');
 
     // Wait for command answer
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');

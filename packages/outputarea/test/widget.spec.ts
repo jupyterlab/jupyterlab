@@ -474,7 +474,7 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(0);
       });
 
-      it('should follow changes to initial stdout stream', () => {
+      it('should follow changes to initial stdout stream', async () => {
         model = new OutputAreaModel({
           values: [DEFAULT_OUTPUTS[0]],
           trusted: true
@@ -484,6 +484,9 @@ describe('outputarea/widget', () => {
         const streamOutput = 'nctvjd745fdk56';
         expect(widget.node.innerHTML).not.toContain(streamOutput);
         widget.model.appendStreamOutput(streamOutput);
+        // Rendering is asynchronous (the renderer defers work off the initial
+        // task), so wait for it to settle before inspecting the DOM.
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect(widget.node.innerHTML).toContain(streamOutput);
       });
 
