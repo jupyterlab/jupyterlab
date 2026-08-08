@@ -475,7 +475,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should consume deferred options only once', async () => {
         const deferred = createRestoreOptions();
-        const warning = jest.spyOn(console, 'warn').mockImplementation();
+        const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
         try {
           tracker.defer(deferred);
@@ -483,6 +483,7 @@ describe('@jupyterlab/apputils', () => {
           await expect(tracker.restore()).resolves.toBeUndefined();
 
           expect(deferred.connector.list).toHaveBeenCalledTimes(1);
+          expect(warning).toHaveBeenCalledTimes(1);
           expect(warning).toHaveBeenCalledWith(
             'No options provided to restore the tracker.'
           );
@@ -492,7 +493,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should warn when no options are available', async () => {
-        const warning = jest.spyOn(console, 'warn').mockImplementation();
+        const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
         try {
           await expect(tracker.restore()).resolves.toBeUndefined();
