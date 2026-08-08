@@ -3165,17 +3165,26 @@ export class Notebook extends StaticNotebook {
     if (targetArea === 'notebook') {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
-      // We don't want to prevent the default selection behavior
-      // if there is currently text selected in an output.
-      const hasSelection = (window.getSelection() ?? '').toString() !== '';
+      // We don't want to prevent the default selection behavior when the user
+      // is extending a text selection within the same region of the cell.
+      const isExtendingText = Private.isExtendingTextInSameRegion(
+        window.getSelection(),
+        widget,
+        target
+      );
       if (
         button === 0 &&
         shiftKey &&
-        !hasSelection &&
+        !isExtendingText &&
         !['INPUT', 'OPTION'].includes(target.tagName)
       ) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
+
+        // Preventing the default also stops the browser from collapsing any
+        // text selection which is already there; drop it explicitly so that
+        // stale highlighted text is not left over the new cell selection.
+        window.getSelection()?.removeAllRanges();
 
         // Shift-click - extend selection
         try {
@@ -3827,6 +3836,78 @@ namespace Private {
     protected onUpdateRequest(msg: Message): void {
       // This is a no-op.
     }
+  }
+
+  /**
+   * Check whether `node` is `parent` or a descendant of it.
+   *
+   * Unlike `Node.contains()` this traverses out of open shadow roots, so a
+   * node rendered by a widget library which attaches a shadow root (such as
+   * Panel or Bokeh) is still recognised as belonging to its host subtree.
+   */
+  function containsDeep(parent: Node, node: Node | null): boolean {
+    let current = node;
+    while (current) {
+      if (parent.contains(current)) {
+        return true;
+      }
+      const root = current.getRootNode();
+      current = root instanceof ShadowRoot ? root.host : null;
+    }
+    return false;
+  }
+
+  /**
+   * Whether a cell exposes an output area.
+   *
+   * #### Notes
+   * This is a structural check rather than `instanceof CodeCell` so that it
+   * still holds when a federated extension loads its own copy of
+   * `@jupyterlab/cells`.
+   */
+  function hasOutputArea(cell: Cell): cell is CodeCell {
+    return 'outputArea' in cell;
+  }
+
+  /**
+   * The regions of a cell whose text the browser, rather than the notebook,
+   * is responsible for selecting: the output area of a code cell and the
+   * rendered input of a rendered markdown or raw cell.
+   */
+  function textRegionsOf(cell: Cell): Node[] {
+    const regions: Node[] = [];
+    if (hasOutputArea(cell)) {
+      regions.push(cell.outputArea.node);
+    }
+    const rendered = cell.inputArea?.renderedInput;
+    if (rendered) {
+      regions.push(rendered.node);
+    }
+    return regions;
+  }
+
+  /**
+   * Whether a shift-click on `target` is the user extending a text selection
+   * which already lives in the same text region of `cell`.
+   *
+   * In that case the notebook must not turn the gesture into a cell range
+   * selection; see https://github.com/jupyterlab/jupyterlab/issues/4800.
+   */
+  export function isExtendingTextInSameRegion(
+    selection: Selection | null,
+    cell: Cell,
+    target: Node
+  ): boolean {
+    if (!selection || selection.isCollapsed) {
+      return false;
+    }
+    const { anchorNode, focusNode } = selection;
+    return textRegionsOf(cell).some(
+      region =>
+        containsDeep(region, target) &&
+        containsDeep(region, anchorNode) &&
+        containsDeep(region, focusNode)
+    );
   }
 
   /**
