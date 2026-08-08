@@ -2094,6 +2094,23 @@ describe('@jupyterlab/notebook', () => {
           ).toBeUndefined();
         });
       });
+
+      it('should preserve all cell metadata', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        // Set deletable to false for every cell that will be copied.
+        widget.widgets
+          .filter(cell => widget.isSelectedOrActive(cell))
+          .forEach(cell => cell.model.setMetadata('deletable', false));
+        NotebookActions.copy(widget, true);
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
+        data.map(cell => {
+          expect((cell as JSONObject).metadata).toHaveProperty(
+            'deletable',
+            false
+          );
+        });
+      });
     });
 
     describe('#copyToSystemClipboard()', () => {
@@ -2129,7 +2146,7 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
-        await NotebookActions.copyToSystemClipboard(widget);
+        await NotebookActions.copyToSystemClipboard(widget, false);
         const data = (await utils.systemClipboard.getData(
           JUPYTER_CELL_MIME
         )) as JSONArray;
@@ -2137,6 +2154,25 @@ describe('@jupyterlab/notebook', () => {
           expect(
             ((cell as JSONObject).metadata as JSONObject).deletable
           ).toBeUndefined();
+        });
+      });
+
+      it('should preserve all cell metadata', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        // Set deletable to false for every cell that will be copied.
+        widget.widgets
+          .filter(cell => widget.isSelectedOrActive(cell))
+          .forEach(cell => cell.model.setMetadata('deletable', false));
+        await NotebookActions.copyToSystemClipboard(widget, true);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect((cell as JSONObject).metadata).toHaveProperty(
+            'deletable',
+            false
+          );
         });
       });
     });
@@ -2177,6 +2213,36 @@ describe('@jupyterlab/notebook', () => {
         await sleep();
         expect(widget.widgets.length).toBe(1);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
+      });
+
+      it('should delete metadata.deletable', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        NotebookActions.cut(widget, false);
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeUndefined();
+        });
+      });
+
+      it('should preserve all cell metadata', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        // Set deletable to false for every cell that will be cut.
+        widget.widgets
+          .filter(cell => widget.isSelectedOrActive(cell))
+          .forEach(cell => cell.model.setMetadata('deletable', false));
+        NotebookActions.cut(widget, true);
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
+        data.map(cell => {
+          expect((cell as JSONObject).metadata).toHaveProperty(
+            'deletable',
+            false
+          );
+        });
       });
     });
 
@@ -2219,6 +2285,61 @@ describe('@jupyterlab/notebook', () => {
         await sleep();
         expect(widget.widgets.length).toBe(1);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
+      });
+
+      it('should delete metadata.deletable', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        await NotebookActions.cutToSystemClipboard(widget, false);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeUndefined();
+        });
+      });
+
+      it('should preserve all cell metadata', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        // Set deletable to false for every cell that will be cut.
+        widget.widgets
+          .filter(cell => widget.isSelectedOrActive(cell))
+          .forEach(cell => cell.model.setMetadata('deletable', false));
+        await NotebookActions.cutToSystemClipboard(widget, true);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect((cell as JSONObject).metadata).toHaveProperty(
+            'deletable',
+            false
+          );
+        });
+      });
+    });
+
+    describe('#duplicate()', () => {
+      it('should delete metadata.deletable', () => {
+        widget.activeCellIndex = 0;
+        widget.activeCell!.model.setMetadata('deletable', false);
+        NotebookActions.duplicate(widget, 'below', false);
+        expect(
+          widget.activeCell!.model.getMetadata('deletable')
+        ).toBeUndefined();
+      });
+
+      it('should preserve all cell metadata', () => {
+        widget.activeCellIndex = 0;
+        widget.activeCell!.model.setMetadata('deletable', false);
+        NotebookActions.duplicate(widget, 'below', true);
+        expect(widget.activeCell!.model.toJSON().metadata).toHaveProperty(
+          'deletable',
+          false
+        );
       });
     });
 
