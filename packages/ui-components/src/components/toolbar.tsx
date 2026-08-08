@@ -410,6 +410,33 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     super.dispose();
   }
 
+  protected onChildRemoved(msg: Widget.ChildMessage): void {
+    // If the widget is being moved to the popup opener, keep tracking its
+    // intended position so it can be restored to the right slot later.
+    // NOTE: we cannot check msg.child.parent here because Lumino fires
+    // child-removed before updating the parent reference; use the transit
+    // set instead.
+    if (this._movingToPopup.has(msg.child)) {
+      return;
+    }
+    const name = Private.nameProperty.get(msg.child);
+    if (!name || name === TOOLBAR_OPENER_NAME) {
+      return;
+    }
+    const position = this._widgetPositions.get(name);
+    if (position === undefined) {
+      return;
+    }
+    this._widgetPositions.delete(name);
+    this._widgetWidths.delete(name);
+    // Shift down all items that were logically after the removed one.
+    this._widgetPositions.forEach((pos, key) => {
+      if (pos > position) {
+        this._widgetPositions.set(key, pos - 1);
+      }
+    });
+  }
+
   /**
    * Insert an item into the toolbar at the after a target item.
    *
@@ -603,7 +630,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
 
           // Insert the widget in the popup toolbar.
           const index = position - openerFirstIndex;
+          this._movingToPopup.add(widget);
           opener.insertWidget(index, widget);
+          this._movingToPopup.delete(widget);
         }
         if (opener.widgetCount() > 0) {
           const widgetsToAdd = [];
@@ -731,6 +760,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   private readonly _resizer: Throttler;
   private readonly _widgetWidths = new Map<string, number>();
   private _widgetPositions = new Map<string, number>();
+  private _movingToPopup = new Set<Widget>();
   // The zoom property is not the real browser zoom, but a value proportional to
   // the zoom, which is modified when the zoom changes.
   private _zoom: number;
