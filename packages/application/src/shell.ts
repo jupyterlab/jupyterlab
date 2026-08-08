@@ -2820,15 +2820,50 @@ namespace Private {
         if (widget == null) {
           return;
         }
-        const oldName = TabBarSvg.titleLabel(widget.title);
+        const isDocument = widget instanceof DocumentWidget;
+        const displayedName = TabBarSvg.titleLabel(widget.title);
+        // A document title may be customized independently of its file name.
+        const fileName = isDocument
+          ? widget.context.localPath.split('/').pop()!
+          : displayedName;
         const inputElement = this.inputElement;
         const newName = inputElement.value;
         inputElement.blur();
 
-        if (newName !== oldName) {
+        if (newName === displayedName) {
+          inputElement.value = displayedName;
+          return;
+        }
+
+        if (!isDocument) {
           widget.title.label = newName;
-        } else {
-          inputElement.value = oldName;
+          return;
+        }
+
+        const invalidNameExp = /[/\\:]/;
+        if (
+          newName.length === 0 ||
+          invalidNameExp.test(newName) ||
+          newName === fileName
+        ) {
+          inputElement.value = fileName;
+          return;
+        }
+
+        // Rename through the context so its path and the contents manager stay
+        // synchronized instead of treating the edit as a display-title change.
+        const oldPath = widget.context.path;
+        try {
+          await widget.context.rename(newName);
+        } catch {
+          inputElement.value = fileName;
+          return;
+        }
+
+        // A completed rename updates context.path through the fileChanged
+        // signal. If it did not change, discard the uncommitted input value.
+        if (widget.context.path === oldPath) {
+          inputElement.value = fileName;
         }
       }
     }
