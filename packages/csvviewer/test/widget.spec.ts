@@ -35,6 +35,26 @@ describe('csvviewer/widget', () => {
       });
     });
 
+    describe('#delimiter', () => {
+      it('should default to comma when not specified', () => {
+        const widget = new CSVViewer({ context });
+        expect(widget.delimiter).toBe(',');
+        widget.dispose();
+      });
+
+      it('should use provided delimiter when specified in options', () => {
+        const widget = new CSVViewer({ context, delimiter: ';' });
+        expect(widget.delimiter).toBe(';');
+        widget.dispose();
+      });
+
+      it('should accept tab as delimiter', () => {
+        const widget = new CSVViewer({ context, delimiter: '\t' });
+        expect(widget.delimiter).toBe('\t');
+        widget.dispose();
+      });
+    });
+
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new CSVViewer({ context });
