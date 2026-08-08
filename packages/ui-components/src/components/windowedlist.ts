@@ -1493,6 +1493,16 @@ export class WindowedList<
       this._areaResizeObserver.observe(this._innerElement);
     }
     this._outerElement.addEventListener('scroll', this, passiveIfSupported);
+    this._outerElement.addEventListener(
+      'wheel',
+      this._onUserScrollIntent,
+      passiveIfSupported
+    );
+    this._outerElement.addEventListener(
+      'keydown',
+      this._onUserScrollIntent,
+      true
+    );
   }
 
   /**
@@ -1520,6 +1530,12 @@ export class WindowedList<
    */
   private _removeListeners() {
     this._outerElement.removeEventListener('scroll', this);
+    this._outerElement.removeEventListener('wheel', this._onUserScrollIntent);
+    this._outerElement.removeEventListener(
+      'keydown',
+      this._onUserScrollIntent,
+      true
+    );
     this._areaResizeObserver?.disconnect();
     this._areaResizeObserver = null;
     this._itemsResizeObserver?.disconnect();
@@ -1688,6 +1704,41 @@ export class WindowedList<
     this.scrollToItem(...this._scrollToItem).catch(reason => {
       console.log(reason);
     });
+  }
+
+  /**
+   * Handle explicit user input which can scroll the list.
+   */
+  private _onUserScrollIntent = (event: Event): void => {
+    if (
+      event.type === 'wheel' ||
+      (event instanceof KeyboardEvent &&
+        (event.key === 'PageDown' || event.key === 'PageUp'))
+    ) {
+      this._cancelScrollback();
+    }
+  };
+
+  /**
+   * Cancel scrollback when the user explicitly scrolls away from its target.
+   */
+  private _cancelScrollback(): void {
+    if (!this.viewModel.windowingActive || !this._scrollToItem) {
+      return;
+    }
+
+    this._scrollToItem = null;
+    this._scrollUpdateWasRequested = false;
+
+    if (this._resetScrollToItemTimeout !== null) {
+      clearTimeout(this._resetScrollToItemTimeout);
+      this._resetScrollToItemTimeout = null;
+    }
+    if (this._programmaticScrollTimeout !== null) {
+      clearTimeout(this._programmaticScrollTimeout);
+      this._programmaticScrollTimeout = null;
+    }
+    this._markProgrammaticScrollingDone();
   }
 
   /**
