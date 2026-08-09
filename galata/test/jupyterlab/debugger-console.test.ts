@@ -105,6 +105,7 @@ test.describe.serial('Debugger Console', () => {
       if (await page.debugger.isOn(fileName)) {
         expect(await page.notebook.activate(fileName)).toBe(true);
         await page.debugger.switchOff(fileName);
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(500);
       }
     } catch (error) {

@@ -79,6 +79,7 @@ test.describe.serial('Debugger', () => {
         ) {
           if (await page.debugger.isOn(openedDocument)) {
             await page.debugger.switchOff(openedDocument);
+            // eslint-disable-next-line playwright/no-wait-for-timeout
             await page.waitForTimeout(500);
           }
           if (openedDocumentIsNotebook) {
@@ -112,7 +113,7 @@ test.describe.serial('Debugger', () => {
         expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
 
         const callStackPanel = await page.debugger.getCallStackPanelLocator();
-        expect(await callStackPanel.innerText()).toBe('');
+        await expect(callStackPanel).toHaveText('');
 
         expect(
           await page.notebook.runCell(0, { inplace: true, wait: false })
@@ -286,7 +287,7 @@ test.describe.serial('Debugger', () => {
         expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
         const callStackPanel = await page.debugger.getCallStackPanelLocator();
-        expect(await callStackPanel.innerText()).toBe('');
+        await expect(callStackPanel).toHaveText('');
 
         // Run script (blocked by breakpoint)
         await page.menu.clickMenuItem('Run>Run All Code');
@@ -343,6 +344,7 @@ test.describe.serial('Debugger', () => {
         });
       }
       await page.debugger.switchOff();
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(500);
       await page.notebook.close();
     });
