@@ -54,7 +54,8 @@ export class MathJaxTypesetter implements ILatexTypesetter {
    */
   constructor(options: MathJaxTypesetter.IOptions = {}) {
     this.mathParseOptions = {
-      dollarInlineMath: options.dollarInlineMath ?? true
+      dollarInlineMath: options.dollarInlineMath ?? true,
+      smartInlineMath: options.smartInlineMath ?? true
     };
   }
 
@@ -85,10 +86,15 @@ export class MathJaxTypesetter implements ILatexTypesetter {
 
   protected async _ensureInitialized() {
     if (!this._initialized) {
+      // `smartInlineMath` only has an effect when a single `$` is a delimiter.
+      const smartInlineMath =
+        this.mathParseOptions.dollarInlineMath !== false &&
+        this.mathParseOptions.smartInlineMath === true;
       this._mathDocument = await Private.ensureMathDocument(
         this.mathParseOptions.dollarInlineMath === false
           ? Private.INLINE_MATH_WITHOUT_DOLLAR
-          : Private.DEFAULT_INLINE_MATH
+          : Private.DEFAULT_INLINE_MATH,
+        smartInlineMath
       );
       this._initialized = true;
     }
@@ -513,12 +519,13 @@ namespace Private {
    * memory cost.
    */
   export function ensureMathDocument(
-    inlineMath: [string, string][]
+    inlineMath: [string, string][],
+    smartInlineMath: boolean = false
   ): Promise<MathDocument<any, any, any>> {
-    const key = JSON.stringify(inlineMath);
+    const key = JSON.stringify({ inlineMath, smartInlineMath });
     let document = _documents.get(key);
     if (!document) {
-      document = createMathDocument(inlineMath);
+      document = createMathDocument(inlineMath, smartInlineMath);
       _documents.set(key, document);
     }
     return document;
@@ -578,10 +585,19 @@ namespace Private {
    * Build a MathDocument configured with the given inline delimiters.
    */
   async function createMathDocument(
-    inlineMath: [string, string][]
+    inlineMath: [string, string][],
+    smartInlineMath: boolean = false
   ): Promise<MathDocument<any, any, any>> {
-    const { mathjax, CHTML, TeX, TeXFont, AllPackages } =
-      await ensureMathModules();
+    const {
+      mathjax,
+      CHTML,
+      TeX,
+      TeXFont,
+      AllPackages,
+      protoItem,
+      quotePattern,
+      FindTeX: FindTeXKlass
+    } = await ensureMathModules();
 
     class EmptyFont extends TeXFont {
       protected static defaultFonts = {} as any;
@@ -596,6 +612,18 @@ namespace Private {
     }
 
     const tex = new TeX({
+      FindTeX: smartInlineMath
+        ? createSmartFindTeX(FindTeXKlass, protoItem, quotePattern, {
+            inlineMath,
+            displayMath: [
+              ['$$', '$$'],
+              ['\\[', '\\]']
+            ],
+            processEscapes: true,
+            processEnvironments: true,
+            processRefs: true
+          })
+        : undefined,
       packages: AllPackages.concat('require'),
       inlineMath,
       displayMath: [
