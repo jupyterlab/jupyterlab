@@ -1801,12 +1801,15 @@ export class WindowedList<
         if (event instanceof MouseEvent) {
           // A primary-button press on the outer element itself (rather than
           // on the content) is a native scrollbar interaction: the scrollbar
-          // gutter lies outside of the client area (right of it, or left of
-          // it in right-to-left layouts).
+          // gutter lies within the border box but outside of the client
+          // area, which spans `clientWidth` starting at `clientLeft`
+          // (`clientLeft` includes the width of the scrollbar when it is
+          // placed on the left in right-to-left layouts).
+          const outer = this._outerElement;
+          const x = event.clientX - outer.getBoundingClientRect().left;
           const onScrollbarGutter =
-            event.target === this._outerElement &&
-            (event.offsetX >= this._outerElement.clientWidth ||
-              event.offsetX < 0);
+            event.target === outer &&
+            (x < outer.clientLeft || x >= outer.clientLeft + outer.clientWidth);
           // Middle-click can start browser autoscroll anywhere in the list.
           if (event.button === 1 || (event.button === 0 && onScrollbarGutter)) {
             this._cancelScrollback();
