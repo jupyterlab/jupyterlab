@@ -333,6 +333,58 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
     );
   });
 
+  test('should keep the position the user scrolled to while a cell above generates a lot of output', async ({
+    page
+  }) => {
+    const notebook = await page.notebook.getNotebookInPanelLocator();
+    const thirdCell = await page.notebook.getCellLocator(2);
+
+    // Set second cell to produce long output with a delay long enough
+    // to allow scrolling away while the execution is ongoing.
+    await page.notebook.setCell(
+      1,
+      'code',
+      'from time import sleep\nsleep(2)\nfor i in range(100):\n    print(i)\n    sleep(0.05)\n'
+    );
+
+    // Select the second cell and clear its output
+    await page.notebook.selectCells(1);
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:clear-cell-output');
+    });
+
+    // Position the viewport over the top of the third cell (which has
+    // a long existing output, providing space to scroll into)
+    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 1);
+
+    // Start running the second cell with advance, without waiting for it
+    const execution = page.evaluate(() => {
+      return window.jupyterapp.commands.execute(
+        'notebook:run-cell-and-select-next'
+      );
+    });
+
+    // Scroll away while the initial `sleep` holds the output back
+    const bbox = (await notebook!.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+    await page.mouse.wheel(0, 600);
+
+    // Let the scroll settle before taking the reference measurement
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500);
+    const referenceBox = (await thirdCell!.boundingBox())!;
+
+    await execution;
+    // Allow the layout to settle after the last output arrived
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500);
+
+    // The position the user scrolled to should have been kept while the
+    // output of the cell above was growing
+    const finalBox = (await thirdCell!.boundingBox())!;
+    expect(Math.abs(finalBox.y - referenceBox.y)).toBeLessThan(150);
+  });
+
   test('should not scroll when advancing if top is non-marginally visible', async ({
     page
   }) => {
