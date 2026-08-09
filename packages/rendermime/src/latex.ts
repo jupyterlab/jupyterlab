@@ -61,8 +61,9 @@ export function removeMath(
   // When `false`, a single `$` is left literal (e.g. currency) while `$$`
   // display math and `\(...\)` / `\[...\]` delimiters keep working.
   const dollarInlineMath = options?.dollarInlineMath ?? true;
-  // When `true`, a single `$` only opens inline math when it is followed
-  // by a non-space character, mirroring pandoc's smart delimiter rules.
+  // When `true`, a single `$` only opens or closes inline math when it is
+  // surrounded by non-space characters (and the closing `$` is not followed
+  // by a digit), mirroring pandoc's smart delimiter rules.
   const smartInlineMath = options?.smartInlineMath ?? true;
   const math: string[] = []; // stores math strings for later
   let start: number | null = null;
