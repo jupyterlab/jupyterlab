@@ -6,10 +6,10 @@ import { removeMath, replaceMath } from '@jupyterlab/rendermime';
 describe('jupyter-ui', () => {
   describe('removeMath()', () => {
     it('should split the text into text and math', () => {
-      const input = 'hello, $ /alpha $, there';
+      const input = 'hello, $/alpha$, there';
       const { text, math } = removeMath(input);
       expect(text).toBe('hello, @@0@@, there');
-      expect(math).toEqual(['$ /alpha $']);
+      expect(math).toEqual(['$/alpha$']);
     });
 
     it('should handle code spans', () => {
@@ -48,24 +48,24 @@ describe('jupyter-ui', () => {
     });
 
     it('should handle math markers', () => {
-      const input = ' @@0@@ hello, $ /alpha $, there';
+      const input = ' @@0@@ hello, $/alpha$, there';
       const { text, math } = removeMath(input);
       expect(text).toBe(' @@0@@ hello, @@1@@, there');
-      expect(math).toEqual(['@@0@@', '$ /alpha $']);
+      expect(math).toEqual(['@@0@@', '$/alpha$']);
     });
 
     it('should handle unbalanced braces', () => {
-      const input = 'hello, $ /alpha { $, there';
+      const input = 'hello, $a_{x$ end';
       const { text, math } = removeMath(input);
-      expect(text).toBe('hello, @@0@@, there');
-      expect(math).toEqual(['$ /alpha { $']);
+      expect(text).toBe('hello, @@0@@ end');
+      expect(math).toEqual(['$a_{x$']);
     });
 
     it('should handle balanced braces', () => {
-      const input = 'hello, $ /alpha { } $, there';
+      const input = 'hello, $a_{x}$ end';
       const { text, math } = removeMath(input);
-      expect(text).toBe('hello, @@0@@, there');
-      expect(math).toEqual(['$ /alpha { } $']);
+      expect(text).toBe('hello, @@0@@ end');
+      expect(math).toEqual(['$a_{x}$']);
     });
 
     it('should handle math blocks', () => {
@@ -117,6 +117,13 @@ describe('jupyter-ui', () => {
       it('should treat single `$` as inline math by default', () => {
         const input = 'You owe me $5 and $10.';
         const { text, math } = removeMath(input);
+        expect(math).toEqual([]);
+        expect(text).toBe(input);
+      });
+
+      it('should treat single `$` as inline math when smart rules are disabled', () => {
+        const input = 'You owe me $5 and $10.';
+        const { text, math } = removeMath(input, { smartInlineMath: false });
         expect(math).toEqual(['$5 and $']);
         expect(text).toBe('You owe me @@0@@10.');
       });
@@ -163,11 +170,41 @@ describe('jupyter-ui', () => {
         expect(text).toBe(input);
       });
     });
+
+    describe('smartInlineMath option', () => {
+      it('should leave currency amounts containing `$` literal by default', () => {
+        const input = 'Hello $24 and $27';
+        const { text, math } = removeMath(input);
+        expect(math).toEqual([]);
+        expect(text).toBe(input);
+      });
+
+      it('should leave a `$` followed by whitespace literal', () => {
+        const input = 'Store $ and compute $x^2$';
+        const { text, math } = removeMath(input);
+        expect(math).toEqual(['$x^2$']);
+        expect(text).toBe('Store $ and compute @@0@@');
+      });
+
+      it('should leave a closing `$` followed by a digit literal', () => {
+        const input = '$x^2$1 is not math';
+        const { text, math } = removeMath(input);
+        expect(math).toEqual([]);
+        expect(text).toBe(input);
+      });
+
+      it('should still recognize math when smart rules are disabled', () => {
+        const input = 'Hello $24 and $27';
+        const { text, math } = removeMath(input, { smartInlineMath: false });
+        expect(math).toEqual(['$24 and $']);
+        expect(text).toBe('Hello @@0@@27');
+      });
+    });
   });
 
   describe('replaceMath()', () => {
     it('should recombine text split with removeMath', () => {
-      const input = 'hello, $ /alpha $, there';
+      const input = 'hello, $/alpha$, there';
       const { text, math } = removeMath(input);
       expect(replaceMath(text, math)).toBe(input);
     });
