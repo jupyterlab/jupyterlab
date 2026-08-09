@@ -63,7 +63,7 @@ class CheckForUpdateABC(abc.ABC):
         self.version = version
 
     @abc.abstractmethod
-    async def __call__(self) -> Awaitable[None | str | tuple[str, tuple[str, str]]]:
+    async def __call__(self) -> Awaitable[str | tuple[str, tuple[str, str]] | None]:
         """Get the notification message if a new version is available.
 
         Returns:

@@ -113,7 +113,7 @@ dev = [
     "hatch",
     "bump2version",
     "mypy==1.20.2",
-    "ruff==0.15.20",
+    "ruff==0.16.1",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -265,10 +265,6 @@ module = ["jupyterlab.browser_check"]
 disable_error_code = ["arg-type", "assignment"]
 
 [[tool.mypy.overrides]]
-module = ["jupyterlab.debuglog"]
-disable_error_code = ["attr-defined"]
-
-[[tool.mypy.overrides]]
 module = ["jupyterlab.extensions.manager"]
 disable_error_code = [
     "arg-type",
@@ -304,20 +300,8 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.build_handler"]
-disable_error_code = ["arg-type", "misc", "override", "union-attr", "var-annotated"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.error_handler"]
-disable_error_code = ["arg-type", "override"]
-
-[[tool.mypy.overrides]]
 module = ["jupyterlab.labapp"]
 disable_error_code = ["arg-type", "assignment", "union-attr"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.upgrade_extension"]
-disable_error_code = ["assignment", "operator"]
 
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
@@ -358,6 +342,8 @@ lint.ignore = [
 "E501",
 # PLR0913 Too many arguments to function call
 "PLR0913",
+# PLR0917 Too many positional arguments
+"PLR0917",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]
