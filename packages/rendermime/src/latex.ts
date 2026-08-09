@@ -13,6 +13,18 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 const inline = '$'; // the inline math delimiter
 
+/**
+ * Check whether a `$` at the given block index may open inline math.
+ *
+ * The opening `$` must have a non-space character immediately to its right
+ * (pandoc's smart delimiter rule), otherwise it is left literal so that e.g.
+ * a lone currency `$` is not treated as math.
+ */
+function isSmartDollarStart(blocks: string[], index: number): boolean {
+  const nextText = blocks.slice(index + 1).join('');
+  return nextText.length > 0 && !/\s/.test(nextText.charAt(0));
+}
+
 // MATHSPLIT contains the pattern for math delimiters and special symbols
 // needed for searching for math in the text input.
 const MATHSPLIT =
@@ -32,6 +44,9 @@ export function removeMath(
   // When `false`, a single `$` is left literal (e.g. currency) while `$$`
   // display math and `\(...\)` / `\[...\]` delimiters keep working.
   const dollarInlineMath = options?.dollarInlineMath ?? true;
+  // When `true`, a single `$` only opens inline math when it is followed
+  // by a non-space character, mirroring pandoc's smart delimiter rules.
+  const smartInlineMath = options?.smartInlineMath ?? true;
   const math: string[] = []; // stores math strings for later
   let start: number | null = null;
   let end: string | null = null;
@@ -116,7 +131,12 @@ export function removeMath(
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if ((block === inline && dollarInlineMath) || block === '$$') {
+      if (
+        (block === inline &&
+          dollarInlineMath &&
+          (!smartInlineMath || isSmartDollarStart(blocks, i))) ||
+        block === '$$'
+      ) {
         start = i;
         end = block;
         braces = 0;
