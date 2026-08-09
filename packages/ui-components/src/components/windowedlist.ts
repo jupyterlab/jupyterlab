@@ -1698,8 +1698,28 @@ export class WindowedList<
       }
     }
 
+    // When no scrollback is pending, compensate the scroll offset for size
+    // changes of items lying entirely above the viewport so that the content
+    // the user is looking at does not shift. This is the windowed equivalent
+    // of the browser-native scroll anchoring, which has to be disabled in
+    // full windowing mode. The sizes must be read before `setWidgetSize`.
+    let scrollCompensation = 0;
+    if (this.viewModel.windowingActive && this._scrollToItem === null) {
+      const scrollOffset = this.viewModel.scrollOffset;
+      for (const { index, size } of newSizes) {
+        const [offset, oldSize] = this.viewModel.getSpan(index, index);
+        if (offset + oldSize <= scrollOffset) {
+          scrollCompensation += size - oldSize;
+        }
+      }
+    }
+
     // If some sizes changed
     if (this.viewModel.setWidgetSize(newSizes)) {
+      if (scrollCompensation !== 0) {
+        this.viewModel.scrollOffset += scrollCompensation;
+        this._scrollUpdateWasRequested = true;
+      }
       this._scrollBackToItemOnResize();
       // Update the list
       this.update();
