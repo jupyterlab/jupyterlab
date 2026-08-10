@@ -181,9 +181,16 @@ test.describe('General', () => {
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toBeEmpty();
+    // Settling the kernel before the snapshot: `language_info` and `kernelspec`
+    // are written to the notebook metadata when it resolves, and each write
+    // rebuilds the form below.
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
+    // Asserted positively: `not.toBeEmpty()` also passes when the element is
+    // missing altogether.
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[ ]:'
+    );
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toHaveClass(/lm-mod-hidden/);
