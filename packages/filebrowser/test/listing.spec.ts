@@ -146,6 +146,39 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('#_startDrag()', () => {
+      it('should request file content when withContent() is called on the drag thunk', async () => {
+        // Use a local instance so the hanging drag does not leak event
+        // listeners onto `document` and affect subsequent tests.
+        const options = createOptionsForConstructor();
+        await options.model.manager.newUntitled({ type: 'file' });
+        const localListing = new TestDirListing(options);
+        Widget.attach(localListing, document.body);
+        await signalToPromise(localListing.updated);
+
+        const contentsManager = localListing.model.manager.services.contents;
+        const getSpy = jest.spyOn(contentsManager, 'get');
+
+        localListing['_startDrag'](0, 0, 0);
+
+        const drag = localListing['_drag']!;
+        const thunk = drag.mimeData.getData(
+          'application/x-jupyter-icontentsrich'
+        ) as DirListing.IContentsThunk;
+
+        expect(thunk).toBeDefined();
+        const model = await thunk.withContent();
+        expect(getSpy).toHaveBeenCalledWith(thunk.model.path, {
+          content: true
+        });
+        expect(model.content).not.toBeNull();
+
+        getSpy.mockRestore();
+        drag.dispose();
+        localListing.dispose();
+      });
+    });
+
     describe('#selectItemByName()', () => {
       it('should select item in the current directory by name', async () => {
         const name = [...dirListing.sortedItems()][2].name;
