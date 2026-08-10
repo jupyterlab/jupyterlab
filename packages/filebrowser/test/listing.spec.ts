@@ -105,43 +105,6 @@ describe('filebrowser/listing', () => {
       });
     });
 
-    describe('last modified column', () => {
-      const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
-
-      beforeEach(async () => {
-        // Use a stable timestamp so that the rendered relative time is
-        // different for the narrow, short, and long column styles.
-        const items = [...dirListing.sortedItems()].filter(
-          item => item.type !== 'directory'
-        );
-        const contents = dirListing.model.manager.services.contents;
-        for (const item of items) {
-          await contents.save(item.path, {
-            last_modified: new Date(2020, 0, 1).toISOString()
-          } as any);
-        }
-        await signalToPromise(dirListing.updated);
-      });
-
-      it('should update the relative time when the column is resized', async () => {
-        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
-        const modifiedCell = itemNode.querySelector(
-          `.${ITEM_MODIFIED_CLASS}`
-        ) as HTMLElement;
-
-        expect(modifiedCell).not.toBeNull();
-        const renderedValues: string[] = [];
-
-        for (const width of [180, 300, 500]) {
-          dirListing.onResize(new Widget.ResizeMessage('resize', width, 300));
-          await framePromise();
-          renderedValues.push(modifiedCell.textContent ?? '');
-        }
-
-        expect(new Set(renderedValues).size).toBe(3);
-      });
-    });
-
     describe('#handleEvent()', () => {
       it('should upload a nested folder on drag', async () => {
         const dt = new DataTransfer();
@@ -869,6 +832,43 @@ describe('filebrowser/listing', () => {
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
           });
         });
+      });
+    });
+
+    describe('last modified column', () => {
+      const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
+
+      beforeEach(async () => {
+        // Use a stable timestamp so that the rendered relative time is
+        // different for the narrow, short, and long column styles.
+        const items = [...dirListing.sortedItems()].filter(
+          item => item.type !== 'directory'
+        );
+        const contents = dirListing.model.manager.services.contents;
+        for (const item of items) {
+          await contents.save(item.path, {
+            last_modified: new Date(2020, 0, 1).toISOString()
+          } as any);
+        }
+        await signalToPromise(dirListing.updated);
+      });
+
+      it('should update the relative time when the column is resized', async () => {
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const modifiedCell = itemNode.querySelector(
+          `.${ITEM_MODIFIED_CLASS}`
+        ) as HTMLElement;
+
+        expect(modifiedCell).not.toBeNull();
+        const renderedValues: string[] = [];
+
+        for (const width of [180, 300, 500]) {
+          dirListing.onResize(new Widget.ResizeMessage(width, 300));
+          await framePromise();
+          renderedValues.push(modifiedCell.textContent ?? '');
+        }
+
+        expect(new Set(renderedValues).size).toBe(3);
       });
     });
 
