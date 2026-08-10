@@ -1364,12 +1364,18 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     languages: IEditorLanguageRegistry
   ) => {
+    // The field renderer is used by rjsf as a React component, so it runs on
+    // every rebuild of the metadata form. The tool is created once and reused:
+    // constructing one per render would rebuild the prompt and the preview from
+    // scratch (showing them empty until the next update) and would leave a
+    // connection to the cell model behind for every abandoned instance.
+    const tool = new ActiveCellTool({
+      tracker,
+      languages
+    });
     const component: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new ActiveCellTool({
-          tracker,
-          languages
-        }).render(props);
+        return tool.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -2273,8 +2279,12 @@ function activateNotebookHandler(
             value: settings.get('sideBySideOutputRatio').composite as number
           })
             .then(result => {
-              setSideBySideOutputRatio(result.value!);
-              if (result.value) {
+              if (
+                result.value !== null &&
+                Number.isFinite(result.value) &&
+                result.value >= 0
+              ) {
+                setSideBySideOutputRatio(result.value);
                 void settings.set('sideBySideOutputRatio', result.value);
               }
             })
@@ -2447,15 +2457,16 @@ function activateNotebookHandler(
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
-      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;
+    }`;
     const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
     if (sideBySideMarginTag) {
-      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+      sideBySideMarginTag.textContent = sideBySideMarginStyle;
     } else {
-      document.head.insertAdjacentHTML(
-        'beforeend',
-        `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
-      );
+      const style = document.createElement('style');
+      style.id = SIDE_BY_SIDE_STYLE_ID;
+      style.textContent = sideBySideMarginStyle;
+      document.head.appendChild(style);
     }
     factory.autoStartDefault = settings.get('autoStartDefaultKernel')
       .composite as boolean;

@@ -1025,6 +1025,29 @@ describe('@jupyter/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
+      it('should not steal focus from outside the notebook when setting mode', async () => {
+        const widget = createActiveWidget();
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        Widget.attach(widget, document.body);
+        try {
+          await framePromise();
+
+          input.focus();
+          expect(document.activeElement).toBe(input);
+          expect(widget.node.contains(input)).toBe(false);
+          widget.mode = 'edit';
+          expect(document.activeElement).toBe(input);
+          await framePromise();
+
+          expect(widget.mode).toBe('edit');
+          expect(document.activeElement).toBe(input);
+        } finally {
+          widget.dispose();
+          input.remove();
+        }
+      });
+
       it('should emit the `stateChanged` signal', () => {
         const widget = createActiveWidget();
         let called = false;

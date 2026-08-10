@@ -1323,7 +1323,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Rehydrate the down area
     if (downArea) {
       const { currentWidget, widgets, size } = downArea;
-      const collapsed = downArea.collapsed ?? !size;
+      const collapsed =
+        downArea.collapsed ??
+        (size === undefined || size === null || size === 0);
 
       const widgetIds = widgets?.map(widget => widget.id) ?? [];
       const otherAreaWidgetIds = new Set<string>();
@@ -1390,12 +1392,18 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         }
       }
 
-      if (!collapsed && widgets?.length && size && size > 0.0) {
+      if (
+        !collapsed &&
+        (widgets?.length ?? 0) > 0 &&
+        size !== undefined &&
+        size !== null &&
+        size > 0.0
+      ) {
         this._showDownPanel(size);
         this._downPanel.currentWidget?.activate();
       } else {
         this._hideDownPanel();
-        if (size && size > 0.0) {
+        if (size !== undefined && size !== null && size > 0.0) {
           // Remember the saved size so a later expand restores the user's
           // previous height. `_hideDownPanel` seeds `_lastDownAreaSize`
           // from the current splitter, which at cold startup reflects the

@@ -57,10 +57,10 @@ describe('@jupyterlab/codemirror', () => {
           container
         );
         expect(container.innerHTML).toEqual(
-          `<span class="ͼ19">(</span>defun check-login <span class="ͼ19">(</span>name password<span class="ͼ19">)</span> <span class="ͼ11">; absolutely secure</span>
-      <span class="ͼ19">(</span>if <span class="ͼ19">(</span>equal name <span class="ͼ12">"admin"</span><span class="ͼ19">)</span>
-        <span class="ͼ19">(</span>equal password <span class="ͼ12">"12345"</span><span class="ͼ19">)</span>
-        <span class="ͼ1d">#t</span><span class="ͼ19">)</span><span class="ͼ19">)</span>`
+          `<span class="ͼ1a">(</span>defun check-login <span class="ͼ1a">(</span>name password<span class="ͼ1a">)</span> <span class="ͼ12">; absolutely secure</span>
+      <span class="ͼ1a">(</span>if <span class="ͼ1a">(</span>equal name <span class="ͼ13">"admin"</span><span class="ͼ1a">)</span>
+        <span class="ͼ1a">(</span>equal password <span class="ͼ13">"12345"</span><span class="ͼ1a">)</span>
+        <span class="ͼ1e">#t</span><span class="ͼ1a">)</span><span class="ͼ1a">)</span>`
         );
       });
 
