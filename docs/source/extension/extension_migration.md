@@ -8,6 +8,22 @@
 
 ## JupyterLab 4.6 to 4.7 (not released yet)
 
+### Default content provider
+
+The `get` method of the default content provider (`RestContentProvider`) now sets the `content` field
+to `false`, meaning **no file content is returned** unless explicitly requested. Previously,
+omitting `options` caused no query parameters to be sent, so the server fell back to its own default
+and returned the full file body. If your extension relies on that implicit behavior, pass
+`{ content: true }` explicitly:
+
+```ts
+// Before (accidentally returned content via server default)
+const model = await provider.get(localPath);
+
+// After (request content explicitly)
+const model = await provider.get(localPath, { content: true });
+```
+
 ### API updates
 
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
