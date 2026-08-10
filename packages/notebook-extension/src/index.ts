@@ -1364,12 +1364,18 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     languages: IEditorLanguageRegistry
   ) => {
+    // The field renderer is used by rjsf as a React component, so it runs on
+    // every rebuild of the metadata form. The tool is created once and reused:
+    // constructing one per render would rebuild the prompt and the preview from
+    // scratch (showing them empty until the next update) and would leave a
+    // connection to the cell model behind for every abandoned instance.
+    const tool = new ActiveCellTool({
+      tracker,
+      languages
+    });
     const component: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new ActiveCellTool({
-          tracker,
-          languages
-        }).render(props);
+        return tool.render(props);
       }
     };
     formRegistry.addRenderer(
