@@ -254,10 +254,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     const oldSpec = this.model!.getMetadata(
       'kernelspec'
     ) as nbformat.IKernelspecMetadata;
+    const preserved  = oldSpec?.name === kernel.name ? oldSpec : undefined;
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
-      display_name: spec?.display_name ?? oldSpec?.display_name ?? kernel.name,
-      language: spec?.language ?? oldSpec?.language
+      display_name: spec?.display_name ?? preserved?.display_name ?? kernel.name,
+      language: spec?.language ?? preserved?.language
     });
   }
 
