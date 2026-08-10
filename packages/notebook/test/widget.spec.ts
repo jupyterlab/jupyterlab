@@ -1873,6 +1873,32 @@ describe('@jupyter/notebook', () => {
           expect(selected(widget)).toEqual([]);
         });
 
+        it('should allow shift-click selection across two outputs', () => {
+          const codeCellIndex = 3;
+          widget.activeCellIndex = codeCellIndex;
+
+          // Set a selection in the active cell outputs.
+          const output = (widget.activeCell as CodeCell).outputArea.node;
+          const selection = window.getSelection()!;
+          selection.selectAllChildren(output);
+          // Guard the fixture: without output text there is nothing to extend.
+          expect(selection.toString()).not.toBe('');
+
+          // Shift click in the output of another cell should preserve browser
+          // text selection, which is what `defaultPrevented` being false means.
+          const otherOutput = (widget.widgets[codeCellIndex + 2] as CodeCell)
+            .outputArea.node;
+          const mouseDownEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          });
+          otherOutput.dispatchEvent(mouseDownEvent);
+          expect(mouseDownEvent.defaultPrevented).toBe(false);
+          expect(widget.activeCellIndex).toBe(codeCellIndex);
+          expect(selected(widget)).toEqual([]);
+        });
+
         it('should extend cell selection when shift-clicking outside selected output', () => {
           const codeCellIndex = 3;
           widget.activeCellIndex = codeCellIndex;

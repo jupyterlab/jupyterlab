@@ -334,6 +334,81 @@ test.describe('Notebook Edit', () => {
     ).toContain('delta');
   });
 
+  test('Shift-click extends text selection across the outputs of two cells', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', 'print("alpha")');
+    await page.notebook.addCell('code', 'print("beta")');
+    await page.notebook.addCell('code', 'print("gamma")');
+    for (const index of [0, 1, 2]) {
+      await page.notebook.runCell(index);
+    }
+
+    const firstCell = await page.notebook.getCellLocator(0);
+    const secondCell = await page.notebook.getCellLocator(1);
+    const thirdCell = await page.notebook.getCellLocator(2);
+    await thirdCell!.locator('.jp-OutputArea-output').waitFor();
+
+    // Make the first cell active, so that extending the cell selection to the
+    // third cell would visibly select the cells below it.
+    await firstCell!.locator('.jp-InputArea-prompt').click();
+
+    await selectText(page, '.jp-Cell-outputArea', 'alpha');
+
+    // Shift-click in the output of a *different* cell.
+    await thirdCell!
+      .locator('.jp-OutputArea-output')
+      .click({ modifiers: ['Shift'] });
+
+    // The browser extends the text selection over the cell in between instead
+    // of the notebook selecting the cells. The clicked cell becomes active
+    // (and thus `jp-mod-selected`) because it takes focus, so the cell where
+    // the selection started and the cell in between are what tell a cell range
+    // selection apart from a text selection here.
+    await expect(firstCell!).not.toHaveClass(/jp-mod-selected/);
+    await expect(secondCell!).not.toHaveClass(/jp-mod-selected/);
+    expect(
+      await page.evaluate(() => window.getSelection()?.toString() ?? '')
+    ).toContain('gamma');
+  });
+
+  test('Shift-click extends text selection across two rendered markdown cells', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'markdown', 'alpha beta gamma');
+    await page.notebook.addCell('code', '1 + 1');
+    await page.notebook.addCell('markdown', 'delta epsilon zeta');
+
+    // Render both markdown cells.
+    await page.notebook.runCell(0);
+    await page.notebook.runCell(2);
+
+    const firstCell = await page.notebook.getCellLocator(0);
+    const secondCell = await page.notebook.getCellLocator(1);
+    const thirdCell = await page.notebook.getCellLocator(2);
+    await firstCell!.locator('.jp-MarkdownOutput').waitFor();
+    await thirdCell!.locator('.jp-MarkdownOutput').waitFor();
+
+    // Make the first cell active, so that extending the cell selection to the
+    // third cell would visibly select the cells below it.
+    await firstCell!.locator('.jp-InputArea-prompt').click();
+
+    await selectText(page, '.jp-MarkdownOutput', 'beta');
+
+    // Shift-click the rendered input of a *different* markdown cell.
+    await thirdCell!
+      .locator('.jp-MarkdownOutput p')
+      .click({ modifiers: ['Shift'] });
+
+    // See the test above on why the cell where the selection started and the
+    // cell in between are the ones checked.
+    await expect(firstCell!).not.toHaveClass(/jp-mod-selected/);
+    await expect(secondCell!).not.toHaveClass(/jp-mod-selected/);
+    expect(
+      await page.evaluate(() => window.getSelection()?.toString() ?? '')
+    ).toContain('delta');
+  });
+
   test('Move cells up', async ({ page }) => {
     await populateNotebook(page);
     const imageName = 'move-cell-up.png';
