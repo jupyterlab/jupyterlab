@@ -785,6 +785,38 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.6.3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.2...08c20a121297016a352f8f6f96aabd25b5703aab))
+
+### Bugs fixed
+
+- Fix Shift-click cell selection after editor text selection [#19243](https://github.com/jupyterlab/jupyterlab/pull/19243) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix active cell prompt and source blink in notebook tools & prevent a memory leak [#19168](https://github.com/jupyterlab/jupyterlab/pull/19168) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Update the item positions when an item is removed from reactive toolbar [#19227](https://github.com/jupyterlab/jupyterlab/pull/19227) ([@brichet](https://github.com/brichet))
+- Fix variable inspection, document autocomplete and variable inspect/render [#19234](https://github.com/jupyterlab/jupyterlab/pull/19234) ([@krassowski](https://github.com/krassowski))
+- Show "starting" rather than "idle" status when changing kernel via `SessionContext.changeKernel()` [#19166](https://github.com/jupyterlab/jupyterlab/pull/19166) ([@Zsailer](https://github.com/Zsailer))
+
+### Maintenance and upkeep improvements
+
+- Update Altair snapshot [#19204](https://github.com/jupyterlab/jupyterlab/pull/19204) ([@krassowski](https://github.com/krassowski))
+- Switch pre-commit to `language: system` [#19193](https://github.com/jupyterlab/jupyterlab/pull/19193) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Update JEP 91 link to the new MyST docs URL [#19212](https://github.com/jupyterlab/jupyterlab/pull/19212) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-07-21&to=2026-08-10&type=c))
+
+@brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-07-21..2026-08-10&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-07-21..2026-08-10&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-07-21..2026-08-10&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-07-21..2026-08-10&type=Issues)) | @Zsailer ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AZsailer+updated%3A2026-07-21..2026-08-10&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.6.2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.6.1...f1beab4a2027af4719d6edc07d52d6cf5a39a432))
@@ -824,8 +856,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-06-29&to=2026-07-21&type=c))
 
 @afshin ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2026-06-29..2026-07-21&type=Issues)) | @GagandeepSingh20 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AGagandeepSingh20+updated%3A2026-06-29..2026-07-21&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-06-29..2026-07-21&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-06-29..2026-07-21&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2026-06-29..2026-07-21&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.6.1
 
