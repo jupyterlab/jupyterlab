@@ -256,23 +256,6 @@ test.describe('General', () => {
       '.jp-ActiveCellTool .jp-ActiveCellTool-Content pre'
     );
     const activeCellPrompt = page.locator('.jp-ActiveCellTool .jp-InputPrompt');
-    const setActiveCell = async (cellIndex: number): Promise<void> => {
-      await page.evaluate(index => {
-        const widget = window.galata.app.shell.currentWidget;
-        if (!widget || !('content' in widget)) {
-          throw new Error(
-            'Expected the current widget to be a notebook panel.'
-          );
-        }
-
-        (widget.content as { activeCellIndex: number }).activeCellIndex = index;
-      }, cellIndex);
-    };
-    const activeCellPromptHidden = async (): Promise<boolean> => {
-      return await activeCellPrompt.evaluate(node =>
-        node.classList.contains('lm-mod-hidden')
-      );
-    };
 
     await expect(activeCellPreview).toHaveText('Raw cell');
     await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
@@ -285,13 +268,12 @@ test.describe('General', () => {
     await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
     await expect(activeCellPrompt).toHaveText('[ ]:');
 
-    await setActiveCell(1);
+    await page.notebook.selectCells(1);
     await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
 
-    await setActiveCell(2);
-    await activeCellPrompt.waitFor({ state: 'attached' });
-    expect(await activeCellPromptHidden()).toBe(false);
-    expect((await activeCellPrompt.textContent())?.trim()).toBe('[ ]:');
+    await page.notebook.selectCells(2);
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
 
     await page.notebook.runCell(2, true);
     await expect(activeCellPrompt).toHaveText('[1]:');
