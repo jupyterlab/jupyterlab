@@ -6,7 +6,7 @@ import { expect, test } from '@jupyterlab/galata';
 
 const TOOL = '.jp-ActiveCellTool';
 const PROMPT = `${TOOL} .jp-InputPrompt`;
-const PREVIEW = `${TOOL} .jp-ActiveCellTool-CellContent pre`;
+const PREVIEW = `${TOOL} .jp-ActiveCellTool-Content pre`;
 
 /**
  * What the active cell field showed on a single animation frame.

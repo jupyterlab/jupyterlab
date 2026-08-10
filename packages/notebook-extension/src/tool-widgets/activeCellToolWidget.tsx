@@ -54,6 +54,10 @@ namespace Private {
  * displayed cell follows the notebook tracker rather than the render calls, so
  * that the field keeps working when the metadata form is not being rebuilt, and
  * so that it does not hold on to a cell model of a closed notebook.
+ *
+ * One instance owns one node, so the field can only be mounted in one place at
+ * a time: `render` moves the node to the most recent mount point and leaves any
+ * earlier one empty. Nothing renders this field twice today.
  */
 export class ActiveCellTool extends NotebookTools.Tool {
   constructor(options: Private.IOptions) {
@@ -79,7 +83,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
     // Only edits to the current cell are rate-limited; switching cells updates
     // the display immediately, see `_onActiveCellChanged`.
     this._previewDebouncer = new Debouncer<void, void, null[]>(
-      () => this._update(false),
+      () => this._update(),
       150
     );
 
@@ -114,7 +118,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
           }
           ref.appendChild(this.node);
           if (this._pendingUpdate) {
-            this._update(true).catch(console.warn);
+            this._update().catch(console.warn);
           }
         }}
       ></div>
@@ -139,7 +143,10 @@ export class ActiveCellTool extends NotebookTools.Tool {
       );
       cellModel.mimeTypeChanged.connect(this._onCellContentChanged, this);
     }
-    this._update(true).catch(console.warn);
+    // The prompt now belongs to a cell whose source line is not on screen yet,
+    // so leave it to `_update` to write both together.
+    this._promptOutdated = true;
+    this._update().catch(console.warn);
   }
 
   /**
@@ -148,11 +155,14 @@ export class ActiveCellTool extends NotebookTools.Tool {
   private _onCellContentChanged(): void {
     if (!this.node.isConnected) {
       this._pendingUpdate = true;
+      this._promptOutdated = true;
       return;
     }
-    // The cell is unchanged, so the prompt cannot end up describing a different
-    // cell than the preview; write it right away and rate-limit the highlight.
-    this._updatePrompt();
+    if (!this._promptOutdated) {
+      // The cell is unchanged and no switch is in flight, so writing the prompt
+      // now cannot pair it with the source line of a different cell.
+      this._updatePrompt();
+    }
     this._previewDebouncer.invoke().catch(console.warn);
   }
 
@@ -187,13 +197,13 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   /**
-   * Refresh the preview, and optionally the prompt along with it.
+   * Refresh the preview, writing an outdated prompt along with it.
    *
-   * @param withPrompt Whether to write the prompt together with the preview,
-   * which is required when the cell changed: writing it earlier would show the
-   * prompt of the new cell next to the source line of the previous one.
+   * The prompt is written in the same task as the preview it belongs with, so
+   * that the field never shows the prompt of one cell above the source line of
+   * another while a language mode is being loaded.
    */
-  private async _update(withPrompt: boolean): Promise<void> {
+  private async _update(): Promise<void> {
     if (!this.node.isConnected) {
       // Nothing is on screen; catch up when the field is mounted again.
       this._pendingUpdate = true;
@@ -205,6 +215,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
     const pending = ++this._updateId;
 
     if (!cellModel) {
+      this._promptOutdated = false;
       this._updatePrompt();
       this._editorEl.replaceChildren();
       return;
@@ -231,12 +242,14 @@ export class ActiveCellTool extends NotebookTools.Tool {
     }
 
     if (pending !== this._updateId) {
-      // A newer update started while this one was highlighting.
+      // A newer update started while this one was highlighting; it still owes
+      // the prompt write, so `_promptOutdated` is deliberately left set.
       return;
     }
 
-    if (withPrompt) {
+    if (this._promptOutdated) {
       this._updatePrompt();
+      this._promptOutdated = false;
     }
     const fragment = document.createDocumentFragment();
     while (staging.firstChild) {
@@ -251,6 +264,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
   private _previewDebouncer: Debouncer<void, void, null[]>;
   private _updateId = 0;
   private _pendingUpdate = false;
+  private _promptOutdated = false;
   private _editorEl: HTMLPreElement;
   private _inputPrompt: InputPrompt;
 }
