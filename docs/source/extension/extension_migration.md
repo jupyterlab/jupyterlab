@@ -10,19 +10,23 @@
 
 ### Default content provider
 
-The `get` method of the default content provider (`RestContentProvider`) now sets the `content` field
-to `false`, meaning **no file content is returned** unless explicitly requested. Previously,
-omitting `options` caused no query parameters to be sent, so the server fell back to its own default
-and returned the full file body. If your extension relies on that implicit behavior, pass
-`{ content: true }` explicitly:
+When fetching a file without explicitly setting the `content` option, **no file content is returned**
+by default. This affects the entire call chain: `ContentsManager.get()` → `DefaultDrive.get()` →
+`RestContentProvider.get()`. Previously, omitting `options` (or omitting the `content` field) caused
+no query parameter to be sent, so the Jupyter Server fell back to its own default and returned the
+full file body. Now `content=0` is always sent unless you opt in explicitly.
+
+If your extension reads file content via `ContentsManager`, pass `{ content: true }` explicitly:
 
 ```ts
 // Before (accidentally returned content via server default)
-const model = await provider.get(localPath);
+const model = await contentsManager.get(path);
 
 // After (request content explicitly)
-const model = await provider.get(localPath, { content: true });
+const model = await contentsManager.get(path, { content: true });
 ```
+
+The same applies if you call `DefaultDrive.get()` or `RestContentProvider.get()` directly.
 
 ### API updates
 
