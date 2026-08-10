@@ -50,9 +50,10 @@ namespace Private {
  * ## Note
  * This field does not work as other metadata form fields, as it does not update metadata.
  *
- * A single instance is meant to be shared by every render of the field. `render`
- * is called by React each time the metadata form is rebuilt, while this widget
- * owns DOM nodes and signal connections which have to outlive a single render.
+ * A single instance is meant to be shared by every render of the field. The
+ * displayed cell follows the notebook tracker rather than the render calls, so
+ * that the field keeps working when the metadata form is not being rebuilt, and
+ * so that it does not hold on to a cell model of a closed notebook.
  */
 export class ActiveCellTool extends NotebookTools.Tool {
   constructor(options: Private.IOptions) {
@@ -76,47 +77,44 @@ export class ActiveCellTool extends NotebookTools.Tool {
     (this.layout as PanelLayout).addWidget(new Widget({ node }));
 
     // Only edits to the current cell are rate-limited; switching cells updates
-    // the display immediately, see `render`.
+    // the display immediately, see `_onActiveCellChanged`.
     this._previewDebouncer = new Debouncer<void, void, null[]>(
-      () => this._updatePreview(),
+      () => this._update(false),
       150
     );
+
+    this._tracker.activeCellChanged.connect(this._onActiveCellChanged, this);
+    // `activeCellChanged` is not emitted when the last notebook is closed:
+    // NotebookTracker.onCurrentChanged returns early on a null widget. Without
+    // this second connection the field would keep the cell model of a closed
+    // notebook, and its shared model, alive for the rest of the session.
+    this._tracker.currentChanged.connect(this._onActiveCellChanged, this);
+    this._onActiveCellChanged();
   }
 
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
+    this._tracker.activeCellChanged.disconnect(this._onActiveCellChanged, this);
+    this._tracker.currentChanged.disconnect(this._onActiveCellChanged, this);
     this._disconnectCellModel();
     this._previewDebouncer.dispose();
     super.dispose();
   }
 
   render(props: FieldProps): JSX.Element {
-    const cellModel = this._tracker.activeCell?.model ?? null;
-
-    // `render` runs on every rebuild of the metadata form, most of which are
-    // not cell changes; only re-wire and repaint when the cell actually changed.
-    if (cellModel && cellModel !== this._cellModel) {
-      this._disconnectCellModel();
-      this._cellModel = cellModel;
-      (cellModel.sharedModel as ISharedText).changed.connect(
-        this._onCellContentChanged,
-        this
-      );
-      cellModel.mimeTypeChanged.connect(this._onCellContentChanged, this);
-
-      // Not debounced: the prompt and the preview are already on screen showing
-      // the previous cell, so a delayed update is visible as a stale frame.
-      this._updatePrompt();
-      this._updatePreview().catch(console.warn);
-    }
-
+    // The content is driven by the tracker; React only supplies the mount
+    // point, which is a different element on every rebuild of the form.
     return (
       <div
         ref={ref => {
-          if (ref && this.node.parentElement !== ref) {
-            ref.appendChild(this.node);
+          if (!ref || this.node.parentElement === ref) {
+            return;
+          }
+          ref.appendChild(this.node);
+          if (this._pendingUpdate) {
+            this._update(true).catch(console.warn);
           }
         }}
       ></div>
@@ -124,11 +122,36 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   /**
+   * Follow the active cell of the tracker, which is null once the last
+   * notebook is closed.
+   */
+  private _onActiveCellChanged(): void {
+    const cellModel = this._tracker.activeCell?.model ?? null;
+    if (cellModel === this._cellModel) {
+      return;
+    }
+    this._disconnectCellModel();
+    this._cellModel = cellModel;
+    if (cellModel) {
+      (cellModel.sharedModel as ISharedText).changed.connect(
+        this._onCellContentChanged,
+        this
+      );
+      cellModel.mimeTypeChanged.connect(this._onCellContentChanged, this);
+    }
+    this._update(true).catch(console.warn);
+  }
+
+  /**
    * Handle a change to the current cell source, mime type or execution count.
    */
   private _onCellContentChanged(): void {
-    // The prompt is a single text node, cheap enough to keep in sync with every
-    // change; re-highlighting the source line is not, so it stays debounced.
+    if (!this.node.isConnected) {
+      this._pendingUpdate = true;
+      return;
+    }
+    // The cell is unchanged, so the prompt cannot end up describing a different
+    // cell than the preview; write it right away and rate-limit the highlight.
     this._updatePrompt();
     this._previewDebouncer.invoke().catch(console.warn);
   }
@@ -150,14 +173,11 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   /**
-   * Synchronously reflect the execution count of the current cell.
+   * Reflect the execution count of the current cell.
    */
   private _updatePrompt(): void {
     const cellModel = this._cellModel;
-    if (!cellModel) {
-      return;
-    }
-    if (isCodeCellModel(cellModel)) {
+    if (cellModel && isCodeCellModel(cellModel)) {
       this._inputPrompt.executionCount = `${cellModel.executionCount ?? ''}`;
       this._inputPrompt.show();
     } else {
@@ -167,36 +187,70 @@ export class ActiveCellTool extends NotebookTools.Tool {
   }
 
   /**
-   * Highlight the first line of the current cell into the preview.
+   * Refresh the preview, and optionally the prompt along with it.
+   *
+   * @param withPrompt Whether to write the prompt together with the preview,
+   * which is required when the cell changed: writing it earlier would show the
+   * prompt of the new cell next to the source line of the previous one.
    */
-  private async _updatePreview(): Promise<void> {
+  private async _update(withPrompt: boolean): Promise<void> {
+    if (!this.node.isConnected) {
+      // Nothing is on screen; catch up when the field is mounted again.
+      this._pendingUpdate = true;
+      return;
+    }
+    this._pendingUpdate = false;
+
     const cellModel = this._cellModel;
+    const pending = ++this._updateId;
+
     if (!cellModel) {
+      this._updatePrompt();
+      this._editorEl.replaceChildren();
       return;
     }
 
-    // Highlight into a detached node and swap the result in as a single
-    // mutation: clearing the preview before an awaited highlight leaves it blank
-    // for as long as loading the language mode takes.
-    const pending = ++this._previewId;
+    const source = cellModel.sharedModel.getSource();
+    const lineEnd = source.indexOf('\n');
+    const firstLine = lineEnd === -1 ? source : source.slice(0, lineEnd);
+
+    // Highlight into a detached node, so that the preview is never cleared
+    // while waiting for a language mode to load.
     const staging = document.createElement('pre');
-    await this._languages.highlight(
-      cellModel.sharedModel.getSource().split('\n')[0],
-      this._languages.findByMIME(cellModel.mimeType),
-      staging
-    );
-    if (pending !== this._previewId) {
+    try {
+      await this._languages.highlight(
+        firstLine,
+        this._languages.findByMIME(cellModel.mimeType),
+        staging
+      );
+    } catch (error) {
+      // Fall back to unhighlighted source rather than keeping the previous
+      // cell's line on screen.
+      console.warn(error);
+      staging.replaceChildren(document.createTextNode(firstLine));
+    }
+
+    if (pending !== this._updateId) {
       // A newer update started while this one was highlighting.
       return;
     }
-    this._editorEl.replaceChildren(...staging.childNodes);
+
+    if (withPrompt) {
+      this._updatePrompt();
+    }
+    const fragment = document.createDocumentFragment();
+    while (staging.firstChild) {
+      fragment.appendChild(staging.firstChild);
+    }
+    this._editorEl.replaceChildren(fragment);
   }
 
   private _tracker: INotebookTracker;
   private _languages: IEditorLanguageRegistry;
   private _cellModel: ICellModel | null = null;
   private _previewDebouncer: Debouncer<void, void, null[]>;
-  private _previewId = 0;
+  private _updateId = 0;
+  private _pendingUpdate = false;
   private _editorEl: HTMLPreElement;
   private _inputPrompt: InputPrompt;
 }

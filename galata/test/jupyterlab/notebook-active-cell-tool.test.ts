@@ -10,30 +10,38 @@ const PREVIEW = `${TOOL} .jp-ActiveCellTool-CellContent pre`;
 
 /**
  * What the active cell field showed on a single animation frame.
+ *
+ * `mounted: false` means the field was not in the document at all, which is
+ * what the metadata form does to it while rebuilding.
  */
-interface IPaintedFrame {
-  /**
-   * Whether the field was absent from the DOM, which happens while the
-   * metadata form is being rebuilt.
-   */
-  absent: boolean;
-  promptHidden: boolean | null;
-  promptText: string | null;
-  preview: string | null;
-}
+type PaintedFrame =
+  | { mounted: false }
+  | {
+      mounted: true;
+      promptHidden: boolean;
+      promptText: string;
+      preview: string;
+    };
 
 interface IRecording {
-  frames: IPaintedFrame[];
+  frames: PaintedFrame[];
   /**
-   * Number of distinct `.jp-ActiveCellTool` nodes inserted into the document,
-   * i.e. the number of widgets the field renderer created.
+   * Distinct `.jp-ActiveCellTool` nodes inserted into the document, i.e. how
+   * many widgets the field renderer built.
    */
-  toolNodes: number;
+  distinctTools: number;
+  /**
+   * How many times any such node was inserted, including reinsertions of the
+   * same one. Zero means the form was never rebuilt and any conclusion drawn
+   * from `distinctTools` would be vacuous.
+   */
+  insertions: number;
 }
 
 interface IProbeState {
-  frames: IPaintedFrame[];
+  frames: PaintedFrame[];
   nodes: Set<Element>;
+  insertions: number;
   recording: boolean;
 }
 
@@ -45,8 +53,9 @@ interface IProbeWindow extends Window {
  * Start sampling the active cell field once per animation frame.
  *
  * Sampling every frame is what makes this a test of the user-visible
- * behaviour: a transient blank state is a defect even though it always
- * resolves on its own, so no amount of waiting in the test can observe it.
+ * behaviour: a transient blank or mismatched state is a defect even though it
+ * always resolves on its own, so no amount of waiting in the test can observe
+ * it after the fact.
  */
 async function startRecording(page: IJupyterLabPageFixture): Promise<void> {
   await page.evaluate(
@@ -54,6 +63,7 @@ async function startRecording(page: IJupyterLabPageFixture): Promise<void> {
       const state: IProbeState = {
         frames: [],
         nodes: new Set<Element>(),
+        insertions: 0,
         recording: true
       };
       (window as IProbeWindow).__activeCellToolProbe = state;
@@ -74,6 +84,7 @@ async function startRecording(page: IJupyterLabPageFixture): Promise<void> {
               : node.querySelector(toolSelector);
             if (tool) {
               state.nodes.add(tool);
+              state.insertions++;
             }
           });
         }
@@ -87,14 +98,16 @@ async function startRecording(page: IJupyterLabPageFixture): Promise<void> {
         }
         const prompt = document.querySelector(promptSelector);
         const preview = document.querySelector(previewSelector);
-        state.frames.push({
-          absent: !prompt,
-          promptHidden: prompt
-            ? prompt.classList.contains('lm-mod-hidden')
-            : null,
-          promptText: prompt ? (prompt.textContent ?? '').trim() : null,
-          preview: preview ? (preview.textContent ?? '') : null
-        });
+        state.frames.push(
+          prompt && preview
+            ? {
+                mounted: true,
+                promptHidden: prompt.classList.contains('lm-mod-hidden'),
+                promptText: (prompt.textContent ?? '').trim(),
+                preview: preview.textContent ?? ''
+              }
+            : { mounted: false }
+        );
         requestAnimationFrame(sample);
       };
       requestAnimationFrame(sample);
@@ -112,69 +125,95 @@ async function stopRecording(
       throw new Error('The active cell field probe was not started.');
     }
     state.recording = false;
-    return { frames: state.frames, toolNodes: state.nodes.size };
+    return {
+      frames: state.frames,
+      distinctTools: state.nodes.size,
+      insertions: state.insertions
+    };
   });
 }
 
 test.describe('Notebook tools active cell field', () => {
-  // First line of each cell, by index, as shown in the field preview.
-  const sources = ['print("first")', 'Raw cell', 'print("second")'];
+  // Each cell, by index: the first source line the field previews, and the
+  // prompt that belongs with it. Cell 0 is executed so that the three cells
+  // have three distinguishable prompts.
+  const cells = [
+    { type: 'code', source: 'print("first")', prompt: '[1]:', hidden: false },
+    { type: 'raw', source: 'Raw cell', prompt: '', hidden: true },
+    { type: 'code', source: 'print("second")', prompt: '[ ]:', hidden: false }
+  ] as const;
 
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew();
-    await page.notebook.setCell(0, 'code', sources[0]);
-    await page.notebook.addCell('raw', sources[1]);
-    await page.notebook.addCell('code', sources[2]);
-    // Give one cell an execution count, so the prompt differs between cells.
+    await page.notebook.setCell(0, 'code', cells[0].source);
+    await page.notebook.addCell(cells[1].type, cells[1].source);
+    await page.notebook.addCell(cells[2].type, cells[2].source);
     await page.notebook.runCell(0, true);
 
-    await page.click('[title="Property Inspector"]');
+    await page.sidebar.openTab('jp-property-inspector');
     await page.click('.jp-PropertyInspector >> text=Common Tools');
-    await expect(page.locator(PROMPT)).not.toBeEmpty();
+    // A positive assertion: `not.toBeEmpty()` would also pass if the field
+    // never appeared at all.
+    await expect(page.locator(PROMPT)).toHaveText(cells[0].prompt);
+    await expect(page.locator(PREVIEW)).toHaveText(cells[0].source);
   });
 
   /**
-   * Switch through every cell a few times, recording every painted frame.
+   * Switch through every cell a few times while the probe records.
    */
   async function cycleCells(page: IJupyterLabPageFixture): Promise<void> {
     const preview = page.locator(PREVIEW);
     for (let round = 0; round < 3; round++) {
-      for (let index = 0; index < sources.length; index++) {
+      for (let index = 0; index < cells.length; index++) {
         await page.notebook.selectCells(index);
         // Also paces the loop: the next switch waits for this one to land.
-        await expect(preview).toHaveText(sources[index]);
+        await expect(preview).toHaveText(cells[index].source);
       }
     }
   }
 
-  test('should not blank the prompt or the preview while switching cells', async ({
+  test('should always show a prompt and a source line of the same cell', async ({
     page
   }) => {
     await startRecording(page);
     await cycleCells(page);
     const { frames } = await stopRecording(page);
 
-    const painted = frames.filter(frame => !frame.absent);
-    // Guard against a probe that silently recorded nothing meaningful.
-    expect(painted.length).toBeGreaterThan(20);
-    expect(
-      painted.filter(frame => frame.preview === null).length,
-      'the preview element was never found, so the assertions below are vacuous'
-    ).toBe(0);
-
-    const emptyPrompt = painted.filter(
-      frame => frame.promptHidden === false && frame.promptText === ''
+    expect(frames.length, 'the probe did not sample any frame').toBeGreaterThan(
+      20
     );
+
+    // The field must not disappear either, so unmounted frames are asserted
+    // rather than filtered out.
+    const unmounted = frames.filter(frame => !frame.mounted);
     expect(
-      emptyPrompt.length,
-      `the prompt was shown but empty on ${emptyPrompt.length} of ${painted.length} painted frames`
+      unmounted.length,
+      `the field was missing from the document on ${unmounted.length} of ${frames.length} frames`
     ).toBe(0);
 
-    const blankPreview = painted.filter(frame => frame.preview === '');
+    // Every painted frame has to match one of the cells exactly: a blank
+    // preview, an empty prompt, or the prompt of one cell beside the source
+    // line of another are all states no cell can explain.
+    const explained = new Set(
+      cells.map(cell => `${cell.hidden}|${cell.prompt}|${cell.source}`)
+    );
+    const unexplained = new Map<string, number>();
+    for (const frame of frames) {
+      if (!frame.mounted) {
+        continue;
+      }
+      const state = `${frame.promptHidden}|${frame.promptText}|${frame.preview}`;
+      if (!explained.has(state)) {
+        unexplained.set(state, (unexplained.get(state) ?? 0) + 1);
+      }
+    }
+
     expect(
-      blankPreview.length,
-      `the preview was blank on ${blankPreview.length} of ${painted.length} painted frames`
-    ).toBe(0);
+      [...unexplained].map(
+        ([state, count]) => `${count}x hidden|prompt|preview = ${state}`
+      ),
+      'the field painted states that do not describe any of the cells'
+    ).toEqual([]);
   });
 
   test('should reuse a single active cell field across form rebuilds', async ({
@@ -182,14 +221,19 @@ test.describe('Notebook tools active cell field', () => {
   }) => {
     await startRecording(page);
     await cycleCells(page);
-    const { toolNodes } = await stopRecording(page);
+    const { distinctTools, insertions } = await stopRecording(page);
+
+    expect(
+      insertions,
+      'the metadata form was never rebuilt, so this test proves nothing'
+    ).toBeGreaterThan(5);
 
     // The field renderer is a React component and runs on every rebuild of the
     // metadata form. Building a widget per render leaves the previous one
     // connected to its cell model for the lifetime of the document.
     expect(
-      toolNodes,
-      `${toolNodes} active cell field widgets were created while switching cells`
+      distinctTools,
+      `${distinctTools} active cell field widgets were built while switching cells`
     ).toBe(1);
   });
 });
