@@ -4,6 +4,8 @@
 # Distributed under the terms of the Modified BSD License.
 import json
 import logging
+from asyncio import Future
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
@@ -21,8 +23,8 @@ class Builder:
     executor = ThreadPoolExecutor(max_workers=5)
     canceled = False
     _canceling = False
-    _kill_event = None
-    _future = None
+    _kill_event: Event | None = None
+    _future: Future[bool] | None = None
 
     def __init__(self, core_mode: bool, app_options: AppOptions | dict | None = None):
         app_options = _ensure_options(app_options)
@@ -33,7 +35,7 @@ class Builder:
         self.labextensions_path = app_options.labextensions_path
 
     @gen.coroutine
-    def get_status(self) -> dict[str, str]:
+    def get_status(self) -> Generator[object, list[str], dict[str, str]]:
         if self.core_mode:
             raise gen.Return({"status": "stable", "message": ""})
         if self.building:
@@ -58,13 +60,14 @@ class Builder:
         raise gen.Return({"status": status, "message": "\n".join(messages)})
 
     @gen.coroutine
-    def build(self) -> None:
+    def build(self) -> Generator[object, object, None]:
         if self._canceling:
             msg = "Cancel in progress"
             raise ValueError(msg)
         if not self.building:
             self.canceled = False
-            self._future = future = gen.Future()
+            future: Future[bool] = gen.Future()
+            self._future = future
             self.building = True
             self._kill_event = evt = Event()
             try:
@@ -80,17 +83,25 @@ class Builder:
             finally:
                 self.building = False
         try:
-            yield self._future
+            current_future = self._future
+            if current_future is None:
+                msg = "No current build"
+                raise ValueError(msg)
+            yield current_future
         except Exception as e:
             raise e
 
     @gen.coroutine
-    def cancel(self) -> None:
+    def cancel(self) -> Generator[object, object, None]:
         if not self.building:
             msg = "No current build"
             raise ValueError(msg)
         self._canceling = True
-        yield self._future
+        future = self._future
+        if future is None:
+            msg = "No current build"
+            raise ValueError(msg)
+        yield future
         self._canceling = False
         self.canceled = True
 
@@ -119,7 +130,7 @@ class Builder:
         kill_event: Event,
         core_config: CoreConfig,
         labextensions_path: list[str],
-    ):
+    ) -> None:
         app_options = AppOptions(
             app_dir=app_dir,
             logger=logger,
@@ -130,7 +141,7 @@ class Builder:
         try:
             build(app_options=app_options)
         except Exception:
-            if self._kill_event.is_set():
+            if kill_event.is_set():
                 return
             self.log.warning("Build failed, running a clean and rebuild")
             clean(app_options=app_options)
@@ -138,19 +149,28 @@ class Builder:
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
-    def initialize(self, builder: Builder | None = None, name: str | None = None):
-        super().initialize(name=name)
+    def initialize(
+        self,
+        name: str = "",
+        *args: object,
+        builder: Builder | None = None,
+        **kwargs: object,
+    ) -> None:
+        super().initialize(name, *args, **kwargs)
+        if builder is None:
+            msg = "Builder is required"
+            raise ValueError(msg)
         self.builder = builder
 
     @web.authenticated
     @gen.coroutine
-    def get(self) -> None:
+    def get(self) -> Generator[object, dict[str, str], None]:
         data = yield self.builder.get_status()
         self.finish(json.dumps(data))
 
     @web.authenticated
     @gen.coroutine
-    def delete(self) -> None:
+    def delete(self) -> Generator[object, object, None]:
         self.log.warning("Canceling build")
         try:
             yield self.builder.cancel()
@@ -160,7 +180,7 @@ class BuildHandler(ExtensionHandlerMixin, APIHandler):
 
     @web.authenticated
     @gen.coroutine
-    def post(self) -> None:
+    def post(self) -> Generator[object, object, None]:
         self.log.debug("Starting build")
         try:
             yield self.builder.build()
