@@ -212,10 +212,11 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     }
   };
   // One debouncer for the lifetime of the component. Building a new one per
-  // render abandoned a live timer every time and reset the debounce window, so
-  // the debouncing never took effect. `setProperty` closes over `propertyMap`,
-  // so the debouncer reaches the current one through a ref instead of
-  // capturing the one from the first render.
+  // render meant a render between two edits put them on different debouncers,
+  // so they were never coalesced and a pending write carried the state of the
+  // render that scheduled it. `setProperty` closes over `propertyMap`, so the
+  // debouncer reaches the current one through a ref instead of capturing the
+  // one from the first render.
   const setPropertyRef = useRef(setProperty);
   setPropertyRef.current = setProperty;
   const debouncerRef = useRef<Debouncer<
