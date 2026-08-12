@@ -400,15 +400,15 @@ export class DirListing extends Widget {
   /**
    * Paste the items from the clipboard.
    *
+   * @param basePath - The destination directory path.
+   *
    * @returns A promise that resolves when the operation is complete.
    */
-  paste(): Promise<void> {
+  paste(basePath = this._model.path): Promise<void> {
     if (!this._clipboard.length) {
       this._isCut = false;
       return Promise.resolve(undefined);
     }
-
-    const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
     for (const path of this._clipboard) {
@@ -785,6 +785,18 @@ export class DirListing extends Widget {
       return items[index];
     }
     return undefined;
+  }
+
+  /**
+   * Find a model given its listing node.
+   *
+   * @param node - The listing node.
+   *
+   * @returns The model for the node.
+   */
+  modelForNode(node: HTMLElement): Contents.IModel | undefined {
+    const index = ArrayExt.firstIndexOf(this._items, node);
+    return index !== -1 ? this._sortedItems[index] : undefined;
   }
 
   /**

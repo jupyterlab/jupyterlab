@@ -233,6 +233,49 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('#paste()', () => {
+      it('should paste into the provided destination directory', async () => {
+        const source = [...dirListing.sortedItems()][0];
+
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        dirListing['_clipboard'] = [source.path];
+        dirListing['_isCut'] = true;
+
+        await dirListing.paste(destination.path);
+
+        const moved = await dirListing.model.manager.services.contents.get(
+          `${destination.path}/${source.name}`
+        );
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory when no destination is provided', async () => {
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.model.cd(destination.path);
+
+        const source = await dirListing.model.manager.newUntitled({
+          type: 'file',
+          path: ''
+        });
+
+        dirListing['_clipboard'] = [source.path];
+        dirListing['_isCut'] = true;
+
+        await dirListing.paste();
+
+        const moved = await dirListing.model.manager.services.contents.get(
+          `${destination.path}/${source.name}`
+        );
+        expect(moved.name).toBe(source.name);
+      });
+    });
+
     describe('#_handleMultiSelect', () => {
       it('should only select when to-index is same as from-index', () => {
         // to-index unselected

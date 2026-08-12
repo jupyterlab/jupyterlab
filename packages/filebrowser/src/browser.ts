@@ -428,6 +428,17 @@ export class FileBrowser
   }
 
   /**
+   * Find the model associated with a listing node.
+   *
+   * @param node - The listing node.
+   *
+   * @returns The model for the node.
+   */
+  modelForNode(node: HTMLElement): Contents.IModel | undefined {
+    return this.listing.modelForNode(node);
+  }
+
+  /**
    * A signal emitted when the selection changes in the file browser.
    */
   get selectionChanged(): ISignal<this, void> {
@@ -498,10 +509,12 @@ export class FileBrowser
   /**
    * Paste the items from the clipboard.
    *
+   * @param basePath - The destination directory path.
+   *
    * @returns A promise that resolves when the operation is complete.
    */
-  paste(): Promise<void> {
-    return this.listing.paste();
+  paste(basePath?: string): Promise<void> {
+    return this.listing.paste(basePath);
   }
 
   /**

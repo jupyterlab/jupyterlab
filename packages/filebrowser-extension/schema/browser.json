@@ -68,6 +68,7 @@
       },
       {
         "command": "filebrowser:paste",
+        "args": { "contextMenu": true },
         "selector": ".jp-DirListing-content",
         "rank": 8.5
       },
