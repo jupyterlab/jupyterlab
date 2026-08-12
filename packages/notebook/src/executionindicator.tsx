@@ -154,7 +154,9 @@ export function ExecutionIndicatorComponent(
     return reactElement('busy', progressBar(percentage), [
       <span key={0}>
         {trans.__(
-          `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
+          'Executed %1/%2 cells',
+          executedCellNumber,
+          scheduledCellNumber
         )}
       </span>,
       <span key={1}>
