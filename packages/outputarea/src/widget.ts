@@ -129,7 +129,8 @@ export class OutputArea extends Widget {
             event: IObservableString.IChangedArgs
           ) => {
             this._setOutput(i, output);
-          }
+          },
+          this
         );
       }
     }
@@ -360,7 +361,8 @@ export class OutputArea extends Widget {
               event: IObservableString.IChangedArgs
             ) => {
               this._setOutput(args.newIndex, output);
-            }
+            },
+            this
           );
         }
         break;
