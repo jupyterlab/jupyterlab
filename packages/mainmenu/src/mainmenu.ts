@@ -316,6 +316,9 @@ export class MainMenu extends MenuBar implements IMainMenu {
     }
 
     if (label) {
+      // The label comes from the `jupyter.lab.menus` key of a settings schema,
+      // from which it is extracted by the schema selectors.
+      // eslint-disable-next-line jupyter/no-dynamic-translation
       menu.title.label = trans._p('menu', label);
     }
 

@@ -533,16 +533,16 @@ function activateJSON(
             if (settingsEntries.length) {
               const successCount =
                 settingsEntries.length - errorUploading.length;
-              const successMessage = trans.__(
-                `Imported settings across ${successCount} ${
-                  successCount === 1 ? 'category' : 'categories'
-                } successfully.`
+              const successMessage = trans._n(
+                'Imported settings across %1 category successfully.',
+                'Imported settings across %1 categories successfully.',
+                successCount
               );
               const failureMessage = errorUploading.length
-                ? trans.__(
-                    `Failed to upload settings for the following ${
-                      errorUploading.length
-                    } ${errorUploading.length === 1 ? 'plugin' : 'plugins'}`
+                ? trans._n(
+                    'Failed to upload settings for the following %1 plugin',
+                    'Failed to upload settings for the following %1 plugins',
+                    errorUploading.length
                   )
                 : '';
 

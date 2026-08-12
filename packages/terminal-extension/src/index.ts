@@ -755,7 +755,10 @@ function addCommands(
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
-          : trans.__(rawTheme);
+          : // Fallback for themes outside `themeDisplayedName`, so there is no
+            // literal to extract.
+            // eslint-disable-next-line jupyter/no-dynamic-translation
+            trans.__(rawTheme);
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;
