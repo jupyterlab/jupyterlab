@@ -862,6 +862,14 @@ async function activateConsole(
     right: dockRightIcon,
     left: dockLeftIcon
   };
+  // Spelled out rather than built from `position` so that the labels are
+  // picked up by the translation string extractor.
+  const labelMap = {
+    top: trans.__('Prompt to top'),
+    bottom: trans.__('Prompt to bottom'),
+    right: trans.__('Prompt to right'),
+    left: trans.__('Prompt to left')
+  };
   promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
     const command = `console:prompt-to-${position}`;
     commands.addCommand(command, {
@@ -874,7 +882,7 @@ async function activateConsole(
       },
       isEnabled: () =>
         !!tracker.currentWidget && tracker.currentWidget.isVisible,
-      label: trans.__(`Prompt to ${position}`),
+      label: labelMap[position],
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {
         args: {

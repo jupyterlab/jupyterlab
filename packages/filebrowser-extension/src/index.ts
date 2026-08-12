@@ -1664,6 +1664,9 @@ function addCommands(
         : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
     },
     label: (args: { ext: string; label: string }) => {
+      // The label is supplied by the caller, most often from the
+      // `jupyter.lab.menus` key of a settings schema.
+      // eslint-disable-next-line jupyter/no-dynamic-translation
       return trans.__(args.label ?? 'New File');
     },
     describedBy: {
