@@ -25,7 +25,7 @@
     {
       "command": "application:close",
       "keys": ["Alt W"],
-      "selector": ".jp-Activity"
+      "selector": "body"
     },
     {
       "command": "application:toggle-mode",
