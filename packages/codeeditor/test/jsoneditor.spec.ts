@@ -149,6 +149,55 @@ describe('codeeditor', () => {
       });
     });
 
+    describe('#isValid', () => {
+      it('should be true for valid JSON content', () => {
+        editor.source = new ObservableJSON();
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo": 1}');
+        expect(editor.isValid).toBe(true);
+      });
+
+      it('should be false for invalid JSON content', () => {
+        editor.source = new ObservableJSON();
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo":');
+        expect(editor.isValid).toBe(false);
+      });
+    });
+
+    describe('#commit()', () => {
+      it('should commit a valid pending change to the source', () => {
+        const source = new ObservableJSON();
+        editor.source = source;
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo": 1}');
+        expect(editor.isDirty).toBe(true);
+        expect(editor.commit()).toBe(true);
+        expect(source.get('foo')).toBe(1);
+        expect(editor.isDirty).toBe(false);
+      });
+
+      it('should be a no-op returning true if there is nothing to commit', () => {
+        const source = new ObservableJSON();
+        editor.source = source;
+        Widget.attach(editor, document.body);
+        expect(editor.isDirty).toBe(false);
+        expect(editor.commit()).toBe(true);
+        expect(editor.isDirty).toBe(false);
+      });
+
+      it('should return false and leave the source unchanged for invalid JSON', () => {
+        const source = new ObservableJSON();
+        source.set('foo', 1);
+        editor.source = source;
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo":');
+        expect(editor.commit()).toBe(false);
+        expect(source.get('foo')).toBe(1);
+        expect(editor.isDirty).toBe(true);
+      });
+    });
+
     describe('model.value.changed', () => {
       it('should add the error flag if invalid JSON', () => {
         editor.model.sharedModel.setSource('foo');
