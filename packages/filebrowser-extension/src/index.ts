@@ -1622,9 +1622,11 @@ function addCommands(
           const target = app.contextMenuHitTest(node =>
             node.classList.contains('jp-DirListing-item')
           );
-          const item = target ? widget.modelForNode(target) : undefined;
-          if (item?.type === 'directory') {
-            return widget.paste(item.path);
+          if (target?.dataset.isdir === 'true') {
+            const item = widget.modelForNode(target);
+            if (item) {
+              return widget.paste(item.path);
+            }
           }
         }
         return widget.paste();

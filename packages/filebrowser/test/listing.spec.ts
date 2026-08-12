@@ -241,8 +241,8 @@ describe('filebrowser/listing', () => {
           type: 'directory'
         });
 
-        dirListing['_clipboard'] = [source.path];
-        dirListing['_isCut'] = true;
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
 
         await dirListing.paste(destination.path);
 
@@ -253,20 +253,16 @@ describe('filebrowser/listing', () => {
       });
 
       it('should paste into the current directory when no destination is provided', async () => {
+        const source = [...dirListing.sortedItems()][0];
+
         const destination = await dirListing.model.manager.newUntitled({
           type: 'directory'
         });
 
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
         await dirListing.model.cd(destination.path);
-
-        const source = await dirListing.model.manager.newUntitled({
-          type: 'file',
-          path: ''
-        });
-
-        dirListing['_clipboard'] = [source.path];
-        dirListing['_isCut'] = true;
-
         await dirListing.paste();
 
         const moved = await dirListing.model.manager.services.contents.get(
