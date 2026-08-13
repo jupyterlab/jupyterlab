@@ -244,15 +244,18 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         widget
       );
     }
+    const isFirstRegistration = !contextKernelChangedHandlers;
     this._contextKernelChangedHandlers[widget.id] = connectionChanged;
     sessionContext.kernelChanged.connect(connectionChanged, widget);
-    // The session context belongs to the document and outlives this widget,
-    // e.g. when one of several views is closed, so the connection cannot be
-    // left for the context to clean up.
-    widget.disposed.connect(() => {
-      sessionContext.kernelChanged.disconnect(connectionChanged, widget);
-      delete this._contextKernelChangedHandlers[widget.id];
-    });
+    if (isFirstRegistration) {
+      // One hook per widget: this method runs on every focus switch. The
+      // connection itself is removed by `Signal.clearData(widget)` during
+      // disposal (the widget is the receiver); only the map entry on this
+      // application-lifetime object needs explicit cleanup.
+      widget.disposed.connect(() => {
+        delete this._contextKernelChangedHandlers[widget.id];
+      });
+    }
 
     return this.update(widget, sessionContext.session);
   }
@@ -338,26 +341,16 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         return;
       }
 
-      const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
-      if (kernelChangedHandler) {
-        connection?.kernelChanged.disconnect(kernelChangedHandler, widget);
-        delete this._kernelChangedHandlers[widget.id];
+      if (connection) {
+        // Removes the kernelChanged, statusChanged, iopubMessage and
+        // anyMessage slots in one call: they are the only connections
+        // between this connection and the widget.
+        Signal.disconnectBetween(connection, widget);
       }
-      const statusChangedHandler = this._statusChangedHandlers[widget.id];
-      if (statusChangedHandler) {
-        connection?.statusChanged.disconnect(statusChangedHandler, widget);
-        delete this._statusChangedHandlers[widget.id];
-      }
-      const iopubMessageHandler = this._iopubMessageHandlers[widget.id];
-      if (iopubMessageHandler) {
-        connection?.iopubMessage.disconnect(iopubMessageHandler, widget);
-        delete this._iopubMessageHandlers[widget.id];
-      }
-      const shellMessageHandler = this._shellMessageHandlers[widget.id];
-      if (shellMessageHandler) {
-        connection?.anyMessage.disconnect(shellMessageHandler, widget);
-        delete this._shellMessageHandlers[widget.id];
-      }
+      delete this._kernelChangedHandlers[widget.id];
+      delete this._statusChangedHandlers[widget.id];
+      delete this._iopubMessageHandlers[widget.id];
+      delete this._shellMessageHandlers[widget.id];
 
       handler.dispose();
       delete this._handlers[widget.id];

@@ -68,6 +68,7 @@ class YUndoManagerPluginValue implements PluginValue {
     ) {
       // do not overwrite previous stored selection
       stackItem.meta.set(this, this._beforeChangeSelection);
+      this._storedSelection = true;
     }
   };
   _onStackItemPopped = ({ stackItem }: { stackItem: IStackItem }) => {
@@ -108,19 +109,23 @@ class YUndoManagerPluginValue implements PluginValue {
     // editor view and everything the view references (for a notebook, the
     // whole deleted cell) reachable after the editor is destroyed, while its
     // only purpose is to restore the selection, which has no meaning once
-    // the view is gone.
-    for (const stack of [
-      this._undoManager.undoStack,
-      this._undoManager.redoStack
-    ]) {
-      for (const item of stack) {
-        (item as IStackItem).meta.delete(this);
+    // the view is gone. Skipped when this editor never stored any, so that
+    // destroying many editors does not rescan the shared stacks needlessly.
+    if (this._storedSelection) {
+      for (const stack of [
+        this._undoManager.undoStack,
+        this._undoManager.redoStack
+      ]) {
+        for (const item of stack) {
+          (item as IStackItem).meta.delete(this);
+        }
       }
     }
   }
   private _undoManager: UndoManager;
   private _view: EditorView;
   private _beforeChangeSelection: null | YRange;
+  private _storedSelection = false;
   private _conf: YUndoManagerConfig;
   private _syncConf: YSyncConfig;
 }

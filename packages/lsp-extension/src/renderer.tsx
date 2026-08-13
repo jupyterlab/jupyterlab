@@ -234,6 +234,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   useEffect(() => {
     return () => {
       debouncerRef.current?.dispose();
+      debouncerRef.current = null;
     };
   }, []);
   const textInputId = useRef<string>(

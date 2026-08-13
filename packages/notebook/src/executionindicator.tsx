@@ -233,6 +233,22 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
   }
 
   /**
+   * Dispose the widget and its model.
+   *
+   * `VDomRenderer.dispose` drops its reference to the model without
+   * disposing it; undisposed, the model stays connected to the session
+   * context (which outlives this widget) and its current notebook stays
+   * reachable. The model is owned here: it is created in the constructor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model?.dispose();
+    super.dispose();
+  }
+
+  /**
    * Render the execution status item.
    */
   render(): JSX.Element | null {
@@ -591,6 +607,15 @@ export namespace ExecutionIndicator {
      * @param  data - the state to be updated.
      */
     private _tick(data: IExecutionState): void {
+      if (this.isDisposed) {
+        // The slots that would clear this interval are disconnected when the
+        // model is disposed, so the interval has to terminate itself
+        // (`_notebookExecutionProgress` is a `WeakMap`, so `dispose` cannot
+        // enumerate the states to clear them there).
+        clearInterval(data.interval);
+        clearTimeout(data.timeout);
+        return;
+      }
       data.totalTime += 1;
       this.stateChanged.emit(void 0);
     }
@@ -661,14 +686,6 @@ export namespace ExecutionIndicator {
     loadSettings?: Promise<ISettingRegistry.ISettings>
   ): Widget {
     const toolbarItem = new ExecutionIndicator(translator);
-    // `VDomRenderer.dispose()` drops its reference to the model without
-    // disposing it. Undisposed, the model stays connected to the session
-    // context (which outlives this panel) and its `_currentNotebook` keeps
-    // the whole notebook view reachable after the panel is closed.
-    const model = toolbarItem.model;
-    toolbarItem.disposed.connect(() => {
-      model.dispose();
-    });
     toolbarItem.model.displayOption = {
       showOnToolBar: true,
       showProgress: true,

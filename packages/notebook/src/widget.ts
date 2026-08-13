@@ -385,18 +385,19 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this._contentVisibilityObserver.disconnect();
       this._contentVisibilityObserver = null;
     }
+    super.dispose();
     // In the windowing modes that detach out-of-viewport cells from the
-    // layout ('full' and 'defer'), `Widget.dispose()` only disposes the
-    // layout children, so the remaining cells have to be disposed
+    // layout ('full' and 'defer'), `Widget.dispose()` above only disposes
+    // the layout children, so the remaining cells have to be disposed
     // explicitly: otherwise their connections to the shared model (which
     // outlives this view) keep every one of them reachable. In the default
     // 'contentVisibility' mode all cells are layout children and this is a
-    // no-op safety net.
+    // no-op safety net. Running after `super.dispose()` lets the in-layout
+    // cells take the disposed-parent fast path instead of a full detach.
     for (const cell of this.cellsArray) {
       cell.dispose();
     }
     this.cellsArray.length = 0;
-    super.dispose();
   }
 
   protected onBeforeDetach(msg: Message): void {

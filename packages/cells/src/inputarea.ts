@@ -143,10 +143,17 @@ export class InputArea extends Widget {
     if (this.isDisposed) {
       return;
     }
+    const editor = this._editor;
+    const rendered = this._rendered;
     this._prompt = null!;
     this._editor = null!;
     this._rendered = null!;
     super.dispose();
+    // Either the editor or the rendered widget is swapped out of the layout
+    // (`renderInput`/`showEditor` set `parent = null`), and
+    // `Widget.dispose()` only disposes layout children.
+    editor?.dispose();
+    rendered?.dispose();
   }
 
   private _prompt: IInputPrompt;

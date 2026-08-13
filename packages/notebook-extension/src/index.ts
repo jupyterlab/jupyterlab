@@ -2699,6 +2699,7 @@ function activateNotebookCompleterService(
     keys: ['Enter'],
     selector: '.jp-Notebook .jp-mod-completer-active'
   });
+  const completerConnected = new WeakSet<NotebookPanel>();
   const updateCompleter = async (
     _: INotebookTracker | undefined,
     notebook: NotebookPanel
@@ -2710,6 +2711,13 @@ function activateNotebookCompleterService(
       sanitizer: sanitizer
     };
     await manager.updateCompleter(completerContext);
+    // `updateCompleter` also runs for every panel on `activeProvidersChanged`
+    // below; connect the listeners only on the first call for a panel so
+    // they do not accumulate per settings change.
+    if (completerConnected.has(notebook)) {
+      return;
+    }
+    completerConnected.add(notebook);
     notebook.content.activeCellChanged.connect((_, cell) => {
       // Ensure the editor will exist on the cell before adding the completer
       cell?.ready
