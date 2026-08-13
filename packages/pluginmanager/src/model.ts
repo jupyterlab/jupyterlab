@@ -408,7 +408,8 @@ export class PluginListModel extends VDomModel {
       // Plugin is locked on client side.
       return true;
     }
-    const extension = pluginId.split(':')[0];
+    const colon = pluginId.indexOf(':');
+    const extension = colon === -1 ? pluginId : pluginId.slice(0, colon);
     if (status.lockRules.includes(extension)) {
       // Entire extension is locked.
       return true;

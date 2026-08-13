@@ -265,14 +265,12 @@ const files: JupyterFrontEndPlugin<void> = {
       label: trans.__('Open the tooltip'),
       execute: async () => {
         const parent = editorTracker.currentWidget;
-        const kernel =
-          parent &&
-          activeSessions[parent.id] &&
-          activeSessions[parent.id].kernel;
-        if (!kernel) {
+        const session = parent ? activeSessions[parent.id] : undefined;
+        const kernel = session?.kernel;
+        if (!parent || !kernel) {
           return;
         }
-        const anchor = parent!.content;
+        const anchor = parent.content;
         const editor = anchor?.editor;
 
         // If all components necessary for rendering exist, create a tooltip.

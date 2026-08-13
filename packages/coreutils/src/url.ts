@@ -53,12 +53,14 @@ export namespace URLExt {
    * @returns the joined url.
    */
   export function join(...parts: string[]): string {
-    let u = urlparse(parts[0], {});
+    const first = parts[0] ?? '';
+
+    let u = urlparse(first, {});
     // Schema-less URL can be only parsed as relative to a base URL
     // see https://github.com/unshiftio/url-parse/issues/219#issuecomment-1002219326
     const isSchemaLess = u.protocol === '' && u.slashes;
     if (isSchemaLess) {
-      u = urlparse(parts[0], 'https:' + parts[0]);
+      u = urlparse(first, 'https:' + first);
     }
     const prefix = `${isSchemaLess ? '' : u.protocol}${u.slashes ? '//' : ''}${
       u.auth
@@ -128,7 +130,7 @@ export namespace URLExt {
         (acc, val) => {
           const [key, value] = val.split('=');
 
-          if (key.length > 0) {
+          if (key !== undefined && key.length > 0) {
             acc[key] = decodeURIComponent(value || '');
           }
 

@@ -136,7 +136,7 @@ export class DataTransferMock implements DataTransfer {
   }
   readonly types: DataTransfer['types'] = [];
   getData(format: string) {
-    return this._data[format];
+    return this._data[format] ?? '';
   }
   setData(format: string, data: string) {
     this._data[format] = data;

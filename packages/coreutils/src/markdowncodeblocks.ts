@@ -59,6 +59,9 @@ export namespace MarkdownCodeBlocks {
     let currentBlock = null;
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
+      if (line === undefined) {
+        continue;
+      }
       const lineContainsMarker = line.indexOf(CODE_BLOCK_MARKER) === 0;
       const constructingBlock = currentBlock != null;
       // Skip this line if it is not part of any code block and doesn't contain a marker.
