@@ -1025,10 +1025,6 @@ export class WindowedList<
    */
   dispose(): void {
     this._updater.dispose();
-    // The view model is created for this list and connects to the items list
-    // it is given, which can outlive this view; disposing the model clears
-    // those connections.
-    this._viewModel.dispose();
     super.dispose();
   }
 

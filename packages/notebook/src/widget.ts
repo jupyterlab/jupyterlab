@@ -398,6 +398,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       cell.dispose();
     }
     this.cellsArray.length = 0;
+    // The view model is created by this class; `WindowedList` does not take
+    // ownership of the model it is handed. Disposing it clears its
+    // connection to the cell list of the shared model, which outlives this
+    // view.
+    this.viewModel.dispose();
   }
 
   protected onBeforeDetach(msg: Message): void {
