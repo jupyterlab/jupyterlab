@@ -73,10 +73,10 @@ export function upgradeLock(
  * Downgrade package versions to match old locked version expect
  * for the package matching the provided pattern.
  *
- * @param lockFile yarn.lock file
- * @param pkgToDescriptor Package name to yarn descriptors
- * @param packages Package pattern to update
- * @param pkgs Original package versions
+ * @param lockFile - yarn.lock file
+ * @param pkgToDescriptor - Package name to yarn descriptors
+ * @param packages - Package pattern to update
+ * @param pkgs - Original package versions
  * @returns Whether some versions have been downgraded or not
  */
 function upgradeSelectedPackages(

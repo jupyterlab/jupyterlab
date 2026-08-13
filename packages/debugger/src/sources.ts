@@ -20,7 +20,7 @@ export class DebuggerSources implements IDebugger.ISources {
   /**
    * Create a new DebuggerSources instance.
    *
-   * @param options The instantiation options for a DebuggerSources instance.
+   * @param options - The instantiation options for a DebuggerSources instance.
    */
   constructor(options: DebuggerSources.IOptions) {
     this._config = options.config;
@@ -52,7 +52,7 @@ export class DebuggerSources implements IDebugger.ISources {
   /**
    * Open a read-only editor in the main area.
    *
-   * @param params The editor open parameters.
+   * @param params - The editor open parameters.
    */
   open(params: IDebugger.ISources.OpenParams): void {
     const { editorWrapper, label, caption } = params;
@@ -270,8 +270,8 @@ export class DebuggerSources implements IDebugger.ISources {
    * Get the code id for a given source and kernel,
    * and handle the case of a kernel without parameters.
    *
-   * @param code The source code.
-   * @param kernel The name of the kernel.
+   * @param code - The source code.
+   * @param kernel - The name of the kernel.
    */
   private _getCodeId(code: string, kernel: string): string {
     try {

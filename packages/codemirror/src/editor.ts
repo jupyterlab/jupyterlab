@@ -243,7 +243,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    *
    * @alpha
    * @experimental
-   * @param ext CodeMirror 6 extension
+   * @param ext - CodeMirror 6 extension
    */
   injectExtension(ext: Extension): void {
     this._configurator.injectExtension(this._editor, ext);
@@ -504,7 +504,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    *
    * Behaviour for multiple selections is undefined.
    *
-   * @param text The text to be inserted.
+   * @param text - The text to be inserted.
    */
   replaceSelection(text: string): void {
     const firstSelection = this.getSelections()[0];

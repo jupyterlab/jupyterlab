@@ -15,7 +15,7 @@ interface ISemanticCommand {
   id: string;
   /**
    * Whether this command is enabled for a given widget
-   * @param widget Widget
+   * @param widget - Widget
    */
   isEnabled?(widget: Widget): boolean;
   /**
@@ -52,7 +52,7 @@ export class SemanticCommand {
   /**
    * Add a command to the semantic group
    *
-   * @param command Command to add
+   * @param command - Command to add
    */
   add(command: ISemanticCommand): void {
     if (this._commands.map(c => c.id).includes(command.id)) {
@@ -70,7 +70,7 @@ export class SemanticCommand {
    * Get the command id of the enabled command from this group
    * for the given widget.
    *
-   * @param widget Widget
+   * @param widget - Widget
    * @returns Command id
    */
   getActiveCommandId(widget: Widget): string | null {
@@ -88,7 +88,7 @@ export class SemanticCommand {
   /**
    * Remove a command ID.
    *
-   * @param id Command ID to remove
+   * @param id - Command ID to remove
    */
   remove(id: string): void {
     const index = this._commands.findIndex(c => c.id === id);

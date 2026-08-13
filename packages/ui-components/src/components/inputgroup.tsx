@@ -24,7 +24,7 @@ export interface IInputGroupProps extends React.InputHTMLAttributes<HTMLInputEle
 /**
  * InputGroup component
  *
- * @param props Component properties
+ * @param props - Component properties
  * @returns Component
  */
 export function InputGroup(props: IInputGroupProps): JSX.Element {

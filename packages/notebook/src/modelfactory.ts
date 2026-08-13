@@ -78,7 +78,7 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
   /**
    * Create a new model for a given path.
    *
-   * @param options Model options.
+   * @param options - Model options.
    *
    * @returns A new document model.
    */

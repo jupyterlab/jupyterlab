@@ -12,8 +12,8 @@ export class DebuggerConfig implements IDebugger.IConfig {
   /**
    * Returns an id based on the given code.
    *
-   * @param code The source code.
-   * @param kernel The kernel name from current session.
+   * @param code - The source code.
+   * @param kernel - The kernel name from current session.
    */
   getCodeId(code: string, kernel: string): string {
     const fileParams = this._fileParams.get(kernel);

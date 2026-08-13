@@ -55,9 +55,9 @@ export class ToolbarWidgetRegistry implements IToolbarWidgetRegistry {
   /**
    * Create a toolbar item widget
    *
-   * @param widgetFactory The widget factory name that creates the toolbar
-   * @param widget The newly widget containing the toolbar
-   * @param toolbarItem The toolbar item definition
+   * @param widgetFactory - The widget factory name that creates the toolbar
+   * @param widget - The newly widget containing the toolbar
+   * @param toolbarItem - The toolbar item definition
    * @returns The widget to be inserted in the toolbar.
    */
   createWidget(
@@ -74,9 +74,9 @@ export class ToolbarWidgetRegistry implements IToolbarWidgetRegistry {
   /**
    * Add a new toolbar item factory
    *
-   * @param widgetFactory The widget factory name that creates the toolbar
-   * @param toolbarItemName The unique toolbar item
-   * @param factory The factory function that receives the widget containing the toolbar and returns the toolbar widget.
+   * @param widgetFactory - The widget factory name that creates the toolbar
+   * @param toolbarItemName - The unique toolbar item
+   * @param factory - The factory function that receives the widget containing the toolbar and returns the toolbar widget.
    * @returns The previously defined factory
    */
   addFactory<T extends Widget = Widget>(
@@ -98,9 +98,9 @@ export class ToolbarWidgetRegistry implements IToolbarWidgetRegistry {
   /**
    * Register a new toolbar item factory
    *
-   * @param widgetFactory The widget factory name that creates the toolbar
-   * @param toolbarItemName The unique toolbar item
-   * @param factory The factory function that receives the widget containing the toolbar and returns the toolbar widget.
+   * @param widgetFactory - The widget factory name that creates the toolbar
+   * @param toolbarItemName - The unique toolbar item
+   * @param factory - The factory function that receives the widget containing the toolbar and returns the toolbar widget.
    * @returns The previously defined factory
    *
    * @deprecated since v4 use `addFactory` instead
@@ -126,7 +126,7 @@ export class ToolbarWidgetRegistry implements IToolbarWidgetRegistry {
 /**
  * Create the default toolbar item widget factory
  *
- * @param commands Application commands registry
+ * @param commands - Application commands registry
  * @returns Default factory
  */
 export function createDefaultFactory(

@@ -19,7 +19,7 @@ interface IPublishOptions {
 /**
  * Sleep for a specified period.
  *
- * @param wait The time in milliseconds to wait.
+ * @param wait - The time in milliseconds to wait.
  */
 async function sleep(wait: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, wait));

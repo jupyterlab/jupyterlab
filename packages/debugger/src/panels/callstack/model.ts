@@ -126,7 +126,7 @@ namespace Private {
   /**
    * Construct an id for the given frame.
    *
-   * @param frame The frame.
+   * @param frame - The frame.
    */
   export function getFrameId(frame: IDebugger.IStackFrame): string {
     return `${frame?.source?.path}-${frame?.id}`;

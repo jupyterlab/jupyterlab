@@ -182,7 +182,7 @@ export class RecentsManager implements IRecentsManager {
 
   /**
    * Set the recent list
-   * @param recents The new recent list
+   * @param recents - The new recent list
    */
   private _setRecents(
     recents: RecentDocument[],

@@ -76,8 +76,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Handle a change to the document registry save state.
    *
-   * @param sender The document registry context
-   * @param state The document registry save state
+   * @param sender - The document registry context
+   * @param state - The document registry save state
    */
   private _onSave(
     sender: DocumentRegistry.Context,
@@ -114,7 +114,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Update the options for the current notebook panel.
    *
-   * @param config new options to set
+   * @param config - new options to set
    */
   setConfig(config: NotebookPanel.IConfig): void {
     this.content.editorConfig = config.editorConfig;

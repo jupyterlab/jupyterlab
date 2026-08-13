@@ -31,7 +31,7 @@ export class KernelSourcesBody extends ReactWidget {
   /**
    * Instantiate a new Body for the KernelSourcesBody widget.
    *
-   * @param options The instantiation options for a KernelSourcesBody.
+   * @param options - The instantiation options for a KernelSourcesBody.
    */
   constructor(options: KernelSourcesBody.IOptions) {
     super();

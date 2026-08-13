@@ -54,9 +54,9 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * CellToolbarTracker constructor
    *
-   * @param panel The notebook panel
-   * @param toolbar The toolbar; deprecated use {@link toolbarFactory} instead
-   * @param toolbarFactory The toolbar factory
+   * @param panel - The notebook panel
+   * @param toolbar - The toolbar; deprecated use {@link toolbarFactory} instead
+   * @param toolbarFactory - The toolbar factory
    */
   constructor(
     panel: NotebookPanel,
@@ -372,7 +372,7 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * Check for overlap between rendered Markdown and the cell toolbar
    *
-   * @param activeCell A rendered MarkdownCell
+   * @param activeCell - A rendered MarkdownCell
    * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
    */
   private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {

@@ -615,7 +615,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   /**
    * Set the allowed schemes
    *
-   * @param scheme Allowed schemes.
+   * @param scheme - Allowed schemes.
    * Automatically regenerates sanitizer options to apply the change.
    * Note: the schemes merge into the current config and does not get overwritten.
    */
@@ -628,7 +628,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   /**
    * Set the URL replacement boolean.
    *
-   * @param autolink URL replacement boolean.
+   * @param autolink - URL replacement boolean.
    */
   setAutolink(autolink: boolean): void {
     this._autolink = autolink;
@@ -641,7 +641,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
    * Disabling this also disables incremental rendering of the text output (it is
    * rendered synchronously in a single blocking pass).
    *
-   * @param incrementalAutolink Whether to auto-link incrementally.
+   * @param incrementalAutolink - Whether to auto-link incrementally.
    */
   setIncrementalAutolink(incrementalAutolink: boolean): void {
     this._incrementalAutolink = incrementalAutolink;
@@ -658,7 +658,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   /**
    * Set whether to allow command linker attributes.
    *
-   * @param allowCommandLinker Whether to allow command linker attributes.
+   * @param allowCommandLinker - Whether to allow command linker attributes.
    */
   setAllowCommandLinker(allowCommandLinker: boolean): void {
     this._allowCommandLinker = allowCommandLinker;

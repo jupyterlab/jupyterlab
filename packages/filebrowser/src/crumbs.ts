@@ -82,7 +82,7 @@ export class BreadCrumbs extends Widget {
   /**
    * Construct a new file browser crumb widget.
    *
-   * @param options Constructor options.
+   * @param options - Constructor options.
    */
   constructor(options: BreadCrumbs.IOptions) {
     super();

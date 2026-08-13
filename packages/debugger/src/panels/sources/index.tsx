@@ -24,7 +24,7 @@ export class Sources extends PanelWithToolbar {
   /**
    * Instantiate a new Sources preview Panel.
    *
-   * @param options The Sources instantiation options.
+   * @param options - The Sources instantiation options.
    */
   constructor(options: Sources.IOptions) {
     super();

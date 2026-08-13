@@ -389,7 +389,7 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
-   * Initialize the key -> property dict for the overrides
+   * Initialize the key-to-property dict for the overrides
    */
   private _initOverrideProps(): void {
     const definitions = this._settings.schema.definitions as any;

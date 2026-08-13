@@ -36,8 +36,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Constructor
    *
-   * @param widget The widget to search in
-   * @param translator Application translator
+   * @param widget - The widget to search in
+   * @param translator - Application translator
    */
   constructor(
     widget: NotebookPanel,
@@ -84,7 +84,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    *
-   * @param domain Widget to test
+   * @param domain - Widget to test
    * @returns Search ability
    */
   static isApplicable(domain: Widget): domain is NotebookPanel {
@@ -100,8 +100,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
-   * @param widget The widget to search on
-   * @param translator [optional] The translator object
+   * @param widget - The widget to search on
+   * @param translator - [optional] The translator object
    *
    * @returns The search provider on the notebook panel
    */
@@ -307,7 +307,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Highlight the next match.
    *
-   * @param loop Whether to loop within the matches list.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns The next match if available.
    */
@@ -322,7 +322,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Highlight the previous match.
    *
-   * @param loop Whether to loop within the matches list.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns The previous match if available.
    */
@@ -337,8 +337,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Search for a regular expression with optional filters.
    *
-   * @param query A regular expression to test for
-   * @param filters Filter parameters to pass to provider
+   * @param query - A regular expression to test for
+   * @param filters - Filter parameters to pass to provider
    *
    */
   async startQuery(
@@ -426,8 +426,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Replace the currently selected match with the provided text
    *
-   * @param newText The replacement text.
-   * @param loop Whether to loop within the matches list.
+   * @param newText - The replacement text.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -478,7 +478,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   /**
    * Replace all matches in the notebook with the provided text
    *
-   * @param newText The replacement text.
+   * @param newText - The replacement text.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */

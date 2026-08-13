@@ -42,7 +42,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Register a new language for CodeMirror
    *
-   * @param language Language to register
+   * @param language - Language to register
    */
   addLanguage(language: IEditorLanguage): void {
     const info =
@@ -83,8 +83,8 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Find a codemirror mode by MIME.
    *
-   * @param mime Mime type to look for
-   * @param strict Whether xml and json should be assimilated to the generic mimetype
+   * @param mime - Mime type to look for
+   * @param strict - Whether xml and json should be assimilated to the generic mimetype
    * @returns The mode or null
    */
   findByMIME(
@@ -121,7 +121,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Find a codemirror mode by name.
    *
-   * @param name The mode name
+   * @param name - The mode name
    * @returns The mode or null
    */
   findByName(name: string): IEditorLanguage | null {
@@ -143,7 +143,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Find a codemirror mode by extension.
    *
-   * @param ext The extension name
+   * @param ext - The extension name
    * @returns The mode or null
    */
   findByExtension(ext: string | readonly string[]): IEditorLanguage | null {
@@ -169,7 +169,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Find a codemirror mode by filename.
    *
-   * @param name File name
+   * @param name - File name
    * @returns The mode or null
    */
   findByFileName(name: string): IEditorLanguage | null {
@@ -191,8 +191,8 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Find a codemirror mode by name or CodeMirror spec.
    *
-   * @param language The CodeMirror mode
-   * @param fallback Whether to fallback to default mimetype spec or not
+   * @param language - The CodeMirror mode
+   * @param fallback - Whether to fallback to default mimetype spec or not
    * @returns The mode or null
    */
   findBest(
@@ -216,9 +216,9 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   /**
    * Parse and style a string.
    *
-   * @param code Code to highlight
-   * @param language Code language
-   * @param el HTML element into which the highlighted code will be inserted
+   * @param code - Code to highlight
+   * @param language - Code language
+   * @param el - HTML element into which the highlighted code will be inserted
    */
   async highlight(
     code: string,
@@ -279,7 +279,7 @@ export namespace EditorLanguageRegistry {
   /**
    * Convert an CodeMirror 5 language parser to CodeMirror 6
    *
-   * @param parser Legacy parser
+   * @param parser - Legacy parser
    * @returns Language object
    */
   export function legacy(parser: StreamParser<unknown>): LanguageSupport {
@@ -289,7 +289,7 @@ export namespace EditorLanguageRegistry {
   /**
    * Create a dialect of SQL
    *
-   * @param dialectName SQL dialect
+   * @param dialectName - SQL dialect
    * @returns Language object
    */
   async function sql(
@@ -302,8 +302,8 @@ export namespace EditorLanguageRegistry {
   /**
    * Get the default editor languages
    *
-   * @param translator Application translator
-   * @param findLanguage Optional function to find a language by name for markdown code block highlighting
+   * @param translator - Application translator
+   * @param findLanguage - Optional function to find a language by name for markdown code block highlighting
    * @returns Default CodeMirror 6 languages
    */
   export function getDefaultLanguages(

@@ -275,7 +275,7 @@ export class NotebookHistory implements INotebookHistory {
   /**
    * Populate the history collection on history reply from a kernel.
    *
-   * @param value The kernel message history reply.
+   * @param value - The kernel message history reply.
    *
    * #### Notes
    * History entries have the shape:

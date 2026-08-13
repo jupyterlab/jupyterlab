@@ -49,7 +49,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   /**
    * Expand a variable.
    *
-   * @param variable The variable to expand.
+   * @param variable - The variable to expand.
    */
   expandVariable(variable: IDebugger.IVariable): void {
     this._variableExpanded.emit(variable);

@@ -24,7 +24,7 @@ export class Variables extends PanelWithToolbar {
   /**
    * Instantiate a new Variables Panel.
    *
-   * @param options The instantiation options for a Variables Panel.
+   * @param options - The instantiation options for a Variables Panel.
    */
   constructor(options: Variables.IOptions) {
     super(options);
@@ -114,7 +114,7 @@ export class Variables extends PanelWithToolbar {
   /**
    * A message handler invoked on a `'resize'` message.
    *
-   * @param msg The Lumino message to process.
+   * @param msg - The Lumino message to process.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
@@ -124,7 +124,7 @@ export class Variables extends PanelWithToolbar {
   /**
    * Resize the body.
    *
-   * @param msg The resize message.
+   * @param msg - The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage): void {
     const height = msg.height - this.toolbar.node.offsetHeight;
@@ -138,7 +138,7 @@ export class Variables extends PanelWithToolbar {
 /**
  * Convert a variable to a primitive type.
  *
- * @param variable The variable.
+ * @param variable - The variable.
  */
 export const convertType = (variable: IDebugger.IVariable): string | number => {
   const { type, value } = variable;

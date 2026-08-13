@@ -70,7 +70,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * Delete a metadata
    *
-   * @param key Metadata key
+   * @param key - Metadata key
    */
   deleteMetadata(key: string): void;
 
@@ -80,15 +80,15 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * ### Notes
    * This returns a copy of the key value.
    *
-   * @param key Metadata key
+   * @param key - Metadata key
    */
   getMetadata(key: string): any;
 
   /**
    * Set a metadata
    *
-   * @param key Metadata key
-   * @param value Metadata value
+   * @param key - Metadata key
+   * @param value - Metadata value
    */
   setMetadata(key: string, value: any): void;
 }
@@ -266,7 +266,7 @@ export class NotebookModel implements INotebookModel {
   /**
    * Delete a metadata
    *
-   * @param key Metadata key
+   * @param key - Metadata key
    */
   deleteMetadata(key: string): void {
     return this.sharedModel.deleteMetadata(key);
@@ -278,7 +278,7 @@ export class NotebookModel implements INotebookModel {
    * ### Notes
    * This returns a copy of the key value.
    *
-   * @param key Metadata key
+   * @param key - Metadata key
    */
   getMetadata(key: string): any {
     return this.sharedModel.getMetadata(key);
@@ -287,8 +287,8 @@ export class NotebookModel implements INotebookModel {
   /**
    * Set a metadata
    *
-   * @param key Metadata key
-   * @param value Metadata value
+   * @param key - Metadata key
+   * @param value - Metadata value
    */
   setMetadata(key: string, value: any): void {
     if (typeof value === 'undefined') {

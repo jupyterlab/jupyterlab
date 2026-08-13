@@ -24,7 +24,7 @@ export class Breakpoints extends PanelWithToolbar {
   /**
    * Instantiate a new Breakpoints Panel.
    *
-   * @param options The instantiation options for a Breakpoints Panel.
+   * @param options - The instantiation options for a Breakpoints Panel.
    */
   constructor(options: Breakpoints.IOptions) {
     super(options);

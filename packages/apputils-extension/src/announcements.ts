@@ -24,9 +24,9 @@ const PRIVACY_URL =
 /**
  * Call the announcement API
  *
- * @param endpoint Endpoint to request
- * @param init Initial values for the request
- * @param serverSettings The server settings to use for the request
+ * @param endpoint - Endpoint to request
+ * @param init - Initial values for the request
+ * @param serverSettings - The server settings to use for the request
  * @returns The response body interpreted as JSON
  */
 async function requestAPI<T>(

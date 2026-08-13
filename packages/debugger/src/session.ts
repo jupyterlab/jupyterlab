@@ -240,8 +240,8 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Send a custom debug request to the kernel.
    *
-   * @param command debug command.
-   * @param args arguments for the debug command.
+   * @param command - debug command.
+   * @param args - arguments for the debug command.
    */
   async sendRequest<K extends keyof IDebugger.ISession.Request>(
     command: K,
@@ -278,7 +278,7 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Send a debug request message to the kernel.
    *
-   * @param msg debug request message to send to the kernel.
+   * @param msg - debug request message to send to the kernel.
    */
   private async _sendDebugMessage(
     msg: KernelMessage.IDebugRequestMsg['content']

@@ -205,7 +205,7 @@ export class PluginListModel extends VDomModel {
   /**
    * Enable a plugin.
    *
-   * @param entry An entry indicating which plugin to enable.
+   * @param entry - An entry indicating which plugin to enable.
    */
   async enable(entry: IEntry): Promise<void> {
     if (!this.isDisclaimed) {
@@ -218,7 +218,7 @@ export class PluginListModel extends VDomModel {
   /**
    * Disable a plugin.
    *
-   * @param entry An entry indicating which plugin to disable.
+   * @param entry - An entry indicating which plugin to disable.
    * @returns Whether the plugin was disabled
    */
   async disable(entry: IEntry): Promise<void> {
@@ -310,8 +310,8 @@ export class PluginListModel extends VDomModel {
   /**
    * Send a request to the server to perform an action on a plugin.
    *
-   * @param action A valid action to perform.
-   * @param entry The plugin to perform the action on.
+   * @param action - A valid action to perform.
+   * @param entry - The plugin to perform the action on.
    */
   private _performAction(action: string, entry: IEntry): Promise<IActionReply> {
     this.actionError = null;
@@ -338,7 +338,7 @@ export class PluginListModel extends VDomModel {
   /**
    * Add a pending action.
    *
-   * @param pending A promise that resolves when the action is completed.
+   * @param pending - A promise that resolves when the action is completed.
    */
   private _addPendingAction(pending: Promise<any>): void {
     // Add to pending actions collection
@@ -423,8 +423,8 @@ export class PluginListModel extends VDomModel {
   /**
    * Call the plugin API
    *
-   * @param endPoint API REST end point for the plugin
-   * @param init Initial values for the request
+   * @param endPoint - API REST end point for the plugin
+   * @param init - Initial values for the request
    * @returns The response body interpreted as JSON
    */
   private async _requestAPI<T>(

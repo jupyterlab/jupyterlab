@@ -755,8 +755,8 @@ export class FileBrowser
    * Given a drive name and a local path, return the full
    * drive path which includes the drive name and the local path.
    *
-   * @param driveName the name of the drive
-   * @param localPath the local path on the drive.
+   * @param driveName - the name of the drive
+   * @param localPath - the local path on the drive.
    *
    * @returns the full drive path
    */

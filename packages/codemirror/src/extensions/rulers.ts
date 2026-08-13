@@ -113,7 +113,7 @@ const plugin = ViewPlugin.fromClass(
 /**
  * Extension for CodeMirror 6 displaying rulers.
  *
- * @param value Rulers position
+ * @param value - Rulers position
  * @returns CodeMirror 6 extension
  */
 export function rulers(value: number[]): Extension {
