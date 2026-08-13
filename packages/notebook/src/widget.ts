@@ -593,6 +593,13 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
+      if (this._contentVisibilityCellsChangedSlot) {
+        oldValue.cells.changed.disconnect(
+          this._contentVisibilityCellsChangedSlot,
+          this
+        );
+        this._contentVisibilityCellsChangedSlot = null;
+      }
       while (this.cellsArray.length) {
         this._removeCell(0);
       }
@@ -1197,16 +1204,26 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this._contentVisibilityObserver!.observe(cell.node)
     );
 
-    // Watch for newly added cells and set intrinsic size for them too
-    this.model?.cells.changed.connect(() => {
-      requestAnimationFrame(() => {
-        this.cellsArray.forEach((cell, i) => {
-          const estHeight = this._viewModel.estimateWidgetSize(i);
-          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-          this._contentVisibilityObserver!.observe(cell.node);
+    // Watch for newly added cells and set intrinsic size for them too. The
+    // connection is stored and guarded: _setupContentVisibilityObserver runs
+    // from both _updateNotebookConfig and onAfterAttach, so an unguarded
+    // connect would stack one handler per call and rescan all cells once per
+    // accumulated handler (gh #19268).
+    if (!this._contentVisibilityCellsChangedSlot) {
+      this._contentVisibilityCellsChangedSlot = () => {
+        requestAnimationFrame(() => {
+          this.cellsArray.forEach((cell, i) => {
+            const estHeight = this._viewModel.estimateWidgetSize(i);
+            cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+            this._contentVisibilityObserver!.observe(cell.node);
+          });
         });
-      });
-    }, this);
+      };
+      this.model?.cells.changed.connect(
+        this._contentVisibilityCellsChangedSlot,
+        this
+      );
+    }
   }
 
   protected cellsArray: Array<Cell>;
@@ -1225,6 +1242,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
+  private _contentVisibilityCellsChangedSlot: (() => void) | null = null;
   private _pageHandler: IPageHandler | undefined;
 }
 
