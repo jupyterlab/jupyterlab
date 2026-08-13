@@ -380,13 +380,17 @@ export namespace ExecutionIndicator {
             this
           );
 
+          // The cleanup handlers are registered with this model as receiver:
+          // without one they would sit on the context until it is disposed,
+          // keeping the notebook captured by this scope reachable even after
+          // the model itself is disposed and cleared.
           context.disposed.connect(ctx => {
             ctx.connectionStatusChanged.disconnect(
               contextConnectionStatusChanged,
               this
             );
             ctx.statusChanged.disconnect(contextStatusChanged, this);
-          });
+          }, this);
           const handleKernelMsg = (
             sender: Kernel.IKernelConnection,
             msg: Kernel.IAnyMessageArgs
@@ -415,9 +419,10 @@ export namespace ExecutionIndicator {
               this._startTimer(nb);
             }
           };
-          context.session?.kernel?.anyMessage.connect(handleKernelMsg);
-          context.session?.kernel?.disposed.connect(kernel =>
-            kernel.anyMessage.disconnect(handleKernelMsg)
+          context.session?.kernel?.anyMessage.connect(handleKernelMsg, this);
+          context.session?.kernel?.disposed.connect(
+            kernel => kernel.anyMessage.disconnect(handleKernelMsg, this),
+            this
           );
           const kernelChangedSlot = (
             _: ISessionContext,
@@ -431,13 +436,14 @@ export namespace ExecutionIndicator {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
               if (kernelData.newValue) {
-                kernelData.newValue.anyMessage.connect(handleKernelMsg);
+                kernelData.newValue.anyMessage.connect(handleKernelMsg, this);
               }
             }
           };
-          context.kernelChanged.connect(kernelChangedSlot);
-          context.disposed.connect(ctx =>
-            ctx.kernelChanged.disconnect(kernelChangedSlot)
+          context.kernelChanged.connect(kernelChangedSlot, this);
+          context.disposed.connect(
+            ctx => ctx.kernelChanged.disconnect(kernelChangedSlot, this),
+            this
           );
         }
       }
@@ -655,6 +661,14 @@ export namespace ExecutionIndicator {
     loadSettings?: Promise<ISettingRegistry.ISettings>
   ): Widget {
     const toolbarItem = new ExecutionIndicator(translator);
+    // `VDomRenderer.dispose()` drops its reference to the model without
+    // disposing it. Undisposed, the model stays connected to the session
+    // context (which outlives this panel) and its `_currentNotebook` keeps
+    // the whole notebook view reachable after the panel is closed.
+    const model = toolbarItem.model;
+    toolbarItem.disposed.connect(() => {
+      model.dispose();
+    });
     toolbarItem.model.displayOption = {
       showOnToolBar: true,
       showProgress: true,

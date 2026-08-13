@@ -131,6 +131,12 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     connection: Session.ISessionConnection | null
   ): Promise<void> {
+    // The caller may reach this point after awaiting session readiness, by
+    // which time the widget can already be disposed; connecting handlers for
+    // it then would leave them on the session connection permanently.
+    if (widget.isDisposed) {
+      return;
+    }
     if (!connection) {
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
@@ -138,16 +144,21 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       return this.updateWidget(widget, connection);
     }
 
+    // All per-widget handlers below are connected with `widget` as receiver:
+    // their senders (the session connection and the debugger service) outlive
+    // the widget, and the receiver makes `Widget.dispose()` remove any
+    // connection missed by the explicit disconnects via
+    // `Signal.clearData(this)`.
     const kernelChanged = (): void => {
       void this.updateWidget(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
 
     if (kernelChangedHandler) {
-      connection.kernelChanged.disconnect(kernelChangedHandler);
+      connection.kernelChanged.disconnect(kernelChangedHandler, widget);
     }
     this._kernelChangedHandlers[widget.id] = kernelChanged;
-    connection.kernelChanged.connect(kernelChanged);
+    connection.kernelChanged.connect(kernelChanged, widget);
 
     const statusChanged = (
       _: Session.ISessionConnection,
@@ -159,9 +170,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
     const statusChangedHandler = this._statusChangedHandlers[widget.id];
     if (statusChangedHandler) {
-      connection.statusChanged.disconnect(statusChangedHandler);
+      connection.statusChanged.disconnect(statusChangedHandler, widget);
     }
-    connection.statusChanged.connect(statusChanged);
+    connection.statusChanged.connect(statusChanged, widget);
     this._statusChangedHandlers[widget.id] = statusChanged;
 
     const iopubMessage = (
@@ -179,9 +190,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
     const iopubMessageHandler = this._iopubMessageHandlers[widget.id];
     if (iopubMessageHandler) {
-      connection.iopubMessage.disconnect(iopubMessageHandler);
+      connection.iopubMessage.disconnect(iopubMessageHandler, widget);
     }
-    connection.iopubMessage.connect(iopubMessage);
+    connection.iopubMessage.connect(iopubMessage, widget);
     this._iopubMessageHandlers[widget.id] = iopubMessage;
     this._activeWidget = widget;
 
@@ -196,10 +207,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
     const shellMessageHandler = this._shellMessageHandlers[widget.id];
     if (shellMessageHandler) {
-      connection.anyMessage.disconnect(shellMessageHandler);
+      connection.anyMessage.disconnect(shellMessageHandler, widget);
     }
 
-    connection.anyMessage.connect(shellMessage);
+    connection.anyMessage.connect(shellMessage, widget);
     this._shellMessageHandlers[widget.id] = shellMessage;
 
     return this.updateWidget(widget, connection);
@@ -216,6 +227,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     sessionContext: ISessionContext
   ): Promise<void> {
+    if (widget.isDisposed) {
+      return;
+    }
     const connectionChanged = (): void => {
       const { session: connection } = sessionContext;
       void this.update(widget, connection);
@@ -225,10 +239,20 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._contextKernelChangedHandlers[widget.id];
 
     if (contextKernelChangedHandlers) {
-      sessionContext.kernelChanged.disconnect(contextKernelChangedHandlers);
+      sessionContext.kernelChanged.disconnect(
+        contextKernelChangedHandlers,
+        widget
+      );
     }
     this._contextKernelChangedHandlers[widget.id] = connectionChanged;
-    sessionContext.kernelChanged.connect(connectionChanged);
+    sessionContext.kernelChanged.connect(connectionChanged, widget);
+    // The session context belongs to the document and outlives this widget,
+    // e.g. when one of several views is closed, so the connection cannot be
+    // left for the context to clean up.
+    widget.disposed.connect(() => {
+      sessionContext.kernelChanged.disconnect(connectionChanged, widget);
+      delete this._contextKernelChangedHandlers[widget.id];
+    });
 
     return this.update(widget, sessionContext.session);
   }
@@ -243,7 +267,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     connection: Session.ISessionConnection | null
   ): Promise<void> {
-    if (!this._service.model || !connection) {
+    // Callers typically await session readiness first, and the widget can be
+    // closed by the time that resolves; connecting handlers for it then
+    // would leave them on the service and the connection permanently.
+    if (widget.isDisposed || !this._service.model || !connection) {
       return;
     }
 
@@ -260,7 +287,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const createHandler = (): void => {
-      if (this._handlers[widget.id]) {
+      // The widget may have been disposed during one of the awaits leading
+      // here; a handler created for it now would never be removed, since the
+      // widget's disposed signal has already fired.
+      if (this._handlers[widget.id] || widget.isDisposed) {
         return;
       }
 
@@ -293,7 +323,32 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const removeHandlers = (): void => {
-      this._service.stopped.disconnect(onDebuggerStopped);
+      this._service.stopped.disconnect(onDebuggerStopped, widget);
+
+      // `update()` registers these for every widget, debugging or not, and
+      // each slot closes over `widget` while its sender (the session
+      // connection) lives on. Release them before the early return below,
+      // otherwise every closed widget stays reachable from the connection.
+      const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
+      if (kernelChangedHandler) {
+        connection?.kernelChanged.disconnect(kernelChangedHandler, widget);
+        delete this._kernelChangedHandlers[widget.id];
+      }
+      const statusChangedHandler = this._statusChangedHandlers[widget.id];
+      if (statusChangedHandler) {
+        connection?.statusChanged.disconnect(statusChangedHandler, widget);
+        delete this._statusChangedHandlers[widget.id];
+      }
+      const iopubMessageHandler = this._iopubMessageHandlers[widget.id];
+      if (iopubMessageHandler) {
+        connection?.iopubMessage.disconnect(iopubMessageHandler, widget);
+        delete this._iopubMessageHandlers[widget.id];
+      }
+      const shellMessageHandler = this._shellMessageHandlers[widget.id];
+      if (shellMessageHandler) {
+        connection?.anyMessage.disconnect(shellMessageHandler, widget);
+        delete this._shellMessageHandlers[widget.id];
+      }
 
       const handler = this._handlers[widget.id];
       if (!handler) {
@@ -302,9 +357,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
       handler.dispose();
       delete this._handlers[widget.id];
-      delete this._kernelChangedHandlers[widget.id];
-      delete this._statusChangedHandlers[widget.id];
-      delete this._iopubMessageHandlers[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
 
       // Clear the model if the handler being removed corresponds
@@ -331,7 +383,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
-    this._service.stopped.connect(onDebuggerStopped);
+    this._service.stopped.connect(onDebuggerStopped, widget);
 
     const addToolbarButton = (enabled: boolean = true): void => {
       const debugButton = this._iconButtons[widget.id];
@@ -408,6 +460,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       delete this._iconButtons[widget.id];
       delete this._debuggerAvailability[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
+      if (this._activeWidget === widget) {
+        this._activeWidget = null;
+      }
     });
 
     const debuggingEnabled = await this._service.isAvailable(connection);

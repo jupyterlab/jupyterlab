@@ -385,6 +385,15 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this._contentVisibilityObserver.disconnect();
       this._contentVisibilityObserver = null;
     }
+    // Windowed rendering keeps off-viewport cells out of the layout, and
+    // `Widget.dispose()` only disposes layout children, so the cells that
+    // are not currently in the viewport have to be disposed explicitly:
+    // otherwise their connections to the shared model (which outlives this
+    // view) keep every one of them reachable.
+    for (const cell of this.cellsArray) {
+      cell.dispose();
+    }
+    this.cellsArray.length = 0;
     super.dispose();
   }
 

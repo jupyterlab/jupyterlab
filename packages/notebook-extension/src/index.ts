@@ -2387,10 +2387,13 @@ function activateNotebookHandler(
     widget.title.iconLabel = ft?.iconLabel ?? '';
     widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
 
-    // Notify the widget tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update. The context
+    // outlives this panel when other views of the document stay open, so the
+    // connection is made with the panel as receiver: `Widget.dispose()` calls
+    // `Signal.clearData(this)`, which removes it when the panel is closed.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
-    });
+    }, widget);
     // Add the notebook panel to the tracker.
     void tracker.add(widget);
   });
@@ -2721,6 +2724,10 @@ function activateNotebookCompleterService(
         })
         .catch(console.error);
     });
+    // The session context outlives this panel when other views of the
+    // document stay open, so the connection is made with the panel as
+    // receiver: `Widget.dispose()` calls `Signal.clearData(this)`, which
+    // removes it when the panel is closed.
     notebook.sessionContext.sessionChanged.connect(() => {
       // Ensure the editor will exist on the cell before adding the completer
       notebook.content.activeCell?.ready
@@ -2733,7 +2740,7 @@ function activateNotebookCompleterService(
           return manager.updateCompleter(newCompleterContext);
         })
         .catch(console.error);
-    });
+    }, notebook);
   };
   notebooks.widgetAdded.connect(updateCompleter);
   manager.activeProvidersChanged.connect(() => {
@@ -2873,18 +2880,28 @@ function addCommands(
     }
   };
 
-  // Set up signal handler to keep the collapse state consistent
+  // Set up signal handler to keep the collapse state consistent. The
+  // connections are made once per panel: `currentChanged` fires repeatedly
+  // for the same panel, and reconnecting each time would pile up duplicate
+  // handlers for as long as the panel lives.
+  const collapseSynchronized = new WeakSet<NotebookPanel>();
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
-      if (!panel?.content?.model?.cells) {
+      if (!panel?.content?.model?.cells || collapseSynchronized.has(panel)) {
         return;
       }
+      collapseSynchronized.add(panel);
+      // The cell list belongs to the model, which outlives this view when
+      // other views of the document stay open, so the connection is made
+      // with the notebook as receiver: `Widget.dispose()` calls
+      // `Signal.clearData(this)`, which removes it when the view is closed.
       panel.content.model.cells.changed.connect(
         (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
-        }
+        },
+        panel.content
       );
       panel.content.activeCellChanged.connect(
         (notebook: Notebook, cell: Cell) => {

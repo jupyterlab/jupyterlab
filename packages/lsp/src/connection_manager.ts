@@ -216,16 +216,30 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
   registerAdapter(path: string, adapter: WidgetLSPAdapter): void {
     this.adapters.set(path, adapter);
 
-    adapter.widget.context.pathChanged.connect((context, newPath) => {
+    const onPathChanged = (context: unknown, newPath: string) => {
       this.adapters.delete(path);
       this.adapters.set(newPath, adapter);
-    });
+    };
+    const context = adapter.widget.context;
+    context.pathChanged.connect(onPathChanged);
 
     adapter.disposed.connect(() => {
       if (adapter.virtualDocument) {
         this.documents.delete(adapter.virtualDocument.uri);
       }
+      // The adapter clears its reference to the virtual document before this
+      // handler runs, so the branch above usually never fires; sweep disposed
+      // documents so they do not accumulate in this application-lifetime map.
+      for (const [uri, virtualDocument] of this.documents) {
+        if (virtualDocument.isDisposed) {
+          this.documents.delete(uri);
+        }
+      }
       this.adapters.delete(path);
+      // The context outlives the adapter when other views of the document
+      // stay open; left connected, this slot would keep the adapter (and
+      // its widget) reachable from the context.
+      context.pathChanged.disconnect(onPathChanged);
     });
   }
 
