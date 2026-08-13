@@ -2867,12 +2867,21 @@ function addCommands(
     }
   };
 
-  // Set up signal handler to keep the collapse state consistent
+  // Set up signal handler to keep the collapse state consistent.
+  // The listener attachment is guarded per panel: currentChanged fires on
+  // every switch back to a notebook, so an unguarded connect would stack one
+  // cells.changed + activeCellChanged pair per activation and make each
+  // cell-list change cost O(activations * cells) (gh #19267).
+  const collapseListenersAttached = new WeakSet<NotebookPanel>();
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
       if (!panel?.content?.model?.cells) {
         return;
       }
+      if (collapseListenersAttached.has(panel)) {
+        return;
+      }
+      collapseListenersAttached.add(panel);
       panel.content.model.cells.changed.connect(
         (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
