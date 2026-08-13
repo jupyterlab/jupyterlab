@@ -234,7 +234,7 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#paste()', () => {
-      it('should paste into the provided destination directory', async () => {
+      it('should paste into the selected destination directory', async () => {
         const source = [...dirListing.sortedItems()][0];
 
         const destination = await dirListing.model.manager.newUntitled({
@@ -244,7 +244,8 @@ describe('filebrowser/listing', () => {
         await dirListing.selectItemByName(source.name);
         dirListing.cut();
 
-        await dirListing.paste(destination.path);
+        await dirListing.selectItemByName(destination.name);
+        await dirListing.paste();
 
         const moved = await dirListing.model.manager.services.contents.get(
           `${destination.path}/${source.name}`
@@ -252,7 +253,7 @@ describe('filebrowser/listing', () => {
         expect(moved.name).toBe(source.name);
       });
 
-      it('should paste into the current directory when no destination is provided', async () => {
+      it('should paste into the current directory when no destination directory is selected', async () => {
         const source = [...dirListing.sortedItems()][0];
 
         const destination = await dirListing.model.manager.newUntitled({

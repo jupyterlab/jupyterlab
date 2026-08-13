@@ -1614,21 +1614,10 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.paste, {
-    execute: args => {
+    execute: () => {
       const widget = tracker.currentWidget;
 
       if (widget) {
-        if (args['contextMenu'] === true) {
-          const target = app.contextMenuHitTest(node =>
-            node.classList.contains('jp-DirListing-item')
-          );
-          if (target?.dataset.isdir === 'true') {
-            const item = widget.modelForNode(target);
-            if (item) {
-              return widget.paste(item.path);
-            }
-          }
-        }
         return widget.paste();
       }
     },
