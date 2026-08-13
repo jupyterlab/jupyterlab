@@ -1206,7 +1206,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           this._contentVisibilityObserver!.observe(cell.node);
         });
       });
-    });
+    }, this);
   }
 
   protected cellsArray: Array<Cell>;
