@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 import { ShortcutUI } from '@jupyterlab/shortcuts-extension/lib/components';
+import { ShortcutInput } from '@jupyterlab/shortcuts-extension/lib/components/ShortcutInput';
 import type {
   IKeybinding,
   IShortcutTarget
@@ -44,6 +45,27 @@ class DummySettings extends Settings {
 }
 
 describe('@jupyterlab/shortcut-extension', () => {
+  describe('IConflicts', () => {
+    it('should only emit conflict display data', () => {
+      const displayConflicts = jest.fn();
+      const input = new ShortcutInput({ displayConflicts } as any);
+      input.state = {
+        ...input.state,
+        keys: ['Ctrl A'],
+        currentChain: 'B'
+      };
+      (input as any).setState = jest.fn();
+
+      const conflictsWith = [{ id: 'conflict' }];
+      (input as any)._emitConflicts(conflictsWith);
+
+      expect(displayConflicts).toHaveBeenCalledWith({
+        keys: ['Ctrl A', 'B'],
+        conflictsWith
+      });
+    });
+  });
+
   describe('ShortcutUI', () => {
     let shortcutUI: ShortcutUI;
     let getSettings: jest.Mock<Promise<DummySettings>, []>;
