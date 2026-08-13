@@ -149,9 +149,10 @@ export class InputArea extends Widget {
     this._editor = null!;
     this._rendered = null!;
     super.dispose();
-    // Either the editor or the rendered widget is swapped out of the layout
-    // (`renderInput`/`showEditor` set `parent = null`), and
-    // `Widget.dispose()` only disposes layout children.
+    // The rendered widget is swapped out of the layout when the editor is
+    // shown (`showEditor` sets `parent = null`), and `Widget.dispose()` only
+    // disposes layout children. The editor itself only ever gets hidden, so
+    // disposing it here is an idempotent safety net.
     editor?.dispose();
     rendered?.dispose();
   }
