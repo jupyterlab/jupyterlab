@@ -628,7 +628,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           .getSource()
           .split('\n')?.[0];
       }
-    });
+    }, this);
 
     if (this.inputHidden) {
       input.parent = null;
@@ -1479,20 +1479,20 @@ export class CodeCell extends Cell<ICodeCellModel> {
       overlay.firstChild?.remove();
       return;
     }
+    const trans = this.translator.load('jupyterlab');
     let overlayTitle: string;
     if (this._outputsScrolled) {
       expandIcon.element({
         container: overlay
       });
-      overlayTitle = 'Expand Output';
+      overlayTitle = trans.__('Expand Output');
     } else {
       collapseIcon.element({
         container: overlay
       });
-      overlayTitle = 'Collapse Output';
+      overlayTitle = trans.__('Collapse Output');
     }
-    const trans = this.translator.load('jupyterlab');
-    overlay.title = trans.__(overlayTitle);
+    overlay.title = overlayTitle;
   }
   /**
    * Save view collapse state to model

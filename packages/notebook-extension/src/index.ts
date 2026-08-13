@@ -772,6 +772,9 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       const formatList = Object.keys(response);
       formatList.forEach(function (key) {
         const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+        // Fallback for export formats the server offers but `formatLabels`
+        // does not know about, so there is no literal to extract.
+        // eslint-disable-next-line jupyter/no-dynamic-translation
         const capCaseKey = trans.__(formattedKey);
         const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
         let args = {
@@ -1114,6 +1117,9 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
           ).length > 0;
         if (!mimetypeExists) {
           const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          // Fallback for export formats the server offers but `formatLabels`
+          // does not know about, so there is no literal to extract.
+          // eslint-disable-next-line jupyter/no-dynamic-translation
           const altOption = trans.__(formattedKey);
           const option = formatLabels[key] ? formatLabels[key] : altOption;
           const mimeTypeValue = response[key].output_mimetype;

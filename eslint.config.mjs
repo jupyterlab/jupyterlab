@@ -240,7 +240,18 @@ export default defineConfig([
       'jupyter/plugin-description': 'error',
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
+      'jupyter/no-dynamic-translation': 'error',
+      'jupyter/incorrect-translator-usage': 'error',
       'jupyter/no-untranslated-string': 'error',
+      'jupyter/no-pageconfig-base-url': 'error',
+      'jupyter/require-signal-cleanup': 'error',
+      'jupyter/require-signal-this-arg': 'error',
+      'jupyter/prefer-signal-this-arg': 'error',
+      // TODO: the disposable rules highlight genuine leaks, but require
+      // a larger refactor (e.g. hoisting a React field renderer out of
+      // the render callback, giving a per-render `Debouncer` a lifetime)
+      'jupyter/require-disposable-ownership': 'warn',
+      'jupyter/require-disposable-transfer': 'warn',
       'tsdoc/syntax': 'warn',
       'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
@@ -413,16 +424,6 @@ export default defineConfig([
           memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
           allowSeparatedGroups: false
         }
-      ],
-
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector:
-            'CallExpression[callee.type="MemberExpression"][callee.object.name="PageConfig"][callee.property.name="getBaseUrl"]',
-          message:
-            'PageConfig.getBaseUrl() should only be called in makeSettings() function and in tests/examples'
-        }
       ]
     },
 
@@ -458,8 +459,6 @@ export default defineConfig([
       '**/*.spec.tsx',
       '**/test/**/*.ts',
       '**/test/**/*.tsx',
-      '**/tests/**/*.ts',
-      '**/tests/**/*.tsx',
       'testutils/**/*.ts',
       'testutils/**/*.tsx',
       'galata/test/**/*.ts',
@@ -475,7 +474,6 @@ export default defineConfig([
       '**/*.spec.ts',
       '**/*.spec.tsx',
       '**/test/**/*.ts',
-      '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',
       'packages/services/src/serverconnection.ts',
@@ -483,15 +481,42 @@ export default defineConfig([
     ],
 
     rules: {
-      'no-restricted-syntax': 'off',
+      'jupyter/no-pageconfig-base-url': 'off',
       'jupyter/command-described-by': 'off',
       'jupyter/no-untranslated-string': 'off'
     }
   },
   {
-    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    // Disposables created in a test are torn down with the jest environment,
+    // and the example applications keep theirs for the lifetime of the page,
+    // so neither has an owner to hand them to.
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**/*.ts',
+      '**/test/**/*.tsx',
+      'packages/*/src/testutils.ts',
+      'testutils/**/*.ts',
+      'examples/**/*.ts',
+      'examples/**/*.tsx',
+      'packages/*/examples/**/*.ts',
+      'packages/*/examples/**/*.tsx'
+    ],
 
     rules: {
+      'jupyter/require-disposable-ownership': 'off',
+      'jupyter/require-disposable-transfer': 'off'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    plugins: { jupyter: jupyterPlugin },
+    rules: {
+      // A warning while the documentation and benchmark tests, which drive the
+      // file browser by hand to take their screenshots, are migrated to the
+      // helpers.
+      'jupyter/galata-prefer-filebrowser-helper': 'warn',
+      // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
         {
