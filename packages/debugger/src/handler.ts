@@ -325,10 +325,19 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     const removeHandlers = (): void => {
       this._service.stopped.disconnect(onDebuggerStopped, widget);
 
-      // `update()` registers these for every widget, debugging or not, and
-      // each slot closes over `widget` while its sender (the session
-      // connection) lives on. Release them before the early return below,
-      // otherwise every closed widget stays reachable from the connection.
+      const handler = this._handlers[widget.id];
+      if (!handler) {
+        // The kernel message handlers registered by `update()` stay in place
+        // for widgets without a debug handler: this branch runs on every
+        // update that does not start debugging, and stripping them here
+        // would leave a subsequently started debug session without restart
+        // detection, variable display and `executionDone`. They are released
+        // when the widget is disposed: the map entries in the disposal hook
+        // below, the connections by `Signal.clearData(widget)` since every
+        // connect passes the widget as receiver.
+        return;
+      }
+
       const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
       if (kernelChangedHandler) {
         connection?.kernelChanged.disconnect(kernelChangedHandler, widget);
@@ -348,11 +357,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       if (shellMessageHandler) {
         connection?.anyMessage.disconnect(shellMessageHandler, widget);
         delete this._shellMessageHandlers[widget.id];
-      }
-
-      const handler = this._handlers[widget.id];
-      if (!handler) {
-        return;
       }
 
       handler.dispose();
@@ -457,6 +461,14 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         await stopDebugger();
       }
       removeHandlers();
+      // The connections made by `update()` are removed by
+      // `Signal.clearData(widget)` during widget disposal (every connect
+      // passes the widget as receiver); the id-keyed entries on this
+      // application-lifetime object have to be deleted explicitly.
+      delete this._kernelChangedHandlers[widget.id];
+      delete this._statusChangedHandlers[widget.id];
+      delete this._iopubMessageHandlers[widget.id];
+      delete this._shellMessageHandlers[widget.id];
       delete this._iconButtons[widget.id];
       delete this._debuggerAvailability[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
