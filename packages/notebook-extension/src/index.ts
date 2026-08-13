@@ -2713,8 +2713,10 @@ function activateNotebookCompleterService(
     await manager.updateCompleter(completerContext);
     // `updateCompleter` also runs for every panel on `activeProvidersChanged`
     // below; connect the listeners only on the first call for a panel so
-    // they do not accumulate per settings change.
-    if (completerConnected.has(notebook)) {
+    // they do not accumulate per settings change. The disposal check covers
+    // a panel closed while `updateCompleter` was pending: connections made
+    // then would outlive the disposal cleanup that has already run.
+    if (notebook.isDisposed || completerConnected.has(notebook)) {
       return;
     }
     completerConnected.add(notebook);

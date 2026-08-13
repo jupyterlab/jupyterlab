@@ -471,6 +471,12 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     });
 
     const debuggingEnabled = await this._service.isAvailable(connection);
+    if (widget.isDisposed) {
+      // Disposed while `isAvailable` was pending: the disposal hook above
+      // has already deleted the per-widget entries, so writing any of them
+      // now would leave them behind for good.
+      return;
+    }
     this._debuggerAvailability[widget.id] = {
       kernelId,
       available: debuggingEnabled

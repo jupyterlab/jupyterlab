@@ -130,5 +130,20 @@ describe('DebuggerHandler', () => {
 
       expect(executionDone).toBe(false);
     });
+
+    it('does not recreate per-widget entries when the widget is disposed mid-update', async () => {
+      // Dispose the widget while `updateWidget` is suspended on its first
+      // await (`isAvailable`): the disposal hook deletes the per-widget
+      // entries, and the resumed continuation must not write new ones.
+      const pending = handler.update(widget as any, connection);
+      widget.dispose();
+      await pending;
+
+      expect((handler as any)._debuggerAvailability[widget.id]).toBeUndefined();
+      expect((handler as any)._iconButtons[widget.id]).toBeUndefined();
+      expect(
+        (handler as any)._kernelChangedHandlers[widget.id]
+      ).toBeUndefined();
+    });
   });
 });
