@@ -174,6 +174,28 @@ describe('@jupyterlab/notebook', () => {
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
 
+      it('should clear scheduled cells when all cells have executed', async () => {
+        const state = indicator.model.executionState(widget)!;
+        const onExecuted = (_: unknown, args: { notebook: Notebook }) => {
+          if (args.notebook === widget) {
+            state.scheduledCell.add('request-id');
+          }
+        };
+        NotebookActions.executed.connect(onExecuted);
+
+        try {
+          await NotebookActions.runCells(
+            widget,
+            [widget.widgets[0]],
+            ipySessionContext
+          );
+        } finally {
+          NotebookActions.executed.disconnect(onExecuted);
+        }
+
+        expect(state.scheduledCell.size).toBe(0);
+      });
+
       it(
         'should reset to idle when kernel gets abruptly terminated',
         async () => {

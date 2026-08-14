@@ -380,12 +380,28 @@ export namespace ExecutionIndicator {
             this
           );
 
+          const selectionExecuted = (
+            _: unknown,
+            args: { notebook: Notebook }
+          ) => {
+            if (state && args.notebook === nb && state.scheduledCell.size > 0) {
+              state.scheduledCell.clear();
+              this._scheduleSwitchToIdle(state);
+              this.stateChanged.emit(void 0);
+            }
+          };
+          NotebookActions.selectionExecuted.connect(selectionExecuted, this);
+
           context.disposed.connect(ctx => {
             ctx.connectionStatusChanged.disconnect(
               contextConnectionStatusChanged,
               this
             );
             ctx.statusChanged.disconnect(contextStatusChanged, this);
+            NotebookActions.selectionExecuted.disconnect(
+              selectionExecuted,
+              this
+            );
           });
           const handleKernelMsg = (
             sender: Kernel.IKernelConnection,
