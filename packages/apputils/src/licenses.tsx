@@ -54,6 +54,7 @@ export class Licenses extends SplitPanel {
       return;
     }
     this._bundles.currentChanged.disconnect(this.onBundleSelected, this);
+    this._disposeBundleTabs();
     this.model.dispose();
     super.dispose();
   }
@@ -124,11 +125,16 @@ export class Licenses extends SplitPanel {
    */
   protected _updateBundles(): void {
     this._bundles.clearTabs();
+    // The tabs are rebuilt from scratch on every model change, and each one
+    // needs a widget to own its title, so the previous owners are released
+    // here rather than left behind once their tab is gone.
+    this._disposeBundleTabs();
     let i = 0;
     const { currentBundleName } = this.model;
     let currentIndex = 0;
     for (const bundle of this.model.bundleNames) {
       const tab = new Widget();
+      this._bundleTabs.push(tab);
       tab.title.label = bundle;
       if (bundle === currentBundleName) {
         currentIndex = i;
@@ -136,6 +142,16 @@ export class Licenses extends SplitPanel {
       this._bundles.insertTab(++i, tab.title);
     }
     this._bundles.currentIndex = currentIndex;
+  }
+
+  /**
+   * Dispose of the widgets owning the bundle tab titles.
+   */
+  private _disposeBundleTabs(): void {
+    for (const tab of this._bundleTabs) {
+      tab.dispose();
+    }
+    this._bundleTabs.length = 0;
   }
 
   /**
@@ -152,6 +168,11 @@ export class Licenses extends SplitPanel {
    * Tabs reflecting available bundles
    */
   protected _bundles: TabBar<Widget>;
+
+  /**
+   * The widgets owning the titles of the bundle tabs.
+   */
+  private _bundleTabs: Widget[] = [];
 
   /**
    * A grid of the current bundle's packages' license metadata

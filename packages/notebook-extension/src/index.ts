@@ -1157,15 +1157,20 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   ) => {
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
-    // Register the custom fields.
+    // Register the custom fields. As with the active cell tool below, the
+    // field renderers are used by rjsf as React components, so they run on
+    // every rebuild of the metadata form. Each field is created once and
+    // reused: constructing one per render abandons an editor, its host node
+    // and its listeners on every keystroke that rebuilds the form.
+    const cellMetadataField = new CellMetadataField({
+      editorFactory,
+      tracker,
+      label: 'Cell metadata',
+      translator: translator
+    });
     const cellComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new CellMetadataField({
-          editorFactory,
-          tracker,
-          label: 'Cell metadata',
-          translator: translator
-        }).render(props);
+        return cellMetadataField.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -1173,14 +1178,15 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       cellComponent
     );
 
+    const notebookMetadataField = new NotebookMetadataField({
+      editorFactory,
+      tracker,
+      label: 'Notebook metadata',
+      translator: translator
+    });
     const notebookComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new NotebookMetadataField({
-          editorFactory,
-          tracker,
-          label: 'Notebook metadata',
-          translator: translator
-        }).render(props);
+        return notebookMetadataField.render(props);
       }
     };
     formRegistry.addRenderer(
