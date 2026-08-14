@@ -247,11 +247,8 @@ export default defineConfig([
       'jupyter/require-signal-cleanup': 'error',
       'jupyter/require-signal-this-arg': 'error',
       'jupyter/prefer-signal-this-arg': 'error',
-      // TODO: the disposable rules highlight genuine leaks, but require
-      // a larger refactor (e.g. hoisting a React field renderer out of
-      // the render callback, giving a per-render `Debouncer` a lifetime)
-      'jupyter/require-disposable-ownership': 'warn',
-      'jupyter/require-disposable-transfer': 'warn',
+      'jupyter/require-disposable-ownership': 'error',
+      'jupyter/require-disposable-transfer': 'error',
       'tsdoc/syntax': 'warn',
       'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
