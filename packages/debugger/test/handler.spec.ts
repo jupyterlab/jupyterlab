@@ -7,7 +7,7 @@ import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
 import type { Session } from '@jupyterlab/services';
 
-import { JupyterServer } from '@jupyterlab/testing';
+import { JupyterServer, signalToPromise, sleep } from '@jupyterlab/testing';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -20,9 +20,9 @@ import { DebuggerHandler } from '../src/handler';
 import { DebuggerService } from '../src/service';
 
 /**
- * A minimal stand-in for a document widget: a real Lumino widget (so that
- * `disposed` and `Signal.clearData` behave as in the application) carrying
- * the toolbar the handler inserts its bug button into.
+ * A minimal stand-in for a document widget: a real Lumino widget, so that
+ * `disposed` and `Signal.clearData` behave as in the application, with the
+ * toolbar the handler adds its button to.
  */
 class TestDocumentWidget extends Widget {
   constructor() {
@@ -67,6 +67,9 @@ describe('DebuggerHandler', () => {
   });
 
   afterEach(async () => {
+    if (service.isStarted) {
+      await service.stop();
+    }
     if (!widget.isDisposed) {
       widget.dispose();
     }
@@ -76,59 +79,80 @@ describe('DebuggerHandler', () => {
   });
 
   describe('#update()', () => {
-    it('keeps the kernel message handlers connected when debugging is not started', async () => {
+    it('reports every execution so that the modules can be refreshed', async () => {
       await handler.update(widget as any, connection);
 
-      // The shell message handler registered by `update()` emits
-      // `executionDone` on every execute reply, whether or not a debug
-      // session is running.
       let executionDone = false;
       handler.executionDone.connect(() => {
         executionDone = true;
       });
 
       await connection.kernel!.requestExecute({ code: '1 + 1' }).done;
-      // The signal is emitted synchronously while the reply is processed;
-      // one macrotask keeps the check clear of message-handling order.
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // `anyMessage` is emitted synchronously as the reply arrives, before
+      // `done` resolves; one macrotask keeps the check clear of any
+      // reordering in message handling.
+      await sleep();
 
       expect(executionDone).toBe(true);
     });
 
-    it('registers the per-widget handlers in the bookkeeping maps', async () => {
+    it('refreshes the variables on execution once debugging is started', async () => {
       await handler.update(widget as any, connection);
 
-      expect((handler as any)._kernelChangedHandlers[widget.id]).toBeDefined();
-      expect((handler as any)._statusChangedHandlers[widget.id]).toBeDefined();
-      expect((handler as any)._iopubMessageHandlers[widget.id]).toBeDefined();
-      expect((handler as any)._shellMessageHandlers[widget.id]).toBeDefined();
+      // Start debugging on the session the handler prepared, as clicking the
+      // bug button does.
+      await service.restoreState(true);
+      expect(service.isStarted).toBe(true);
+
+      const { model } = service;
+      model.variables.scopes = [];
+      const variablesChanged = signalToPromise(model.variables.changed);
+      await connection.kernel!.requestExecute({ code: 'a_variable = 1' }).done;
+      await variablesChanged;
+
+      const [globals] = model.variables.scopes;
+      expect(globals.variables.map(variable => variable.name)).toContain(
+        'a_variable'
+      );
     });
 
-    it('releases the per-widget handlers when the widget is disposed', async () => {
+    it('leaves the kernel alone once the widget is closed', async () => {
       await handler.update(widget as any, connection);
+      await service.restoreState(true);
+      const { model } = service;
+
       widget.dispose();
 
-      // The id-keyed maps live on the application-lifetime handler, so the
-      // entries (whose slots close over the widget) must not survive it.
-      expect(
-        (handler as any)._kernelChangedHandlers[widget.id]
-      ).toBeUndefined();
-      expect(
-        (handler as any)._statusChangedHandlers[widget.id]
-      ).toBeUndefined();
-      expect((handler as any)._iopubMessageHandlers[widget.id]).toBeUndefined();
-      expect((handler as any)._shellMessageHandlers[widget.id]).toBeUndefined();
-
-      // The connections themselves are removed by `Signal.clearData` in
-      // `Widget.dispose`, so the disposed widget's slots no longer run.
+      // The session outlives the widget (other views of the document may
+      // still be open), so the handler has to stop following it.
       let executionDone = false;
       handler.executionDone.connect(() => {
         executionDone = true;
       });
-      await connection.kernel!.requestExecute({ code: '1 + 1' }).done;
-      await new Promise(resolve => setTimeout(resolve, 100));
+      model.variables.scopes = [];
+      await connection.kernel!.requestExecute({ code: 'another_variable = 1' })
+        .done;
+      // Give the slots that must not run a chance to.
+      await sleep();
 
       expect(executionDone).toBe(false);
+      expect(model.variables.scopes).toEqual([]);
+      expect(handler.activeWidget).toBeNull();
+    });
+
+    it('forgets the closed widget instead of keeping its entries', async () => {
+      await handler.update(widget as any, connection);
+      widget.dispose();
+
+      // The id-keyed maps live on the application-lifetime handler and have
+      // no public accessor: nothing reads them once the widget is gone,
+      // which is what makes leftovers a leak rather than a behaviour.
+      expect(handler['_kernelChangedHandlers'][widget.id]).toBeUndefined();
+      expect(handler['_statusChangedHandlers'][widget.id]).toBeUndefined();
+      expect(handler['_iopubMessageHandlers'][widget.id]).toBeUndefined();
+      expect(handler['_shellMessageHandlers'][widget.id]).toBeUndefined();
+      expect(handler['_iconButtons'][widget.id]).toBeUndefined();
+      expect(handler['_debuggerAvailability'][widget.id]).toBeUndefined();
     });
 
     it('does not recreate per-widget entries when the widget is disposed mid-update', async () => {
@@ -139,11 +163,10 @@ describe('DebuggerHandler', () => {
       widget.dispose();
       await pending;
 
-      expect((handler as any)._debuggerAvailability[widget.id]).toBeUndefined();
-      expect((handler as any)._iconButtons[widget.id]).toBeUndefined();
-      expect(
-        (handler as any)._kernelChangedHandlers[widget.id]
-      ).toBeUndefined();
+      expect(handler.activeWidget).toBeNull();
+      expect(handler['_debuggerAvailability'][widget.id]).toBeUndefined();
+      expect(handler['_iconButtons'][widget.id]).toBeUndefined();
+      expect(handler['_kernelChangedHandlers'][widget.id]).toBeUndefined();
     });
   });
 });
