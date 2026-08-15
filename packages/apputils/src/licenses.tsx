@@ -17,7 +17,8 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { VirtualElement } from '@lumino/virtualdom';
 import { h } from '@lumino/virtualdom';
-import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
+import { Panel, SplitPanel, TabBar } from '@lumino/widgets';
 import * as React from 'react';
 import type { ILicensesClient } from './tokens';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -133,13 +134,13 @@ export class Licenses extends SplitPanel {
     const { currentBundleName } = this.model;
     let currentIndex = 0;
     for (const bundle of this.model.bundleNames) {
-      const tab = new Widget();
-      this._bundleTabs.push(tab);
-      tab.title.label = bundle;
       if (bundle === currentBundleName) {
         currentIndex = i;
       }
-      this._bundles.insertTab(++i, tab.title);
+      // Passing title options avoids creating a dummy widget per tab whose
+      // only purpose would be to own the title (and would have to be
+      // disposed when the tabs are rebuilt).
+      this._bundles.insertTab(++i, { owner: this, label: bundle });
     }
     this._bundles.currentIndex = currentIndex;
   }

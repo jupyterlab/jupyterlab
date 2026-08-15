@@ -36,7 +36,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/react-components": "^0.16.6",
+    "@jupyter/react-components": "^0.17.1",
     "@jupyterlab/apputils": "^4.7.4",
     "@jupyterlab/statedb": "^4.6.4",
     "@jupyterlab/translation": "^4.6.4",
