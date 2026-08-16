@@ -75,6 +75,23 @@ export abstract class ReactWidget extends Widget {
   }
 
   /**
+   * Dispose the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    // `onBeforeDetach` unmounts on a normal detach, but a widget disposed
+    // while already detached would keep its React root mounted forever,
+    // along with every subscription made by the rendered components.
+    if (this._rootDOM !== null) {
+      this._rootDOM.unmount();
+      this._rootDOM = null;
+    }
+    super.dispose();
+  }
+
+  /**
    * Render the React nodes to the DOM.
    *
    * @returns a promise that resolves when the rendering is done.

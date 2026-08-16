@@ -1322,15 +1322,20 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   ) => {
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
-    // Register the custom fields.
+    // Register the custom fields. As with the active cell tool below, the
+    // field renderers are used by rjsf as React components, so they run on
+    // every rebuild of the metadata form. Each field is created once and
+    // reused: constructing one per render abandons an editor, its host node
+    // and its listeners on every keystroke that rebuilds the form.
+    const cellMetadataField = new CellMetadataField({
+      editorFactory,
+      tracker,
+      label: 'Cell metadata',
+      translator: translator
+    });
     const cellComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new CellMetadataField({
-          editorFactory,
-          tracker,
-          label: 'Cell metadata',
-          translator: translator
-        }).render(props);
+        return cellMetadataField.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -1338,14 +1343,15 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       cellComponent
     );
 
+    const notebookMetadataField = new NotebookMetadataField({
+      editorFactory,
+      tracker,
+      label: 'Notebook metadata',
+      translator: translator
+    });
     const notebookComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new NotebookMetadataField({
-          editorFactory,
-          tracker,
-          label: 'Notebook metadata',
-          translator: translator
-        }).render(props);
+        return notebookMetadataField.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -2381,10 +2387,13 @@ function activateNotebookHandler(
     widget.title.iconLabel = ft?.iconLabel ?? '';
     widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
 
-    // Notify the widget tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update. The context
+    // outlives this panel when other views of the document stay open, so the
+    // connection is made with the panel as receiver: `Widget.dispose()` calls
+    // `Signal.clearData(this)`, which removes it when the panel is closed.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
-    });
+    }, widget);
     // Add the notebook panel to the tracker.
     void tracker.add(widget);
   });
@@ -2690,6 +2699,7 @@ function activateNotebookCompleterService(
     keys: ['Enter'],
     selector: '.jp-Notebook .jp-mod-completer-active'
   });
+  const completerConnected = new WeakSet<NotebookPanel>();
   const updateCompleter = async (
     _: INotebookTracker | undefined,
     notebook: NotebookPanel
@@ -2701,6 +2711,15 @@ function activateNotebookCompleterService(
       sanitizer: sanitizer
     };
     await manager.updateCompleter(completerContext);
+    // `updateCompleter` also runs for every panel on `activeProvidersChanged`
+    // below; connect the listeners only on the first call for a panel so
+    // they do not accumulate per settings change. The disposal check covers
+    // a panel closed while `updateCompleter` was pending: connections made
+    // then would outlive the disposal cleanup that has already run.
+    if (notebook.isDisposed || completerConnected.has(notebook)) {
+      return;
+    }
+    completerConnected.add(notebook);
     notebook.content.activeCellChanged.connect((_, cell) => {
       // Ensure the editor will exist on the cell before adding the completer
       cell?.ready
@@ -2715,6 +2734,10 @@ function activateNotebookCompleterService(
         })
         .catch(console.error);
     });
+    // The session context outlives this panel when other views of the
+    // document stay open, so the connection is made with the panel as
+    // receiver: `Widget.dispose()` calls `Signal.clearData(this)`, which
+    // removes it when the panel is closed.
     notebook.sessionContext.sessionChanged.connect(() => {
       // Ensure the editor will exist on the cell before adding the completer
       notebook.content.activeCell?.ready
@@ -2727,7 +2750,7 @@ function activateNotebookCompleterService(
           return manager.updateCompleter(newCompleterContext);
         })
         .catch(console.error);
-    });
+    }, notebook);
   };
   notebooks.widgetAdded.connect(updateCompleter);
   manager.activeProvidersChanged.connect(() => {
@@ -2867,18 +2890,28 @@ function addCommands(
     }
   };
 
-  // Set up signal handler to keep the collapse state consistent
+  // Set up signal handler to keep the collapse state consistent. The
+  // connections are made once per panel: `currentChanged` fires repeatedly
+  // for the same panel, and reconnecting each time would pile up duplicate
+  // handlers for as long as the panel lives.
+  const collapseSynchronized = new WeakSet<NotebookPanel>();
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
-      if (!panel?.content?.model?.cells) {
+      if (!panel?.content?.model?.cells || collapseSynchronized.has(panel)) {
         return;
       }
+      collapseSynchronized.add(panel);
+      // The cell list belongs to the model, which outlives this view when
+      // other views of the document stay open, so the connection is made
+      // with the notebook as receiver: `Widget.dispose()` calls
+      // `Signal.clearData(this)`, which removes it when the view is closed.
       panel.content.model.cells.changed.connect(
         (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
-        }
+        },
+        panel.content
       );
       panel.content.activeCellChanged.connect(
         (notebook: Notebook, cell: Cell) => {

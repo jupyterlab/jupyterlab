@@ -16,6 +16,33 @@ import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 
+// Application-lifetime sender types for the signal lifetime rules. The
+// `longLivedTypes` option replaces the plugin's built-in list, so the twelve
+// defaults are restated here, followed by the kernel session types: a session
+// (and its context) outlives the widgets built on it, e.g. when one of
+// several views of a document is closed.
+const LONG_LIVED_TYPES = [
+  // Plugin defaults:
+  'CommandRegistry',
+  'IDebugger',
+  'IDocumentManager',
+  'ILSPConnection',
+  'ILabShell',
+  'ILanguageServerManager',
+  'IRenderMimeRegistry',
+  'ISettingRegistry',
+  'IShell',
+  'IStateDB',
+  'IThemeManager',
+  'ServiceManager',
+  // Kernel session types:
+  'ISessionContext',
+  'SessionContext',
+  'ISessionConnection',
+  'IKernelConnection',
+  'KernelConnection'
+];
+
 // Filter globals to remove any with leading/trailing whitespace
 const cleanGlobals = globalsObj => {
   const cleaned = {};
@@ -245,14 +272,17 @@ export default defineConfig([
       'jupyter/incorrect-translator-usage': 'error',
       'jupyter/no-untranslated-string': 'error',
       'jupyter/no-pageconfig-base-url': 'error',
-      'jupyter/require-signal-cleanup': 'error',
+      'jupyter/require-signal-cleanup': [
+        'error',
+        { longLivedTypes: LONG_LIVED_TYPES }
+      ],
       'jupyter/require-signal-this-arg': 'error',
-      'jupyter/prefer-signal-this-arg': 'error',
-      // TODO: the disposable rules highlight genuine leaks, but require
-      // a larger refactor (e.g. hoisting a React field renderer out of
-      // the render callback, giving a per-render `Debouncer` a lifetime)
-      'jupyter/require-disposable-ownership': 'warn',
-      'jupyter/require-disposable-transfer': 'warn',
+      'jupyter/prefer-signal-this-arg': [
+        'error',
+        { longLivedTypes: LONG_LIVED_TYPES }
+      ],
+      'jupyter/require-disposable-ownership': 'error',
+      'jupyter/require-disposable-transfer': 'error',
       'tsdoc/syntax': 'warn',
       'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [

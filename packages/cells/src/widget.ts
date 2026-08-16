@@ -566,11 +566,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     this._resizeDebouncer.dispose();
+    const input = this._input;
+    const inputPlaceholder = this._inputPlaceholder;
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
     super.dispose();
+    // The input area (or its placeholder) is swapped out of the layout when
+    // the input is hidden, and `Widget.dispose()` only disposes layout
+    // children, so dispose both explicitly; after `super.dispose()` so the
+    // in-layout one takes the disposed-parent fast path.
+    input?.dispose();
+    inputPlaceholder?.dispose();
   }
 
   /**
@@ -1614,11 +1622,20 @@ export class CodeCell extends Cell<ICodeCellModel> {
       'keydown',
       this._detectCaretMovementInOuput
     );
+    const output = this._output;
+    const outputPlaceholder = this._outputPlaceholder;
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
     this._outputPlaceholder = null!;
     super.dispose();
+    // The output area (or its placeholder) is swapped out of the layout when
+    // outputs are hidden or deferred, and `Widget.dispose()` only disposes
+    // layout children, so dispose both explicitly: an undisposed output area
+    // stays connected to the output model, which is shared with other views
+    // of the document.
+    output.dispose();
+    outputPlaceholder?.dispose();
   }
 
   /**
