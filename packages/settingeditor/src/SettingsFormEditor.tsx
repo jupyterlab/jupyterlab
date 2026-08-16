@@ -345,10 +345,10 @@ export class SettingsFormEditor extends React.Component<
       const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
       if (this.props.filteredValues?.length ?? 0 > 0) {
         for (const field in filteredSchema.properties) {
+          const title = filteredSchema.properties[field].title;
           if (
-            !this.props.filteredValues?.includes(
-              filteredSchema.properties[field].title ?? field
-            )
+            !this.props.filteredValues?.includes(field) &&
+            !this.props.filteredValues?.includes(title ?? field)
           ) {
             delete filteredSchema.properties[field];
           }
