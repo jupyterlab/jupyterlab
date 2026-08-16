@@ -1175,7 +1175,7 @@ export interface IExecuteReply extends IExecuteReplyBase {
  */
 export interface IExecuteReplyMsg extends IShellMessage<'execute_reply'> {
   parent_header: IHeader<'execute_request'>;
-  content: ReplyContent<IExecuteReply> & IExecuteCount;
+  content: ReplyContent<IExecuteReply>;
 }
 
 /**
