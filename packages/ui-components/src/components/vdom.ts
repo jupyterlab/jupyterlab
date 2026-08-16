@@ -25,7 +25,7 @@ export abstract class ReactWidget extends Widget {
   }
   /**
    * Creates a new `ReactWidget` that renders a constant element.
-   * @param element React element to render.
+   * @param element - React element to render.
    */
   static create(element: ReactRenderElement): ReactWidget {
     return new (class extends ReactWidget {

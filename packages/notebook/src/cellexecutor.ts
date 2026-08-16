@@ -19,7 +19,7 @@ import type { INotebookCellExecutor } from './tokens';
 /**
  * Run a single notebook cell.
  *
- * @param options Cell execution options
+ * @param options - Cell execution options
  * @returns Execution status
  */
 export async function runCell({

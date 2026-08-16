@@ -217,7 +217,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
   /**
    * Get the rank of the item at index.
    *
-   * @param index Item index.
+   * @param index - Item index.
    * @returns Rank of the item.
    */
   getRankAt(index: number): number {
@@ -279,8 +279,8 @@ class DisposableMenuItem implements IDisposableMenuItem {
   /**
    * Create a disposable menu item from an item and the menu it belongs to
    *
-   * @param item Menu item
-   * @param menu Menu
+   * @param item - Menu item
+   * @param menu - Menu
    */
   constructor(item: Menu.IItem, menu: Menu) {
     this._item = new WeakRef(item);

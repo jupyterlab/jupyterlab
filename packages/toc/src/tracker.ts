@@ -18,8 +18,8 @@ export class TableOfContentsTracker implements ITableOfContentsTracker {
   /**
    * Track a given model.
    *
-   * @param widget Widget
-   * @param model Table of contents model
+   * @param widget - Widget
+   * @param model - Table of contents model
    */
   add(widget: Widget, model: TableOfContents.Model): void {
     this.modelMapping.set(widget, model);
@@ -28,7 +28,7 @@ export class TableOfContentsTracker implements ITableOfContentsTracker {
   /**
    * Get the table of contents model associated with a given widget.
    *
-   * @param widget Widget
+   * @param widget - Widget
    * @returns The table of contents model
    */
   get(widget: Widget): TableOfContents.Model | null {

@@ -197,8 +197,8 @@ export interface ISearchProviderFactory<T extends Widget = Widget> {
    * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
-   * @param widget The widget to search on
-   * @param translator [optional] The translator object
+   * @param widget - The widget to search on
+   * @param translator - [optional] The translator object
    *
    * @returns The search provider on the widget
    */
@@ -209,7 +209,7 @@ export interface ISearchProviderFactory<T extends Widget = Widget> {
    * given widget. The function is a type guard, meaning that it returns
    * a boolean, but has a type predicate (`x is T`) for its return signature.
    *
-   * @param domain Widget to test
+   * @param domain - Widget to test
    */
   readonly isApplicable: (domain: Widget) => domain is T;
 }
@@ -259,8 +259,8 @@ export interface IBaseSearchProvider extends IDisposable {
   /**
    * Start a search
    *
-   * @param query Regular expression to test for
-   * @param filters Filters to apply when searching
+   * @param query - Regular expression to test for
+   * @param filters - Filters to apply when searching
    */
   startQuery(query: RegExp, filters: IFilters): Promise<void>;
 
@@ -277,7 +277,7 @@ export interface IBaseSearchProvider extends IDisposable {
   /**
    * Highlight the next match
    *
-   * @param loop Whether to loop within the matches list.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns The next match if it exists
    */
@@ -286,7 +286,7 @@ export interface IBaseSearchProvider extends IDisposable {
   /**
    * Highlight the previous match
    *
-   * @param loop Whether to loop within the matches list.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns The previous match if it exists.
    */
@@ -296,8 +296,8 @@ export interface IBaseSearchProvider extends IDisposable {
    * Replace the currently selected match with the provided text
    * and highlight the next match.
    *
-   * @param newText The replacement text
-   * @param loop Whether to loop within the matches list.
+   * @param newText - The replacement text
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -310,7 +310,7 @@ export interface IBaseSearchProvider extends IDisposable {
   /**
    * Replace all matches in the widget with the provided text
    *
-   * @param newText The replacement text.
+   * @param newText - The replacement text.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -372,8 +372,8 @@ export interface ISearchProvider extends IBaseSearchProvider {
   /**
    * Validate a new filter value for the widget.
    *
-   * @param name The filter name
-   * @param value The filter value candidate
+   * @param name - The filter name
+   * @param value - The filter value candidate
    *
    * @returns The valid filter value
    */

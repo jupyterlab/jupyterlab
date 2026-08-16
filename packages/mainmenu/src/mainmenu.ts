@@ -237,8 +237,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Generate the menu.
    *
-   * @param commands The command registry
-   * @param options The main menu options.
+   * @param commands - The command registry
+   * @param options - The main menu options.
    * @param trans - The application language translator.
    */
   static generateMenu(

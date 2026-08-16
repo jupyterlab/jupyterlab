@@ -21,7 +21,7 @@ export class SidebarHelper {
   /**
    * Whether a sidebar is opened or not
    *
-   * @param side Sidebar side
+   * @param side - Sidebar side
    * @returns Opened status
    */
   isOpen = async (side: galata.SidebarPosition = 'left'): Promise<boolean> => {
@@ -31,7 +31,7 @@ export class SidebarHelper {
   /**
    * Whether a given tab is opened or not
    *
-   * @param id Tab id
+   * @param id - Tab id
    * @returns Tab opened status
    */
   async isTabOpen(id: galata.SidebarTabId): Promise<boolean> {
@@ -44,7 +44,7 @@ export class SidebarHelper {
   /**
    * Get the position of a given tab
    *
-   * @param id Tab id
+   * @param id - Tab id
    * @returns Tab position
    */
   getTabPosition = async (
@@ -81,7 +81,7 @@ export class SidebarHelper {
   /**
    * Move a given tab to left side
    *
-   * @param id Tab id
+   * @param id - Tab id
    */
   async moveTabToLeft(id: galata.SidebarTabId): Promise<void> {
     await this.setTabPosition(id, 'left');
@@ -90,7 +90,7 @@ export class SidebarHelper {
   /**
    * Move a given tab to the right side
    *
-   * @param id Tab id
+   * @param id - Tab id
    */
   async moveTabToRight(id: galata.SidebarTabId): Promise<void> {
     await this.setTabPosition(id, 'right');
@@ -99,8 +99,8 @@ export class SidebarHelper {
   /**
    * Set the position of a given tab
    *
-   * @param id Tab id
-   * @param side Sidebar side
+   * @param id - Tab id
+   * @param side - Sidebar side
    */
   async setTabPosition(
     id: galata.SidebarTabId,
@@ -122,7 +122,7 @@ export class SidebarHelper {
   /**
    * Toggle a given tab position
    *
-   * @param id Tab id
+   * @param id - Tab id
    */
   async toggleTabPosition(id: galata.SidebarTabId): Promise<void> {
     const tab = this.getTabLocator(id);
@@ -184,7 +184,7 @@ export class SidebarHelper {
   /**
    * Get the handle on a given tab
    *
-   * @param id Tab id
+   * @param id - Tab id
    * @returns Tab handle
    *
    * @deprecated You should use locator instead {@link getTabLocator}
@@ -198,7 +198,7 @@ export class SidebarHelper {
   /**
    * Get the locator on a given tab
    *
-   * @param id Tab id
+   * @param id - Tab id
    * @returns Tab locator
    */
   getTabLocator(id: galata.SidebarTabId): Locator {
@@ -208,7 +208,7 @@ export class SidebarHelper {
   /**
    * Open a given tab
    *
-   * @param id Tab id
+   * @param id - Tab id
    */
   async openTab(id: galata.SidebarTabId): Promise<void> {
     const isOpen = await this.isTabOpen(id);
@@ -227,7 +227,7 @@ export class SidebarHelper {
   /**
    * Get the handle on a sidebar content panel
    *
-   * @param side Position
+   * @param side - Position
    * @returns Panel handle
    *
    * @deprecated You should use locator instead {@link getContentPanelLocator}
@@ -241,7 +241,7 @@ export class SidebarHelper {
   /**
    * Get the locator on a sidebar content panel
    *
-   * @param side Position
+   * @param side - Position
    * @returns Panel handle
    */
   getContentPanelLocator(side: galata.SidebarPosition = 'left'): Locator {
@@ -253,7 +253,7 @@ export class SidebarHelper {
   /**
    * Get the tab bar of the sidebar
    *
-   * @param side Position
+   * @param side - Position
    * @returns Tab bar handle
    *
    * @deprecated You should use locator instead {@link getTabBarLocator}
@@ -267,7 +267,7 @@ export class SidebarHelper {
   /**
    * Get the locator of the tab bar of the sidebar
    *
-   * @param side Position
+   * @param side - Position
    * @returns Tab bar locator
    */
   getTabBarLocator(side: galata.SidebarPosition = 'left'): Locator {
@@ -277,7 +277,7 @@ export class SidebarHelper {
   /**
    * Open a given sidebar
    *
-   * @param side Position
+   * @param side - Position
    */
   async open(side: galata.SidebarPosition = 'left'): Promise<void> {
     const isOpen = await this.isOpen(side);
@@ -297,7 +297,7 @@ export class SidebarHelper {
   /**
    * Close a given sidebar
    *
-   * @param side Position
+   * @param side - Position
    */
   async close(side: galata.SidebarPosition = 'left'): Promise<void> {
     const isOpen = await this.isOpen(side);
@@ -317,8 +317,8 @@ export class SidebarHelper {
   /**
    * Set the sidebar width
    *
-   * @param width Sidebar width in pixels
-   * @param side Which sidebar to set: 'left' or 'right'
+   * @param width - Sidebar width in pixels
+   * @param side - Which sidebar to set: 'left' or 'right'
    */
   async setWidth(
     width = 251,
@@ -356,7 +356,7 @@ export class SidebarHelper {
   /**
    * Get the selector for a given tab
    *
-   * @param id Tab id
+   * @param id - Tab id
    * @returns Selector
    */
   buildTabSelector(id: galata.SidebarTabId): string {

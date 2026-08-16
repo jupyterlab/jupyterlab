@@ -23,7 +23,7 @@ export class FileHandler implements IDisposable {
   /**
    * Instantiate a new FileHandler.
    *
-   * @param options The instantiation options for a FileHandler.
+   * @param options - The instantiation options for a FileHandler.
    */
   constructor(options: FileHandler.IOptions) {
     this._debuggerService = options.debuggerService;

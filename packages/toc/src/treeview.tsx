@@ -13,7 +13,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
   /**
    * Constructor
    *
-   * @param options Widget options
+   * @param options - Widget options
    */
   constructor(options: TableOfContents.IOptions) {
     super(options.model);

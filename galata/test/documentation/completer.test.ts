@@ -290,9 +290,9 @@ async function invokeInlineCompleter(
  * The right-hand side of a cell only holds the cell toolbar, which is not part
  * of what these screenshots document, so the region stops at the popups.
  *
- * @param page The page the elements belong to
- * @param cell The cell the popups are anchored to
- * @param popups The popups to cover
+ * @param page - The page the elements belong to
+ * @param cell - The cell the popups are anchored to
+ * @param popups - The popups to cover
  */
 async function boundsAroundPopups(
   page: IJupyterLabPageFixture,
@@ -316,9 +316,9 @@ async function boundsAroundPopups(
  * section, so that the screenshot does not have to be updated every time an
  * unrelated setting is added to the section.
  *
- * @param page The page the Settings Editor is opened in
- * @param section The settings section the setting belongs to
- * @param options Identifier of the setting to point at (`highlight`) and,
+ * @param page - The page the Settings Editor is opened in
+ * @param section - The settings section the setting belongs to
+ * @param options - Identifier of the setting to point at (`highlight`) and,
  * optionally, of the group the region starts at (`from`), which defaults to
  * the highlighted setting itself
  */

@@ -26,7 +26,7 @@ export class ConsoleHandler implements IDisposable {
   /**
    * Instantiate a new ConsoleHandler.
    *
-   * @param options The instantiation options for a ConsoleHandler.
+   * @param options - The instantiation options for a ConsoleHandler.
    */
   constructor(options: ConsoleHandler.IOptions) {
     this._debuggerService = options.debuggerService;
@@ -106,7 +106,7 @@ export class ConsoleHandler implements IDisposable {
   /**
    * Add a new editor handler for the given cell.
    *
-   * @param cell The cell to add the handler to.
+   * @param cell - The cell to add the handler to.
    */
   private _addEditorHandler(cell: Cell): void {
     const modelId = cell.model.id;

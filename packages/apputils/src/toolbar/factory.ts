@@ -30,7 +30,7 @@ const TOOLBAR_KEY = 'jupyter.lab.toolbars';
 /**
  * Display warning when the toolbar definition have been modified.
  *
- * @param trans Translation bundle
+ * @param trans - Translation bundle
  */
 async function displayInformation(trans: TranslationBundle): Promise<void> {
   const result = await showDialog({
@@ -54,12 +54,12 @@ async function displayInformation(trans: TranslationBundle): Promise<void> {
  *
  * The list will be populated only with the enabled items.
  *
- * @param toolbarItems Observable list to populate
- * @param registry Application settings registry
- * @param factoryName Widget factory name that needs a toolbar
- * @param pluginId Settings plugin id
- * @param translator Translator object
- * @param propertyId Property holding the toolbar definition in the settings; default 'toolbar'
+ * @param toolbarItems - Observable list to populate
+ * @param registry - Application settings registry
+ * @param factoryName - Widget factory name that needs a toolbar
+ * @param pluginId - Settings plugin id
+ * @param translator - Translator object
+ * @param propertyId - Property holding the toolbar definition in the settings; default 'toolbar'
  * @returns List of toolbar items
  */
 async function setToolbarItems(
@@ -241,12 +241,12 @@ async function setToolbarItems(
  * Create the toolbar factory for a given container widget based
  * on a data description stored in settings
  *
- * @param toolbarRegistry Toolbar widgets registry
- * @param settingsRegistry Settings registry
- * @param factoryName Toolbar container factory name
- * @param pluginId Settings plugin id
- * @param translator Translator
- * @param propertyId Toolbar definition key in the settings plugin
+ * @param toolbarRegistry - Toolbar widgets registry
+ * @param settingsRegistry - Settings registry
+ * @param factoryName - Toolbar container factory name
+ * @param pluginId - Settings plugin id
+ * @param translator - Translator
+ * @param propertyId - Toolbar definition key in the settings plugin
  * @returns List of toolbar widgets factory
  */
 export function createToolbarFactory(
@@ -355,9 +355,9 @@ export function createToolbarFactory(
 /**
  * Set the toolbar items of a widget from a factory
  *
- * @param widget Widget with the toolbar to set
- * @param factory Toolbar items factory
- * @param toolbar Separated toolbar if widget is a raw widget
+ * @param widget - Widget with the toolbar to set
+ * @param factory - Toolbar items factory
+ * @param toolbar - Separated toolbar if widget is a raw widget
  */
 export function setToolbar(
   widget: Toolbar.IWidgetToolbar | Widget,

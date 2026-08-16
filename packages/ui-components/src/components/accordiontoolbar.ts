@@ -239,7 +239,7 @@ export namespace AccordionToolbar {
   /**
    * Create an accordion layout for accordion panel with toolbar in the title.
    *
-   * @param options Panel options
+   * @param options - Panel options
    * @returns Panel layout
    *
    * #### Note

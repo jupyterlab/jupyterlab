@@ -584,7 +584,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Update the editor configuration with the partial provided dictionary.
    *
-   * @param v Partial editor configuration
+   * @param v - Partial editor configuration
    */
   updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };

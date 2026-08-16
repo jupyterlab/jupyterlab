@@ -51,7 +51,7 @@ export interface IConsoleHistory extends IDisposable {
   /**
    * Add a new item to the bottom of history.
    *
-   * @param item The item being added to the bottom of history.
+   * @param item - The item being added to the bottom of history.
    *
    * #### Notes
    * If the item being added is undefined or empty, it is ignored. If the item
@@ -186,7 +186,7 @@ export class ConsoleHistory implements IConsoleHistory {
   /**
    * Add a new item to the bottom of history.
    *
-   * @param item The item being added to the bottom of history.
+   * @param item - The item being added to the bottom of history.
    *
    * #### Notes
    * If the item being added is undefined or empty, it is ignored. If the item
@@ -212,7 +212,7 @@ export class ConsoleHistory implements IConsoleHistory {
   /**
    * Populate the history collection on history reply from a kernel.
    *
-   * @param value The kernel message history reply.
+   * @param value - The kernel message history reply.
    *
    * #### Notes
    * History entries have the shape:

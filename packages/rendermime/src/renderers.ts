@@ -421,7 +421,7 @@ export namespace renderMarkdown {
   /**
    * Create a normalized id for a header element.
    *
-   * @param header Header element
+   * @param header - Header element
    * @returns Normalized id
    */
   export function createHeaderId(header: Element): string {

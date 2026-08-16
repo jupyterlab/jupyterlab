@@ -1011,9 +1011,9 @@ namespace Private {
   /**
    * Helper function to construct the notification content
    *
-   * @param message Message to print in the notification
-   * @param closeHandler Function closing the notification
-   * @param actions Toast actions
+   * @param message - Message to print in the notification
+   * @param closeHandler - Function closing the notification
+   * @param actions - Toast actions
    */
   export function createContent(
     message: string,
@@ -1055,10 +1055,10 @@ namespace Private {
   /**
    * Create a toast notification
    *
-   * @param toastId Toast unique id
-   * @param message Toast message
-   * @param type Toast type
-   * @param options Toast options
+   * @param toastId - Toast unique id
+   * @param message - Toast message
+   * @param type - Toast type
+   * @param options - Toast options
    * @returns Toast id
    */
   export async function createToast<T extends ReadonlyJSONValue>(

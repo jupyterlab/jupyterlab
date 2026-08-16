@@ -20,7 +20,7 @@ export class EditorAdapter implements IDisposable {
   /**
    * Instantiate a new EditorAdapter.
    *
-   * @param options The instantiation options for a EditorAdapter.
+   * @param options - The instantiation options for a EditorAdapter.
    */
   constructor(options: EditorAdapter.IOptions) {
     this._widgetAdapter = options.widgetAdapter;
@@ -108,7 +108,7 @@ export namespace EditorAdapter {
     /**
      * Extension factory.
      *
-     * @param options
+     * @param options - The factory options.
      * @returns The extension builder or null if the extension is not active for that document
      */
     readonly factory: (

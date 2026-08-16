@@ -14,9 +14,9 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 /**
  * Run a shell command in the visible terminal panel.
  *
- * @param page Playwright page (provided by galata fixture)
- * @param terminalLocator Locator that matches the terminal container
- * @param command Shell command to run
+ * @param page - Playwright page (provided by galata fixture)
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param command - Shell command to run
  */
 async function runCommand(
   page: Page,

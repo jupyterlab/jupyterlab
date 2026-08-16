@@ -21,8 +21,8 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
-   * @param widget The widget to search on
-   * @param translator [optional] The translator object
+   * @param widget - The widget to search on
+   * @param translator - [optional] The translator object
    *
    * @returns The search provider on the widget
    */
@@ -62,7 +62,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   /**
    * Move the current match indicator to the next match.
    *
-   * @param loop Whether to loop within the matches list.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns The match is never returned by this provider
    */
@@ -74,7 +74,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   /**
    * Move the current match indicator to the previous match.
    *
-   * @param loop Whether to loop within the matches list.
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns The match is never returned by this provider
    */
@@ -87,8 +87,8 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * Replace the currently selected match with the provided text
    * Not implemented in the CSV viewer as it is read-only.
    *
-   * @param newText The replacement text
-   * @param loop Whether to loop within the matches list.
+   * @param newText - The replacement text
+   * @param loop - Whether to loop within the matches list.
    *
    * @returns A promise that resolves once the action has completed.
    */
@@ -100,7 +100,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * Replace all matches in the notebook with the provided text
    * Not implemented in the CSV viewer as it is read-only.
    *
-   * @param newText The replacement text
+   * @param newText - The replacement text
    *
    * @returns A promise that resolves once the action has completed.
    */
@@ -112,7 +112,7 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
-   * @param query A RegExp to be use to perform the search
+   * @param query - A RegExp to be use to perform the search
    */
   startQuery(query: RegExp): Promise<void> {
     this._query = query;

@@ -34,7 +34,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Instantiate a new DebuggerService.
    *
-   * @param options The instantiation options for a DebuggerService.
+   * @param options - The instantiation options for a DebuggerService.
    */
   constructor(options: DebuggerService.IOptions) {
     this._config = options.config;
@@ -160,7 +160,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Computes an id based on the given code.
    *
-   * @param code The source code.
+   * @param code - The source code.
    */
   getCodeId(code: string): string {
     try {
@@ -183,7 +183,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Request whether debugging is available for the session connection.
    *
-   * @param connection The session connection.
+   * @param connection - The session connection.
    */
   async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
     if (!this._specsManager) {
@@ -242,7 +242,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Retrieve the content of a source file.
    *
-   * @param source The source object containing the path to the file.
+   * @param source - The source object containing the path to the file.
    */
   async getSource(source: DebugProtocol.Source): Promise<IDebugger.Source> {
     if (!this.session) {
@@ -258,7 +258,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Evaluate an expression.
    *
-   * @param expression The expression to evaluate as a string.
+   * @param expression - The expression to evaluate as a string.
    */
   async evaluate(
     expression: string
@@ -305,8 +305,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Request rich representation of a variable.
    *
-   * @param variableName The variable name to request
-   * @param frameId The current frame id in which to request the variable
+   * @param variableName - The variable name to request
+   * @param frameId - The current frame id in which to request the variable
    * @returns The mime renderer data model
    */
   async inspectRichVariable(
@@ -330,7 +330,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Request variables for a given variable reference.
    *
-   * @param variablesReference The variable reference to request.
+   * @param variablesReference - The variable reference to request.
    */
   async inspectVariable(
     variablesReference: number
@@ -351,7 +351,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Request to set a variable in the global scope.
    *
-   * @param name The name of the variable.
+   * @param name - The name of the variable.
    */
   async copyToGlobals(name: string): Promise<void> {
     if (!this.session) {
@@ -722,7 +722,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Restore the debugger state
    *
-   * @param state Debugger state
+   * @param state - Debugger state
    * @returns Whether the state has been restored successfully or not
    */
   async restoreDebuggerState(state: IDebugger.State): Promise<boolean> {
@@ -735,8 +735,8 @@ export class DebuggerService implements IDebugger, IDisposable {
 
   /**
    * Migrate breakpoints from previous path to new path when restoring service state
-   * @param breakpoints
-   * @returns
+   * @param debuggerState - The debugger state to migrate.
+   * @returns The migrated breakpoints.
    */
   private async _migrateBreakpoints(debuggerState: IDebugger.State) {
     const oldSessionPrefix: string | undefined = debuggerState.tmpPrefix;
@@ -814,8 +814,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Map a list of scopes to a list of variables.
    *
-   * @param scopes The list of scopes.
-   * @param variables The list of variables.
+   * @param scopes - The list of scopes.
+   * @param variables - The list of variables.
    */
   private _convertScopes(
     scopes: DebugProtocol.Scope[],
@@ -844,7 +844,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Dump the content of a cell.
    *
-   * @param code The source code to dump.
+   * @param code - The source code to dump.
    */
   private async _dumpCell(
     code: string
@@ -875,7 +875,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Get all the frames for the given thread id.
    *
-   * @param threadId The thread id.
+   * @param threadId - The thread id.
    */
   private async _getFrames(
     threadId: number
@@ -893,7 +893,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Get all the scopes for the given frame.
    *
-   * @param frame The frame.
+   * @param frame - The frame.
    */
   private async _getScopes(
     frame: DebugProtocol.StackFrame
@@ -913,7 +913,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Get the variables for a given scope.
    *
-   * @param scope The scope to get variables for.
+   * @param scope - The scope to get variables for.
    */
   private async _getVariables(
     scope: DebugProtocol.Scope
@@ -965,8 +965,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Handle a change of the current active frame.
    *
-   * @param _ The callstack model
-   * @param frame The frame.
+   * @param _ - The callstack model
+   * @param frame - The frame.
    */
   private async _onCurrentFrameChanged(
     _: IDebugger.Model.ICallstack,
@@ -986,8 +986,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Handle a variable expanded event and request variables from the kernel.
    *
-   * @param _ The variables model.
-   * @param variable The expanded variable.
+   * @param _ - The variables model.
+   * @param variable - The expanded variable.
    */
   private async _onVariableExpanded(
     _: VariablesModel,
@@ -1019,8 +1019,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Set the breakpoints for a given file.
    *
-   * @param breakpoints The list of breakpoints to set.
-   * @param path The path to where to set the breakpoints.
+   * @param breakpoints - The list of breakpoints to set.
+   * @param path - The path to where to set the breakpoints.
    */
   private async _setBreakpoints(
     breakpoints: DebugProtocol.SourceBreakpoint[],
@@ -1039,7 +1039,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Re-send the breakpoints to the kernel and update the model.
    *
-   * @param breakpoints The map of breakpoints to send
+   * @param breakpoints - The map of breakpoints to send
    */
   private async _restoreBreakpoints(
     breakpoints: Map<string, IDebugger.IBreakpoint[]>

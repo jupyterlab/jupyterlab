@@ -91,7 +91,7 @@ export function cloneKernel(
 /**
  * A mock kernel object.
  *
- * @param model The model of the kernel
+ * @param model - The model of the kernel
  */
 export const KernelMock = jest.fn<
   Kernel.IKernelConnection,
@@ -202,8 +202,8 @@ export const KernelMock = jest.fn<
 /**
  * A mock session connection.
  *
- * @param options Addition session options to use
- * @param model A session model to use
+ * @param options - Addition session options to use
+ * @param model - A session model to use
  */
 export const SessionConnectionMock = jest.fn<
   Session.ISessionConnection,

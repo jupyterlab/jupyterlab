@@ -32,8 +32,8 @@ interface IDebuggerAvailability {
 /**
  * Add a bug icon to the widget toolbar to enable and disable debugging.
  *
- * @param widget The widget to add the debug toolbar button to.
- * @param onClick The callback when the toolbar button is clicked.
+ * @param widget - The widget to add the debug toolbar button to.
+ * @param onClick - The callback when the toolbar button is clicked.
  */
 function updateIconButton(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
@@ -67,10 +67,10 @@ function updateIconButton(
  * Updates button state to on/off,
  * adds/removes css class to update styling
  *
- * @param widget the debug button widget
- * @param pressed true if pressed, false otherwise
- * @param enabled true if widget enabled, false otherwise
- * @param onClick click handler
+ * @param widget - the debug button widget
+ * @param pressed - true if pressed, false otherwise
+ * @param enabled - true if widget enabled, false otherwise
+ * @param onClick - click handler
  */
 function updateIconButtonState(
   widget: ToolbarButton,
@@ -94,7 +94,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   /**
    * Instantiate a new DebuggerHandler.
    *
-   * @param options The instantiation options for a DebuggerHandler.
+   * @param options - The instantiation options for a DebuggerHandler.
    */
   constructor(options: DebuggerHandler.IOptions) {
     this._type = options.type;
@@ -124,8 +124,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
    * Update a debug handler for the given widget, and
    * handle kernel changed events.
    *
-   * @param widget The widget to update.
-   * @param connection The session connection.
+   * @param widget - The widget to update.
+   * @param connection - The session connection.
    */
   async update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
@@ -220,8 +220,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
    * Update a debug handler for the given widget, and
    * handle connection kernel changed events.
    *
-   * @param widget The widget to update.
-   * @param sessionContext The session context.
+   * @param widget - The widget to update.
+   * @param sessionContext - The session context.
    */
   async updateContext(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
@@ -263,8 +263,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   /**
    * Update a debug handler for the given widget.
    *
-   * @param widget The widget to update.
-   * @param connection The session connection.
+   * @param widget - The widget to update.
+   * @param connection - The session connection.
    */
   async updateWidget(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
@@ -640,8 +640,8 @@ export namespace DebuggerHandler {
      * Update a debug handler for the given widget, and
      * handle kernel changed events.
      *
-     * @param widget The widget to update.
-     * @param connection The session connection.
+     * @param widget - The widget to update.
+     * @param connection - The session connection.
      */
     update(
       widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
@@ -652,8 +652,8 @@ export namespace DebuggerHandler {
      * Update a debug handler for the given widget, and
      * handle connection kernel changed events.
      *
-     * @param widget The widget to update.
-     * @param sessionContext The session context.
+     * @param widget - The widget to update.
+     * @param sessionContext - The session context.
      */
     updateContext(
       widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],

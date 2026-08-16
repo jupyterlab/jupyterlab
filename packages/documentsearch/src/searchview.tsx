@@ -797,9 +797,9 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
   /**
    * Search document widget constructor.
    *
-   * @param model Search document model
-   * @param translator Application translator object
-   * @param keyBindings Search keybindings
+   * @param model - Search document model
+   * @param translator - Application translator object
+   * @param keyBindings - Search keybindings
    *
    */
   constructor(

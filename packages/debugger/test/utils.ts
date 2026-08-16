@@ -37,7 +37,7 @@ export const KERNELSPECS: JSONObject = {
 /**
  * Create new server connection settings.
  *
- * @param settings The server connection settings.
+ * @param settings - The server connection settings.
  */
 export function makeSettings(
   settings?: Partial<ServerConnection.ISettings>
@@ -55,9 +55,9 @@ export interface IService {
 /**
  * Handle a single request with a mock response.
  *
- * @param item The service.
- * @param status The status code for the response.
- * @param body The body for the response.
+ * @param item - The service.
+ * @param status - The status code for the response.
+ * @param body - The body for the response.
  */
 export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.

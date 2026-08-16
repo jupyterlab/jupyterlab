@@ -264,8 +264,8 @@ export namespace ToolbarItems {
   /**
    * Create the refresh button
    *
-   * @param widget HTML viewer widget
-   * @param translator Application translator object
+   * @param widget - HTML viewer widget
+   * @param translator - Application translator object
    * @returns Toolbar item button
    */
   export function createRefreshButton(
@@ -287,8 +287,8 @@ export namespace ToolbarItems {
   /**
    * Create the trust button
    *
-   * @param document HTML viewer widget
-   * @param translator Application translator object
+   * @param document - HTML viewer widget
+   * @param translator - Application translator object
    * @returns Toolbar item button
    */
   export function createTrustButton(

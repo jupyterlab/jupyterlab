@@ -130,7 +130,7 @@ export interface IObjectPool<
   /**
    * Find the first object in the pool that satisfies a filter function.
    *
-   * @param fn The filter function to call on each object.
+   * @param fn - The filter function to call on each object.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.

@@ -401,8 +401,8 @@ export class ListModel extends VDomModel {
   /**
    * Install an extension.
    *
-   * @param entry An entry indicating which extension to install.
-   * @param options Additional options for the action.
+   * @param entry - An entry indicating which extension to install.
+   * @param options - Additional options for the action.
    */
   async install(
     entry: IEntry,
@@ -419,7 +419,7 @@ export class ListModel extends VDomModel {
   /**
    * Uninstall an extension.
    *
-   * @param entry An entry indicating which extension to uninstall.
+   * @param entry - An entry indicating which extension to uninstall.
    */
   async uninstall(entry: IEntry): Promise<void> {
     if (!entry.installed) {
@@ -432,7 +432,7 @@ export class ListModel extends VDomModel {
   /**
    * Enable an extension.
    *
-   * @param entry An entry indicating which extension to enable.
+   * @param entry - An entry indicating which extension to enable.
    */
   async enable(entry: IEntry): Promise<void> {
     if (entry.enabled) {
@@ -445,7 +445,7 @@ export class ListModel extends VDomModel {
   /**
    * Disable an extension.
    *
-   * @param entry An entry indicating which extension to disable.
+   * @param entry - An entry indicating which extension to disable.
    */
   async disable(entry: IEntry): Promise<void> {
     if (!entry.enabled) {
@@ -458,7 +458,7 @@ export class ListModel extends VDomModel {
   /**
    * Refresh installed packages
    *
-   * @param force Force refreshing the list of installed packages
+   * @param force - Force refreshing the list of installed packages
    */
   async refreshInstalled(force = false): Promise<void> {
     this.installedError = null;
@@ -478,7 +478,7 @@ export class ListModel extends VDomModel {
   /**
    * Fetch the list of installed extensions.
    *
-   * @param force Force refreshing the list of installed packages
+   * @param force - Force refreshing the list of installed packages
    *
    * #### Notes
    * This is the data source backing {@link refreshInstalled}; override it to
@@ -560,9 +560,9 @@ export class ListModel extends VDomModel {
   /**
    * Send a request to the server to perform an action on an extension.
    *
-   * @param action A valid action to perform.
-   * @param entry The extension to perform the action on.
-   * @param actionOptions Additional options for the action.
+   * @param action - A valid action to perform.
+   * @param entry - The extension to perform the action on.
+   * @param actionOptions - Additional options for the action.
    */
   protected performAction(
     action: string,
@@ -634,7 +634,7 @@ export class ListModel extends VDomModel {
   /**
    * Add a pending action.
    *
-   * @param pending A promise that resolves when the action is completed.
+   * @param pending - A promise that resolves when the action is completed.
    */
   protected addPendingAction(pending: Promise<any>): void {
     // Add to pending actions collection
@@ -699,7 +699,7 @@ export namespace ListModel {
   /**
    * Utility function to check whether an entry can be updated.
    *
-   * @param entry The entry to check.
+   * @param entry - The entry to check.
    */
   export function entryHasUpdate(entry: IEntry): boolean {
     if (!entry.installed || !entry.latest_version) {
@@ -728,9 +728,9 @@ namespace Private {
   /**
    * Call the API extension
    *
-   * @param queryArgs Query arguments
-   * @param init Initial values for the request
-   * @param serverSettings The server settings to use for the request
+   * @param queryArgs - Query arguments
+   * @param init - Initial values for the request
+   * @param serverSettings - The server settings to use for the request
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(

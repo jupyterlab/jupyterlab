@@ -23,8 +23,8 @@ export class SearchDocumentModel
 {
   /**
    * Search document model
-   * @param searchProvider Provider for the current document
-   * @param searchDebounceTime Debounce search time
+   * @param searchProvider - Provider for the current document
+   * @param searchDebounceTime - Debounce search time
    */
   constructor(
     protected searchProvider: ISearchProvider,
@@ -316,8 +316,8 @@ export class SearchDocumentModel
   /**
    * Set the value of a given filter.
    *
-   * @param name Filter name
-   * @param v Filter value
+   * @param name - Filter name
+   * @param v - Filter value
    */
   async setFilter(name: string, v: boolean): Promise<void> {
     if (this._filters[name] !== v) {
@@ -393,9 +393,9 @@ namespace Private {
   /**
    * Build the regular expression to use for searching.
    *
-   * @param queryString Query string
-   * @param caseSensitive Whether the search is case sensitive or not
-   * @param regex Whether the expression is a regular expression
+   * @param queryString - Query string
+   * @param caseSensitive - Whether the search is case sensitive or not
+   * @param regex - Whether the expression is a regular expression
    * @returns The regular expression to use
    */
   export function parseQuery(

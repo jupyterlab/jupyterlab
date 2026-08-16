@@ -23,7 +23,7 @@ export interface IButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 /**
  * Button component
  *
- * @param props Component properties
+ * @param props - Component properties
  * @returns Component
  */
 export function Button(props: IButtonProps): JSX.Element {
