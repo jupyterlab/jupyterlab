@@ -476,7 +476,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
-    return this._cellToolbarRect(activeCell)?.left || null;
+    return this._cellToolbarRect(activeCell)?.left ?? null;
   }
 
   private _enabled: boolean;
@@ -577,18 +577,27 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
       });
     };
 
-    return (this._tracker = new CellToolbarTracker(
+    const tracker = (this._tracker = new CellToolbarTracker(
       panel,
       undefined,
       factoryWithWidgetId
     ));
+    // This extension lives as long as the document registry while the tracker
+    // belongs to one panel: left in place, the reference would keep the
+    // disposed panel reachable through the factory closure above.
+    panel.disposed.connect(() => {
+      if (this._tracker === tracker) {
+        this._tracker = null;
+      }
+    });
+    return tracker;
   }
 
   /**
    * Whether the cell toolbar is displayed, if there is enough room for it
    */
   get enabled(): boolean {
-    return this._tracker.enabled;
+    return this._tracker?.enabled ?? false;
   }
 
   /**
@@ -605,5 +614,5 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     widget: Widget,
     commandArgs?: Record<string, any>
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
-  private _tracker: CellToolbarTracker;
+  private _tracker: CellToolbarTracker | null = null;
 }

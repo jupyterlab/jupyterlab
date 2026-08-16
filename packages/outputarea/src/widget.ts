@@ -129,7 +129,8 @@ export class OutputArea extends Widget {
             event: IObservableString.IChangedArgs
           ) => {
             this._setOutput(i, output);
-          }
+          },
+          this
         );
       }
     }
@@ -296,6 +297,17 @@ export class OutputArea extends Widget {
       this._future.dispose();
       this._future = null!;
     }
+    // The DOM node can be retained past disposal (e.g. by design-token
+    // bindings on ancestor elements); without removing the listener, the
+    // retained node would keep this widget and everything it references
+    // reachable as well.
+    if (this._promptOverlay) {
+      this._promptOverlay.removeEventListener(
+        'click',
+        this._onPromptOverlayClick
+      );
+      this._promptOverlay = null;
+    }
     this._displayIdMap.clear();
     this._outputTracker.dispose();
     super.dispose();
@@ -360,7 +372,8 @@ export class OutputArea extends Widget {
               event: IObservableString.IChangedArgs
             ) => {
               this._setOutput(args.newIndex, output);
-            }
+            },
+            this
           );
         }
         break;
@@ -442,15 +455,18 @@ export class OutputArea extends Widget {
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    overlay.addEventListener('click', () => {
-      this._toggleScrolling.emit();
-    });
+    overlay.addEventListener('click', this._onPromptOverlayClick);
     this.node.appendChild(overlay);
+    this._promptOverlay = overlay;
 
     requestAnimationFrame(() => {
       this._initialize.emit();
     });
   }
+
+  private _onPromptOverlayClick = (): void => {
+    this._toggleScrolling.emit();
+  };
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
@@ -486,7 +502,7 @@ export class OutputArea extends Widget {
     change: number | void
   ): void {
     const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
-    if (change) {
+    if (change !== undefined) {
       if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
@@ -532,7 +548,7 @@ export class OutputArea extends Widget {
     // to prevent this jitter.
     const rect = this.node.getBoundingClientRect();
     this.node.style.minHeight = `${rect.height}px`;
-    if (this._minHeightTimeout) {
+    if (this._minHeightTimeout !== null) {
       window.clearTimeout(this._minHeightTimeout);
     }
     this._minHeightTimeout = window.setTimeout(() => {
@@ -923,6 +939,7 @@ export class OutputArea extends Widget {
   private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _initialize = new Signal<OutputArea, void>(this);
+  private _promptOverlay: HTMLDivElement | null = null;
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });

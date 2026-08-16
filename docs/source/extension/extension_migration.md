@@ -871,6 +871,7 @@ configuration by adding the following line:
 
 ```python
 import jupyterlab
+
 c.LabApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
 ```
 
