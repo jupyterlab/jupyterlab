@@ -45,4 +45,4 @@ jobs:
         run: |
           python scripts/check_spelling.py \
             --base "${{ github.event.pull_request.base.sha }}" \
-            --head "${{ github.event.pull_request.head.sha }}"
+            --head HEAD
