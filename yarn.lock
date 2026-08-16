@@ -2261,37 +2261,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/eslint-plugin@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@jupyter/eslint-plugin@npm:1.0.1"
+"@jupyter/eslint-plugin@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@jupyter/eslint-plugin@npm:1.1.0"
   dependencies:
     "@typescript-eslint/utils": ^8.54.0
+    "@typescript-eslint/visitor-keys": ^8.54.0
     jsonc-eslint-parser: ^2.4.0
   peerDependencies:
     eslint: ">=9.0.0"
-  checksum: 74d79d31ce8bf5d9ad597984953d9baef300314570162ed34a40a2105041fadeda4842be96dd949c57338f47e3ee403f0e6380a99d5bfb558e467634a143dcb2
+  checksum: 38d5c9fd45e43eaecbae5a58f2e23d8f5c3798a6da0301017400d5cb3050d8b15332fb1b65cbdb0dbd6aa01a28a0565f780d9b81a91fe42962ad44d27192896b
   languageName: node
   linkType: hard
 
-"@jupyter/react-components@npm:^0.16.6":
-  version: 0.16.6
-  resolution: "@jupyter/react-components@npm:0.16.6"
+"@jupyter/react-components@npm:^0.17.1":
+  version: 0.17.1
+  resolution: "@jupyter/react-components@npm:0.17.1"
   dependencies:
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/web-components": ^0.17.1
     react: ">=17.0.0 <19.0.0"
-  checksum: 4619ae8a41a987aa7529d8625d1b2f7921f977091e710f47a6c60190ef49c15ac9849289ffcf0327d18ef2d0493959c7aac7010a205f9328569301a248b6ecfb
+  checksum: 1c8b5d3a814c0c372ea21ae5544dcd6f021aecfa8168fa44c34a9364ea10ad539ff4791d524b3803be3fbe55d33a0e76576c6f715999d324ca437f289662e099
   languageName: node
   linkType: hard
 
-"@jupyter/web-components@npm:^0.16.6":
-  version: 0.16.6
-  resolution: "@jupyter/web-components@npm:0.16.6"
+"@jupyter/web-components@npm:^0.17.1":
+  version: 0.17.1
+  resolution: "@jupyter/web-components@npm:0.17.1"
   dependencies:
     "@microsoft/fast-colors": ^5.3.1
     "@microsoft/fast-element": ^1.12.0
     "@microsoft/fast-foundation": ^2.49.4
     "@microsoft/fast-web-utilities": ^5.4.1
-  checksum: 41a4a2b5bb2177cbb562c858c8327a868eab9205679dbc8f99105b1580882a2d14a6e2bd9202a4acdec539c44cee8d5a5b64f7fea6a03baa3ad2905b95a6538c
+  checksum: 51fd643aa7ef27a482ee19a53845d71aaf80b8b4a88437a2733519e975a394959b84a65d5415c5fb56acf18bf06b788680a0f06b6118a938bebbda6561dc5fb7
   languageName: node
   linkType: hard
 
@@ -3019,7 +3020,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.5.4
     "@codemirror/view": ^6.39.14
-    "@jupyter/react-components": ^0.16.6
+    "@jupyter/react-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
@@ -3238,7 +3239,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-cell@workspace:examples/cell"
   dependencies:
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
@@ -3266,7 +3267,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/codemirror": ^4.7.0-alpha.1
@@ -3377,7 +3378,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/web-components": ^0.17.1
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
     "@jupyterlab/codemirror": ^4.7.0-alpha.1
@@ -3424,7 +3425,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
@@ -3506,7 +3507,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-terminal@workspace:examples/terminal"
   dependencies:
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/web-components": ^0.17.1
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/coreutils": ^6.7.0-alpha.1
     "@jupyterlab/services": ^7.7.0-alpha.1
@@ -4713,7 +4714,7 @@ __metadata:
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
     "@eslint/js": ^10.0.1
-    "@jupyter/eslint-plugin": ^1.0.1
+    "@jupyter/eslint-plugin": ^1.1.0
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
@@ -4765,7 +4766,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
-    "@jupyter/react-components": ^0.16.6
+    "@jupyter/react-components": ^0.17.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
     "@jupyterlab/statedb": ^4.7.0-alpha.1
     "@jupyterlab/translation": ^4.7.0-alpha.1
@@ -5146,7 +5147,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/toc@workspace:packages/toc"
   dependencies:
-    "@jupyter/react-components": ^0.16.6
+    "@jupyter/react-components": ^0.17.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
     "@jupyterlab/coreutils": ^6.7.0-alpha.1
     "@jupyterlab/docregistry": ^4.7.0-alpha.1
@@ -5254,8 +5255,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components@workspace:packages/ui-components"
   dependencies:
-    "@jupyter/react-components": ^0.16.6
-    "@jupyter/web-components": ^0.16.6
+    "@jupyter/react-components": ^0.17.1
+    "@jupyter/web-components": ^0.17.1
     "@jupyterlab/coreutils": ^6.7.0-alpha.1
     "@jupyterlab/observables": ^5.7.0-alpha.1
     "@jupyterlab/rendermime-interfaces": ^3.15.0-alpha.1
@@ -8057,7 +8058,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/visitor-keys@npm:8.56.1":
+"@typescript-eslint/visitor-keys@npm:8.56.1, @typescript-eslint/visitor-keys@npm:^8.54.0":
   version: 8.56.1
   resolution: "@typescript-eslint/visitor-keys@npm:8.56.1"
   dependencies:
