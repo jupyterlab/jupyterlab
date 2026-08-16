@@ -35,7 +35,7 @@ SUPPORT_FILE_PREFIXES = ("docs/source/_ext/",)
 SPELLING_INDEX = "__spelling_index"
 SPELLING_WORDLIST = DOCS_SOURCE / "spelling_wordlist.txt"
 
-HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,\d+)? @@")
+HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,(?P<count>\d+))? @@")
 SPELLING_RE = re.compile(r"^(?P<source>.*):(?P<line>\d+|None):(?P<rest>.*)$")
 
 
@@ -114,34 +114,57 @@ def changed_text_document_lines(git_diff_args: list[str]) -> dict[str, set[int]]
 
     changed: dict[str, set[int]] = defaultdict(set)
     current_path: str | None = None
-    current_line: int | None = None
+    in_file_header = False
 
     for raw_line in diff.splitlines():
-        if raw_line.startswith("+++ "):
+        if raw_line.startswith("diff --git "):
+            current_path = None
+            in_file_header = True
+            continue
+
+        if in_file_header and raw_line.startswith("+++ "):
             target = raw_line[4:].removeprefix("b/")
             current_path = target if is_text_document(target) else None
-            current_line = None
             continue
 
         hunk_match = HUNK_RE.match(raw_line)
         if hunk_match:
-            current_line = int(hunk_match.group("start")) if current_path else None
-            continue
+            in_file_header = False
+            if current_path is None:
+                continue
 
-        if current_path is None or current_line is None:
-            continue
-
-        if raw_line.startswith("+") and not raw_line.startswith("+++"):
-            changed[current_path].add(current_line)
-            current_line += 1
-        elif raw_line.startswith("-") and not raw_line.startswith("---"):
-            continue
-        elif raw_line.startswith(" "):
-            current_line += 1
-        else:
+            start = int(hunk_match.group("start"))
+            count = int(hunk_match.group("count") or 1)
+            if count:
+                changed[current_path].update(range(start, start + count))
             continue
 
     return dict(changed)
+
+
+def validate_non_staged_head(args: argparse.Namespace) -> None:
+    """Ensure non-staged checks read content matching the requested head."""
+    if args.staged or not args.head:
+        return
+
+    requested_head = git_output(["rev-parse", "--verify", f"{args.head}^{{commit}}"]).strip()
+    current_head = git_output(["rev-parse", "--verify", "HEAD^{commit}"]).strip()
+    tracked_changes = git_output(["status", "--porcelain", "--untracked-files=no"])
+
+    messages = []
+    if requested_head != current_head:
+        messages.append(f"--head resolves to {requested_head}, but HEAD is {current_head}.")
+    if tracked_changes:
+        messages.append(f"Tracked working tree changes:\n{tracked_changes}")
+
+    if messages:
+        details = "\n".join(messages)
+        message = (
+            "Non-staged spelling checks copy content from the working tree, so "
+            "--head must resolve to HEAD and tracked files must be clean.\n"
+            f"{details}"
+        )
+        raise SystemExit(message)
 
 
 def changed_support_files(git_diff_args: list[str]) -> list[str]:
@@ -416,6 +439,7 @@ def main() -> int:
     args = parser.parse_args()
 
     git_diff_args = diff_args(args)
+    validate_non_staged_head(args)
     changed_lines = changed_text_document_lines(git_diff_args)
     changed_paths = sorted(path for path, lines in changed_lines.items() if lines)
     support_paths = changed_support_files(git_diff_args)
