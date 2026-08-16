@@ -2783,7 +2783,9 @@ namespace Private {
           // The future is authoritative for the prompt number; a snapshot
           // taken before completion would be stale (still null). Setting a
           // non-null execution count also flips the state back to 'idle'.
-          cellRef.model.executionCount = reply.content.execution_count;
+          if (reply.content.status === 'ok') {
+            cellRef.model.executionCount = reply.content.execution_count;
+          }
           cellRef.model.executionState = 'idle';
         }
       },
