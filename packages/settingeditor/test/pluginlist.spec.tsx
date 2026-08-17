@@ -310,5 +310,77 @@ describe('@jupyterlab/settingeditor', () => {
       expect(pluginId).toBe(IDS[1]);
       expect(list.selection).toBe(IDS[1]);
     });
+
+    describe('setFilter', () => {
+      let model: PluginList.Model;
+
+      const taggedId = 'plugin-tagged';
+      const taggedSchema: ISettingRegistry.ISchema = {
+        type: 'object',
+        title: 'Tagged Plugin',
+        tags: ['my-tag'],
+        properties: {
+          value: { title: 'Value', type: 'string', default: 'x' },
+          taggedProp: {
+            title: 'Tagged Property',
+            type: 'string',
+            default: 'y',
+            tags: ['prop-tag']
+          }
+        }
+      };
+
+      beforeEach(async () => {
+        connector.schemas[taggedId] = taggedSchema;
+        await registry.load(taggedId);
+        model = new PluginList.Model({ registry });
+        await model.ready;
+        list = new PluginList({ registry, model });
+        Widget.attach(list, document.body);
+        MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+      });
+
+      it('should return tag when query exactly matches a schema tag', () => {
+        list.setFilter(updateFilterFunction('my-tag', false, false), 'my-tag');
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toBe('tag');
+      });
+
+      it('should match tags case-insensitively', () => {
+        list.setFilter(updateFilterFunction('MY-TAG', false, false), 'MY-TAG');
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toBe('tag');
+      });
+
+      it('should not match a partial tag', () => {
+        list.setFilter(updateFilterFunction('my', false, false), 'my');
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).not.toBe('tag');
+      });
+
+      it('should return all when query matches title but not tag', () => {
+        list.setFilter(updateFilterFunction('Tagged', false, false), 'Tagged');
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toBe('all');
+      });
+
+      it('should return matching property names when query matches a property tag', () => {
+        list.setFilter(
+          updateFilterFunction('prop-tag', false, false),
+          'prop-tag'
+        );
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toEqual(['Tagged Property']);
+      });
+
+      it('should match property tags case-insensitively', () => {
+        list.setFilter(
+          updateFilterFunction('PROP-TAG', false, false),
+          'PROP-TAG'
+        );
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toEqual(['Tagged Property']);
+      });
+    });
   });
 });
