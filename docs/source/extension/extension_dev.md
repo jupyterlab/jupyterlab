@@ -551,6 +551,48 @@ If your extension has a top-level `style` key in `package.json`, the CSS file it
 
 A convention in JupyterLab for deduplicating CSS on the page is that if your extension has a top-level `styleModule` key in `package.json` giving a JavaScript module that can be imported, it will be imported (as a JavaScript module) instead of importing the `style` key CSS file as a CSS file.
 
+### Theme-aware extension styles
+
+Extension styles should use JupyterLab CSS variables rather than hard-coded
+colors when possible. JupyterLab themes define public variables such as
+`--jp-ui-font-color1`, `--jp-content-font-color1`, `--jp-layout-color1`, and
+`--jp-border-color1`; using these variables allows extension UI to adapt when
+users switch between light, dark, high-contrast, or custom themes.
+
+For example, avoid hard-coded colors:
+
+```css
+.my-extension-panel {
+  color: black;
+  background: white;
+}
+```
+
+Prefer JupyterLab theme variables:
+
+```css
+.my-extension-panel {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  border-color: var(--jp-border-color1);
+}
+```
+
+Extensions can also define their own CSS variables in terms of JupyterLab
+variables and then use those extension variables throughout their styles:
+
+```css
+:root {
+  --my-extension-color: var(--jp-content-font-color1);
+  --my-extension-background: var(--jp-layout-color1);
+}
+
+.my-extension-panel {
+  color: var(--my-extension-color);
+  background: var(--my-extension-background);
+}
+```
+
 ## Prebuilt Extensions
 
 ### package.json metadata
