@@ -61,6 +61,7 @@ for (const c of showSourcesCases) {
     test.afterEach(async ({ page }) => {
       await page.click('jp-button[title^=Continue]');
       await page.debugger.switchOff();
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(500);
       await page.notebook.close();
     });
@@ -80,7 +81,7 @@ for (const c of showSourcesCases) {
       expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
 
       const callStackPanel = await page.debugger.getCallStackPanelLocator();
-      expect(await callStackPanel.innerText()).toBe('');
+      await expect(callStackPanel).toHaveText('');
 
       void page.notebook.run();
 
@@ -235,7 +236,7 @@ for (const c of showSourcesCases) {
       expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
       const callStackPanel = await page.debugger.getCallStackPanelLocator();
-      expect(await callStackPanel.innerText()).toBe('');
+      await expect(callStackPanel).toHaveText('');
 
       // Run script (blocked by breakpoint)
       await page.menu.clickMenuItem('Run>Run All Code');
@@ -285,6 +286,7 @@ test.describe('Debugger Tests', () => {
       await page.click('jp-button[title^=Continue]');
     }
     await page.debugger.switchOff();
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500);
     await page.notebook.close();
   });
