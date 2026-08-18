@@ -246,7 +246,10 @@ class GhostTextWidget extends WidgetType {
       content = content.substring(0, content.length - addition.length);
     }
 
-    const maxLines = this.options.maxLines || Infinity;
+    const maxLines =
+      this.options.maxLines === undefined || this.options.maxLines === 0
+        ? Infinity
+        : this.options.maxLines;
     if (maxLines !== Infinity) {
       // Split into content to show immediately and the hidden part
       const lines = content.split('\n');
@@ -349,7 +352,7 @@ export namespace GhostTextManager {
   export interface IOptions {
     /**
      * Callback for editor `blur` event.
-     * Returning true will prevent the default action of removing current ghost.
+     * Returning false will prevent the default action of removing current ghost.
      */
     onBlur(event: FocusEvent): boolean;
   }

@@ -379,13 +379,13 @@ export class ThemeManager implements IThemeManager {
    */
   private _incrFontSize(key: string, add: boolean = true): Promise<void> {
     // get the numeric and unit parts of the current font size
-    let parts = (this.getCSS(key) ?? '13px').split(/([a-zA-Z]+)/);
+    let parts = (this.getCSS(key) ?? '13px').split(/([a-z]+)/i);
 
     if (!parts[1] || Number.isNaN(Number(parts[0]))) {
       const element = document.createElement('div');
       element.style.fontSize = `var(--jp-${key})`;
       document.body.appendChild(element);
-      parts = getComputedStyle(element).fontSize.split(/([a-zA-Z]+)/);
+      parts = getComputedStyle(element).fontSize.split(/([a-z]+)/i);
       element.remove();
     }
 

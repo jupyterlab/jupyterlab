@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type {
   CellSearchProvider,
@@ -66,7 +64,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
   }
 
-  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<any>) {
+  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
     if (args.name === 'mode') {
       // Delay the update to ensure that `document.activeElement` settled.
       window.setTimeout(() => {
@@ -796,7 +794,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         return;
       }
       const currentMatch = searchEngine.getCurrentMatch();
-      if (!currentMatch && this.matchesCount) {
+      const matchesCount = this.matchesCount;
+      if (!currentMatch && matchesCount !== null && matchesCount > 0) {
         // Select a match as current by highlighting next (with looping) from
         // the selection start, to prevent "current" match from jumping around.
         await this.highlightNext(true, {

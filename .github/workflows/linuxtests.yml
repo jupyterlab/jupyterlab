@@ -8,6 +8,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   linuxtests:
     name: Linux
@@ -15,12 +18,10 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, interop, nonode, lint]
         # This will be used by the base setup action
         python-version: ["3.10", "3.14"]
         include:
-          - group: examples
-            upload-output: true
           - group: release_test
             upload-output: true
           - group: lint
@@ -47,8 +48,6 @@ jobs:
             python-version: "3.10"
           - group: lint
             python-version: "3.10"
-          - group: examples
-            python-version: "3.10"
           - group: splice_source
             python-version: "3.10"
       fail-fast: false
@@ -56,10 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_package_manager: "uv pip"
 
@@ -72,15 +73,16 @@ jobs:
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Restore Playwright browsers cache
-        uses: actions/cache@v5
+        if: ${{ github.event_name != 'release' }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
         id: playwright-cache
         with:
           path: /home/runner/pw-browsers
           key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}
 
       - name: Restore ${{ matrix.group }} cache
-        if: ${{ matrix.cache-path }}
-        uses: actions/cache@v5
+        if: ${{ matrix.cache-path && github.event_name != 'release' }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
         with:
           path: ${{ matrix.cache-path }}
           key: |-
@@ -101,21 +103,22 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: |
             ./build/${{ matrix.group }}_output
-            ./examples/*/test-results
 
   test_minimum_versions:
     name: Test Minimum Versions
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_version: "3.10"
           dependency_type: minimum
@@ -131,9 +134,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           python_package_manager: "uv pip"
       - name: Install dependencies
@@ -143,7 +148,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: "sdist"
           path: dist/*.tar.gz
@@ -155,10 +160,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
       - name: Download sdist
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
+          name: "sdist"
           path: "sdist"
       - name: Install From SDist
         run: |
@@ -178,13 +184,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
       - run: |
-          node ./jupyterlab/staging/yarn.js install
-          node ./jupyterlab/staging/yarn.js run build:packages
-          node ./jupyterlab/staging/yarn.js run docs
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+          pip install -vv --group builder
+          jlpm
+          jlpm build:packages
+          jlpm docs
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.* https://webpack.js.org/.*"
+          ignore_links: "https?://.* .*/images/[\\w-]+.png"

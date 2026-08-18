@@ -284,7 +284,7 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Escape');
     await page.getByText(`Mode: Command`, { exact: true }).waitFor();
     expect(await page.notebook.isCellInEditingMode(0)).toBeFalsy();
-    expect(await page.isVisible('.jp-DocumentSearch-overlay')).toBeTruthy();
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
 
     // Second escape should close the search box (even if it is not focused)
     await page.keyboard.press('Escape');
@@ -341,6 +341,7 @@ test.describe('Notebook Search', () => {
     await page.fill('[placeholder="Find"]', 'with');
     await page.click('button[title="Show Search Filters"]');
     await page.click('text=Search in 1 Selected Cell');
+    await page.locator('text=1/4').waitFor();
 
     // Bring focus to first cell without switching away from command mode
     let cell = await page.notebook.getCellLocator(0);
@@ -354,7 +355,7 @@ test.describe('Notebook Search', () => {
     // Expect the filter text to be updated
     await page.locator('text=Search in 4 Selected Cells').waitFor();
 
-    // Wait for the counter to be properly updated
+    // Wait for the counter to reset to the first match in the selection.
     await page
       .locator('.jp-DocumentSearch-index-counter:has-text("1/19")')
       .waitFor({ timeout: 10000 });
@@ -587,6 +588,11 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search Cell Outputs');
 
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
+
     await page.locator('text=1/29').waitFor();
 
     const cell = await page.notebook.getCellLocator(5);
@@ -784,6 +790,7 @@ test.describe('Auto search in any selection', async () => {
     await page.keyboard.press('Shift+End');
 
     // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18462
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     // Open search box (filters should already be shown)

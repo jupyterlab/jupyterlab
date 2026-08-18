@@ -6,7 +6,7 @@
 
 import type { Extension } from '@codemirror/state';
 
-import { EditorView } from '@codemirror/view';
+import { placeholder as editorPlaceholder, EditorView } from '@codemirror/view';
 
 import { ElementExt } from '@lumino/domutils';
 
@@ -24,7 +24,11 @@ import type { DirListing } from '@jupyterlab/filebrowser';
 
 import type * as nbformat from '@jupyterlab/nbformat';
 
-import type { IOutputPrompt, IStdin } from '@jupyterlab/outputarea';
+import type {
+  IOutputPrompt,
+  IPageHandler,
+  IStdin
+} from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputPrompt,
@@ -164,6 +168,11 @@ const RAW_CELL_CLASS = 'jp-RawCell';
  * The class name added to a rendered input area.
  */
 const RENDERED_CLASS = 'jp-mod-rendered';
+
+/**
+ * The class name added to rendered markdown cells showing the empty placeholder.
+ */
+const EMPTY_MARKDOWN_PLACEHOLDER_CLASS = 'jp-mod-emptyMarkdownPlaceholder';
 
 const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
 
@@ -557,11 +566,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     this._resizeDebouncer.dispose();
+    const input = this._input;
+    const inputPlaceholder = this._inputPlaceholder;
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
     super.dispose();
+    // The input area (or its placeholder) is swapped out of the layout when
+    // the input is hidden, and `Widget.dispose()` only disposes layout
+    // children, so dispose both explicitly; after `super.dispose()` so the
+    // in-layout one takes the disposed-parent fast path.
+    input?.dispose();
+    inputPlaceholder?.dispose();
   }
 
   /**
@@ -628,7 +645,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           .getSource()
           .split('\n')?.[0];
       }
-    });
+    }, this);
 
     if (this.inputHidden) {
       input.parent = null;
@@ -1085,6 +1102,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     const contentFactory = this.contentFactory;
     const model = this.model;
     this.maxNumberOutputs = options.maxNumberOutputs;
+    this._pageHandler = options.pageHandler ?? null;
 
     // Note that modifying the below label warrants one to also modify
     // the same in this._outputLengthHandler. Ideally, this label must
@@ -1101,6 +1119,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       rendermime,
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
+      pageHandler: this._pageHandler ?? undefined,
       translator: this.translator,
       promptOverlay: true,
       inputHistoryScope: options.inputHistoryScope,
@@ -1479,20 +1498,20 @@ export class CodeCell extends Cell<ICodeCellModel> {
       overlay.firstChild?.remove();
       return;
     }
+    const trans = this.translator.load('jupyterlab');
     let overlayTitle: string;
     if (this._outputsScrolled) {
       expandIcon.element({
         container: overlay
       });
-      overlayTitle = 'Expand Output';
+      overlayTitle = trans.__('Expand Output');
     } else {
       collapseIcon.element({
         container: overlay
       });
-      overlayTitle = 'Collapse Output';
+      overlayTitle = trans.__('Collapse Output');
     }
-    const trans = this.translator.load('jupyterlab');
-    overlay.title = trans.__(overlayTitle);
+    overlay.title = overlayTitle;
   }
   /**
    * Save view collapse state to model
@@ -1570,6 +1589,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       model: this.model,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
+      pageHandler: this._pageHandler ?? undefined,
       placeholder: false,
       translator: this.translator
     });
@@ -1582,7 +1602,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     return new SimplifiedOutputArea({
       model: this.model.outputs!,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime
+      rendermime: this._rendermime,
+      pageHandler: this._pageHandler ?? undefined
     });
   }
 
@@ -1601,11 +1622,20 @@ export class CodeCell extends Cell<ICodeCellModel> {
       'keydown',
       this._detectCaretMovementInOuput
     );
+    const output = this._output;
+    const outputPlaceholder = this._outputPlaceholder;
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
     this._outputPlaceholder = null!;
     super.dispose();
+    // The output area (or its placeholder) is swapped out of the layout when
+    // outputs are hidden or deferred, and `Widget.dispose()` only disposes
+    // layout children, so dispose both explicitly: an undisposed output area
+    // stays connected to the output model, which is shared with other views
+    // of the document.
+    output.dispose();
+    outputPlaceholder?.dispose();
   }
 
   /**
@@ -1682,7 +1712,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.model.executionState == 'running') {
       prompt = '*';
     } else {
-      prompt = `${this.model.executionCount || ''}`;
+      prompt = `${this.model.executionCount ?? ''}`;
     }
     this._setPrompt(prompt);
   }
@@ -1718,6 +1748,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _lastOnCaretMovedHandler: () => void;
   private _lastTarget: HTMLElement | null = null;
   private _lastOutputHeight = '';
+  private _pageHandler: IPageHandler | null = null;
 }
 
 /**
@@ -1736,6 +1767,11 @@ export namespace CodeCell {
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**
@@ -2077,7 +2113,7 @@ export abstract class AttachmentsCell<
       if (protocol !== 'data:') {
         return;
       }
-      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
+      const dataURIRegex = /([\w+/]+)?(?:;(charset=[\w-]*|base64))?,(.*)/;
       const matches = dataURIRegex.exec(href);
       if (!matches || matches.length !== 4) {
         return;
@@ -2153,6 +2189,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       options.showEditorForReadOnlyMarkdown ??
       MarkdownCell.defaultShowEditorForReadOnlyMarkdown;
 
+    this._cachedHeadingText = this.model.sharedModel.getSource();
+    this._emptyPlaceholder =
+      options.emptyPlaceholder ??
+      trans.__('Double-click (or press Enter) to edit');
+    this._editModePlaceholder = trans.__(
+      'You can use Markdown and LaTeX: $ α^2 $'
+    );
+
     // Defer setting placeholder as the renderer must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
 
@@ -2177,10 +2221,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
-
-    this._cachedHeadingText = this.model.sharedModel.getSource();
-    this._emptyPlaceholder =
-      options.emptyPlaceholder ?? trans.__('Type Markdown and LaTeX: $ α^2 $');
   }
 
   /**
@@ -2494,6 +2534,20 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
   }
 
+  /**
+   * Get the editor options at initialization.
+   *
+   * @returns Editor options
+   */
+  protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
+    const base = super.getEditorOptions() ?? {};
+    base.extensions = [
+      ...(base.extensions ?? []),
+      editorPlaceholder(this._editModePlaceholder)
+    ];
+    return base;
+  }
+
   /*
    * Handle `update-request` messages.
    */
@@ -2524,6 +2578,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private async _handleRendered(): Promise<void> {
     if (!this._rendered) {
+      this.removeClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS);
       this.showEditor();
     } else {
       // TODO: It would be nice for the cell to provide a way for
@@ -2545,8 +2600,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     }
 
     const model = this.model;
-    const text =
-      (model && model.sharedModel.getSource()) || this._emptyPlaceholder;
+    const source = model?.sharedModel.getSource() ?? '';
+    const isEmpty = source.length === 0;
+    const text = isEmpty ? this._emptyPlaceholder : source;
+    this.toggleClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS, isEmpty);
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -2588,6 +2645,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
+  private _editModePlaceholder: string;
 }
 
 /**

@@ -3,9 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Button } from '@jupyter/react-components';
 import type { ITranslator } from '@jupyterlab/translation';
-import { addIcon, FilterBox } from '@jupyterlab/ui-components';
+import {
+  addIcon,
+  caretDownEmptyIcon,
+  FilterBox
+} from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
@@ -14,53 +17,53 @@ import type { IShortcutUI } from '../types';
 export interface IAdvancedOptionsProps {
   toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
-  resetShortcuts: IShortcutUI['resetShortcuts'];
+  showAddCommand: boolean;
   translator: ITranslator;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
 }
 
-export interface ISymbolsProps {}
-
 function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
   const trans = props.translator.load('jupyterlab');
+  const selectorsLabel = props.showSelectors
+    ? trans.__('Hide Selectors')
+    : trans.__('Show Selectors');
+  const addShortcutLabel = props.showAddCommand
+    ? trans.__('Collapse new shortcut row')
+    : trans.__('Add shortcut');
   return (
     <div className="jp-Shortcuts-AdvancedOptions">
-      <a
-        className="jp-Shortcuts-AdvancedOptionsLink"
+      <button
+        type="button"
+        className="jp-Button jp-mod-styled jp-mod-reject jp-Shortcuts-SelectorsToggle"
+        aria-pressed={props.showSelectors}
         onClick={() => props.toggleSelectors()}
       >
-        {props.showSelectors
-          ? trans.__('Hide Selectors')
-          : trans.__('Show Selectors')}
-      </a>
-      <a
-        className="jp-Shortcuts-AdvancedOptionsLink"
-        onClick={() => props.resetShortcuts()}
-      >
-        {trans.__('Reset All')}
-      </a>
-      <Button
-        className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
+        {selectorsLabel}
+      </button>
+      <button
+        type="button"
+        className="jp-Button jp-mod-styled jp-mod-accept jp-Shortcuts-AddShortcut jp-Shortcuts-Icon"
+        aria-pressed={props.showAddCommand}
         onClick={props.toggleAddCommandRow}
-        title={trans.__('Tool for adding shortcuts')}
-        aria-label={trans.__('Tool for adding shortcuts')}
+        title={addShortcutLabel}
+        aria-label={addShortcutLabel}
       >
-        <addIcon.react
-          tag="span"
-          elementSize="xlarge"
-          elementPosition="center"
-        />
-      </Button>
+        {props.showAddCommand ? (
+          <caretDownEmptyIcon.react tag={null} />
+        ) : (
+          <addIcon.react tag={null} />
+        )}
+      </button>
     </div>
   );
 }
 
 /** State for TopNav component */
 export interface ITopNavProps {
-  resetShortcuts: IShortcutUI['resetShortcuts'];
   updateSearchQuery: IShortcutUI['updateSearchQuery'];
   toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
+  showAddCommand: boolean;
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
@@ -103,7 +106,7 @@ export class TopNav extends React.Component<ITopNavProps> {
           <AdvancedOptions
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
-            resetShortcuts={this.props.resetShortcuts}
+            showAddCommand={this.props.showAddCommand}
             toggleAddCommandRow={this.props.toggleAddCommandRow}
             translator={this.props.translator}
           />

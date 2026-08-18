@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap } from '@codemirror/commands';
@@ -30,7 +29,10 @@ import {
 } from '@codemirror/view';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -65,20 +67,20 @@ export interface IEditorHandlerOptions {
   /**
    * The base configuration options for all editor.
    */
-  baseConfiguration?: Record<string, any>;
+  baseConfiguration?: Record<string, unknown>;
   /**
    * The configuration options for the editor.
    *
    * They take precedence over the base configuration.
    */
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
   /**
    * Editor default extensions.
    *
    * Extension defined in the mapping without a base configuration
    * will not be configurable.
    */
-  defaultExtensions?: [string, IConfigurableExtension<any>][];
+  defaultExtensions?: [string, IConfigurableExtension<unknown>][];
 }
 
 /**
@@ -98,9 +100,10 @@ export class ExtensionsHandler
     this._baseConfig = baseConfiguration ?? {};
     this._config = config ?? {};
 
-    this._configurableBuilderMap = new Map<string, IConfigurableExtension<any>>(
-      defaultExtensions
-    );
+    this._configurableBuilderMap = new Map<
+      string,
+      IConfigurableExtension<unknown>
+    >(defaultExtensions);
 
     const configurables = Object.keys(this._config).concat(
       Object.keys(this._baseConfig)
@@ -118,7 +121,7 @@ export class ExtensionsHandler
    *
    * It should result in a call to `IExtensionsHandler.reconfigureExtensions`.
    */
-  get configChanged(): ISignal<this, Record<string, any>> {
+  get configChanged(): ISignal<this, Record<string, unknown>> {
     return this._configChanged;
   }
 
@@ -185,7 +188,7 @@ export class ExtensionsHandler
    * You will need to reconfigure the editor extensions by listening
    * to `IExtensionsHandler.configChanged`.
    */
-  setBaseOptions(options: Record<string, any>): void {
+  setBaseOptions(options: Record<string, unknown>): void {
     // Change values of baseConfig
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
@@ -194,7 +197,7 @@ export class ExtensionsHandler
       const notOverridden = changed.filter(k => !customizedKeys.includes(k));
       if (notOverridden.length > 0) {
         this._configChanged.emit(
-          notOverridden.reduce<Record<string, any>>((agg, key) => {
+          notOverridden.reduce<Record<string, unknown>>((agg, key) => {
             agg[key] = this._baseConfig[key];
             return agg;
           }, {})
@@ -220,12 +223,12 @@ export class ExtensionsHandler
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Record<string, any>): void {
+  setOptions(options: Record<string, unknown>): void {
     const changed = this._getChangedOptions(options, this._config);
     if (changed.length > 0) {
       this._config = { ...options };
       this._configChanged.emit(
-        changed.reduce<Record<string, any>>((agg, key) => {
+        changed.reduce<Record<string, unknown>>((agg, key) => {
           agg[key] = this._config[key] ?? this._baseConfig[key];
           return agg;
         }, {})
@@ -259,7 +262,7 @@ export class ExtensionsHandler
    */
   reconfigureExtensions(
     view: EditorView,
-    configuration: Record<string, any>
+    configuration: Record<string, unknown>
   ): void {
     const effects = Object.keys(configuration)
       .filter(key => this.has(key))
@@ -320,7 +323,7 @@ export class ExtensionsHandler
    * @param key Extension unique identifier
    * @returns The extension builder
    */
-  protected get(key: string): IConfigurableExtension<any> | undefined {
+  protected get(key: string): IConfigurableExtension<unknown> | undefined {
     return this._configurableBuilderMap.get(key);
   }
 
@@ -344,8 +347,8 @@ export class ExtensionsHandler
   }
 
   private _getChangedOptions(
-    newConfig: Record<string, any>,
-    oldConfig: Record<string, any>
+    newConfig: Record<string, unknown>,
+    oldConfig: Record<string, unknown>
   ): string[] {
     const changed = new Array<string>();
     const newKeys = new Array<string>();
@@ -361,10 +364,10 @@ export class ExtensionsHandler
     return changed;
   }
 
-  private _baseConfig: Record<string, any>;
-  private _config: Record<string, any>;
-  private _configChanged = new Signal<this, Record<string, any>>(this);
-  private _configurableBuilderMap: Map<string, IConfigurableExtension<any>>;
+  private _baseConfig: Record<string, unknown>;
+  private _config: Record<string, unknown>;
+  private _configChanged = new Signal<this, Record<string, unknown>>(this);
+  private _configurableBuilderMap: Map<string, IConfigurableExtension<unknown>>;
   private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _immutables = new Set<string>();
@@ -380,11 +383,16 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
    * This is the default configuration optionally modified by the user;
    * e.g. through user settings.
    */
-  get baseConfiguration(): Record<string, any> {
+  get baseConfiguration(): Record<string, unknown> {
     return { ...this.defaultOptions, ...this._baseConfiguration };
   }
-  set baseConfiguration(v: Record<string, any>) {
-    if (!JSONExt.deepEqual(v, this._baseConfiguration)) {
+  set baseConfiguration(v: Record<string, unknown>) {
+    if (
+      !JSONExt.deepEqual(
+        v as ReadonlyPartialJSONValue,
+        this._baseConfiguration as ReadonlyPartialJSONValue
+      )
+    ) {
       this._baseConfiguration = v;
       for (const handler of this.handlers) {
         handler.setBaseOptions(this.baseConfiguration);
@@ -398,7 +406,7 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
    * This is the default configuration as defined when extensions
    * are registered.
    */
-  get defaultConfiguration(): Record<string, any> {
+  get defaultConfiguration(): Record<string, unknown> {
     // Only options with schema should be JSON serializable
     // So we cannot use `JSONExt.deepCopy` on the default options.
     return Object.freeze({ ...this.defaultOptions });
@@ -408,7 +416,11 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
    * Editor configuration JSON schema
    */
   get settingsSchema(): ReadonlyJSONObject {
-    return Object.freeze(JSONExt.deepCopy(this.configurationSchema));
+    return Object.freeze(
+      JSONExt.deepCopy(
+        this.configurationSchema as unknown as ReadonlyPartialJSONValue
+      )
+    ) as ReadonlyJSONObject;
   }
 
   /**
@@ -427,12 +439,12 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
       this.defaultOptions[factory.name] = factory.default;
     }
     if (factory.schema) {
-      this.configurationSchema[factory.name] = {
+      const schema = {
         default: factory.default ?? null,
         ...factory.schema
-      };
-      this.defaultOptions[factory.name] =
-        this.configurationSchema[factory.name].default;
+      } as ReadonlyJSONObject & { default?: unknown };
+      this.configurationSchema[factory.name] = schema;
+      this.defaultOptions[factory.name] = schema.default;
     }
   }
 
@@ -446,10 +458,12 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
       /**
        * The configuration options for the editor.
        */
-      config?: Record<string, any>;
+      config?: Record<string, unknown>;
     }
   ): IExtensionsHandler {
-    const configuration = new Array<[string, IConfigurableExtension<any>]>();
+    const configuration = new Array<
+      [string, IConfigurableExtension<unknown>]
+    >();
     for (const [key, builder] of this.configurationBuilder.entries()) {
       const extension = builder.factory(options);
       if (extension) {
@@ -472,14 +486,17 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
   }
   protected configurationBuilder = new Map<
     string,
-    IEditorExtensionFactory<any>
+    IEditorExtensionFactory<unknown>
   >();
-  protected configurationSchema: Record<string, any> = {};
+  protected configurationSchema: Record<
+    string,
+    ReadonlyJSONObject & { default?: unknown }
+  > = {};
 
-  protected defaultOptions: Record<string, any> = {};
+  protected defaultOptions: Record<string, unknown> = {};
   protected handlers = new Set<ExtensionsHandler>();
   protected immutableExtensions = new Set<string>();
-  private _baseConfiguration: Record<string, any> = {};
+  private _baseConfiguration: Record<string, unknown> = {};
 }
 
 /**
@@ -612,10 +629,10 @@ export namespace EditorExtensionRegistry {
       themes?: IEditorThemeRegistry;
       translator?: ITranslator | null;
     } = {}
-  ): ReadonlyArray<Readonly<IEditorExtensionFactory<any>>> {
+  ): ReadonlyArray<Readonly<IEditorExtensionFactory<unknown>>> {
     const { themes, translator } = options;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
-    const extensions: IEditorExtensionFactory<any>[] = [
+    const extensions: IEditorExtensionFactory<unknown>[] = [
       Object.freeze({
         name: 'autoClosingBrackets',
         default: false,
@@ -748,7 +765,7 @@ export namespace EditorExtensionRegistry {
               'Alt-A',
               'Escape',
               'Enter'
-            ].includes(binding.key as string);
+            ].includes(binding.key!);
           }),
           {
             key: 'Tab',

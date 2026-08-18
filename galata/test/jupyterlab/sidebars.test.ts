@@ -139,7 +139,10 @@ test('File Browser has no unused rules', async ({ page }) => {
       // only added after resizing
       'jp-DirListing-narrow',
       // used in "open file" dialog containing a file browser
-      '.jp-Open-Dialog'
+      '.jp-Open-Dialog',
+      // used for movable sections in file browser, not visible
+      // when no sections are moved
+      'jp-FileBrowser-accordion'
     ]
   });
   expect(unusedRules.length).toEqual(0);
@@ -203,12 +206,11 @@ test('Check Running Session button on sidebar has correct aria label and role', 
 }) => {
   await page.sidebar.open('left');
   const runningSessionsWidget = page.locator('#jp-running-sessions');
-  const runningSessionsElementAriaLabel =
-    await runningSessionsWidget.getAttribute('aria-label');
-  const runningSessionsElementRole =
-    await runningSessionsWidget.getAttribute('role');
-  expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
-  expect(runningSessionsElementRole).toEqual('region');
+  await expect(runningSessionsWidget).toHaveAttribute(
+    'aria-label',
+    'Running Sessions section'
+  );
+  await expect(runningSessionsWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Extension Manager button on sidebar has correct aria label and role', async ({
@@ -216,12 +218,11 @@ test('Check Extension Manager button on sidebar has correct aria label and role'
 }) => {
   await page.sidebar.open('left');
   const extensionManagerWidget = page.locator('#extensionmanager\\.main-view');
-  const extensionManagerElementAriaLabel =
-    await extensionManagerWidget.getAttribute('aria-label');
-  const extensionManagerElementRole =
-    await extensionManagerWidget.getAttribute('role');
-  expect(extensionManagerElementAriaLabel).toEqual('Extension Manager section');
-  expect(extensionManagerElementRole).toEqual('region');
+  await expect(extensionManagerWidget).toHaveAttribute(
+    'aria-label',
+    'Extension Manager section'
+  );
+  await expect(extensionManagerWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check File Browser button on sidebar has correct aria label and role', async ({
@@ -229,11 +230,11 @@ test('Check File Browser button on sidebar has correct aria label and role', asy
 }) => {
   await page.sidebar.open('left');
   const fileBrowserWidget = page.locator('#filebrowser');
-  const fileBrowserElementAriaLabel =
-    await fileBrowserWidget.getAttribute('aria-label');
-  const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
-  expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
-  expect(fileBrowserElementRole).toEqual('region');
+  await expect(fileBrowserWidget).toHaveAttribute(
+    'aria-label',
+    'File Browser Section'
+  );
+  await expect(fileBrowserWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Debugger button on sidebar has correct aria label and role', async ({
@@ -241,11 +242,11 @@ test('Check Debugger button on sidebar has correct aria label and role', async (
 }) => {
   await page.sidebar.open('right');
   const debuggerWidget = page.locator('#jp-debugger-sidebar');
-  const debuggerElementAriaLabel =
-    await debuggerWidget.getAttribute('aria-label');
-  const debuggerElementRole = await debuggerWidget.getAttribute('role');
-  expect(debuggerElementAriaLabel).toEqual('Debugger section');
-  expect(debuggerElementRole).toEqual('region');
+  await expect(debuggerWidget).toHaveAttribute(
+    'aria-label',
+    'Debugger section'
+  );
+  await expect(debuggerWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Table of Contents button on sidebar has correct aria label and role', async ({
@@ -253,12 +254,11 @@ test('Check Table of Contents button on sidebar has correct aria label and role'
 }) => {
   await page.sidebar.open('left');
   const tableOfContentsWidget = page.locator('#table-of-contents');
-  const tableOfContentsElementAriaLabel =
-    await tableOfContentsWidget.getAttribute('aria-label');
-  const tableOfContentsElementRole =
-    await tableOfContentsWidget.getAttribute('role');
-  expect(tableOfContentsElementAriaLabel).toEqual('Table of Contents section');
-  expect(tableOfContentsElementRole).toEqual('region');
+  await expect(tableOfContentsWidget).toHaveAttribute(
+    'aria-label',
+    'Table of Contents section'
+  );
+  await expect(tableOfContentsWidget).toHaveAttribute('role', 'region');
 });
 
 const elementAriaLabels = {
@@ -330,19 +330,113 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       for (let ariaLabel of keyValueArray) {
         const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
-        let initialState = await elementLocator.getAttribute('aria-expanded');
+        const initialState = await elementLocator.getAttribute('aria-expanded');
 
         await page.activity.keyToElement(`[aria-label='${ariaLabel}']`, 'Tab');
         await page.keyboard.press('Enter');
-        let stateAfter = await elementLocator.getAttribute('aria-expanded');
-
-        expect(initialState).not.toEqual(stateAfter);
+        // Pressing Enter toggles the panel; wait for aria-expanded to flip.
+        await expect
+          .poll(() => elementLocator.getAttribute('aria-expanded'))
+          .not.toBe(initialState);
 
         await page.keyboard.press('Enter');
-        let finalState = await elementLocator.getAttribute('aria-expanded');
-
-        expect(initialState).toEqual(finalState);
+        // Toggling again returns the panel to its initial state.
+        await expect
+          .poll(() => elementLocator.getAttribute('aria-expanded'))
+          .toBe(initialState);
       }
     });
+  });
+});
+
+test.describe('Running Sessions - Move Sections to File Browser', () => {
+  const RUNNING_SECTION_TITLE_SELECTOR =
+    '#jp-running-sessions .jp-AccordionPanel-title';
+  const HOSTED_SECTION_TITLE_SELECTOR =
+    '.jp-FileBrowser-accordion .jp-hosted-section';
+  const MOVE_TO_FB_COMMAND_SELECTOR =
+    '.lm-Menu-content .lm-Menu-item[data-command="apputils:move-section-to"]';
+  const MOVE_BACK_COMMAND_SELECTOR =
+    '.lm-Menu-content .lm-Menu-item[data-command="apputils:move-section-back"]';
+
+  test.use({
+    tmpPath: 'running-sessions-filebrowser-test'
+  });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadContent('hello', 'text', `${tmpPath}/test.txt`);
+  });
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await galata.Mock.freezeContentLastModified(page);
+    await page.filebrowser.openDirectory(tmpPath);
+  });
+
+  test('should move sections to file browser, take screenshot, and move back via context menu', async ({
+    page
+  }) => {
+    // Open a .txt file and a terminal so Open Tabs has entries
+    await page.filebrowser.open('test.txt');
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    // Move "Open Tabs" to the file browser
+    await page.sidebar.openTab('jp-running-sessions');
+    const openTabsRunningTitle = page
+      .locator(RUNNING_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Open Tabs' });
+    await openTabsRunningTitle.click({ button: 'right' });
+    await page
+      .locator(MOVE_TO_FB_COMMAND_SELECTOR)
+      .filter({ hasText: 'File Browser' })
+      .click();
+
+    // Move "Terminals" to the file browser
+    const terminalsRunningTitle = page
+      .locator(RUNNING_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Terminals' });
+    await terminalsRunningTitle.click({ button: 'right' });
+    await page
+      .locator(MOVE_TO_FB_COMMAND_SELECTOR)
+      .filter({ hasText: 'File Browser' })
+      .click();
+
+    // Switch to the file browser and verify both sections are hosted there
+    await page.sidebar.openTab('filebrowser');
+    const openTabsHostedTitle = page
+      .locator(HOSTED_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Open Tabs' });
+    const terminalsHostedTitle = page
+      .locator(HOSTED_SECTION_TITLE_SELECTOR)
+      .filter({ hasText: 'Terminals' });
+    await expect(openTabsHostedTitle).toBeVisible();
+    await expect(terminalsHostedTitle).toBeVisible();
+
+    // Screenshot with both sections visible in the file browser accordion
+    const leftPanel = page.sidebar.getContentPanelLocator('left');
+    expect(await leftPanel.screenshot()).toMatchSnapshot(
+      'filebrowser-with-moved-sections.png'
+    );
+
+    // Move "Open Tabs" back via context menu
+    await openTabsHostedTitle.click({ button: 'right' });
+    await page
+      .locator(MOVE_BACK_COMMAND_SELECTOR)
+      .filter({ hasText: 'Running Sessions' })
+      .click();
+    await expect(openTabsHostedTitle).not.toBeVisible();
+
+    // Move "Terminals" back via context menu
+    await terminalsHostedTitle.click({ button: 'right' });
+    await page
+      .locator(MOVE_BACK_COMMAND_SELECTOR)
+      .filter({ hasText: 'Running Sessions' })
+      .click();
+    await expect(terminalsHostedTitle).not.toBeVisible();
+
+    // Both sections should be back in running sessions
+    await page.sidebar.openTab('jp-running-sessions');
+    await expect(openTabsRunningTitle).toBeVisible();
+    await expect(terminalsRunningTitle).toBeVisible();
   });
 });

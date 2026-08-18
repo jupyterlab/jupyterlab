@@ -212,6 +212,10 @@
             "bottom"
           ],
           "description": "The direction to split the tab"
+        },
+        "id": {
+          "type": "string",
+          "description": "The widget ID to split. Defaults to the context menu target."
         }
       },
       "required": [
@@ -658,6 +662,33 @@
         "search": {
           "type": "string",
           "description": "The URL search string containing query parameters"
+        }
+      }
+    }
+  },
+  {
+    "id": "apputils:move-section-back",
+    "label": "Move back",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "apputils:move-section-to",
+    "label": "Move to ",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "targetId": {
+          "type": "string"
+        },
+        "targetLabel": {
+          "type": "string"
         }
       }
     }
@@ -1514,6 +1545,21 @@
   {
     "id": "console:redo",
     "label": "Redo",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
+  },
+  {
+    "id": "console:rename",
+    "label": "Rename Console…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -2630,6 +2676,21 @@
     }
   },
   {
+    "id": "filebrowser:open-directory",
+    "label": "Open the file browser for the provided `path`.",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to open in the file browser"
+        }
+      }
+    }
+  },
+  {
     "id": "filebrowser:open-path",
     "label": "Open from Path…",
     "caption": "Open from path",
@@ -2720,6 +2781,18 @@
     }
   },
   {
+    "id": "filebrowser:show-panel",
+    "label": "File Browser",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift F"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
     "caption": "",
@@ -2793,9 +2866,7 @@
     "id": "filebrowser:toggle-main",
     "label": "File Browser",
     "caption": "",
-    "shortcuts": [
-      "Ctrl Shift F"
-    ],
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -3799,6 +3870,16 @@
     }
   },
   {
+    "id": "markdownviewer:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "markdownviewer:edit",
     "label": "Show Markdown Editor",
     "caption": "",
@@ -4081,6 +4162,16 @@
     }
   },
   {
+    "id": "notebook:copy-selected-text",
+    "label": "Copy Selected Text",
+    "caption": "Copy selected text from the active cell or output area",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:copy-to-clipboard",
     "label": "Copy Output to Clipboard",
     "caption": "",
@@ -4193,6 +4284,16 @@
           "description": "Whether to activate the notebook after execution"
         }
       }
+    }
+  },
+  {
+    "id": "notebook:cut-selected-text",
+    "label": "Cut Selected Text",
+    "caption": "Cut selected text from the active cell or output area",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
@@ -4682,6 +4783,16 @@
     }
   },
   {
+    "id": "notebook:paste-text",
+    "label": "Paste Text",
+    "caption": "Paste text from the clipboard into the active cell editor",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:reconnect-to-kernel",
     "label": "Reconnect to Kernel",
     "caption": "",
@@ -4905,8 +5016,28 @@
     }
   },
   {
+    "id": "notebook:select-last-modified-cell",
+    "label": "Select Last Modified Cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:select-last-run-cell",
     "label": "Select current running or last run cell",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "notebook:select-next-modified-cell",
+    "label": "Select Next Modified Cell",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -4957,6 +5088,16 @@
   {
     "id": "notebook:show-cell-outputs",
     "label": "Expand Selected Outputs",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "notebook:show-export-guidance",
+    "label": "Enable notebook exports",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -5566,6 +5707,16 @@
   {
     "id": "terminal:copy",
     "label": "Copy",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "terminal:copy-link",
+    "label": "Copy Link Address",
     "caption": "",
     "shortcuts": [],
     "args": {

@@ -435,6 +435,46 @@ describe('@jupyterlab/completer', () => {
         );
         spy.mockRestore();
       });
+
+      it('should ignore stale completion replies', async () => {
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        handler.completer.reset();
+
+        let resolvePending!: (
+          reply: CompletionHandler.ICompletionItemsReply
+        ) => void;
+        const pending = new Promise<CompletionHandler.ICompletionItemsReply>(
+          resolve => {
+            resolvePending = resolve;
+          }
+        );
+        const fetch = jest.spyOn(provider, 'fetch').mockReturnValue(pending);
+        const shouldShow = jest
+          .spyOn(provider, 'shouldShowContinuousHint')
+          .mockReturnValueOnce(true)
+          .mockReturnValue(false);
+        const model = handler.completer.model!;
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+        expect(fetch).toHaveBeenCalledTimes(1);
+
+        handler.editor!.model.sharedModel.updateSource(5, 5, ':');
+        await new Promise(process.nextTick);
+        resolvePending({
+          start: 0,
+          end: 1,
+          items: [{ label: 'alpha' }]
+        });
+        await new Promise(process.nextTick);
+
+        expect(model.original).toBeNull();
+        expect(model.completionItems()).toHaveLength(0);
+        fetch.mockRestore();
+        shouldShow.mockRestore();
+      });
     });
 
     it('should update cursor position after autocomplete on empty word', () => {

@@ -539,6 +539,36 @@ The recommended ranges for this rank are:
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
 
+#### Movable accordion sections
+
+Sidebar panels can participate in the movable-sections system so users can
+relocate accordion sections between panels via the context menu. There are two
+roles — **source** (sections can be taken out) and **target** (sections can be
+dropped in). A panel can serve as both simultaneously.
+
+Take {ts:interface}`apputils.IMovableSectionRegistry` as an **optional** dependency and register your panel:
+
+```typescript
+import { IMovableSectionRegistry } from '@jupyterlab/apputils';
+
+optional: [IMovableSectionRegistry];
+activate: (app, registry: IMovableSectionRegistry | null) => {
+  if (registry) {
+    // Expose sections that can be moved out:
+    registry.registerSource('@my-org/my-ext:panel', 'My Panel', myPanel);
+    // Accept sections dropped in:
+    registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
+  }
+};
+```
+
+The label (second argument) appears in the context menu as "Move to My Panel" or
+"Move back to My Panel".
+
+**Source panels** must implement {ts:interface}`apputils.IMovableSectionSource`
+
+**Target panels** must implement {ts:interface}`apputils.IMovableSectionDestination`
+
 (mainmenu)=
 
 ## Main Menu
@@ -1134,7 +1164,7 @@ Kernel subshells enable concurrent code execution within kernels that support th
 Subshells are supported by:
 
 - **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via `supported_features: ['kernel subshells']` in kernel info replies
-- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html)
+- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/)
 
 **User Interface**
 
@@ -1179,7 +1209,7 @@ if (kernel.supportsSubshells) {
 }
 ```
 
-For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html).
+For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/).
 
 ## LSP Features
 

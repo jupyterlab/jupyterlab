@@ -15,6 +15,7 @@ import type { INotebookModel } from '@jupyterlab/notebook';
 import { NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import type { SourceChange } from '@jupyter/ydoc';
 
 function contextFactory(): Context<INotebookModel> {
   const serviceManager = new ServiceManager({ standby: 'never' });
@@ -71,9 +72,10 @@ class FooCompletionProvider implements ICompletionProvider {
   async isApplicable(context: ICompletionContext): Promise<boolean> {
     return true;
   }
-  shouldShowContinuousHint(completerIsVisible: boolean, changed: any) {
-    return true;
-  }
+  shouldShowContinuousHint: ICompletionProvider['shouldShowContinuousHint'] = (
+    completerIsVisible: boolean,
+    changed: SourceChange
+  ) => true;
 }
 
 const defaultOptions = {
@@ -298,6 +300,39 @@ describe('completer/reconciliator', () => {
         await reconciliator.shouldShowContinuousHint(true, null as any);
         expect(fooProvider1.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
         expect(fooProvider2.shouldShowContinuousHint).toHaveBeenCalledTimes(0);
+      });
+
+      it('should use the default identifier heuristic', async () => {
+        const provider = new FooCompletionProvider();
+        provider.shouldShowContinuousHint = undefined;
+        const editor = createEditorWidget();
+        editor.model.mimeType = 'text/x-python';
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          context: {
+            ...defaultOptions.context,
+            editor: editor.editor
+          },
+          providers: [provider]
+        });
+        const change = (insert: string): SourceChange => ({
+          sourceChange: [{ insert }]
+        });
+
+        await expect(
+          reconciliator.shouldShowContinuousHint(false, change('a'))
+        ).resolves.toBe(true);
+        await expect(
+          reconciliator.shouldShowContinuousHint(false, change('.'))
+        ).resolves.toBe(false);
+        await expect(
+          reconciliator.shouldShowContinuousHint(false, change('ab'))
+        ).resolves.toBe(false);
+        await expect(
+          reconciliator.shouldShowContinuousHint(true, change('a'))
+        ).resolves.toBe(false);
+
+        editor.dispose();
       });
     });
     describe('#applicableProviders()', () => {

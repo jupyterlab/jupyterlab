@@ -25,6 +25,7 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
     .waitFor({ state: 'visible' });
   // Wait a short while as the file initializes before renaming, see
   // https://github.com/jupyterlab/jupyterlab/issues/18455
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(100);
   await page.contents.renameFile(
     `${tmpPath}/dir1/dir2/untitled.txt`,
@@ -81,4 +82,34 @@ test('File rename input respects UI font size', async ({ page }) => {
   );
 
   expect(inputFontSize).toEqual(normalFontSize);
+});
+
+test('Filter input is cleared after navigating into a subdirectory', async ({
+  page,
+  tmpPath
+}) => {
+  await page.contents.createDirectory(`${tmpPath}/mydir`);
+  await page.contents.uploadContent(
+    'data',
+    'text',
+    `${tmpPath}/mydir/file.txt`
+  );
+  await page.contents.uploadContent('data', 'text', `${tmpPath}/other.txt`);
+  await page.filebrowser.openDirectory(tmpPath);
+
+  const filterInput = page.locator('input[placeholder="Filter files by name"]');
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('filebrowser:toggle-file-filter')
+  );
+  await filterInput.fill('mydir');
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
+
+  await page.locator('.jp-DirListing-item:has-text("mydir")').dblclick();
+
+  await expect(
+    page.locator('.jp-DirListing-item:has-text("file.txt")')
+  ).toBeVisible();
+
+  await expect(filterInput).toHaveValue('');
 });

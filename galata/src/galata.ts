@@ -60,7 +60,7 @@ export namespace galata {
         // we fall back to Noto Simplified Chinese (for tests where only
         // a few Chinese characters are shown). For tests where the whole
         // UI is meant to be displayed in a non-Latin script, drop the
-        // "system-ui" part so that `font-display: swap` is respected.
+        // "DejaVu Sans" part so that `font-display: swap` is respected.
         'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
         'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
       }
@@ -464,7 +464,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Sessions API
@@ -473,7 +473,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const sessions = /.*\/api\/sessions(?<id>\/[@:-\w]+)?/;
+    export const sessions = /.*\/api\/sessions(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Settings API
@@ -482,7 +482,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const settings = /.*\/api\/settings(?<id>(\/[@:-\w]+)*)/;
+    export const settings = /.*\/api\/settings(?<id>(\/[@:\-\w]+)*)/;
 
     /**
      * Terminals API
@@ -491,7 +491,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const terminals = /.*\/api\/terminals(?<id>\/[@:-\w]+)?/;
+    export const terminals = /.*\/api\/terminals(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Translations API
@@ -500,7 +500,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const translations = /.*\/api\/translations(?<id>\/[@:-\w]+)?/;
+    export const translations = /.*\/api\/translations(?<id>\/[@:\-\w]+)?/;
 
     /**
      * Workspaces API
@@ -797,8 +797,7 @@ export namespace galata {
       config: Record<string, JSONObject>
     ): Promise<void> {
       await page.route(Routes.config, (route, request) => {
-        const section = Routes.config.exec(request.url())?.groups
-          ?.section as string;
+        const { section } = Routes.config.exec(request.url())!.groups!;
         switch (request.method()) {
           case 'GET':
             return route.fulfill({

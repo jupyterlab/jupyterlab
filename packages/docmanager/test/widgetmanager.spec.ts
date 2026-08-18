@@ -292,8 +292,8 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should prompt the user before closing', async () => {
-        // Populate the model with content.
-        context.model.fromString('foo');
+        // Mark the model as dirty.
+        context.model.dirty = true;
 
         const widget = manager.createWidget(widgetFactory, context);
         const closed = manager.onClose(widget);
@@ -305,7 +305,7 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should ask confirmation when a dirty widget is closing', async () => {
         manager.confirmClosingDocument = true;
-        context.model.fromString('foo');
+        context.model.dirty = true;
 
         const widget = manager.createWidget(widgetFactory, context);
         const closed = manager.onClose(widget);
@@ -324,8 +324,8 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should not prompt if the other widget is writable', async () => {
-        // Populate the model with content.
-        context.model.fromString('foo');
+        // Mark the model as dirty.
+        context.model.dirty = true;
 
         const one = manager.createWidget(widgetFactory, context);
         const two = manager.createWidget(widgetFactory, context);
@@ -338,8 +338,8 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should prompt if the only other widget has a readonly factory', async () => {
-        // Populate the model with content.
-        context.model.fromString('foo');
+        // Mark the model as dirty.
+        context.model.dirty = true;
 
         const writable = manager.createWidget(widgetFactory, context);
         const readonly = manager.createWidget(readOnlyFactory, context);
@@ -354,7 +354,7 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should close the widget', async () => {
-        context.model.fromString('foo');
+        context.model.dirty = true;
         const widget = manager.createWidget(widgetFactory, context);
         const promise = manager.onClose(widget);
         await dismissDialog();

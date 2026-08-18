@@ -2,9 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
+import { waitForLauncherIcons } from './utils';
 
 test.describe('General Tests', () => {
   test('Launch Screen', async ({ page }) => {
+    await waitForLauncherIcons(page);
     const imageName = 'launch.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
@@ -52,6 +54,7 @@ test.describe('General Tests', () => {
     );
     // Wait for a short time to increase the chance that
     // the setting was already saved on the backend.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
     await page.reload();
     expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');

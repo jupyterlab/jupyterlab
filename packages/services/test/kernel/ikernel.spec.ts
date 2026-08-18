@@ -4,9 +4,63 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import type WebSocket from 'ws';
 import type { Kernel, KernelManager, KernelSpec } from '../../src';
 import { KernelMessage, KernelSpecAPI } from '../../src';
+import { deserialize } from '../../src/kernel/serialize';
 import { FakeKernelManager, handleRequest, KernelTester } from '../utils';
+
+class RequestOrderKernelTester extends KernelTester {
+  requestOrder: string[] = [];
+
+  waitForNextRequest(): Promise<string> {
+    const delegate = new PromiseDelegate<string>();
+    this._nextRequestWaiters.push(delegate);
+    return delegate.promise;
+  }
+
+  waitForRequestType(msgType: string): Promise<void> {
+    if (this.requestOrder.includes(msgType)) {
+      return Promise.resolve();
+    }
+    const delegate = new PromiseDelegate<void>();
+    this._requestTypeWaiters.push({ msgType, delegate });
+    return delegate.promise;
+  }
+
+  protected onSocket(sock: WebSocket): void {
+    super.onSocket(sock);
+    sock.on('message', (msg: any) => {
+      if (msg instanceof Buffer) {
+        msg = new Uint8Array(msg).buffer;
+      }
+      const data = deserialize(
+        msg,
+        KernelMessage.supportedKernelWebSocketProtocols
+          .v1KernelWebsocketJupyterOrg
+      );
+      const msgType = data.header.msg_type;
+      this.requestOrder.push(msgType);
+
+      for (const delegate of this._nextRequestWaiters.splice(0)) {
+        delegate.resolve(msgType);
+      }
+      this._requestTypeWaiters = this._requestTypeWaiters.filter(waiter => {
+        if (waiter.msgType === msgType) {
+          waiter.delegate.resolve();
+          return false;
+        }
+        return true;
+      });
+    });
+  }
+
+  private _nextRequestWaiters: PromiseDelegate<string>[] = [];
+  private _requestTypeWaiters: Array<{
+    msgType: string;
+    delegate: PromiseDelegate<void>;
+  }> = [];
+}
 
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernelConnection;
@@ -690,6 +744,60 @@ describe('Kernel.IKernel', () => {
       expect(future.isDisposed).toBe(true);
       expect(comm.isDisposed).toBe(true);
       await kernel.shutdown();
+    });
+
+    it('should prioritize kernel info after late messages during restart', async () => {
+      const tester = new RequestOrderKernelTester();
+      const kernel = await tester.start();
+      let future:
+        | Kernel.IShellFuture<
+            KernelMessage.IExecuteRequestMsg,
+            KernelMessage.IExecuteReplyMsg
+          >
+        | undefined;
+
+      try {
+        (kernel as any)._kernelInfoTimeout = 100;
+        tester.requestOrder = [];
+
+        const restartResponse = new PromiseDelegate<Response>();
+        const oldFetch = tester.serverSettings.fetch;
+        (tester.serverSettings as any).fetch = () => {
+          (tester.serverSettings as any).fetch = oldFetch;
+          return restartResponse.promise;
+        };
+
+        const firstRequest = tester.waitForNextRequest();
+        const restart = kernel.restart();
+        future = kernel.requestExecute({ code: 'foo' });
+
+        const staleMessageId = UUID.uuid4();
+        const staleMessage = testEmission(kernel.anyMessage, {
+          find: (_, args) =>
+            args.direction === 'recv' &&
+            args.msg.header.msg_id === staleMessageId
+        });
+        tester.sendStatus(staleMessageId, 'idle');
+        await staleMessage;
+
+        restartResponse.resolve(
+          new Response(JSON.stringify({ id: kernel.id, name: kernel.name }), {
+            status: 200
+          })
+        );
+
+        expect(await firstRequest).toBe('kernel_info_request');
+        await restart;
+        await tester.waitForRequestType('execute_request');
+        expect(tester.requestOrder.slice(0, 2)).toEqual([
+          'kernel_info_request',
+          'execute_request'
+        ]);
+      } finally {
+        future?.dispose();
+        await tester.shutdown();
+        tester.dispose();
+      }
     });
   });
 

@@ -37,6 +37,11 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('No Kernel');
 
+      // Save notebook via galata (otherwise we would need
+      // to save and wait until dirty icon goes away to avoid
+      // another dialog showing up randomly on close due to race).
+      await page.notebook.save();
+
       await Promise.all([
         page
           .getByRole('tab', { name: 'Untitled.ipynb' })
@@ -255,7 +260,7 @@ test.describe('Kernel', () => {
     // Switch back to running notebook
     await page.notebook.activate('Untitled.ipynb');
     // The status bar should show Busy since the long running script is still executing
-    await page.waitForTimeout(500);
+    await statusBar.getByText('Busy').waitFor();
 
     const statusText = await statusBar.textContent();
     expect(statusText).toContain('Busy');
