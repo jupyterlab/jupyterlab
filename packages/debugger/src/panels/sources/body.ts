@@ -44,7 +44,7 @@ export class SourcesBody extends Widget {
 
     void this._showSource();
 
-    this._model.currentSourceChanged.connect(this._showSource.bind(this));
+    this._model.currentSourceChanged.connect(this._showSource, this);
 
     const layout = new PanelLayout();
     layout.addWidget(this._editor);
