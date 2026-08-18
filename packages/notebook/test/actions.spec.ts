@@ -20,6 +20,8 @@ import {
 } from '@jupyterlab/notebook';
 import type { Stdin } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { Kernel } from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 import type { IExecutionState, ISharedCodeCell } from '@jupyter/ydoc';
 import type { YNotebook } from '@jupyter/ydoc';
 import {
@@ -67,6 +69,103 @@ function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
         resolve();
       }
     });
+  });
+}
+
+function createResolvedFuture(
+  executionCount = 1
+): Kernel.IShellFuture<
+  KernelMessage.IExecuteRequestMsg,
+  KernelMessage.IExecuteReplyMsg
+> {
+  const done = Promise.resolve(
+    KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+      channel: 'shell',
+      msgType: 'execute_reply',
+      session: UUID.uuid4(),
+      content: {
+        status: 'ok',
+        execution_count: executionCount,
+        user_expressions: {},
+        payload: []
+      }
+    })
+  );
+  return {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+}
+
+function createPendingFuture(): {
+  future: Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  resolve: (executionCount?: number) => void;
+} {
+  let resolveDone: (msg: KernelMessage.IExecuteReplyMsg) => void = () => {
+    return;
+  };
+  const done = new Promise<KernelMessage.IExecuteReplyMsg>(resolve => {
+    resolveDone = resolve;
+  });
+  const future = {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  return {
+    future,
+    resolve: (executionCount = 1) => {
+      resolveDone(
+        KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+          channel: 'shell',
+          msgType: 'execute_reply',
+          session: UUID.uuid4(),
+          content: {
+            status: 'ok',
+            execution_count: executionCount,
+            user_expressions: {},
+            payload: []
+          }
+        })
+      );
+    }
+  };
+}
+
+function createStreamMessage(text: string): KernelMessage.IStreamMsg {
+  return KernelMessage.createMessage<KernelMessage.IStreamMsg>({
+    channel: 'iopub',
+    msgType: 'stream',
+    session: UUID.uuid4(),
+    content: {
+      name: 'stdout',
+      text
+    }
+  });
+}
+
+function createClearOutputMessage(wait = true): KernelMessage.IClearOutputMsg {
+  return KernelMessage.createMessage<KernelMessage.IClearOutputMsg>({
+    channel: 'iopub',
+    msgType: 'clear_output',
+    session: UUID.uuid4(),
+    content: {
+      wait
+    }
   });
 }
 
@@ -2622,6 +2721,43 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
       }, 20000);
 
+      it('should not show newer-output notification after undoing a cell type change', async () => {
+        const initialVisibleOutput = 'before\n';
+        const finalOutput = 'after\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.outputs.clear();
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: initialVisibleOutput
+        });
+        const future = createResolvedFuture(1);
+        cell.outputArea.reattachFuture(future);
+        NotebookActions.changeCellType(widget, 'markdown');
+
+        // Simulate output that arrived while the cell widget was replaced.
+        void future.onIOPub(createClearOutputMessage());
+        void future.onIOPub(createStreamMessage(finalOutput));
+        await Promise.resolve();
+
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => '');
+        try {
+          NotebookActions.undo(widget);
+          expect(notificationInfo).not.toHaveBeenCalled();
+
+          const cellAfterUndo = widget.widgets[0] as CodeCell;
+          expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+          expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+            initialVisibleOutput
+          );
+        } finally {
+          notificationInfo.mockRestore();
+        }
+      });
+
       it('should preserve execution state and output after undoing a cell deletion', async () => {
         const finalOutput = '0\n1\n2\n3\n4\n';
         const cell = widget.widgets[0] as CodeCell;
@@ -2665,6 +2801,101 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterUndo.model.executionState).toBe('idle');
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
       }, 20000);
+
+      it('should keep restored output and allow applying newer buffered output after undoing a cell deletion', async () => {
+        const initialVisibleOutput = 'before\n';
+        const finalOutput = 'after\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.outputs.clear();
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: initialVisibleOutput
+        });
+        const future = createResolvedFuture(2);
+        cell.outputArea.reattachFuture(future);
+
+        NotebookActions.deleteCells(widget);
+        // Simulate output that arrived while the cell was deleted.
+        void future.onIOPub(createClearOutputMessage());
+        void future.onIOPub(createStreamMessage(finalOutput));
+        await Promise.resolve();
+
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => '');
+        try {
+          NotebookActions.undo(widget);
+
+          const cellAfterUndo = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+          // Default view keeps the output as it was when the cell was deleted.
+          expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+            initialVisibleOutput
+          );
+          expect(notificationInfo).toHaveBeenCalledTimes(1);
+
+          const showNewOutputsAction =
+            notificationInfo.mock.calls[0][1]?.actions?.[0];
+          expect(showNewOutputsAction?.label).toBe('Show new outputs');
+          showNewOutputsAction?.callback(new MouseEvent('click'));
+          await Promise.resolve();
+
+          expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+            finalOutput
+          );
+          expect(cellAfterUndo.model.executionCount).toBe(2);
+        } finally {
+          notificationInfo.mockRestore();
+        }
+      });
+
+      it('should keep stream output contiguous across repeated deletion undo', async () => {
+        const initialVisibleOutput = '0\n1\n2\n3\n4\n5\n';
+        const firstBufferedOutput = '6\n7\n8\n9\n10\n';
+        const secondBufferedOutput = '11\n12\n13\n14\n15\n16\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.outputs.clear();
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: initialVisibleOutput
+        });
+        const { future, resolve } = createPendingFuture();
+        cell.outputArea.reattachFuture(future);
+
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage(firstBufferedOutput));
+        NotebookActions.undo(widget);
+
+        let cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          initialVisibleOutput + firstBufferedOutput
+        );
+
+        NotebookActions.redo(widget);
+        void future.onIOPub(createStreamMessage(secondBufferedOutput));
+        NotebookActions.undo(widget);
+
+        cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          initialVisibleOutput + firstBufferedOutput + secondBufferedOutput
+        );
+
+        resolve(3);
+        await future.done;
+      });
 
       it('should preserve execution state and output after undoing a move of a running cell', async () => {
         const finalOutput = '0\n1\n2\n3\n4\n';
