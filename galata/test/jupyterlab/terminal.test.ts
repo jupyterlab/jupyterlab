@@ -4,49 +4,20 @@
  */
 
 import path from 'path';
-import { type Locator, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
+const TERMINAL_TAB_LABEL_SELECTOR =
+  '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel';
 const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
-
-/**
- * Run a shell command in the visible terminal panel.
- *
- * @param page Playwright page (provided by galata fixture)
- * @param terminalLocator Locator that matches the terminal container
- * @param command Shell command to run
- */
-async function runCommand(
-  page: Page,
-  terminalLocator: Locator,
-  command: string,
-  verify = false
-): Promise<void> {
-  await terminalLocator.waitFor({ state: 'visible' });
-  await terminalLocator.locator('.xterm-screen').click();
-
-  const terminalInput = terminalLocator.locator(TERMINAL_INPUT_SELECTOR);
-  await terminalInput.waitFor({ state: 'attached' });
-  await expect(terminalInput).toBeFocused();
-
-  await page.keyboard.type(command);
-  if (verify) {
-    await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
-      command
-    );
-  }
-  await page.keyboard.press('Enter');
-}
 
 async function waitForTerminal(page: Page) {
   const terminal = page.locator(TERMINAL_SELECTOR);
   await terminal.waitFor();
-  const terminalTabLabel = page.locator(
-    '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
-  );
-  await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+  const terminalTabLabel = page.locator(TERMINAL_TAB_LABEL_SELECTOR);
+  await terminalTabLabel.filter({ hasText: /^Terminal \d+$/ }).waitFor();
 }
 
 /**
@@ -125,11 +96,59 @@ test.describe('Terminal', () => {
 
   test.describe('Open', () => {
     test('should appear in the sidebar', async ({ page }) => {
+      await waitForTerminal(page);
+      const terminalTitle = await page
+        .locator(TERMINAL_TAB_LABEL_SELECTOR)
+        .first()
+        .innerText();
+
       await page.sidebar.openTab('jp-running-sessions');
-      // The number at the end is the identifier of the terminal.
-      // We allow any because concurrent execution of tests means
-      // that server can assign an identifier different than `1`.
-      await expect(page.locator('text=/terminals\\/\\d+/')).toBeVisible();
+
+      await expect(
+        page
+          .locator('#jp-running-sessions .jp-RunningSessions-itemLabel')
+          .filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+    });
+
+    test('should reuse terminal tab title in the running sidebar', async ({
+      page
+    }) => {
+      const terminalTitle = 'Galata terminal title';
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+
+      const titleSaved = page.terminal.waitForTitleSaved(terminalTitle);
+      await page.terminal.runCommand(`printf "\\033]2;${terminalTitle}\\007"`, {
+        terminal
+      });
+
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+
+      await page.sidebar.openTab('jp-running-sessions');
+      const runningLabels = page.locator(
+        '#jp-running-sessions .jp-RunningSessions-itemLabel'
+      );
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+
+      await page.activity.closePanel(terminalTitle);
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(1);
+      await titleSaved;
+
+      await page.reload();
+      await page.sidebar.openTab('jp-running-sessions');
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(1);
     });
   });
 
@@ -212,7 +231,7 @@ test.describe('Terminal', () => {
       await waitForTerminal(page);
 
       // Display some content in terminal.
-      await runCommand(page, terminal, 'seq 1006 2 1024');
+      await page.terminal.runCommand('seq 1006 2 1024', { terminal });
 
       // Perform search.
       const searchText = '101';
@@ -268,7 +287,7 @@ test.describe('Terminal', () => {
       await terminalInput.waitFor();
 
       // Display enough content to make the terminal scrollable.
-      await runCommand(page, terminal, 'seq 1 200');
+      await page.terminal.runCommand('seq 1 200', { terminal });
 
       // The position of the scrollbar slider reflects the scroll position
       // independently of the renderer; once the output arrives the terminal
@@ -345,7 +364,10 @@ test.describe('Terminal', () => {
     await waitForTerminal(page);
 
     // use the local helper to run basename
-    await runCommand(page, terminal, 'basename $PWD', true);
+    await page.terminal.runCommand('basename $PWD', {
+      terminal,
+      verify: true
+    });
 
     // Wait for the basename to appear in the terminal output
     const basename = path.basename(tmpPath);
@@ -365,7 +387,10 @@ test.describe('Terminal', () => {
     const terminal = page.locator(TERMINAL_SELECTOR);
     await waitForTerminal(page);
 
-    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
+    await page.terminal.runCommand('echo https://jupyter.org/', {
+      terminal,
+      verify: true
+    });
 
     // Wait for the URL to appear in the terminal output
     const terminalBody = terminal.locator('.jp-Terminal-body:visible');
@@ -570,7 +595,7 @@ test.describe('Open in Terminal from File Browser', () => {
     await terminalPanelLocator.click();
 
     // Use helper to execute pwd in the visible terminal container
-    await runCommand(page, terminalPanelLocator, 'pwd');
+    await page.terminal.runCommand('pwd', { terminal: terminalPanelLocator });
 
     await expect(terminalPanelLocator).toContainText(folderName, {
       timeout: 5000
@@ -643,7 +668,7 @@ test.describe('Open in Terminal from File Browser', () => {
         timeout: 15000
       });
 
-      await runCommand(page, terminalPanel, 'pwd');
+      await page.terminal.runCommand('pwd', { terminal: terminalPanel });
 
       await expect(terminalPanel).toContainText(
         new RegExp(`${folderA}|${folderB}`),
@@ -710,7 +735,7 @@ test.describe('Open in Terminal from File Browser', () => {
     const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
     await activeTerminal.waitFor({ state: 'visible' });
 
-    await runCommand(page, activeTerminal, 'pwd');
+    await page.terminal.runCommand('pwd', { terminal: activeTerminal });
 
     const activeBody = activeTerminal.locator('.jp-Terminal-body:visible');
     await expect(activeBody).toContainText(folderName, { timeout: 5000 });
