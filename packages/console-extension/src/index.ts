@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module console-extension
@@ -39,7 +38,10 @@ import {
   IConsoleCellExecutor,
   IConsoleTracker
 } from '@jupyterlab/console';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IPageHandler } from '@jupyterlab/outputarea';
@@ -139,6 +141,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   optional: [
     ILayoutRestorer,
     IDefaultFileBrowser,
+    IFileBrowserFactory,
     IMainMenu,
     ICommandPalette,
     ILauncher,
@@ -258,7 +261,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   factory,
   tracker,
   foreign,
@@ -281,6 +284,7 @@ async function activateConsole(
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
   filebrowser: IDefaultFileBrowser | null,
+  filebrowserFactory: IFileBrowserFactory | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -822,10 +826,12 @@ async function activateConsole(
       }
     },
     execute: args => {
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? filebrowser;
       const basePath =
         ((args['basePath'] as string) ||
           (args['cwd'] as string) ||
-          filebrowser?.model.path) ??
+          currentBrowser?.model.path) ??
         '';
       return createConsole({ basePath, ...args });
     }
@@ -863,6 +869,14 @@ async function activateConsole(
     right: dockRightIcon,
     left: dockLeftIcon
   };
+  // Spelled out rather than built from `position` so that the labels are
+  // picked up by the translation string extractor.
+  const labelMap = {
+    top: trans.__('Prompt to top'),
+    bottom: trans.__('Prompt to bottom'),
+    right: trans.__('Prompt to right'),
+    left: trans.__('Prompt to left')
+  };
   promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
     const command = `console:prompt-to-${position}`;
     commands.addCommand(command, {
@@ -875,7 +889,7 @@ async function activateConsole(
       },
       isEnabled: () =>
         !!tracker.currentWidget && tracker.currentWidget.isVisible,
-      label: trans.__(`Prompt to ${position}`),
+      label: labelMap[position],
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {
         args: {
@@ -1570,7 +1584,10 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+  const updateCompleter = async (
+    _: IConsoleTracker | undefined,
+    consolePanel: ConsolePanel
+  ) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,

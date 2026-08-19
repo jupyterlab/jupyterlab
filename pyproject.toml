@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.21.1", "jupyter-builder>=1.0.2"]
+requires = ["hatchling>=1.21.1", "jupyter-builder>=1.1.1"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter-builder>=1.0.2",
+    "jupyter-builder>=1.1.1",
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -49,6 +49,7 @@ dependencies = [
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
+    "typing-extensions>=4.6.0;python_version<\"3.12\"",
 ]
 dynamic = [
     "version",
@@ -111,7 +112,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.15.20",
+    "mypy==1.20.2",
+    "ruff==0.16.1",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -123,7 +125,7 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=1.0.2",
+    "jupyter-builder>=1.1.1",
 ]
 docs = [
     { include-group = "builder" },
@@ -235,6 +237,72 @@ norecursedirs = "node_modules .git _build .ipynb_checkpoints"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml --durations=3"
 ignore = "tests examples"
 
+[tool.mypy]
+files = ["jupyterlab"]
+python_version = "3.10"
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "copier",
+    "jupyter_collaboration",
+    "jupyterhub.singleuser",
+    "jupyterhub.singleuser.mixins",
+    "notebook_shim.shim",
+    "tomli",
+    "tomli_w",
+    "tomllib",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["numpy", "numpy.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
+[[tool.mypy.overrides]]
+module = ["jupyterlab.browser_check"]
+disable_error_code = ["arg-type", "assignment"]
+
+[[tool.mypy.overrides]]
+module = ["jupyterlab.extensions.manager"]
+disable_error_code = [
+    "arg-type",
+    "attr-defined",
+    "misc",
+    "return-value",
+    "union-attr",
+    "var-annotated",
+]
+
+[[tool.mypy.overrides]]
+module = ["jupyterlab.extensions.pypi"]
+disable_error_code = [
+    "arg-type",
+    "assignment",
+    "attr-defined",
+    "call-overload",
+    "dict-item",
+    "override",
+    "return-value",
+    "var-annotated",
+]
+
+[[tool.mypy.overrides]]
+module = ["jupyterlab.handlers.announcements"]
+disable_error_code = [
+    "arg-type",
+    "assignment",
+    "attr-defined",
+    "return-value",
+    "union-attr",
+    "var-annotated",
+]
+
+[[tool.mypy.overrides]]
+module = ["jupyterlab.labapp"]
+disable_error_code = ["arg-type", "assignment", "union-attr"]
+
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
@@ -263,7 +331,7 @@ exclude = ["*.ipynb"]
 target-version = "py310"
 line-length = 100
 lint.select = [
-  "A", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
+  "A", "ANN", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
   "ICN", "LOG", "N", "PERF", "PIE", "PLC", "PLE", "PLR", "PLW", "Q", "RSE",
   "RUF", "S", "SIM", "SLOT", "T", "TC", "TID", "UP", "W", "YTT",
 ]
@@ -274,9 +342,15 @@ lint.ignore = [
 "E501",
 # PLR0913 Too many arguments to function call
 "PLR0913",
+# PLR0917 Too many positional arguments
+"PLR0917",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
 
 [tool.ruff.lint.per-file-ignores]
 # F821 Undefined name `c`
@@ -286,9 +360,11 @@ lint.ignore = [
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "examples/federated/main.py" = ["RUF012"]
 # T201 `print` found
-"examples/test_examples.py" = ["T201"]
+"examples/test_examples.py" = ["T201", "ANN"]
 # T201 `print` found
 "galata/*" = ["T201"]
+# ANN is skipped for Python test and fixture files; annotations can change displayed source.
+"galata/test/**/*.py" = ["ANN"]
 # F821 Undefined name `c`
 "galata/jupyter_server_test_config.py" = ["F821"]
 "galata/jupyter_server_csp_test_config.py" = ["F821"]
@@ -310,6 +386,7 @@ lint.ignore = [
 # EM101 Exception must not use a string literal
 # PLR2004 Magic value used in comparison
 "jupyterlab/tests/*" = ["C901", "S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004"]
+"jupyterlab/tests/**" = ["ANN"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/tests/echo_kernel.py" = ["RUF012"]
 # T201 `print` found

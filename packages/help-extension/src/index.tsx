@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module help-extension
@@ -205,7 +204,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2025)}
+            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2026)}
           </span>
         );
         const body = (
@@ -426,7 +425,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       }
     ];
 
-    resources.sort((a: any, b: any) => {
+    resources.sort((a, b) => {
       return a.text.localeCompare(b.text);
     });
 
@@ -595,7 +594,7 @@ const resources: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   about,
   jupyterForum,
   licensesCommands,

@@ -1296,6 +1296,9 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
     function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
       const menu = new RankedMenu({ ...options, commands: app.commands });
       if (options.label) {
+        // The label comes from the `jupyter.lab.menus` key of a settings
+        // schema, from which it is extracted by the schema selectors.
+        // eslint-disable-next-line jupyter/no-dynamic-translation
         menu.title.label = trans.__(options.label);
       }
       return menu;

@@ -7,7 +7,7 @@ import { closeIcon } from '@jupyterlab/ui-components';
 import type { PartialJSONObject, PartialJSONValue } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
@@ -211,11 +211,32 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
         .catch(console.error);
     }
   };
-  const debouncedSetProperty = new Debouncer<
+  // One debouncer for the lifetime of the component. Building a new one per
+  // render meant a render between two edits put them on different debouncers,
+  // so they were never coalesced and a pending write carried the state of the
+  // render that scheduled it. `setProperty` closes over `propertyMap`, so the
+  // debouncer reaches the current one through a ref instead of capturing the
+  // one from the first render.
+  const setPropertyRef = useRef(setProperty);
+  setPropertyRef.current = setProperty;
+  const debouncerRef = useRef<Debouncer<
     void,
     unknown,
     [hash: string, property: ISettingProperty]
-  >(setProperty);
+  > | null>(null);
+  if (!debouncerRef.current) {
+    debouncerRef.current = new Debouncer(
+      (hash: string, property: ISettingProperty) =>
+        setPropertyRef.current(hash, property)
+    );
+  }
+  const debouncedSetProperty = debouncerRef.current;
+  useEffect(() => {
+    return () => {
+      debouncerRef.current?.dispose();
+      debouncerRef.current = null;
+    };
+  }, []);
   const textInputId = useRef<string>(
     DOMUtils.createDomID() + '-line-number-input'
   );

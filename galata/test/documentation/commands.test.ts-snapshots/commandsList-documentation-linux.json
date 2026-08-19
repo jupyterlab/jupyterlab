@@ -3874,6 +3874,16 @@
     }
   },
   {
+    "id": "markdownviewer:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "markdownviewer:edit",
     "label": "Show Markdown Editor",
     "caption": "",
@@ -5701,6 +5711,16 @@
   {
     "id": "terminal:copy",
     "label": "Copy",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "terminal:copy-link",
+    "label": "Copy Link Address",
     "caption": "",
     "shortcuts": [],
     "args": {
