@@ -144,8 +144,20 @@ export class MimeContent extends Widget {
     if (this._dataType === 'string') {
       data[this.mimeType] = model.toString();
     } else {
-      data[this.mimeType] = model.toJSON();
+      // `model.toJSON()` parses the document source, which throws when the
+      // content is not valid JSON. Surface that as an inline error in the
+      // widget (and keep the document open) rather than letting the render
+      // pass fail silently. See https://github.com/jupyterlab/jupyterlab/issues/4490
+      try {
+        data[this.mimeType] = model.toJSON();
+      } catch (reason) {
+        this._setError(
+          this._trans.__('The file does not contain valid JSON: %1', `${reason}`)
+        );
+        return;
+      }
     }
+    this._setError(null);
     const mimeModel = new MimeModel({
       data,
       callback: this._changeCallback,
@@ -172,6 +184,35 @@ export class MimeContent extends Widget {
         reason
       );
     }
+  }
+
+  /**
+   * Show or clear an inline error banner in the widget.
+   *
+   * @param message - The error message to show, or `null` to clear it.
+   *
+   * #### Notes
+   * The banner is shown above the rendered content and the last successfully
+   * rendered content is left in place, so the document stays open and
+   * recovers automatically once the content is valid again.
+   */
+  private _setError(message: string | null): void {
+    if (message === null) {
+      if (this._errorNode) {
+        this._errorNode.remove();
+        this._errorNode = null;
+      }
+      this.removeClass('jp-MimeDocument-error');
+      return;
+    }
+    if (!this._errorNode) {
+      this._errorNode = document.createElement('div');
+      this._errorNode.className = 'jp-MimeDocument-errorBanner';
+      this._errorNode.setAttribute('role', 'alert');
+      this.node.insertBefore(this._errorNode, this.node.firstChild);
+    }
+    this._errorNode.textContent = message;
+    this.addClass('jp-MimeDocument-error');
   }
 
   /**
@@ -206,6 +247,7 @@ export class MimeContent extends Widget {
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
+  private _errorNode: HTMLDivElement | null = null;
   private _isRendering = false;
   private _renderRequested = false;
 }

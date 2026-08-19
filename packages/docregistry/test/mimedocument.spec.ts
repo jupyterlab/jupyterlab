@@ -121,5 +121,51 @@ describe('docregistry/mimedocument', () => {
         await emission;
       });
     });
+
+    describe('invalid JSON', () => {
+      const errorSelector = '.jp-MimeDocument-errorBanner';
+
+      it('should show an inline error banner instead of failing silently', async () => {
+        const renderer = RENDERMIME.createRenderer('application/json');
+        const widget = new MimeContent({
+          context: dContext,
+          renderer,
+          mimeType: 'application/json',
+          renderTimeout: 1000,
+          dataType: 'json'
+        });
+        dContext.model.fromString('{ invalid');
+        await widget.ready;
+        const banner = widget.node.querySelector(errorSelector);
+        expect(banner).not.toBeNull();
+        expect(widget.hasClass('jp-MimeDocument-error')).toBe(true);
+        // The document is not disposed on invalid JSON.
+        expect(widget.isDisposed).toBe(false);
+        widget.dispose();
+      });
+
+      it('should clear the error banner once the content is valid again', async () => {
+        const renderer = RENDERMIME.createRenderer('application/json');
+        const widget = new MimeContent({
+          context: dContext,
+          renderer,
+          mimeType: 'application/json',
+          renderTimeout: 1000,
+          dataType: 'json'
+        });
+        dContext.model.fromString('{ invalid');
+        await widget.ready;
+        expect(widget.node.querySelector(errorSelector)).not.toBeNull();
+
+        // Make the content valid and request a re-render.
+        dContext.model.fromString('{ "valid": true }');
+        widget.update();
+        // Allow the asynchronous update-driven render to complete.
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(widget.node.querySelector(errorSelector)).toBeNull();
+        expect(widget.hasClass('jp-MimeDocument-error')).toBe(false);
+        widget.dispose();
+      });
+    });
   });
 });
