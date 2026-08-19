@@ -19,6 +19,12 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
 
+import type { FindTeX } from 'mathjax-full/js/input/tex/FindTeX';
+
+import type { protoItem as protoItemType } from 'mathjax-full/js/core/MathItem';
+
+import type { quotePattern as quotePatternType } from 'mathjax-full/js/util/string';
+
 namespace CommandIDs {
   /**
    * Copy raw LaTeX to clipboard.
@@ -48,7 +54,8 @@ export class MathJaxTypesetter implements ILatexTypesetter {
    */
   constructor(options: MathJaxTypesetter.IOptions = {}) {
     this.mathParseOptions = {
-      dollarInlineMath: options.dollarInlineMath ?? true
+      dollarInlineMath: options.dollarInlineMath ?? true,
+      smartInlineMath: options.smartInlineMath ?? true
     };
   }
 
@@ -79,10 +86,15 @@ export class MathJaxTypesetter implements ILatexTypesetter {
 
   protected async _ensureInitialized() {
     if (!this._initialized) {
+      // `smartInlineMath` only has an effect when a single `$` is a delimiter.
+      const smartInlineMath =
+        this.mathParseOptions.dollarInlineMath !== false &&
+        this.mathParseOptions.smartInlineMath === true;
       this._mathDocument = await Private.ensureMathDocument(
         this.mathParseOptions.dollarInlineMath === false
           ? Private.INLINE_MATH_WITHOUT_DOLLAR
-          : Private.DEFAULT_INLINE_MATH
+          : Private.DEFAULT_INLINE_MATH,
+        smartInlineMath
       );
       this._initialized = true;
     }
@@ -257,6 +269,177 @@ namespace Private {
   ];
 
   /**
+   * Whether the character at `index` in `text` is a non-space character.
+   */
+  function isNonSpace(text: string, index: number): boolean {
+    const character = text.charAt(index);
+    return character !== '' && !/\s/.test(character);
+  }
+
+  /**
+   * Whether a `$` at `index` may open inline math under pandoc's smart
+   * delimiter rules: the opening `$` must have a non-space character
+   * immediately to its right.
+   */
+  function isSmartDollarStart(text: string, index: number): boolean {
+    return isNonSpace(text, index + 1);
+  }
+
+  /**
+   * Whether the `$` matched by `match` may close inline math under pandoc's
+   * smart delimiter rules: the closing `$` must have a non-space character
+   * immediately to its left and must not be followed immediately by a digit.
+   */
+  function isSmartDollarEnd(
+    text: string,
+    index: number,
+    length: number
+  ): boolean {
+    return (
+      isNonSpace(text, index - 1) && !/\d/.test(text.charAt(index + length))
+    );
+  }
+
+  /**
+   * Build a `FindTeX` instance that applies pandoc's smart `$` delimiter
+   * rules, so that currency amounts such as "$24 and $27" are left literal
+   * while genuine inline math such as `$x^2$` is still recognized.
+   *
+   * Display math (`$$...$$`) and the `\(...\)` / `\[...\]` delimiters are
+   * unaffected. Only single `$` delimiters are subject to the smart rules.
+   *
+   * @param FindTeXKlass - The `FindTeX` class to extend (loaded dynamically).
+   * @param protoItem - The `protoItem` factory from MathJax's `MathItem`.
+   * @param quotePattern - The `quotePattern` helper from MathJax's `string`.
+   * @param options - The finder options (delimiters and process flags).
+   */
+  export function createSmartFindTeX(
+    FindTeXKlass: typeof FindTeX<any, any, any>,
+    protoItem: typeof protoItemType,
+    quotePattern: typeof quotePatternType,
+    options: {
+      inlineMath: [string, string][];
+      displayMath: [string, string][];
+      processEscapes: boolean;
+      processEnvironments: boolean;
+      processRefs: boolean;
+    }
+  ): FindTeX<any, any, any> {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    class SmartFindTeX extends FindTeXKlass {
+      /**
+       * Register `smartInlineMath` as a known option so that MathJax's
+       * option handling accepts it instead of dropping it (with a warning)
+       * as if it were unknown.
+       */
+      public static OPTIONS = {
+        ...FindTeXKlass.OPTIONS,
+        smartInlineMath: false
+      };
+
+      protected override findMathInString(
+        math: any[],
+        n: number,
+        text: string
+      ): void {
+        let start: RegExpExecArray | null;
+        let match: any;
+
+        this.start.lastIndex = 0;
+        while ((start = this.start.exec(text))) {
+          if (start[this.env] !== undefined && this.env) {
+            const end =
+              '\\\\end\\s*(\\{' + quotePattern(start[this.env]) + '\\})';
+            match = this.findEnd(text, n, start, [
+              '{' + start[this.env] + '}',
+              true,
+              this.endPattern('', end)
+            ]);
+            if (match) {
+              match.math = match.open + match.math + match.close;
+              match.open = match.close = '';
+            }
+          } else if (start[this.sub] !== undefined && this.sub) {
+            const mathString = start[this.sub];
+            const end = start.index + start[this.sub].length;
+            if (mathString.length === 2) {
+              match = protoItem(
+                '',
+                mathString.substr(1),
+                '',
+                n,
+                start.index,
+                end
+              );
+            } else {
+              match = protoItem('', mathString, '', n, start.index, end, false);
+            }
+          } else {
+            // A `$` which is not followed by a non-space character cannot
+            // open inline math; leave it literal and keep scanning after it.
+            if (
+              start[0] === '$' &&
+              this.options['smartInlineMath'] &&
+              !isSmartDollarStart(text, start.index)
+            ) {
+              continue;
+            }
+            match = this.findEnd(text, n, start, this.end[start[0]]);
+          }
+          if (match) {
+            math.push(match);
+            this.start.lastIndex = match.end.n;
+          }
+        }
+      }
+
+      protected override findEnd(
+        text: string,
+        n: number,
+        start: RegExpExecArray,
+        end: [string, boolean, RegExp]
+      ): any {
+        const [close, display, pattern] = end;
+
+        // Only single `$` delimiters are subject to the smart rules.
+        if (!(this.options['smartInlineMath'] && close === '$')) {
+          return super.findEnd(text, n, start, end);
+        }
+
+        const i = (pattern.lastIndex = start.index + start[0].length);
+        let match: RegExpExecArray | null;
+        let braces = 0;
+
+        while ((match = pattern.exec(text))) {
+          if (
+            (match[1] || match[0]) === close &&
+            braces === 0 &&
+            isSmartDollarEnd(text, match.index, match[0].length)
+          ) {
+            return protoItem(
+              start[0],
+              text.substr(i, match.index - i),
+              match[0],
+              n,
+              start.index,
+              match.index + match[0].length,
+              display
+            );
+          } else if (match[0] === '{') {
+            braces++;
+          } else if (match[0] === '}' && braces) {
+            braces--;
+          }
+        }
+
+        return null as any;
+      }
+    }
+
+    return new SmartFindTeX({ ...options, smartInlineMath: true });
+  }
+
+  /**
    * Load the MathJax modules and register the document handler.
    *
    * The heavy dynamic imports and the (global, one-time) handler registration
@@ -276,7 +459,10 @@ namespace Private {
       { SafeHandler },
       { HTMLHandler },
       { browserAdaptor },
-      { AssistiveMmlHandler }
+      { AssistiveMmlHandler },
+      { protoItem },
+      { quotePattern },
+      { FindTeX }
     ] = await Promise.all([
       import('mathjax-full/js/mathjax'),
       import('mathjax-full/js/output/chtml'),
@@ -286,14 +472,26 @@ namespace Private {
       import('mathjax-full/js/ui/safe/SafeHandler'),
       import('mathjax-full/js/handlers/html/HTMLHandler'),
       import('mathjax-full/js/adaptors/browserAdaptor'),
-      import('mathjax-full/js/a11y/assistive-mml')
+      import('mathjax-full/js/a11y/assistive-mml'),
+      import('mathjax-full/js/core/MathItem'),
+      import('mathjax-full/js/util/string'),
+      import('mathjax-full/js/input/tex/FindTeX')
     ]);
 
     mathjax.handlers.register(
       AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
     );
 
-    return { mathjax, CHTML, TeX, TeXFont, AllPackages };
+    return {
+      mathjax,
+      CHTML,
+      TeX,
+      TeXFont,
+      AllPackages,
+      protoItem,
+      quotePattern,
+      FindTeX
+    };
   }
 
   let _loading: ReturnType<typeof loadModules> | null = null;
@@ -321,12 +519,13 @@ namespace Private {
    * memory cost.
    */
   export function ensureMathDocument(
-    inlineMath: [string, string][]
+    inlineMath: [string, string][],
+    smartInlineMath: boolean = false
   ): Promise<MathDocument<any, any, any>> {
-    const key = JSON.stringify(inlineMath);
+    const key = JSON.stringify({ inlineMath, smartInlineMath });
     let document = _documents.get(key);
     if (!document) {
-      document = createMathDocument(inlineMath);
+      document = createMathDocument(inlineMath, smartInlineMath);
       _documents.set(key, document);
     }
     return document;
@@ -386,10 +585,19 @@ namespace Private {
    * Build a MathDocument configured with the given inline delimiters.
    */
   async function createMathDocument(
-    inlineMath: [string, string][]
+    inlineMath: [string, string][],
+    smartInlineMath: boolean = false
   ): Promise<MathDocument<any, any, any>> {
-    const { mathjax, CHTML, TeX, TeXFont, AllPackages } =
-      await ensureMathModules();
+    const {
+      mathjax,
+      CHTML,
+      TeX,
+      TeXFont,
+      AllPackages,
+      protoItem,
+      quotePattern,
+      FindTeX: FindTeXKlass
+    } = await ensureMathModules();
 
     class EmptyFont extends TeXFont {
       protected static defaultFonts = {} as any;
@@ -404,6 +612,18 @@ namespace Private {
     }
 
     const tex = new TeX({
+      FindTeX: smartInlineMath
+        ? createSmartFindTeX(FindTeXKlass, protoItem, quotePattern, {
+            inlineMath,
+            displayMath: [
+              ['$$', '$$'],
+              ['\\[', '\\]']
+            ],
+            processEscapes: true,
+            processEnvironments: true,
+            processRefs: true
+          })
+        : undefined,
       packages: AllPackages.concat('require'),
       inlineMath,
       displayMath: [
