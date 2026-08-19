@@ -242,7 +242,8 @@ export function shouldOverwrite(
         label: trans.__('Overwrite'),
         ariaLabel: trans.__('Overwrite Existing File')
       })
-    ]
+    ],
+    skipQueue: true
   };
   return showDialog(options).then(result => {
     return Promise.resolve(result.button.accept);
