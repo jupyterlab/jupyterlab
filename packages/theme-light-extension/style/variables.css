@@ -193,7 +193,7 @@ all of MD as it is not optimized for dense, information rich UIs.
    * Code font variables are used for typography of code and other monospaces content.
    */
 
-  --jp-code-font-size: 13px;
+  --jp-code-font-size: calc(var(--jp-content-font-size1) * 13 / 14);
   --jp-code-line-height: 1.3077; /* 17px for 13px base */
   --jp-code-padding: 5px; /* 5px for 13px base, codemirror highlighting needs integer px value */
   --jp-code-font-family-default: menlo, consolas, 'DejaVu Sans Mono', monospace;
