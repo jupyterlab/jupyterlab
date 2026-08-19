@@ -14,7 +14,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { PartialJSONValue } from '@lumino/coreutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type { Title, Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import type { DocumentRegistry, IDocumentWidget } from './index';
 import { createReadonlyLabel } from './components';
 
@@ -570,9 +570,6 @@ export class DocumentWidget<
       this._handleDirtyState();
       this._handleReadOnlyState();
     });
-
-    // listen for changes to the title object
-    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -580,31 +577,6 @@ export class DocumentWidget<
    */
   setFragment(fragment: string): void {
     /* no-op */
-  }
-
-  /**
-   * Handle a title change.
-   */
-  private async _onTitleChanged(_sender: Title<this>) {
-    const validNameExp = /[/\\:]/;
-    const name = this.title.label;
-    // Use localPath to avoid the drive name
-    const filename =
-      this.context.localPath.split('/').pop() || this.context.localPath;
-
-    if (name === filename) {
-      return;
-    }
-    if (name.length > 0 && !validNameExp.test(name)) {
-      const oldPath = this.context.path;
-      await this.context.rename(name);
-      if (this.context.path !== oldPath) {
-        // Rename succeeded
-        return;
-      }
-    }
-    // Reset title if name is invalid or rename fails
-    this.title.label = filename;
   }
 
   /**
