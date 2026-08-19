@@ -1856,7 +1856,9 @@ export namespace CodeCell {
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
       const msg = (await msgPromise)!;
-      model.executionCount = msg.content.execution_count;
+      if (msg.content.status === 'ok') {
+        model.executionCount = msg.content.execution_count;
+      }
       if (recordTiming) {
         const timingInfo = Object.assign(
           {},
