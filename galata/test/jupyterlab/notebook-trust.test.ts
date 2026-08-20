@@ -2,8 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
+import type { ICellModel } from '@jupyterlab/cells';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 
 const fileName = 'trust.ipynb';
+const TRUST_ITEM_SELECTOR = '.jp-StatusItem-trust';
 const TRUSTED_SELECTOR = 'svg[data-icon="ui-components:trusted"]';
 const NOT_TRUSTED_SELECTOR = 'svg[data-icon="ui-components:not-trusted"]';
 
@@ -77,5 +80,82 @@ test.describe('Notebook Trust', () => {
     // It should no longer be trusted
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(0);
     await expect(page.locator(NOT_TRUSTED_SELECTOR)).toHaveCount(1);
+  });
+
+  test('Trust status does not rescan trust state on source edits', async ({
+    page
+  }) => {
+    const trustItem = page.locator(TRUST_ITEM_SELECTOR);
+
+    await page.evaluate(() => {
+      const panel = window.jupyterapp.shell
+        .currentWidget as unknown as NotebookPanel;
+      const model = panel.content.model;
+      if (!model) {
+        throw new Error('Notebook model not found');
+      }
+
+      model.sharedModel.insertCell(1, {
+        cell_type: 'code',
+        metadata: { trusted: true },
+        source: '1'
+      });
+      model.sharedModel.insertCell(2, {
+        cell_type: 'code',
+        metadata: { trusted: true },
+        source: '2'
+      });
+      model.cells.get(2).trusted = false;
+    });
+
+    await expect(trustItem).toHaveAttribute(
+      'title',
+      /2 of 3 code cells trusted\./
+    );
+
+    const trustedReads = await page.evaluate(() => {
+      const panel = window.jupyterapp.shell
+        .currentWidget as unknown as NotebookPanel;
+      const model = panel.content.model;
+      if (!model) {
+        throw new Error('Notebook model not found');
+      }
+      const cell = model.cells.get(0);
+      let prototype = Object.getPrototypeOf(cell);
+      let descriptor: PropertyDescriptor | undefined;
+      let reads = 0;
+
+      while (prototype && !descriptor) {
+        descriptor = Object.getOwnPropertyDescriptor(prototype, 'trusted');
+        prototype = Object.getPrototypeOf(prototype);
+      }
+      if (!descriptor) {
+        throw new Error('Could not find trusted descriptor');
+      }
+
+      Object.defineProperty(cell as ICellModel, 'trusted', {
+        configurable: true,
+        get: function () {
+          reads++;
+          return descriptor.get!.call(this);
+        },
+        set: function (value: boolean) {
+          descriptor.set!.call(this, value);
+        }
+      });
+      try {
+        cell.sharedModel.setSource('print("changed")');
+      } finally {
+        Object.defineProperty(cell as ICellModel, 'trusted', descriptor);
+      }
+
+      return reads;
+    });
+
+    expect(trustedReads).toBe(0);
+    await expect(trustItem).toHaveAttribute(
+      'title',
+      /2 of 3 code cells trusted\./
+    );
   });
 });
