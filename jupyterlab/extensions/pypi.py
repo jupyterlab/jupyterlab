@@ -56,7 +56,8 @@ _R = TypeVar("_R")
 
 
 class _HttpxLegacyAsyncClientFactory(Protocol):
-    def __call__(self, *, proxies: Mapping[str, str | None]) -> httpx.AsyncClient: ...
+    def __call__(self, *, proxies: Mapping[str, str | None]) -> httpx.AsyncClient:
+        raise NotImplementedError
 
 
 def _json_object_or_none(value: object) -> dict[str, JSONValue] | None:

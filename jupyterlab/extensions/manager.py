@@ -529,7 +529,7 @@ class ExtensionManager(PluginManager):
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
-            await self._fetch_listings_from_callback()
+            await self._fetch_listings()
 
         cache = self._extensions_cache[query].cache[page]
         if cache is None:
@@ -560,14 +560,6 @@ class ExtensionManager(PluginManager):
         if query in self._extensions_cache:
             self._extensions_cache[query].cache[page] = None
         await self._update_extensions_list(query, page, per_page)
-
-    async def _fetch_listings_from_callback(self) -> None:
-        """Fetch listings using the periodic callback hook."""
-        if self._listing_fetch is None:
-            return
-        listings_task = self._listing_fetch.callback()
-        if listings_task is not None:
-            await listings_task
 
     async def _fetch_listings(self) -> None:
         """Fetch the listings for the extension manager."""

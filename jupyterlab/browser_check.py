@@ -71,7 +71,8 @@ BrowserTest = Callable[[str], Awaitable[None] | int | None]
 
 
 class _Stoppable(Protocol):
-    def stop(self) -> None: ...
+    def stop(self) -> None:
+        raise NotImplementedError
 
 
 class _BrowserTestApp(Protocol):

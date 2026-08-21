@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, cast
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
-from jupyter_server.utils import to_os_path
+from jupyter_server.utils import ApiPath, to_os_path
 from jupyter_server.utils import url_path_join as ujoin
 from jupyterlab_server import (
     LabServerApp,
@@ -67,7 +67,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from jupyter_server.serverapp import ServerApp
-    from jupyter_server.utils import ApiPath
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -753,7 +752,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         try:
             contents_manager = self.serverapp.contents_manager
             preferred_dir = to_os_path(
-                cast("ApiPath", contents_manager.preferred_dir),
+                ApiPath(contents_manager.preferred_dir),
                 contents_manager.root_dir,
             )
             return os.path.samefile(preferred_dir, os.path.expanduser("~"))
