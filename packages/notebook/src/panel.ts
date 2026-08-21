@@ -250,12 +250,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
-    const language = spec?.language?.toLowerCase();
-    if (language) {
-      this.node.dataset.jpKernelLanguage = language;
-    } else {
-      delete this.node.dataset.jpKernelLanguage;
-    }
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,

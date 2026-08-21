@@ -90,13 +90,13 @@
     {
       "command": "console:replace-selection",
       "keys": ["Alt -"],
-      "selector": ".jp-ConsolePanel[data-jp-kernel-language='r'] .jp-CodeConsole-promptCell",
+      "selector": "[data-jp-editor-language='r']",
       "args": { "text": "<- " }
     },
     {
       "command": "console:replace-selection",
       "keys": ["Accel Shift M"],
-      "selector": ".jp-ConsolePanel[data-jp-kernel-language='r'] .jp-CodeConsole-promptCell",
+      "selector": "[data-jp-editor-language='r']",
       "args": { "text": "%>% " }
     },
     {

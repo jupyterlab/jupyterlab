@@ -382,13 +382,13 @@
     {
       "command": "notebook:replace-selection",
       "keys": ["Alt -"],
-      "selector": ".jp-NotebookPanel[data-jp-kernel-language='r'] .jp-Notebook.jp-mod-editMode",
+      "selector": "[data-jp-editor-language='r']",
       "args": { "text": "<- " }
     },
     {
       "command": "notebook:replace-selection",
       "keys": ["Accel Shift M"],
-      "selector": ".jp-NotebookPanel[data-jp-kernel-language='r'] .jp-Notebook.jp-mod-editMode",
+      "selector": "[data-jp-editor-language='r']",
       "args": { "text": "%>% " }
     },
     {

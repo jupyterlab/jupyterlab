@@ -86,6 +86,20 @@ describe('CodeMirrorEditor', () => {
     it('should create a CodeMirrorEditor', () => {
       expect(editor).toBeInstanceOf(CodeMirrorEditor);
     });
+
+    it('should set the editor language data attribute', async () => {
+      model.mimeType = 'text/x-python';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('python');
+    });
+
+    it('should update the editor language data attribute', async () => {
+      model.mimeType = 'text/x-python';
+      await sleep(0);
+      model.mimeType = 'text/plain';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('none');
+    });
   });
 
   describe('#edgeRequested', () => {
