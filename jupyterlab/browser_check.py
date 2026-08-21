@@ -6,6 +6,8 @@ This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 import logging
@@ -17,7 +19,7 @@ import time
 from collections.abc import Awaitable, Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from os import path as osp
-from typing import Any
+from typing import Protocol, cast
 
 from jupyter_server.serverapp import aliases, flags
 from jupyter_server.utils import pathname2url, urljoin
@@ -68,7 +70,18 @@ class LogErrorHandler(logging.StreamHandler):
 BrowserTest = Callable[[str], Awaitable[None] | int | None]
 
 
-def run_test(app: LabApp, func: BrowserTest):
+class _Stoppable(Protocol):
+    def stop(self) -> None: ...
+
+
+class _BrowserTestApp(Protocol):
+    log: logging.Logger
+    display_url: str
+    http_server: _Stoppable
+    io_loop: IOLoop
+
+
+def run_test(app: _BrowserTestApp, func: BrowserTest):
     """Synchronous entry point to run a test function.
     func is a function that accepts an app url as a parameter and returns a result.
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
@@ -77,7 +90,7 @@ def run_test(app: LabApp, func: BrowserTest):
     IOLoop.current().spawn_callback(run_test_async, app, func)
 
 
-async def run_test_async(app: LabApp, func: BrowserTest):
+async def run_test_async(app: _BrowserTestApp, func: BrowserTest):
     """Run a test against the application.
     func is a function that accepts an app url as a parameter and returns a result.
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
@@ -93,14 +106,16 @@ async def run_test_async(app: LabApp, func: BrowserTest):
 
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
-    if hasattr(app, "browser_open_file"):
-        url = urljoin("file:", pathname2url(app.browser_open_file))
+    browser_open_file = getattr(app, "browser_open_file", None)
+    if browser_open_file is not None:
+        url = urljoin("file:", pathname2url(browser_open_file))
     else:
         url = app.display_url
 
     # Allow a synchronous function to be passed in.
+    test: Awaitable[object]
     if inspect.iscoroutinefunction(func):
-        test = func(url)
+        test = cast("Callable[[str], Awaitable[object]]", func)(url)
     else:
         app.log.info("Using thread pool executor to run test")
         loop = asyncio.get_event_loop()
@@ -138,10 +153,10 @@ async def run_test_async(app: LabApp, func: BrowserTest):
 
 async def run_async_process(
     cmd: Sequence[str],
-    **kwargs: Any,
+    cwd: str | None = None,
 ) -> tuple[bytes, bytes]:
     """Run an asynchronous command"""
-    proc = await asyncio.create_subprocess_exec(*cmd, **kwargs)
+    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cwd)
     stdout, stderr = await proc.communicate()
     if proc.returncode != 0:
         raise RuntimeError(str(cmd) + " exited with " + str(proc.returncode))
@@ -204,13 +219,17 @@ class BrowserApp(LabApp):
         super().initialize_settings()
 
     def initialize_handlers(self) -> None:
-        def func(*args: Any, **kwargs: Any) -> int:
+        def func(url: str) -> int:
             return 0
 
+        test_func: BrowserTest = func
         if self.test_browser:
-            func = run_browser_sync if os.name == "nt" else run_browser
+            test_func = run_browser_sync if os.name == "nt" else run_browser
 
-        run_test(self.serverapp, func)
+        if self.serverapp is None:
+            msg = "BrowserApp requires a linked server application"
+            raise RuntimeError(msg)
+        run_test(cast("_BrowserTestApp", self.serverapp), test_func)
         super().initialize_handlers()
 
 
@@ -226,7 +245,7 @@ if __name__ == "__main__":
     skip_options = ["--no-browser-test", "--no-chrome-test"]
     for option in skip_options:
         if option in sys.argv:
-            BrowserApp.test_browser = False
+            setattr(BrowserApp, "test_browser", False)  # noqa: B010
             sys.argv.remove(option)
 
     BrowserApp.launch_instance()

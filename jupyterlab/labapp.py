@@ -3,11 +3,13 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
 import dataclasses
 import json
 import os
 import sys
-from collections.abc import Sequence
+from typing import TYPE_CHECKING, cast
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -60,6 +62,12 @@ from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from jupyter_server.serverapp import ServerApp
+    from jupyter_server.utils import ApiPath
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -161,7 +169,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
 
     name = Unicode("JupyterLab", config=True, help="The name of the built application")
 
-    version = Unicode("", config=True, help="The version of the built application")
+    version = cast("str", Unicode("", config=True, help="The version of the built application"))
 
     dev_build = Bool(
         None,
@@ -632,9 +640,21 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             app_dir = DEV_DIR
         return app_dir
 
+    def _app_dir(self) -> str:
+        if self.app_dir is None:
+            msg = "LabApp.app_dir is not initialized"
+            raise RuntimeError(msg)
+        return self.app_dir
+
+    def _serverapp(self) -> ServerApp:
+        if self.serverapp is None:
+            msg = "LabApp requires a linked server application"
+            raise RuntimeError(msg)
+        return self.serverapp
+
     @default("app_settings_dir")
     def _default_app_settings_dir(self) -> str:
-        return pjoin(self.app_dir, "settings")
+        return pjoin(self._app_dir(), "settings")
 
     @default("app_version")
     def _default_app_version(self) -> str:
@@ -646,21 +666,21 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     @default("schemas_dir")
     def _default_schemas_dir(self) -> str:
-        return pjoin(self.app_dir, "schemas")
+        return pjoin(self._app_dir(), "schemas")
 
     @default("templates_dir")
     def _default_templates_dir(self) -> str:
-        return pjoin(self.app_dir, "static")
+        return pjoin(self._app_dir(), "static")
 
     @default("themes_dir")
     def _default_themes_dir(self) -> str:
         if self.override_theme_url:
             return ""
-        return pjoin(self.app_dir, "themes")
+        return pjoin(self._app_dir(), "themes")
 
     @default("static_dir")
     def _default_static_dir(self) -> str:
-        return pjoin(self.app_dir, "static")
+        return pjoin(self._app_dir(), "static")
 
     @default("static_url_prefix")
     def _default_static_url_prefix(self) -> str:
@@ -668,7 +688,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             return self.override_static_url
         else:
             static_url = f"/static/{self.name}/"
-            return ujoin(self.serverapp.base_url, static_url)
+            return ujoin(self._serverapp().base_url, static_url)
 
     @default("theme_url")
     def _default_theme_url(self) -> str:
@@ -728,9 +748,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     def _preferred_path_is_home(self) -> bool:
         """Whether the preferred path resolves to the user's home directory."""
+        if self.serverapp is None:
+            return False
         try:
             contents_manager = self.serverapp.contents_manager
-            preferred_dir = to_os_path(contents_manager.preferred_dir, contents_manager.root_dir)
+            preferred_dir = to_os_path(
+                cast("ApiPath", contents_manager.preferred_dir),
+                contents_manager.root_dir,
+            )
             return os.path.samefile(preferred_dir, os.path.expanduser("~"))
         except (AttributeError, OSError):
             return False
