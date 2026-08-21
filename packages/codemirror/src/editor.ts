@@ -665,16 +665,29 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _onMimeTypeChanged(): void {
     // TODO: should we provide a hook for when the mode is done being set?
+    const mimeType = this._model.mimeType;
     this._languages
-      .getLanguage(this._model.mimeType)
+      .getLanguage(mimeType)
       .then(language => {
+        if (this.isDisposed || this._model.mimeType !== mimeType) {
+          return;
+        }
+        if (language) {
+          this.host.dataset.jpEditorLanguage = language.name.toLowerCase();
+        } else {
+          delete this.host.dataset.jpEditorLanguage;
+        }
         this._editor.dispatch({
           effects: this._language.reconfigure(language?.support ?? [])
         });
       })
       .catch(reason => {
+        if (this.isDisposed || this._model.mimeType !== mimeType) {
+          return;
+        }
+        delete this.host.dataset.jpEditorLanguage;
         console.log(
-          `Failed to load language for '${this._model.mimeType}'.`,
+          `Failed to load language for '${mimeType}'.`,
           reason
         );
         this._editor.dispatch({
