@@ -3,7 +3,7 @@
 
 import type { ISpecModel, ISpecModels } from './restapi';
 import type { PartialJSONObject } from '@lumino/coreutils';
-import { validateProperty } from '../validate';
+import { isRecord, validateProperty } from '../validate';
 
 /**
  * Validate a server kernelspec model to a client side model.
@@ -48,6 +48,12 @@ export function validateSpecModel(data: unknown): ISpecModel {
  * Validate a `Kernel.ISpecModels` object.
  */
 export function validateSpecModels(data: unknown): ISpecModels {
+  if (
+    isRecord(data) &&
+    !Object.prototype.hasOwnProperty.call(data, 'kernelspecs')
+  ) {
+    throw new Error('No kernelspecs found');
+  }
   validateProperty(data, 'kernelspecs', 'object');
   let keys = Object.keys(data.kernelspecs as Record<string, unknown>);
   const kernelspecs: { [key: string]: ISpecModel } = Object.create(null);
