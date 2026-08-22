@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type {
   DocumentRegistry,
   IDocumentWidget
@@ -19,8 +17,6 @@ import { EditorTableOfContentsFactory } from './factory';
  * ## Notes
  *
  * -   As `part` and `chapter` section headings appear to be less common, assign them to heading level 1.
- *
- * @private
  */
 const LATEX_LEVELS: { [label: string]: number } = {
   part: 1, // Only available for report and book classes
@@ -124,9 +120,11 @@ export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
   isApplicable(widget: Widget): boolean {
     const isApplicable = super.isApplicable(widget);
 
-    if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
-      return mime && (mime === 'text/x-latex' || mime === 'text/x-stex');
+    if (isApplicable && Private.isFileEditorWidget(widget)) {
+      let mime = widget.content.model.mimeType;
+      return Boolean(
+        mime && (mime === 'text/x-latex' || mime === 'text/x-stex')
+      );
     }
     return false;
   }
@@ -143,5 +141,13 @@ export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
     configuration?: TableOfContents.IConfig
   ): LaTeXTableOfContentsModel {
     return new LaTeXTableOfContentsModel(widget, configuration);
+  }
+}
+
+namespace Private {
+  export function isFileEditorWidget(
+    widget: Widget
+  ): widget is IDocumentWidget<FileEditor, DocumentRegistry.IModel> {
+    return 'content' in widget;
   }
 }
