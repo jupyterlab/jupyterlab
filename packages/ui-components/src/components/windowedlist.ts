@@ -50,6 +50,12 @@ const PROGRAMMATIC_SCROLL_TIMEOUT = 3000;
  */
 const MAXIMUM_TIME_WAITING_FOR_ITEM = 10000;
 
+/**
+ * CSS selector for elements in which keys like Space or Home/End edit
+ * or navigate text rather than scroll the list.
+ */
+const EDITABLE_SELECTOR = 'input, textarea, select, [contenteditable="true"]';
+
 /*
  * Feature detection
  *
@@ -1104,6 +1110,10 @@ export class WindowedList<
    * @param align Type of alignment
    * @param margin In 'smart' mode the viewport proportion to add
    * @param alignPreference Allows to override the alignment of item when the `auto` heuristic decides that the item needs to be scrolled into view.
+   * @returns A promise which resolves once the scroll has settled; it rejects
+   * when the request is superseded by a new `scrollToItem` call or cancelled
+   * by explicit user scrolling input (wheel, scrolling keys, touch scrolling,
+   * or scrollbar and middle-click interactions).
    */
   scrollToItem(
     index: number,
@@ -1493,6 +1503,30 @@ export class WindowedList<
       this._areaResizeObserver.observe(this._innerElement);
     }
     this._outerElement.addEventListener('scroll', this, passiveIfSupported);
+    if (this.viewModel.windowingActive) {
+      // Scrollback (and thus its cancellation) only applies in full
+      // windowing mode; `onStateChanged` re-runs `_removeListeners` and
+      // `_addListeners` when the windowing mode changes at runtime.
+      this._outerElement.addEventListener(
+        'wheel',
+        this._onUserScrollIntent,
+        passiveIfSupported
+      );
+      this._outerElement.addEventListener(
+        'keydown',
+        this._onUserScrollIntent,
+        true
+      );
+      this._outerElement.addEventListener(
+        'touchmove',
+        this._onUserScrollIntent,
+        passiveIfSupported
+      );
+      this._outerElement.addEventListener(
+        'mousedown',
+        this._onUserScrollIntent
+      );
+    }
   }
 
   /**
@@ -1520,6 +1554,20 @@ export class WindowedList<
    */
   private _removeListeners() {
     this._outerElement.removeEventListener('scroll', this);
+    this._outerElement.removeEventListener('wheel', this._onUserScrollIntent);
+    this._outerElement.removeEventListener(
+      'keydown',
+      this._onUserScrollIntent,
+      true
+    );
+    this._outerElement.removeEventListener(
+      'touchmove',
+      this._onUserScrollIntent
+    );
+    this._outerElement.removeEventListener(
+      'mousedown',
+      this._onUserScrollIntent
+    );
     this._areaResizeObserver?.disconnect();
     this._areaResizeObserver = null;
     this._itemsResizeObserver?.disconnect();
@@ -1686,8 +1734,124 @@ export class WindowedList<
       return;
     }
     this.scrollToItem(...this._scrollToItem).catch(reason => {
-      console.log(reason);
+      // Rejection is expected when the user cancels the scrollback
+      // or a new scroll request supersedes this one.
+      console.debug(reason);
     });
+  }
+
+  /**
+   * Handle explicit user input which can scroll the list.
+   *
+   * Cancellation is deliberately keyed on input events (wheel, keydown,
+   * touchmove, mousedown) rather than on the `scroll` event: programmatic
+   * scrolling, including the scrollback itself, fires `scroll` too, and
+   * cancelling based on it proved flaky (see #18973).
+   */
+  private _onUserScrollIntent = (event: Event): void => {
+    switch (event.type) {
+      case 'wheel':
+        if (
+          event instanceof WheelEvent &&
+          // Ctrl+wheel zooms rather than scrolls; since the scrollback
+          // target is an item index, scrolling back keeps the followed
+          // item in view through the zoom reflow.
+          !event.ctrlKey &&
+          // A wheel event without vertical delta cannot scroll the list.
+          event.deltaY !== 0
+        ) {
+          this._cancelScrollback();
+        }
+        break;
+      case 'keydown':
+        if (event instanceof KeyboardEvent) {
+          if (
+            // Paging through IME candidates does not scroll the list.
+            event.isComposing ||
+            // Modified keys are shortcuts (e.g. browser tab switching).
+            event.ctrlKey ||
+            event.altKey ||
+            event.metaKey
+          ) {
+            break;
+          }
+          if (event.key === 'PageDown' || event.key === 'PageUp') {
+            this._cancelScrollback();
+          } else if (
+            event.key === ' ' ||
+            event.key === 'Home' ||
+            event.key === 'End'
+          ) {
+            // These keys scroll the list via the browser default action
+            // only when focus is outside of a text editing context.
+            const target = event.target;
+            if (
+              target instanceof Element &&
+              !target.closest(EDITABLE_SELECTOR)
+            ) {
+              this._cancelScrollback();
+            }
+          }
+        }
+        break;
+      case 'touchmove':
+        this._cancelScrollback();
+        break;
+      case 'mousedown':
+        if (event instanceof MouseEvent) {
+          // A primary-button press on the outer element itself (rather than
+          // on the content) is a native scrollbar interaction: the scrollbar
+          // gutter lies within the border box but outside of the client
+          // area, which spans `clientWidth` starting at `clientLeft`
+          // (`clientLeft` includes the width of the scrollbar when it is
+          // placed on the left in right-to-left layouts).
+          const outer = this._outerElement;
+          const x = event.clientX - outer.getBoundingClientRect().left;
+          const onScrollbarGutter =
+            event.target === outer &&
+            (x < outer.clientLeft || x >= outer.clientLeft + outer.clientWidth);
+          // Middle-click can start browser autoscroll anywhere in the list.
+          if (event.button === 1 || (event.button === 0 && onScrollbarGutter)) {
+            this._cancelScrollback();
+          }
+        }
+        break;
+    }
+  };
+
+  /**
+   * Cancel scrollback when the user explicitly scrolls away from its target.
+   */
+  private _cancelScrollback(): void {
+    if (!this.viewModel.windowingActive || !this._scrollToItem) {
+      return;
+    }
+
+    this._scrollToItem = null;
+    if (this._scrollUpdateWasRequested) {
+      // A programmatic scroll was requested but not yet applied by `_update()`:
+      // drop the pending `scrollTop` write and restore the view model offset
+      // to the actual scroll position, otherwise the next update would render
+      // the window for the abandoned target while the viewport stays put.
+      this._scrollUpdateWasRequested = false;
+      this.viewModel.scrollOffset = this._outerElement.scrollTop;
+    }
+
+    if (this._resetScrollToItemTimeout !== null) {
+      clearTimeout(this._resetScrollToItemTimeout);
+      this._resetScrollToItemTimeout = null;
+    }
+    if (this._programmaticScrollTimeout !== null) {
+      clearTimeout(this._programmaticScrollTimeout);
+      this._programmaticScrollTimeout = null;
+    }
+    if (this._isScrolling) {
+      // Reject like the supersede path in `scrollToItem`: resolving would run
+      // the callers' success continuations (scroll within cell, focus, etc.)
+      // which re-scroll to the target the user just navigated away from.
+      this._isScrolling.reject('Scrolling was cancelled by user input.');
+      this._isScrolling = null;
+    }
   }
 
   /**
@@ -1829,7 +1993,13 @@ export class WindowedList<
       if (target.hasAttribute('data-index')) {
         const index = parseInt(target.getAttribute('data-index')!, 10);
         return void (async () => {
-          await this.scrollToItem(index);
+          try {
+            await this.scrollToItem(index);
+          } catch (reason) {
+            // The jump was superseded or cancelled by the user;
+            // the target was never reached so do not emit `jumped`.
+            return;
+          }
           this.jumped.emit(index);
         })();
       }
