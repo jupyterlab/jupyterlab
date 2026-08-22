@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { SemanticCommand } from '@jupyterlab/apputils';
 import type { TranslationBundle } from '@jupyterlab/translation';
@@ -80,7 +79,7 @@ export interface ISemanticCommandOptions {
  * Add a semantic commands to the application and take care
  * of setting up the command changed signal.
  *
- * @param options Semantic command options
+ * @param options - Semantic command options
  */
 export function addSemanticCommand(options: ISemanticCommandOptions): void {
   const {
@@ -142,10 +141,10 @@ export function addSemanticCommand(options: ISemanticCommandOptions): void {
  * Create the command options from the given semantic commands list
  * and the given default values.
  *
- * @param app Jupyter Application
- * @param semanticCommands Single semantic command  or a list of commands
- * @param defaultValues Default values
- * @param trans Translation bundle
+ * @param app - Jupyter Application
+ * @param semanticCommands - Single semantic command  or a list of commands
+ * @param defaultValues - Default values
+ * @param trans - Translation bundle
  * @returns Command options
  *
  * @deprecated Please use {@link addSemanticCommand}. This function will
@@ -199,7 +198,7 @@ export function createSemanticCommand(
         commandId => commandId !== null && commands.isEnabled(commandId)
       );
 
-      let result: any = null;
+      let result: unknown = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
           const args = { [SemanticCommand.WIDGET]: widget!.id };
@@ -219,7 +218,7 @@ export function createSemanticCommand(
 
   function reduceAttribute(
     attribute: keyof CommandRegistry.ICommandOptions
-  ): any[] {
+  ): unknown[] {
     const widget = shell.currentWidget;
     const commandIds = commandList.map(cmd =>
       widget !== null ? cmd.getActiveCommandId(widget) : null
