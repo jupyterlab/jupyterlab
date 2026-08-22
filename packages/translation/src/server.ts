@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -14,8 +13,8 @@ const TRANSLATIONS_SETTINGS_URL = 'api/translations';
 /**
  * Call the API extension
  *
- * @param locale API REST end point for the extension
- * @param init Initial values for the request
+ * @param locale - API REST end point for the extension
+ * @param init - Initial values for the request
  * @returns The response body interpreted as JSON
  */
 export async function requestTranslationsAPI<T>(
@@ -40,19 +39,23 @@ export async function requestTranslationsAPI<T>(
     throw new ServerConnection.NetworkError(error);
   }
 
-  let data: any = await response.text();
+  let data: unknown = await response.text();
 
-  if (data.length > 0) {
+  if (typeof data === 'string' && data.length > 0) {
     try {
       data = JSON.parse(data);
-    } catch (error) {
+    } catch {
       console.error('Not a JSON response body.', response);
     }
   }
 
   if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message || data);
+    const message =
+      typeof data === 'object' && data !== null && 'message' in data
+        ? (data.message as string) || data
+        : data;
+    throw new ServerConnection.ResponseError(response, message as string);
   }
 
-  return data;
+  return data as T;
 }
