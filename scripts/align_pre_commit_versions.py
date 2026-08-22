@@ -99,7 +99,7 @@ def sync_versions(root: Path) -> list[str]:
             **UTF8,
         )
         updates.append(
-            f"{mismatch.target.mirror_path}: {mismatch.target.name} "
+            f"{mismatch.target.mirror_path.as_posix()}: {mismatch.target.name} "
             f"{mismatch.current} -> {mismatch.expected}"
         )
 
@@ -135,7 +135,7 @@ def _version_mismatches(root: Path) -> list[VersionMismatch]:
 def _alignment_error(mismatch: VersionMismatch) -> str:
     # Keep check-mode output actionable for CI logs and local runs.
     return (
-        f"{mismatch.target.mirror_path} has {mismatch.target.mirror_prefix}"
+        f"{mismatch.target.mirror_path.as_posix()} has {mismatch.target.mirror_prefix}"
         f"{mismatch.current}, expected {mismatch.target.mirror_prefix}"
         f"{mismatch.expected}"
     )
