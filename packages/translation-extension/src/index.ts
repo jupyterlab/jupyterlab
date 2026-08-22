@@ -156,6 +156,9 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         const appLocale = translator.languageCode.replace('-', '_');
         for (const locale in languageList.data) {
           const value = languageList.data[locale];
+          if (value === undefined) {
+            continue;
+          }
           const displayName = value.displayName;
           const nativeName = value.nativeName;
           const toggled = appLocale === locale;

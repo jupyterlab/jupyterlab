@@ -773,9 +773,12 @@ namespace Private {
     const link = response.headers.get('Link') ?? '';
 
     const links: { [key: string]: string } = {};
-    let match: RegExpExecArray | null = null;
+    let match: RegExpExecArray | null;
     while ((match = LINK_PARSER.exec(link)) !== null) {
-      links[match[2]] = match[1];
+      const [, url, relation] = match;
+      if (url !== undefined && relation !== undefined) {
+        links[relation] = url;
+      }
     }
     return [data, links];
   }

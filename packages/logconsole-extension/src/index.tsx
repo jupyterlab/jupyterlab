@@ -275,7 +275,9 @@ function activateLogConsole(
   });
 
   function toTitleCase(value: string) {
-    return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
+    return value.length === 0
+      ? value
+      : value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   app.commands.addCommand(CommandIDs.setLevel, {
@@ -442,15 +444,17 @@ export class LogLevelSwitcher extends ReactWidget {
           options={
             logger === null
               ? []
-              : [
-                  [this._trans.__('Critical'), 'Critical'],
-                  [this._trans.__('Error'), 'Error'],
-                  [this._trans.__('Warning'), 'Warning'],
-                  [this._trans.__('Info'), 'Info'],
-                  [this._trans.__('Debug'), 'Debug']
-                ].map(data => ({
-                  label: data[0],
-                  value: data[1].toLowerCase()
+              : (
+                  [
+                    [this._trans.__('Critical'), 'Critical'],
+                    [this._trans.__('Error'), 'Error'],
+                    [this._trans.__('Warning'), 'Warning'],
+                    [this._trans.__('Info'), 'Info'],
+                    [this._trans.__('Debug'), 'Debug']
+                  ] as [string, string][]
+                ).map(([label, value]) => ({
+                  label,
+                  value: value.toLowerCase()
                 }))
           }
         />
