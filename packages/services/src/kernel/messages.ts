@@ -1167,6 +1167,14 @@ export interface IExecuteReply extends IExecuteReplyBase {
 }
 
 /**
+ * The content of an `execute_reply` message.
+ */
+export type IExecuteReplyContent =
+  | IExecuteReply
+  | (IReplyErrorContent & IExecuteCount)
+  | IReplyAbortContent;
+
+/**
  * An `'execute_reply'` message on the `'stream'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execution-results).
@@ -1175,7 +1183,7 @@ export interface IExecuteReply extends IExecuteReplyBase {
  */
 export interface IExecuteReplyMsg extends IShellMessage<'execute_reply'> {
   parent_header: IHeader<'execute_request'>;
-  content: ReplyContent<IExecuteReply>;
+  content: IExecuteReplyContent;
 }
 
 /**
