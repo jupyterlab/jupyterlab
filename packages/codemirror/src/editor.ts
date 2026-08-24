@@ -686,10 +686,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           return;
         }
         delete this.host.dataset.jpEditorLanguage;
-        console.log(
-          `Failed to load language for '${mimeType}'.`,
-          reason
-        );
+        console.warn(`Failed to load language for '${mimeType}'.`, reason);
         this._editor.dispatch({
           effects: this._language.reconfigure([])
         });
