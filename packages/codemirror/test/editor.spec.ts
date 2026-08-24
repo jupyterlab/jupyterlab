@@ -50,7 +50,7 @@ describe('CodeMirrorEditor', () => {
         extensionsRegistry.addExtension(ext);
       });
     for (const language of EditorLanguageRegistry.getDefaultLanguages().filter(
-      spec => spec.name === 'Python'
+      spec => ['Python', 'R'].includes(spec.name)
     )) {
       languages.addLanguage(language);
       await languages.getLanguage(language.name);
@@ -87,10 +87,16 @@ describe('CodeMirrorEditor', () => {
       expect(editor).toBeInstanceOf(CodeMirrorEditor);
     });
 
-    it('should set the editor language data attribute', async () => {
+    it('should set the editor language data attribute for Python', async () => {
       model.mimeType = 'text/x-python';
       await sleep(0);
       expect(editor.host.dataset.jpEditorLanguage).toBe('python');
+    });
+
+    it('should set the editor language data attribute for R', async () => {
+      model.mimeType = 'text/x-rsrc';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('r');
     });
 
     it('should update the editor language data attribute', async () => {
