@@ -57,7 +57,7 @@ export interface IEntry {
   /**
    * The latest version of the extension.
    */
-  latest_version: string;
+  latest_version: string | null;
 
   /**
    * The installed version of the extension.
@@ -701,7 +701,9 @@ export namespace ListModel {
    *
    * @param entry The entry to check.
    */
-  export function entryHasUpdate(entry: IEntry): boolean {
+  export function entryHasUpdate(
+    entry: IEntry
+  ): entry is IEntry & { latest_version: string } {
     if (!entry.installed || !entry.latest_version) {
       return false;
     }
