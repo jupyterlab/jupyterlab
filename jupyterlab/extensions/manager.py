@@ -9,7 +9,7 @@ import json
 import re
 from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
+from typing import Any
 
 import tornado
 from jupyterlab_server.translation_utils import translator
@@ -25,55 +25,7 @@ from jupyterlab.commands import (
     get_app_info,
 )
 
-if TYPE_CHECKING:
-    import ssl
-    from collections.abc import Awaitable, Callable
-    from datetime import datetime
-
-    from tornado.httputil import HTTPHeaders
-
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
-
-
-class ListingsTornadoOptions(TypedDict, total=False):
-    """Typed subset of options accepted by Tornado HTTP requests."""
-
-    method: str
-    headers: dict[str, str] | HTTPHeaders
-    body: bytes | str | None
-    auth_username: str | None
-    auth_password: str | None
-    auth_mode: str | None
-    connect_timeout: float | None
-    request_timeout: float | None
-    if_modified_since: float | datetime | None
-    follow_redirects: bool | None
-    max_redirects: int | None
-    user_agent: str | None
-    use_gzip: bool | None
-    network_interface: str | None
-    streaming_callback: Callable[[bytes], None] | None
-    header_callback: Callable[[str], None] | None
-    prepare_curl_callback: Callable[[object], None] | None
-    proxy_host: str | None
-    proxy_port: int | None
-    proxy_username: str | None
-    proxy_password: str | None
-    proxy_auth_mode: str | None
-    allow_nonstandard_methods: bool | None
-    validate_cert: bool | None
-    ca_certs: str | None
-    allow_ipv6: bool | None
-    client_key: str | None
-    client_cert: str | None
-    body_producer: Callable[[Callable[[bytes], None]], Awaitable[None]] | None
-    expect_100_continue: bool
-    decompress_response: bool | None
-    ssl_options: dict[str, object] | ssl.SSLContext | None
-
-
-def _default_listings_tornado_options() -> ListingsTornadoOptions:
-    return {}
 
 
 def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None):
@@ -198,9 +150,7 @@ class ExtensionManagerOptions(PluginManagerOptions):
     allowed_extensions_uris: set[str] = field(default_factory=set)
     blocked_extensions_uris: set[str] = field(default_factory=set)
     listings_refresh_seconds: int = 60 * 60
-    listings_tornado_options: ListingsTornadoOptions = field(
-        default_factory=_default_listings_tornado_options
-    )
+    listings_tornado_options: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

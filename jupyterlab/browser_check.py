@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import sys
 import time
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from os import path as osp
 from typing import Protocol, cast
@@ -155,9 +155,10 @@ async def run_test_async(app: _BrowserTestApp, func: BrowserTest):
 async def run_async_process(
     cmd: Sequence[str],
     cwd: str | None = None,
+    env: Mapping[str, str] | None = None,
 ) -> tuple[bytes, bytes]:
     """Run an asynchronous command"""
-    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cwd)
+    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
     stdout, stderr = await proc.communicate()
     if proc.returncode != 0:
         raise RuntimeError(str(cmd) + " exited with " + str(proc.returncode))
@@ -246,7 +247,7 @@ if __name__ == "__main__":
     skip_options = ["--no-browser-test", "--no-chrome-test"]
     for option in skip_options:
         if option in sys.argv:
-            setattr(BrowserApp, "test_browser", False)  # noqa: B010
+            BrowserApp.test_browser = False  # type: ignore[assignment]
             sys.argv.remove(option)
 
     BrowserApp.launch_instance()

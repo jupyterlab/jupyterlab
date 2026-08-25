@@ -14,7 +14,7 @@ import re
 import sys
 import tempfile
 import xmlrpc.client
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
@@ -22,7 +22,7 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Protocol, TypeVar, cast
+from typing import TypeVar, cast
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
@@ -55,11 +55,6 @@ _Arg = TypeVar("_Arg")
 _R = TypeVar("_R")
 
 
-class _HttpxLegacyAsyncClientFactory(Protocol):
-    def __call__(self, *, proxies: Mapping[str, str | None]) -> httpx.AsyncClient:
-        raise NotImplementedError
-
-
 def _json_object_or_none(value: object) -> dict[str, JSONValue] | None:
     if not isinstance(value, dict):
         return None
@@ -89,7 +84,7 @@ def _metadata_string_map(data: PackageMetadata, key: str) -> dict[str, str]:
 
 
 class ProxiedTransport(xmlrpc.client.Transport):
-    proxy: tuple[str, int | None]
+    proxy: tuple[str, str | int | None]
     proxy_headers: dict[str, str] | None
 
     def set_proxy(
@@ -98,13 +93,12 @@ class ProxiedTransport(xmlrpc.client.Transport):
         port: str | int | None = None,
         headers: dict[str, str] | None = None,
     ) -> None:
-        self.proxy = host, int(port) if port is not None else None
+        self.proxy = host, port
         self.proxy_headers = headers
 
     def make_connection(self, host: tuple[str, dict[str, str]] | str) -> http.client.HTTPConnection:
-        tunnel_host = host[0] if isinstance(host, tuple) else host
-        connection = http.client.HTTPConnection(*self.proxy)
-        connection.set_tunnel(tunnel_host, headers=self.proxy_headers)
+        connection = http.client.HTTPConnection(*self.proxy)  # type: ignore[arg-type]
+        connection.set_tunnel(host, headers=self.proxy_headers)  # type: ignore[arg-type]
         self._connection = host, connection
         return connection
 
@@ -119,40 +113,31 @@ https_proxy_url = (
 
 # sniff ``httpx`` version for version-sensitive API
 _httpx_version = Version(httpx.__version__)
+_httpx_client_args: dict[str, object] = {}
 
 xmlrpc_transport_override = None
 
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
-    proxy_host = http_proxy.hostname
-    try:
-        proxy_port = http_proxy.port
-    except ValueError:
-        proxy_port = None
+    proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
-    if proxy_host is not None:
-        xmlrpc_transport_override = ProxiedTransport()
-        xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
-
-
-def _create_httpx_client() -> httpx.AsyncClient:
-    """Create an httpx client while supporting the proxy API rename."""
-    if not http_proxy_url:
-        return httpx.AsyncClient()
     if _httpx_version >= Version("0.28.0"):
-        return httpx.AsyncClient(
-            mounts={
+        _httpx_client_args = {
+            "mounts": {
                 "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
                 "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
             }
-        )
-    legacy_client = cast("_HttpxLegacyAsyncClientFactory", httpx.AsyncClient)
-    return legacy_client(
-        proxies={
-            "http://": http_proxy_url,
-            "https://": https_proxy_url,
         }
-    )
+    else:
+        _httpx_client_args = {
+            "proxies": {
+                "http://": http_proxy_url,
+                "https://": https_proxy_url,
+            }
+        }
+
+    xmlrpc_transport_override = ProxiedTransport()
+    xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
 def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
@@ -285,7 +270,7 @@ class PyPIExtensionManager(ExtensionManager):
         parent: config.Configurable | None = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = _create_httpx_client()
+        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)  # type: ignore[arg-type]
         # Set configurable cache size to fetch function
         self._fetch_package_metadata: FetchPackageMetadata = partial(
             _fetch_package_metadata, self._httpx_client
@@ -692,9 +677,8 @@ class PyPIExtensionManager(ExtensionManager):
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
-                                with TarFile.open(
-                                    fileobj=io.BytesIO(response.content), mode="r:gz"
-                                ) as sdist:
+                                sdist_bytes = io.BytesIO(response.content)
+                                with TarFile(sdist_bytes) as sdist:  # type: ignore[arg-type]
                                     for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
