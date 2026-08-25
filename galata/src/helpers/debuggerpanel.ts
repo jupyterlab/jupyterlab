@@ -21,7 +21,7 @@ export class DebuggerHelper {
   /**
    * Returns true if debugger toolbar item is enabled, false otherwise
    *
-   * @param name - Notebook name
+   * @param name Notebook name
    */
   async isOn(name?: string): Promise<boolean> {
     const toolbar = await this.notebook.getToolbarLocator(name);
@@ -35,7 +35,7 @@ export class DebuggerHelper {
   /**
    * Enables the debugger toolbar item
    *
-   * @param name - Notebook name
+   * @param name Notebook name
    */
   async switchOn(name?: string): Promise<void> {
     const toolbar = await this.notebook.getToolbarLocator(name);
@@ -63,7 +63,7 @@ export class DebuggerHelper {
   /**
    * Disables the debugger toolbar item
    *
-   * @param name - Notebook name
+   * @param name Notebook name
    */
   async switchOff(name?: string): Promise<void> {
     const toolbar = await this.notebook.getToolbarLocator(name);

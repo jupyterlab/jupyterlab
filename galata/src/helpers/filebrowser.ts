@@ -18,7 +18,7 @@ export class FileBrowserHelper {
   /**
    * Create the selector for a file in the file browser
    *
-   * @param fileName - File name
+   * @param fileName File name
    * @returns XPath to file in file browser
    */
   xpBuildFileSelector(fileName: string): string {
@@ -30,7 +30,7 @@ export class FileBrowserHelper {
   /**
    * Create the selector for a directory in the file browser
    *
-   * @param dirName - Directory name
+   * @param dirName Directory name
    * @returns XPath to directory in file browser
    */
   xpBuildDirectorySelector(dirName: string): string {
@@ -44,7 +44,7 @@ export class FileBrowserHelper {
    *
    * It will open intermediate folders if needed.
    *
-   * @param filePath - File path
+   * @param filePath File path
    */
   async revealFileInBrowser(filePath: string): Promise<void> {
     const pos = filePath.lastIndexOf('/');
@@ -60,7 +60,7 @@ export class FileBrowserHelper {
   /**
    * Whether the file is listed in the file browser or not.
    *
-   * @param fileName - File name
+   * @param fileName File name
    * @returns File status
    */
   async isFileListedInBrowser(fileName: string): Promise<boolean> {
@@ -95,8 +95,8 @@ export class FileBrowserHelper {
    * Note: This will double click on the file;
    * an editor needs to be available for the given file type.
    *
-   * @param filePath - File path
-   * @param factory - Document factory to use
+   * @param filePath File path
+   * @param factory Document factory to use
    * @returns Action success status
    */
   async open(filePath: string, factory?: string): Promise<boolean> {
@@ -166,7 +166,7 @@ export class FileBrowserHelper {
   /**
    * Open a given directory in the file browser
    *
-   * @param dirPath - Directory path
+   * @param dirPath Directory path
    * @returns Action success status
    */
   async openDirectory(dirPath: string): Promise<boolean> {

@@ -39,7 +39,7 @@ export class ActivityHelper {
   /**
    * Whether a tab is active or not
    *
-   * @param name - Activity name
+   * @param name Activity name
    * @returns Active status
    */
   async isTabActive(name: string): Promise<boolean> {
@@ -62,8 +62,8 @@ export class ActivityHelper {
   /**
    * Continually press navigation key until specified element is focused
    *
-   * @param selector - name of attribute selector
-   * @param key - navigation key to press
+   * @param selector name of attribute selector
+   * @param key navigation key to press
    */
   async keyToElement(
     selector: string,
@@ -82,7 +82,7 @@ export class ActivityHelper {
   /**
    * Get a handle on a tab
    *
-   * @param name - Activity name
+   * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
    *
    * @deprecated You should use locator instead {@link getTabLocator}
@@ -101,7 +101,7 @@ export class ActivityHelper {
 
   /**
    * Get a tab locator
-   * @param name - Activity name
+   * @param name Activity name
    * @returns Tab locator
    */
   getTabLocator(name?: string | RegExp): Locator {
@@ -113,7 +113,7 @@ export class ActivityHelper {
   /**
    * Get a handle on a panel
    *
-   * @param name - Activity name
+   * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
    *
    * @deprecated You should use locator instead {@link getPanelLocator}
@@ -147,7 +147,7 @@ export class ActivityHelper {
   /**
    * Get a panel locator
    *
-   * @param name - Activity name
+   * @param name Activity name
    * @returns Panel locator or null
    */
   async getPanelLocator(name?: string): Promise<Locator | null> {
@@ -170,7 +170,7 @@ export class ActivityHelper {
   /**
    * Close a panel from its tab name
    *
-   * @param name - Activity name
+   * @param name Activity name
    */
   async closePanel(name: string | RegExp): Promise<void> {
     await this.activateTab(name);
@@ -183,7 +183,7 @@ export class ActivityHelper {
   /**
    * Activate a tab is active
    *
-   * @param name - Activity name
+   * @param name Activity name
    * @returns Whether the action is successful
    */
   async activateTab(name: string | RegExp): Promise<boolean> {

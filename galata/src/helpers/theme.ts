@@ -44,7 +44,7 @@ export class ThemeHelper {
   /**
    * Set JupyterLab theme
    *
-   * @param themeName - Theme name
+   * @param themeName Theme name
    */
   async setTheme(themeName: string): Promise<void> {
     const page = this.page;
