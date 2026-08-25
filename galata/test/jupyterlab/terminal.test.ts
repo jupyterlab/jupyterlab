@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
@@ -409,7 +409,10 @@ test.describe('Terminal', () => {
     const terminal = page.locator(TERMINAL_SELECTOR);
     await waitForTerminal(page);
 
-    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
+    await page.terminal.runCommand('echo https://jupyter.org/', {
+      terminal,
+      verify: true
+    });
 
     // Hover over the link on the output row to trigger link detection.
     const position = await hoverOverLink(
@@ -445,10 +448,9 @@ test.describe('Terminal', () => {
 
     // Emit an escape-sequence hyperlink whose displayed text differs from
     // its target.
-    await runCommand(
-      page,
-      terminal,
-      "printf '\\e]8;;https://example.com/issues/42\\e\\\\click-me\\e]8;;\\e\\\\\\n'"
+    await page.terminal.runCommand(
+      "printf '\\e]8;;https://example.com/issues/42\\e\\\\click-me\\e]8;;\\e\\\\\\n'",
+      { terminal }
     );
 
     // Hover over the link on the output row to trigger link detection.
@@ -481,10 +483,9 @@ test.describe('Terminal', () => {
 
     // As a control that link detection works in this session, check that
     // an allowed (https) escape-sequence hyperlink offers the copy entry.
-    await runCommand(
-      page,
-      terminal,
-      "printf '\\e]8;;https://example.com/\\e\\\\allowed\\e]8;;\\e\\\\\\n'"
+    await page.terminal.runCommand(
+      "printf '\\e]8;;https://example.com/\\e\\\\allowed\\e]8;;\\e\\\\\\n'",
+      { terminal }
     );
     const allowedPosition = await hoverOverLink(page, terminal, /^allowed\s*$/);
     await page.mouse.click(allowedPosition.x, allowedPosition.y, {
@@ -499,10 +500,9 @@ test.describe('Terminal', () => {
 
     // A hyperlink with an unsafe scheme is not detected as a link at all:
     // it cannot be activated and offers no copy entry.
-    await runCommand(
-      page,
-      terminal,
-      "printf '\\e]8;;javascript:alert(1)\\e\\\\dangerous\\e]8;;\\e\\\\\\n'"
+    await page.terminal.runCommand(
+      "printf '\\e]8;;javascript:alert(1)\\e\\\\dangerous\\e]8;;\\e\\\\\\n'",
+      { terminal }
     );
     const blockedPosition = await rowPosition(terminal, /^dangerous\s*$/);
     // Move the pointer over the row as a real hover would.
