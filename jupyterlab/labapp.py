@@ -66,8 +66,6 @@ from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from jupyter_server.serverapp import ServerApp
-
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
@@ -528,7 +526,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         help=("The override url for static lab theme assets, typically a CDN."),
     )
 
-    app_dir = Unicode(None, config=True, help="The app directory to launch JupyterLab from.")
+    app_dir = Unicode("", config=True, help="The app directory to launch JupyterLab from.")
 
     user_settings_dir = Unicode(
         get_user_settings_dir(), config=True, help="The directory for user settings."
@@ -639,21 +637,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             app_dir = DEV_DIR
         return app_dir
 
-    def _app_dir(self) -> str:
-        if self.app_dir is None:
-            msg = "LabApp.app_dir is not initialized"
-            raise RuntimeError(msg)
-        return self.app_dir
-
-    def _serverapp(self) -> ServerApp:
-        if self.serverapp is None:
-            msg = "LabApp requires a linked server application"
-            raise RuntimeError(msg)
-        return self.serverapp
-
     @default("app_settings_dir")
     def _default_app_settings_dir(self) -> str:
-        return pjoin(self._app_dir(), "settings")
+        return pjoin(self.app_dir, "settings")
 
     @default("app_version")
     def _default_app_version(self) -> str:
@@ -665,29 +651,33 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     @default("schemas_dir")
     def _default_schemas_dir(self) -> str:
-        return pjoin(self._app_dir(), "schemas")
+        return pjoin(self.app_dir, "schemas")
 
     @default("templates_dir")
     def _default_templates_dir(self) -> str:
-        return pjoin(self._app_dir(), "static")
+        return pjoin(self.app_dir, "static")
 
     @default("themes_dir")
     def _default_themes_dir(self) -> str:
         if self.override_theme_url:
             return ""
-        return pjoin(self._app_dir(), "themes")
+        return pjoin(self.app_dir, "themes")
 
     @default("static_dir")
     def _default_static_dir(self) -> str:
-        return pjoin(self._app_dir(), "static")
+        return pjoin(self.app_dir, "static")
 
     @default("static_url_prefix")
     def _default_static_url_prefix(self) -> str:
         if self.override_static_url:
             return self.override_static_url
         else:
+            serverapp = self.serverapp
+            if serverapp is None:
+                msg = "LabApp requires a linked server application"
+                raise RuntimeError(msg)
             static_url = f"/static/{self.name}/"
-            return ujoin(self._serverapp().base_url, static_url)
+            return ujoin(serverapp.base_url, static_url)
 
     @default("theme_url")
     def _default_theme_url(self) -> str:
