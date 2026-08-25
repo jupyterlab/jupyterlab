@@ -9,7 +9,7 @@ import * as path from 'path';
 /**
  * Read a file as a base-64 string
  *
- * @param filePath - Local file path
+ * @param filePath Local file path
  * @returns Base 64 encoded file content
  */
 export function base64EncodeFile(filePath: string): string {
@@ -64,7 +64,7 @@ async function getBodyData(page: Page, key: string): Promise<string> {
 /**
  * Get the Jupyter server base URL stored in the index.html file
  *
- * @param page - Playwright page model
+ * @param page Playwright page model
  * @returns Base URL
  */
 export async function getBaseUrl(page: Page): Promise<string> {
@@ -74,7 +74,7 @@ export async function getBaseUrl(page: Page): Promise<string> {
 /**
  * Get the classes of an element
  *
- * @param element - Element handle
+ * @param element Element handle
  * @returns Classes list
  *
  * @deprecated You should use locator instead {@link getLocatorClassList}
@@ -100,7 +100,7 @@ export async function getElementClassList(
 /**
  * Get the classes of an locator
  *
- * @param locator - Element locator
+ * @param locator Element locator
  * @returns Classes list
  */
 export async function getLocatorClassList(locator: Locator): Promise<string[]> {
@@ -115,8 +115,8 @@ export async function getLocatorClassList(locator: Locator): Promise<string[]> {
 /**
  * List the content of a local directory
  *
- * @param dirPath - Local directory path
- * @param filePaths - List to populate with the directory content
+ * @param dirPath Local directory path
+ * @param filePaths List to populate with the directory content
  * @returns Content of the directory
  */
 export function getFilesInDirectory(
@@ -144,8 +144,8 @@ export function getFilesInDirectory(
 /**
  * Get the value of an option stored in the page config object
  *
- * @param page - Playwright page model
- * @param name - Option name
+ * @param page Playwright page model
+ * @param name Option name
  * @returns Option value
  */
 export async function getOption(page: Page, name: string): Promise<string> {
@@ -155,7 +155,7 @@ export async function getOption(page: Page, name: string): Promise<string> {
 /**
  * Get the token stored in the page config object
  *
- * @param page - Playwright page model
+ * @param page Playwright page model
  * @returns Token
  */
 export async function getToken(page: Page): Promise<string> {
@@ -168,8 +168,8 @@ export async function getToken(page: Page): Promise<string> {
 /**
  * Wait for a function to return true until timeout
  *
- * @param fn - Condition
- * @param timeout - Time out
+ * @param fn Condition
+ * @param timeout Time out
  */
 export async function waitForCondition(
   fn: () => boolean | Promise<boolean>,
@@ -205,8 +205,8 @@ export async function waitForCondition(
 /**
  * Wait for an element to emit 'transitionend' event.
  *
- * @param page - Playwright page model object
- * @param element - Element or selector to watch
+ * @param page Playwright page model object
+ * @param element Element or selector to watch
  */
 export async function waitForTransition(
   page: Page,
@@ -248,7 +248,7 @@ export async function waitForTransition(
 /**
  * Get the selector to look for a specific class
  *
- * @param className - Class name
+ * @param className Class name
  * @returns Selector
  *
  * @deprecated You should use locator CSS selector `locator('.className')`
@@ -260,7 +260,7 @@ export function xpContainsClass(className: string): string {
 /**
  * Get the selector to look for a specific activity tab
  *
- * @param name - Activity name
+ * @param name Activity name
  * @returns Selector
  *
  * @deprecated You should use locator selector `getByRole('main').getByRole('tab', { name })`
@@ -274,7 +274,7 @@ export function xpBuildActivityTabSelector(name: string): string {
 /**
  * Get the selector to look for a specific activity panel
  *
- * @param id - Activity id
+ * @param id Activity id
  * @returns Selector
  *
  * @deprecated You should use locator selector `getByRole('main').getByRole('tabpanel', { name })`
