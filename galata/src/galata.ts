@@ -205,10 +205,10 @@ export namespace galata {
   /**
    * Add the Galata helpers to the page model
    *
-   * @param page - Playwright page model
-   * @param baseURL - Application base URL
-   * @param waitForApplication - Callback that resolved when the application page is ready
-   * @param appPath - Application URL path fragment
+   * @param page Playwright page model
+   * @param baseURL Application base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
+   * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
   export function addHelpersToPage(
@@ -333,8 +333,8 @@ export namespace galata {
   /**
    * Create a contents REST API helpers object
    *
-   * @param request - Playwright API request context
-   * @param page - Playwright page model
+   * @param request Playwright API request context
+   * @param page Playwright page model
    * @returns Contents REST API helpers
    */
   export function newContentsHelper(
@@ -419,7 +419,7 @@ export namespace galata {
   /**
    * Create a new performance helper
    *
-   * @param page - Playwright page model
+   * @param page Playwright page model
    * @returns Performance helper
    */
   export function newPerformanceHelper(page: Page): PerformanceHelper {
@@ -525,10 +525,10 @@ export namespace galata {
     /**
      * Generate a notebook with identical cells
      *
-     * @param nCells - Number of cells
-     * @param cellType - Type of cells
-     * @param defaultInput - Default input source
-     * @param defaultOutput - Default outputs
+     * @param nCells Number of cells
+     * @param cellType Type of cells
+     * @param defaultInput Default input source
+     * @param defaultOutput Default outputs
      * @returns The notebook
      */
     export function generateNotebook(
@@ -560,7 +560,7 @@ export namespace galata {
     /**
      * Generate a cell object
      *
-     * @param skeleton - Cell description template
+     * @param skeleton Cell description template
      * @returns A cell
      */
     export function makeCell(
@@ -592,7 +592,7 @@ export namespace galata {
     /**
      * Generate a notebook object from a cell list
      *
-     * @param cells - Notebook cells
+     * @param cells Notebook cells
      * @returns Notebook
      */
     export function makeNotebook(
@@ -633,7 +633,7 @@ export namespace galata {
      * Set last modified attributes one day ago one listing
      * directory content.
      *
-     * @param page - Page model object
+     * @param page Page model object
      *
      * #### Notes
      * The goal is to freeze the file browser display
@@ -707,7 +707,7 @@ export namespace galata {
     /**
      * Set a notebook's writable attribute to false
      *
-     * @param page - Page model object
+     * @param page Page model object
      *
      * #### Notes
      * The goal is to have the notebook to appear as read-only
@@ -765,10 +765,10 @@ export namespace galata {
     /**
      * Clear all wanted sessions or terminals.
      *
-     * @param baseURL - Application base URL
-     * @param runners - Session or terminal ids to stop
-     * @param type - Type of runner; session or terminal
-     * @param request - API request context
+     * @param baseURL Application base URL
+     * @param runners Session or terminal ids to stop
+     * @param type Type of runner; session or terminal
+     * @param request API request context
      * @returns Whether the runners were closed or not
      */
     export async function clearRunners(
@@ -789,8 +789,8 @@ export namespace galata {
     /**
      * Mock config route.
      *
-     * @param page - Page model object
-     * @param config - In-memory config
+     * @param page Page model object
+     * @param config In-memory config
      */
     export async function mockConfig(
       page: Page,
@@ -829,8 +829,8 @@ export namespace galata {
     /**
      * Mock custom CSS.
      *
-     * @param page - Page model object
-     * @param customCSS - Custom CSS content
+     * @param page Page model object
+     * @param customCSS Custom CSS content
      */
     export async function mockCustomCSS(
       page: Page,
@@ -869,7 +869,7 @@ export namespace galata {
     /**
      * Parse response JSON with response disposal error detection.
      *
-     * @param response - The API response to parse
+     * @param response The API response to parse
      * @returns Parsed JSON data
      * @throws ResponseDisposedError if response was disposed
      * @throws Error if parsing fails for other reasons
@@ -895,9 +895,9 @@ export namespace galata {
     /**
      * Mock the runners API to display only those created during a test
      *
-     * @param page - Page model object
-     * @param runners - Mapping of current test runners
-     * @param type - Type of runner; session or terminal
+     * @param page Page model object
+     * @param runners Mapping of current test runners
+     * @param type Type of runner; session or terminal
      */
     export async function mockRunners(
       page: Page,
@@ -1149,8 +1149,8 @@ export namespace galata {
     /**
      * Mock workspace route.
      *
-     * @param page - Page model object
-     * @param workspace - In-memory workspace
+     * @param page Page model object
+     * @param workspace In-memory workspace
      */
     export async function mockState(
       page: Page,
@@ -1197,9 +1197,9 @@ export namespace galata {
     /**
      * Mock settings route.
      *
-     * @param page - Page model object
-     * @param settings - In-memory settings
-     * @param mockedSettings - Test mocked settings
+     * @param page Page model object
+     * @param settings In-memory settings
+     * @param mockedSettings Test mocked settings
      */
     export async function mockSettings(
       page: Page,
@@ -1327,8 +1327,8 @@ export namespace galata {
     /**
      * Mock user route.
      *
-     * @param page - Page model object
-     * @param user - In-memory user
+     * @param page Page model object
+     * @param user In-memory user
      */
     export async function mockUser(
       page: Page,

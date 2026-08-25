@@ -20,8 +20,8 @@ const GENERAL_CONFIG = {
 /**
  * Matrix of figures per test file
  *
- * @param tests - Kind of test
- * @param comparison - Field name to compare
+ * @param tests Kind of test
+ * @param comparison Field name to compare
  * @returns The specification
  */
 function configPerFile(
@@ -58,9 +58,9 @@ function configPerFile(
  *
  * Note: The data field is set to empty
  *
- * @param tests - Kind of test
- * @param comparison - Field name to compare
- * @param filenames - Test file name list
+ * @param tests Kind of test
+ * @param comparison Field name to compare
+ * @param filenames Test file name list
  * @returns The specification
  */
 function generateVegaLiteSpec(

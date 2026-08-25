@@ -21,8 +21,8 @@ export class ContentsHelper {
   /**
    * Construct a new instance of ContentsHelper
    *
-   * @param request - Playwright API request context
-   * @param page - Playwright page model object
+   * @param request Playwright API request context
+   * @param page Playwright page model object
    */
   constructor(
     request?: APIRequestContext,
@@ -44,8 +44,8 @@ export class ContentsHelper {
   /**
    * Return the model for a path.
    *
-   * @param path - Path
-   * @param type - Path type
+   * @param path Path
+   * @param type Path type
    * @returns Element metadata
    */
   async getContentMetadata(
@@ -78,7 +78,7 @@ export class ContentsHelper {
   /**
    * Whether a directory exists or not
    *
-   * @param dirPath - Directory path
+   * @param dirPath Directory path
    * @returns Directory existence status
    */
   async directoryExists(dirPath: string): Promise<boolean> {
@@ -90,7 +90,7 @@ export class ContentsHelper {
   /**
    * Whether a file exists or not
    *
-   * @param filePath - File path
+   * @param filePath File path
    * @returns File existence status
    */
   async fileExists(filePath: string): Promise<boolean> {
@@ -102,7 +102,7 @@ export class ContentsHelper {
   /**
    * Create a directory
    *
-   * @param dirPath - Directory path
+   * @param dirPath Directory path
    * @returns Action success status
    */
   async createDirectory(dirPath: string): Promise<boolean> {
@@ -126,8 +126,8 @@ export class ContentsHelper {
   /**
    * Upload a directory recursively in the Jupyter server
    *
-   * @param sourcePath - Local source path
-   * @param destinationPath - Server destination path
+   * @param sourcePath Local source path
+   * @param destinationPath Server destination path
    * @returns Action success status
    */
   async uploadDirectory(
@@ -152,9 +152,9 @@ export class ContentsHelper {
    *
    * Note: the destinationPath is the filepath on the server.
    *
-   * @param content - Content file to upload
-   * @param format - Content format
-   * @param destinationPath - Destination filepath
+   * @param content Content file to upload
+   * @param format Content format
+   * @param destinationPath Destination filepath
    * @returns Whether the action succeeded or not.
    */
 
@@ -205,8 +205,8 @@ export class ContentsHelper {
    *
    * Note: the destinationPath is the filepath on the server.
    *
-   * @param sourcePath - Filepath to upload
-   * @param destinationPath - Destination filepath
+   * @param sourcePath Filepath to upload
+   * @param destinationPath Destination filepath
    * @returns Whether the action succeeded or not.
    */
   async uploadFile(
@@ -223,7 +223,7 @@ export class ContentsHelper {
   /**
    * Delete a file
    *
-   * @param filePath - File path
+   * @param filePath File path
    * @returns Action success status
    */
   async deleteFile(filePath: string): Promise<boolean> {
@@ -251,7 +251,7 @@ export class ContentsHelper {
   /**
    * Delete recursively a directory
    *
-   * @param dirPath - Directory path
+   * @param dirPath Directory path
    * @returns Action success status
    */
   async deleteDirectory(dirPath: string): Promise<boolean> {
@@ -286,8 +286,8 @@ export class ContentsHelper {
   /**
    * Rename a file
    *
-   * @param oldName - Old name
-   * @param newName - New name
+   * @param oldName Old name
+   * @param newName New name
    * @returns Action success status
    */
   async renameFile(oldName: string, newName: string): Promise<boolean> {
@@ -334,8 +334,8 @@ export class ContentsHelper {
   /**
    * Rename a directory
    *
-   * @param oldName - Old name
-   * @param newName - New name
+   * @param oldName Old name
+   * @param newName New name
    * @returns Action success status
    */
   async renameDirectory(oldName: string, newName: string): Promise<boolean> {
@@ -345,7 +345,7 @@ export class ContentsHelper {
   /**
    * Wait for a contents API response
    *
-   * @param trigger - Action to trigger while waiting
+   * @param trigger Action to trigger while waiting
    */
   async waitForAPIResponse(
     trigger?: () => Promise<void> | void,

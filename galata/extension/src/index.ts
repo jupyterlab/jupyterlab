@@ -26,7 +26,7 @@ export { IGalataHelpers } from './tokens';
 window.galata = new GalataInpage();
 /**
  * Galata in-page object
- * @deprecated Use `window.galata` instead.
+ * @deprecated
  */
 window.galataip = window.galata;
 

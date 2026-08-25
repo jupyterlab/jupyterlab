@@ -35,7 +35,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Get an application plugin
    *
-   * @param pluginId - Plugin ID
+   * @param pluginId Plugin ID
    * @returns Application plugin
    */
   async getPlugin<K extends keyof IPluginNameToInterfaceMap>(
@@ -78,15 +78,15 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Disconnect a listener to new Jupyter dialog events.
    *
-   * @param event - Event type
-   * @param listener - Event listener
+   * @param event Event type
+   * @param listener Event listener
    */
   off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   /**
    * Disconnect a listener to new or updated Jupyter notification events.
    *
-   * @param event - Event type
-   * @param listener - Event listener
+   * @param event Event type
+   * @param listener Event listener
    */
   off(
     event: 'notification',
@@ -122,8 +122,8 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Connect a listener to new Jupyter dialog events.
    *
-   * @param event - Event type
-   * @param listener - Event listener
+   * @param event Event type
+   * @param listener Event listener
    */
   on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   on(
@@ -133,8 +133,8 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Connect a listener to new or updated Jupyter notification events.
    *
-   * @param event - Event type
-   * @param listener - Event listener
+   * @param event Event type
+   * @param listener Event listener
    */
   on(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
     this.getPlugin(PLUGIN_ID_GALATA_HELPERS)
@@ -178,15 +178,15 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Connect a listener to the next new Jupyter dialog event.
    *
-   * @param event - Event type
-   * @param listener - Event listener
+   * @param event Event type
+   * @param listener Event listener
    */
   once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   /**
    * Connect a listener to the next new or updated Jupyter notification event.
    *
-   * @param event - Event type
-   * @param listener - Event listener
+   * @param event Event type
+   * @param listener Event listener
    */
   once(
     event: 'notification',
@@ -206,8 +206,8 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for a function to finish for max. timeout milliseconds
    *
-   * @param fn - Function
-   * @param timeout - Timeout
+   * @param fn Function
+   * @param timeout Timeout
    */
   async waitForFunction(fn: Function, timeout?: number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -242,7 +242,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Waits for the given `timeout` in milliseconds.
    *
-   * @param timeout - A timeout to wait for
+   * @param timeout A timeout to wait for
    */
   async waitForTimeout(timeout: number): Promise<void> {
     return new Promise(resolve => {
@@ -255,8 +255,8 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for a condition to fulfill or for a certain time
    *
-   * @param condition - Condition or timeout to wait for
-   * @param timeout - Timeout
+   * @param condition Condition or timeout to wait for
+   * @param timeout Timeout
    */
   async waitFor(condition: Function | number, timeout?: number): Promise<void> {
     const conditionType = typeof condition;
@@ -271,7 +271,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for the route to be on path and close all documents
    *
-   * @param path - Path to monitor
+   * @param path Path to monitor
    */
   async waitForLaunch(path = '/lab'): Promise<void> {
     let resolver: () => void;
@@ -296,9 +296,9 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for an element to be found from a CSS selector
    *
-   * @param selector - CSS selector
-   * @param node - Element
-   * @param options - Options
+   * @param selector CSS selector
+   * @param node Element
+   * @param options Options
    * @returns Selected element
    */
   async waitForSelector(
@@ -328,9 +328,9 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for an element to be found from a XPath
    *
-   * @param selector - CSS selector
-   * @param node - Element
-   * @param options - Options
+   * @param selector CSS selector
+   * @param node Element
+   * @param options Options
    * @returns Selected element
    */
   async waitForXPath(
@@ -378,8 +378,8 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Add a cell to the active notebook
    *
-   * @param cellType - Cell type
-   * @param source - Cell input source
+   * @param cellType Cell type
+   * @param source Cell input source
    * @returns Action success result
    */
   addNotebookCell(cellType: nbformat.CellType, source: string): boolean {
@@ -407,7 +407,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Reset execution count of one or all cells.
    *
-   * @param cellIndex - Cell index
+   * @param cellIndex Cell index
    */
   resetExecutionCount(cellIndex?: number): void {
     const nbPanel = this._app.shell.currentWidget as NotebookPanel;
@@ -434,9 +434,9 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Set the type and content of a cell in the active notebook
    *
-   * @param cellIndex - Cell index
-   * @param cellType - Cell type
-   * @param source - Cell input source
+   * @param cellIndex Cell index
+   * @param cellType Cell type
+   * @param source Cell input source
    * @returns Action success status
    */
   setNotebookCell(
@@ -471,7 +471,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Test if a cell is selected in the active notebook
    *
-   * @param cellIndex - Cell index
+   * @param cellIndex Cell index
    * @returns Whether the cell is selected or not
    */
   isNotebookCellSelected(cellIndex: number): boolean {
@@ -497,7 +497,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for a Markdown cell to be rendered
    *
-   * @param cell - Cell
+   * @param cell Cell
    */
   async waitForMarkdownCellRendered(cell: MarkdownCell): Promise<void> {
     if (!cell.inViewport) {
@@ -528,8 +528,8 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Wait for a cell to be run
    *
-   * @param cell - Cell
-   * @param timeout - Timeout
+   * @param cell Cell
+   * @param timeout Timeout
    */
   async waitForCellRun(cell: Cell, timeout = 2000): Promise<void> {
     const model = cell.model;
@@ -612,7 +612,7 @@ export class GalataInpage implements IGalataInpage {
    * Run the active notebook cell by cell
    * and execute the callback after each cell execution
    *
-   * @param callback - Callback
+   * @param callback Callback
    */
   async runActiveNotebookCellByCell(
     callback?: INotebookRunCallback
@@ -660,7 +660,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Test if one or all cells have an execution number.
    *
-   * @param cellIndex - Cell index
+   * @param cellIndex Cell index
    * @returns Whether the cell was executed or not
    *
    * ### Notes
@@ -703,7 +703,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Get the index of a toolbar item
    *
-   * @param itemName - Item name
+   * @param itemName Item name
    * @returns Index
    */
   getNotebookToolbarItemIndex(itemName: string): number {
@@ -714,7 +714,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Test if a element is visible or not
    *
-   * @param el - Element
+   * @param el Element
    * @returns Test result
    */
   isElementVisible(el: HTMLElement): boolean {
@@ -724,7 +724,7 @@ export class GalataInpage implements IGalataInpage {
   /**
    * Set the application theme
    *
-   * @param themeName - Theme name
+   * @param themeName Theme name
    */
   async setTheme(themeName: string): Promise<void> {
     await this._app.commands.execute('apputils:change-theme', {
