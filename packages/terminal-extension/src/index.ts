@@ -442,12 +442,7 @@ function addRunningSessionManager(
 ) {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
-  const signaler = new RunningTerminalSignaler(
-    manager,
-    tracker,
-    stateDB,
-    name => trans.__('Terminal %1', name)
-  );
+  const signaler = new RunningTerminalSignaler(manager, tracker, stateDB);
 
   class RunningTerminal implements IRunningSessions.IRunningItem {
     constructor(model: Terminal.IModel) {
@@ -489,11 +484,9 @@ class RunningTerminalSignaler {
   constructor(
     manager: Terminal.IManager,
     tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
-    stateDB: IStateDB<TerminalTitleState> | null,
-    defaultLabel: (name: string) => string
+    stateDB: IStateDB<TerminalTitleState> | null
   ) {
     this._stateDB = stateDB;
-    this._defaultLabel = defaultLabel;
     this._ready = this._loadTitles(manager).catch(reason => {
       console.warn('Failed to load terminal title state.', reason);
     });
@@ -542,11 +535,7 @@ class RunningTerminalSignaler {
 
       const name = widget.content.session.name;
       const label = TabBarSvg.titleLabel(widget.title);
-      if (
-        label === '...' ||
-        this._titles.get(name) === label ||
-        (this._titles.has(name) && label === this._defaultLabel(name))
-      ) {
+      if (label === '...' || this._titles.get(name) === label) {
         return;
       }
 
@@ -574,11 +563,12 @@ class RunningTerminalSignaler {
     }
 
     const saved = await this._stateDB.fetch(TERMINAL_TITLES_STATE_DB_ID);
-    if (!saved) {
+    const savedTitles = Private.terminalTitleEntries(saved);
+    if (savedTitles.length === 0) {
       return;
     }
 
-    for (const [name, label] of Object.entries(saved)) {
+    for (const [name, label] of savedTitles) {
       if (!this._titles.has(name)) {
         this._titles.set(name, label);
       }
@@ -624,7 +614,6 @@ class RunningTerminalSignaler {
   }
 
   private _stateDB: IStateDB<TerminalTitleState> | null;
-  private _defaultLabel: (name: string) => string;
   private _ready: Promise<void>;
   private _titles = new Map<string, string>();
   private _widgets = new Set<MainAreaWidget<ITerminal.ITerminal>>();
@@ -1058,6 +1047,19 @@ namespace Private {
     key: string
   ): key is keyof ITerminal.IOptions {
     return TERMINAL_OPTION_KEYS.has(key);
+  }
+
+  /**
+   * Get valid terminal title entries from persisted state.
+   */
+  export function terminalTitleEntries(state: unknown): [string, string][] {
+    if (typeof state !== 'object' || state === null || Array.isArray(state)) {
+      return [];
+    }
+
+    return Object.entries(state).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string'
+    );
   }
 
   /**

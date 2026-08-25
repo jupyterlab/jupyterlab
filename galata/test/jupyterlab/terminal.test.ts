@@ -150,6 +150,57 @@ test.describe('Terminal', () => {
         runningLabels.filter({ hasText: terminalTitle })
       ).toHaveCount(1);
     });
+
+    test('should update the running sidebar when the terminal title resets', async ({
+      page
+    }) => {
+      const terminalTitle = 'Galata terminal title reset';
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+      const defaultTerminalTitle = await page
+        .locator(TERMINAL_TAB_LABEL_SELECTOR)
+        .first()
+        .innerText();
+
+      const titleSaved = page.terminal.waitForTitleSaved(terminalTitle);
+      await page.terminal.runCommand(`printf "\\033]2;${terminalTitle}\\007"`, {
+        terminal
+      });
+      await titleSaved;
+
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+
+      await page.sidebar.openTab('jp-running-sessions');
+      const runningLabels = page.locator(
+        '#jp-running-sessions .jp-RunningSessions-itemLabel'
+      );
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+
+      const defaultTitleSaved =
+        page.terminal.waitForTitleSaved(defaultTerminalTitle);
+      await page.terminal.runCommand(
+        `printf "\\033]2;${defaultTerminalTitle}\\007"`,
+        { terminal }
+      );
+      await defaultTitleSaved;
+
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, {
+          hasText: defaultTerminalTitle
+        })
+      ).toBeVisible();
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(0);
+      await expect(
+        runningLabels.filter({ hasText: defaultTerminalTitle })
+      ).toHaveCount(2);
+    });
   });
 
   test.describe('Theme', () => {
