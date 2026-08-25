@@ -224,6 +224,33 @@ test.describe('Application Context Menu', () => {
       const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
+
+    test('Open context on notebook empty space', async ({ page }) => {
+      // Right-click in the notebook padding, which is left of the cells.
+      await page
+        .locator('.jp-Notebook .jp-WindowedPanel-viewport')
+        .click({ button: 'right', position: { x: 5, y: 20 } });
+
+      await expect(
+        page.getByRole('menuitem', { name: 'Clear Outputs of All Cells' })
+      ).toBeVisible();
+    });
+
+    test('Clear Outputs of All Cells is not offered on a cell', async ({
+      page
+    }) => {
+      await page.click('text=from IPython.display import Image', {
+        button: 'right'
+      });
+      // Wait for the cell context menu to open.
+      await expect(
+        page.getByRole('menuitem', { name: 'Clear Cell Output' })
+      ).toBeVisible();
+
+      await expect(
+        page.getByRole('menuitem', { name: 'Clear Outputs of All Cells' })
+      ).toBeHidden();
+    });
   });
 
   test('Open file editor context menu', async ({ page }) => {
