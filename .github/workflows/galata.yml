@@ -152,7 +152,7 @@ jobs:
         id: pw-version
         run: |
           set -e
-          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_VERSION=$(grep -m1 '^"playwright@npm:' yarn.lock)
           echo "Playwright version: $PW_VERSION"
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
         working-directory: core
@@ -347,7 +347,7 @@ jobs:
         id: pw-version
         run: |
           set -e
-          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_VERSION=$(grep -m1 '^"playwright@npm:' yarn.lock)
           PW_PACKAGE_VERSION=$(echo "$PW_VERSION" | sed -E 's/^"playwright@npm:([^"]+)":/\1/')
           echo "Playwright version: $PW_VERSION"
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
