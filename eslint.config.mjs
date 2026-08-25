@@ -54,6 +54,36 @@ const cleanGlobals = globalsObj => {
   return cleaned;
 };
 
+const IGNORED_TSDOC_MESSAGES = new Set(['tsdoc-param-tag-missing-hyphen']);
+const tsdocSyntaxRule = tsdocPlugin.rules.syntax;
+const filteredTsdocPlugin = {
+  ...tsdocPlugin,
+  rules: {
+    ...tsdocPlugin.rules,
+    syntax: {
+      ...tsdocSyntaxRule,
+      create(context) {
+        return tsdocSyntaxRule.create(
+          Object.create(context, {
+            report: {
+              value: (descriptor, ...args) => {
+                const messageId =
+                  descriptor && typeof descriptor === 'object'
+                    ? descriptor.messageId
+                    : undefined;
+
+                if (!IGNORED_TSDOC_MESSAGES.has(messageId)) {
+                  context.report(descriptor, ...args);
+                }
+              }
+            }
+          })
+        );
+      }
+    }
+  }
+};
+
 export default defineConfig([
   globalIgnores([
     '**/node_modules',
@@ -236,7 +266,7 @@ export default defineConfig([
       jest: jestPlugin,
       react: reactPlugin,
       jupyter: jupyterPlugin,
-      tsdoc: tsdocPlugin
+      tsdoc: filteredTsdocPlugin
     },
 
     languageOptions: {
