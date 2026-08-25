@@ -271,6 +271,8 @@ test.describe('Terminal', () => {
       await page.keyboard.press('Escape');
       await expect(terminal.locator('.xterm-viewport')).toBeFocused();
 
+      // allow focus/cursor styling to settle before screenshot
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(100);
       expect(await terminal.screenshot()).toMatchSnapshot('focus.png');
     });

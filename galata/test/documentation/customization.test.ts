@@ -79,6 +79,7 @@ test.describe('Default', () => {
     // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
     // so for now to ease the snapshot updates we just wait for it to settle.
     await debuggerActive.waitFor();
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(1250);
     await debuggerActive.waitFor();
 
@@ -264,6 +265,7 @@ test.describe('Customized', () => {
     // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
     // so for now to ease the snapshot updates we just wait for it to settle.
     await debuggerActive.waitFor();
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(1250);
     await debuggerActive.waitFor();
 

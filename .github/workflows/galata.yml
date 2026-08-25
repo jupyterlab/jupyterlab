@@ -542,7 +542,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: galata-pr-comment-data
+          name: ui-test-report-comment-data
           path: pr-comment-data.json
           retention-days: 1
 

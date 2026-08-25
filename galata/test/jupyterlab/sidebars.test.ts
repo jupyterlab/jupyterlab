@@ -206,12 +206,11 @@ test('Check Running Session button on sidebar has correct aria label and role', 
 }) => {
   await page.sidebar.open('left');
   const runningSessionsWidget = page.locator('#jp-running-sessions');
-  const runningSessionsElementAriaLabel =
-    await runningSessionsWidget.getAttribute('aria-label');
-  const runningSessionsElementRole =
-    await runningSessionsWidget.getAttribute('role');
-  expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
-  expect(runningSessionsElementRole).toEqual('region');
+  await expect(runningSessionsWidget).toHaveAttribute(
+    'aria-label',
+    'Running Sessions section'
+  );
+  await expect(runningSessionsWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Extension Manager button on sidebar has correct aria label and role', async ({
@@ -219,12 +218,11 @@ test('Check Extension Manager button on sidebar has correct aria label and role'
 }) => {
   await page.sidebar.open('left');
   const extensionManagerWidget = page.locator('#extensionmanager\\.main-view');
-  const extensionManagerElementAriaLabel =
-    await extensionManagerWidget.getAttribute('aria-label');
-  const extensionManagerElementRole =
-    await extensionManagerWidget.getAttribute('role');
-  expect(extensionManagerElementAriaLabel).toEqual('Extension Manager section');
-  expect(extensionManagerElementRole).toEqual('region');
+  await expect(extensionManagerWidget).toHaveAttribute(
+    'aria-label',
+    'Extension Manager section'
+  );
+  await expect(extensionManagerWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check File Browser button on sidebar has correct aria label and role', async ({
@@ -232,11 +230,11 @@ test('Check File Browser button on sidebar has correct aria label and role', asy
 }) => {
   await page.sidebar.open('left');
   const fileBrowserWidget = page.locator('#filebrowser');
-  const fileBrowserElementAriaLabel =
-    await fileBrowserWidget.getAttribute('aria-label');
-  const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
-  expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
-  expect(fileBrowserElementRole).toEqual('region');
+  await expect(fileBrowserWidget).toHaveAttribute(
+    'aria-label',
+    'File Browser Section'
+  );
+  await expect(fileBrowserWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Debugger button on sidebar has correct aria label and role', async ({
@@ -244,11 +242,11 @@ test('Check Debugger button on sidebar has correct aria label and role', async (
 }) => {
   await page.sidebar.open('right');
   const debuggerWidget = page.locator('#jp-debugger-sidebar');
-  const debuggerElementAriaLabel =
-    await debuggerWidget.getAttribute('aria-label');
-  const debuggerElementRole = await debuggerWidget.getAttribute('role');
-  expect(debuggerElementAriaLabel).toEqual('Debugger section');
-  expect(debuggerElementRole).toEqual('region');
+  await expect(debuggerWidget).toHaveAttribute(
+    'aria-label',
+    'Debugger section'
+  );
+  await expect(debuggerWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Table of Contents button on sidebar has correct aria label and role', async ({
@@ -256,12 +254,11 @@ test('Check Table of Contents button on sidebar has correct aria label and role'
 }) => {
   await page.sidebar.open('left');
   const tableOfContentsWidget = page.locator('#table-of-contents');
-  const tableOfContentsElementAriaLabel =
-    await tableOfContentsWidget.getAttribute('aria-label');
-  const tableOfContentsElementRole =
-    await tableOfContentsWidget.getAttribute('role');
-  expect(tableOfContentsElementAriaLabel).toEqual('Table of Contents section');
-  expect(tableOfContentsElementRole).toEqual('region');
+  await expect(tableOfContentsWidget).toHaveAttribute(
+    'aria-label',
+    'Table of Contents section'
+  );
+  await expect(tableOfContentsWidget).toHaveAttribute('role', 'region');
 });
 
 const elementAriaLabels = {
@@ -333,18 +330,20 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       for (let ariaLabel of keyValueArray) {
         const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
-        let initialState = await elementLocator.getAttribute('aria-expanded');
+        const initialState = await elementLocator.getAttribute('aria-expanded');
 
         await page.activity.keyToElement(`[aria-label='${ariaLabel}']`, 'Tab');
         await page.keyboard.press('Enter');
-        let stateAfter = await elementLocator.getAttribute('aria-expanded');
-
-        expect(initialState).not.toEqual(stateAfter);
+        // Pressing Enter toggles the panel; wait for aria-expanded to flip.
+        await expect
+          .poll(() => elementLocator.getAttribute('aria-expanded'))
+          .not.toBe(initialState);
 
         await page.keyboard.press('Enter');
-        let finalState = await elementLocator.getAttribute('aria-expanded');
-
-        expect(initialState).toEqual(finalState);
+        // Toggling again returns the panel to its initial state.
+        await expect
+          .poll(() => elementLocator.getAttribute('aria-expanded'))
+          .toBe(initialState);
       }
     });
   });
