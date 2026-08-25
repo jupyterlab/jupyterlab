@@ -113,7 +113,7 @@ dev = [
     "hatch",
     "bump2version",
     "mypy==1.20.2",
-    "ruff==0.15.20",
+    "ruff==0.16.1",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -260,65 +260,6 @@ module = ["numpy", "numpy.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 
-[[tool.mypy.overrides]]
-module = ["jupyterlab.browser_check"]
-disable_error_code = ["arg-type", "assignment"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.debuglog"]
-disable_error_code = ["attr-defined"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.extensions.manager"]
-disable_error_code = [
-    "arg-type",
-    "attr-defined",
-    "misc",
-    "return-value",
-    "union-attr",
-    "var-annotated",
-]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.extensions.pypi"]
-disable_error_code = [
-    "arg-type",
-    "assignment",
-    "attr-defined",
-    "call-overload",
-    "dict-item",
-    "override",
-    "return-value",
-    "var-annotated",
-]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.announcements"]
-disable_error_code = [
-    "arg-type",
-    "assignment",
-    "attr-defined",
-    "return-value",
-    "union-attr",
-    "var-annotated",
-]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.build_handler"]
-disable_error_code = ["arg-type", "misc", "override", "union-attr", "var-annotated"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.error_handler"]
-disable_error_code = ["arg-type", "override"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.labapp"]
-disable_error_code = ["arg-type", "assignment", "union-attr"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.upgrade_extension"]
-disable_error_code = ["assignment", "operator"]
-
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
@@ -358,6 +299,8 @@ lint.ignore = [
 "E501",
 # PLR0913 Too many arguments to function call
 "PLR0913",
+# PLR0917 Too many positional arguments
+"PLR0917",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]

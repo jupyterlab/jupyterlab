@@ -75,7 +75,7 @@ export namespace Clipboard {
 
     // Save the current selection.
     const savedRanges: any[] = [];
-    for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
+    for (let i = 0, len = sel?.rangeCount ?? 0; i < len; ++i) {
       savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }
 

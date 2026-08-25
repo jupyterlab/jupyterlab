@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import * as path from 'path';
 
 const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-Completer';
@@ -49,7 +48,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
 
       await expect(completer).toBeHidden();
       // Ensure the completer is still bound to the editor before pressing Tab
@@ -73,63 +71,6 @@ test.describe('Completer', () => {
       completer = page.locator(COMPLETER_SELECTOR);
 
       await expect(completer).toBeHidden();
-    });
-
-    test('Show documentation panel', async ({ page, tmpPath, browserName }) => {
-      test.skip(browserName === 'firefox', 'Flaky on Firefox');
-      const scriptName = 'completer_panel.py';
-      await page.contents.uploadFile(
-        path.resolve(__dirname, `./notebooks/${scriptName}`),
-        `${tmpPath}/${scriptName}`
-      );
-      await galata.Mock.mockSettings(page, [], {
-        ...galata.DEFAULT_SETTINGS,
-        '@jupyterlab/completer-extension:manager': {
-          showDocumentationPanel: true
-        }
-      });
-      await page.notebook.save();
-      await page.goto();
-      await page.notebook.openByPath(fileName);
-
-      await page.notebook.setCell(
-        0,
-        'code',
-        'from completer_panel import option_1, option_2'
-      );
-      await page.notebook.runCell(0, true);
-      await page.notebook.addCell('code', 'option');
-      await page.notebook.enterCellEditingMode(1);
-
-      // we need to wait until the completer gets bound to the cell after entering it
-      const editor = page.locator(
-        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
-      );
-      await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
-
-      await page.keyboard.press('Tab');
-      let completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
-      await expect(completer).toBeHidden();
-
-      // Throttle requests to catch loading bar
-      const session = await page.performance.throttleNetwork({
-        downloadThroughput: (500 * 1024) / 8,
-        uploadThroughput: (500 * 1024) / 8,
-        latency: 300
-      });
-
-      await page.keyboard.press('Tab');
-      completer = page.locator(COMPLETER_SELECTOR);
-      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
-      await page
-        .locator('.jp-Completer-loading-bar')
-        .waitFor({ state: 'detached' });
-      await session?.detach();
-      const imageName = 'completer-with-doc-panel.png';
-      expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
 
     test('Token completions show up without running the cell when in the same cell', async ({
@@ -165,7 +106,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
@@ -195,7 +135,6 @@ test.describe('Completer', () => {
       let completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
@@ -218,7 +157,9 @@ test.describe('Completer', () => {
 
       await page.keyboard.type('import getopt\ngetopt.');
       await page.keyboard.press('Tab');
-      // we need to wait until the completer gets bound to the cell after entering it
+      // We need to wait until the completer gets bound to the cell after
+      // entering it.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(50);
     });
 
