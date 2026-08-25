@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 /**
  * @packageDocumentation
+ * @module vega5-extension
  */
 
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';

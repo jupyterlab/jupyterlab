@@ -79,7 +79,7 @@ export interface ISemanticCommandOptions {
  * Add a semantic commands to the application and take care
  * of setting up the command changed signal.
  *
- * @param options - Semantic command options
+ * @param options Semantic command options
  */
 export function addSemanticCommand(options: ISemanticCommandOptions): void {
   const {
@@ -141,10 +141,10 @@ export function addSemanticCommand(options: ISemanticCommandOptions): void {
  * Create the command options from the given semantic commands list
  * and the given default values.
  *
- * @param app - Jupyter Application
- * @param semanticCommands - Single semantic command  or a list of commands
- * @param defaultValues - Default values
- * @param trans - Translation bundle
+ * @param app Jupyter Application
+ * @param semanticCommands Single semantic command  or a list of commands
+ * @param defaultValues Default values
+ * @param trans Translation bundle
  * @returns Command options
  *
  * @deprecated Please use {@link addSemanticCommand}. This function will

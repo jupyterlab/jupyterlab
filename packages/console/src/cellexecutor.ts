@@ -10,7 +10,7 @@ import type { IConsoleCellExecutor } from './tokens';
 /**
  * Run a console cell.
  *
- * @param options - Cell execution options
+ * @param options Cell execution options
  * @returns Execution status
  */
 export async function runCell({

@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 /**
  * @packageDocumentation
+ * @module mermaid-extension
  */
 
 import type { IMermaidManager } from './tokens';

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 /**
  * @packageDocumentation
+ * @module metadataform
  */
 
 import type { CellType } from '@jupyterlab/nbformat';
@@ -182,8 +183,8 @@ export namespace MetadataForm {
     /**
      * Update the metadata of the current cell or notebook.
      *
-     * @param formData - The cell metadata set in the form.
-     * @param reload - Whether to update the form after updating the metadata.
+     * @param formData the cell metadata set in the form.
+     * @param reload whether to update the form after updating the metadata.
      *
      * ## Notes
      * Metadata are updated from root only. If some metadata is nested,

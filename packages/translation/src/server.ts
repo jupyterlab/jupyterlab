@@ -13,8 +13,8 @@ const TRANSLATIONS_SETTINGS_URL = 'api/translations';
 /**
  * Call the API extension
  *
- * @param locale - API REST end point for the extension
- * @param init - Initial values for the request
+ * @param locale API REST end point for the extension
+ * @param init Initial values for the request
  * @returns The response body interpreted as JSON
  */
 export async function requestTranslationsAPI<T>(

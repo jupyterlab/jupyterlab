@@ -22,7 +22,7 @@ export abstract class ReactWidget extends Widget {
   }
   /**
    * Creates a new `ReactWidget` that renders a constant element.
-   * @param element - React element to render.
+   * @param element React element to render.
    */
   static create(element: ReactRenderElement): ReactWidget {
     return new (class extends ReactWidget {
@@ -243,7 +243,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  * Example as child:
  *
  * ```
- * function LiveButton(isActiveSignal: ISignal<unknown, boolean>) {
+ * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
  *  return (
  *    <UseSignal signal={isActiveSignal} initialArgs={true}>
  *     {(_, isActive) => <Button isActive={isActive}>}
@@ -255,7 +255,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  * Example as prop:
  *
  * ```
- * function LiveButton(isActiveSignal: ISignal<unknown, boolean>) {
+ * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
  *  return (
  *    <UseSignal
  *      signal={isActiveSignal}
