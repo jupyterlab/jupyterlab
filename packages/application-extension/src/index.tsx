@@ -461,14 +461,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           const errorMessage = trans.__(
             'Could not copy image. Browser security restrictions may prevent copying images loaded from another origin.'
           );
-          const blob = imageToPngBlob(image, errorMessage);
+          const blob = await imageToPngBlob(image, errorMessage);
 
           await navigator.clipboard.write([
             new ClipboardItem({ 'image/png': blob })
           ]);
-          Notification.success(trans.__('Image copied to clipboard.'), {
-            autoClose: COPY_IMAGE_NOTIFICATION_AUTO_CLOSE
-          });
         } catch (reason) {
           const error =
             reason instanceof Error

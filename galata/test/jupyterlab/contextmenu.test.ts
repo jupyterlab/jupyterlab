@@ -146,6 +146,42 @@ test.describe('Application Context Menu', () => {
     ).toBeVisible();
   });
 
+  test.describe('Image clipboard', () => {
+    test.skip(
+      ({ browserName }) => browserName !== 'chromium',
+      'Image clipboard read is tested on Chromium.'
+    );
+
+    test('Copy image from context menu to clipboard', async ({
+      page,
+      tmpPath
+    }) => {
+      await page
+        .context()
+        .grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.filebrowser.open(`${tmpPath}/${testImageName}`);
+
+      const image = page.locator('.jp-ImageViewer img');
+      await image.waitFor();
+      await image.click({ button: 'right' });
+      await page.getByRole('menuitem', { name: 'Copy Image' }).click();
+
+      await expect
+        .poll(async () =>
+          page.evaluate(async () => {
+            const items = await navigator.clipboard.read();
+            const item = items.find(item => item.types.includes('image/png'));
+            if (!item) {
+              return 0;
+            }
+            const blob = await item.getType('image/png');
+            return blob.type === 'image/png' ? blob.size : 0;
+          })
+        )
+        .toBeGreaterThan(0);
+    });
+  });
+
   test.describe('Notebook context menus', () => {
     test.beforeEach(async ({ page, tmpPath }) => {
       await page.notebook.openByPath(`${tmpPath}/${testNotebook}`);
