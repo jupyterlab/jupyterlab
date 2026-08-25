@@ -1,8 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JSONExt, type ReadonlyPartialJSONValue } from '@lumino/coreutils';
+
 export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+  return (
+    typeof value === 'object' &&
+    JSONExt.isObject(value as ReadonlyPartialJSONValue)
+  );
 }
 
 /**

@@ -11,8 +11,10 @@ import type { IMermaidManager } from './tokens';
 import { MERMAID_CLASS, MERMAID_MIME_TYPE, WARNING_CLASS } from './tokens';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
+  JSONExt,
   PromiseDelegate,
-  type ReadonlyPartialJSONObject
+  type ReadonlyPartialJSONObject,
+  type ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -112,9 +114,9 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
 
 namespace Private {
   export function isReadonlyPartialJSONObject(
-    value: unknown
+    value: ReadonlyPartialJSONValue | undefined
   ): value is ReadonlyPartialJSONObject {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
+    return value !== undefined && JSONExt.isObject(value);
   }
 }
 

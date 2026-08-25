@@ -21,6 +21,9 @@ import { normalizeDomain } from './utils';
  */
 export type PluralForm = (n: number) => IPluralResult;
 
+/**
+ * Plural form evaluation result.
+ */
 export interface IPluralResult {
   nplurals: number;
   plural: number;
