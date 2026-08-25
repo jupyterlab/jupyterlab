@@ -2451,7 +2451,7 @@ namespace Private {
         if (w.id && w.content instanceof SplitPanel) {
           widgetStates[w.id] = {
             sizes: w.content.relativeSizes() as number[],
-            expansionStates: w.content.widgets.map(wi => wi.isVisible)
+            expansionStates: w.content.widgets.map(wi => !wi.isHidden)
           };
         }
       });

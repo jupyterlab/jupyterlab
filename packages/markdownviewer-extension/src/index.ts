@@ -10,7 +10,7 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
-import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
+import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
@@ -35,6 +35,7 @@ namespace CommandIDs {
   export const markdownPreview = 'markdownviewer:open';
   export const markdownEditor = 'markdownviewer:edit';
   export const trust = 'markdownviewer:trust';
+  export const copy = 'markdownviewer:copy';
 }
 
 /**
@@ -220,6 +221,32 @@ function activate(
         return { trusted: true };
       }
       return { trusted: false };
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.copy, {
+    label: trans.__('Copy'),
+    isEnabled: () => {
+      const selection = document.getSelection();
+      const widget = tracker.currentWidget;
+      return (
+        widget !== null &&
+        selection !== null &&
+        selection.toString().length > 0 &&
+        widget.content.node.contains(selection.anchorNode)
+      );
+    },
+    execute: () => {
+      const selection = document.getSelection();
+      if (selection !== null && selection.toString().length > 0) {
+        Clipboard.copyToSystem(selection.toString());
+      }
     },
     describedBy: {
       args: {

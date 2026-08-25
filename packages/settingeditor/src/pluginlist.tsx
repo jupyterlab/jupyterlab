@@ -631,7 +631,11 @@ export class PluginList extends ReactWidget {
     const { id, schema, version } = plugin;
     const trans = this.translator.load('jupyterlab');
     const title =
-      typeof schema.title === 'string' ? trans._p('schema', schema.title) : id;
+      typeof schema.title === 'string'
+        ? // Extracted from the settings schema by the `title` selector.
+          // eslint-disable-next-line jupyter/no-dynamic-translation
+          trans._p('schema', schema.title)
+        : id;
     const highlightedTitleIndices = StringExt.matchSumOfSquares(
       title.toLocaleLowerCase(),
       this._query?.toLocaleLowerCase() ?? ''
@@ -645,7 +649,9 @@ export class PluginList extends ReactWidget {
     );
     const description =
       typeof schema.description === 'string'
-        ? trans._p('schema', schema.description)
+        ? // Extracted from the settings schema by the `description` selector.
+          // eslint-disable-next-line jupyter/no-dynamic-translation
+          trans._p('schema', schema.description)
         : '';
     const itemTitle = `${description}\n${id}\n${version}`;
     const icon = this.getHint(ICON_KEY, this._registry, plugin);

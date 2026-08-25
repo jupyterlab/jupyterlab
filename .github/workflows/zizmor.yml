@@ -26,7 +26,7 @@ jobs:
 
       - name: Run zizmor 🌈
         # Check zizmor version is aligned with the one in .pre-commit-config.yaml
-        run: uvx zizmor@1.25.2 --format=sarif . > results.sarif
+        run: uvx zizmor@1.29.0 --format=sarif . > results.sarif
         # Note: we are not passing GitHub token here, so it runs in offline mode;
         # online mode is known to exhaust Github rate limits due to extensive
         # GitHub API calls, see https://github.com/zizmorcore/zizmor/issues/278 and
