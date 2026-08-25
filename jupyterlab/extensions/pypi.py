@@ -601,7 +601,9 @@ class PyPIExtensionManager(ExtensionManager):
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
-                                with TarFile(io.BytesIO(response.content)) as sdist:
+                                with TarFile.open(
+                                    fileobj=io.BytesIO(response.content), mode="r:gz"
+                                ) as sdist:
                                     for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
