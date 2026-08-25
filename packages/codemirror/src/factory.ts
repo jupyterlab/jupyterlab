@@ -65,7 +65,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Create a new editor
    *
-   * @param options - Editor options
+   * @param options Editor options
    * @returns The editor
    */
   protected newEditor(

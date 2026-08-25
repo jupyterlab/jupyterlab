@@ -28,7 +28,7 @@ export class FileEditorSearchProvider
 {
   /**
    * Constructor
-   * @param widget - File editor panel
+   * @param widget File editor panel
    */
   constructor(protected widget: FileEditorPanel) {
     super();
@@ -85,8 +85,8 @@ export class FileEditorSearchProvider
   /**
    * Callback on source change
    *
-   * @param emitter - Source of the change
-   * @param changes - Source change
+   * @param emitter Source of the change
+   * @param changes Source change
    */
   protected async onSharedModelChanged(
     emitter: ISharedText,
@@ -104,8 +104,8 @@ export class FileEditorSearchProvider
    * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
-   * @param widget - The widget to search on
-   * @param translator - [optional] The translator object
+   * @param widget The widget to search on
+   * @param translator [optional] The translator object
    *
    * @returns The search provider on the widget
    */

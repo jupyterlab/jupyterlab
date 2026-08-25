@@ -20,10 +20,10 @@ export class TranslationManager implements ITranslator {
   /**
    * Construct a new TranslationManager.
    *
-   * @param translationsUrl - The URL of the translation server.
-   * @param stringsPrefix - (optional) The prefix for translation strings.
-   * @param serverSettings - (optional) The server settings.
-   * @param connector - (optional) The translation connector. If provided, the `translationsUrl` and `serverSettings` parameters will be ignored.
+   * @param translationsUrl The URL of the translation server.
+   * @param stringsPrefix (optional) The prefix for translation strings.
+   * @param serverSettings (optional) The server settings.
+   * @param connector (optional) The translation connector. If provided, the `translationsUrl` and `serverSettings` parameters will be ignored.
    */
   constructor(
     translationsUrl: string = '',
@@ -50,7 +50,7 @@ export class TranslationManager implements ITranslator {
   /**
    * Fetch the localization data from the server.
    *
-   * @param locale - The language locale to use for translations.
+   * @param locale The language locale to use for translations.
    */
   async fetch(locale: string): Promise<void> {
     this._languageData = await this._connector.fetch({ language: locale });
@@ -84,7 +84,7 @@ export class TranslationManager implements ITranslator {
   /**
    * Load translation bundles for a given domain.
    *
-   * @param domain - The translation domain to use for translations.
+   * @param domain The translation domain to use for translations.
    */
   load(domain: string): TranslationBundle {
     if (this._domainData) {

@@ -32,7 +32,7 @@ class OpenTabsSignaler {
   /**
    * Add a widget to watch for title changing.
    *
-   * @param widget - A widget whose title may change.
+   * @param widget A widget whose title may change.
    */
   addWidget(widget: Widget): void {
     widget.title.changed.connect(this._emitTabsChanged, this);

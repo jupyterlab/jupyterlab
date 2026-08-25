@@ -592,7 +592,7 @@ export class PluginList extends ReactWidget {
 
   /**
    * Updates the filter when the search bar value changes.
-   * @param filter - Filter function passed by search bar based on search value.
+   * @param filter Filter function passed by search bar based on search value.
    */
   setFilter(
     filter: ((item: string) => Partial<IScore> | null) | null,

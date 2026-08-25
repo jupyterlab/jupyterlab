@@ -89,7 +89,7 @@ export namespace URLExt {
   /**
    * Return a serialized object string suitable for a query.
    *
-   * @param value - The source object.
+   * @param value The source object.
    *
    * @returns an encoded url query.
    *

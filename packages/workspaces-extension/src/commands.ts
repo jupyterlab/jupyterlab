@@ -667,7 +667,7 @@ namespace Private {
 
   /**
    * Ask user for a path to save to.
-   * @param defaultPath - Path already present when the dialog is shown
+   * @param defaultPath Path already present when the dialog is shown
    */
   async function getSavePath(
     defaultPath: string,

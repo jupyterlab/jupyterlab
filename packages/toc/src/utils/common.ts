@@ -21,9 +21,9 @@ export interface IHTMLHeading extends TableOfContents.IHeading {
 /**
  * Filter headings for table of contents and compute associated prefix
  *
- * @param headings - Headings to process
- * @param options - Options
- * @param initialLevels - Initial levels for prefix computation
+ * @param headings Headings to process
+ * @param options Options
+ * @param initialLevels Initial levels for prefix computation
  * @returns Extracted headings
  */
 export function filterHeadings<
@@ -84,8 +84,8 @@ export function isHTML(mime: string): boolean {
  * ### Notes
  * The html string is not sanitized - use with caution
  *
- * @param html - HTML string to parse
- * @param force - Whether to ignore HTML headings with class jp-toc-ignore and tocSkip or not
+ * @param html HTML string to parse
+ * @param force Whether to ignore HTML headings with class jp-toc-ignore and tocSkip or not
  * @returns Extracted headings
  */
 export function getHTMLHeadings(html: string, force = true): IHTMLHeading[] {
@@ -111,9 +111,9 @@ export function getHTMLHeadings(html: string, force = true): IHTMLHeading[] {
 /**
  * Add an heading prefix to a HTML node.
  *
- * @param container - HTML node containing the heading
- * @param selector - Heading selector
- * @param prefix - Title prefix to add
+ * @param container HTML node containing the heading
+ * @param selector Heading selector
+ * @param prefix Title prefix to add
  * @returns The modified HTML element
  */
 export function addPrefix(
@@ -148,10 +148,10 @@ export function addPrefix(
 /**
  * Update the levels and create the numbering prefix
  *
- * @param level - Current level
- * @param previousLevel - Previous level
- * @param levels - Levels list
- * @param options - Options
+ * @param level Current level
+ * @param previousLevel Previous level
+ * @param levels Levels list
+ * @param options Options
  * @returns The numbering prefix
  */
 export function getPrefix(
@@ -199,8 +199,8 @@ export function getPrefix(
 /**
  * Add a numbering prefix to a HTML element.
  *
- * @param el - HTML element
- * @param numbering - Numbering prefix to add
+ * @param el HTML element
+ * @param numbering Numbering prefix to add
  */
 function addNumbering(el: Element, numbering: string): void {
   el.insertAdjacentHTML(
@@ -211,7 +211,7 @@ function addNumbering(el: Element, numbering: string): void {
 
 /**
  * Remove all numbering nodes from element
- * @param element - Node to clear
+ * @param element Node to clear
  */
 export function clearNumbering(element: Element): void {
   element?.querySelectorAll(`span.${NUMBERING_CLASS}`).forEach(el => {

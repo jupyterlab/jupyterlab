@@ -191,7 +191,7 @@ export abstract class EditorSearchProvider<
    * #### Notes
    * It will start or end the search
    *
-   * @param v - New value
+   * @param v New value
    */
   async setIsActive(v: boolean): Promise<void> {
     if (this._isActive === v) {
@@ -237,8 +237,8 @@ export abstract class EditorSearchProvider<
    * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" the first match.
    *
-   * @param query - A RegExp to be use to perform the search
-   * @param filters - Filter parameters to pass to provider
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     this.query = query;
@@ -322,7 +322,7 @@ export abstract class EditorSearchProvider<
    * and highlighting on the composer (notebook) level needs to switch to next
    * engine (cell) with matches.
    *
-   * @param newText - The replacement text.
+   * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
   replaceCurrentMatch(
@@ -397,7 +397,7 @@ export abstract class EditorSearchProvider<
   /**
    * Replace all matches in the cell source with the provided text
    *
-   * @param newText - The replacement text.
+   * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
   replaceAllMatches(
@@ -453,8 +453,8 @@ export abstract class EditorSearchProvider<
   /**
    * Callback on source change
    *
-   * @param emitter - Source of the change
-   * @param changes - Source change
+   * @param emitter Source of the change
+   * @param changes Source change
    */
   protected async onSharedModelChanged(
     emitter: ISharedText,
@@ -544,7 +544,7 @@ export class CodeMirrorSearchHighlighter {
   /**
    * Constructor
    *
-   * @param editor - The CodeMirror editor
+   * @param editor The CodeMirror editor
    */
   constructor(editor: CodeMirrorEditor | null) {
     this._cm = editor;
@@ -717,7 +717,7 @@ export class CodeMirrorSearchHighlighter {
   /**
    * Set the editor
    *
-   * @param editor - Editor
+   * @param editor Editor
    */
   setEditor(editor: CodeMirrorEditor): void {
     if (this._cm) {
@@ -917,10 +917,10 @@ namespace Utils {
    * #### Notes
    * Search is done using a binary search algorithm
    *
-   * @param matches - List of matches
-   * @param position - Searched position
-   * @param lowerBound - Lower range index
-   * @param higherBound - High range index
+   * @param matches List of matches
+   * @param position Searched position
+   * @param lowerBound Lower range index
+   * @param higherBound High range index
    * @returns The next match or null if none exists
    */
   export function findNext(

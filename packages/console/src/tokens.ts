@@ -58,7 +58,7 @@ export interface IConsoleCellExecutor {
   /**
    * Execute a cell.
    *
-   * @param options - Cell execution options
+   * @param options Cell execution options
    */
   runCell(options: IConsoleCellExecutor.IRunCellOptions): Promise<boolean>;
 }

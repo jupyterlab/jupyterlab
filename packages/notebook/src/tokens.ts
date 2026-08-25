@@ -193,7 +193,7 @@ export interface INotebookCellExecutor {
   /**
    * Execute a cell.
    *
-   * @param options - Cell execution options
+   * @param options Cell execution options
    */
   runCell(options: INotebookCellExecutor.IRunCellOptions): Promise<boolean>;
 }

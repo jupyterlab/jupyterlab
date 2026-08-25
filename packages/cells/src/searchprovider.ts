@@ -64,7 +64,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
   /**
    * Constructor
    *
-   * @param cell - Cell widget
+   * @param cell Cell widget
    */
   constructor(cell: Cell<ICellModel>) {
     super(cell);
@@ -236,8 +236,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * Initialize the search using the provided options. Should update the UI to highlight
    * all matches and "select" the first match.
    *
-   * @param query - A RegExp to be use to perform the search
-   * @param filters - Filter parameters to pass to provider
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     await super.startQuery(query, filters);
@@ -262,7 +262,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
   /**
    * Replace all matches in the cell source with the provided text
    *
-   * @param newText - The replacement text.
+   * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
   async replaceAllMatches(
@@ -280,7 +280,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * Replace the currently selected match with the provided text.
    * If no match is selected, it won't do anything.
    *
-   * @param newText - The replacement text.
+   * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
   async replaceCurrentMatch(
@@ -331,7 +331,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Constructor
    *
-   * @param cell - Cell widget
+   * @param cell Cell widget
    */
   constructor(cell: Cell<ICellModel>) {
     super(cell);
@@ -420,8 +420,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" the first match.
    *
-   * @param query - A RegExp to be use to perform the search
-   * @param filters - Filter parameters to pass to provider
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     await super.startQuery(query, filters);
@@ -435,7 +435,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Replace all matches in the cell source with the provided text
    *
-   * @param newText - The replacement text.
+   * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
   async replaceAllMatches(
@@ -457,7 +457,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * Replace the currently selected match with the provided text.
    * If no match is selected, it won't do anything.
    *
-   * @param newText - The replacement text.
+   * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
   async replaceCurrentMatch(
@@ -475,8 +475,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Callback on rendered state change
    *
-   * @param cell - Cell that emitted the change
-   * @param rendered - New rendered value
+   * @param cell Cell that emitted the change
+   * @param rendered New rendered value
    */
   protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
     if (!this._unrenderedByHighlight) {
@@ -501,7 +501,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 /**
  * Factory to create a cell search provider
  *
- * @param cell - Cell widget
+ * @param cell Cell widget
  * @returns Cell search provider
  */
 export function createCellSearchProvider(

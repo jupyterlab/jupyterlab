@@ -83,7 +83,7 @@ export class SidePanel extends Widget {
   /**
    * Add a widget to the content panel bottom.
    *
-   * @param widget - Widget to add
+   * @param widget Widget to add
    */
   addWidget(widget: Toolbar.IWidgetToolbar): void {
     this.content.addWidget(widget);
@@ -92,8 +92,8 @@ export class SidePanel extends Widget {
   /**
    * Insert a widget at the given position in the content panel.
    *
-   * @param index - Position
-   * @param widget - Widget to insert
+   * @param index Position
+   * @param widget Widget to insert
    */
   insertWidget(index: number, widget: Toolbar.IWidgetToolbar): void {
     this.content.insertWidget(index, widget);

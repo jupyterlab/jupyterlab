@@ -40,7 +40,7 @@ export interface IPropertyInspectorProvider {
   /**
    * Register a widget in the property inspector provider.
    *
-   * @param widget - The owner widget whose properties will be inspected.
+   * @param widget The owner widget whose properties will be inspected.
    *
    * ## Notes
    * Only one property inspector can be provided for each widget.

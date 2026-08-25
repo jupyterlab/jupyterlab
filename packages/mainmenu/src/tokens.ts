@@ -29,9 +29,9 @@ export interface IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    *
-   * @param menu - The menu to add
-   * @param update - Whether to update the menu bar or not
-   * @param options - Options for adding the menu
+   * @param menu The menu to add
+   * @param update Whether to update the menu bar or not
+   * @param options Options for adding the menu
    */
   addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void;
 

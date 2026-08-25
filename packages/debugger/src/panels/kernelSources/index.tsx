@@ -20,7 +20,7 @@ export class KernelSources extends PanelWithToolbar {
   /**
    * Instantiate a new Sources preview Panel.
    *
-   * @param options - The Sources instantiation options.
+   * @param options The Sources instantiation options.
    */
   constructor(options: KernelSources.IOptions) {
     super();

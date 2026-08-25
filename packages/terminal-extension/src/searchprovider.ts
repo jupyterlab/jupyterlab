@@ -26,7 +26,7 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
   /**
    * Constructor.
    *
-   * @param widget - The widget to search in.
+   * @param widget The widget to search in.
    */
   constructor(protected widget: TerminalWidget) {
     super(widget);
@@ -53,8 +53,8 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
    * Note the widget provided is always checked using `isApplicable` before calling this
    * function.
    *
-   * @param widget - The terminal widget to search in.
-   * @param translator - [optional] The translator object.
+   * @param widget The terminal widget to search in.
+   * @param translator [optional] The translator object.
    *
    * @returns The search provider for the terminal widget.
    */
@@ -154,7 +154,7 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
   /**
    * Start a search using the provided query.
    *
-   * @param query - A RegExp to be use to perform the search
+   * @param query A RegExp to be use to perform the search
    */
   async startQuery(query: RegExp): Promise<void> {
     this._query = query;
@@ -175,8 +175,8 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
   /**
    * Convert a color to the '#rrggbb' format expected by xtermjs SearchAddon.
    *
-   * @param color - Color to convert.
-   * @param backgroundColor - Background color to mix with `color` if it is not opaque.
+   * @param color Color to convert.
+   * @param backgroundColor Background color to mix with `color` if it is not opaque.
    * @returns Color string of form '#rrggbb'
    */
   private _colorToRRGGBB(color: string, backgroundColor: string): string {
@@ -253,7 +253,7 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
   /**
    * Return xtermjs search options based on regex query flags and theme colors.
    *
-   * @param flags - Regex query flags.
+   * @param flags Regex query flags.
    *
    * @returns xtermjs search options.
    */

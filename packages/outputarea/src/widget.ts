@@ -726,7 +726,7 @@ export class OutputArea extends Widget {
    * Dispose information message and show output models from the given
    * index to maxNumberOutputs
    *
-   * @param lastShown - Starting model index to insert.
+   * @param lastShown Starting model index to insert.
    */
   private _showTrimmedOutputs(lastShown: number) {
     // Dispose information widget
@@ -904,8 +904,8 @@ export class OutputArea extends Widget {
   /**
    * Wrap a output widget within a output panel
    *
-   * @param output - Output widget to wrap
-   * @param executionCount - Execution count
+   * @param output Output widget to wrap
+   * @param executionCount Execution count
    * @returns The output panel
    */
   private _wrappedOutput(
@@ -1653,8 +1653,8 @@ namespace Private {
      * ### Notes
      * The widget will be disposed on click after calling the callback.
      *
-     * @param maxNumberOutputs - Maximal number of outputs to display
-     * @param _onClick - Callback on click event on the widget
+     * @param maxNumberOutputs Maximal number of outputs to display
+     * @param _onClick Callback on click event on the widget
      */
     constructor(
       maxNumberOutputs: number,

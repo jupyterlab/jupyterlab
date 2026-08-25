@@ -15,7 +15,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
   /**
    * Instantiate a new Sources.Model
    *
-   * @param options - The Sources.Model instantiation options.
+   * @param options The Sources.Model instantiation options.
    */
   constructor(options: SourcesModel.IOptions) {
     this._currentSource = null;
@@ -92,7 +92,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
   /**
    * Set the current source.
    *
-   * @param source - The source to set as the current source.
+   * @param source The source to set as the current source.
    */
   set currentSource(source: IDebugger.Source | null) {
     this._currentSource = source;

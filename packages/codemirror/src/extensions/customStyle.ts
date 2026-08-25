@@ -69,7 +69,7 @@ function setEditorStyle(view: EditorView): Record<string, string> | null {
 /**
  * Get the extension to customize an editor theme.
  *
- * @param config - Theme customization
+ * @param config Theme customization
  * @returns Editor extension
  */
 export function customTheme(config: CustomTheme): Extension {

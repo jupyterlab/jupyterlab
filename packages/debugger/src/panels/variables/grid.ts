@@ -22,7 +22,7 @@ export class VariablesBodyGrid extends Panel {
   /**
    * Instantiate a new VariablesBodyGrid.
    *
-   * @param options - The instantiation options for a VariablesBodyGrid.
+   * @param options The instantiation options for a VariablesBodyGrid.
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();

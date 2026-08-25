@@ -229,7 +229,7 @@ export class EditorThemeRegistry implements IEditorThemeRegistry {
   /**
    * Register a new theme.
    *
-   * @param theme - Codemirror 6 theme
+   * @param theme Codemirror 6 theme
    */
   addTheme(theme: IEditorTheme) {
     if (this._themeMap.has(theme.name)) {
@@ -244,7 +244,7 @@ export class EditorThemeRegistry implements IEditorThemeRegistry {
    * #### Notes
    * It falls back to the default theme
    *
-   * @param name - Theme name
+   * @param name Theme name
    * @returns Theme extension
    */
   getTheme(name: string): Extension {
@@ -261,7 +261,7 @@ export namespace EditorThemeRegistry {
   /**
    * Get the default editor themes.
    *
-   * @param translator - Application translator
+   * @param translator Application translator
    * @returns Default CodeMirror 6 themes
    */
   export function getDefaultThemes(

@@ -33,7 +33,7 @@ export class DebuggerSidebar extends SidePanel {
   /**
    * Instantiate a new Debugger.Sidebar
    *
-   * @param options - The instantiation options for a Debugger.Sidebar
+   * @param options The instantiation options for a Debugger.Sidebar
    */
   constructor(options: DebuggerSidebar.IOptions) {
     const translator = options.translator || nullTranslator;

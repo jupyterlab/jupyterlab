@@ -13,7 +13,7 @@ import type { Notebook, NotebookMode } from '.';
 /**
  * A pure function for rendering a Command/Edit mode component.
  *
- * @param props - the props for rendering the component.
+ * @param props the props for rendering the component.
  *
  * @returns a tsx component for command/edit mode.
  */

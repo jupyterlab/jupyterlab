@@ -90,8 +90,8 @@ export class HTMLSearchEngine {
   /**
    * Search for a `query` in a DOM tree.
    *
-   * @param query - Regular expression to search
-   * @param rootNode - DOM root node to search in
+   * @param query Regular expression to search
+   * @param rootNode DOM root node to search in
    * @returns The list of matches
    */
   static search(query: RegExp, rootNode: Node): Promise<IHTMLSearchMatch[]> {
@@ -161,9 +161,9 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * The widget provided is always checked using `isApplicable` before calling
    * this factory.
    *
-   * @param widget - The widget to search on
-   * @param registry - The search provider registry
-   * @param translator - [optional] The translator object
+   * @param widget The widget to search on
+   * @param registry The search provider registry
+   * @param translator [optional] The translator object
    *
    * @returns The search provider on the widget
    */
@@ -252,7 +252,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Move the current match indicator to the next match.
    *
-   * @param loop - Whether to loop within the matches list.
+   * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves once the action has completed.
    */
@@ -263,7 +263,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Move the current match indicator to the previous match.
    *
-   * @param loop - Whether to loop within the matches list.
+   * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves once the action has completed.
    */
@@ -276,8 +276,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Replace the currently selected match with the provided text
    *
-   * @param newText - The replacement text
-   * @param loop - Whether to loop within the matches list.
+   * @param newText The replacement text
+   * @param loop Whether to loop within the matches list.
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -288,7 +288,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   /**
    * Replace all matches in the notebook with the provided text
    *
-   * @param newText - The replacement text
+   * @param newText The replacement text
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -301,8 +301,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
-   * @param query - A RegExp to be use to perform the search
-   * @param filters - Filter parameters to pass to provider
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters = {}): Promise<void> {
     await this.endQuery();

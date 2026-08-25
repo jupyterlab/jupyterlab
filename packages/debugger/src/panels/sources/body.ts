@@ -23,7 +23,7 @@ export class SourcesBody extends Widget {
   /**
    * Instantiate a new Body for the SourcesBody widget.
    *
-   * @param options - The instantiation options for a SourcesBody.
+   * @param options The instantiation options for a SourcesBody.
    */
   constructor(options: SourcesBody.IOptions) {
     super();

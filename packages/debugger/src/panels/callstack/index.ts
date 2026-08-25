@@ -19,7 +19,7 @@ export class Callstack extends PanelWithToolbar {
   /**
    * Instantiate a new Callstack Panel.
    *
-   * @param options - The instantiation options for a Callstack Panel.
+   * @param options The instantiation options for a Callstack Panel.
    */
   constructor(options: Callstack.IOptions) {
     super(options);

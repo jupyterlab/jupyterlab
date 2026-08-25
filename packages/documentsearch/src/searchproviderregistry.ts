@@ -21,7 +21,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   /**
    * Constructor
    *
-   * @param translator - Application translator object
+   * @param translator Application translator object
    */
   constructor(protected translator: ITranslator = nullTranslator) {}
 

@@ -21,7 +21,7 @@ export abstract class SearchProvider<
   /**
    * Constructor
    *
-   * @param widget - The widget to search in
+   * @param widget The widget to search in
    */
   constructor(protected widget: T) {
     this._stateChanged = new Signal<this, void>(this);
@@ -116,8 +116,8 @@ export abstract class SearchProvider<
   /**
    * Start a search using the provided options.
    *
-   * @param query - A RegExp to be use to perform the search
-   * @param filters - Filter parameters to pass to provider
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
    */
   abstract startQuery(query: RegExp, filters: IFilters): Promise<void>;
 
@@ -148,7 +148,7 @@ export abstract class SearchProvider<
   /**
    * Replace the currently selected match with the provided text
    *
-   * @param newText - The replacement text
+   * @param newText The replacement text
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
@@ -161,7 +161,7 @@ export abstract class SearchProvider<
   /**
    * Replace all matches in the widget with the provided text
    *
-   * @param newText - The replacement text
+   * @param newText The replacement text
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */

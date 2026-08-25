@@ -438,7 +438,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Get the cell editor and add new ones to the mappings.
    *
-   * @param cell - Cell widget
+   * @param cell Cell widget
    * @returns Cell editor accessor
    */
   private _getCellEditor(cell: Cell): Document.IEditor {

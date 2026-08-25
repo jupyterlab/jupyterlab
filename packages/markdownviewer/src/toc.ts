@@ -27,9 +27,9 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
   /**
    * Constructor
    *
-   * @param widget - The widget to search in
-   * @param parser - Markdown parser
-   * @param configuration - Default model configuration
+   * @param widget The widget to search in
+   * @param parser Markdown parser
+   * @param configuration Default model configuration
    */
   constructor(
     widget: MarkdownDocument,
@@ -92,8 +92,8 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
   /**
    * Constructor
    *
-   * @param tracker - Widget tracker
-   * @param parser - Markdown parser
+   * @param tracker Widget tracker
+   * @param parser Markdown parser
    */
   constructor(
     tracker: IWidgetTracker<MarkdownDocument>,

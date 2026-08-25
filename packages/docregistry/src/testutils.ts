@@ -93,7 +93,7 @@ export async function createSession(
 /**
  * Create a session context given a partial session model.
  *
- * @param model - The session model to use.
+ * @param model The session model to use.
  */
 export function createSimpleSessionContext(
   model: Private.RecursivePartial<Session.IModel> = {}
@@ -106,8 +106,8 @@ export function createSimpleSessionContext(
 /**
  * Emit an iopub message on a session context.
  *
- * @param sessionContext - The session context
- * @param msg - Message created with `KernelMessage.createMessage`
+ * @param sessionContext The session context
+ * @param msg Message created with `KernelMessage.createMessage`
  */
 export function emitIopubMessage(
   context: ISessionContext,
@@ -124,8 +124,8 @@ export function emitIopubMessage(
  * Forcibly change the status of a session context.
  * An iopub message is emitted for the change.
  *
- * @param sessionContext - The session context of interest.
- * @param newStatus - The new kernel status.
+ * @param sessionContext The session context of interest.
+ * @param newStatus The new kernel status.
  */
 export function updateKernelStatus(
   sessionContext: ISessionContext,
@@ -146,7 +146,7 @@ export function updateKernelStatus(
 /**
  * A mock session context.
  *
- * @param session - The session connection object to use
+ * @param session The session connection object to use
  */
 export const SessionContextMock = jest.fn<
   ISessionContext,

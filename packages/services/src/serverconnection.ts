@@ -157,7 +157,7 @@ export namespace ServerConnection {
      * Create a ResponseError from a response, handling the traceback and message
      * as appropriate.
      *
-     * @param response - The response object.
+     * @param response The response object.
      *
      * @returns A promise that resolves with a `ResponseError` object.
      */

@@ -97,7 +97,7 @@ export namespace StateCommands {
 
   /**
    * Prevent insertion of new line when running cell with Ctrl/Command + Enter
-   * @deprecated This command is no longer used.
+   * @deprecated
    */
   export function preventNewLineOnRun(target: { dom: HTMLElement }): boolean {
     if (target.dom.closest(CODE_RUNNER_SELECTOR)) {

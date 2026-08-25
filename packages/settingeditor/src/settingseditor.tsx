@@ -91,7 +91,7 @@ export class SettingsEditor extends SplitPanel {
   /**
    * Set the dirty state status
    *
-   * @param dirty - New status
+   * @param dirty New status
    */
   setDirtyState(dirty: boolean): void {
     this._dirty = dirty;
@@ -114,7 +114,7 @@ export class SettingsEditor extends SplitPanel {
   /**
    * Updates the filter of the plugin list.
    *
-   * @param query - The query to filter the plugin list
+   * @param query The query to filter the plugin list
    */
   updateQuery(query: string): void {
     this._list.setFilter(
@@ -126,7 +126,7 @@ export class SettingsEditor extends SplitPanel {
   /**
    * A message handler invoked on a `'close-request'` message.
    *
-   * @param msg - Widget message
+   * @param msg Widget message
    */
   protected onCloseRequest(msg: Message): void {
     const trans = this.translator.load('jupyterlab');

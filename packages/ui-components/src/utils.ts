@@ -94,7 +94,7 @@ export function getReactAttrs(
 
 /**
  * Test whether an object is a tree item or not.
- * @param el - Element to test
+ * @param el Element to test
  * @returns Result
  */
 function isTreeItemElement(el: HTMLElement | null): boolean {
@@ -104,7 +104,7 @@ function isTreeItemElement(el: HTMLElement | null): boolean {
 /**
  * Find the tree item encapsulating the element.
  *
- * @param el - Starting element
+ * @param el Starting element
  * @returns The tree item
  */
 export function getTreeItemElement(el: HTMLElement): HTMLElement | null {

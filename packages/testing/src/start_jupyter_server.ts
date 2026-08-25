@@ -170,7 +170,7 @@ namespace Private {
   /**
    * Make a temporary directory.
    *
-   * @param suffix - the last portion of the dir naem.
+   * @param suffix the last portion of the dir naem.
    */
   export function mktempDir(suffix: string): string {
     const pathPrefix = '/tmp/jupyterServer';
@@ -341,7 +341,7 @@ namespace Private {
   /**
    * Handle process startup.
    *
-   * @param output - the process output
+   * @param output the process output
    *
    * @returns The baseUrl of the server or `null`.
    */

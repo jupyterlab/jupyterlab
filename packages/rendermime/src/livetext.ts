@@ -85,8 +85,8 @@ interface ILiveRenderState {
 /**
  * Split a shallow node (node without nested nodes inside) at a given text content position.
  *
- * @param node - the shallow node to be split
- * @param at - the position in textContent at which the split should occur
+ * @param node the shallow node to be split
+ * @param at the position in textContent at which the split should occur
  */
 function splitShallowNode<T extends Node>(
   node: T,

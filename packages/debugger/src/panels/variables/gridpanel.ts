@@ -29,7 +29,7 @@ export class Grid extends Panel {
   /**
    * Instantiate a new VariablesGrid.
    *
-   * @param options - The instantiation options for a VariablesGrid.
+   * @param options The instantiation options for a VariablesGrid.
    */
   constructor(options: Grid.IOptions) {
     super();
@@ -73,7 +73,7 @@ export class Grid extends Panel {
   /**
    * Set the variable filter list.
    *
-   * @param filter - The variable filter to apply.
+   * @param filter The variable filter to apply.
    */
   set filter(filter: Set<string>) {
     (this._grid.dataModel as GridModel).filter = filter;
@@ -83,7 +83,7 @@ export class Grid extends Panel {
   /**
    * Set the scope for the variables data model.
    *
-   * @param scope - The scopes for the variables
+   * @param scope The scopes for the variables
    */
   set scope(scope: string) {
     (this._grid.dataModel as GridModel).scope = scope;
@@ -156,7 +156,7 @@ namespace Grid {
 export class GridModel extends DataModel {
   /**
    * Create grid model
-   * @param translator - optional translator
+   * @param translator optional translator
    */
   constructor(translator?: ITranslator) {
     super();
@@ -186,7 +186,7 @@ export class GridModel extends DataModel {
   /**
    * Get the row count for a particular region in the data grid.
    *
-   * @param region - The datagrid region.
+   * @param region The datagrid region.
    */
   rowCount(region: DataModel.RowRegion): number {
     return region === 'body' ? this._data.name.length : 1;
@@ -195,7 +195,7 @@ export class GridModel extends DataModel {
   /**
    * Get the column count for a particular region in the data grid.
    *
-   * @param region - The datagrid region.
+   * @param region The datagrid region.
    */
   columnCount(region: DataModel.ColumnRegion): number {
     return region === 'body' ? 2 : 1;
@@ -204,9 +204,9 @@ export class GridModel extends DataModel {
   /**
    * Get the data count for a particular region, row and column in the data grid.
    *
-   * @param region - The datagrid region.
-   * @param row - The datagrid row
-   * @param column - The datagrid column
+   * @param region The datagrid region.
+   * @param row The datagrid row
+   * @param column The datagrid column
    */
   data(region: DataModel.CellRegion, row: number, column: number): any {
     if (region === 'row-header') {
@@ -226,7 +226,7 @@ export class GridModel extends DataModel {
   /**
    * Get the variable reference for a given row
    *
-   * @param row - The row in the datagrid.
+   * @param row The row in the datagrid.
    */
   getVariableReference(row: number): number {
     return this._data.variablesReference[row];
@@ -235,7 +235,7 @@ export class GridModel extends DataModel {
   /**
    * Get the variable name for a given row
    *
-   * @param row - The row in the datagrid.
+   * @param row The row in the datagrid.
    */
   getVariableName(row: number): string {
     return this._data.name[row];
@@ -244,7 +244,7 @@ export class GridModel extends DataModel {
   /**
    * Set the datagrid model data from the list of variables.
    *
-   * @param scopes - The list of variables.
+   * @param scopes The list of variables.
    */
   setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
@@ -403,8 +403,8 @@ namespace Private {
     /**
      * Handle a mouse double-click event.
      *
-     * @param grid - The datagrid clicked.
-     * @param event - The mouse event.
+     * @param grid The datagrid clicked.
+     * @param event The mouse event.
      */
     onMouseDoubleClick(grid: DataGrid, event: MouseEvent): void {
       const hit = grid.hitTest(event.clientX, event.clientY);

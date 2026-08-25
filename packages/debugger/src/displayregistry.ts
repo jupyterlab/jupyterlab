@@ -25,7 +25,7 @@ export class DebuggerDisplayRegistry implements IDebuggerDisplayRegistry {
   /**
    * Register a display provider.
    *
-   * @param provider - source display providder to register.
+   * @param provider source display providder to register.
    */
   register(provider: IDebuggerSourceDisplayProvider): void {
     this._providers.push(provider);

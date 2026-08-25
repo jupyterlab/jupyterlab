@@ -12,7 +12,7 @@ export class ReadOnlyEditorFactory {
   /**
    * Construct a new editor widget factory.
    *
-   * @param options - The instantiation options for a ReadOnlyEditorFactory.
+   * @param options The instantiation options for a ReadOnlyEditorFactory.
    */
   constructor(options: ReadOnlyEditorFactory.IOptions) {
     this._services = options.editorServices;
@@ -21,7 +21,7 @@ export class ReadOnlyEditorFactory {
   /**
    * Create a new CodeEditorWrapper given a Source.
    *
-   * @param source - The source to create a new editor for.
+   * @param source The source to create a new editor for.
    */
   createNewEditor(source: IDebugger.Source): CodeEditorWrapper {
     const { content, mimeType, path } = source;

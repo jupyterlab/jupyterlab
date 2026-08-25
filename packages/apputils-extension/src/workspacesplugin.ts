@@ -103,7 +103,7 @@ namespace Private {
 
     /**
      * Loads the workspace into load, and jump to it
-     * @param context - This is used to query the workspace content
+     * @param context This is used to query the workspace content
      */
     protected createNewWidget(
       context: DocumentRegistry.Context

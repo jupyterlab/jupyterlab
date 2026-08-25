@@ -162,7 +162,7 @@ export class NotebookViewModel extends WindowedListModel {
   /**
    * Cell size estimator
    *
-   * @param index - Cell index
+   * @param index Cell index
    * @returns Cell height in pixels
    */
   estimateWidgetSize = (index: number): number => {
@@ -203,8 +203,8 @@ export class NotebookViewModel extends WindowedListModel {
   /**
    * Set an estimated height for a cell
    *
-   * @param cellId - Cell ID
-   * @param size - Cell height
+   * @param cellId Cell ID
+   * @param size Cell height
    */
   setEstimatedWidgetSize(cellId: string, size: number | null): void {
     if (size === null) {
@@ -225,7 +225,7 @@ export class NotebookViewModel extends WindowedListModel {
   /**
    * Render the cell at index.
    *
-   * @param index - Cell index
+   * @param index Cell index
    * @returns Cell widget
    */
   widgetRenderer = (index: number): Widget => {
@@ -586,7 +586,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
   /**
    * A message handler invoked on a `'child-removed'` message.
    *
-   * @param msg - Message
+   * @param msg Message
    */
   protected onChildRemoved(msg: Widget.ChildMessage): void {
     this._willBeRemoved = msg.child;

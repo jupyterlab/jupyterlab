@@ -80,7 +80,7 @@ class EvaluateDialog extends Dialog<string> {
   /**
    * Handle the DOM events for the Evaluate dialog.
    *
-   * @param event - The DOM event sent to the dialog widget
+   * @param event The DOM event sent to the dialog widget
    */
   handleEvent(event: Event): void {
     if (event.type === 'keydown') {
@@ -104,7 +104,7 @@ class EvaluateDialogBody extends Widget implements Dialog.IBodyWidget<string> {
   /**
    * CodePromptDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: DebuggerEvaluateDialog.IOptions) {
     super();

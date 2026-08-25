@@ -529,9 +529,9 @@ class InstalledList extends ReactWidget {
   /**
    * Callback handler for when the user wants to perform an action on an extension.
    *
-   * @param action - The action to perform.
-   * @param entry - The entry to perform the action on.
-   * @param actionOptions - Additional options for the action.
+   * @param action The action to perform.
+   * @param entry The entry to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
   onAction(
     action: Action,
@@ -565,7 +565,7 @@ class SearchResult extends ReactWidget {
   /**
    * Callback handler for the user changes the page of the search result pagination.
    *
-   * @param value - The pagination page number.
+   * @param value The pagination page number.
    */
   onPage(value: number): void {
     this.model.page = value;
@@ -574,9 +574,9 @@ class SearchResult extends ReactWidget {
   /**
    * Callback handler for when the user wants to perform an action on an extension.
    *
-   * @param action - The action to perform.
-   * @param entry - The entry to perform the action on.
-   * @param actionOptions - Additional options for the action.
+   * @param action The action to perform.
+   * @param entry The entry to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
   onAction(
     action: Action,

@@ -223,8 +223,8 @@ class AvailableList extends VDomRenderer<PluginListModel> {
   /**
    * Callback handler for when the user wants to perform an action on an extension.
    *
-   * @param action - The action to perform.
-   * @param entry - The entry to perform the action on.
+   * @param action The action to perform.
+   * @param entry The entry to perform the action on.
    */
   onAction(action: Action, entry: IEntry): Promise<void> {
     switch (action) {

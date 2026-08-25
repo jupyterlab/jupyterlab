@@ -47,7 +47,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Instantiate a new EditorHandler.
    *
-   * @param options - The instantiation options for a EditorHandler.
+   * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
     this._src = options.src;
@@ -288,8 +288,8 @@ export class EditorHandler implements IDisposable {
   /**
    * Handle a click on the gutter.
    *
-   * @param editor - The editor from where the click originated.
-   * @param position - The position corresponding to the click event.
+   * @param editor The editor from where the click originated.
+   * @param position The position corresponding to the click event.
    */
   private _getEffectiveClickedLine(
     editor: EditorView,
@@ -319,8 +319,8 @@ export class EditorHandler implements IDisposable {
   /**
    * Handle a click on the gutter.
    *
-   * @param editor - The editor from where the click originated.
-   * @param position - The position corresponding to the click event.
+   * @param editor The editor from where the click originated.
+   * @param position The position corresponding to the click event.
    */
   private _onGutterClick(editor: EditorView, position: number): void {
     if (this._id !== this._debuggerService.session?.connection?.id) {
@@ -513,9 +513,9 @@ export namespace EditorHandler {
   /**
    * Highlight the current line of the frame in the given editor.
    *
-   * @param editor - The editor to highlight.
-   * @param line - The line number.
-   * @param scrollLogicalPosition - the position of the the widget after scroll, or false
+   * @param editor The editor to highlight.
+   * @param line The line number.
+   * @param scrollLogicalPosition the position of the the widget after scroll, or false
    * if no scroll is expected.
    */
   export function showCurrentLine(
@@ -559,7 +559,7 @@ export namespace EditorHandler {
   /**
    * Remove all line highlighting indicators for the given editor.
    *
-   * @param editor - The editor to cleanup.
+   * @param editor The editor to cleanup.
    */
   export function clearHighlight(editor: CodeEditor.IEditor): void {
     if (!editor || editor.isDisposed) {
@@ -613,8 +613,8 @@ namespace Private {
   /**
    * Create a new breakpoint.
    *
-   * @param session - The name of the session.
-   * @param line - The line number of the breakpoint.
+   * @param session The name of the session.
+   * @param line The line number of the breakpoint.
    */
   export function createBreakpoint(
     session: string,
