@@ -158,4 +158,43 @@ test.describe('Notebook Trust', () => {
       /2 of 3 code cells trusted\./
     );
   });
+
+  test('Trust status refreshes the active non-code cell trust state', async ({
+    page
+  }) => {
+    const trustItem = page.locator(TRUST_ITEM_SELECTOR);
+
+    await expect(trustItem).toHaveAttribute(
+      'title',
+      /Notebook trusted: 1 of 1 code cells trusted\./
+    );
+
+    await page.evaluate(() => {
+      const panel = window.jupyterapp.shell
+        .currentWidget as unknown as NotebookPanel;
+      const model = panel.content.model;
+      if (!model) {
+        throw new Error('Notebook model not found');
+      }
+
+      const codeCell = model.cells.get(0);
+      codeCell.trusted = true;
+      model.sharedModel.insertCell(1, {
+        cell_type: 'markdown',
+        metadata: {},
+        source: 'Active markdown'
+      });
+
+      const markdownCell = model.cells.get(1);
+      markdownCell.trusted = false;
+      panel.content.activeCellIndex = 1;
+      markdownCell.trusted = true;
+      codeCell.trusted = false;
+    });
+
+    await expect(trustItem).toHaveAttribute(
+      'title',
+      /Active cell trusted: 0 of 1 code cells trusted\./
+    );
+  });
 });

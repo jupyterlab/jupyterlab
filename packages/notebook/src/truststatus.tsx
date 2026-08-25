@@ -264,9 +264,8 @@ export namespace NotebookTrustStatus {
       if (cell.type === 'code' && wasTrusted !== isTrusted) {
         this._trustedCells += isTrusted ? 1 : -1;
       }
-      if (this._notebook?.activeCell?.model === cell) {
-        this._activeCellTrusted = isTrusted;
-      }
+      this._activeCellTrusted =
+        this._notebook?.activeCell?.model.trusted ?? false;
       this._triggerChange(oldState, this._getAllState());
     }
 
