@@ -6,7 +6,7 @@ import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { expect } from '@playwright/test';
 
 /**
- * Normalize rgba color format for comparison (remove spaces, use .XX instead of 0.XX for decimals less than 1)
+ * Normalize rgba color format for comparison (remove spaces, use .XX instead of 0.XX for decimals < 1)
  */
 function normalizeColor(color: string): string {
   return color.replace(/\s/g, '').replace(/,0\./g, ',.');

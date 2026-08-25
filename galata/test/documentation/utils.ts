@@ -10,7 +10,7 @@ import path from 'path';
 /**
  * Filter directory content
  *
- * @param array - Array of content models
+ * @param array Array of content models
  * @returns Filtered array
  */
 export function filterContent(array: any[]): any[] {
@@ -24,8 +24,8 @@ export function filterContent(array: any[]): any[] {
 /**
  * Generate a SVG arrow to inject in a HTML document.
  *
- * @param position - Absolute position
- * @param rotation - Rotation in degree
+ * @param position Absolute position
+ * @param rotation Rotation in degree
  * @returns The svg to inject in the page
  */
 export function generateArrow(
@@ -47,7 +47,7 @@ export function generateArrow(
 /**
  * Generate a SVG mouse pointer to inject in a HTML document.
  *
- * @param position - Absolute position
+ * @param position Absolute position
  * @returns The svg to inject in the page
  */
 export function positionMouse(position: { x: number; y: number }): string {
@@ -88,8 +88,8 @@ export interface IPositionInElement {
 /**
  * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
  *
- * @param element - A playwright handle or locator for the target DOM element
- * @param position - A position within the target element (default: bottom right quarter).
+ * @param element A playwright handle or locator for the target DOM element
+ * @param position A position within the target element (default: bottom right quarter).
  * @returns The svg to inject in the page
  */
 export async function positionMouseOver(
@@ -124,9 +124,9 @@ export interface IClip {
  * (for example a completer and the cell it completes) without hard-coding
  * pixel coordinates.
  *
- * @param page - The page the elements belong to
- * @param elements - The elements to enclose
- * @param padding - Margin added on each side (default: 8 pixels)
+ * @param page The page the elements belong to
+ * @param elements The elements to enclose
+ * @param padding Margin added on each side (default: 8 pixels)
  * @returns The enclosing rectangle, clipped to the viewport
  */
 export async function boundsAround(

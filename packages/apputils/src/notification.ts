@@ -50,7 +50,7 @@ export class NotificationManager implements IDisposable {
   /**
    * Dismiss one notification (specified by its id) or all if no id provided.
    *
-   * @param id - Notification id
+   * @param id Notification id
    */
   dismiss(id?: string): void {
     if (typeof id === 'undefined') {
@@ -89,7 +89,7 @@ export class NotificationManager implements IDisposable {
   /**
    * Test whether a notification exists or not.
    *
-   * @param id - Notification id
+   * @param id Notification id
    * @returns Notification status
    */
   has(id: string): boolean {
@@ -101,9 +101,9 @@ export class NotificationManager implements IDisposable {
    *
    * This will trigger the `changed` signal with an `added` event.
    *
-   * @param message - Notification message
-   * @param type - Notification type
-   * @param options - Notification option
+   * @param message Notification message
+   * @param type Notification type
+   * @param options Notification option
    * @returns Notification unique id
    */
   notify<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -148,7 +148,7 @@ export class NotificationManager implements IDisposable {
    * Once updated the notification will be moved at the begin
    * of the notification stack.
    *
-   * @param args - Update options
+   * @param args Update options
    * @returns Whether the update was successful or not.
    */
   update<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -400,7 +400,7 @@ export namespace Notification {
   /**
    * Dismiss one notification (specified by its id) or all if no id provided
    *
-   * @param id - notification id
+   * @param id notification id
    */
   export function dismiss(id?: string): void {
     manager.dismiss(id);
@@ -412,9 +412,9 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param message - Notification message
-   * @param type - Notification type
-   * @param options - Options for the error notification
+   * @param message Notification message
+   * @param type Notification type
+   * @param options Options for the error notification
    * @returns Notification unique id
    */
   export function emit<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -431,8 +431,8 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param message - Notification message
-   * @param options - Options for the error notification
+   * @param message Notification message
+   * @param options Options for the error notification
    * @returns Notification unique id
    */
   export function error<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -448,8 +448,8 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param message - Notification message
-   * @param options - Options for the info notification
+   * @param message Notification message
+   * @param options Options for the info notification
    * @returns Notification unique id
    */
   export function info<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -465,8 +465,8 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param promise - Promise to wait for
-   * @param options - Options for the in-progress notification
+   * @param promise Promise to wait for
+   * @param options Options for the in-progress notification
    * @returns Notification unique id
    */
   export function promise<
@@ -511,8 +511,8 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param message - Notification message
-   * @param options - Options for the success notification
+   * @param message Notification message
+   * @param options Options for the success notification
    * @returns Notification unique id
    */
   export function success<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -533,7 +533,7 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param args - Update options
+   * @param args Update options
    * @returns Whether the update was successful or not.
    */
   export function update<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
@@ -548,8 +548,8 @@ export namespace Notification {
    * #### Notes
    * The message will be truncated if longer than 140 characters.
    *
-   * @param message - Notification message
-   * @param options - Options for the warning notification
+   * @param message Notification message
+   * @param options Options for the warning notification
    * @returns Notification unique id
    */
   export function warning<T extends ReadonlyJSONValue = ReadonlyJSONValue>(

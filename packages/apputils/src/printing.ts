@@ -69,8 +69,8 @@ export namespace Printing {
   /**
    * Prints a URL by loading it into an iframe.
    *
-   * @param url - URL to load into an iframe.
-   * @param serverSettings - The server settings to use for the request.
+   * @param url URL to load into an iframe.
+   * @param serverSettings The server settings to use for the request.
    */
   export async function printURL(
     url: string,

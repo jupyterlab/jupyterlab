@@ -295,7 +295,7 @@ class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
   /**
    * InputDialog constructor
    *
-   * @param label - Input field label
+   * @param label Input field label
    */
   constructor(options: IBaseOptions) {
     super();
@@ -350,7 +350,7 @@ class InputBooleanDialog extends InputDialogBase<boolean> {
   /**
    * InputBooleanDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: InputDialog.IBooleanOptions) {
     super(options);
@@ -375,7 +375,7 @@ class InputNumberDialog extends InputDialogBase<number> {
   /**
    * InputNumberDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: InputDialog.INumberOptions) {
     super(options);
@@ -404,7 +404,7 @@ class InputDialogTextBase extends InputDialogBase<string> {
   /**
    * InputDialogTextBase constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: Omit<InputDialog.ITextOptions, 'selectionRange'>) {
     super(options);
@@ -435,7 +435,7 @@ class InputTextDialog extends InputDialogTextBase {
   /**
    * InputTextDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: InputDialog.ITextOptions) {
     super(options);
@@ -467,7 +467,7 @@ class InputPasswordDialog extends InputDialogTextBase {
   /**
    * InputPasswordDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: InputDialog.ITextOptions) {
     super(options);
@@ -492,7 +492,7 @@ class InputItemsDialog extends InputDialogBase<string> {
   /**
    * InputItemsDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: InputDialog.IItemOptions) {
     super(options);
@@ -559,7 +559,7 @@ class InputMultipleItemsDialog extends InputDialogBase<string> {
   /**
    * InputMultipleItemsDialog constructor
    *
-   * @param options - Constructor options
+   * @param options Constructor options
    */
   constructor(options: InputDialog.IMultipleItemsOptions) {
     super(options);

@@ -35,8 +35,8 @@ export namespace MenuFactory {
   /**
    * Create menus from their description
    *
-   * @param data - Menubar description
-   * @param menuFactory - Factory for empty menu
+   * @param data Menubar description
+   * @param menuFactory Factory for empty menu
    */
   export function createMenus(
     data: ISettingRegistry.IMenu[],
@@ -53,8 +53,8 @@ export namespace MenuFactory {
   /**
    * Convert a menu description in a JupyterLabMenu object
    *
-   * @param item - Menu description
-   * @param menuFactory - Empty menu factory
+   * @param item Menu description
+   * @param menuFactory Empty menu factory
    * @returns The menu widget
    */
   function dataToMenu(
@@ -88,9 +88,9 @@ export namespace MenuFactory {
   /**
    * Convert an item description in a context menu item object
    *
-   * @param item - Context menu item
-   * @param menu - Context menu to populate
-   * @param menuFactory - Empty menu factory
+   * @param item Context menu item
+   * @param menu Context menu to populate
+   * @param menuFactory Empty menu factory
    */
   export function addContextItem(
     item: ISettingRegistry.IContextMenuItem,
@@ -108,9 +108,9 @@ export namespace MenuFactory {
   /**
    * Convert an item description in a menu item object
    *
-   * @param item - Menu item
-   * @param menu - Menu to populate
-   * @param menuFactory - Empty menu factory
+   * @param item Menu item
+   * @param menu Menu to populate
+   * @param menuFactory Empty menu factory
    */
   function addItem(
     item: ISettingRegistry.IMenuItem,
@@ -132,9 +132,9 @@ export namespace MenuFactory {
    * #### Note
    * New elements are added to the current menu list.
    *
-   * @param menus - Current menus
-   * @param data - New description to take into account
-   * @param menuFactory - Empty menu factory
+   * @param menus Current menus
+   * @param data New description to take into account
+   * @param menuFactory Empty menu factory
    * @returns Newly created menus
    */
   export function updateMenus(
