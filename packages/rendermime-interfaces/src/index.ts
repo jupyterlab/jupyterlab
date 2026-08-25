@@ -419,6 +419,20 @@ export namespace IRenderMime {
     getAutolink?(): boolean;
 
     /**
+     * @returns Whether URLs in large textual outputs are auto-linked
+     * incrementally (asynchronously, across animation frames) rather than in a
+     * single synchronous pass.
+     *
+     * When incremental, the text is shown first and links appear shortly after,
+     * keeping the UI responsive; disabling it also disables incremental
+     * rendering of the text itself (everything is rendered in one blocking
+     * pass, so links appear together with the text at first paint).
+     *
+     * When not implemented, incremental auto-linking is assumed.
+     */
+    getIncrementalAutolink?(): boolean;
+
+    /**
      * Sanitize an HTML string.
      *
      * @param dirty - The dirty text.
