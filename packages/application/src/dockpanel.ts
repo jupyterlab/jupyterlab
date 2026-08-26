@@ -32,9 +32,9 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
    * not be called directly by user code.
    */
   override handleEvent(event: Event): void {
-    // Only the pointer which started the drag can end it. A second pointer
-    // going down elsewhere must not be mistaken for the drag ending, or the
-    // panels stay frozen for good.
+    // A second pointer going down while a drag is in progress must not be
+    // mistaken for a new drag which never started, or the flag is cleared and
+    // the panels stay frozen for good.
     if (event.type === 'pointerdown' && !this._isResizeDragActive) {
       this._isResizeDragActive = this._isHandlePointerDown(event);
       if (this._isResizeDragActive) {
@@ -374,10 +374,15 @@ namespace Private {
   export function endsDrag(event: Event, dragPointerId: number): boolean {
     switch (event.type) {
       case 'pointerup':
+        // Deliberately not matched against `dragPointerId`. Lumino releases
+        // on any button 0 release and then drops its document listeners, so
+        // matching here would leave the panels frozen with no drag running
+        // and no further event able to unfreeze them.
         return (event as PointerEvent).button === 0;
       case 'pointercancel':
-        // An unrelated pointer being cancelled, a palm resting on a touch
-        // screen for instance, must not end a drag it was never part of.
+        // Matched, because Lumino has no cancel case to keep in step with. An
+        // unrelated pointer being cancelled, a palm resting on a touch screen
+        // for instance, must not end a drag it was never part of.
         return (event as PointerEvent).pointerId === dragPointerId;
       case 'keydown':
         return (event as KeyboardEvent).keyCode === 27;

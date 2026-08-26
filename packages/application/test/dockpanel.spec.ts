@@ -275,6 +275,19 @@ describe('OptimizedDockPanelSvg', () => {
       expect(first.content.style.maxWidth).toBe('');
     });
 
+    it('should end the drag when any pointer releases, as Lumino does', () => {
+      pressHandle();
+
+      // Lumino releases on any button 0 release without checking which
+      // pointer it came from, and drops its listeners. Holding the freeze
+      // here would strand it with no drag running and nothing left to end it.
+      document.dispatchEvent(
+        pointerEvent('pointerup', { button: 0, pointerId: 2 })
+      );
+
+      expect(first.content.style.maxWidth).toBe('');
+    });
+
     it('should ignore another pointer being cancelled', () => {
       pressHandle();
       // A palm resting on a touch screen, cancelled by the browser, is not
