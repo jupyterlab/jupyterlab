@@ -124,7 +124,7 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Shift+Tab');
     await expect(page.getByPlaceholder('Find')).toBeFocused();
 
-    await page.getByPlaceholder('Replace').focus();
+    await page.getByRole('button', { name: 'Replace All' }).focus();
     await page.keyboard.press('Tab');
     await expect(page.getByTitle('Match Case')).toBeFocused();
   });
