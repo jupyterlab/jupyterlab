@@ -16,6 +16,7 @@ import { Widget } from '@lumino/widgets';
 
 class EditableSearchProvider extends SearchProvider {
   readonly isReadOnly = false;
+  replaceOptionsSupport = { preserveCase: false };
 
   async startQuery(_query: RegExp, _filters: IFilters): Promise<void> {
     return;
@@ -80,12 +81,16 @@ describe('documentsearch/searchview', () => {
       const replace = view.node.querySelector(
         '[placeholder="Replace"]'
       ) as HTMLTextAreaElement;
+      const replaceAll = Array.from(view.node.querySelectorAll('button')).find(
+        button => button.textContent?.includes('Replace All')
+      ) as HTMLButtonElement | undefined;
       const matchCase = view.node.querySelector(
         'button[title="Match Case"]'
       ) as HTMLButtonElement;
 
       expect(find).toBeTruthy();
       expect(replace).toBeTruthy();
+      expect(replaceAll).toBeTruthy();
       expect(matchCase).toBeTruthy();
 
       find.focus();
@@ -110,8 +115,8 @@ describe('documentsearch/searchview', () => {
       );
       expect(document.activeElement).toBe(find);
 
-      replace.focus();
-      replace.dispatchEvent(
+      replaceAll!.focus();
+      replaceAll!.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 'Tab',
           bubbles: true,
@@ -119,6 +124,68 @@ describe('documentsearch/searchview', () => {
         })
       );
       expect(document.activeElement).toBe(matchCase);
+    });
+
+    it('should not steal Ctrl+Tab from the Find field', async () => {
+      view.showReplace();
+      await framePromise();
+      await view.renderPromise;
+
+      const find = view.node.querySelector(
+        '[placeholder="Find"]'
+      ) as HTMLTextAreaElement;
+      const replace = view.node.querySelector(
+        '[placeholder="Replace"]'
+      ) as HTMLTextAreaElement;
+
+      find.focus();
+      find.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Tab',
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true
+        })
+      );
+      expect(document.activeElement).toBe(find);
+      expect(document.activeElement).not.toBe(replace);
+    });
+
+    it('should tab from Replace to Preserve Case when that option exists', async () => {
+      provider.replaceOptionsSupport = { preserveCase: true };
+      view.showReplace();
+      await framePromise();
+      await view.renderPromise;
+
+      const find = view.node.querySelector(
+        '[placeholder="Find"]'
+      ) as HTMLTextAreaElement;
+      const replace = view.node.querySelector(
+        '[placeholder="Replace"]'
+      ) as HTMLTextAreaElement;
+      const preserveCase = view.node.querySelector(
+        'button[title="Preserve Case"]'
+      ) as HTMLButtonElement;
+
+      expect(preserveCase).toBeTruthy();
+
+      find.focus();
+      find.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Tab',
+          bubbles: true,
+          cancelable: true
+        })
+      );
+      expect(document.activeElement).toBe(replace);
+
+      const tabEvent = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        bubbles: true,
+        cancelable: true
+      });
+      replace.dispatchEvent(tabEvent);
+      expect(tabEvent.defaultPrevented).toBe(false);
     });
   });
 });

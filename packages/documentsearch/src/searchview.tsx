@@ -219,11 +219,13 @@ interface IReplaceEntryProps {
   onReplaceCurrent: () => void;
   onReplaceAll: () => void;
   onReplaceKeydown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onReplaceAllKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   preserveCase: boolean;
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
+  replaceAllButtonRef?: React.RefObject<HTMLButtonElement>;
   translator?: ITranslator;
 }
 
@@ -272,6 +274,8 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceAll()}
+        onKeyDown={props.onReplaceAllKeyDown}
+        ref={props.replaceAllButtonRef}
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
@@ -566,6 +570,12 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
     return !this.props.isReadOnly && this.props.replaceEntryVisible;
   }
 
+  private _isPlainTab(event: React.KeyboardEvent): boolean {
+    return (
+      event.key === 'Tab' && !event.ctrlKey && !event.metaKey && !event.altKey
+    );
+  }
+
   private _onSearchChange(event: React.ChangeEvent) {
     const searchText = (event.target as HTMLTextAreaElement).value;
     this.props.onSearchChanged(searchText);
@@ -574,7 +584,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   private _onSearchKeydown(event: React.KeyboardEvent) {
     // Tab from Find should land on Replace first, not Match Case.
     if (
-      event.key === 'Tab' &&
+      this._isPlainTab(event) &&
       !event.shiftKey &&
       this._replaceTabStopVisible()
     ) {
@@ -599,16 +609,10 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   }
 
   private _onReplaceKeydown(event: React.KeyboardEvent) {
-    if (event.key === 'Tab' && event.shiftKey) {
+    if (this._isPlainTab(event) && event.shiftKey) {
       event.preventDefault();
       event.stopPropagation();
       this.props.searchInputRef.current?.focus();
-      return;
-    }
-    if (event.key === 'Tab' && !event.shiftKey) {
-      event.preventDefault();
-      event.stopPropagation();
-      this._matchCaseButton.current?.focus();
       return;
     }
     if (event.key === 'Enter') {
@@ -622,15 +626,27 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
     }
   }
 
+  private _onReplaceAllKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (
+      this._isPlainTab(event) &&
+      !event.shiftKey &&
+      this._replaceTabStopVisible()
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._matchCaseButton.current?.focus();
+    }
+  }
+
   private _onMatchCaseKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
     if (
-      event.key === 'Tab' &&
+      this._isPlainTab(event) &&
       event.shiftKey &&
       this._replaceTabStopVisible()
     ) {
       event.preventDefault();
       event.stopPropagation();
-      this._replaceInput.current?.focus();
+      this._replaceAllButton.current?.focus();
     }
   }
 
@@ -812,6 +828,9 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 onReplaceKeydown={(e: React.KeyboardEvent) =>
                   this._onReplaceKeydown(e)
                 }
+                onReplaceAllKeyDown={(
+                  e: React.KeyboardEvent<HTMLButtonElement>
+                ) => this._onReplaceAllKeyDown(e)}
                 onChange={(e: React.ChangeEvent) =>
                   this.props.onReplaceChanged(
                     (e.target as HTMLTextAreaElement).value
@@ -823,6 +842,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 replaceText={this.props.replaceText}
                 preserveCase={this.props.preserveCase}
                 inputRef={this._replaceInput}
+                replaceAllButtonRef={this._replaceAllButton}
                 translator={this.translator}
               />
               <div className={SPACER_CLASS}></div>
@@ -839,6 +859,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
 
   protected translator: ITranslator;
   private _replaceInput = React.createRef<HTMLTextAreaElement>();
+  private _replaceAllButton = React.createRef<HTMLButtonElement>();
   private _matchCaseButton = React.createRef<HTMLButtonElement>();
 }
 
