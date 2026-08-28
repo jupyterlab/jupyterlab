@@ -55,11 +55,12 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   id: '@jupyterlab/markdownviewer-extension:plugin',
   description: 'Adds markdown file viewer and provides its tracker.',
   provides: IMarkdownViewerTracker,
-  requires: [IRenderMimeRegistry, ITranslator, ISearchProviderRegistry],
+  requires: [IRenderMimeRegistry, ITranslator],
   optional: [
     ILayoutRestorer,
     ISettingRegistry,
     ITableOfContentsRegistry,
+    ISearchProviderRegistry,
     ISanitizer
   ],
   autoStart: true
@@ -72,10 +73,10 @@ function activate(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
-  registry: ISearchProviderRegistry,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
+  searchRegistry: ISearchProviderRegistry | null,
   sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
@@ -89,16 +90,18 @@ function activate(
     namespace
   });
 
-  registry.add('markdownviewer', {
-    isApplicable: (widget): widget is MarkdownDocument =>
-      widget instanceof MarkdownDocument,
-    createNew: widget => {
-      if (!(widget instanceof MarkdownDocument)) {
-        throw new Error('The widget is not a MarkdownDocument');
+  if (searchRegistry) {
+    searchRegistry.add('markdownviewer', {
+      isApplicable: (widget): widget is MarkdownDocument =>
+        widget instanceof MarkdownDocument,
+      createNew: widget => {
+        if (!(widget instanceof MarkdownDocument)) {
+          throw new Error('The widget is not a MarkdownDocument');
+        }
+        return GenericSearchProvider.createNew(widget.content, searchRegistry);
       }
-      return GenericSearchProvider.createNew(widget.content, registry);
-    }
-  });
+    });
+  }
 
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
