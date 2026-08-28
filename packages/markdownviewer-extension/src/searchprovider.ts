@@ -3,7 +3,6 @@
 import type { ISearchProviderFactory } from '@jupyterlab/documentsearch';
 import { GenericSearchProvider } from '@jupyterlab/documentsearch';
 import { MarkdownDocument } from '@jupyterlab/markdownviewer';
-import type { Widget } from '@lumino/widgets';
 
 /**
  * Search provider for the rendered markdown of a markdown viewer.
@@ -35,7 +34,7 @@ export class MarkdownViewerSearchProvider extends GenericSearchProvider {
  */
 export const markdownViewerSearchProviderFactory: ISearchProviderFactory<MarkdownDocument> =
   {
-    isApplicable: (domain: Widget): domain is MarkdownDocument =>
+    isApplicable: (domain): domain is MarkdownDocument =>
       domain instanceof MarkdownDocument,
     createNew: (widget: MarkdownDocument) =>
       new MarkdownViewerSearchProvider(widget.content)
