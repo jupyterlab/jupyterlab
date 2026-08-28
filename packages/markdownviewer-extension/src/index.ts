@@ -16,9 +16,9 @@ import {
   ISearchProviderRegistry
 } from '@jupyterlab/documentsearch';
 import { PathExt } from '@jupyterlab/coreutils';
-import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
+  MarkdownDocument,
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownViewerTableOfContentsFactory
@@ -90,9 +90,14 @@ function activate(
   });
 
   registry.add('markdownviewer', {
-    isApplicable: (widget): widget is MarkdownViewer =>
-      widget instanceof MarkdownViewer,
-    createNew: widget => GenericSearchProvider.createNew(widget, registry)
+    isApplicable: (widget): widget is MarkdownDocument =>
+      widget instanceof MarkdownDocument,
+    createNew: widget => {
+      if (!(widget instanceof MarkdownDocument)) {
+        throw new Error('The widget is not a MarkdownDocument');
+      }
+      return GenericSearchProvider.createNew(widget.content, registry);
+    }
   });
 
   let config: Partial<MarkdownViewer.IConfig> = {
