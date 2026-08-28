@@ -53,16 +53,22 @@ describe('docregistry/context', () => {
         expect(context).toBeInstanceOf(Context);
       });
 
-      it('should set the session path with global path', () => {
+      it('should set and start the session with global path', async () => {
         const localPath = `${UUID.uuid4()}.txt`;
         const globalPath = `TestDrive:${localPath}`;
+        const startNew = jest.mocked(manager.sessions.startNew);
+        startNew.mockClear();
         context = new Context({
           manager,
           factory,
-          path: globalPath
+          path: globalPath,
+          kernelPreference: { name: manager.kernelspecs.specs!.default }
         });
 
+        await context.sessionContext.initialize();
+
         expect(context.sessionContext.path).toEqual(globalPath);
+        expect(startNew.mock.calls[0][0].path).toMatch(/^TestDrive:\//);
       });
     });
 
