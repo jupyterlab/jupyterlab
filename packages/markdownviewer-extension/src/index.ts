@@ -11,14 +11,11 @@ import type {
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
-import {
-  GenericSearchProvider,
-  ISearchProviderRegistry
-} from '@jupyterlab/documentsearch';
 import { PathExt } from '@jupyterlab/coreutils';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
-  MarkdownDocument,
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownViewerTableOfContentsFactory
@@ -31,6 +28,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
+
+import { markdownViewerSearchProviderFactory } from './searchprovider';
 
 /**
  * The command IDs used by the markdownviewer plugin.
@@ -90,17 +89,12 @@ function activate(
     namespace
   });
 
+  // Register the search provider for the rendered markdown.
   if (searchRegistry) {
-    searchRegistry.add('markdownviewer', {
-      isApplicable: (widget): widget is MarkdownDocument =>
-        widget instanceof MarkdownDocument,
-      createNew: widget => {
-        if (!(widget instanceof MarkdownDocument)) {
-          throw new Error('The widget is not a MarkdownDocument');
-        }
-        return GenericSearchProvider.createNew(widget.content, searchRegistry);
-      }
-    });
+    searchRegistry.add(
+      'jp-markdownViewerSearchProvider',
+      markdownViewerSearchProviderFactory
+    );
   }
 
   let config: Partial<MarkdownViewer.IConfig> = {
