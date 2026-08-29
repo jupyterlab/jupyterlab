@@ -8,6 +8,8 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { IConnectionStatus } from '@jupyterlab/services';
 import { ConnectionStatus, ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import type { JupyterFrontEndPlugin } from './frontend';
 import { JupyterFrontEnd } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
@@ -361,6 +363,16 @@ export namespace JupyterLab {
     readonly availablePlugins: IPluginInfo[];
 
     /**
+     * A signal emitted when available plugin metadata changes.
+     */
+    readonly availablePluginsChanged?: ISignal<IInfo, void>;
+
+    /**
+     * Add available plugin metadata and notify listeners.
+     */
+    addAvailablePlugins?(plugins: IPluginInfo[]): void;
+
+    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
@@ -413,6 +425,24 @@ export namespace JupyterLab {
      */
     get availablePlugins(): IPluginInfo[] {
       return this._availablePlugins;
+    }
+
+    /**
+     * A signal emitted when available plugin metadata changes.
+     */
+    get availablePluginsChanged(): ISignal<IInfo, void> {
+      return this._availablePluginsChanged;
+    }
+
+    /**
+     * Add available plugin metadata and notify listeners.
+     */
+    addAvailablePlugins(plugins: IPluginInfo[]): void {
+      if (plugins.length === 0) {
+        return;
+      }
+      this._availablePlugins.push(...plugins);
+      this._availablePluginsChanged.emit(void 0);
     }
 
     /**
@@ -472,6 +502,7 @@ export namespace JupyterLab {
     private _disabled: { patterns: string[]; matches: string[] };
     private _mimeExtensions: IRenderMime.IExtensionModule[];
     private _availablePlugins: IPluginInfo[];
+    private _availablePluginsChanged = new Signal<IInfo, void>(this);
     private _filesCached: boolean;
     private _connectionStatus: IConnectionStatus;
   }

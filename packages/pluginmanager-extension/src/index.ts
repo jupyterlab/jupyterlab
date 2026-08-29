@@ -78,7 +78,8 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       const model = new PluginListModel({
         ...args,
         pluginData: {
-          availablePlugins: appInfo.availablePlugins
+          availablePlugins: appInfo.availablePlugins,
+          availablePluginsChanged: appInfo.availablePluginsChanged
         },
         serverSettings: app.serviceManager.serverSettings,
         extraLockedPlugins: [

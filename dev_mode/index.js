@@ -175,8 +175,8 @@ export async function main() {
     return Array.isArray(exports) ? exports : [exports];
   }
 
-  function recordPlugin(plugin, extension, isDisabled) {
-    allPlugins.push({
+  function createPluginInfo(plugin, extension, isDisabled) {
+    return {
       id: plugin.id,
       description: plugin.description,
       requires: plugin.requires ?? [],
@@ -185,16 +185,23 @@ export async function main() {
       autoStart: plugin.autoStart,
       enabled: !isDisabled,
       extension: extension.__scope__
-    });
+    };
+  }
+
+  function recordPlugin(plugin, extension, isDisabled) {
+    allPlugins.push(createPluginInfo(plugin, extension, isDisabled));
     if (isDisabled) {
       disabled.push(plugin.id);
     }
   }
 
   function collectDisabledPlugins(extension) {
+    const plugins = [];
     for (let plugin of getPlugins(extension)) {
-      recordPlugin(plugin, extension, true);
+      plugins.push(createPluginInfo(plugin, extension, true));
+      disabled.push(plugin.id);
     }
+    return plugins;
   }
 
   /**
@@ -225,11 +232,12 @@ export async function main() {
     const deferredDisabledFederatedPlugins = await Promise.allSettled(
       deferredDisabledFederatedModules.map(data => createModule(data.name, data.module))
     );
+    const disabledPlugins = [];
 
     deferredDisabledFederatedPlugins.forEach(p => {
       if (p.status === "fulfilled") {
         try {
-          collectDisabledPlugins(p.value);
+          disabledPlugins.push(...collectDisabledPlugins(p.value));
         } catch (e) {
           console.error(e);
         }
@@ -237,6 +245,13 @@ export async function main() {
         console.error(p.reason);
       }
     });
+
+    const addAvailablePlugins = lab.info.addAvailablePlugins?.bind(lab.info);
+    if (addAvailablePlugins) {
+      addAvailablePlugins(disabledPlugins);
+    } else {
+      allPlugins.push(...disabledPlugins);
+    }
   }
 
   // Handle the registered mime extensions.

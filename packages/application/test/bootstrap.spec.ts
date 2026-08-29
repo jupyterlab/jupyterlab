@@ -215,10 +215,16 @@ describe('bootstrap federated extensions', () => {
     }
 
     class MockJupyterLab {
+      info: { addAvailablePlugins: (plugins: IPluginInfo[]) => void };
       restored: Promise<void>;
 
       constructor(options: IJupyterLabOptions) {
         labOptions = options;
+        this.info = {
+          addAvailablePlugins: (plugins: IPluginInfo[]) => {
+            options.availablePlugins.push(...plugins);
+          }
+        };
         this.restored = new Promise<void>(resolve => {
           resolveRestored = resolve;
         });
