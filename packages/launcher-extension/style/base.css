@@ -6,7 +6,7 @@
 .jp-FileBrowser-toolbar
   .jp-ToolbarButtonComponent[data-command='launcher:create'] {
   width: 72px;
-  background: var(--jp-accept-color-normal, var(--jp-brand-color1));
+  background: var(--jp-icon-contrast-color3, var(--jp-brand-color1));
 }
 
 .jp-FileBrowser-toolbar
