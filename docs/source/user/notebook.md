@@ -331,7 +331,7 @@ The panel has two sections:
 The metadata is displayed as JSON that you can edit directly. After making
 changes:
 
-```{image} ../images/metadata-editor.png
+```{image} ../images/interface-right-advanced.png
 :align: center
 :alt: The Property Inspector showing the commit and revert icons for editing cell metadata
 :class: jp-screenshot

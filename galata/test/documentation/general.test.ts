@@ -195,11 +195,13 @@ test.describe('General', () => {
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toHaveClass(/lm-mod-hidden/);
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right_common.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right_common.png');
 
     // Expect the 'Raw NbConvert Format' field to be displayed only on raw cells
     await expect(
@@ -257,6 +259,25 @@ test.describe('General', () => {
         .textContent()
     )?.replace(/\s/g, '');
     expect(newNotebookMetadata).toContain('"base_numbering":3');
+
+    // Expect modifying cell metadata from advanced tools
+    await page.click('.cm-content > div:nth-child(8)');
+    await page.keyboard.press('End');
+    await page.keyboard.type(',"newtest-tag"');
+    const modifiedCellMetadata = (
+      await page
+        .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+        .first()
+        .textContent()
+    )?.replace(/\s/g, '');
+    expect(modifiedCellMetadata).toContain('"tags":["test-tag","newtest-tag"]');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 340, x: 997, width: 283, height: 660 }
+        })
+      )
+      .toMatchSnapshot('interface_right_advanced.png');
 
     // Test the active cell widget
     const activeCellPreview = page.locator(
