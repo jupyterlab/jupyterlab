@@ -35,6 +35,13 @@ interface IPluginInfo {
   extension: string;
 }
 
+interface ITestElement {
+  id: string;
+  textContent: string;
+  className: string;
+  style: { display: string };
+}
+
 interface IJupyterLabOptions {
   availablePlugins: IPluginInfo[];
   disabled: { matches: string[]; patterns: unknown[] };
@@ -45,6 +52,13 @@ interface IJupyterLabOptions {
 
 interface IPluginRegistry {
   registeredPlugins: ITestPlugin[];
+}
+
+interface ITestInfo {
+  availablePlugins: IPluginInfo[];
+  disabled: { matches: string[]; patterns: unknown[] };
+  addAvailablePlugins: (plugins: IPluginInfo[]) => void;
+  addDisabledPluginIds: (pluginIds: string[]) => void;
 }
 
 interface IExports {
@@ -68,14 +82,10 @@ interface ITestContext {
       { get: (module: string) => Promise<() => ITestModule> }
     >;
     jupyterapp?: unknown;
+    setTimeout?: (handler: () => void, timeout?: number) => unknown;
   };
   document: {
-    createElement: (tag: string) => {
-      id: string;
-      textContent: string;
-      className: string;
-      style: { display: string };
-    };
+    createElement: (tag: string) => ITestElement;
     body: {
       appendChild: (element: unknown) => void;
     };
@@ -125,6 +135,7 @@ describe('bootstrap federated extensions', () => {
     const moduleRequests: string[] = [];
     const registeredPlugins: ITestPlugin[] = [];
     let labOptions: IJupyterLabOptions | null = null;
+    let labInfo: ITestInfo | null = null;
     let resolveRestored: () => void;
 
     function getLabOptions(): IJupyterLabOptions {
@@ -132,6 +143,13 @@ describe('bootstrap federated extensions', () => {
         throw new Error('JupyterLab options were not captured.');
       }
       return labOptions;
+    }
+
+    function getLabInfo(): ITestInfo {
+      if (!labInfo) {
+        throw new Error('JupyterLab info was not captured.');
+      }
+      return labInfo;
     }
 
     const modules: Record<string, Record<string, ITestModule>> = {
@@ -215,16 +233,26 @@ describe('bootstrap federated extensions', () => {
     }
 
     class MockJupyterLab {
-      info: { addAvailablePlugins: (plugins: IPluginInfo[]) => void };
+      info: ITestInfo;
       restored: Promise<void>;
 
       constructor(options: IJupyterLabOptions) {
         labOptions = options;
-        this.info = {
+        const info: ITestInfo = {
+          availablePlugins: options.availablePlugins,
+          disabled: {
+            matches: [...options.disabled.matches],
+            patterns: [...options.disabled.patterns]
+          },
           addAvailablePlugins: (plugins: IPluginInfo[]) => {
-            options.availablePlugins.push(...plugins);
+            info.availablePlugins.push(...plugins);
+          },
+          addDisabledPluginIds: (pluginIds: string[]) => {
+            info.disabled.matches.push(...pluginIds);
           }
         };
+        this.info = info;
+        labInfo = info;
         this.restored = new Promise<void>(resolve => {
           resolveRestored = resolve;
         });
@@ -342,6 +370,9 @@ describe('bootstrap federated extensions', () => {
         plugin => plugin.id === '@jupyterlab/plugin-disabled-extension:disabled'
       )?.enabled
     ).toBe(false);
+    expect(getLabInfo().disabled.matches).toEqual([
+      '@jupyterlab/plugin-disabled-extension:disabled'
+    ]);
 
     resolveRestored!();
     await flushPromises();
@@ -370,5 +401,165 @@ describe('bootstrap federated extensions', () => {
       { id: '@jupyterlab/disabled-extension:plugin', enabled: false },
       { id: '@jupyterlab/disabled-extension:mime', enabled: false }
     ]);
+    expect(getLabInfo().disabled.matches).toEqual([
+      '@jupyterlab/plugin-disabled-extension:disabled',
+      '@jupyterlab/disabled-extension:plugin',
+      '@jupyterlab/disabled-extension:mime'
+    ]);
+  });
+
+  it('waits for deferred disabled extension load failures in browser test mode', async () => {
+    const moduleRequests: string[] = [];
+    const registeredPlugins: ITestPlugin[] = [];
+    let resolveRestored: () => void;
+    let rejectDeferredModule: (reason: Error) => void;
+    let browserTestElement: ITestElement | null = null;
+
+    function getBrowserTestElement(): ITestElement {
+      if (!browserTestElement) {
+        throw new Error('Browser test element was not created.');
+      }
+      return browserTestElement;
+    }
+
+    const deferredModule = new Promise<() => ITestModule>((_, reject) => {
+      rejectDeferredModule = reject;
+    });
+
+    class MockJupyterPluginRegistry implements IPluginRegistry {
+      registeredPlugins = registeredPlugins;
+
+      registerPlugins(plugins: ITestPlugin[]): void {
+        this.registeredPlugins.push(...plugins);
+      }
+
+      resolveOptionalService(): Promise<null> {
+        return Promise.resolve(null);
+      }
+
+      resolveRequiredService(): Promise<Record<string, never>> {
+        return Promise.resolve({});
+      }
+    }
+
+    class MockJupyterLab {
+      info: ITestInfo;
+      restored: Promise<void>;
+
+      constructor(options: IJupyterLabOptions) {
+        const info: ITestInfo = {
+          availablePlugins: options.availablePlugins,
+          disabled: {
+            matches: [...options.disabled.matches],
+            patterns: [...options.disabled.patterns]
+          },
+          addAvailablePlugins: (plugins: IPluginInfo[]) => {
+            info.availablePlugins.push(...plugins);
+          },
+          addDisabledPluginIds: (pluginIds: string[]) => {
+            info.disabled.matches.push(...pluginIds);
+          }
+        };
+        this.info = info;
+        this.restored = new Promise<void>(resolve => {
+          resolveRestored = resolve;
+        });
+      }
+
+      start(): void {
+        return;
+      }
+    }
+
+    const context: ITestContext = {
+      exports: {},
+      PageConfig: {
+        getOption: (name: string) => {
+          switch (name) {
+            case 'browserTest':
+              return 'true';
+            case 'exposeAppInBrowser':
+            case 'devMode':
+              return 'false';
+            case 'federated_extensions':
+              return JSON.stringify([
+                {
+                  name: '@jupyterlab/failing-disabled-extension',
+                  extension: './extension'
+                }
+              ]);
+            default:
+              return '';
+          }
+        },
+        Extension: {
+          disabled: ['@jupyterlab/failing-disabled-extension'],
+          deferred: []
+        }
+      },
+      JupyterPluginRegistry: MockJupyterPluginRegistry,
+      require: (id: string) => {
+        if (id === '@jupyterlab/application') {
+          return { JupyterLab: MockJupyterLab };
+        }
+        if (id === '@jupyterlab/services') {
+          return { IConnectionStatus: {}, IServiceManager: {} };
+        }
+        throw new Error(`Unexpected require: ${id}`);
+      },
+      window: {
+        _JUPYTERLAB: {
+          '@jupyterlab/failing-disabled-extension': {
+            get: async (module: string) => {
+              moduleRequests.push(
+                `@jupyterlab/failing-disabled-extension:${module}`
+              );
+              return deferredModule;
+            }
+          }
+        },
+        setTimeout: jest.fn()
+      },
+      document: {
+        createElement: () => {
+          browserTestElement = {
+            id: '',
+            textContent: '',
+            className: '',
+            style: { display: '' }
+          };
+          return browserTestElement;
+        },
+        body: {
+          appendChild: () => undefined
+        }
+      },
+      console: {
+        error: jest.fn(),
+        warn: jest.fn()
+      }
+    };
+
+    const main = loadBootstrap(context);
+
+    await main();
+
+    resolveRestored!();
+    await flushPromises();
+    await flushPromises();
+
+    expect(getBrowserTestElement().className).toBe('');
+
+    rejectDeferredModule!(new Error('deferred disabled extension failed'));
+    await flushPromises();
+    await flushPromises();
+
+    expect(moduleRequests).toEqual([
+      '@jupyterlab/failing-disabled-extension:./extension'
+    ]);
+    expect(getBrowserTestElement().className).toBe('completed');
+    expect(getBrowserTestElement().textContent).toContain(
+      'deferred disabled extension failed'
+    );
   });
 });

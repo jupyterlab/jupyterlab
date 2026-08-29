@@ -373,6 +373,11 @@ export namespace JupyterLab {
     addAvailablePlugins?(plugins: IPluginInfo[]): void;
 
     /**
+     * Add disabled plugin IDs discovered after startup.
+     */
+    addDisabledPluginIds?(pluginIds: string[]): void;
+
+    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
@@ -443,6 +448,22 @@ export namespace JupyterLab {
       }
       this._availablePlugins.push(...plugins);
       this._availablePluginsChanged.emit(void 0);
+    }
+
+    /**
+     * Add disabled plugin IDs discovered after startup.
+     */
+    addDisabledPluginIds(pluginIds: string[]): void {
+      if (pluginIds.length === 0) {
+        return;
+      }
+      const disabled = new Set(this._disabled.matches);
+      for (const pluginId of pluginIds) {
+        if (!disabled.has(pluginId)) {
+          this._disabled.matches.push(pluginId);
+          disabled.add(pluginId);
+        }
+      }
     }
 
     /**

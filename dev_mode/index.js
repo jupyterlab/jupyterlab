@@ -197,11 +197,12 @@ export async function main() {
 
   function collectDisabledPlugins(extension) {
     const plugins = [];
+    const pluginIds = [];
     for (let plugin of getPlugins(extension)) {
       plugins.push(createPluginInfo(plugin, extension, true));
-      disabled.push(plugin.id);
+      pluginIds.push(plugin.id);
     }
-    return plugins;
+    return { pluginIds, plugins };
   }
 
   /**
@@ -233,11 +234,14 @@ export async function main() {
       deferredDisabledFederatedModules.map(data => createModule(data.name, data.module))
     );
     const disabledPlugins = [];
+    const disabledPluginIds = [];
 
     deferredDisabledFederatedPlugins.forEach(p => {
       if (p.status === "fulfilled") {
         try {
-          disabledPlugins.push(...collectDisabledPlugins(p.value));
+          const pluginInfo = collectDisabledPlugins(p.value);
+          disabledPlugins.push(...pluginInfo.plugins);
+          disabledPluginIds.push(...pluginInfo.pluginIds);
         } catch (e) {
           console.error(e);
         }
@@ -245,6 +249,13 @@ export async function main() {
         console.error(p.reason);
       }
     });
+
+    const addDisabledPluginIds = lab.info.addDisabledPluginIds?.bind(lab.info);
+    if (addDisabledPluginIds) {
+      addDisabledPluginIds(disabledPluginIds);
+    } else {
+      disabled.push(...disabledPluginIds);
+    }
 
     const addAvailablePlugins = lab.info.addAvailablePlugins?.bind(lab.info);
     if (addAvailablePlugins) {
@@ -344,11 +355,12 @@ export async function main() {
   // 4. Start the application, which will activate the other plugins
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
-  lab.restored
-    .then(() => loadDeferredDisabledFederatedPlugins())
-    .catch(reason => {
-      console.error('Error when loading disabled federated extensions:', reason);
-    });
+  const deferredDisabledFederatedPluginsReady = lab.restored.then(() =>
+    loadDeferredDisabledFederatedPlugins()
+  );
+  deferredDisabledFederatedPluginsReady.catch(reason => {
+    console.error('Error when loading disabled federated extensions:', reason);
+  });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
@@ -360,7 +372,7 @@ export async function main() {
 
   // Handle a browser test.
   if (browserTest.toLowerCase() === 'true') {
-    lab.restored
+    deferredDisabledFederatedPluginsReady
       .then(function() { report(errors); })
       .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
 
