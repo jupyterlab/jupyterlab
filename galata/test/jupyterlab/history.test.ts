@@ -32,6 +32,7 @@ test.describe('test kernel history keybindings', () => {
     await page.notebook.enterCellEditingMode(2);
     await page.keyboard.press('Alt+ArrowUp');
     // test fails without this wait
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
     // input: 3+4
     await page.keyboard.press('Alt+ArrowDown');

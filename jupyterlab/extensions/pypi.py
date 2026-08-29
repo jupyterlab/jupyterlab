@@ -3,6 +3,8 @@
 
 """Extension manager using pip as package manager and PyPi.org as packages source."""
 
+from __future__ import annotations
+
 import asyncio
 import http.client
 import io
@@ -12,7 +14,7 @@ import re
 import sys
 import tempfile
 import xmlrpc.client
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
@@ -20,7 +22,7 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Optional
+from typing import TypeVar, cast
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
@@ -33,6 +35,11 @@ from packaging.version import InvalidVersion, Version
 from packaging.version import parse as parse_version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
 from jupyterlab._version import __version__
 from jupyterlab.extensions.manager import (
     ActionResult,
@@ -41,15 +48,57 @@ from jupyterlab.extensions.manager import (
     ExtensionPackage,
 )
 
+JSONValue = str | int | float | bool | None | list["JSONValue"] | dict[str, "JSONValue"]
+PackageMetadata = dict[str, JSONValue]
+FetchPackageMetadata = Callable[[str, str, str], Awaitable[PackageMetadata]]
+_Arg = TypeVar("_Arg")
+_R = TypeVar("_R")
+
+
+def _json_object_or_none(value: object) -> dict[str, JSONValue] | None:
+    if not isinstance(value, dict):
+        return None
+    return {key: cast("JSONValue", item) for key, item in value.items() if isinstance(key, str)}
+
+
+def _json_object(value: object) -> dict[str, JSONValue]:
+    return _json_object_or_none(value) or {}
+
+
+def _json_list(value: object) -> list[JSONValue]:
+    if not isinstance(value, list):
+        return []
+    return [cast("JSONValue", item) for item in value]
+
+
+def _metadata_string(data: PackageMetadata, key: str) -> str | None:
+    value = data.get(key)
+    return value if isinstance(value, str) else None
+
+
+def _metadata_string_map(data: PackageMetadata, key: str) -> dict[str, str]:
+    value = data.get(key)
+    if not isinstance(value, dict):
+        return {}
+    return {k: v for k, v in value.items() if isinstance(v, str)}
+
 
 class ProxiedTransport(xmlrpc.client.Transport):
-    def set_proxy(self, host, port=None, headers=None):
+    proxy: tuple[str, str | int | None]
+    proxy_headers: dict[str, str] | None
+
+    def set_proxy(
+        self,
+        host: str,
+        port: str | int | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         self.proxy = host, port
         self.proxy_headers = headers
 
-    def make_connection(self, host):
-        connection = http.client.HTTPConnection(*self.proxy)
-        connection.set_tunnel(host, headers=self.proxy_headers)
+    def make_connection(self, host: tuple[str, dict[str, str]] | str) -> http.client.HTTPConnection:
+        connection = http.client.HTTPConnection(*self.proxy)  # type: ignore[arg-type]
+        connection.set_tunnel(host, headers=self.proxy_headers)  # type: ignore[arg-type]
         self._connection = host, connection
         return connection
 
@@ -64,7 +113,7 @@ https_proxy_url = (
 
 # sniff ``httpx`` version for version-sensitive API
 _httpx_version = Version(httpx.__version__)
-_httpx_client_args = {}
+_httpx_client_args: dict[str, object] = {}
 
 xmlrpc_transport_override = None
 
@@ -116,18 +165,28 @@ def _check_python_version_compatible(requires_python: str | None) -> tuple[bool,
         return True, None
 
 
+def _process_output(output: bytes | str | None) -> str:
+    """Decode captured subprocess output."""
+    if output is None:
+        return ""
+    if isinstance(output, bytes):
+        return output.decode("utf-8")
+    return output
+
+
 async def _fetch_package_metadata(
     client: httpx.AsyncClient,
     name: str,
     latest_version: str,
     base_url: str,
-) -> dict:
+) -> PackageMetadata:
     response = await client.get(
         base_url + f"/{name}/{latest_version}/json",
         headers={"Content-Type": "application/json"},
     )
     if response.status_code < 400:  # noqa PLR2004
-        data = json.loads(response.text).get("info")
+        response_data: object = json.loads(response.text)
+        data = _json_object(_json_object(response_data).get("info"))
 
         # Keep minimal information to limit cache size
         return {
@@ -211,9 +270,11 @@ class PyPIExtensionManager(ExtensionManager):
         parent: config.Configurable | None = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)
+        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)  # type: ignore[arg-type]
         # Set configurable cache size to fetch function
-        self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
+        self._fetch_package_metadata: FetchPackageMetadata = partial(
+            _fetch_package_metadata, self._httpx_client
+        )
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._rpc_client = xmlrpc.client.ServerProxy(
@@ -222,7 +283,7 @@ class PyPIExtensionManager(ExtensionManager):
         self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
-        self.__all_packages_cache = None
+        self.__all_packages_cache: list[tuple[str, str]] | None = None
 
         self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
         if xmlrpc_transport_override:
@@ -235,6 +296,7 @@ class PyPIExtensionManager(ExtensionManager):
         """Extension manager metadata."""
         return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
+    @override
     async def is_install_allowed(self, name: str, version: str | None = None) -> bool:
         try:
             canonicalize_name(name, validate=True)
@@ -252,6 +314,11 @@ class PyPIExtensionManager(ExtensionManager):
             self.log.warning(f"Installation denied by allowlist/blocklist for {name}")
         return allowed
 
+    @override
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize PyPI package names for listing policy comparisons."""
+        return canonicalize_name(name)
+
     async def get_latest_version(self, pkg: str) -> str | None:
         """Return the latest available version for a given extension.
 
@@ -266,14 +333,17 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
             if response.status_code < 400:  # noqa PLR2004
-                data = json.loads(response.content).get("info", {})
+                response_data: object = json.loads(response.content)
+                data = _json_object(_json_object(response_data).get("info"))
             else:
                 self.log.debug(f"Failed to get package information on PyPI; {response!s}")
                 return None
         except Exception:
             return None
         else:
-            return ExtensionManager.get_semver_version(data.get("version", "")) or None
+            return (
+                ExtensionManager.get_semver_version(_metadata_string(data, "version") or "") or None
+            )
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -294,13 +364,18 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:  # noqa
+    async def __throttleRequest(  # noqa: N802
+        self,
+        recursive: bool,
+        fn: Callable[[_Arg], _R],
+        arg: _Arg,
+    ) -> _R:
         """Throttle XMLRPC API request
 
         Args:
             recursive: Whether to call the throttling recursively once or not.
             fn: API method to call
-            *args: API method arguments
+            arg: API method argument
         Returns:
             Result of the method
         Raises:
@@ -308,30 +383,34 @@ class PyPIExtensionManager(ExtensionManager):
         """
         current_loop = tornado.ioloop.IOLoop.current()
         try:
-            data = await current_loop.run_in_executor(None, fn, *args)
+            data: _R = await current_loop.run_in_executor(None, fn, arg)
         except xmlrpc.client.Fault as err:
-            if err.faultCode == -32500 and err.faultString.startswith(  # noqa PLR2004
-                "HTTPTooManyRequests:"
+            if not (
+                err.faultCode == -32500  # noqa PLR2004
+                and err.faultString.startswith("HTTPTooManyRequests:")
             ):
-                delay = 1.01
-                match = re.search(r"Limit may reset in (\d+) seconds.", err.faultString)
-                if match is not None:
-                    delay = int(match.group(1) or "1")
-                self.log.info(
-                    f"HTTPTooManyRequests - Perform next call to PyPI XMLRPC API in {delay}s."
-                )
-                await asyncio.sleep(delay * self.rpc_request_throttling + 0.01)
-                if recursive:
-                    data = await self.__throttleRequest(False, fn, *args)
-                else:
-                    data = await current_loop.run_in_executor(None, fn, *args)
+                raise
+            delay = 1.01
+            match = re.search(r"Limit may reset in (\d+) seconds.", err.faultString)
+            if match is not None:
+                delay = int(match.group(1) or "1")
+            self.log.info(
+                f"HTTPTooManyRequests - Perform next call to PyPI XMLRPC API in {delay}s."
+            )
+            await asyncio.sleep(delay * self.rpc_request_throttling + 0.01)
+            if recursive:
+                data = await self.__throttleRequest(False, fn, arg)
+            else:
+                data = await current_loop.run_in_executor(None, fn, arg)
 
         return data
 
     @observe("package_metadata_cache_size")
-    def _observe_package_metadata_cache_size(self, change):
-        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
-            partial(_fetch_package_metadata, self._httpx_client)
+    def _observe_package_metadata_cache_size(self, change: dict[str, object]) -> None:
+        new_size = cast("int | str", change["new"])
+        self._fetch_package_metadata = cast(
+            "FetchPackageMetadata",
+            alru_cache(maxsize=int(new_size))(partial(_fetch_package_metadata, self._httpx_client)),
         )
 
     async def list_packages(
@@ -358,37 +437,41 @@ class PyPIExtensionManager(ExtensionManager):
         """
         matches = await self.__get_all_extensions()
 
-        extensions = {}
-        all_matches = []
+        extensions: dict[str, ExtensionPackage] = {}
+        all_matches: list[tuple[int, ExtensionPackage]] = []
 
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
             _, latest_version = list(group)[-1]
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
-            package_urls = data.get("project_urls") or {}
+            package_urls = _metadata_string_map(data, "project_urls")
 
             source_url = package_urls.get("Source Code")
-            homepage_url = data.get("home_page") or package_urls.get("Homepage")
-            documentation_url = data.get("docs_url") or package_urls.get("Documentation")
-            bug_tracker_url = data.get("bugtrack_url") or package_urls.get("Bug Tracker")
+            homepage_url = _metadata_string(data, "home_page") or package_urls.get("Homepage")
+            documentation_url = _metadata_string(data, "docs_url") or package_urls.get(
+                "Documentation"
+            )
+            bug_tracker_url = _metadata_string(data, "bugtrack_url") or package_urls.get(
+                "Bug Tracker"
+            )
 
             best_guess_home_url = (
                 homepage_url
-                or data.get("project_url")
-                or data.get("package_url")
+                or _metadata_string(data, "project_url")
+                or _metadata_string(data, "package_url")
                 or documentation_url
                 or source_url
                 or bug_tracker_url
             )
 
             # Check Python version compatibility
-            requires_python = data.get("requires_python")
+            requires_python = _metadata_string(data, "requires_python")
             python_compatible, version_explanation = _check_python_version_compatible(
                 requires_python
             )
 
-            description = data.get("summary")
+            description = _metadata_string(data, "summary") or ""
             if version_explanation:
                 if description:
                     description += f" ({version_explanation})"
@@ -398,15 +481,15 @@ class PyPIExtensionManager(ExtensionManager):
             extension = ExtensionPackage(
                 name=normalized_name,
                 description=description,
-                homepage_url=best_guess_home_url,
-                author=data.get("author"),
-                license=data.get("license"),
+                homepage_url=best_guess_home_url or "",
+                author=_metadata_string(data, "author"),
+                license=_metadata_string(data, "license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
                 pkg_type="prebuilt",
                 allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
-                package_manager_url=data.get("package_url"),
+                package_manager_url=_metadata_string(data, "package_url"),
                 repository_url=source_url,
             )
 
@@ -451,40 +534,47 @@ class PyPIExtensionManager(ExtensionManager):
         return extensions, total_pages
 
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
-        if self.__all_packages_cache is None or datetime.now(
+        all_packages_cache = self.__all_packages_cache
+        if all_packages_cache is None or datetime.now(
             tz=timezone.utc
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
             self.log.debug("Requesting PyPI.org RPC API for prebuilt JupyterLab extensions.")
-            self.__all_packages_cache = await self.__throttleRequest(
-                True,
+            browse = cast(
+                "Callable[[list[str]], list[tuple[str, str]]]",
                 self._rpc_client.browse,
+            )
+            raw_packages = await self.__throttleRequest(
+                True,
+                browse,
                 ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
             )
+            all_packages_cache = list(raw_packages)
 
             # Also include known language packs.  They are not tagged with the
             # prebuilt extension classifier so we fetch their latest versions
             # from the JSON API instead.
-            extension_names = {p[0] for p in self.__all_packages_cache}
+            extension_names = {p[0] for p in all_packages_cache}
             packs_to_fetch = [name for name in LANGUAGE_PACKS if name not in extension_names]
             language_pack_results = await asyncio.gather(
                 *(self.get_latest_version(name) for name in packs_to_fetch),
                 return_exceptions=True,
             )
             for name, result in zip(packs_to_fetch, language_pack_results, strict=True):
-                if isinstance(result, Exception):
+                if isinstance(result, BaseException):
                     self.log.info(
                         "Failed to fetch latest version for language pack %s: %s",
                         name,
                         result,
                     )
                 elif result is not None:
-                    self.__all_packages_cache.append((name, result))
+                    all_packages_cache.append((name, result))
 
+            self.__all_packages_cache = all_packages_cache
             self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
 
-        return self.__all_packages_cache
+        return all_packages_cache
 
-    async def install(self, name: str, version: Optional[str] = None) -> ActionResult:  # noqa
+    async def install(self, name: str, version: str | None = None) -> ActionResult:  # noqa
         """Install the required extension.
 
         Note:
@@ -498,7 +588,7 @@ class PyPIExtensionManager(ExtensionManager):
         Returns:
             The action result
         """
-        if not self.is_install_allowed(name, version):
+        if not await self.is_install_allowed(name, version):
             # is_install_allowed will log the reason
             return ActionResult(status="error", message="install is not allowed")
 
@@ -527,7 +617,7 @@ class PyPIExtensionManager(ExtensionManager):
             else:
                 cmdline.append(name)
 
-            pkg_action = {}
+            pkg_action: dict[str, JSONValue] = {}
             try:
                 tmp_cmd = cmdline.copy()
                 tmp_cmd.insert(-1, "--dry-run")
@@ -537,15 +627,20 @@ class PyPIExtensionManager(ExtensionManager):
                     None, partial(run, tmp_cmd, capture_output=True, check=True)
                 )
 
-                action_info = json.loads(result.stdout.decode("utf-8"))
-                pkg_action = next(
-                    filter(
-                        lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
-                        action_info.get("install", []),
-                    )
-                )
+                action_info = _json_object(json.loads(_process_output(result.stdout)))
+                expected_name = name.replace("_", "-")
+                for package in _json_list(action_info.get("install")):
+                    if not isinstance(package, dict):
+                        continue
+                    metadata = _json_object(package.get("metadata"))
+                    if metadata.get("name") == expected_name:
+                        pkg_action = package
+                        break
             except CalledProcessError as e:
-                self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
+                self.log.debug(
+                    f"Fail to get installation report: {_process_output(e.stderr)}",
+                    exc_info=e,
+                )
             except Exception as err:
                 self.log.debug("Fail to get installation report.", exc_info=err)
             else:
@@ -558,14 +653,16 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
             self.log.debug(f"return code: {result.returncode}")
-            self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
-            error = result.stderr.decode("utf-8")
+            self.log.debug(f"stdout: {_process_output(result.stdout)}")
+            error = _process_output(result.stderr)
             if result.returncode == 0:
                 self.log.debug(f"stderr: {error}")
                 # Figure out if the package has server or kernel parts
-                jlab_metadata = None
+                jlab_metadata: dict[str, JSONValue] | None = None
                 try:
-                    download_url: str = pkg_action.get("download_info", {}).get("url")
+                    raw_download_info = pkg_action.get("download_info")
+                    download_info = _json_object(raw_download_info)
+                    download_url = _metadata_string(download_info, "url")
                     if download_url is not None:
                         response = await self._httpx_client.get(download_url)
                         if response.status_code < 400:  # noqa PLR2004
@@ -575,20 +672,22 @@ class PyPIExtensionManager(ExtensionManager):
                                         lambda f: Path(f).name == "package.json",
                                         wheel.namelist(),
                                     ):
-                                        data = json.loads(wheel.read(filename))
-                                        jlab_metadata = data.get("jupyterlab")
+                                        data = _json_object(json.loads(wheel.read(filename)))
+                                        jlab_metadata = _json_object_or_none(data.get("jupyterlab"))
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
-                                with TarFile(io.BytesIO(response.content)) as sdist:
+                                sdist_bytes = io.BytesIO(response.content)
+                                with TarFile(sdist_bytes) as sdist:  # type: ignore[arg-type]
                                     for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
                                     ):
-                                        data = json.load(
-                                            sdist.extractfile(sdist.getmember(filename))
-                                        )
-                                        jlab_metadata = data.get("jupyterlab")
+                                        package_file = sdist.extractfile(sdist.getmember(filename))
+                                        if package_file is None:
+                                            continue
+                                        data = _json_object(json.load(package_file))
+                                        jlab_metadata = _json_object_or_none(data.get("jupyterlab"))
                                         if jlab_metadata is not None:
                                             break
                         else:
@@ -600,7 +699,7 @@ class PyPIExtensionManager(ExtensionManager):
                     "frontend",
                 ]
                 if jlab_metadata is not None:
-                    discovery = jlab_metadata.get("discovery", {})
+                    discovery = _json_object(jlab_metadata.get("discovery"))
                     if "kernel" in discovery:
                         follow_ups.append("kernel")
                     if "server" in discovery:
@@ -636,23 +735,21 @@ class PyPIExtensionManager(ExtensionManager):
         ]
 
         # Figure out if the package has server or kernel parts
-        jlab_metadata = None
+        jlab_metadata: dict[str, JSONValue] | None = None
         try:
             tmp_cmd = cmdline.copy()
             tmp_cmd.remove("--yes")
             result = await current_loop.run_in_executor(
                 None, partial(run, tmp_cmd, capture_output=True)
             )
-            lines = filter(
-                lambda line: line.endswith("package.json"),
-                map(lambda line: line.strip(), result.stdout.decode("utf-8").splitlines()),  # noqa
-            )
-            for filepath in filter(
-                lambda f: f.name == "package.json",
-                map(Path, lines),
-            ):
-                data = json.loads(filepath.read_bytes())
-                jlab_metadata = data.get("jupyterlab")
+            lines = [
+                line.strip()
+                for line in _process_output(result.stdout).splitlines()
+                if line.strip().endswith("package.json")
+            ]
+            for filepath in (Path(line) for line in lines):
+                data = _json_object(json.loads(filepath.read_bytes()))
+                jlab_metadata = _json_object_or_none(data.get("jupyterlab"))
                 if jlab_metadata is not None:
                     break
         except Exception as e:
@@ -665,15 +762,15 @@ class PyPIExtensionManager(ExtensionManager):
         )
 
         self.log.debug(f"return code: {result.returncode}")
-        self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
-        error = result.stderr.decode("utf-8")
+        self.log.debug(f"stdout: {_process_output(result.stdout)}")
+        error = _process_output(result.stderr)
         if result.returncode == 0:
             self.log.debug(f"stderr: {error}")
             follow_ups = [
                 "frontend",
             ]
             if jlab_metadata is not None:
-                discovery = jlab_metadata.get("discovery", {})
+                discovery = _json_object(jlab_metadata.get("discovery"))
                 if "kernel" in discovery:
                     follow_ups.append("kernel")
                 if "server" in discovery:

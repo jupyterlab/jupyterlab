@@ -47,6 +47,16 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
+// Library packages that are deliberately not singletons.
+const NOT_SINGLETON: string[] = [
+  // Not an importable JavaScript module at all
+  '@jupyterlab/core-meta',
+  // Stylesheet-only package.
+  '@jupyterlab/nbconvert-css',
+  // Aggregation shell package
+  '@jupyterlab/metapackage'
+];
+
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
@@ -66,7 +76,8 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-sql',
     '@codemirror/lang-wast',
     '@codemirror/lang-xml',
-    '@codemirror/legacy-modes'
+    '@codemirror/legacy-modes',
+    '@plutojl/lang-julia'
   ],
   '@jupyterlab/codemirror-extension': [
     '@codemirror/lang-markdown',
@@ -348,6 +359,21 @@ function ensureBranch(): string[] {
       }
     }
 
+    if (filePath === 'packages/notebook-extension/src/index.ts') {
+      // Runtime help links should point users to stable documentation.
+      const runtimeHelpLinks = [
+        'https://jupyterlab.readthedocs.io/en/stable/user/export.html'
+      ];
+      runtimeHelpLinks.forEach(stableLink => {
+        const versionedLink = stableLink.replace('/stable/', `/${rtdVersion}/`);
+        if (stableLink !== versionedLink) {
+          while (newData.indexOf(versionedLink) !== -1) {
+            newData = newData.replace(versionedLink, stableLink);
+          }
+        }
+      });
+    }
+
     if (newData !== oldData) {
       messages.push(`Overwriting ${filePath}`);
       fs.writeFileSync(filePath, newData, 'utf-8');
@@ -469,11 +495,13 @@ function ensureCorePackage(corePackage: any, corePaths: string[]) {
       return;
     }
 
-    // If the package has a tokens.ts file, make sure it is noted as a singleton
-    if (
-      fs.existsSync(path.join(pkgPath, 'src', 'tokens.ts')) &&
-      !singletonPackages.includes(data.name)
-    ) {
+    // Every library package is a singleton unless it opts out: they either
+    // declare tokens, whose identity must be unique to resolve, or export
+    // classes that third-party extensions may use in `instanceof` checks.
+    const isSingleton =
+      !data.name.endsWith('-extension') && !NOT_SINGLETON.includes(data.name);
+
+    if (isSingleton && !singletonPackages.includes(data.name)) {
       singletonPackages.push(data.name);
     }
   });

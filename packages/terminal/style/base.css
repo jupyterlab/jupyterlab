@@ -19,6 +19,11 @@
   outline-offset: calc(var(--jp-focus-outline-width) * -1);
 }
 
+/*
+ * These border rules only apply to the WebGL renderer; the DOM renderer has
+ * no `<canvas>`. Each border color matches the corresponding terminal
+ * background, so without a canvas only an invisible 1px spacer is missing.
+ */
 [data-term-theme='inherit'] .xterm .xterm-screen canvas {
   border: var(--jp-border-width) solid var(--jp-layout-color0);
 }
@@ -29,4 +34,22 @@
 
 [data-term-theme='dark'] .xterm .xterm-screen canvas {
   border: var(--jp-border-width) solid #000;
+}
+
+/*
+ * xterm's stylesheet paints `.xterm-viewport` black and the theme does not
+ * restyle it. The viewport spans the `.jp-Terminal-body` padding, so the
+ * black would show as a frame around the terminal; match it to the terminal
+ * theme instead.
+ */
+[data-term-theme='inherit'] .xterm .xterm-viewport {
+  background-color: var(--jp-layout-color0);
+}
+
+[data-term-theme='light'] .xterm .xterm-viewport {
+  background-color: white;
+}
+
+[data-term-theme='dark'] .xterm .xterm-viewport {
+  background-color: black;
 }

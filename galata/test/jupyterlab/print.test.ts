@@ -46,7 +46,7 @@ test.describe('Print layout', () => {
 
     const newPage = await page.context().newPage();
 
-    await newPage.goto(printedNotebookURL, { waitUntil: 'networkidle' });
+    await newPage.goto(printedNotebookURL, { waitUntil: 'load' });
 
     // Wait until MathJax loading message disappears
     const mathJaxMessage = newPage.locator('#MathJax_Message');

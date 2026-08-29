@@ -65,6 +65,35 @@ test.describe('General Tests', () => {
     await page.menu.closeAll();
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
+
+  test('Export menu shows guidance when no format is available', async ({
+    page
+  }) => {
+    await page.route(/\/api\/nbconvert(\?.*)?$/, (route, request) => {
+      if (request.method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: '{}'
+        });
+      }
+
+      return route.continue();
+    });
+
+    await page.goto();
+    await page.notebook.createNew();
+
+    await page.menu.openLocator('File>Save and Export Notebook As');
+    const exportMenu = await page.menu.getOpenMenuLocator();
+    expect(exportMenu).toBeDefined();
+    await expect(
+      exportMenu!.getByRole('menuitem', {
+        name: 'Enable notebook exports'
+      })
+    ).toHaveCount(1);
+    await expect(exportMenu!.getByRole('menuitem')).toHaveCount(1);
+  });
 });
 
 const EXPECTED_MISSING_COMMANDS_MAINMENU = ['hub:control-panel', 'hub:logout'];

@@ -7,5 +7,6 @@
  * @module settingregistry
  */
 
+export * from './settingconnector';
 export * from './settingregistry';
 export * from './tokens';

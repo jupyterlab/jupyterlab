@@ -32,7 +32,6 @@ import { PageConfig } from '@jupyterlab/coreutils';
 declare let requirejs: any;
 
 export const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
-const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 const STARTING_KERNEL_SESSION = '';
 
 /**
@@ -473,11 +472,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // If we have a kernel_info_request and we are starting or restarting, send the
     // kernel_info_request immediately if we can, and if not throw an error so
     // we can retry later. On restarting we do this because we must get at least one message
-    // from the kernel to reset the kernel session (thus clearing the restart
-    // status sentinel).
+    // from the kernel before sending pending messages.
     if (
-      (this._kernelSession === STARTING_KERNEL_SESSION ||
-        this._kernelSession === RESTARTING_KERNEL_SESSION) &&
+      (this._kernelSession === STARTING_KERNEL_SESSION || this._isRestarting) &&
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
@@ -497,10 +494,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     // Send if the ws allows it, otherwise queue the message.
-    if (
-      this.connectionStatus === 'connected' &&
-      this._kernelSession !== RESTARTING_KERNEL_SESSION
-    ) {
+    if (this.connectionStatus === 'connected' && !this._isRestarting) {
       this._ws!.send(
         this.serverSettings.serializer.serialize(msg, this._ws!.protocol)
       );
@@ -556,11 +550,16 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
     this._updateStatus('restarting');
     this._clearKernelState();
-    this._kernelSession = RESTARTING_KERNEL_SESSION;
-    await this._kernelAPIClient.restart(this.id);
-    // Reconnect to the kernel to address cases where kernel ports
-    // have changed during the restart.
-    await this.reconnect();
+    this._isRestarting = true;
+    try {
+      await this._kernelAPIClient.restart(this.id);
+      // Reconnect to the kernel to address cases where kernel ports
+      // have changed during the restart.
+      await this.reconnect();
+    } catch (error) {
+      this._isRestarting = false;
+      throw error;
+    }
     this.hasPendingInput = false;
   }
 
@@ -1289,7 +1288,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // stop sending messages.
     while (
       this.connectionStatus === 'connected' &&
-      this._kernelSession !== RESTARTING_KERNEL_SESSION &&
+      !this._isRestarting &&
       this._pendingMessages.length > 0
     ) {
       this._sendMessage(this._pendingMessages[0], false);
@@ -1549,7 +1548,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     if (this.status !== 'dead') {
       if (connectionStatus === 'connected') {
-        let restarting = this._kernelSession === RESTARTING_KERNEL_SESSION;
+        let restarting = this._isRestarting;
 
         // Send a kernel info request to make sure we send at least one
         // message to get kernel status back. Always request kernel info
@@ -1567,12 +1566,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
             return;
           }
           sendPendingCalled = true;
-          if (restarting && this._kernelSession === RESTARTING_KERNEL_SESSION) {
+          if (restarting && this._isRestarting) {
             // We were restarting and a message didn't arrive to set the
             // session, but we just assume the restart succeeded and send any
             // pending messages.
 
             // FIXME: it would be better to retry the kernel_info_request here
+            this._isRestarting = false;
             this._kernelSession = '';
           }
           clearTimeout(timeoutHandle);
@@ -1580,7 +1580,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
             this._sendPending();
           }
         };
-        void p.then(sendPendingOnce);
+        void p.then(() => {
+          if (restarting) {
+            this._isRestarting = false;
+          }
+          sendPendingOnce();
+        });
         // FIXME: if sent while zmq subscriptions are not established,
         // kernelInfo may not resolve, so use a timeout to ensure we don't hang forever.
         // It may be preferable to retry kernelInfo rather than give up after one timeout.
@@ -1842,6 +1847,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _status: KernelMessage.Status = 'unknown';
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
+  private _isRestarting = false;
   private _clientId: string;
   private _isDisposed = false;
   /**

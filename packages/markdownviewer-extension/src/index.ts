@@ -10,8 +10,9 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
-import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
+import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
@@ -28,6 +29,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 
+import { markdownViewerSearchProviderFactory } from './searchprovider';
+
 /**
  * The command IDs used by the markdownviewer plugin.
  */
@@ -35,6 +38,7 @@ namespace CommandIDs {
   export const markdownPreview = 'markdownviewer:open';
   export const markdownEditor = 'markdownviewer:edit';
   export const trust = 'markdownviewer:trust';
+  export const copy = 'markdownviewer:copy';
 }
 
 /**
@@ -55,6 +59,7 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
     ILayoutRestorer,
     ISettingRegistry,
     ITableOfContentsRegistry,
+    ISearchProviderRegistry,
     ISanitizer
   ],
   autoStart: true
@@ -70,6 +75,7 @@ function activate(
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
+  searchRegistry: ISearchProviderRegistry | null,
   sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
@@ -82,6 +88,14 @@ function activate(
   const tracker = new WidgetTracker<MarkdownDocument>({
     namespace
   });
+
+  // Register the search provider for the rendered markdown.
+  if (searchRegistry) {
+    searchRegistry.add(
+      'jp-markdownViewerSearchProvider',
+      markdownViewerSearchProviderFactory
+    );
+  }
 
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
@@ -220,6 +234,32 @@ function activate(
         return { trusted: true };
       }
       return { trusted: false };
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.copy, {
+    label: trans.__('Copy'),
+    isEnabled: () => {
+      const selection = document.getSelection();
+      const widget = tracker.currentWidget;
+      return (
+        widget !== null &&
+        selection !== null &&
+        selection.toString().length > 0 &&
+        widget.content.node.contains(selection.anchorNode)
+      );
+    },
+    execute: () => {
+      const selection = document.getSelection();
+      if (selection !== null && selection.toString().length > 0) {
+        Clipboard.copyToSystem(selection.toString());
+      }
     },
     describedBy: {
       args: {
