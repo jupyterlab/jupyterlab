@@ -67,7 +67,6 @@ export async function main() {
   const federatedExtensionPromises = [];
   const federatedMimeExtensionPromises = [];
   const federatedStylePromises = [];
-  const deferredDisabledFederatedModules = [];
 
   // Start initializing the federated extensions
   const extensions = JSON.parse(
@@ -129,31 +128,16 @@ export async function main() {
   const queuedFederated = [];
 
   extensions.forEach(data => {
-    const isDisabled = isPluginDisabled(data.name);
     if (data.extension) {
       queuedFederated.push(data.name);
-      if (isDisabled) {
-        deferredDisabledFederatedModules.push({
-          name: data.name,
-          module: data.extension
-        });
-      } else {
-        federatedExtensionPromises.push(createModule(data.name, data.extension));
-      }
+      federatedExtensionPromises.push(createModule(data.name, data.extension));
     }
     if (data.mimeExtension) {
       queuedFederated.push(data.name);
-      if (isDisabled) {
-        deferredDisabledFederatedModules.push({
-          name: data.name,
-          module: data.mimeExtension
-        });
-      } else {
-        federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
-      }
+      federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
 
-    if (data.style && !isDisabled) {
+    if (data.style && !isPluginDisabled(data.name)) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
   });
@@ -176,28 +160,6 @@ export async function main() {
     return Array.isArray(exports) ? exports : [exports];
   }
 
-  function recordPlugin(plugin, extension, isDisabled) {
-    allPlugins.push({
-      id: plugin.id,
-      description: plugin.description,
-      requires: plugin.requires ?? [],
-      optional: plugin.optional ?? [],
-      provides: plugin.provides ?? null,
-      autoStart: plugin.autoStart,
-      enabled: !isDisabled,
-      extension: extension.__scope__
-    });
-    if (isDisabled) {
-      disabled.push(plugin.id);
-    }
-  }
-
-  function collectDisabledPlugins(extension) {
-    for (let plugin of getPlugins(extension)) {
-      recordPlugin(plugin, extension, true);
-    }
-  }
-
   /**
    * Iterate over active plugins in an extension.
    *
@@ -208,8 +170,18 @@ export async function main() {
     const plugins = getPlugins(extension);
     for (let plugin of plugins) {
       const isDisabled = isPluginDisabled(plugin.id);
-      recordPlugin(plugin, extension, isDisabled);
+      allPlugins.push({
+        id: plugin.id,
+        description: plugin.description,
+        requires: plugin.requires ?? [],
+        optional: plugin.optional ?? [],
+        provides: plugin.provides ?? null,
+        autoStart: plugin.autoStart,
+        enabled: !isDisabled,
+        extension: extension.__scope__
+      });
       if (isDisabled) {
+        disabled.push(plugin.id);
         continue;
       }
       if (isPluginDeferred(plugin.id)) {
@@ -218,26 +190,6 @@ export async function main() {
       }
       yield plugin;
     }
-  }
-
-  // Disabled federated extensions are loaded after restoration only to discover
-  // their plugin metadata; they must not be registered or activated.
-  async function loadDeferredDisabledFederatedPlugins() {
-    const deferredDisabledFederatedPlugins = await Promise.allSettled(
-      deferredDisabledFederatedModules.map(data => createModule(data.name, data.module))
-    );
-
-    deferredDisabledFederatedPlugins.forEach(p => {
-      if (p.status === "fulfilled") {
-        try {
-          collectDisabledPlugins(p.value);
-        } catch (e) {
-          console.error(e);
-        }
-      } else {
-        console.error(p.reason);
-      }
-    });
   }
 
   // Handle the registered mime extensions.
@@ -329,12 +281,6 @@ export async function main() {
 
   // 4. Start the application, which will activate the other plugins
   lab.start({ ignorePlugins, bubblingKeydown: true });
-
-  lab.restored
-    .then(() => loadDeferredDisabledFederatedPlugins())
-    .catch(reason => {
-      console.error('Error when loading disabled federated extensions:', reason);
-    });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
