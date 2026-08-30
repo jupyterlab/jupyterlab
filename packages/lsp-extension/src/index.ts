@@ -160,12 +160,12 @@ function activateSettings(
   settingRegistry.transform(plugin.id, {
     fetch: plugin => {
       const schema = plugin.schema.properties!;
-      const defaultValue: { [key: string]: any } = {};
+      const defaultValue: PartialJSONObject = {};
       languageServerManager.sessions.forEach((_, key) => {
         defaultValue[key] = { rank: 50, configuration: {} };
       });
 
-      schema[LANGUAGE_SERVERS]['default'] = defaultValue;
+      schema[LANGUAGE_SERVERS].default = defaultValue;
       return plugin;
     },
     compose: plugin => {
@@ -182,7 +182,7 @@ function activateSettings(
       if (serverUserSettings) {
         serverComposite = { ...serverComposite, ...serverUserSettings };
       }
-      const composite: { [key: string]: any } = {
+      const composite: PartialJSONObject = {
         [LANGUAGE_SERVERS]: serverComposite
       };
       Object.entries(properties).forEach(([key, value]) => {
@@ -274,7 +274,10 @@ function addRunningSessionManager(
   translator: ITranslator
 ) {
   const trans = translator.load('jupyterlab');
-  const signal = new Signal<any, any>(lsManager);
+  const signal = new Signal<
+    ILSPDocumentConnectionManager,
+    ILSPDocumentConnectionManager
+  >(lsManager);
   lsManager.connected.connect(() => signal.emit(lsManager));
   lsManager.disconnected.connect(() => signal.emit(lsManager));
   lsManager.closed.connect(() => signal.emit(lsManager));

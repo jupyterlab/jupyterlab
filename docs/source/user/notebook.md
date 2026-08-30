@@ -252,7 +252,7 @@ For static plots in JupyterLab with IPython kernel, simply import and use your p
 import matplotlib.pyplot as plt
 
 plt.plot([1, 2, 3, 4])
-plt.ylabel('some numbers')
+plt.ylabel("some numbers")
 plt.show()
 ```
 
@@ -276,6 +276,30 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 **R:**
 
 - [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
+
+### Mermaid diagrams
+
+JupyterLab includes built-in support for rendering Mermaid diagrams in Markdown cells.
+
+Mermaid diagrams can be added using fenced code blocks with the `mermaid` language identifier:
+
+````markdown
+```mermaid
+graph TD
+  A --> B
+```
+````
+
+which renders as:
+
+```mermaid
+graph TD
+  A --> B
+```
+
+Mermaid support is bundled with JupyterLab and does not require installing an additional extension.
+
+Mermaid diagrams are rendered automatically in Markdown cells in notebooks opened in JupyterLab. The diagram source remains visible when editing the Markdown cell.
 
 (paste-code-cells-without-output)=
 

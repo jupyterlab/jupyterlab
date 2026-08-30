@@ -4,6 +4,7 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import {
+  ensureMathTypeset,
   filterContent,
   freeezeKernelIds,
   generateArrow,
@@ -52,6 +53,13 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
+    // Force the Lorenz equations to typeset at their correct size while the
+    // notebook is still the active tab. Otherwise MathJax can render them too
+    // small (see `ensureMathTypeset`), which shifts the cells below by a
+    // sub-pixel and makes the code cell screenshot flaky by one row.
+    await ensureMathTypeset(page);
+
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
@@ -67,6 +75,15 @@ test.describe('General', () => {
     await page.dblclick('text=lorenz.py');
 
     await page.click('div[role="main"] >> text=Lorenz.ipynb');
+
+    // Wait for the debugger bug icon to settle.
+    // This needs to be before running any cells/switching to a different panel.
+    // We need to fix it cleanely later but for now let's make tests less flaky,
+    // and if it has to fail, fail fast (after 10 seconds, not 1 minute).
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor({ timeout: 10000 });
 
     await page.notebook.run();
 
@@ -102,12 +119,6 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
-    // wait for the debugger bug icon to settle
-    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
-    await panel
-      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
-      .waitFor();
-
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -130,9 +141,22 @@ test.describe('General', () => {
       (document.activeElement as HTMLElement).blur();
     });
 
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 31, x: 0, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_left.png');
+
+    await page.click('[title="Running Terminals and Kernels"]');
+    await page.click('[aria-label="Open Tabs Section"]', {
+      button: 'right',
+      position: { x: 10, y: 10 }
+    });
     expect(
-      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('interface_left.png');
+      await page.screenshot({ clip: { y: 31, x: 0, width: 330, height: 400 } })
+    ).toMatchSnapshot('sidebar_context_menu.png');
   });
 
   test('Right Sidebar', async ({ page, tmpPath }) => {
@@ -147,20 +171,26 @@ test.describe('General', () => {
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right.png');
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
-    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18460
+    // Settling the kernel before the snapshot: `language_info` and `kernelspec`
+    // are written to the notebook metadata when it resolves, and each write
+    // rebuilds the form below.
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toBeEmpty();
+    // Asserted positively: `not.toBeEmpty()` also passes when the element is
+    // missing altogether.
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[ ]:'
+    );
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toHaveClass(/lm-mod-hidden/);
@@ -229,33 +259,31 @@ test.describe('General', () => {
     expect(newNotebookMetadata).toContain('"base_numbering":3');
 
     // Test the active cell widget
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('Raw cell');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).toHaveClass(/lm-mod-hidden/);
+    const activeCellPreview = page.locator(
+      '.jp-ActiveCellTool .jp-ActiveCellTool-Content pre'
+    );
+    const activeCellPrompt = page.locator('.jp-ActiveCellTool .jp-InputPrompt');
+
+    await expect(activeCellPreview).toHaveText('Raw cell');
+    await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
     await (await page.notebook.getCellInputLocator(1))?.click();
     await page.keyboard.type(' content');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('Raw cell content');
+    await expect(activeCellPreview).toHaveText('Raw cell content');
 
     await page.notebook.addCell('code', 'print("test")');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('print("test")');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toHaveClass(/lm-mod-hidden/);
-    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
-      '[ ]:'
-    );
+    await expect(activeCellPreview).toHaveText('print("test")');
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
+
+    await page.notebook.selectCells(1);
+    await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
+
+    await page.notebook.selectCells(2);
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
 
     await page.notebook.runCell(2, true);
-    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
-      '[1]:'
-    );
+    await expect(activeCellPrompt).toHaveText('[1]:');
   });
 
   test('File menu', async ({ page }) => {
@@ -459,6 +487,7 @@ test.describe('General', () => {
 
     if (testInfo.config.updateSnapshots !== 'none') {
       // Wait a bit for the map to load when updating the snapshots
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
     }
 
@@ -476,11 +505,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
+    // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
+    // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
+    await page.getByText('Cell 1/6').waitFor();
+
     const trustIndictor = page.locator('.jp-StatusItem-trust');
 
-    expect(await trustIndictor.screenshot()).toMatchSnapshot(
-      'notebook_not_trusted.png'
-    );
+    expect
+      .soft(await trustIndictor.screenshot())
+      .toMatchSnapshot('notebook_not_trusted.png');
 
     // Open trust dialog
     // Note: we do not `await` here as it only resolves once dialog is closed
@@ -562,6 +595,7 @@ test.describe('General', () => {
     await page.dblclick('text=Data.ipynb');
 
     // Open a terminal
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.click('text=File');
     await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
@@ -576,6 +610,7 @@ test.describe('General', () => {
     await page.keyboard.press('Enter');
 
     // Wait for command answer
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');

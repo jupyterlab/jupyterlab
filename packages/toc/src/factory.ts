@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IWidgetTracker } from '@jupyterlab/apputils';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import type { Widget } from '@lumino/widgets';
@@ -41,6 +42,16 @@ export abstract class TableOfContentsFactory<
     }
 
     return true;
+  }
+
+  /**
+   * Get additional toolbar items for the widget
+   *
+   * @param widget - widget
+   * @returns List of toolbar items
+   */
+  getToolbarItems(widget: W): ToolbarRegistry.IToolbarItem[] {
+    return [];
   }
 
   /**
@@ -84,7 +95,7 @@ export abstract class TableOfContentsFactory<
       });
 
     widget.disposed.connect(() => {
-      monitor.activityStopped.disconnect(updateHeadings);
+      monitor.dispose();
       context.pathChanged.disconnect(updateTitle);
     });
 

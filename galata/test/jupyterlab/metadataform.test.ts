@@ -195,9 +195,9 @@ test.describe('Required metadata', () => {
 
     // Error should be displayed as required field is empty.
     await expect(formGroup.locator('.validationErrors')).not.toBeEmpty();
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-required-missing.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-required-missing.png');
 
     // Relevant metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -511,9 +511,6 @@ test.describe('Notebook level and cell type metadata', () => {
     let nbMetadata = await getNotebookMetadata(page);
     expect(nbMetadata['nb-nested']).toBeUndefined();
 
-    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
-    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-
     // Fill the first level nested metadata.
     await formGroup.locator('input').first().fill('Cell input');
     await formGroup.locator('input').last().fill('Notebook input');
@@ -623,16 +620,16 @@ test.describe('Conditional metadata', () => {
     // There should be 1 field displayed as condition is not met.
     await formGroup.locator('select').first().selectOption('not met');
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-not-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-not-met.png');
 
     // Met the condition, then the second field should be displayed too.
     await formGroup.locator('select').first().selectOption('met');
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-met.png');
 
     // If the condition is not met, only one field should be displayed.
     await formGroup.locator('select').first().selectOption('not met');

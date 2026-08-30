@@ -349,7 +349,19 @@ namespace Private {
       // e.g. SecurityError in case of CSP Sandbox
       return;
     }
-    const matches = cookie.match('\\b' + name + '=([^;]*)\\b');
-    return matches?.[1];
+    // When duplicate cookies exist at different paths, document.cookie
+    // lists them most-specific-path first (RFC 6265 §5.4). Tornado's
+    // server-side cookie parser (SimpleCookie, a dict subclass) overwrites
+    // earlier entries, so for "_xsrf=A; _xsrf=B" the server sees "B".
+    // We return the last match to stay consistent. (#15083)
+    const prefix = name + '=';
+    let lastValue: string | undefined;
+    for (const part of cookie.split(';')) {
+      const trimmed = part.trim();
+      if (trimmed.startsWith(prefix)) {
+        lastValue = trimmed.substring(prefix.length);
+      }
+    }
+    return lastValue;
   }
 }

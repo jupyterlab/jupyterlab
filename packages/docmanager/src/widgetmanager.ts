@@ -69,7 +69,10 @@ export class DocumentWidgetManager implements IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  get stateChanged(): ISignal<DocumentWidgetManager, IChangedArgs<any>> {
+  get stateChanged(): ISignal<
+    DocumentWidgetManager,
+    IChangedArgs<boolean, boolean, 'confirmClosingDocument'>
+  > {
     return this._stateChanged;
   }
 
@@ -550,9 +553,10 @@ export class DocumentWidgetManager implements IDisposable {
   private _activateRequested = new Signal<this, string>(this);
   private _confirmClosingTab = false;
   private _isDisposed = false;
-  private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
-    this
-  );
+  private _stateChanged = new Signal<
+    DocumentWidgetManager,
+    IChangedArgs<boolean, boolean, 'confirmClosingDocument'>
+  >(this);
   private _recentsManager: IRecentsManager | null;
   private _dialogs: IDocumentManagerDialogs | null;
 }

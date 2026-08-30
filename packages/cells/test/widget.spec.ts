@@ -298,7 +298,7 @@ describe('cells/widget', () => {
           model,
           placeholder: false
         }).initializeState();
-        expect(widget.syncEditable).toEqual(false);
+        expect(widget.syncEditable).toEqual(undefined);
         expect(widget.readOnly).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -383,7 +383,7 @@ describe('cells/widget', () => {
           model,
           placeholder: false
         }).initializeState();
-        expect(widget.syncCollapse).toEqual(false);
+        expect(widget.syncCollapse).toEqual(undefined);
         expect(widget.inputHidden).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -717,7 +717,7 @@ describe('cells/widget', () => {
           rendermime
         });
         widget.initializeState();
-        expect(widget.syncScrolled).toEqual(false);
+        expect(widget.syncScrolled).toEqual(undefined);
         expect(widget.outputsScrolled).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -804,7 +804,7 @@ describe('cells/widget', () => {
           rendermime
         });
         widget.initializeState();
-        expect(widget.syncCollapse).toEqual(false);
+        expect(widget.syncCollapse).toEqual(undefined);
         expect(widget.outputHidden).toEqual(false);
 
         // Not synced if setting widget attribute
@@ -1051,7 +1051,88 @@ describe('cells/widget', () => {
         widget.initializeState();
         Widget.attach(widget, document.body);
         await framePromise();
-        expect(widget.node.textContent).toBe('this is empty');
+        const renderedPlaceholder =
+          widget.node.querySelector('.jp-MarkdownOutput');
+        expect(renderedPlaceholder?.textContent).toBe('this is empty');
+      });
+
+      it('should show the default placeholder in command mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const renderedPlaceholder =
+          widget.node.querySelector('.jp-MarkdownOutput');
+        expect(renderedPlaceholder?.textContent).toBe(
+          'Double-click (or press Enter) to edit'
+        );
+        expect(
+          widget.node.classList.contains('jp-mod-emptyMarkdownPlaceholder')
+        ).toBe(true);
+      });
+
+      it('should not mark rendered markdown content as placeholder', async () => {
+        const model = new MarkdownCellModel();
+        model.sharedModel.setSource('hello');
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        expect(
+          widget.node.classList.contains('jp-mod-emptyMarkdownPlaceholder')
+        ).toBe(false);
+      });
+
+      it('should show markdown help placeholder in edit mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        widget.rendered = false;
+        await signalToPromise(widget.renderedChanged);
+        widget.editor!.focus();
+        await framePromise();
+        const placeholder = widget.node.querySelector('.cm-placeholder');
+        expect(placeholder?.textContent).toBe(
+          'You can use Markdown and LaTeX: $ α^2 $'
+        );
+      });
+
+      it('should leave the markdown help placeholder unfocused in command mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        widget.rendered = false;
+        await signalToPromise(widget.renderedChanged);
+        await framePromise();
+        const editor = widget.node.querySelector('.cm-editor');
+        const placeholder = widget.node.querySelector('.cm-placeholder');
+        expect(editor?.classList.contains('cm-focused')).toBe(false);
+        expect(placeholder?.textContent).toBe(
+          'You can use Markdown and LaTeX: $ α^2 $'
+        );
       });
     });
 

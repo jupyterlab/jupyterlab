@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'toc_scrolling_notebook.ipynb';
@@ -43,7 +44,7 @@ test.describe('Table of Contents scrolling to heading', () => {
       .locator('.jp-TableOfContents-tree')
       .getByText('the last one')
       .click();
-    await page.waitForTimeout(100);
+    await waitForNotebookScrollEnd(page);
 
     // Should switch to command mode
     await expect.soft(page.getByText('Mode: Command')).toBeVisible();
@@ -60,16 +61,36 @@ test.describe('Table of Contents scrolling to heading', () => {
       bbox!.y + 0.5 * bbox!.height
     );
     await page.mouse.wheel(0, -1200);
-    await page.waitForTimeout(100);
+    await waitForNotebookScrollEnd(page);
 
     await page
       .locator('.jp-TableOfContents-tree')
       .getByText('the last one')
       .click();
-    await page.waitForTimeout(100);
+    await waitForNotebookScrollEnd(page);
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'scrolled-to-bottom-heading.png'
     );
   });
 });
+
+/**
+ * Wait for the notebook scroll position to stabilise across one animation frame.
+ * scrollIntoView fires inside a Promise chain after scrollToItem resolves.
+ * This checks that scrollTop is unchanged between two consecutive frames.
+ */
+async function waitForNotebookScrollEnd(page: Page): Promise<void> {
+  await page.waitForFunction(() => {
+    const outer = document.querySelector(
+      '.jp-Notebook .jp-WindowedPanel-outer'
+    );
+    if (!outer) {
+      return true;
+    }
+    return new Promise<boolean>(resolve => {
+      const pos = outer.scrollTop;
+      requestAnimationFrame(() => resolve(outer.scrollTop === pos));
+    });
+  });
+}

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 const data = require('./package.json');
 const rspack = require('@rspack/core');
-const Build = require('@jupyterlab/builder').Build;
+const Build = require('@jupyter/builder').Build;
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 // Generate rspack config to copy extension assets to the build directory,
@@ -61,6 +61,12 @@ module.exports = [
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: /\.js$/,
           type: 'asset/source'
+        },
+        {
+          test: /\.m?js/,
+          resolve: {
+            fullySpecified: false
+          }
         }
       ]
     },

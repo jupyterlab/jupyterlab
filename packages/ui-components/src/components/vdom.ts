@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDisposable } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -71,6 +72,23 @@ export abstract class ReactWidget extends Widget {
       this._rootDOM.unmount();
       this._rootDOM = null;
     }
+  }
+
+  /**
+   * Dispose the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    // `onBeforeDetach` unmounts on a normal detach, but a widget disposed
+    // while already detached would keep its React root mounted forever,
+    // along with every subscription made by the rendered components.
+    if (this._rootDOM !== null) {
+      this._rootDOM.unmount();
+      this._rootDOM = null;
+    }
+    super.dispose();
   }
 
   /**

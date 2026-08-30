@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -524,11 +523,20 @@ export namespace EditorHandler {
     line: number,
     scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
+    const lineCount = editor.lineCount;
+
+    if (line < 1 || line > lineCount) {
+      console.warn(
+        `Line ${line} is not in the document which contains ${lineCount} lines`
+      );
+      return;
+    }
+
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
 
-    const effects: StateEffect<any>[] = [
+    const effects: StateEffect<unknown>[] = [
       _highlightEffect.of({ pos: [linePos] })
     ];
 

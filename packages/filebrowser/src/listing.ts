@@ -798,6 +798,39 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Move focus to selected item, or to the first item if no item is selected.
+   */
+  private _focusContent(): void {
+    const items = this._sortedItems;
+    if (items.length === 0) {
+      this._focusItem(0);
+      return;
+    }
+
+    let index =
+      this._focusPath !== ''
+        ? ArrayExt.findFirstIndex(
+            items,
+            value => value.path === this._focusPath
+          )
+        : -1;
+
+    // Fallbacks if path is missing/not found.
+    if (index === -1) {
+      index = Math.min(Math.max(this._focusIndex, 0), items.length - 1);
+    }
+
+    this._selectItem(index, false, true);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._focusContent();
+  }
+
+  /**
    * Select an item by name.
    *
    * @param name - The name of the item to select.
@@ -983,7 +1016,7 @@ export class DirListing extends Widget {
   }
 
   private _computeContentWidth(width: number | null = null) {
-    if (!width) {
+    if (width === null || width === 0) {
       width = this.node.getBoundingClientRect().width;
     }
 
@@ -1349,7 +1382,7 @@ export class DirListing extends Widget {
       }
       // restrict the minimum and maximum width
       size = Math.max(size, column.minWidth);
-      if (this._width) {
+      if (this._width !== null && this._width > 0) {
         let reservedForOtherColumns = 0;
         for (const other of visibleColumns) {
           if (other.id === column.id) {
@@ -1364,7 +1397,7 @@ export class DirListing extends Widget {
     }
 
     // Ensure that total fits
-    if (this._width) {
+    if (this._width !== null && this._width > 0) {
       // Distribute the excess/shortfall over the columns which should stretch.
       const excess = this._width - total;
       let growAllowed = doNotGrowBeforeInclusive === null;
@@ -1397,7 +1430,7 @@ export class DirListing extends Widget {
     for (const column of visibleColumns) {
       let size = this._columnSizes[column.id];
 
-      if (Private.isResizable(column) && size) {
+      if (Private.isResizable(column) && size !== null && size !== 0) {
         size -=
           (this._handleWidth * resizeHandles.length) / resizableColumns.length;
         // if this is first resizable or last resizable column
@@ -1433,7 +1466,7 @@ export class DirListing extends Widget {
     size: number | null
   ): void {
     const previousSize = this._columnSizes[name];
-    if (previousSize && size && size > previousSize) {
+    if (previousSize !== null && size !== null && size > previousSize) {
       // check if we can resize up
       let total = 0;
       let before = true;
@@ -1455,7 +1488,7 @@ export class DirListing extends Widget {
           total += column.minWidth;
         }
       }
-      if (this._width && total > this._width) {
+      if (this._width !== null && this._width > 0 && total > this._width) {
         // up sizing is no longer possible
         return;
       }
@@ -1869,9 +1902,8 @@ export class DirListing extends Widget {
       return;
     }
 
-    switch (event.keyCode) {
-      case 13: {
-        // Enter
+    switch (event.key) {
+      case 'Enter': {
         // Do nothing if any modifier keys are pressed.
         if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
           return;
@@ -1883,16 +1915,14 @@ export class DirListing extends Widget {
         }
         return;
       }
-      case 38:
-        // Up arrow
+      case 'ArrowUp':
         this._handleArrowY(event, -1);
         return;
-      case 40:
-        // Down arrow
+      case 'ArrowDown':
         this._handleArrowY(event, 1);
         return;
-      case 32: {
-        // Space
+      case ' ':
+      case 'Spacebar': {
         if (event.ctrlKey) {
           // Follow the Windows and Ubuntu convention: you must press `ctrl` +
           // `space` in order to toggle whether an item is selected.
@@ -1947,7 +1977,7 @@ export class DirListing extends Widget {
       // Don't gobble up the space key on the check-all checkbox (which the
       // browser treats as a click event).
       !(
-        (event.key === ' ' || event.keyCode === 32) &&
+        (event.key === ' ' || event.key === 'Spacebar') &&
         (event.target as HTMLInputElement).type === 'checkbox'
       )
     ) {
@@ -2127,6 +2157,10 @@ export class DirListing extends Widget {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
     const index = Private.hitTestNodes(this._items, event);
+    if (index === -1 || index >= this._items.length) {
+      event.dropAction = 'none';
+      return;
+    }
     this._items[index].classList.add(DROP_TARGET_CLASS);
   }
 
@@ -2364,11 +2398,14 @@ export class DirListing extends Widget {
       // Focus the top node if the folder is empty and therefore there are no
       // items inside the folder to focus.
       this._focusIndex = 0;
+      this._focusPath = '';
       this.node.focus();
       return;
     }
-    this._focusIndex = index;
-    const node = items[index];
+    const clampedIndex = Math.min(Math.max(index, 0), items.length - 1);
+    this._focusIndex = clampedIndex;
+    this._focusPath = this._sortedItems[clampedIndex]?.path ?? '';
+    const node = items[clampedIndex];
     const nameNode = this.renderer.getNameNode(node);
     if (nameNode) {
       // Make the filename text node focusable so that it receives keyboard
@@ -2795,6 +2832,7 @@ export class DirListing extends Widget {
   private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
+  private _focusPath = '';
   private _modifiedStyle: Time.HumanStyle = 'short';
   private _createdStyle: Time.HumanStyle = 'short';
   private _allUploaded = new Signal<DirListing, void>(this);
@@ -3909,7 +3947,7 @@ namespace Private {
     edit: HTMLInputElement,
     original: string
   ): Promise<string> {
-    const parent = text.parentElement as HTMLElement;
+    const parent = text.parentElement!;
     parent.replaceChild(edit, text);
     edit.focus();
     const index = edit.value.lastIndexOf('.');
@@ -3925,13 +3963,13 @@ namespace Private {
         resolve(edit.value);
       };
       edit.onkeydown = (event: KeyboardEvent) => {
-        switch (event.keyCode) {
-          case 13: // Enter
+        switch (event.key) {
+          case 'Enter':
             event.stopPropagation();
             event.preventDefault();
             edit.blur();
             break;
-          case 27: // Escape
+          case 'Escape':
             event.stopPropagation();
             event.preventDefault();
             edit.value = original;

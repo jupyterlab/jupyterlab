@@ -9,7 +9,7 @@ import { Dialog, Notification } from '@jupyterlab/apputils';
 import { GalataInpage } from './global';
 import type { IGalataHelpers } from './tokens';
 import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
-import './fonts';
+import { fontsPlugin } from './fonts';
 
 export type {
   IGalataInpage,
@@ -32,6 +32,7 @@ window.galataip = window.galata;
 
 const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
   id: PLUGIN_ID_GALATA_HELPERS,
+  description: 'Galata in-page extension helpers.',
   autoStart: true,
   activate: (app: JupyterFrontEnd): IGalataHelpers => {
     return Object.freeze({
@@ -41,4 +42,4 @@ const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
   }
 };
 
-export default galataPlugin;
+export default [galataPlugin, fontsPlugin];

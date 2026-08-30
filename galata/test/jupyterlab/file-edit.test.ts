@@ -34,6 +34,7 @@ test.describe('File Edit Operations', () => {
     const currentDir = await page.filebrowser.getCurrentDirectory();
     // Wait a short while as the file initializes before renaming, see
     // https://github.com/jupyterlab/jupyterlab/issues/18455
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
     await page.contents.renameFile(
       `${currentDir}/${DEFAULT_NAME}`,
@@ -68,15 +69,24 @@ test.describe('Console Interactions', () => {
     });
 
     await page.getByText('Create Console for Editor').click();
+
+    const loadingBanner = page
+      .locator('.jp-CodeConsole-banner')
+      .getByText('...');
+    // Wait for loading state in the banner to show up
+    await loadingBanner.waitFor({ state: 'attached' });
+
+    // Select kernel
     await page.getByRole('button', { name: 'Select Kernel' }).click();
 
-    await page
-      .getByText("Type 'copyright', 'credits'")
-      .waitFor({ state: 'visible' });
+    // Wait for loading banner to disappear once fully loaded
+    await loadingBanner.waitFor({ state: 'detached' });
 
     await page.getByText('123', { exact: true }).click();
 
-    await expect(page.getByText("Type 'copyright', 'credits'")).toBeVisible();
+    // Wait for kernel to start up before execution
+    await page.locator('.jp-ConsolePanel [title="Kernel Idle"]').waitFor();
+
     await page.keyboard.press('Shift+Enter');
 
     await expect(

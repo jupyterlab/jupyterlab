@@ -59,24 +59,21 @@ JupyterLab follows Gettext's approach for translation. Gettext extracts strings 
 
 By using [jupyterlab-translate](https://github.com/jupyterlab/jupyterlab-translate), you can extract, update, and compile your translation.
 
-After that, you must include your compiled translation (.json, .mo) to your python package. This can be done by editing these two files.
+After that, you must include your compiled translation (.json, .mo) to your python package. This can be done by adding the entry point to your `pyproject.toml`:
 
-setup.py:
-
-```python
-from setuptools import setup
-
-setup(
-    # ...
-    entry_points={"jupyterlab.locale": ["jupyterlab_some_package = jupyterlab_some_package"]},
-)
+```toml
+[project.entry-points."jupyterlab.locale"]
+jupyterlab_some_package = "jupyterlab_some_package"
 ```
 
-MANIFEST.in:
+With modern build backends (e.g. [hatchling](https://hatch.pypa.io/)), compiled translation files inside the package directory are included automatically. If your backend requires explicit listing, add the patterns to your build configuration; for example with hatchling:
 
-```text
-recursive-include jupyterlab_some_package *.json
-recursive-include jupyterlab_some_package *.mo
+```toml
+[tool.hatch.build.targets.wheel]
+include = [
+    "jupyterlab_some_package/**/*.json",
+    "jupyterlab_some_package/**/*.mo",
+]
 ```
 
 :::{note}
@@ -142,9 +139,9 @@ props.trans.__('This translatable string will be found');
 Examples that will **not** work:
 
 ```typescript
-translator.__('This translatable string WONT be found');
-__('This translatable string WONT be found');
-this.__('This translatable string WONT be found');
+translator.__("This translatable string WON'T be found");
+__("This translatable string WON'T be found");
+this.__("This translatable string WON'T be found");
 ```
 
 To fix this issue, alter your variable to use an accepted name:
@@ -159,7 +156,7 @@ trans.__('This translatable string will be found');
 Example that will **not** work:
 
 ```typescript
-const errorMessage = 'This translatable string WONT be found';
+const errorMessage = "This translatable string WON'T be found";
 trans.__(errorMessage);
 ```
 

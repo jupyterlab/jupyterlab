@@ -275,6 +275,13 @@ Hidden files and folders can be displayed in JupyterLab by combining two paramet
 
 Single-click navigation for files and folders can be enabled via the settings editor under the `File Browser` option: `Navigate files and directories with single click`
 
+## Editable Breadcrumbs
+
+You can click on the empty space to the right of the breadcrumb path to enter
+edit mode. This opens a text input pre-filled with the current path and a
+completion dropdown that suggests matching subdirectories as you type, allowing
+you to quickly navigate to any folder.
+
 ## File name sort order
 
 (file-sort-order)=

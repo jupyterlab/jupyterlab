@@ -21,7 +21,7 @@
 ##### h6
 
 This is just a sample paragraph
-You can look at different level of nested unordered list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc
+You can look at different levels of nested unordered lists in this sample.
 
 - level 1
   - level 2

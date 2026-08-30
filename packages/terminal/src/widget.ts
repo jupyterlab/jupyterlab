@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Dialog, Notification, showDialog } from '@jupyterlab/apputils';
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -16,7 +17,6 @@ import type {
   ITerminalOptions,
   Terminal as Xterm
 } from '@xterm/xterm';
-import type { CanvasAddon } from '@xterm/addon-canvas';
 import type { FitAddon } from '@xterm/addon-fit';
 import type { SearchAddon } from '@xterm/addon-search';
 import type { WebLinksAddon } from '@xterm/addon-web-links';
@@ -33,6 +33,16 @@ const TERMINAL_CLASS = 'jp-Terminal';
  * The class name added to a terminal body.
  */
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
+
+/**
+ * The class name for screen reader only text.
+ */
+const SR_ONLY_CLASS = 'jp-sr-only';
+
+/**
+ * The delay in milliseconds to reset the escape key press.
+ */
+const ESCAPE_FOCUS_DELAY_MS = 350;
 
 /**
  * A widget which manages a terminal session.
@@ -60,16 +70,44 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Initialize settings.
     this._options = { ...ITerminal.defaultOptions, ...options };
 
+    // Track the link under the pointer so that it can be exposed when the
+    // context menu is opened (see `contextMenuLink`).
+    const setHoveredLink = (link: string | null): void => {
+      this._hoveredLink = link;
+    };
+
     const { theme, ...other } = this._options;
     const xtermOptions = {
       theme: Private.getXTermTheme(theme),
       allowProposedApi: true, // To support xtermjs SearchAddon coloring.
+      // Handle OSC 8 escape-sequence hyperlinks.
+      linkHandler: {
+        activate: (event: MouseEvent, uri: string) => {
+          void Private.activateLink(this._trans, uri);
+        },
+        hover: (event: MouseEvent, uri: string) => {
+          setHoveredLink(uri);
+        },
+        leave: () => {
+          setHoveredLink(null);
+        }
+      },
       ...other
     };
 
     this.addClass(TERMINAL_CLASS);
 
     this._setThemeAttribute(theme);
+    this._terminalId = Private.id++;
+    this.id = `jp-Terminal-${this._terminalId}`;
+    this._escapeInstructionsId = `jp-Terminal-escape-instructions-${this._terminalId}`;
+    const escapeInstructions = document.createElement('p');
+    escapeInstructions.id = this._escapeInstructionsId;
+    escapeInstructions.className = SR_ONLY_CLASS;
+    escapeInstructions.textContent = this._trans.__(
+      'Press Escape twice to leave terminal focus. Press Enter to return focus to the terminal input.'
+    );
+    this.node.appendChild(escapeInstructions);
 
     // Buffer session message while waiting for the terminal
     let buffer = '';
@@ -96,14 +134,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }, this);
 
     // Create the xterm.
-    Private.createTerminal(xtermOptions)
+    Private.createTerminal(xtermOptions, setHoveredLink)
       .then(([term, fitAddon, searchAddon]) => {
         this._term = term;
         this._fitAddon = fitAddon;
         this._searchAddon = searchAddon;
         this._initializeTerm();
 
-        this.id = `jp-Terminal-${Private.id++}`;
         this.title.label = this._trans.__('Terminal');
         this._isReady = true;
         this._ready.resolve();
@@ -262,6 +299,16 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   /**
+   * The URI of the link under the pointer when the context menu was last
+   * opened over the terminal, or `null` if the context menu was not opened
+   * over a link.
+   * Public as needed by the `terminal:copy-link` command.
+   */
+  get contextMenuLink(): string | null {
+    return this._contextMenuLink;
+  }
+
+  /**
    * Process a message sent to the widget.
    *
    * @param msg - The message sent to the widget.
@@ -306,10 +353,32 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   /**
+   * A signal emitted when users should be reminded how to leave terminal focus.
+   */
+  get escapeHintRequested(): ISignal<this, void> {
+    return this._escapeHintRequested;
+  }
+
+  /**
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('keydown', this, true);
+    this.node.addEventListener('contextmenu', this);
     this.update();
+  }
+
+  /**
+   * Remove event listeners when the widget is detached.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('keydown', this, true);
+    this.node.removeEventListener('contextmenu', this);
+    // The pointer leave callback may not fire when the widget is detached
+    // while a link is hovered, so reset the hovered link explicitly.
+    this._hoveredLink = null;
+    this._clearEscapeResetTimer();
+    this._escapePressedOnce = false;
   }
 
   /**
@@ -340,7 +409,17 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Open the terminal if necessary.
     if (!this._termOpened) {
       this._term.open(this.node);
+      // Load the renderer addon after open so a failed activation leaves
+      // the DOM renderer in place.
+      Private.addRenderer(this._term);
       this._term.element?.classList.add(TERMINAL_BODY_CLASS);
+      this._term.textarea?.setAttribute(
+        'aria-describedby',
+        this._escapeInstructionsId
+      );
+      this._term.element
+        ?.querySelector('.xterm-viewport')
+        ?.setAttribute('aria-describedby', this._escapeInstructionsId);
       this._termOpened = true;
     }
 
@@ -408,13 +487,36 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       this.title.label = title;
     });
 
-    // Do not add any Ctrl+C/Ctrl+V handling on macOS,
-    // where Cmd+C/Cmd+V works as intended.
-    if (Platform.IS_MAC) {
-      return;
-    }
-
     term.attachCustomKeyEventHandler(event => {
+      // Send Shift+Enter as a line feed (\n) rather than carriage
+      // return (\r), so terminal applications can distinguish
+      // between Enter (execute) and Shift+Enter (newline). Handle
+      // only keydown and call preventDefault() so the browser
+      // suppresses the follow-up keypress event that xterm.js would
+      // otherwise turn into a \r.
+      // Skip during IME composition so composed text isn't split by
+      // an injected \n.
+      if (
+        event.type === 'keydown' &&
+        event.shiftKey &&
+        event.key === 'Enter' &&
+        !event.isComposing &&
+        event.keyCode !== 229
+      ) {
+        event.preventDefault();
+        this.session.send({
+          type: 'stdin',
+          content: ['\n']
+        });
+        return false;
+      }
+
+      // Do not add any Ctrl+C/Ctrl+V handling on macOS,
+      // where Cmd+C/Cmd+V works as intended.
+      if (Platform.IS_MAC) {
+        return true;
+      }
+
       if (event.ctrlKey && event.key === 'c' && term.hasSelection()) {
         // Return so that the usual OS copy happens
         // instead of interrupt signal.
@@ -495,7 +597,116 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     );
   }
 
+  /**
+   * Handle the `keydown` event for the widget.
+   */
+  private _evtKeyDown(event: KeyboardEvent): void {
+    const xtermViewport = this._term.element?.querySelector(
+      '.xterm-viewport'
+    ) as HTMLElement | null;
+    const xtermTextarea = this._term.textarea;
+    const activeElement = document.activeElement as HTMLElement | null;
+    const viewportFocused =
+      !!activeElement &&
+      !!xtermViewport &&
+      (activeElement === xtermViewport ||
+        xtermViewport.contains(activeElement));
+    const textareaFocused = !!xtermTextarea && activeElement === xtermTextarea;
+
+    if (event.key === 'Escape') {
+      if (!textareaFocused) {
+        this._clearEscapeResetTimer();
+        this._escapePressedOnce = false;
+        return;
+      }
+      if (!this._escapePressedOnce) {
+        this._escapePressedOnce = true;
+        this._scheduleEscapeReset();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      this._clearEscapeResetTimer();
+      this._escapePressedOnce = false;
+      if (xtermTextarea) {
+        // This ensures pressing Tab does not return to the textarea and avoids
+        // becoming a tab trap.
+        xtermTextarea.tabIndex = -1;
+      }
+      xtermViewport?.setAttribute('tabindex', '0');
+      xtermViewport?.focus();
+      return;
+    }
+
+    this._clearEscapeResetTimer();
+    this._escapePressedOnce = false;
+
+    if (viewportFocused && event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (xtermTextarea) {
+        xtermTextarea.tabIndex = 0;
+        xtermTextarea.focus();
+      }
+      return;
+    }
+
+    if (viewportFocused && event.key === 'Tab' && xtermTextarea) {
+      xtermTextarea.tabIndex = -1;
+    }
+
+    // The viewport is not a native scroll container, so translate the
+    // scrolling keys into xterm.js scroll API calls.
+    if (viewportFocused) {
+      let handled = true;
+      switch (event.key) {
+        case 'ArrowUp':
+          this._term.scrollLines(-1);
+          break;
+        case 'ArrowDown':
+          this._term.scrollLines(1);
+          break;
+        case 'PageUp':
+          this._term.scrollPages(-1);
+          break;
+        case 'PageDown':
+          this._term.scrollPages(1);
+          break;
+        case 'Home':
+          this._term.scrollToTop();
+          break;
+        case 'End':
+          this._term.scrollToBottom();
+          break;
+        default:
+          handled = false;
+      }
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  }
+
+  private _scheduleEscapeReset(): void {
+    this._clearEscapeResetTimer();
+    this._escapeResetTimer = window.setTimeout(() => {
+      this._escapePressedOnce = false;
+      this._escapeHintRequested.emit();
+      this._escapeResetTimer = null;
+    }, ESCAPE_FOCUS_DELAY_MS);
+  }
+
+  private _clearEscapeResetTimer(): void {
+    if (this._escapeResetTimer !== null) {
+      window.clearTimeout(this._escapeResetTimer);
+      this._escapeResetTimer = null;
+    }
+  }
+
+  private _contextMenuLink: string | null = null;
   private _fitAddon: FitAddon;
+  private _hoveredLink: string | null = null;
   private _searchAddon: SearchAddon;
   private _needsResize = true;
   private _offsetWidth = -1;
@@ -507,6 +718,36 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _termOpened = false;
   private _trans: TranslationBundle;
   private _themeChanged = new Signal<this, void>(this);
+  private _escapeHintRequested = new Signal<this, void>(this);
+  private _escapePressedOnce = false;
+  private _escapeResetTimer: number | null = null;
+  private _terminalId: number;
+  private _escapeInstructionsId: string;
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event -The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the terminal widget's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      case 'contextmenu':
+        // Capture the hovered link when the context menu is being opened,
+        // as the pointer leaves the link once the menu is displayed.
+        this._contextMenuLink = this._hoveredLink;
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 /**
@@ -596,82 +837,197 @@ namespace Private {
  * Utility functions for creating a Terminal widget
  */
 namespace Private {
-  let supportWebGL: boolean = false;
   let Xterm_: typeof Xterm;
   let FitAddon_: typeof FitAddon;
   let WeblinksAddon_: typeof WebLinksAddon;
   let SearchAddon_: typeof SearchAddon;
-  let Renderer_: typeof CanvasAddon | typeof WebglAddon;
+  let WebglAddon_: typeof WebglAddon | undefined;
+  let initPromise: Promise<void> | undefined;
 
   /**
-   * Detect if the browser supports WebGL or not.
+   * Detect if the browser supports WebGL2 or not, which the xterm.js
+   * WebGL addon requires.
    *
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/By_example/Detect_WebGL
    */
-  function hasWebGLContext(): boolean {
+  function hasWebGL2Context(): boolean {
     // Create canvas element. The canvas is not added to the
     // document itself, so it is never displayed in the
     // browser window.
     const canvas = document.createElement('canvas');
 
-    // Get WebGLRenderingContext from canvas element.
-    const gl =
-      canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    // Get WebGL2RenderingContext from canvas element.
+    const gl = canvas.getContext('webgl2');
 
     // Report the result.
     try {
-      return gl instanceof WebGLRenderingContext;
+      return gl instanceof WebGL2RenderingContext;
     } catch (error) {
       return false;
     }
   }
 
-  function addRenderer(term: Xterm): void {
-    let renderer = new Renderer_();
-    term.loadAddon(renderer);
-    if (supportWebGL) {
-      (renderer as WebglAddon).onContextLoss(event => {
+  /**
+   * Load the xterm.js modules, at most once.
+   */
+  async function initialize(): Promise<void> {
+    const [xterm_, fitAddon_, weblinksAddon_, searchAddon_] = await Promise.all(
+      [
+        import('@xterm/xterm'),
+        import('@xterm/addon-fit'),
+        import('@xterm/addon-web-links'),
+        import('@xterm/addon-search')
+      ]
+    );
+    Xterm_ = xterm_.Terminal;
+    FitAddon_ = fitAddon_.FitAddon;
+    WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
+    SearchAddon_ = searchAddon_.SearchAddon;
+    if (hasWebGL2Context()) {
+      try {
+        const webglAddon_ = await import('@xterm/addon-webgl');
+        WebglAddon_ = webglAddon_.WebglAddon;
+      } catch (error) {
+        console.warn(
+          'Failed to load the WebGL renderer, falling back to the DOM renderer.',
+          error
+        );
+      }
+    }
+  }
+
+  /**
+   * Attach the WebGL renderer to an opened terminal.
+   *
+   * The built-in DOM renderer is used when the WebGL addon is unavailable
+   * or fails to activate.
+   */
+  export function addRenderer(term: Xterm): void {
+    if (!WebglAddon_) {
+      return;
+    }
+    try {
+      const renderer = new WebglAddon_();
+      term.loadAddon(renderer);
+      renderer.onContextLoss(() => {
         console.debug('WebGL context lost - reinitialize Xtermjs renderer.');
         renderer.dispose();
         // If the Webgl context is lost, reinitialize the addon
         addRenderer(term);
       });
+    } catch (error) {
+      console.warn(
+        'Failed to activate the WebGL renderer, falling back to the DOM renderer.',
+        error
+      );
     }
   }
 
   /**
    * Create a xterm.js terminal asynchronously.
+   *
+   * @param options - The xterm.js terminal options.
+   *
+   * @param onLinkHover - A callback invoked with the URI of the link under
+   * the pointer, or `null` when the pointer leaves the link.
    */
   export async function createTerminal(
-    options: ITerminalOptions & ITerminalInitOnlyOptions
+    options: ITerminalOptions & ITerminalInitOnlyOptions,
+    onLinkHover: (link: string | null) => void
   ): Promise<[Xterm, FitAddon, SearchAddon]> {
-    if (!Xterm_) {
-      supportWebGL = hasWebGLContext();
-      const [xterm_, fitAddon_, renderer_, weblinksAddon_, searchAddon_] =
-        await Promise.all([
-          import('@xterm/xterm'),
-          import('@xterm/addon-fit'),
-          supportWebGL
-            ? import('@xterm/addon-webgl')
-            : import('@xterm/addon-canvas'),
-          import('@xterm/addon-web-links'),
-          import('@xterm/addon-search')
-        ]);
-      Xterm_ = xterm_.Terminal;
-      FitAddon_ = fitAddon_.FitAddon;
-      Renderer_ =
-        (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
-      WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
-      SearchAddon_ = searchAddon_.SearchAddon;
+    if (!initPromise) {
+      initPromise = initialize();
+      // Allow a later terminal to retry if the modules failed to load, for
+      // example because of a transient network failure.
+      initPromise.catch(() => {
+        initPromise = undefined;
+      });
     }
+    await initPromise;
 
     const term = new Xterm_(options);
-    addRenderer(term);
     const fitAddon = new FitAddon_();
     term.loadAddon(fitAddon);
     const searchAddon = new SearchAddon_();
-    term.loadAddon(new WeblinksAddon_());
+    term.loadAddon(
+      new WeblinksAddon_(undefined, {
+        hover: (event: MouseEvent, uri: string) => {
+          onLinkHover(uri);
+        },
+        leave: () => {
+          onLinkHover(null);
+        }
+      })
+    );
     term.loadAddon(searchAddon);
     return [term, fitAddon, searchAddon];
+  }
+
+  /**
+   * The URI schemes that an activated link is allowed to open.
+   *
+   * Non-HTTP OSC 8 hyperlinks are already discarded by xterm.js (see the
+   * `allowNonHttpProtocols` option of its link handler API), and
+   * automatically detected web links are matched with an `https?://`
+   * pattern, so this list is a second line of defense, as recommended by
+   * the xterm.js documentation.
+   */
+  const ALLOWED_LINK_SCHEMES = ['http:', 'https:'];
+
+  /**
+   * Open a link that was activated in the terminal.
+   *
+   * Like the default OSC 8 hyperlink activation behavior of xterm.js, the
+   * user is asked to confirm before navigating: the target URI of an
+   * escape-sequence hyperlink can be unrelated to the displayed text. The
+   * target is also required to use one of the allowed URI schemes, as a
+   * second line of defense against unsafe navigation targets such as
+   * `javascript:` links.
+   */
+  export async function activateLink(
+    trans: TranslationBundle,
+    uri: string
+  ): Promise<void> {
+    let scheme: string;
+    try {
+      scheme = new URL(uri).protocol;
+    } catch {
+      console.warn(`Not opening a link with an invalid URI: ${uri}`);
+      return;
+    }
+    if (!ALLOWED_LINK_SCHEMES.includes(scheme)) {
+      console.warn(`Not opening a link with a disallowed scheme: ${uri}`);
+      return;
+    }
+    const { button } = await showDialog({
+      title: trans.__('Open Link?'),
+      body: trans.__(
+        'Do you want to navigate to %1? This link could potentially be dangerous.',
+        uri
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: trans.__('Open') })
+      ]
+    });
+    if (!button.accept) {
+      return;
+    }
+    const newWindow = window.open();
+    if (newWindow) {
+      try {
+        newWindow.opener = null;
+      } catch {
+        // no-op, Electron can throw
+      }
+      newWindow.location.href = uri;
+    } else {
+      Notification.error(
+        trans.__(
+          'Failed to open the link: the popup was blocked by the browser.'
+        ),
+        { autoClose: 5000 }
+      );
+    }
   }
 }

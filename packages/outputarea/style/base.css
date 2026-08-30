@@ -10,6 +10,8 @@
 
 .jp-OutputArea {
   overflow-y: auto;
+  anchor-name: --jp-output-area;
+  anchor-scope: --jp-output-area;
 }
 
 .jp-OutputArea-child {
@@ -65,8 +67,8 @@
 .jp-OutputArea-promptOverlay {
   position: absolute;
   top: 0;
-  width: var(--jp-cell-prompt-width);
   height: 100%;
+  width: var(--jp-cell-prompt-width);
   opacity: 0.5;
   display: flex;
   align-items: center;
@@ -196,7 +198,9 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 }
 
 .jp-TrimmedOutputs-button:focus-visible {
-  outline: 1px solid var(--jp-brand-color1);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
   outline-offset: -1px;
 }
 
@@ -267,6 +271,13 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 .jp-Stdin-input:focus {
   box-shadow: none;
+}
+
+.jp-Stdin-input:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -2px;
 }
 
 .jp-Stdin-input:focus::placeholder {

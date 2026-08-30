@@ -591,10 +591,25 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * @returns Whether URLs are auto-linked incrementally (asynchronously,
+   * across animation frames) rather than in a single synchronous pass.
+   */
+  getIncrementalAutolink(): boolean {
+    return this._incrementalAutolink;
+  }
+
+  /**
    * @returns Whether to allow name and id attributes.
    */
   get allowNamedProperties(): boolean {
     return this._allowNamedProperties;
+  }
+
+  /**
+   * @returns Whether to allow command linker attributes.
+   */
+  get allowCommandLinker(): boolean {
+    return this._allowCommandLinker;
   }
 
   /**
@@ -620,6 +635,19 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * Set whether URLs are auto-linked incrementally (asynchronously, across
+   * animation frames) rather than in a single synchronous pass.
+   *
+   * Disabling this also disables incremental rendering of the text output (it is
+   * rendered synchronously in a single blocking pass).
+   *
+   * @param incrementalAutolink Whether to auto-link incrementally.
+   */
+  setIncrementalAutolink(incrementalAutolink: boolean): void {
+    this._incrementalAutolink = incrementalAutolink;
+  }
+
+  /**
    * Set the whether to allow `name` and `id` attributes.
    */
   setAllowNamedProperties(allowNamedProperties: boolean): void {
@@ -627,8 +655,20 @@ export class Sanitizer implements IRenderMime.ISanitizer {
     this._options = this._generateOptions();
   }
 
+  /**
+   * Set whether to allow command linker attributes.
+   *
+   * @param allowCommandLinker Whether to allow command linker attributes.
+   */
+  setAllowCommandLinker(allowCommandLinker: boolean): void {
+    this._allowCommandLinker = allowCommandLinker;
+    this._options = this._generateOptions();
+  }
+
   private _autolink: boolean = true;
+  private _incrementalAutolink: boolean = true;
   private _allowNamedProperties: boolean = false;
+  private _allowCommandLinker: boolean = true;
   private _customAllowedSchemes: string[] | undefined;
   private _options: sanitize.IOptions;
   private _generateOptions = (): sanitize.IOptions => {
@@ -800,8 +840,9 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         br: ['clear'],
         button: [
           'accesskey',
-          'data-commandlinker-args',
-          'data-commandlinker-command',
+          ...(this._allowCommandLinker
+            ? ['data-commandlinker-args', 'data-commandlinker-command']
+            : []),
           'disabled',
           ...(this._allowNamedProperties ? ['name'] : []),
           'tabindex',

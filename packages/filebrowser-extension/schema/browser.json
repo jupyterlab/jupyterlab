@@ -313,6 +313,12 @@
       "title": "Show Filter Bar by Default",
       "description": "Show the filter bar by default in the file browser.",
       "default": false
+    },
+    "clearFilterOnNavigation": {
+      "type": "boolean",
+      "title": "Clear Filter on Navigation",
+      "description": "Clear the filter when naviating to a new directory",
+      "default": true
     }
   },
   "additionalProperties": false,

@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import type { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
@@ -52,12 +51,12 @@ export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
-  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+  readonly busySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * A signal for when application changes its dirty status.
    */
-  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+  readonly dirtySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * Whether the application is busy.

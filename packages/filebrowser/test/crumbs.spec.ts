@@ -93,6 +93,7 @@ describe('filebrowser/model', () => {
     // Remove leading '/' from preferredPath (as done by jupyter server)
     const preferredPath = path.startsWith('/') ? path.slice(1) : path;
     PageConfig.setOption('preferredPath', preferredPath);
+    PageConfig.setOption('preferredPathIsHome', 'false');
     crumbs = new LogCrumbs({ model });
   });
 
@@ -105,12 +106,58 @@ describe('filebrowser/model', () => {
       it('should create a new BreadCrumbs instance', () => {
         const bread = new BreadCrumbs({ model });
         expect(bread).toBeInstanceOf(BreadCrumbs);
+        // Before attachment, the breadcrumb container is empty (items are
+        // populated during onUpdateRequest which runs after attach).
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
-        expect(items.length).toBe(1);
+        expect(items.length).toBe(0);
+        // After attachment, the root node should have two child elements:
+        // the breadcrumb container and the path navigator.
+        Widget.attach(bread, document.body);
+        expect(bread.node.children.length).toBe(2);
+        Widget.detach(bread);
+        bread.dispose();
       });
 
       it('should add the jp-BreadCrumbs class', () => {
         expect(crumbs.hasClass('jp-BreadCrumbs')).toBe(true);
+      });
+
+      it('should use the home icon only when the preferred path is home', () => {
+        PageConfig.setOption('preferredPathIsHome', 'true');
+        const bread = new BreadCrumbs({ model });
+        Widget.attach(bread, document.body);
+        MessageLoop.sendMessage(bread, Widget.Msg.UpdateRequest);
+
+        const rootIcon = bread.node.querySelector(
+          `.${BREADCRUMB_ROOT_CLASS} svg`
+        );
+        const preferredHomeIcon = bread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(rootIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder'
+        );
+        expect(preferredHomeIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:home'
+        );
+
+        Widget.detach(bread);
+        bread.dispose();
+
+        PageConfig.setOption('preferredPathIsHome', 'false');
+        const nonHomeBread = new BreadCrumbs({ model });
+        Widget.attach(nonHomeBread, document.body);
+        MessageLoop.sendMessage(nonHomeBread, Widget.Msg.UpdateRequest);
+
+        const preferredIcon = nonHomeBread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(preferredIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder-favorite'
+        );
+
+        Widget.detach(nonHomeBread);
+        nonHomeBread.dispose();
       });
     });
 

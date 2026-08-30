@@ -88,14 +88,17 @@
 }
 
 #jupyterlab-splash.light #moon1 .planet {
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   background-color: #6f7070;
 }
 
 #jupyterlab-splash.light #moon2 .planet {
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   background-color: #767677;
 }
 
 #jupyterlab-splash.light #moon3 .planet {
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   background-color: #989798;
 }
 

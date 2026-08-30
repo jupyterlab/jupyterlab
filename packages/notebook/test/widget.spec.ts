@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CommandLinker } from '@jupyterlab/apputils';
 import type { Cell } from '@jupyterlab/cells';
 import {
   CodeCell,
@@ -11,19 +12,31 @@ import {
   RawCellModel
 } from '@jupyterlab/cells';
 import type { INotebookModel } from '@jupyterlab/notebook';
-import { Notebook, NotebookModel, StaticNotebook } from '@jupyterlab/notebook';
 import {
+  Notebook,
+  NotebookActions,
+  NotebookModel,
+  NotebookPanel,
+  StaticNotebook
+} from '@jupyterlab/notebook';
+import {
+  dismissDialog,
   framePromise,
   JupyterServer,
   signalToPromise,
   sleep
 } from '@jupyterlab/testing';
+import { CommandRegistry } from '@lumino/commands';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type {
+  IMarkdownHeadingToken,
+  IMarkdownParser
+} from '@jupyterlab/rendermime';
 import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();
@@ -129,6 +142,15 @@ class LogNotebook extends Notebook {
   protected onCellRemoved(index: number, cell: Cell): void {
     super.onCellRemoved(index, cell);
     this.methods.push('onCellRemoved');
+  }
+}
+
+class ViewOnlyNotebookFactory extends NotebookPanel.ContentFactory {
+  override createCodeCell(options: CodeCell.IOptions): CodeCell {
+    const cell = super.createCodeCell(options);
+    cell.syncEditable = false;
+    cell.readOnly = true;
+    return cell;
   }
 }
 
@@ -289,6 +311,221 @@ describe('@jupyter/notebook', () => {
         widget.model = model;
         const child = widget.widgets[0];
         expect(child.model.mimeType).toBe('text/x-python');
+      });
+
+      it('should preserve custom read-only code cell settings from content factory', () => {
+        const viewOnlyFactory = new ViewOnlyNotebookFactory({
+          editorFactory: utils.editorFactory
+        });
+        const widget = new Notebook({
+          ...options,
+          contentFactory: viewOnlyFactory
+        });
+        widget.model = new NotebookModel();
+
+        const child = widget.widgets[0] as CodeCell;
+        expect(child.syncEditable).toBe(false);
+        expect(child.readOnly).toBe(true);
+      });
+
+      it('should treat a markdown-only notebook as untrusted for command linker', async () => {
+        let called = false;
+        const command = 'notebook:test-command-link-md-only';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const disposable = commands.addCommand(command, {
+          execute: () => {
+            called = true;
+          }
+        });
+        const model = new NotebookModel();
+        model.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '[run](notebook.ipynb)'
+        });
+        model.cells.get(0).trusted = true; // trusted markdown cell — still no code cells
+        const widget = new StaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({
+            markdownParser: {
+              render: async () => '<a href="notebook.ipynb">run</a>'
+            },
+            resolver: {
+              resolveUrl: async (url: string) => url,
+              getDownloadUrl: async (url: string) => url,
+              isLocal: () => true
+            },
+            linkHandler: {
+              handleLink: (node: HTMLElement, path: string, id?: string) => {
+                linker.connectNode(node, command, { path, id });
+              }
+            },
+            trustHandler: {
+              markTrusted: (node: HTMLElement) => {
+                linker.markTrusted(node);
+              },
+              unmarkTrusted: (node: HTMLElement) => {
+                linker.unmarkTrusted(node);
+              }
+            }
+          })
+        });
+
+        try {
+          widget.model = model;
+          Widget.attach(widget, document.body);
+          await framePromise();
+
+          const anchor = widget.node.querySelector('a') as HTMLAnchorElement;
+          expect(anchor).toBeTruthy();
+
+          simulate(anchor, 'click');
+          await Promise.resolve();
+          await Promise.resolve();
+
+          expect(called).toBe(false);
+        } finally {
+          await dismissDialog();
+          widget.dispose();
+          linker.dispose();
+          disposable.dispose();
+        }
+      });
+
+      it('should not execute command-linked rendered markdown in an untrusted notebook', async () => {
+        let called = false;
+        const command = 'notebook:test-command-link-untrusted';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const disposable = commands.addCommand(command, {
+          execute: () => {
+            called = true;
+          }
+        });
+        const model = new NotebookModel();
+        model.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '[run](notebook.ipynb)'
+        });
+        model.sharedModel.insertCell(1, {
+          cell_type: 'code',
+          source: ''
+        });
+        // code cell is NOT trusted
+        const widget = new StaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({
+            markdownParser: {
+              render: async () => '<a href="notebook.ipynb">run</a>'
+            },
+            resolver: {
+              resolveUrl: async (url: string) => url,
+              getDownloadUrl: async (url: string) => url,
+              isLocal: () => true
+            },
+            linkHandler: {
+              handleLink: (node: HTMLElement, path: string, id?: string) => {
+                linker.connectNode(node, command, { path, id });
+              }
+            },
+            trustHandler: {
+              markTrusted: (node: HTMLElement) => {
+                linker.markTrusted(node);
+              },
+              unmarkTrusted: (node: HTMLElement) => {
+                linker.unmarkTrusted(node);
+              }
+            }
+          })
+        });
+
+        try {
+          widget.model = model;
+          Widget.attach(widget, document.body);
+          await framePromise();
+
+          const anchor = widget.node.querySelector('a') as HTMLAnchorElement;
+          expect(anchor).toBeTruthy();
+
+          simulate(anchor, 'click');
+          await Promise.resolve();
+          await Promise.resolve();
+
+          expect(called).toBe(false);
+        } finally {
+          await dismissDialog();
+          widget.dispose();
+          linker.dispose();
+          disposable.dispose();
+        }
+      });
+
+      it('should execute command-linked rendered markdown in a trusted notebook', async () => {
+        let called = false;
+        const command = 'notebook:test-command-link-trusted';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const disposable = commands.addCommand(command, {
+          execute: () => {
+            called = true;
+          }
+        });
+        const model = new NotebookModel();
+        model.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '[run](notebook.ipynb)'
+        });
+        model.sharedModel.insertCell(1, {
+          cell_type: 'code',
+          source: ''
+        });
+        model.cells.get(1).trusted = true; // code cell is trusted → notebook is trusted
+        const widget = new StaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({
+            markdownParser: {
+              render: async () => '<a href="notebook.ipynb">run</a>'
+            },
+            resolver: {
+              resolveUrl: async (url: string) => url,
+              getDownloadUrl: async (url: string) => url,
+              isLocal: () => true
+            },
+            linkHandler: {
+              handleLink: (node: HTMLElement, path: string, id?: string) => {
+                linker.connectNode(node, command, { path, id });
+              }
+            },
+            trustHandler: {
+              markTrusted: (node: HTMLElement) => {
+                linker.markTrusted(node);
+              },
+              unmarkTrusted: (node: HTMLElement) => {
+                linker.unmarkTrusted(node);
+              }
+            }
+          })
+        });
+
+        try {
+          widget.model = model;
+          Widget.attach(widget, document.body);
+          await framePromise();
+
+          const anchor = widget.node.querySelector('a') as HTMLAnchorElement;
+          expect(anchor).toBeTruthy();
+
+          simulate(anchor, 'click');
+          await Promise.resolve();
+          await Promise.resolve();
+
+          expect(called).toBe(true);
+        } finally {
+          await dismissDialog();
+          widget.dispose();
+          linker.dispose();
+          disposable.dispose();
+        }
       });
 
       describe('`cells.changed` signal', () => {
@@ -452,6 +689,112 @@ describe('@jupyter/notebook', () => {
     });
 
     describe('#moveCell()', () => {
+      it('should refresh hidden cells after moving a collapsed heading down', async () => {
+        const getMarkdownHeading = (
+          content: string
+        ): { level: number; text: string } | null => {
+          let level = 0;
+          while (
+            level < content.length &&
+            level < 6 &&
+            content[level] === '#'
+          ) {
+            level++;
+          }
+          if (level === 0 || ![' ', '\t'].includes(content[level])) {
+            return null;
+          }
+          return { level, text: content.slice(level).trim() };
+        };
+        const headingParser: IMarkdownParser = {
+          render: async (content: string) => {
+            const heading = getMarkdownHeading(content);
+            if (!heading) {
+              return content;
+            }
+            return `<h${heading.level}>${heading.text}</h${heading.level}>`;
+          },
+          getHeadingTokens: async (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> => {
+            return content
+              .split('\n')
+              .map((line, lineNumber) => ({ line: lineNumber, raw: line }))
+              .filter(token => getMarkdownHeading(token.raw) !== null);
+          }
+        };
+        const widget = new LogStaticNotebook({
+          ...options,
+          rendermime: rendermime.clone({ markdownParser: headingParser })
+        });
+        widget.model = new NotebookModel();
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'markdown',
+              source: '# Title',
+              metadata: {}
+            },
+            {
+              cell_type: 'markdown',
+              source: '## First section',
+              metadata: {}
+            },
+            {
+              cell_type: 'code',
+              source: 'first = 1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'second = 2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'markdown',
+              source: '## Second section',
+              metadata: {}
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const firstHeading = widget.widgets[1] as MarkdownCell;
+        await Promise.all(
+          widget.widgets
+            .filter(
+              (cell): cell is MarkdownCell => cell instanceof MarkdownCell
+            )
+            .map(cell => cell.getHeadings())
+        );
+        NotebookActions.setHeadingCollapse(firstHeading, true, widget);
+
+        expect(widget.widgets[2].isHidden).toBe(true);
+        expect(widget.widgets[3].isHidden).toBe(true);
+
+        widget.moveCell(1, 3);
+
+        expect(
+          widget.widgets.map(cell => cell.model.sharedModel.getSource())
+        ).toEqual([
+          '# Title',
+          'first = 1',
+          'second = 2',
+          '## First section',
+          '## Second section'
+        ]);
+        expect(widget.widgets[1].isHidden).toBe(false);
+        expect(widget.widgets[2].isHidden).toBe(false);
+        expect(widget.widgets[3].isHidden).toBe(false);
+        expect((widget.widgets[3] as MarkdownCell).headingCollapsed).toBe(true);
+      });
+
       it('should preserve isDirty state after moving a code cell', () => {
         const widget = createWidget();
         widget.model!.sharedModel.insertCells(0, [
@@ -682,6 +1025,29 @@ describe('@jupyter/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
+      it('should not steal focus from outside the notebook when setting mode', async () => {
+        const widget = createActiveWidget();
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        Widget.attach(widget, document.body);
+        try {
+          await framePromise();
+
+          input.focus();
+          expect(document.activeElement).toBe(input);
+          expect(widget.node.contains(input)).toBe(false);
+          widget.mode = 'edit';
+          expect(document.activeElement).toBe(input);
+          await framePromise();
+
+          expect(widget.mode).toBe('edit');
+          expect(document.activeElement).toBe(input);
+        } finally {
+          widget.dispose();
+          input.remove();
+        }
+      });
+
       it('should emit the `stateChanged` signal', () => {
         const widget = createActiveWidget();
         let called = false;
@@ -842,6 +1208,59 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#headingCollapsedChanged', () => {
+      it('should ignore stale async heading collapse callbacks', async () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'markdown',
+              source: '# Heading 1',
+              metadata: {}
+            },
+            {
+              cell_type: 'code',
+              source: 'print("hello")',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        const child = widget.widgets[1];
+
+        // Ensure heading metadata is parsed before controlling callback timing.
+        await heading.getHeadings();
+
+        let resolvePending: (() => void) | null = null;
+        const pending = new Promise<void>(resolve => {
+          resolvePending = resolve;
+        });
+        const getHeadingsSpy = jest
+          .spyOn(heading, 'getHeadings')
+          .mockImplementationOnce(async () => {
+            await pending;
+            return [];
+          });
+
+        heading.headingCollapsed = true;
+        heading.headingCollapsed = false;
+
+        resolvePending!();
+        await framePromise();
+        await framePromise();
+
+        expect(heading.headingCollapsed).toBe(false);
+        expect(child.isHidden).toBe(false);
+        getHeadingsSpy.mockRestore();
+      });
+    });
+
     describe('#select()', () => {
       it('should select a cell widget', () => {
         const widget = createActiveWidget();
@@ -915,6 +1334,117 @@ describe('@jupyter/notebook', () => {
         expect(selected(widget)).toEqual([0, 2, 3, 4]);
         widget.deselectAll();
         expect(selected(widget)).toEqual([]);
+      });
+
+      it('should not auto-select children when activating a collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Activate the heading
+        widget.activeCellIndex = 0;
+
+        // Children should not be selected just from activation
+        expect(selected(widget)).toEqual([]);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should include children when explicitly selecting a collapsed heading', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Explicitly select the heading
+        widget.select(heading);
+
+        // Children should be selected when explicitly selecting the heading
+        expect(selected(widget)).toEqual([0, 1, 2]);
+      });
+
+      it('should clear all selections without side effects on deselectAll', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[2]);
+
+        // All selections should be cleared
+        widget.deselectAll();
+        expect(selected(widget)).toEqual([]);
+        expect(widget.activeCellIndex).toBe(0);
       });
     });
 
@@ -1224,6 +1754,9 @@ describe('@jupyter/notebook', () => {
 
       afterEach(() => {
         widget.dispose();
+        // The selection is shared by the whole document, so it must be reset
+        // even when an assertion above threw.
+        window.getSelection()?.removeAllRanges();
       });
 
       describe('mousedown', () => {
@@ -1316,7 +1849,57 @@ describe('@jupyter/notebook', () => {
           expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
-        it('should not extend a selection if there is text selected in the output', () => {
+        it('should allow shift-click selection within a single output', () => {
+          const codeCellIndex = 3;
+          widget.activeCellIndex = codeCellIndex;
+
+          // Set a selection in the active cell outputs.
+          const output = (widget.activeCell as CodeCell).outputArea.node;
+          const selection = window.getSelection()!;
+          selection.selectAllChildren(output);
+          // Guard the fixture: without output text there is nothing to extend.
+          expect(selection.toString()).not.toBe('');
+
+          // Shift click within the same output should preserve browser text
+          // selection, which is what `defaultPrevented` being false means here.
+          const mouseDownEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          });
+          output.dispatchEvent(mouseDownEvent);
+          expect(mouseDownEvent.defaultPrevented).toBe(false);
+          expect(widget.activeCellIndex).toBe(codeCellIndex);
+          expect(selected(widget)).toEqual([]);
+        });
+
+        it('should allow shift-click selection across two outputs', () => {
+          const codeCellIndex = 3;
+          widget.activeCellIndex = codeCellIndex;
+
+          // Set a selection in the active cell outputs.
+          const output = (widget.activeCell as CodeCell).outputArea.node;
+          const selection = window.getSelection()!;
+          selection.selectAllChildren(output);
+          // Guard the fixture: without output text there is nothing to extend.
+          expect(selection.toString()).not.toBe('');
+
+          // Shift click in the output of another cell should preserve browser
+          // text selection, which is what `defaultPrevented` being false means.
+          const otherOutput = (widget.widgets[codeCellIndex + 2] as CodeCell)
+            .outputArea.node;
+          const mouseDownEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          });
+          otherOutput.dispatchEvent(mouseDownEvent);
+          expect(mouseDownEvent.defaultPrevented).toBe(false);
+          expect(widget.activeCellIndex).toBe(codeCellIndex);
+          expect(selected(widget)).toEqual([]);
+        });
+
+        it('should extend cell selection when shift-clicking outside selected output', () => {
           const codeCellIndex = 3;
           widget.activeCellIndex = codeCellIndex;
 
@@ -1326,12 +1909,16 @@ describe('@jupyter/notebook', () => {
             (widget.activeCell as CodeCell).outputArea.node
           );
 
-          // Shift click below, which should not extend cells selection.
+          // Shift click below, which should extend cell selection.
           simulate(widget.widgets[codeCellIndex + 2].node, 'mousedown', {
             shiftKey: true
           });
-          expect(widget.activeCellIndex).toBe(codeCellIndex);
-          expect(selected(widget)).toEqual([]);
+          expect(widget.activeCellIndex).toBe(codeCellIndex + 2);
+          expect(selected(widget)).toEqual([
+            codeCellIndex,
+            codeCellIndex + 1,
+            codeCellIndex + 2
+          ]);
         });
 
         it('should leave a markdown cell rendered', async () => {

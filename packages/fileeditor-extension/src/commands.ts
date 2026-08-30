@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectAll } from '@codemirror/commands';
 import { findNext, gotoLine } from '@codemirror/search';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
@@ -8,6 +9,7 @@ import type {
   ISessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
+
 import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
 import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
@@ -943,7 +945,10 @@ export namespace Commands {
       isVisible: () => {
         const widget = tracker.currentWidget;
         return (
-          (widget && PathExt.extname(widget.context.path) === '.md') || false
+          (isEnabled() &&
+            widget &&
+            PathExt.extname(widget.context.path) === '.md') ||
+          false
         );
       },
       icon: markdownIcon,
@@ -1222,11 +1227,16 @@ export namespace Commands {
 
         // Get data from clipboard
         const clipboard = window.navigator.clipboard;
-        const clipboardData: string = await clipboard.readText();
+        try {
+          const clipboardData: string = await clipboard.readText();
 
-        if (clipboardData) {
-          // Paste data to the editor
-          editor.replaceSelection && editor.replaceSelection(clipboardData);
+          if (clipboardData) {
+            // Paste data to the editor
+            editor.replaceSelection && editor.replaceSelection(clipboardData);
+          }
+        } catch (err) {
+          // browser limitation fallback (e.g Firefox)
+          Clipboard.showPasteUnavailableDialog(trans);
         }
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
@@ -1474,6 +1484,8 @@ export namespace Commands {
 
     addCreateNewMarkdownCommandToPalette(palette, trans);
 
+    addMarkdownPreviewCommandToPalette(palette, trans);
+
     addChangeFontSizeCommandsToPalette(palette, trans);
   }
 
@@ -1525,6 +1537,20 @@ export namespace Commands {
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
       args: { isPalette: true },
+      category: paletteCategory
+    });
+  }
+
+  /**
+   * Add a Markdown Preview command to the File Editor palette
+   */
+  export function addMarkdownPreviewCommandToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ): void {
+    const paletteCategory = trans.__('Text Editor');
+    palette.addItem({
+      command: CommandIDs.markdownPreview,
       category: paletteCategory
     });
   }

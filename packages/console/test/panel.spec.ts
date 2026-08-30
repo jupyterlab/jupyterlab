@@ -64,18 +64,38 @@ describe('console/panel', () => {
         );
       });
 
-      it('should set the session context path to local path', () => {
+      it('should keep the drive name in the session context path', () => {
         manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
         const localPath = `${UUID.uuid4()}.txt`;
+        const globalPath = `TestDrive:${localPath}`;
         const panel = new TestPanel({
           manager,
           contentFactory,
           rendermime,
           mimeTypeService,
-          path: `TestDrive:${localPath}`
+          path: globalPath
         });
 
-        expect(panel.sessionContext.path).toEqual(localPath);
+        expect(panel.sessionContext.path).toEqual(globalPath);
+        panel.dispose();
+      });
+
+      it('should start the session with the drive name for root-level paths', async () => {
+        manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
+        const startNew = jest.mocked(manager.sessions.startNew);
+        startNew.mockClear();
+        const panel = new TestPanel({
+          manager,
+          contentFactory,
+          rendermime,
+          mimeTypeService,
+          path: `TestDrive:${UUID.uuid4()}.txt`,
+          kernelPreference: { name: manager.kernelspecs.specs!.default }
+        });
+
+        await panel.sessionContext.initialize();
+
+        expect(startNew.mock.calls[0][0].path).toMatch(/^TestDrive:\//);
         panel.dispose();
       });
     });

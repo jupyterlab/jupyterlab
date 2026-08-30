@@ -43,7 +43,7 @@ test.describe('CSV Viewer', () => {
     await expect(csvLocator).toBeVisible();
 
     const screenshotName = 'csv-dark-theme.png';
-    expect(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
+    expect.soft(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
 
     // change to light theme and back to dark theme
     await page.theme.setLightTheme();

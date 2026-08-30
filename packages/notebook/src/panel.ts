@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { Dialog, Printing, showDialog } from '@jupyterlab/apputils';
 import { isMarkdownCellModel } from '@jupyterlab/cells';
@@ -190,7 +189,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(
-    sender: any,
+    sender: ISessionContext,
     args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     if (!this.model || !args.newValue) {

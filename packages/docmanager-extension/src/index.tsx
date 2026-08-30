@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module docmanager-extension
@@ -152,7 +153,7 @@ const contextsPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     widgetOpener: IDocumentWidgetOpener,
-    status: ILabStatus
+    status: ILabStatus | null
   ) => {
     const contexts = new WeakSet<DocumentRegistry.Context>();
     widgetOpener.opened.connect((_, widget) => {
@@ -278,12 +279,15 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
         | null;
-      docManager.autosaveInterval = autosaveInterval || 120;
+      docManager.autosaveInterval =
+        autosaveInterval === null || autosaveInterval === 0
+          ? 120
+          : autosaveInterval;
 
       // Handle last modified timestamp check margin
       const lastModifiedCheckMargin = settings.get('lastModifiedCheckMargin')
         .composite as number | null;
-      docManager.lastModifiedCheckMargin = lastModifiedCheckMargin || 500;
+      docManager.lastModifiedCheckMargin = lastModifiedCheckMargin ?? 500;
 
       const renameUntitledFile = settings.get('renameUntitledFileOnSave')
         .composite as boolean;
@@ -1511,8 +1515,10 @@ function addLabCommands(
         return;
       }
 
-      // 'activate' is needed if this command is selected in the "open tabs" sidebar
-      await commands.execute('filebrowser:activate', { path: context.path });
+      // 'open-directory' is needed if this command is selected in the "open tabs" sidebar
+      await commands.execute('filebrowser:open-directory', {
+        path: context.path
+      });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     },
     describedBy: {

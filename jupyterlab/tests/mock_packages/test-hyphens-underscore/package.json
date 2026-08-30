@@ -4,14 +4,14 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build:labextension": "jupyter labextension build .",
+    "build:labextension": "jupyter-builder build .",
     "clean": "rimraf ./test_hyphens_underscore/labextension"
   },
   "dependencies": {
     "@jupyterlab/launcher": "^4.0.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0",
+    "@jupyter/builder": "^1.0.0-beta.1",
     "rimraf": "^3.0.2"
   },
   "files": [

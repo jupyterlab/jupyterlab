@@ -17,7 +17,6 @@ import type {
   ServiceManagerPlugin,
   Session,
   Setting,
-  Terminal,
   User,
   Workspace
 } from '@jupyterlab/services';
@@ -52,6 +51,7 @@ import {
   ServiceManager,
   SessionManager,
   SettingManager,
+  Terminal,
   TerminalManager,
   UserManager,
   WorkspaceManager
@@ -312,6 +312,9 @@ const terminalManagerPlugin: ServiceManagerPlugin<Terminal.IManager> = {
     serverSettings: ServerConnection.ISettings | undefined,
     connectionStatus: IConnectionStatus | undefined
   ): Terminal.IManager => {
+    if (!Terminal.isAvailable()) {
+      return new TerminalManager.NoopManager();
+    }
     return new TerminalManager({
       serverSettings,
       standby: () => {
