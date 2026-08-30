@@ -60,26 +60,18 @@ async function openOverview(page: IJupyterLabPageFixture) {
   await page.sidebar.setWidth();
 
   // Open Data.ipynb
-  await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
-  await page.dblclick('text=Data.ipynb');
-
-  // Back home
-  await page.click('.jp-BreadCrumbs-home svg');
+  await page.notebook.openByPath('notebooks/Data.ipynb');
 
   // Open jupyterlab.md
-  await page.dblclick('[aria-label="File Browser Section"] >> text=narrative');
+  await page.filebrowser.openDirectory('narrative');
   await page.click('text=jupyterlab.md', {
     button: 'right'
   });
   await page.click('text=Open With');
   await page.click('text=Markdown Preview');
 
-  // Back home
-  await page.click('.jp-BreadCrumbs-home svg');
-
   // Open bar.vl.json
-  await page.dblclick('[aria-label="File Browser Section"] >> text=data');
-  await page.dblclick('text=bar.vl.json');
+  await page.filebrowser.open('data/bar.vl.json');
   await page.dblclick(
     'text=1024px-Hubble_Interacting_Galaxy_AM_0500-620_(2008-04-24).jpg'
   );
