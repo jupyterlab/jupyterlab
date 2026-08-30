@@ -1233,6 +1233,13 @@ class _AppHandler:
 
         if did_something:
             level_page_config["disabledExtensions"] = disabled_at_level
+            # Record the (unlocked) lock status explicitly, otherwise the 4.0 -> 4.1
+            # migration in `_maybe_mirror_disabled_in_locked` would mirror the entry
+            # written above onto `lockedExtensions` on the next command, locking an
+            # extension the user only meant to disable.
+            locked_at_level = level_page_config.get("lockedExtensions", {})
+            locked_at_level.setdefault(extension, False)
+            level_page_config["lockedExtensions"] = locked_at_level
             write_page_config(level_page_config, level=level)
         return did_something
 
