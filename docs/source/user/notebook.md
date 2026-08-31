@@ -324,7 +324,7 @@ The panel has two sections:
 - **Notebook Metadata**: displays the metadata for the entire notebook
   (e.g., kernel information, language info).
 - **Cell Metadata**: displays the metadata for the currently selected cell
-  (e.g., tags, whether the cell is editable or deletable).
+  (e.g., tags, whether the cell can be edited or deleted).
 
 ### Editing Metadata
 
