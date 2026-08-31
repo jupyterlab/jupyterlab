@@ -337,7 +337,7 @@ changes:
 :class: jp-screenshot
 ```
 
-- Click the **checkmark icon** to commit your changes.
+- Click the **checkmark icon** to commit your changes. This icon appears only once your edits are valid JSON.
 - Click the **revert icon** to discard your changes and restore the
   previous metadata.
 
