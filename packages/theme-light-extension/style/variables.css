@@ -185,7 +185,9 @@ all of MD as it is not optimized for dense, information rich UIs.
    * Data grid needs higher density than other user content to accommodate large data sets.
    */
   --jp-datagrid-font-size: 12px;
-  --jp-datagrid-font-family: var(--jp-content-font-family);
+  --jp-datagrid-font-family:
+    'Segoe UI', 'Helvetica Neue', helvetica, arial, roboto, 'Noto Sans',
+    sans-serif;
 
   /*
    * Code Fonts
