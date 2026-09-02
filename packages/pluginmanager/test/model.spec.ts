@@ -215,6 +215,29 @@ describe('@jupyterlab/pluginmanager', () => {
         ]);
       });
 
+      it('should not refresh once disposed', async () => {
+        const availablePlugins = [providerPlugin];
+        const availablePluginsChanged = new Signal<unknown, void>({});
+        const model = new PluginListModel({
+          pluginData: {
+            availablePlugins,
+            availablePluginsChanged
+          }
+        });
+        await model.ready;
+        const callsBefore = spy.mock.calls.length;
+
+        model.dispose();
+        availablePlugins.push(optionalUserPlugin);
+        availablePluginsChanged.emit(void 0);
+        await Promise.resolve();
+
+        expect(spy).toHaveBeenCalledTimes(callsBefore);
+        expect(model.available.map(plugin => plugin.id)).toEqual([
+          providerPlugin.id
+        ]);
+      });
+
       it('should mark plugins as locked if server has all plugins locked', async () => {
         spy.mockImplementation((..._) => {
           return Promise.resolve({
