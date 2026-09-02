@@ -124,8 +124,7 @@ export interface IOptions {
  */
 interface ITOptions {
   /**
-   * String describing the plural of the given language.
-   * See: https://www.gnu.org/software/gettext/manual/html_node/Translating-plural-forms.html
+  * Whether to use the plural form.
    */
   pluralForm?: boolean;
 

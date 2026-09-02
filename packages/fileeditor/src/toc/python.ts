@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
 import type {
